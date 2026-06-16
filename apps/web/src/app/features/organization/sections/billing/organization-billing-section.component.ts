@@ -1,5 +1,5 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { Component, effect, inject, signal } from '@angular/core';
+import { Component, effect, inject, input, signal } from '@angular/core';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { OrganizationService } from '../../../../core/organization/organization.service';
 import type { OrgInvoice, OrgSubscription } from '../../../../core/organization/organization.types';
@@ -15,6 +15,8 @@ export class OrganizationBillingSectionComponent {
   private readonly i18nService = inject(I18nService);
   private readonly organizationService = inject(OrganizationService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
+
+  readonly canViewInvoices = input(true);
 
   readonly subscription = signal<OrgSubscription | null>(null);
   readonly invoices = signal<OrgInvoice[]>([]);

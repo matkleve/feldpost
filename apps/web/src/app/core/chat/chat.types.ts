@@ -8,8 +8,12 @@ export interface ChatChannel {
   type: ChatChannelType;
   createdBy: string | null;
   createdAt: string;
+  updatedAt: string;
+  lastActivityAt: string;
   archivedAt: string | null;
   unreadCount?: number;
+  /** Peer user id for DM channels (other participant). */
+  dmPeerUserId?: string | null;
 }
 
 export interface ChatChannelMember {

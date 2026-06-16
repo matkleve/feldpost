@@ -146,6 +146,7 @@ export class ChatService {
     }
 
     await this.markChannelRead(input.channelId);
+    this.invalidateChannelsCache();
     return { data: message, error: null };
   }
 

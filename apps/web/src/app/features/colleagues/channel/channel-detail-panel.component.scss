@@ -15,16 +15,15 @@
   display: flex;
   flex: 0 1 auto;
   flex-direction: column;
-  gap: var(--spacing-4);
+  gap: 0;
   min-height: 16rem;
   max-height: 100%;
   min-width: 0;
-  padding: var(--spacing-4);
   border: 1px solid var(--border);
   border-radius: var(--container-radius-panel);
   background: var(--card);
   box-shadow: var(--shadow-md);
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 .channel-detail__header {
@@ -32,6 +31,8 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-2);
+  padding: var(--spacing-4) var(--spacing-4) var(--spacing-3);
+  border-bottom: 1px solid var(--border);
 }
 
 .channel-detail__title {
@@ -41,10 +42,69 @@
   line-height: var(--line-height-tight);
 }
 
+.channel-detail__tabs {
+  display: flex;
+  gap: var(--spacing-4);
+  padding: 0 var(--spacing-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.channel-detail__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: var(--spacing-2) 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition:
+    color var(--motion-duration-fast) var(--motion-ease-out),
+    border-color var(--motion-duration-fast) var(--motion-ease-out);
+
+  &:hover,
+  &:focus-visible {
+    outline: none;
+    color: var(--foreground);
+  }
+}
+
+.channel-detail__tab--active {
+  border-bottom-color: var(--primary);
+  color: var(--foreground);
+}
+
+.channel-detail__tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  padding: 0 var(--spacing-1);
+  border-radius: var(--radius-full);
+  background: var(--muted);
+  color: var(--muted-foreground);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+.channel-detail__panel {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  min-height: 0;
+  padding: var(--spacing-4);
+  overflow-y: auto;
+}
+
 .channel-detail__create {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-3);
+  padding: var(--spacing-4);
 }
 
 .channel-detail__field {
@@ -52,8 +112,7 @@
   gap: var(--spacing-1);
 }
 
-.channel-detail__field > span,
-.channel-detail__field dt {
+.channel-detail__field > span {
   margin: 0;
   color: var(--muted-foreground);
   font-size: var(--font-size-xs);
@@ -62,9 +121,11 @@
   text-transform: uppercase;
 }
 
-.channel-detail__field dd {
-  margin: 0;
+.channel-detail__about-block h3 {
+  margin: 0 0 var(--spacing-2);
   font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--foreground);
 }
 
 .channel-detail__description {
@@ -73,8 +134,18 @@
   resize: vertical;
 }
 
+.channel-detail__description-text {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-reading);
+  color: var(--foreground);
+  white-space: pre-wrap;
+}
+
 .channel-detail__description-empty {
+  margin: 0;
   color: var(--muted-foreground);
+  font-size: var(--font-size-sm);
 }
 
 .channel-detail__checkbox {
@@ -92,25 +163,47 @@
   display: grid;
   gap: var(--spacing-3);
   margin: 0;
+  padding-top: var(--spacing-2);
+  border-top: 1px solid var(--border);
 }
 
-.channel-detail__section {
+.channel-detail__meta-row {
+  display: grid;
+  grid-template-columns: minmax(0, 6rem) minmax(0, 1fr);
+  gap: var(--spacing-2);
+  align-items: baseline;
+}
+
+.channel-detail__meta-row dt {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.channel-detail__meta-row dd {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--foreground);
+}
+
+.channel-detail__add-members {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2);
-  min-height: 0;
+  padding-top: var(--spacing-3);
+  border-top: 1px solid var(--border);
 }
 
-.channel-detail__section h3 {
+.channel-detail__add-members h3 {
   margin: 0;
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  color: var(--muted-foreground);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--foreground);
 }
 
 .channel-detail__actions {
   display: flex;
   margin-top: auto;
+  padding-top: var(--spacing-2);
 }

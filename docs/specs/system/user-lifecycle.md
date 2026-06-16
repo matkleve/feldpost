@@ -49,7 +49,7 @@ stateDiagram-v2
 2. Supabase creates an entry in `auth.users`.
 3. A database trigger automatically:
    - Creates a row in `profiles` with the user's `organization_id` (see below).
-   - Assigns a default role (for example, `user`) via `user_roles`.
+   - Assign the default org role via `user_roles.org_role_id` (worker default or invite role).
 
 This ensures system consistency without any client-side orchestration.
 
@@ -66,7 +66,7 @@ Every user must belong to exactly one organization (see D12). During MVP:
 - Trigger timing: runs immediately after a new row is created in `auth.users`.
 - Trigger responsibilities:
   - Create exactly one `profiles` row for the new `auth.users.id`, including `organization_id`.
-  - Assign the default `user` role in `user_roles`.
+  - Assign the default org role in `user_roles` (`org_role_id` → default worker role).
 - Failure behavior:
   - If profile creation or role assignment fails, registration transaction must fail.
   - The system must never leave a user without a profile or without a role.
@@ -100,20 +100,21 @@ Every user must belong to exactly one organization (see D12). During MVP:
 
 ## 3. Role Assignment
 
-Default behavior:
+Default behavior for invite-based registration:
 
-- All new users receive role `user`.
+- New users receive the invite's `org_role_id` (or the org default worker role) via the registration trigger.
 
-Admin role assignment:
+Organization administration:
 
-- Must be performed manually via:
-  - SQL, or
-  - Admin interface (future extension).
+- Custom roles and permission matrices are managed in `/organization/roles` ([organization-page.md](../page/organization-page.md)).
+- Hierarchy checks use `user_role_level()` and `can_manage_user()` (e.g. Colleagues member detail).
+
+Legacy note: global `public.roles` remains for migration compatibility; runtime authorization uses `org_roles` + `has_permission()`.
 
 **Invariants**
 
-- Roles are defined in `roles` and linked to users via `user_roles`.
-- RLS checks rely on `user_roles` and `roles` (see `security-boundaries.md`).
+- Roles are defined per organization in `org_roles` and linked via `user_roles.org_role_id`.
+- RLS checks use `has_permission()`, `is_admin()`, and `is_viewer()` where documented per table.
 - Role revocation must be blocked if it would leave a user with zero roles.
 
 ---

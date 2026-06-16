@@ -54,6 +54,7 @@ export interface OrgExportJob {
   status: string;
   format: string;
   downloadUrl: string | null;
+  payload: Record<string, unknown> | null;
   createdAt: string;
   completedAt: string | null;
   expiresAt: string | null;

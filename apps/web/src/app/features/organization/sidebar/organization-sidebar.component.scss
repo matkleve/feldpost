@@ -1,45 +1,164 @@
-.organization-sidebar {
+@use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
+
+:host {
   display: flex;
   min-height: 0;
   min-width: 0;
   flex-direction: column;
-  gap: var(--spacing-3);
-  padding: var(--spacing-3);
 }
 
-.organization-sidebar__list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-1);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
+@layer components {
+  // Left rail column for organization sections — mirrors settings overlay section list
+  // @see docs/specs/page/organization-page.md
+  .organization-sidebar {
+    display: flex;
+    min-height: 0;
+    min-width: 0;
+    flex-direction: column;
+    gap: var(--spacing-2);
+    height: 100%;
+    padding: var(--spacing-3);
+    border-inline-end: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+    background: color-mix(in srgb, var(--card) 80%, transparent);
+  }
 
-.organization-sidebar__item {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  width: 100%;
-  padding: var(--spacing-2) var(--spacing-3);
-  border: 1px solid transparent;
-  border-radius: var(--radius-md);
-  background: transparent;
-  color: var(--menu-item-text);
-  cursor: pointer;
-  text-align: left;
-  transition: background-color var(--motion-duration-fast) var(--motion-ease-out);
-}
+  // Rail header stack (title + subtitle)
+  // @see docs/specs/ui/settings-overlay/settings-overlay.md
+  .organization-sidebar__header {
+    display: grid;
+    gap: var(--spacing-1);
+    min-width: 0;
+    flex-shrink: 0;
+  }
 
-.organization-sidebar__item:hover {
-  background: var(--menu-item-hover);
-}
+  // Rail primary line — global h2 metrics; color only here
+  // @see docs/specs/ui/settings-overlay/settings-overlay.md
+  .organization-sidebar__kicker {
+    margin: 0;
+    color: var(--foreground);
+  }
 
-.organization-sidebar__item--active {
-  border-color: var(--menu-border-subtle);
-  background: var(--menu-item-hover);
-}
+  // Secondary rail line under Organization title
+  // @see docs/specs/ui/settings-overlay/settings-overlay.md
+  .organization-sidebar__title {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    font-weight: 400;
+    line-height: 1.45;
+    color: var(--muted-foreground);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
 
-.organization-sidebar__item .material-icons {
-  font-size: var(--font-size-lg);
+  // Scrollable vertical list of section entries
+  // @see docs/specs/ui/settings-overlay/settings-overlay.md
+  .organization-sidebar__section-list {
+    display: grid;
+    flex: 1 1 auto;
+    gap: var(--spacing-1);
+    min-height: 0;
+    overflow: auto;
+    padding-right: var(--spacing-1);
+  }
+
+  // Flex row for icon + stacked label + chevron in the section rail
+  // @see docs/specs/ui/settings-overlay/settings-overlay.md
+  .organization-sidebar__section-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-3);
+    min-width: 0;
+    min-height: 3.25rem;
+    padding-block: var(--spacing-2);
+    padding-inline: var(--spacing-3);
+    width: 100%;
+    border: 1px solid transparent;
+    border-radius: max(2px, calc(var(--radius-sm) - 4px));
+    background: transparent;
+    text-align: left;
+    color: var(--foreground);
+    cursor: pointer;
+    transition:
+      border-color var(--motion-duration-fast) var(--motion-ease-out),
+      background var(--motion-duration-fast) var(--motion-ease-out),
+      color var(--motion-duration-fast) var(--motion-ease-out),
+      box-shadow var(--motion-duration-fast) var(--motion-ease-out);
+  }
+
+  .organization-sidebar__section-item:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  // Hover affordance for rail section buttons (non-active rows)
+  // @see docs/design/state-visuals.md § Interaction emphasis
+  .organization-sidebar__section-item:hover:not(.organization-sidebar__section-item--active):not(:disabled) {
+    @include emphasis.hover(10%);
+  }
+
+  // Selected section emphasis on the rail row
+  // @see docs/design/state-visuals.md § Interaction emphasis
+  .organization-sidebar__section-item--active {
+    @include emphasis.selected-bordered(10%, 42%);
+  }
+
+  .organization-sidebar__section-item--active:hover:not(:disabled),
+  .organization-sidebar__section-item--active:focus-visible {
+    @include emphasis.selected-hover(10%);
+    border-color: color-mix(in srgb, var(--primary) 46%, var(--border));
+    box-shadow: var(--interactive-focus-ring);
+    outline: none;
+  }
+
+  .organization-sidebar__section-item:not(.organization-sidebar__section-item--active):focus-visible {
+    border-color: color-mix(in srgb, var(--primary) 46%, var(--border));
+    box-shadow: var(--interactive-focus-ring);
+    outline: none;
+  }
+
+  // Icon cell in the rail row
+  // @see docs/design/state-visuals.md § Interaction emphasis
+  .organization-sidebar__section-media {
+    color: var(--muted-foreground);
+    align-self: center;
+  }
+
+  .organization-sidebar__section-item--active .organization-sidebar__section-media {
+    color: var(--interaction-selected-ink);
+  }
+
+  .organization-sidebar__section-item--active:hover .organization-sidebar__section-media,
+  .organization-sidebar__section-item--active:focus-visible .organization-sidebar__section-media {
+    color: var(--primary);
+  }
+
+  // Section title line in the rail list
+  // @see docs/specs/ui/settings-overlay/settings-overlay.md
+  .organization-sidebar__section-label {
+    min-width: 0;
+  }
+
+  .organization-sidebar__section-label strong,
+  .organization-sidebar__section-label small {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  .organization-sidebar__section-label strong {
+    font-size: var(--font-size-sm);
+  }
+
+  // Trailing chevron affordance in rail rows
+  // @see docs/specs/ui/settings-overlay/settings-overlay.md
+  .organization-sidebar__section-chevron {
+    font-size: var(--font-size-sm);
+    color: var(--muted-foreground);
+    align-self: center;
+  }
 }

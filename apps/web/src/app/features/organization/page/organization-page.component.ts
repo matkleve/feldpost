@@ -1,10 +1,15 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
+import {
+  filterOrganizationSections,
+  ORG_PAGE_PERMISSION_KEYS,
+} from '../logic/organization-page.helpers';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { OrganizationService } from '../../../core/organization/organization.service';
 import { RoleService } from '../../../core/roles/roles.service';
+import { ToastService } from '../../../core/toast/toast.service';
 import type { OrganizationProfile } from '../../../core/organization/organization.types';
 import type { OrgPermission, OrgRole } from '../../../core/roles/roles.types';
 import { PageGridComponent } from '../../../shared/page-grid';
@@ -18,6 +23,7 @@ import { OrganizationExportSectionComponent } from '../sections/export/organizat
 import { OrganizationAuditSectionComponent } from '../sections/audit/organization-audit-section.component';
 import {
   ORGANIZATION_SECTIONS,
+  resolveOrganizationSectionConfig,
   resolveOrganizationSectionFromUrl,
   type OrganizationSectionId,
 } from './organization-page.config';
@@ -47,9 +53,9 @@ export class OrganizationPageComponent {
   private readonly i18nService = inject(I18nService);
   private readonly organizationService = inject(OrganizationService);
   private readonly roleService = inject(RoleService);
+  private readonly toastService = inject(ToastService);
 
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
-  readonly sections = ORGANIZATION_SECTIONS;
 
   readonly currentUrl = toSignal(
     this.router.events.pipe(
@@ -70,6 +76,25 @@ export class OrganizationPageComponent {
   readonly roles = signal<OrgRole[]>([]);
   readonly permissions = signal<OrgPermission[]>([]);
   readonly selectedRoleId = signal<string | null>(null);
+  readonly grantedPermissionKeys = signal<ReadonlySet<string>>(new Set());
+
+  readonly visibleSections = computed(() =>
+    filterOrganizationSections(ORGANIZATION_SECTIONS, this.grantedPermissionKeys()),
+  );
+
+  readonly activeSectionConfig = computed(() =>
+    resolveOrganizationSectionConfig(this.activeSection()),
+  );
+
+  readonly canEditActiveSection = computed(() => {
+    const editKey = this.activeSectionConfig().editPermissionKey;
+    if (!editKey) return true;
+    return this.grantedPermissionKeys().has(editKey);
+  });
+
+  readonly canViewBillingInvoices = computed(() =>
+    this.grantedPermissionKeys().has('org.billing.view'),
+  );
 
   readonly selectedRole = computed(() => {
     const roleId = this.selectedRoleId();
@@ -83,6 +108,14 @@ export class OrganizationPageComponent {
 
   constructor() {
     void this.refresh();
+    effect(() => {
+      const visible = this.visibleSections();
+      const active = this.activeSection();
+      if (this.loading() || visible.length === 0) return;
+      if (!visible.some((section) => section.id === active)) {
+        void this.router.navigate(['/organization', visible[0].id], { replaceUrl: true });
+      }
+    });
     if (this.router.url === '/organization' || this.router.url.startsWith('/organization?')) {
       void this.router.navigate(['/organization', 'profile'], { replaceUrl: true });
     }
@@ -91,6 +124,17 @@ export class OrganizationPageComponent {
   async refresh(): Promise<void> {
     this.loading.set(true);
     this.loadError.set(null);
+
+    const permissionResults = await Promise.all(
+      ORG_PAGE_PERMISSION_KEYS.map(async (key) => ({
+        key,
+        granted: await this.roleService.hasPermission(key),
+      })),
+    );
+    const granted = new Set(
+      permissionResults.filter((entry) => entry.granted).map((entry) => entry.key),
+    );
+    this.grantedPermissionKeys.set(granted);
 
     const [profileResult, rolesResult, permissionsResult] = await Promise.all([
       this.organizationService.loadProfile(),
@@ -142,8 +186,19 @@ export class OrganizationPageComponent {
       description: patch.description,
       industry: patch.industry,
     });
+    if (result.error) {
+      this.toastService.show({
+        message: result.error.message,
+        type: 'error',
+      });
+      return;
+    }
     if (result.data) {
       this.profile.set(result.data);
+      this.toastService.show({
+        message: this.t('organization.profile.saved', 'Organization profile saved.'),
+        type: 'success',
+      });
     }
   }
 

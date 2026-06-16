@@ -7,14 +7,15 @@ import { CHAT_QUICK_REACTIONS, type ChatChannel, type ChatChannelMember, type Ch
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { ProjectsService } from '../../../core/projects/projects.service';
 import { groupReactions } from '../../../core/chat/chat.helpers';
-import { RailSearchFieldComponent } from '../../../shared/rail-search-field';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
+import { ChatHeaderComponent } from './chat-header.component';
+import type { ChatDetailsRequest, ChatHeaderVariant } from './chat-header.types';
 import { ThreadPanelComponent } from './thread-panel.component';
 
 @Component({
   selector: 'app-chat-area',
   standalone: true,
-  imports: [DatePipe, FormsModule, RailSearchFieldComponent, ThreadPanelComponent, ...HLM_BUTTON_IMPORTS],
+  imports: [DatePipe, FormsModule, ChatHeaderComponent, ThreadPanelComponent, ...HLM_BUTTON_IMPORTS],
   templateUrl: './chat-area.component.html',
   styleUrl: './chat-area.component.scss',
   host: {
@@ -46,7 +47,7 @@ export class ChatAreaComponent {
   readonly messageDeleted = output<string>();
   readonly reactionToggled = output<{ messageId: string; emoji: string }>();
   readonly threadOpened = output<ChatMessage>();
-  readonly memberProfileRequested = output<void>();
+  readonly detailsRequested = output<ChatDetailsRequest>();
 
   readonly draft = signal('');
   readonly searchQuery = signal('');
@@ -67,13 +68,13 @@ export class ChatAreaComponent {
     return this.channelTitle(this.channel());
   });
 
-  readonly isDmChannel = computed(() => this.channel()?.type === 'dm');
-
-  readonly dmPeerInitials = computed(() => {
-    const title = this.displayTitle();
-    const trimmed = title.trim();
-    return trimmed ? trimmed.charAt(0).toUpperCase() : '?';
+  readonly headerVariant = computed((): ChatHeaderVariant => {
+    const channel = this.channel();
+    if (!channel) return 'empty';
+    return channel.type === 'dm' ? 'dm' : 'channel';
   });
+
+  readonly memberCount = computed(() => this.channelMembers().length);
 
   readonly typingText = computed(() => {
     const ids = this.typingUserIds();
@@ -226,11 +227,5 @@ export class ChatAreaComponent {
     }
     const element = document.getElementById(`chat-msg-${message.id}`);
     element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
-
-  onMemberProfileOpen(): void {
-    if (this.isDmChannel()) {
-      this.memberProfileRequested.emit();
-    }
   }
 }

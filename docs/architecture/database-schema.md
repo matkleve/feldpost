@@ -55,7 +55,8 @@ Legacy image-era tables are removed from runtime schema:
 | column     | type        | null/default                       | spec reference(s)                |
 | ---------- | ----------- | ---------------------------------- | -------------------------------- |
 | id         | uuid        | not null/default gen_random_uuid() | docs/specs/page/projects-page.md |
-| name       | text        | not null                           | docs/specs/page/projects-page.md |
+| name       | text        | not null                           | docs/specs/page/organization-page.md |
+| logo_url, address_*, phone, email, website, description, industry | text | nullable | docs/specs/page/organization-page.md |
 | created_at | timestamptz | not null/default now()             | docs/specs/page/projects-page.md |
 
 ### public.profiles
@@ -82,7 +83,7 @@ Legacy image-era tables are removed from runtime schema:
 | ------- | ---- | ---------------------------------- | ---------------------------------------------------------- |
 | id      | uuid | not null/default gen_random_uuid() | docs/specs/ui/settings-overlay/invite-only-registration.md |
 | user_id | uuid | not null                           | docs/specs/ui/settings-overlay/invite-only-registration.md |
-| role_id | uuid | not null                           | docs/specs/ui/settings-overlay/invite-only-registration.md |
+| org_role_id | uuid | not null                      | docs/specs/service/roles/roles-service.md |
 
 ### public.projects
 

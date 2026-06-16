@@ -1,16 +1,30 @@
 import type { ChatChannel, ChatMessage } from './chat.types';
 
-export function toChannel(row: Record<string, unknown>): ChatChannel {
+export function toChannel(row: Record<string, unknown>, currentUserId?: string | null): ChatChannel {
+  const members = row['chat_channel_members'] as Array<{ user_id: string }> | undefined;
+  const type = row['type'] as ChatChannel['type'];
+  let dmPeerUserId: string | null = null;
+  if (type === 'dm' && currentUserId && members?.length) {
+    dmPeerUserId = members.find((member) => member.user_id !== currentUserId)?.user_id ?? null;
+  }
+
+  const updatedAt = row['updated_at'] as string;
+  const createdAt = row['created_at'] as string;
+  const lastMessageAt = (row['last_message_at'] as string | null) ?? null;
+
   return {
     id: row['id'] as string,
     organizationId: row['organization_id'] as string,
     name: (row['name'] as string | null) ?? null,
     description: (row['description'] as string | null) ?? null,
-    type: row['type'] as ChatChannel['type'],
+    type,
     createdBy: (row['created_by'] as string | null) ?? null,
-    createdAt: row['created_at'] as string,
+    createdAt,
+    updatedAt,
+    lastActivityAt: lastMessageAt ?? updatedAt ?? createdAt,
     archivedAt: (row['archived_at'] as string | null) ?? null,
     unreadCount: (row['unread_count'] as number | undefined) ?? undefined,
+    dmPeerUserId,
   };
 }
 

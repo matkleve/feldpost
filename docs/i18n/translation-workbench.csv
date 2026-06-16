@@ -628,6 +628,9 @@ projects.viewToggle.cards.title,Card view,apps/web/src/app/features/projects/pro
 projects.page.title,Projects,apps/web/src/app/features/projects/projects-page.component.html text-node,Projects,Projekte,Progetti
 colleagues.page.title,Messaging,apps/web/src/app/features/colleagues/sidebar/member-list.component.html text-node,Messaging,Nachrichten,Messaggi
 colleagues.sidebar.label,Messaging,colleagues sidebar nav aria-label,Messaging,Nachrichten,Messaggi
+colleagues.sidebar.search.placeholder,Search messaging…,colleagues sidebar global search placeholder,Search messaging…,Nachrichten suchen…,Cerca messaggi…
+colleagues.sidebar.search.aria,Search channels and direct messages,colleagues sidebar global search aria,Search channels and direct messages,Kanäle und Direktnachrichten suchen,Cerca canali e messaggi diretti
+colleagues.sidebar.list.aria,Channels and direct messages,colleagues sidebar scroll list region aria,Channels and direct messages,Kanäle und Direktnachrichten,Canali e messaggi diretti
 colleagues.tab.members,Members,colleagues sidebar tab,Members,Mitglieder,Membri
 colleagues.tab.invites,Invites,colleagues sidebar tab,Invites,Einladungen,Inviti
 colleagues.invites.referrals.title,Joined via your invite,colleagues invites right panel heading,Joined via your invite,Über deine Einladung beigetreten,Entrati tramite il tuo invito
@@ -681,6 +684,12 @@ colleagues.channels.search,Search channels,colleagues channel search placeholder
 colleagues.channels.search_aria,Search channels,colleagues channel search aria,Search channels,Kanäle suchen,Cerca canali
 colleagues.channels.search_toggle,Search channels,colleagues channel search toggle button,Search channels,Kanäle suchen,Cerca canali
 colleagues.channels.actions_aria,Channel section actions,colleagues channel section toolbar aria,Channel section actions,Aktionen für Kanäle,Azioni sezione canali
+colleagues.channels.starred,Starred,colleagues channel starred section heading,Starred,Favoriten,Preferiti
+colleagues.sidebar.group.today,Today,colleagues sidebar recency group today,Today,Heute,Oggi
+colleagues.sidebar.group.yesterday,Yesterday,colleagues sidebar recency group yesterday,Yesterday,Gestern,Ieri
+colleagues.sidebar.group.lastWeek,Last week,colleagues sidebar recency group last week,Last week,Letzte Woche,Settimana scorsa
+colleagues.sidebar.group.lastMonth,Last month,colleagues sidebar recency group last month,Last month,Letzter Monat,Mese scorso
+colleagues.sidebar.group.older,Older,colleagues sidebar recency group older,Older,Älter,Più vecchi
 colleagues.channel.star,Add to favorites,colleagues channel star action,Add to favorites,Zu Favoriten hinzufügen,Aggiungi ai preferiti
 colleagues.channel.unstar,Remove from favorites,colleagues channel unstar action,Remove from favorites,Aus Favoriten entfernen,Rimuovi dai preferiti
 colleagues.channel.create,Create channel,colleagues create channel button aria,Create channel,Kanal erstellen,Crea canale
@@ -700,6 +709,17 @@ colleagues.channel.description_label,Description,colleagues channel detail descr
 colleagues.channel.description_placeholder,Add a description…,colleagues channel description placeholder,Add a description…,Beschreibung hinzufügen…,Aggiungi una descrizione…
 colleagues.channel.description_empty,No description,colleagues channel description empty read-only,No description,Keine Beschreibung,Nessuna descrizione
 colleagues.channel.details_title,Channel details,colleagues channel detail panel aria,Channel details,Kanaldetails,Dettagli canale
+colleagues.channel.open_details,Open channel details,colleagues channel header title button aria,Open channel details,Kanaldetails öffnen,Apri dettagli canale
+colleagues.channel.details_button,Details,colleagues channel header details button,Details,Details,Dettagli
+colleagues.channel.view_members,View channel members,colleagues channel header members button aria,View channel members,Kanalmitglieder anzeigen,Visualizza membri del canale
+colleagues.channel.details_nav,Channel details sections,colleagues channel detail tabs nav aria,Channel details sections,Abschnitte der Kanaldetails,Sezioni dettagli canale
+colleagues.channel.tab.about,About,colleagues channel detail tab,About,Info,Informazioni
+colleagues.channel.tab.members,Members,colleagues channel detail tab,Members,Mitglieder,Membri
+colleagues.chat.channel_nav,Channel navigation,colleagues chat header tabs nav aria,Channel navigation,Kanalnavigation,Navigazione canale
+colleagues.chat.conversation_nav,Conversation navigation,colleagues chat header tabs nav aria unified,Conversation navigation,Unterhaltungsnavigation,Navigazione conversazione
+colleagues.chat.open_details,Open conversation details,colleagues chat DM header title button aria,Open conversation details,Unterhaltungsdetails öffnen,Apri dettagli conversazione
+colleagues.chat.details_button,Details,colleagues chat header details button unified,Details,Details,Dettagli
+colleagues.chat.tab.messages,Messages,colleagues chat header tab,Messages,Nachrichten,Messaggi
 colleagues.channel.members_title,Members,colleagues channel detail members heading,Members,Mitglieder,Membri
 colleagues.channel.members_loading,Loading members,colleagues channel members loading,Loading members,Lade Mitglieder,Caricamento membri
 colleagues.channel.members_empty,No members yet,colleagues channel members empty,No members yet,Noch keine Mitglieder,Ancora nessun membro
@@ -727,6 +747,9 @@ colleagues.member.message,Message,colleagues message member action,Message,Nachr
 colleagues.member.select_hint,Select a colleague to view details.,colleagues empty detail panel,Select a colleague to view details.,Wähle eine Person für Details.,Seleziona un collega per i dettagli.
 colleagues.page.error.title,Could not load colleagues,colleagues page load error title,Could not load colleagues,Kolleginnen und Kollegen konnten nicht geladen werden,Impossibile caricare i colleghi
 colleagues.chat.search,Search messages,colleagues chat search placeholder,Search messages,Nachrichten suchen,Cerca messaggi
+colleagues.chat.members_search,Search members,colleagues chat members dropdown search,Search members,Mitglieder suchen,Cerca membri
+colleagues.chat.members_search_clear,Clear member search,colleagues chat members dropdown clear search,Clear member search,Mitgliedersuche löschen,Cancella ricerca membri
+colleagues.chat.members_search_empty,No members match your search.,colleagues chat members dropdown empty,No members match your search.,Keine Mitglieder entsprechen der Suche.,Nessun membro corrisponde alla ricerca.
 colleagues.chat.search_results,Search results,colleagues chat search results panel,Search results,Suchergebnisse,Risultati di ricerca
 colleagues.chat.unknown_author,Colleague,colleagues chat unknown author,Colleague,Kollegin oder Kollege,Collega
 colleagues.chat.edited,edited,colleagues chat edited badge,edited,bearbeitet,modificato
@@ -755,7 +778,88 @@ common.close,Close,shared close action,Close,Schließen,Chiudi
 common.cancel,Cancel,shared cancel action,Cancel,Abbrechen,Annulla
 common.save,Save,shared save action,Save,Speichern,Salva
 common.remove,Remove,shared remove action,Remove,Entfernen,Rimuovi
-organization.page.title,Organization,apps/web/src/app/features/organization/sidebar/organization-sidebar.component.html text-node,Organization,Organisation,Organizzazione
+organization.page.title,Organization,organization page rail title,Organization,Organisation,Organizzazione
+organization.page.subtitle,Company settings and administration,organization page rail subtitle,Company settings and administration,Unternehmenseinstellungen und Verwaltung,Impostazioni aziendali e amministrazione
+organization.page.error.title,Could not load organization,organization page load error title,Could not load organization,Organisation konnte nicht geladen werden,Impossibile caricare l'organizzazione
+organization.page.no_access.title,No organization sections available,organization page no permission title,No organization sections available,Keine Organisationsbereiche verfügbar,Nessuna sezione organizzazione disponibile
+organization.page.no_access.message,Your role does not include organization administration permissions.,organization page no permission body,Your role does not include organization administration permissions.,Deine Rolle umfasst keine Berechtigungen für die Organisationsverwaltung.,Il tuo ruolo non include i permessi di amministrazione dell'organizzazione.
+organization.sidebar.label,Organization sections,organization sidebar aria label,Organization sections,Organisationsbereiche,Sezioni organizzazione
+organization.section.profile,Profile,organization section nav label,Profile,Profil,Profilo
+organization.section.profile.subtitle,Company identity and contact details,organization section nav subtitle,Company identity and contact details,Unternehmensidentität und Kontaktdaten,Identità aziendale e contatti
+organization.section.roles,Roles & Permissions,organization section nav label,Roles & Permissions,Rollen & Berechtigungen,Ruoli e permessi
+organization.section.roles.subtitle,Hierarchy and capability matrix,organization section nav subtitle,Hierarchy and capability matrix,Hierarchie und Berechtigungsmatrix,Gerarchia e matrice delle capacità
+organization.section.branding,Branding,organization section nav label,Branding,Branding,Branding
+organization.section.branding.subtitle,Theme colors for your workspace,organization section nav subtitle,Theme colors for your workspace,Designfarben für deinen Arbeitsbereich,Colori del tema per l'area di lavoro
+organization.section.billing,Billing,organization section nav label,Billing,Abrechnung,Fatturazione
+organization.section.billing.subtitle,Plan limits and invoices,organization section nav subtitle,Plan limits and invoices,Tarifgrenzen und Rechnungen,Limiti del piano e fatture
+organization.section.integrations,API Keys,organization section nav label,API Keys,API-Schlüssel,Chiavi API
+organization.section.integrations.subtitle,Integration credentials,organization section nav subtitle,Integration credentials,Integrationszugangsdaten,Credenziali di integrazione
+organization.section.export,Data Export,organization section nav label,Data Export,Datenexport,Esportazione dati
+organization.section.export.subtitle,Download organization data,organization section nav subtitle,Download organization data,Organisationsdaten herunterladen,Scarica i dati dell'organizzazione
+organization.section.audit,Audit Log,organization section nav label,Audit Log,Audit-Protokoll,Registro di controllo
+organization.section.audit.subtitle,Recent admin actions,organization section nav subtitle,Recent admin actions,Aktuelle Admin-Aktionen,Azioni amministrative recenti
+organization.profile.title,Company profile,organization profile section title,Company profile,Unternehmensprofil,Profilo aziendale
+organization.profile.subtitle,Identity and contact details for your organization.,organization profile section subtitle,Identity and contact details for your organization.,Identität und Kontaktdaten deiner Organisation.,Identità e contatti della tua organizzazione.
+organization.profile.name,Organization name,organization profile field label,Organization name,Organisationsname,Nome organizzazione
+organization.profile.logo_url,Logo URL,organization profile field label,Logo URL,Logo-URL,URL logo
+organization.profile.description,Description,organization profile field label,Description,Beschreibung,Descrizione
+organization.profile.industry,Industry,organization profile field label,Industry,Branche,Settore
+organization.profile.email,Email,organization profile field label,Email,E-Mail,E-mail
+organization.profile.phone,Phone,organization profile field label,Phone,Telefon,Telefono
+organization.profile.website,Website,organization profile field label,Website,Website,Sito web
+organization.profile.address,Address,organization profile field label,Address,Adresse,Indirizzo
+organization.profile.city,City,organization profile field label,City,Stadt,Città
+organization.profile.postal,Postal code,organization profile field label,Postal code,Postleitzahl,CAP
+organization.profile.country,Country,organization profile field label,Country,Land,Paese
+organization.profile.saved,Organization profile saved.,organization profile toast,Organization profile saved.,Organisationsprofil gespeichert.,Profilo organizzazione salvato.
+organization.roles.title,Roles & permissions,organization roles section title,Roles & permissions,Rollen & Berechtigungen,Ruoli e permessi
+organization.roles.subtitle,Define hierarchy and capabilities for your team.,organization roles section subtitle,Define hierarchy and capabilities for your team.,Definiere Hierarchie und Berechtigungen für dein Team.,Definisci gerarchia e capacità per il tuo team.
+organization.roles.list,Role list,organization roles list aria,Role list,Rollenliste,Elenco ruoli
+organization.roles.delete,Delete role,organization roles delete action,Delete role,Rolle löschen,Elimina ruolo
+organization.roles.save_permissions,Save permissions,organization roles save action,Save permissions,Berechtigungen speichern,Salva permessi
+organization.roles.select,Select a role to edit permissions.,organization roles empty state,Select a role to edit permissions.,Wähle eine Rolle zum Bearbeiten der Berechtigungen.,Seleziona un ruolo per modificare i permessi.
+organization.roles.create,Create role,organization roles create heading,Create role,Rolle erstellen,Crea ruolo
+organization.roles.internal_name,Internal name,organization roles field label,Internal name,Interner Name,Nome interno
+organization.roles.display_name,Display name,organization roles field label,Display name,Anzeigename,Nome visualizzato
+organization.roles.level,Level,organization roles field label,Level,Stufe,Livello
+organization.roles.create_button,Create role,organization roles create action,Create role,Rolle erstellen,Crea ruolo
+organization.roles.delete_confirm.title,Delete role?,organization roles confirm title,Delete role?,Rolle löschen?,Eliminare il ruolo?
+organization.roles.delete_confirm.message,This role will be removed permanently. Users assigned to it must be reassigned first.,organization roles confirm body,This role will be removed permanently. Users assigned to it must be reassigned first.,Diese Rolle wird dauerhaft entfernt. Zugewiesene Nutzer müssen zuerst neu zugewiesen werden.,Questo ruolo verrà rimosso definitivamente. Gli utenti assegnati devono essere riassegnati prima.
+organization.branding.title,Branding,organization branding section title,Branding,Branding,Branding
+organization.branding.subtitle,Organization color overrides applied to the workspace theme.,organization branding section subtitle,Organization color overrides applied to the workspace theme.,Organisationsfarben werden auf das Arbeitsbereich-Design angewendet.,I colori dell'organizzazione si applicano al tema dell'area di lavoro.
+organization.branding.primary,Primary color,organization branding field label,Primary color,Primärfarbe,Colore primario
+organization.branding.accent,Accent color,organization branding field label,Accent color,Akzentfarbe,Colore di accento
+organization.branding.background,Background color,organization branding field label,Background color,Hintergrundfarbe,Colore di sfondo
+organization.branding.saved,Branding saved.,organization branding toast,Branding saved.,Branding gespeichert.,Branding salvato.
+organization.billing.title,Billing,organization billing section title,Billing,Abrechnung,Fatturazione
+organization.billing.subtitle,Current plan and invoice history.,organization billing section subtitle,Current plan and invoice history.,Aktueller Tarif und Rechnungsverlauf.,Piano attuale e storico fatture.
+organization.billing.status,Status,organization billing field label,Status,Status,Stato
+organization.billing.storage,Storage limit,organization billing field label,Storage limit,Speicherlimit,Limite di archiviazione
+organization.billing.members,Member limit,organization billing field label,Member limit,Mitgliederlimit,Limite membri
+organization.billing.invoice_date,Date,organization billing table header,Date,Datum,Data
+organization.billing.invoice_amount,Amount,organization billing table header,Amount,Betrag,Importo
+organization.billing.invoice_status,Status,organization billing table header,Status,Status,Stato
+organization.billing.no_invoices,No invoices yet.,organization billing empty state,No invoices yet.,Noch keine Rechnungen.,Nessuna fattura ancora.
+organization.billing.invoices_restricted,Invoice history requires billing view permission.,organization billing restricted message,Invoice history requires billing view permission.,Rechnungsverlauf erfordert die Berechtigung zur Rechnungsansicht.,Lo storico fatture richiede il permesso di visualizzazione fatturazione.
+organization.integrations.title,API keys,organization integrations section title,API keys,API-Schlüssel,Chiavi API
+organization.integrations.subtitle,Generate and revoke integration keys for your organization.,organization integrations section subtitle,Generate and revoke integration keys for your organization.,Erstelle und widerrufe Integrationsschlüssel für deine Organisation.,Genera e revoca chiavi di integrazione per la tua organizzazione.
+organization.integrations.copy_once,Copy this key now — it will not be shown again.,organization integrations revealed key hint,Copy this key now — it will not be shown again.,Kopiere diesen Schlüssel jetzt — er wird nicht erneut angezeigt.,Copia questa chiave ora — non verrà mostrata di nuovo.
+organization.integrations.key_name,Key name,organization integrations field label,Key name,Schlüsselname,Nome chiave
+organization.integrations.generate,Generate key,organization integrations action,Generate key,Schlüssel erstellen,Genera chiave
+organization.integrations.revoke,Revoke,organization integrations action,Revoke,Widerrufen,Revoca
+organization.integrations.revoke_confirm.title,Revoke API key?,organization integrations confirm title,Revoke API key?,API-Schlüssel widerrufen?,Revocare la chiave API?
+organization.integrations.revoke_confirm.message,Integrations using this key will stop working immediately.,organization integrations confirm body,Integrations using this key will stop working immediately.,Integrationen mit diesem Schlüssel funktionieren sofort nicht mehr.,Le integrazioni che usano questa chiave smetteranno di funzionare immediatamente.
+organization.export.title,Data export,organization export section title,Data export,Datenexport,Esportazione dati
+organization.export.subtitle,Request a full organization export as JSON.,organization export section subtitle,Request a full organization export as JSON.,Fordere einen vollständigen Organisationsexport als JSON an.,Richiedi un'esportazione completa dell'organizzazione in JSON.
+organization.export.request,Request export,organization export action,Request export,Export anfordern,Richiedi esportazione
+organization.export.download,Download,organization export action,Download,Herunterladen,Scarica
+organization.export.ready,Export is ready to download.,organization export toast,Export is ready to download.,Export steht zum Download bereit.,L'esportazione è pronta per il download.
+organization.audit.title,Audit log,organization audit section title,Audit log,Audit-Protokoll,Registro di controllo
+organization.audit.subtitle,Recent organization actions and changes.,organization audit section subtitle,Recent organization actions and changes.,Aktuelle Organisationsaktionen und Änderungen.,Azioni e modifiche recenti dell'organizzazione.
+organization.audit.when,When,organization audit table header,When,Wann,Quando
+organization.audit.action,Action,organization audit table header,Action,Aktion,Azione
+organization.audit.entity,Entity,organization audit table header,Entity,Entität,Entità
+organization.audit.empty,No audit entries yet.,organization audit empty state,No audit entries yet.,Noch keine Audit-Einträge.,Nessuna voce di controllo ancora.
 projects.page.search.aria,Project search,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,Project search,Projektsuche,Ricerca progetto
 projects.page.action.newProject,New project,apps/web/src/app/features/projects/projects-page.component.html attr:aria-label,New project,Neues Projekt,Nuovo progetto
 projects.page.defaultProjectName,Project {number},projects page inline new-project default numbered name,Project {number},Projekt {number},Progetto {number}

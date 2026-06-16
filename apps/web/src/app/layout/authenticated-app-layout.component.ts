@@ -24,6 +24,8 @@ import { ShareLinkRestoreService } from '../core/share-set/share-link-restore.se
 import type { ShareLinkRestoreResult } from '../core/share-set/share-link-restore.types';
 import { ShareUrlSyncService } from '../core/share-set/share-url-sync.service';
 import { I18nService } from '../core/i18n/i18n.service';
+import { applyOrgBrandingToDocument } from '../core/organization/organization.helpers';
+import { OrganizationService } from '../core/organization/organization.service';
 import { ToastService } from '../core/toast/toast.service';
 import { NavComponent } from '../features/nav/nav.component';
 import { DragDividerComponent } from '../shared/workspace-pane/shell/drag-divider/drag-divider.component';
@@ -86,6 +88,7 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
   private readonly shareUrlSyncService = inject(ShareUrlSyncService);
   private readonly toastService = inject(ToastService);
   private readonly i18nService = inject(I18nService);
+  private readonly organizationService = inject(OrganizationService);
   private readonly injector = inject(Injector);
 
   private readonly currentUrl = toSignal(
@@ -125,6 +128,12 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
   constructor() {
     // Side-effect: keeps workspace pane rawImages aligned with global selection.
     inject(WorkspaceSelectedItemsSyncService);
+
+    void this.organizationService.loadBranding().then((result) => {
+      if (result.data) {
+        applyOrgBrandingToDocument(result.data);
+      }
+    });
 
     effect(() => {
       const shell = this.activeShell();

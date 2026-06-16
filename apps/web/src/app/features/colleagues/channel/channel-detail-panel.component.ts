@@ -10,6 +10,7 @@ import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 import { HLM_INPUT_IMPORTS } from '../../../shared/ui/input';
 
 export type ChannelDetailMode = 'create' | 'view';
+export type ChannelDetailTab = 'about' | 'members';
 
 @Component({
   selector: 'app-channel-detail-panel',
@@ -35,12 +36,14 @@ export class ChannelDetailPanelComponent {
   readonly colleagues = input<OrgMember[]>([]);
   readonly canManage = input(false);
   readonly membersLoading = input(false);
+  readonly activeTab = input<ChannelDetailTab>('about');
 
   readonly closed = output<void>();
   readonly created = output<{ name: string; type: 'public' | 'private' }>();
   readonly memberInviteRequested = output<string>();
   readonly descriptionUpdated = output<string>();
   readonly archiveRequested = output<void>();
+  readonly tabChange = output<ChannelDetailTab>();
 
   readonly draftName = signal('');
   readonly draftDescription = signal('');
@@ -126,5 +129,9 @@ export class ChannelDetailPanelComponent {
     if (next === current) return;
 
     this.descriptionUpdated.emit(next);
+  }
+
+  onTabSelect(tab: ChannelDetailTab): void {
+    this.tabChange.emit(tab);
   }
 }

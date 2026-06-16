@@ -1,12 +1,11 @@
 import { Component, inject, input, output } from '@angular/core';
 import { I18nService } from '../../../core/i18n/i18n.service';
-import { PageRailTitleComponent } from '../../../shared/page-rail-title';
 import type { OrganizationSectionConfig, OrganizationSectionId } from '../page/organization-page.config';
 
 @Component({
   selector: 'app-organization-sidebar',
   standalone: true,
-  imports: [PageRailTitleComponent],
+  imports: [],
   templateUrl: './organization-sidebar.component.html',
   styleUrl: './organization-sidebar.component.scss',
   host: {

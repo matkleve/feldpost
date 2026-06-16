@@ -15,6 +15,7 @@ import { ToastService } from '../../../core/toast/toast.service';
 import { PageGridComponent } from '../../../shared/page-grid';
 import { MemberListComponent } from '../sidebar/member-list.component';
 import { ChatAreaComponent } from '../chat/chat-area.component';
+import type { ChatDetailsRequest, ChatRightRailInspector } from '../chat/chat-header.types';
 import { MemberDetailPanelComponent } from '../member-detail/member-detail-panel.component';
 import { ChannelDetailPanelComponent } from '../channel/channel-detail-panel.component';
 import { ColleaguesInvitesWorkspaceComponent } from '../invites/colleagues-invites-workspace.component';
@@ -76,7 +77,8 @@ export class ColleaguesPageComponent implements OnDestroy {
   readonly inspectorMemberId = signal<string | null>(null);
   readonly selectedChannelId = signal<string | null>(null);
   readonly creatingChannel = signal(false);
-  readonly channelDetailDismissed = signal(false);
+  readonly rightRailInspector = signal<ChatRightRailInspector>('closed');
+  readonly channelDetailTab = signal<'about' | 'members'>('about');
   readonly channelMembers = signal<ChatChannelMember[]>([]);
   readonly channelMembersLoading = signal(false);
   readonly onlineUserIds = signal<Set<string>>(new Set());
@@ -107,8 +109,17 @@ export class ColleaguesPageComponent implements OnDestroy {
 
   readonly showChannelDetail = computed(() => {
     const channel = this.selectedChannel();
-    return !!channel && channel.type !== 'dm' && !this.creatingChannel() && !this.channelDetailDismissed();
+    return (
+      this.rightRailInspector() === 'channel' &&
+      !!channel &&
+      channel.type !== 'dm' &&
+      !this.creatingChannel()
+    );
   });
+
+  readonly showMemberDetail = computed(
+    () => this.rightRailInspector() === 'member' && !!this.inspectorMember(),
+  );
 
   readonly membersWithPresence = computed(() =>
     this.members().map((member) => ({
@@ -227,24 +238,39 @@ export class ColleaguesPageComponent implements OnDestroy {
   onMemberSelected(memberId: string): void {
     this.exitInvitesIfActive();
     this.creatingChannel.set(false);
+    this.rightRailInspector.set('closed');
     this.inspectorMemberId.set(null);
     void this.openDirectMessage(memberId);
   }
 
   onMemberPanelClosed(): void {
     this.inspectorMemberId.set(null);
+    this.rightRailInspector.set('closed');
   }
 
-  onChatMemberProfileOpen(): void {
-    const memberId = this.activeDmMemberId();
-    if (memberId) {
+  onChatDetailsRequested(request: ChatDetailsRequest): void {
+    if (request.kind === 'member') {
+      const memberId = this.activeDmMemberId();
+      if (!memberId) {
+        return;
+      }
       this.inspectorMemberId.set(memberId);
+      this.rightRailInspector.set('member');
+      return;
     }
+
+    if (this.selectedChannel()?.type === 'dm') {
+      return;
+    }
+
+    this.inspectorMemberId.set(null);
+    this.channelDetailTab.set(request.channelTab ?? 'about');
+    this.rightRailInspector.set('channel');
   }
 
   onChannelCreateOpen(): void {
     this.creatingChannel.set(true);
-    this.channelDetailDismissed.set(false);
+    this.rightRailInspector.set('closed');
     this.inspectorMemberId.set(null);
   }
 
@@ -253,13 +279,14 @@ export class ColleaguesPageComponent implements OnDestroy {
       this.creatingChannel.set(false);
       return;
     }
-    this.channelDetailDismissed.set(true);
+    this.rightRailInspector.set('closed');
   }
 
   async onChannelSelected(channelId: string): Promise<void> {
     this.exitInvitesIfActive();
     this.creatingChannel.set(false);
-    this.channelDetailDismissed.set(false);
+    this.rightRailInspector.set('closed');
+    this.channelDetailTab.set('about');
     this.inspectorMemberId.set(null);
     await this.selectChannel(channelId);
   }
@@ -274,6 +301,8 @@ export class ColleaguesPageComponent implements OnDestroy {
 
   private async openDirectMessage(memberId: string): Promise<void> {
     this.exitInvitesIfActive();
+    this.rightRailInspector.set('closed');
+    this.inspectorMemberId.set(null);
     const result = await this.chatService.findOrCreateDm(memberId);
     if (result.error) {
       this.toastService.show({
@@ -309,7 +338,7 @@ export class ColleaguesPageComponent implements OnDestroy {
     if (result.data) {
       this.channels.update((list) => [...list, result.data!]);
       this.creatingChannel.set(false);
-      this.channelDetailDismissed.set(false);
+      this.rightRailInspector.set('closed');
       await this.selectChannel(result.data.id);
       this.toastService.show({
         type: 'success',

@@ -11,23 +11,38 @@
     </div>
   }
 
-  <form class="org-section__form" (ngSubmit)="onCreateKey()">
-    <div hlmFormField>
-      <label hlmLabel for="api-key-name">{{ t('organization.integrations.key_name', 'Key name') }}</label>
-      <input hlmInput id="api-key-name" [ngModel]="newKeyName()" (ngModelChange)="newKeyName.set($event)" name="keyName" />
-    </div>
-    <button hlmBtn type="submit">{{ t('organization.integrations.generate', 'Generate key') }}</button>
-  </form>
+  @if (canEdit()) {
+    <form class="org-section__form" (ngSubmit)="onCreateKey()">
+      <div hlmFormField>
+        <label hlmLabel for="api-key-name">{{ t('organization.integrations.key_name', 'Key name') }}</label>
+        <input hlmInput id="api-key-name" [ngModel]="newKeyName()" (ngModelChange)="newKeyName.set($event)" name="keyName" />
+      </div>
+      <button hlmBtn type="submit">{{ t('organization.integrations.generate', 'Generate key') }}</button>
+    </form>
+  }
 
   <ul class="org-integrations__list">
     @for (key of apiKeys(); track key.id) {
       <li>
         <span>{{ key.name }}</span>
         <code>{{ key.keyPrefix }}…</code>
-        <button hlmBtn variant="outline" type="button" (click)="onRevoke(key.id)">
-          {{ t('organization.integrations.revoke', 'Revoke') }}
-        </button>
+        @if (canEdit()) {
+          <button hlmBtn variant="outline" type="button" (click)="onRevokeClick(key.id)">
+            {{ t('organization.integrations.revoke', 'Revoke') }}
+          </button>
+        }
       </li>
     }
   </ul>
 </section>
+
+@if (revokeDialogOpen()) {
+  <app-confirm-dialog
+    [title]="t('organization.integrations.revoke_confirm.title', 'Revoke API key?')"
+    [message]="t('organization.integrations.revoke_confirm.message', 'Integrations using this key will stop working immediately.')"
+    [confirmLabel]="t('organization.integrations.revoke', 'Revoke')"
+    [cancelLabel]="t('common.cancel', 'Cancel')"
+    (confirmed)="onRevokeConfirmed()"
+    (cancelled)="onRevokeCancelled()"
+  />
+}

@@ -6,16 +6,18 @@
   <form class="org-section__form" (ngSubmit)="onSave()">
     <div hlmFormField>
       <label hlmLabel for="brand-primary">{{ t('organization.branding.primary', 'Primary color') }}</label>
-      <input hlmInput id="brand-primary" type="color" [ngModel]="primaryColor()" (ngModelChange)="primaryColor.set($event)" name="primary" />
+      <input hlmInput id="brand-primary" type="color" [ngModel]="primaryColor()" (ngModelChange)="primaryColor.set($event)" name="primary" [disabled]="!canEdit()" />
     </div>
     <div hlmFormField>
       <label hlmLabel for="brand-accent">{{ t('organization.branding.accent', 'Accent color') }}</label>
-      <input hlmInput id="brand-accent" type="color" [ngModel]="accentColor()" (ngModelChange)="accentColor.set($event)" name="accent" />
+      <input hlmInput id="brand-accent" type="color" [ngModel]="accentColor()" (ngModelChange)="accentColor.set($event)" name="accent" [disabled]="!canEdit()" />
     </div>
     <div hlmFormField>
       <label hlmLabel for="brand-bg">{{ t('organization.branding.background', 'Background color') }}</label>
-      <input hlmInput id="brand-bg" type="color" [ngModel]="backgroundColor()" (ngModelChange)="backgroundColor.set($event)" name="background" />
+      <input hlmInput id="brand-bg" type="color" [ngModel]="backgroundColor()" (ngModelChange)="backgroundColor.set($event)" name="background" [disabled]="!canEdit()" />
     </div>
-    <button hlmBtn type="submit">{{ t('common.save', 'Save') }}</button>
+    @if (canEdit()) {
+      <button hlmBtn type="submit">{{ t('common.save', 'Save') }}</button>
+    }
   </form>
 </section>

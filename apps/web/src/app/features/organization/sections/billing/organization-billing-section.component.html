@@ -13,7 +13,8 @@
     </div>
   }
 
-  <table class="org-billing__table">
+  @if (canViewInvoices()) {
+    <table class="org-billing__table">
     <thead>
       <tr>
         <th>{{ t('organization.billing.invoice_date', 'Date') }}</th>
@@ -34,5 +35,8 @@
         </tr>
       }
     </tbody>
-  </table>
+    </table>
+  } @else {
+    <p class="org-billing__restricted">{{ t('organization.billing.invoices_restricted', 'Invoice history requires billing view permission.') }}</p>
+  }
 </section>

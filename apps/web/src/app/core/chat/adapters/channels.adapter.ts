@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { AuthService } from '../../auth/auth.service';
 import { SupabaseService } from '../../supabase/supabase.service';
 import { toChannel } from '../chat.helpers';
 import type { ChatChannel, ChatChannelMember } from '../chat.types';
@@ -6,19 +7,22 @@ import type { ChatChannel, ChatChannelMember } from '../chat.types';
 @Injectable({ providedIn: 'root' })
 export class ChatChannelsAdapter {
   private readonly supabase = inject(SupabaseService);
+  private readonly authService = inject(AuthService);
 
   async loadChannels(): Promise<{ data: ChatChannel[]; error: Error | null }> {
     const { data, error } = await this.supabase.client
       .from('chat_channels')
-      .select('*')
+      .select('*, chat_channel_members(user_id)')
       .is('archived_at', null)
-      .order('created_at');
+      .order('last_message_at', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false });
 
     if (error) {
       return { data: [], error: new Error(error.message) };
     }
 
-    return { data: (data ?? []).map((row) => toChannel(row)), error: null };
+    const userId = this.authService.user()?.id ?? null;
+    return { data: (data ?? []).map((row) => toChannel(row, userId)), error: null };
   }
 
   async createChannel(
@@ -43,7 +47,7 @@ export class ChatChannelsAdapter {
       role: 'owner',
     });
 
-    return { data: toChannel(data), error: null };
+    return { data: toChannel(data, userId), error: null };
   }
 
   async archiveChannel(channelId: string): Promise<{ error: Error | null }> {
@@ -70,7 +74,8 @@ export class ChatChannelsAdapter {
       return { data: null, error: new Error(error?.message ?? 'Could not update channel.') };
     }
 
-    return { data: toChannel(data), error: null };
+    const currentUserId = this.authService.user()?.id ?? null;
+    return { data: toChannel(data, currentUserId), error: null };
   }
 
   async addChannelMember(
@@ -138,7 +143,7 @@ export class ChatChannelsAdapter {
       return { data: null, error: new Error(loadError?.message ?? 'Could not load direct message.') };
     }
 
-    return { data: toChannel(channel), error: null };
+    return { data: toChannel(channel, userId), error: null };
   }
 
   async markChannelRead(channelId: string, userId: string): Promise<void> {

@@ -4,7 +4,7 @@
     <p>{{ t('organization.export.subtitle', 'Request a full organization export as JSON.') }}</p>
   </header>
 
-  <button hlmBtn type="button" (click)="onRequestExport()">
+  <button hlmBtn type="button" [disabled]="requesting()" (click)="onRequestExport()">
     {{ t('organization.export.request', 'Request export') }}
   </button>
 
@@ -14,8 +14,10 @@
         <span>{{ job.createdAt | date: 'medium' }}</span>
         <span>{{ job.format }}</span>
         <span>{{ job.status }}</span>
-        @if (job.downloadUrl) {
-          <a [href]="job.downloadUrl" target="_blank" rel="noopener">{{ t('organization.export.download', 'Download') }}</a>
+        @if (job.status === 'completed' && job.payload) {
+          <button hlmBtn variant="outline" type="button" (click)="onDownload(job)">
+            {{ t('organization.export.download', 'Download') }}
+          </button>
         }
       </li>
     }

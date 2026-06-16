@@ -1,0 +1,116 @@
+<header class="chat-header">
+  <div class="chat-header__top">
+    @if (isInteractive()) {
+      <div class="chat-header__identity">
+        <button
+          type="button"
+          class="chat-header__title-btn"
+          [class.chat-header__title-btn--dm]="isDm()"
+          [attr.aria-label]="
+            isDm()
+              ? t('colleagues.chat.open_details', 'Open conversation details')
+              : t('colleagues.channel.open_details', 'Open channel details')
+          "
+          (click)="onTitleOpen()"
+        >
+          @if (isDm()) {
+            <span class="chat-header__avatar" aria-hidden="true">{{ titleInitials() }}</span>
+          } @else {
+            <span class="chat-header__prefix" aria-hidden="true">#</span>
+          }
+          <h1>{{ title() }}</h1>
+        </button>
+        <button
+          type="button"
+          hlmBtn
+          variant="ghost"
+          size="sm"
+          class="chat-header__details-btn"
+          [attr.aria-label]="t('colleagues.chat.details_button', 'Details')"
+          (click)="onDetailsOpen()"
+        >
+          <span class="material-icons" aria-hidden="true">info</span>
+          {{ t('colleagues.chat.details_button', 'Details') }}
+        </button>
+      </div>
+    } @else {
+      <div class="chat-header__title-static">
+        <h1>{{ title() }}</h1>
+      </div>
+    }
+
+    <div class="chat-header__actions">
+      @if (isChannel()) {
+        <button
+          type="button"
+          hlmBtn
+          variant="outline"
+          size="sm"
+          class="chat-header__members-btn"
+          [attr.data-active]="membersDropdownOpen() ? 'true' : null"
+          [attr.aria-expanded]="membersDropdownOpen()"
+          [attr.aria-label]="t('colleagues.channel.view_members', 'View channel members')"
+          (click)="toggleMembersDropdown($event)"
+        >
+          <span class="material-icons" aria-hidden="true">group</span>
+          {{ memberCount() }}
+        </button>
+      }
+      <app-rail-search-field
+        class="chat-header__search"
+        [value]="searchQuery()"
+        [placeholder]="t('colleagues.chat.search', 'Search messages')"
+        [ariaLabel]="t('colleagues.chat.search', 'Search messages')"
+        (valueChange)="searchQueryChange.emit($event)"
+        (submitted)="searchSubmitted.emit()"
+      />
+    </div>
+  </div>
+
+  @if (isInteractive()) {
+    <nav class="chat-header__tabs" [attr.aria-label]="t('colleagues.chat.conversation_nav', 'Conversation navigation')">
+      <span class="chat-header__tab chat-header__tab--active" aria-current="page">
+        <span class="material-icons" aria-hidden="true">chat_bubble_outline</span>
+        {{ t('colleagues.chat.tab.messages', 'Messages') }}
+      </span>
+    </nav>
+  }
+</header>
+
+@if (membersDropdownOpen()) {
+  <app-toolbar-dropdown-stack
+    [activePanelId]="'members'"
+    [anchor]="membersDropdownAnchor()"
+    (closeRequested)="closeMembersDropdown()"
+  >
+    <app-standard-dropdown
+      class="chat-header__members-dropdown"
+      scrollMode="delegate"
+      [searchTerm]="memberSearchQuery()"
+      [searchPlaceholder]="t('colleagues.chat.members_search', 'Search members')"
+      [clearSearchAriaLabel]="t('colleagues.chat.members_search_clear', 'Clear member search')"
+      (searchTermChange)="memberSearchQuery.set($event)"
+      (clearRequested)="memberSearchQuery.set('')"
+    >
+      <div dropdown-items class="chat-header__members-list">
+        @for (member of filteredChannelMembers(); track member.userId) {
+          <div hlmMenuItem class="chat-header__members-row">
+            <span class="chat-header__members-avatar" aria-hidden="true">
+              {{ memberInitials(member.fullName) }}
+            </span>
+            <span class="chat-header__members-meta">
+              <span class="chat-header__members-name">
+                {{ member.fullName || t('colleagues.members.unnamed', 'Unnamed') }}
+              </span>
+              <span class="chat-header__members-role">{{ memberRoleLabel(member) }}</span>
+            </span>
+          </div>
+        } @empty {
+          <p class="chat-header__members-empty">
+            {{ t('colleagues.chat.members_search_empty', 'No members match your search.') }}
+          </p>
+        }
+      </div>
+    </app-standard-dropdown>
+  </app-toolbar-dropdown-stack>
+}

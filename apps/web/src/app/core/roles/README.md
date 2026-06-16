@@ -2,7 +2,7 @@
 
 Per-organization hierarchical roles and configurable permissions.
 
-Mirrors `docs/specs/service/roles/` (planned).
+Mirrors `docs/specs/service/roles/roles-service.md`.
 
 ## Responsibilities
 

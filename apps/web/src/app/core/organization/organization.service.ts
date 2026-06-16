@@ -233,18 +233,19 @@ export class OrganizationService {
       return { data: null, error: new Error(error?.message ?? 'Could not start export.') };
     }
 
-    return {
-      data: {
-        id: data.id as string,
-        status: data.status as string,
-        format: data.format as string,
-        downloadUrl: (data.download_url as string | null) ?? null,
-        createdAt: data.created_at as string,
-        completedAt: (data.completed_at as string | null) ?? null,
-        expiresAt: (data.expires_at as string | null) ?? null,
-      },
-      error: null,
-    };
+    return this.processExportJob(data.id as string);
+  }
+
+  async processExportJob(jobId: string): Promise<{ data: OrgExportJob | null; error: Error | null }> {
+    const { data, error } = await this.supabase.client.rpc('process_org_export_job', {
+      p_job_id: jobId,
+    });
+
+    if (error || !data) {
+      return { data: null, error: new Error(error?.message ?? 'Could not process export.') };
+    }
+
+    return { data: this.toExportJob(data as Record<string, unknown>), error: null };
   }
 
   async loadExportJobs(): Promise<{ data: OrgExportJob[]; error: Error | null }> {
@@ -258,15 +259,7 @@ export class OrganizationService {
     }
 
     return {
-      data: (data ?? []).map((row) => ({
-        id: row.id as string,
-        status: row.status as string,
-        format: row.format as string,
-        downloadUrl: (row.download_url as string | null) ?? null,
-        createdAt: row.created_at as string,
-        completedAt: (row.completed_at as string | null) ?? null,
-        expiresAt: (row.expires_at as string | null) ?? null,
-      })),
+      data: (data ?? []).map((row) => this.toExportJob(row as Record<string, unknown>)),
       error: null,
     };
   }
@@ -293,6 +286,19 @@ export class OrganizationService {
         createdAt: row.created_at as string,
       })),
       error: null,
+    };
+  }
+
+  private toExportJob(row: Record<string, unknown>): OrgExportJob {
+    return {
+      id: row['id'] as string,
+      status: row['status'] as string,
+      format: row['format'] as string,
+      downloadUrl: (row['download_url'] as string | null) ?? null,
+      payload: (row['payload'] as Record<string, unknown> | null) ?? null,
+      createdAt: row['created_at'] as string,
+      completedAt: (row['completed_at'] as string | null) ?? null,
+      expiresAt: (row['expires_at'] as string | null) ?? null,
     };
   }
 

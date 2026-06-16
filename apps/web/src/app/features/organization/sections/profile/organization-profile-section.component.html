@@ -8,56 +8,63 @@
     <form class="org-section__form" (ngSubmit)="onSave()">
       <div hlmFormField>
         <label hlmLabel for="org-name">{{ t('organization.profile.name', 'Organization name') }}</label>
-        <input hlmInput id="org-name" name="orgName" [(ngModel)]="draftName" required />
+        <input hlmInput id="org-name" name="orgName" [(ngModel)]="draftName" required [disabled]="!canEdit()" />
+      </div>
+
+      <div hlmFormField>
+        <label hlmLabel for="org-logo">{{ t('organization.profile.logo_url', 'Logo URL') }}</label>
+        <input hlmInput id="org-logo" name="orgLogo" [(ngModel)]="draftLogoUrl" [disabled]="!canEdit()" />
       </div>
 
       <div hlmFormField>
         <label hlmLabel for="org-description">{{ t('organization.profile.description', 'Description') }}</label>
-        <textarea hlmInput id="org-description" name="orgDescription" rows="3" [(ngModel)]="draftDescription"></textarea>
+        <textarea hlmInput id="org-description" name="orgDescription" rows="3" [(ngModel)]="draftDescription" [disabled]="!canEdit()"></textarea>
       </div>
 
       <div hlmFormField>
         <label hlmLabel for="org-industry">{{ t('organization.profile.industry', 'Industry') }}</label>
-        <input hlmInput id="org-industry" name="orgIndustry" [(ngModel)]="draftIndustry" />
+        <input hlmInput id="org-industry" name="orgIndustry" [(ngModel)]="draftIndustry" [disabled]="!canEdit()" />
       </div>
 
       <div class="org-section__grid">
         <div hlmFormField>
           <label hlmLabel for="org-email">{{ t('organization.profile.email', 'Email') }}</label>
-          <input hlmInput id="org-email" name="orgEmail" type="email" [(ngModel)]="draftEmail" />
+          <input hlmInput id="org-email" name="orgEmail" type="email" [(ngModel)]="draftEmail" [disabled]="!canEdit()" />
         </div>
         <div hlmFormField>
           <label hlmLabel for="org-phone">{{ t('organization.profile.phone', 'Phone') }}</label>
-          <input hlmInput id="org-phone" name="orgPhone" [(ngModel)]="draftPhone" />
+          <input hlmInput id="org-phone" name="orgPhone" [(ngModel)]="draftPhone" [disabled]="!canEdit()" />
         </div>
       </div>
 
       <div hlmFormField>
         <label hlmLabel for="org-website">{{ t('organization.profile.website', 'Website') }}</label>
-        <input hlmInput id="org-website" name="orgWebsite" [(ngModel)]="draftWebsite" />
+        <input hlmInput id="org-website" name="orgWebsite" [(ngModel)]="draftWebsite" [disabled]="!canEdit()" />
       </div>
 
       <div hlmFormField>
         <label hlmLabel for="org-address">{{ t('organization.profile.address', 'Address') }}</label>
-        <input hlmInput id="org-address" name="orgAddress" [(ngModel)]="draftAddressLine1" />
+        <input hlmInput id="org-address" name="orgAddress" [(ngModel)]="draftAddressLine1" [disabled]="!canEdit()" />
       </div>
 
       <div class="org-section__grid">
         <div hlmFormField>
           <label hlmLabel for="org-city">{{ t('organization.profile.city', 'City') }}</label>
-          <input hlmInput id="org-city" name="orgCity" [(ngModel)]="draftCity" />
+          <input hlmInput id="org-city" name="orgCity" [(ngModel)]="draftCity" [disabled]="!canEdit()" />
         </div>
         <div hlmFormField>
           <label hlmLabel for="org-postal">{{ t('organization.profile.postal', 'Postal code') }}</label>
-          <input hlmInput id="org-postal" name="orgPostal" [(ngModel)]="draftPostalCode" />
+          <input hlmInput id="org-postal" name="orgPostal" [(ngModel)]="draftPostalCode" [disabled]="!canEdit()" />
         </div>
         <div hlmFormField>
           <label hlmLabel for="org-country">{{ t('organization.profile.country', 'Country') }}</label>
-          <input hlmInput id="org-country" name="orgCountry" [(ngModel)]="draftCountry" />
+          <input hlmInput id="org-country" name="orgCountry" [(ngModel)]="draftCountry" [disabled]="!canEdit()" />
         </div>
       </div>
 
-      <button hlmBtn type="submit">{{ t('common.save', 'Save') }}</button>
+      @if (canEdit()) {
+        <button hlmBtn type="submit">{{ t('common.save', 'Save') }}</button>
+      }
     </form>
   }
 </section>

@@ -47,7 +47,7 @@
         (messageEdited)="onMessageEdited($event)"
         (messageDeleted)="onMessageDeleted($event)"
         (reactionToggled)="onReactionToggled($event)"
-        (memberProfileRequested)="onChatMemberProfileOpen()"
+        (detailsRequested)="onChatDetailsRequested($event)"
       />
     }
   </section>
@@ -64,7 +64,7 @@
       pageGridRight
       (messageRequested)="onMessageMember($event)"
     />
-  } @else if (inspectorMember(); as member) {
+  } @else if (showMemberDetail() && inspectorMember(); as member) {
     <app-member-detail-panel
       pageGridRight
       [member]="member"
@@ -78,11 +78,13 @@
       pageGridRight
       mode="view"
       [channel]="channel"
+      [activeTab]="channelDetailTab()"
       [members]="channelMembers()"
       [colleagues]="membersWithPresence()"
       [canManage]="canManageChannels()"
       [membersLoading]="channelMembersLoading()"
       (closed)="onChannelPanelClosed()"
+      (tabChange)="channelDetailTab.set($event)"
       (memberInviteRequested)="onChannelMemberInviteFromPanel($event)"
       (descriptionUpdated)="onChannelDescriptionUpdated($event)"
       (archiveRequested)="onChannelDetailArchive()"

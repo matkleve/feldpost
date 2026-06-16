@@ -34,23 +34,37 @@
       </button>
     </form>
   } @else if (channel(); as ch) {
-    <dl class="channel-detail__meta">
-      <div class="channel-detail__field">
-        <dt>{{ t('colleagues.channel.type_label', 'Type') }}</dt>
-        <dd>{{ channelTypeLabel(ch) }}</dd>
-      </div>
-      <div class="channel-detail__field">
-        <dt>{{ t('colleagues.channel.created_label', 'Created') }}</dt>
-        <dd>{{ ch.createdAt | date: 'mediumDate' }}</dd>
-      </div>
-      <div class="channel-detail__field">
-        <dt>{{ t('colleagues.channel.description_label', 'Description') }}</dt>
-        <dd>
+    <nav class="channel-detail__tabs" [attr.aria-label]="t('colleagues.channel.details_nav', 'Channel details sections')">
+      <button
+        type="button"
+        class="channel-detail__tab"
+        [class.channel-detail__tab--active]="activeTab() === 'about'"
+        [attr.aria-current]="activeTab() === 'about' ? 'page' : null"
+        (click)="onTabSelect('about')"
+      >
+        {{ t('colleagues.channel.tab.about', 'About') }}
+      </button>
+      <button
+        type="button"
+        class="channel-detail__tab"
+        [class.channel-detail__tab--active]="activeTab() === 'members'"
+        [attr.aria-current]="activeTab() === 'members' ? 'page' : null"
+        (click)="onTabSelect('members')"
+      >
+        {{ t('colleagues.channel.tab.members', 'Members') }}
+        <span class="channel-detail__tab-count">{{ members().length }}</span>
+      </button>
+    </nav>
+
+    @if (activeTab() === 'about') {
+      <section class="channel-detail__panel">
+        <div class="channel-detail__about-block">
+          <h3>{{ t('colleagues.channel.description_label', 'Description') }}</h3>
           @if (canManage()) {
             <textarea
               hlmInput
               class="channel-detail__description"
-              rows="3"
+              rows="4"
               [ngModel]="draftDescription()"
               (ngModelChange)="draftDescription.set($event)"
               (blur)="onDescriptionBlur()"
@@ -58,53 +72,65 @@
               [attr.aria-label]="t('colleagues.channel.description_label', 'Description')"
             ></textarea>
           } @else if (ch.description) {
-            {{ ch.description }}
+            <p class="channel-detail__description-text">{{ ch.description }}</p>
           } @else {
-            <span class="channel-detail__description-empty">
+            <p class="channel-detail__description-empty">
               {{ t('colleagues.channel.description_empty', 'No description') }}
-            </span>
+            </p>
           }
-        </dd>
-      </div>
-    </dl>
+        </div>
 
-    <section class="channel-detail__section">
-      <h3>{{ t('colleagues.channel.members_title', 'Members') }}</h3>
-      <app-rail-select-list
-        [compact]="true"
-        [items]="memberListItems()"
-        [selectedId]="null"
-        [loading]="membersLoading()"
-        [listAriaLabel]="t('colleagues.channel.members_title', 'Members')"
-        [loadingMessage]="t('colleagues.channel.members_loading', 'Loading members')"
-        [emptyMessage]="t('colleagues.channel.members_empty', 'No members yet')"
-      />
-    </section>
+        <dl class="channel-detail__meta">
+          <div class="channel-detail__meta-row">
+            <dt>{{ t('colleagues.channel.type_label', 'Type') }}</dt>
+            <dd>{{ channelTypeLabel(ch) }}</dd>
+          </div>
+          <div class="channel-detail__meta-row">
+            <dt>{{ t('colleagues.channel.created_label', 'Created') }}</dt>
+            <dd>{{ ch.createdAt | date: 'mediumDate' }}</dd>
+          </div>
+        </dl>
 
-    @if (canManage()) {
-      <section class="channel-detail__section">
-        <h3>{{ t('colleagues.channel.add_members_title', 'Add colleagues') }}</h3>
-        <app-rail-search-field
-          [value]="addMemberSearch()"
-          [placeholder]="t('colleagues.members.search', 'Search colleagues')"
-          [ariaLabel]="t('colleagues.channel.add_members_search_aria', 'Search colleagues to add')"
-          (valueChange)="addMemberSearch.set($event)"
-        />
+        @if (canManage()) {
+          <div class="channel-detail__actions">
+            <button hlmBtn variant="outline" size="sm" type="button" (click)="archiveRequested.emit()">
+              {{ t('colleagues.channel.archive', 'Archive channel') }}
+            </button>
+          </div>
+        }
+      </section>
+    } @else {
+      <section class="channel-detail__panel">
         <app-rail-select-list
           [compact]="true"
-          [items]="inviteListItems()"
+          [items]="memberListItems()"
           [selectedId]="null"
-          [listAriaLabel]="t('colleagues.channel.add_members_title', 'Add colleagues')"
-          [emptyMessage]="t('colleagues.channel.add_members_empty', 'Everyone is already in this channel')"
-          (actionTriggered)="onInviteAction($event)"
+          [loading]="membersLoading()"
+          [listAriaLabel]="t('colleagues.channel.members_title', 'Members')"
+          [loadingMessage]="t('colleagues.channel.members_loading', 'Loading members')"
+          [emptyMessage]="t('colleagues.channel.members_empty', 'No members yet')"
         />
-      </section>
 
-      <div class="channel-detail__actions">
-        <button hlmBtn variant="outline" size="sm" type="button" (click)="archiveRequested.emit()">
-          {{ t('colleagues.channel.archive', 'Archive channel') }}
-        </button>
-      </div>
+        @if (canManage()) {
+          <div class="channel-detail__add-members">
+            <h3>{{ t('colleagues.channel.add_members_title', 'Add colleagues') }}</h3>
+            <app-rail-search-field
+              [value]="addMemberSearch()"
+              [placeholder]="t('colleagues.members.search', 'Search colleagues')"
+              [ariaLabel]="t('colleagues.channel.add_members_search_aria', 'Search colleagues to add')"
+              (valueChange)="addMemberSearch.set($event)"
+            />
+            <app-rail-select-list
+              [compact]="true"
+              [items]="inviteListItems()"
+              [selectedId]="null"
+              [listAriaLabel]="t('colleagues.channel.add_members_title', 'Add colleagues')"
+              [emptyMessage]="t('colleagues.channel.add_members_empty', 'Everyone is already in this channel')"
+              (actionTriggered)="onInviteAction($event)"
+            />
+          </div>
+        }
+      </section>
     }
   }
 </aside>

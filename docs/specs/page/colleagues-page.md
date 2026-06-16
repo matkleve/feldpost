@@ -30,13 +30,15 @@ A split-layout page: a left rail lists channels and DMs; the center is the chat 
 
 | # | User Action | System Response | Triggers |
 | --- | --- | --- | --- |
-| 1 | Clicks channel in sidebar | Loads messages, subscribes to realtime, opens channel detail on right | `selectChannel()` |
-| 2 | Clicks member in sidebar | Opens DM channel (find-or-create), member detail on right | `openDirectMessage()` |
-| 3 | Switches to Invites tab | Shows invite management in center | Router query param |
-| 4 | Creates channel | Opens create panel on right; after confirm new channel becomes active | `onChannelCreate()` |
-| 5 | Archives channel | Channel removed from list; next channel becomes active | `onChannelArchive()` |
-| 6 | Invites member to channel | Member added to `chat_channel_members` via RPC | `onChannelMemberInvite()` |
-| 7 | Sends a message | Sent via `ChatService.sendMessage()`; realtime distributes to all | `ChatAreaComponent` |
+| 1 | Clicks channel in sidebar | Loads messages, subscribes to realtime; right rail stays closed | `onChannelSelected()` → `selectChannel()` |
+| 2 | Clicks member in sidebar | Opens DM channel (find-or-create); right rail stays closed | `onMemberSelected()` → `openDirectMessage()` |
+| 3 | Clicks chat title or Details (channel or DM) | Opens matching right-rail inspector | `onChatDetailsRequested()` |
+| 4 | Clicks channel member count (header) | Opens searchable members dropdown; right rail stays closed | `app-chat-header` members dropdown |
+| 5 | Switches to Invites tab | Shows invite management in center | Router query param |
+| 6 | Creates channel | Opens create panel on right; after confirm new channel becomes active | `onChannelCreateOpen()` / `onChannelCreate()` |
+| 7 | Archives channel | Channel removed from list; next channel becomes active | `onChannelArchive()` |
+| 8 | Invites member to channel | Member added to `chat_channel_members` via RPC | `onChannelMemberInvite()` |
+| 9 | Sends a message | Sent via `ChatService.sendMessage()`; realtime distributes to all | `ChatAreaComponent` |
 
 ## Component Hierarchy
 
@@ -46,13 +48,14 @@ ColleaguesPageComponent (shell)
 │   ├── Channels section (collapsible, starred sorted first)
 │   └── Direct Messages section (collapsible)
 ├── ChatAreaComponent                 ← center, main chat
+│   ├── app-chat-header               ← shared channel/DM header; see chat-header.md
 │   ├── MessageList (date groups, reactions, attachments, entity links)
 │   ├── ThreadPanelComponent          ← right of messages when thread open
 │   └── Composer (text, file, project link)
-├── ChannelDetailPanelComponent       ← right rail — mode: create | view
+├── ChannelDetailPanelComponent       ← right rail — create mode or channel inspector
 │   ├── Create form (name, private toggle)
-│   └── View (members list, add-member search, archive)
-└── MemberDetailPanelComponent        ← right rail — when member selected
+│   └── View tabs: About | Members (archive, add-member search)
+└── MemberDetailPanelComponent        ← right rail — DM colleague inspector
     ├── Avatar + Name
     ├── Role (editable for managers)
     └── Actions (Message, Suspend, Remove)
@@ -63,10 +66,11 @@ ColleaguesPageComponent (shell)
 | Signal | Type | Default | Controls |
 | --- | --- | --- | --- |
 | `selectedChannelId` | `string \| null` | `general` on load | Active chat |
-| `selectedMemberId` | `string \| null` | First member on load | Right panel |
-| `creatingChannel` | `boolean` | `false` | Create-vs-view panel mode |
-| `channelDetailDismissed` | `boolean` | `false` | Right panel visibility |
-| `channelMembers` | `ChatChannelMember[]` | `[]` | Typing indicator, invite list |
+| `rightRailInspector` | `'closed' \| 'channel' \| 'member'` | `'closed'` | Which right-rail panel is open |
+| `inspectorMemberId` | `string \| null` | `null` | Member shown when inspector is `member` |
+| `channelDetailTab` | `'about' \| 'members'` | `'about'` | Active tab in channel detail panel |
+| `creatingChannel` | `boolean` | `false` | Create form overrides inspector on right rail |
+| `channelMembers` | `ChatChannelMember[]` | `[]` | Typing indicator, header dropdown, channel panel |
 | `onlineUserIds` | `Set<string>` | empty | Presence dots |
 
 ## Data
@@ -103,6 +107,8 @@ RLS via `can_access_chat_channel()`: public channels visible to all org members;
 | --- | --- |
 | `features/colleagues/page/colleagues-page.component.*` | Shell, state coordination |
 | `features/colleagues/sidebar/member-list.component.*` | Left rail: channels + DMs |
+| `features/colleagues/chat/chat-header.component.*` | Shared channel/DM header |
+| `features/colleagues/chat/chat-header.types.ts` | Header variant + details request types |
 | `features/colleagues/chat/chat-area.component.*` | Message area + composer |
 | `features/colleagues/chat/thread-panel.component.*` | Thread side panel |
 | `features/colleagues/channel/channel-detail-panel.component.*` | Channel create/view |

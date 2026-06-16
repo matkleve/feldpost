@@ -12,6 +12,7 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | Address Disambiguation Strategy | service/location-path-parser/location-path-parser.md | Selects ranking mode (`cluster-majority`, `distance-weighted`, `bayesian-context`) for ambiguous street+house matches. |
 | Address Review Lower Bound | service/location-path-parser/location-path-parser.md | Probability lower bound (default `0.70`) below which an issue is emitted instead of soft review. |
 | Custom Properties | ui/settings-overlay/settings-overlay.md | organization metadata key configuration defaults. |
+| Branding | page/organization-page.md | org-level CSS variable overrides (`--primary`, `--accent`, `--background`). |
 | Data & Storage | ui/settings-overlay/settings-overlay.md | data retention/export/cache/storage defaults. |
 | Email Change Security | ui/settings-overlay/account-page.md | verification requirements and pending-state copy. |
 | Email Change Security | ui/settings-overlay/account-settings-section.md | whether dual-email confirmation is required and how pending verification is shown. |

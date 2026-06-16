@@ -6,7 +6,7 @@
 >
   <app-organization-sidebar
     pageGridLeft
-    [sections]="sections"
+    [sections]="visibleSections()"
     [activeSection]="activeSection()"
     [loading]="loading()"
     (sectionSelected)="onSectionSelected($event)"
@@ -18,11 +18,17 @@
         <h2>{{ t('organization.page.error.title', 'Could not load organization') }}</h2>
         <p>{{ loadError() }}</p>
       </div>
+    } @else if (visibleSections().length === 0) {
+      <div role="status" class="organization-page__error">
+        <h2>{{ t('organization.page.no_access.title', 'No organization sections available') }}</h2>
+        <p>{{ t('organization.page.no_access.message', 'Your role does not include organization administration permissions.') }}</p>
+      </div>
     } @else {
       @switch (activeSection()) {
         @case ('profile') {
           <app-organization-profile-section
             [profile]="profile()"
+            [canEdit]="canEditActiveSection()"
             (saved)="onProfileSaved($event)"
           />
         }
@@ -31,18 +37,19 @@
             [roles]="roles()"
             [permissions]="permissions()"
             [selectedRoleId]="selectedRoleId()"
+            [canEdit]="canEditActiveSection()"
             (roleSelected)="onRoleSelected($event)"
             (rolesChanged)="onRolesChanged()"
           />
         }
         @case ('branding') {
-          <app-organization-branding-section />
+          <app-organization-branding-section [canEdit]="canEditActiveSection()" />
         }
         @case ('billing') {
-          <app-organization-billing-section />
+          <app-organization-billing-section [canViewInvoices]="canViewBillingInvoices()" />
         }
         @case ('integrations') {
-          <app-organization-integrations-section />
+          <app-organization-integrations-section [canEdit]="canEditActiveSection()" />
         }
         @case ('export') {
           <app-organization-export-section />
