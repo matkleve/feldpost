@@ -1,5 +1,7 @@
 export const environment = {
   production: false,
+  /** Dev uses `window.location.origin` for auth redirects; production sets this via write-env.mjs */
+  appUrl: undefined as string | undefined,
   i18n: {
     enableLegacyDomFallback: true,
   },
