@@ -34,20 +34,18 @@ import {
   viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { UploadShellUiService } from '../../../upload/upload-shell/upload-shell-ui.service';
 import type {
   ImageUploadedEvent,
   UploadLocationMapPickRequest,
   UploadLocationPreviewEvent,
 } from '../../../../core/workspace-pane/workspace-pane-shell-events.types';
-import { ExifCoords } from '../../../../core/upload/upload.service';
 import {
   UploadManagerService,
   ImageReplacedEvent,
   ImageAttachedEvent,
 } from '../../../../core/upload/upload-manager.service';
-import { buildLocationUpdateFailureToast } from '../../../../core/media-location-update/location-update-toast.util';
 import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-view.service';
 import { FilterService } from '../../../../core/filter/filter.service';
 import { WorkspaceSelectionService } from '../../../../core/workspace-selection/workspace-selection.service';
@@ -57,7 +55,6 @@ import {
 } from '../../../../core/media-download/media-download.service';
 import { ToastService } from '../../../../core/toast/toast.service';
 import type { ToastOptions, ToastType } from '../../../../core/toast/toast.types';
-import { MediaDeleteUndoService } from '../../../../core/media-delete/media-delete-undo.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { SearchBarComponent } from '../../search-bar/search-bar.component';
 import { MapFilterToolbarComponent } from '../../map-filter-toolbar/map-filter-toolbar.component';
@@ -75,17 +72,16 @@ import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/shel
 import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../../../shared/ui/menu';
 import { ActionEngineService } from '../../../../core/action/action-engine.service';
 import { ResolvedAction } from '../../../../core/action/action-types';
-import {
-  buildPhotoMarkerHtml,
-  PhotoMarkerZoomLevel,
-} from '../../../../core/map/marker-factory';
+import { PhotoMarkerZoomLevel } from '../../../../core/map/marker-factory';
 import { MapShellState } from './map-shell.state';
 import { PhotoMarkerState } from '../markers/map-marker-reconcile.facade';
 import { MapViewportCoordinatorService } from '../markers/map-viewport-coordinator.service';
 import { MapContextActionsService } from '../context-menu/map-context-actions.service';
 import { MapContextMenuHandlerService } from '../context-menu/map-context-menu-handler.service';
 import { MapClickHandlerService } from '../handlers/map-click-handler.service';
+import { MapLocationPickService } from '../handlers/map-location-pick.service';
 import { PhotoMarkerLifecycleService } from '../markers/photo-marker-lifecycle.service';
+import { MapMediaDeleteSyncService } from '../markers/map-media-delete-sync.service';
 import { PhotoMarkerIconStateService } from '../markers/photo-marker-icon-state.service';
 import { MarkerMotionService } from '../markers/marker-motion.service';
 import { MapPhotoMarkerRenderService } from '../markers/map-photo-marker-render.service';
@@ -103,35 +99,23 @@ import {
 } from '../radius/radius-drawing-orchestrator.service';
 import { MapShellBasemapService } from '../leaflet/map-shell-basemap.service';
 import {
-  MapCircle,
-  MapDivIcon,
   MapInstance,
   MapLatLng,
   MapLayerGroup,
-  MapMarker,
   MapMouseEvent,
-  MapPoint,
-  MapPolyline,
   MapLeafletService,
 } from '../leaflet/map-leaflet.service';
 import { MapFocusPayloadService } from '../context-menu/map-focus-payload.service';
 import { MapZoomOrchestratorService } from '../../../../core/map-zoom/map-zoom-orchestrator.service';
 import { LocationMapPickNavigationService } from '../../../../core/workspace-pane/location-map-pick-navigation.service';
-import { MediaDetailLocationSyncService } from '../../../../core/media-detail-data/media-detail-location-sync.service';
 import { MapShellGpsService } from '../leaflet/map-shell-gps.service';
 import { MapShellSearchService } from '../leaflet/map-shell-search.service';
 import { DeferredStartupHandles, MapDeferredStartupService } from '../leaflet/map-deferred-startup.service';
 import { MapProjectActionsService } from '../workspace/map-project-actions.service';
 import { MapProjectDialogService } from '../workspace/map-project-dialog.service';
 import { MarkerStateMutationsService } from '../markers/marker-state-mutations.service';
-import {
-  getFirstMarkerKeyForMedia,
-  getMarkerKeysForMedia,
-  registerMarkerKeyForMedia,
-} from '../markers/marker-media-index.helpers';
+import { getFirstMarkerKeyForMedia } from '../markers/marker-media-index.helpers';
 import { WorkspacePaneObserverAdapter } from '../../../../core/workspace-pane/workspace-pane-observer.adapter';
-import { MediaLocationUpdateService } from '../../../../core/media-location-update/media-location-update.service';
-import { MediaLocationsService } from '../../../../core/media-locations/media-locations.service';
 import type { SelectedItemsContextPort } from '../../../../core/workspace-pane/workspace-pane-context.port';
 import { WORKSPACE_PANE_SHELL_HOST } from '../../../../core/workspace-pane/workspace-pane-shell-host.token';
 import type { WorkspacePaneLayoutMapEffects } from '../../../../core/workspace-pane/workspace-pane-layout-map-effects.service';
@@ -190,11 +174,9 @@ export class MapShellComponent implements OnDestroy {
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
   private readonly mediaDownloadService = inject(MediaDownloadService);
   private readonly toastService = inject(ToastService);
-  private readonly mediaDeleteUndo = inject(MediaDeleteUndoService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly i18nService = inject(I18nService);
   private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
   private readonly settingsPaneService = inject(SettingsPaneService);
   private readonly routeSessionCache = inject(RouteSessionCacheService);
   private readonly state = inject(MapShellState);
@@ -202,7 +184,9 @@ export class MapShellComponent implements OnDestroy {
   private readonly mapContextActionsService = inject(MapContextActionsService);
   private readonly mapContextMenuHandlerService = inject(MapContextMenuHandlerService);
   private readonly mapClickHandlerService = inject(MapClickHandlerService);
+  private readonly mapLocationPickService = inject(MapLocationPickService);
   private readonly photoMarkerLifecycleService = inject(PhotoMarkerLifecycleService);
+  private readonly mapMediaDeleteSyncService = inject(MapMediaDeleteSyncService);
   private readonly photoMarkerIconStateService = inject(PhotoMarkerIconStateService);
   private readonly markerMotionService = inject(MarkerMotionService);
   private readonly markerRenderService = inject(MapPhotoMarkerRenderService);
@@ -216,7 +200,6 @@ export class MapShellComponent implements OnDestroy {
   private readonly mapFocusPayloadService = inject(MapFocusPayloadService);
   private readonly mapZoomOrchestrator = inject(MapZoomOrchestratorService);
   private readonly locationMapPickNavigationService = inject(LocationMapPickNavigationService);
-  private readonly mediaDetailLocationSync = inject(MediaDetailLocationSyncService);
   readonly gpsService = inject(MapShellGpsService);
   readonly searchService = inject(MapShellSearchService);
   private readonly mapDeferredStartupService = inject(MapDeferredStartupService);
@@ -226,8 +209,6 @@ export class MapShellComponent implements OnDestroy {
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
   private readonly workspacePaneShellHost = inject(WORKSPACE_PANE_SHELL_HOST);
   private readonly workspacePaneLayoutMapEffectsService = inject(WorkspacePaneLayoutMapEffectsService);
-  private readonly mediaLocationUpdateService = inject(MediaLocationUpdateService);
-  private readonly mediaLocationsService = inject(MediaLocationsService);
   private readonly actionEngineService = inject(ActionEngineService);
   private readonly mapWorkspaceContextResolverService = inject(MapWorkspaceContextResolverService);
   private readonly mapWorkspaceActionExecutorService = inject(MapWorkspaceActionExecutorService);
@@ -266,15 +247,6 @@ export class MapShellComponent implements OnDestroy {
     signal<ReturnType<LocationMapPickNavigationService['readPayload']>>(
       this.locationMapPickNavigationService.readPayload(this.router),
     );
-  private locationMapPickReturnUrl: string | null = null;
-  private lastLocationMapPickSync: {
-    mediaId: string;
-    lat: number;
-    lng: number;
-    locationRowId?: string;
-    address?: import('../../../../core/media-location-update/media-location-update.types').MediaLocationAddressPatch;
-  } | null = null;
-
   /**
    * Leaflet map instance. Protected (not private) so unit tests can inject
    * a mock to test behaviour without initialising the real Leaflet map.
@@ -597,7 +569,7 @@ export class MapShellComponent implements OnDestroy {
       this.markerMotionService.initPreference();
       this.initMap();
       this.subscribeToUploadManagerEvents();
-      this.subscribeToMediaDeleteEvents();
+      this.mapMediaDeleteSyncService.subscribe(this.destroyRef);
       this.subscribeRouteSessionInvalidation();
       this.scheduleDeferredStartupWork();
       this.mapInitialized = true;
@@ -921,7 +893,7 @@ export class MapShellComponent implements OnDestroy {
     this.placementActive.set(false);
     this.searchService.setPlacementActive(false);
     this.map?.getContainer().classList.remove('map-container--placing');
-    this.navigateBackAfterLocationMapPick();
+    this.mapLocationPickService.navigateBackAfterLocationMapPick();
   }
 
   // ── GPS button ────────────────────────────────────────────────────────────
@@ -1132,6 +1104,20 @@ export class MapShellComponent implements OnDestroy {
       toMarkerKey: (lat, lng) => this.toMarkerKey(lat, lng),
     });
 
+    this.mapLocationPickService.bind({
+      onImageUploaded: (event) => this.onImageUploaded(event),
+    });
+
+    this.mapMediaDeleteSyncService.bind({
+      getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
+      getPhotoMarkerLayer: () => this.photoMarkerLayer,
+      getMarkersByMediaId: () => this.markersByMediaId,
+      getSelectedMarkerKey: () => this.selectedMarkerKey(),
+      getSelectedMarkerKeys: () => this.selectedMarkerKeys(),
+      getDetailMediaId: () => this.detailMediaId(),
+      patchDetailMediaId: (id) => this.patchDetailMediaId(id),
+    });
+
     this.mapClickHandlerService.bind({
       getMap: () => this.map,
       getPlacementActive: () => this.placementActive(),
@@ -1160,11 +1146,7 @@ export class MapShellComponent implements OnDestroy {
       getPendingUploadedLocationMapPick: () => this.pendingUploadedLocationMapPick,
       setPendingUploadedLocationMapPick: (value) => { this.pendingUploadedLocationMapPick = value; },
       onCompleteLocationMapPick: (pick, coords) => {
-        void this.applyUploadedLocationMapPick(pick, coords).then((saved) => {
-          if (saved) {
-            this.navigateBackAfterLocationMapPick();
-          }
-        });
+        void this.mapLocationPickService.applyAndNavigate(pick, coords);
       },
     });
 
@@ -1282,119 +1264,8 @@ export class MapShellComponent implements OnDestroy {
     }
 
     this.pendingLocationMapPickNav.set(null);
-    this.locationMapPickReturnUrl = payload.returnUrl;
+    this.mapLocationPickService.setReturnUrl(payload.returnUrl);
     this.onUploadLocationMapPickRequested(payload.request);
-  }
-
-  private navigateBackAfterLocationMapPick(): void {
-    const returnUrl = this.locationMapPickReturnUrl;
-    const sync = this.lastLocationMapPickSync;
-    if (!returnUrl) {
-      return;
-    }
-    this.locationMapPickReturnUrl = null;
-    void this.router.navigateByUrl(returnUrl).then(() => {
-      if (!sync) {
-        return;
-      }
-      this.lastLocationMapPickSync = null;
-      this.mediaDetailLocationSync.notifyCoordinatesUpdated(
-        sync.mediaId,
-        sync.lat,
-        sync.lng,
-        sync.address,
-        sync.locationRowId,
-      );
-    });
-  }
-
-  private async applyUploadedLocationMapPick(
-    request: UploadLocationMapPickRequest,
-    coords: { lat: number; lng: number },
-  ): Promise<boolean> {
-    const rowId = request.locationRowId;
-    let lat: number | undefined;
-    let lng: number | undefined;
-    let address:
-      | import('../../../../core/media-location-update/media-location-update.types').MediaLocationAddressPatch
-      | undefined;
-
-    if (rowId) {
-      const rowResult = await this.mediaLocationsService.updateFromCoordinates(rowId, coords);
-      if (!rowResult.ok) {
-        this.toastService.show({
-          ...buildLocationUpdateFailureToast(rowResult.error, {
-            file: 'map-shell.component.ts',
-            fn: 'applyUploadedLocationMapPick',
-          }),
-        });
-        return false;
-      }
-      if (!('row' in rowResult)) {
-        return false;
-      }
-      const row = rowResult.row;
-      if (row.latitude == null || row.longitude == null) {
-        this.toastService.show({
-          ...buildLocationUpdateFailureToast('Location update failed.', {
-            file: 'map-shell.component.ts',
-            fn: 'applyUploadedLocationMapPick',
-          }),
-        });
-        return false;
-      }
-      lat = row.latitude;
-      lng = row.longitude;
-      address = {
-        address_label: row.address_label,
-        street: row.street,
-        city: row.city,
-        district: row.district,
-        country: row.country,
-      };
-    } else {
-      const legacyResult = await this.mediaLocationUpdateService.updateFromCoordinates(
-        request.mediaId,
-        coords,
-      );
-      if (!legacyResult.ok || typeof legacyResult.lat !== 'number' || typeof legacyResult.lng !== 'number') {
-        this.toastService.show({
-          ...buildLocationUpdateFailureToast(
-            legacyResult.ok ? 'Location update failed.' : legacyResult.error,
-            {
-              file: 'map-shell.component.ts',
-              fn: 'applyUploadedLocationMapPick',
-            },
-          ),
-        });
-        return false;
-      }
-      lat = legacyResult.lat;
-      lng = legacyResult.lng;
-      address = legacyResult.address;
-    }
-
-    if (typeof lat !== 'number' || typeof lng !== 'number') {
-      return false;
-    }
-
-    this.onImageUploaded({ id: request.mediaId, lat, lng });
-    this.lastLocationMapPickSync = {
-      mediaId: request.mediaId,
-      lat,
-      lng,
-      locationRowId: rowId,
-      address,
-    };
-    this.mediaDetailLocationSync.notifyCoordinatesUpdated(
-      request.mediaId,
-      lat,
-      lng,
-      address,
-      rowId,
-    );
-    this.showMapToast('upload.location.update.success', 'Location updated.', 'success');
-    return true;
   }
 
   /**
@@ -1423,71 +1294,6 @@ export class MapShellComponent implements OnDestroy {
       }),
       // Upload failure toasts are owned by UploadNotificationService (global, deduped).
     );
-  }
-
-  private subscribeToMediaDeleteEvents(): void {
-    this.mediaDeleteUndo.mediaDeleted$
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(({ mediaItemIds }) => {
-        this.syncMapAfterMediaDeleted(mediaItemIds);
-      });
-
-    this.mediaDeleteUndo.mediaRestored$
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        void this.mapViewportCoordinatorService.queryViewportMarkers();
-      });
-  }
-
-  /** Removes optimistic/upload markers and refreshes viewport markers after hard delete. */
-  private syncMapAfterMediaDeleted(mediaItemIds: readonly string[]): void {
-    if (mediaItemIds.length === 0) {
-      return;
-    }
-
-    const deleted = new Set(mediaItemIds);
-    const removals = new Map<string, string>();
-
-    for (const mediaId of deleted) {
-      for (const markerKey of getMarkerKeysForMedia(this.markersByMediaId, mediaId)) {
-        removals.set(markerKey, mediaId);
-      }
-    }
-
-    for (const [markerKey, state] of this.uploadedPhotoMarkers.entries()) {
-      if (state.mediaId && deleted.has(state.mediaId) && !removals.has(markerKey)) {
-        removals.set(markerKey, state.mediaId);
-      }
-    }
-
-    for (const [markerKey, mediaId] of removals) {
-      this.markerStateMutationsService.removeDeletedPhotoFromMapUi({
-        markerKey,
-        mediaId,
-        uploadedPhotoMarkers: this.uploadedPhotoMarkers,
-        photoMarkerLayer: this.photoMarkerLayer,
-        markersByMediaId: this.markersByMediaId,
-        selectedMarkerKey: this.selectedMarkerKey(),
-        selectedMarkerKeys: this.selectedMarkerKeys(),
-        detailMediaId: this.detailMediaId(),
-        cancelMarkerMoveAnimation: (marker) => this.markerBindingService.cancelMarkerMoveAnimation(marker),
-        setSelectedMarker: (key) => this.markerSelectionService.setSelectedMarker(key),
-        setSelectedMarkerKeys: (keys) => this.markerSelectionService.setSelectedMarkerKeys(keys),
-        setDetailImageId: (id) => this.patchDetailMediaId(id),
-      });
-    }
-
-    const selectedIds = [...this.workspaceSelectionService.selectedMediaIds()];
-    const nextSelected = selectedIds.filter((id) => !deleted.has(id));
-    if (nextSelected.length !== selectedIds.length) {
-      if (nextSelected.length === 0) {
-        this.workspaceSelectionService.clearSelection();
-      } else {
-        this.workspaceSelectionService.selectAllInScope(nextSelected);
-      }
-    }
-
-    void this.mapViewportCoordinatorService.queryViewportMarkers();
   }
 
   /**
