@@ -87,18 +87,6 @@ describe('upload-resolver-tray.helpers', () => {
     ).toBe('upload.resolver.question.houseStep');
   });
 
-  it('resolverQuestionKeyForGroup picks project_address_a question', () => {
-    expect(
-      resolverQuestionKeyForGroup(group({ disambiguationKind: 'project_address_a' })),
-    ).toBe('upload.resolver.question.projectAddressA');
-  });
-
-  it('resolverQuestionKeyForGroup picks project_address_b question', () => {
-    expect(
-      resolverQuestionKeyForGroup(group({ disambiguationKind: 'project_address_b' })),
-    ).toBe('upload.resolver.question.projectAddressB');
-  });
-
   it('resolverQuestionKeyForGroup: containment_check takes priority over collapseStage', () => {
     expect(
       resolverQuestionKeyForGroup(group({

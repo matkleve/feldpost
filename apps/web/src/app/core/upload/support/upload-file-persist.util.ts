@@ -37,6 +37,8 @@ export interface UploadFilePersistInput {
   projectId?: string;
   abortSignal?: AbortSignal;
   relativePath?: string;
+  /** Low-confidence filename/folder address fragments. @see upload-manager-pipeline.md § Action 11c */
+  addressNotes?: string[];
   options?: { pendingPartialLocation?: boolean };
 }
 
@@ -103,6 +105,7 @@ export async function persistUploadFile(
     manualCoords: input.manualCoords,
     parsedExif: input.parsedExif,
     relativePath: input.relativePath,
+    addressNotes: input.addressNotes,
     options: input.options,
     abortSignal: input.abortSignal,
     deps,
@@ -146,11 +149,12 @@ async function insertUploadMediaRow(args: {
   manualCoords?: ExifCoords;
   parsedExif?: ParsedExif;
   relativePath?: string;
+  addressNotes?: string[];
   options?: { pendingPartialLocation?: boolean };
   abortSignal?: AbortSignal;
   deps: UploadFilePersistDeps;
 }): Promise<UploadResult> {
-  const { file, user, orgId, storagePath, manualCoords, parsedExif, relativePath, options, abortSignal, deps } =
+  const { file, user, orgId, storagePath, manualCoords, parsedExif, relativePath, addressNotes, options, abortSignal, deps } =
     args;
 
   const parsed = parsedExif ?? (await deps.parseExif(file));
@@ -183,6 +187,7 @@ async function insertUploadMediaRow(args: {
       exif_raw: parsed.exifRaw ?? null,
       location_status: locationStatus,
       gps_assignment_allowed: gpsAssignmentAllowed,
+      address_notes: addressNotes?.length ? addressNotes : [],
     })
     .select('id');
 

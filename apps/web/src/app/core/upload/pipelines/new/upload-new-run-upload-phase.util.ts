@@ -121,6 +121,12 @@ export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<vo
       enrich.enrichWithForwardGeocode(mediaId, titleAddress),
     geocodeTitleAddress: (titleAddress) => enrich.forwardGeocodeAddress(titleAddress),
     mismatchToleranceMeters,
+    persistMismatch: async (mediaId, distanceMeters) => {
+      await supabaseClient
+        .from('media_items')
+        .update({ location_mismatch_meters: distanceMeters })
+        .eq('id', mediaId);
+    },
     setLocalUrl: (mediaId, localUrl) => mediaDownloadService.setLocalUrl(mediaId, localUrl),
     persistThumbnail: async (job: UploadJob) => {
       const userId = getUserId();
@@ -171,6 +177,7 @@ async function runUploadCall(args: {
       abortSignal,
       job.relativePath,
       { pendingPartialLocation: job.pendingPartialLocation },
+      job.addressNotes,
     ),
     timeoutMs,
     'Upload timed out. Please retry.',

@@ -23,6 +23,11 @@ type FinalizeNewUploadPhaseArgs = {
   ) => Promise<{ coords: ExifCoords } | undefined>;
   geocodeTitleAddress: (titleAddress: string) => Promise<ExifCoords | undefined>;
   mismatchToleranceMeters: number;
+  /**
+   * Fire-and-forget DB update when a location mismatch is confirmed.
+   * @see upload-manager-pipeline.location-routing.supplement.md § Mismatch audit
+   */
+  persistMismatch?: (mediaId: string, distanceMeters: number) => Promise<void>;
   setLocalUrl: (mediaId: string, localUrl: string) => void;
   persistThumbnail?: (job: UploadJob) => Promise<void>;
   emitImageUploaded: (event: {
@@ -49,6 +54,7 @@ export async function finalizeNewUploadPhase(args: FinalizeNewUploadPhaseArgs): 
     enrichWithForwardGeocode,
     geocodeTitleAddress,
     mismatchToleranceMeters,
+    persistMismatch,
     setLocalUrl,
     persistThumbnail,
     emitImageUploaded,
@@ -128,6 +134,7 @@ export async function finalizeNewUploadPhase(args: FinalizeNewUploadPhaseArgs): 
           titleAddress,
           geocodeTitleAddress,
           mismatchToleranceMeters,
+          persistMismatch,
           setPhase,
           updateJob,
         });
@@ -188,6 +195,7 @@ async function auditTitleExifMismatch(args: {
   titleAddress: string;
   geocodeTitleAddress: (titleAddress: string) => Promise<ExifCoords | undefined>;
   mismatchToleranceMeters: number;
+  persistMismatch?: (mediaId: string, distanceMeters: number) => Promise<void>;
   setPhase: FinalizeNewUploadPhaseArgs['setPhase'];
   updateJob: FinalizeNewUploadPhaseArgs['updateJob'];
 }): Promise<void> {
@@ -199,6 +207,7 @@ async function auditTitleExifMismatch(args: {
     titleAddress,
     geocodeTitleAddress,
     mismatchToleranceMeters,
+    persistMismatch,
     setPhase,
     updateJob,
   } = args;
@@ -207,12 +216,15 @@ async function auditTitleExifMismatch(args: {
   const titleCoords = await geocodeTitleAddress(titleAddress);
   const compareCoords = titleCoords ?? placedCoords;
   const distanceMeters = haversineMeters(exifCoords, compareCoords);
+  const roundedDistance = Math.round(distanceMeters);
+  const isMismatch = distanceMeters > mismatchToleranceMeters;
+
   updateJob({
     titleAddressCoords: compareCoords,
-    locationMismatchMeters:
-      distanceMeters > mismatchToleranceMeters ? Math.round(distanceMeters) : undefined,
+    locationMismatchMeters: isMismatch ? roundedDistance : undefined,
   });
-  if (distanceMeters > mismatchToleranceMeters) {
+
+  if (isMismatch) {
     console.warn('[upload-new] location source mismatch detected', {
       jobId,
       mediaId: updatedJob.mediaId,
@@ -222,6 +234,11 @@ async function auditTitleExifMismatch(args: {
       distanceMeters,
       toleranceMeters: mismatchToleranceMeters,
     });
+    // Persist to DB so detail view can surface the mismatch after navigation.
+    // @see upload-manager-pipeline.location-routing.supplement.md § Mismatch audit
+    if (persistMismatch && updatedJob.mediaId) {
+      void persistMismatch(updatedJob.mediaId, roundedDistance);
+    }
   }
 }
 

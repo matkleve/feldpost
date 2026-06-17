@@ -254,7 +254,7 @@ sequenceDiagram
 - [ ] Ambiguous street+house matches run disambiguation ranking and auto-assign only when probability >= configured threshold.
 - [x] EXIF GPS is never discarded when title/folder addresses exist.
 - [ ] Text-derived coordinates and EXIF coordinates are compared with a 15m tolerance.
-- [ ] Mismatches beyond 15m are persisted as structured location mismatch state and surfaced to detail UI.
+- [x] Mismatches beyond 15m are persisted as structured location mismatch state and surfaced to detail UI.
 - [x] Hash deduplication runs for photo, document, and video (`photo_v1` / `binary_v1`).
 - [x] Org-scoped dedup lookup via `check_dedup_hashes` ([dedup-scope supplement](./upload-manager-pipeline.dedup-scope.supplement.md)).
 - [x] Documents without GPS and without parseable textual address enter issues as `document_unresolved` with status `Choose location or project`, even when submitted with project context.
@@ -270,7 +270,7 @@ sequenceDiagram
 - [ ] Choosing `use_existing` links the current project context to the existing media item when needed.
 - [ ] Choosing `upload_anyway` creates a new media item even with matching hash.
 - [ ] Choosing `reject` marks the item as skipped/rejected and keeps audit trace.
-- [ ] Parser residual fragments are preserved in `addressNotes[]` and carried into media detail evidence.
+- [x] Parser residual fragments are preserved in `addressNotes[]` and carried into media detail evidence.
 - [x] Dedup behavior is resume-safe when a folder is re-selected after interruption (same user).
 - [x] Dedup lookup is scoped to `organization_id` ([dedup-scope supplement](./upload-manager-pipeline.dedup-scope.supplement.md)).
 - [x] Cross-user org duplicate matches surface as `duplicate_file` issues; same-user resume auto-skips.

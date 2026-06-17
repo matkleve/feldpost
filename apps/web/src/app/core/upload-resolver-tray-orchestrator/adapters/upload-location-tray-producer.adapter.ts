@@ -212,12 +212,6 @@ function questionKeyForGroup(group: UploadDisambiguationGroup): string {
   if (group.disambiguationKind === 'house_step' || group.trayStep === '1b') {
     return 'upload.resolver.question.houseStep';
   }
-  if (group.disambiguationKind === 'project_address_a') {
-    return 'upload.resolver.question.projectAddressA';
-  }
-  if (group.disambiguationKind === 'project_address_b') {
-    return 'upload.resolver.question.projectAddressB';
-  }
   if (group.collapseStage === 'city') {
     return 'upload.resolver.question.city';
   }

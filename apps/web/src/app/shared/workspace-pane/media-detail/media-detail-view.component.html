@@ -149,6 +149,24 @@
               </div>
             }
 
+            @if (addressNotes(); as notes) {
+              <div class="detail-section detail-address-notes" role="region" [attr.aria-label]="t('workspace.imageDetail.section.addressNotes.aria', 'Unresolved address fragments')">
+                <p class="detail-section__label">{{ t('workspace.imageDetail.section.addressNotes', 'Address fragments') }}</p>
+                <div class="detail-address-notes__chips">
+                  @for (note of notes; track note) {
+                    <span class="detail-address-notes__chip">{{ note }}</span>
+                  }
+                </div>
+              </div>
+            }
+
+            @if (locationMismatchMeters(); as meters) {
+              <div class="detail-section detail-location-mismatch" role="status">
+                <span class="material-icons detail-location-mismatch__icon" aria-hidden="true">wrong_location</span>
+                <span class="detail-location-mismatch__label">{{ t('workspace.imageDetail.locationMismatch', 'GPS and address diverge by') }} {{ meters }}m</span>
+              </div>
+            }
+
             <app-metadata-section
               [entries]="metadata()"
               [metadataKeyDefinitions]="metadataKeyDefinitions()"

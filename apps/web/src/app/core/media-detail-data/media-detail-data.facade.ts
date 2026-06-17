@@ -50,6 +50,8 @@ interface MediaDetailRow {
   district: string | null;
   country: string | null;
   address_field_meta: AddressFieldMeta | null;
+  address_notes: string[] | null;
+  location_mismatch_meters: number | null;
 }
 
 interface ProjectRow {
@@ -287,6 +289,8 @@ export class MediaDetailDataFacade {
       location_unresolved: unresolved,
       gps_assignment_allowed: media.gps_assignment_allowed ?? true,
       address_field_meta: media.address_field_meta ?? null,
+      address_notes: media.address_notes ?? null,
+      location_mismatch_meters: media.location_mismatch_meters ?? null,
     };
   }
 }

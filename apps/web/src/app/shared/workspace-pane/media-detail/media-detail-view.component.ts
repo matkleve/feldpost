@@ -330,6 +330,15 @@ export class MediaDetailViewComponent implements OnDestroy {
 
   readonly hasAddress = computed(() => this.fullAddress().trim().length > 0);
 
+  /** Parser-preserved fragments that were too low-confidence to geocode. @see upload-manager-pipeline.md § Action 11c */
+  readonly addressNotes = computed(() => {
+    const notes = this.media()?.address_notes;
+    return notes && notes.length > 0 ? notes : null;
+  });
+
+  /** Distance (m) between EXIF GPS and title-derived coordinates. Null = no mismatch. @see upload-manager-pipeline.md § Action 6 */
+  readonly locationMismatchMeters = computed(() => this.media()?.location_mismatch_meters ?? null);
+
   readonly displayTitle = computed(() => resolveDisplayTitle(this.media(), this.t));
 
   readonly mediaTypeChipLabel = computed(() =>

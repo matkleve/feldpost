@@ -38,4 +38,15 @@ export interface MediaRecord {
   address_field_meta?: AddressFieldMeta | null;
   /** Count of linked locations with paired GPS (gallery map icon). */
   zoomable_location_count?: number | null;
+  /**
+   * Low-confidence or residual address fragments preserved from filename/folder parsing.
+   * @see upload-manager-pipeline.md § Action 11c
+   */
+  address_notes?: string[] | null;
+  /**
+   * Distance in metres between EXIF GPS and title-derived coordinates when both were present.
+   * Null = no mismatch detected.
+   * @see upload-manager-pipeline.md § Action 6
+   */
+  location_mismatch_meters?: number | null;
 }

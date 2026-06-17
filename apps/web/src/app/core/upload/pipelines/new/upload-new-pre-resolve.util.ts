@@ -124,6 +124,18 @@ export function mergeTitleCandidateOnJob(
     return { highConfidence: false };
   }
 
+  const candidateMeetsThreshold = mergedCandidate.score >= config.titleConfidenceThreshold;
+
+  // Low-confidence file parse: store as addressNotes instead of routing title address.
+  // @see upload-manager-pipeline.md § Filename Address Confidence Contract
+  if (!candidateMeetsThreshold && mergedCandidate.source === 'file') {
+    const existing = deps.jobState.findJob(jobId)?.addressNotes ?? [];
+    deps.jobState.updateJob(jobId, {
+      addressNotes: [...existing, mergedCandidate.address],
+    });
+    return { highConfidence: false };
+  }
+
   deps.jobState.updateJob(jobId, {
     titleAddress: mergedCandidate.address,
     titleAddressSource: mergedCandidate.source,
@@ -131,7 +143,7 @@ export function mergeTitleCandidateOnJob(
 
   return {
     titleAddress: mergedCandidate.address,
-    highConfidence: mergedCandidate.score >= config.titleConfidenceThreshold,
+    highConfidence: candidateMeetsThreshold,
   };
 }
 
