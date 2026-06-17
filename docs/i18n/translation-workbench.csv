@@ -1549,4 +1549,7 @@ colleagues.chat.error.reaction,Could not update reaction.,chat reaction error to
 colleagues.chat.toast.channel_created,Channel created.,chat channel created success toast,Channel created.,Kanal erstellt.,Canale creato.
 colleagues.chat.toast.channel_archived,Channel archived.,chat channel archived success toast,Channel archived.,Kanal archiviert.,Canale archiviato.
 colleagues.chat.toast.member_invited,Member invited to channel.,chat member invited success toast,Member invited to channel.,Mitglied zum Kanal eingeladen.,Membro invitato al canale.
+workspace.imageDetail.section.addressNotes,Address fragments,media detail section label for low-confidence address fragments from filename parsing,Address fragments,Adressfragmente,Frammenti di indirizzo
+workspace.imageDetail.section.addressNotes.aria,Unresolved address fragments,aria label for address notes evidence section in media detail,Unresolved address fragments,Nicht auflösbare Adressfragmente,Frammenti di indirizzo non risolti
+workspace.imageDetail.locationMismatch,GPS and address diverge by,media detail mismatch indicator label prefix (followed by metres value),GPS and address diverge by,GPS und Adresse weichen ab um,GPS e indirizzo divergono di
 "

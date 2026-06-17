@@ -135,7 +135,7 @@ flowchart TD
 | --- | --- | --- |
 | Title forward | `resolve_media_location` via `UploadEnrichmentService.enrichWithForwardGeocode` | Linked location lat/lng + address |
 | EXIF placement | `resolve_media_location` (not `bulk_update_media_addresses` alone) | Linked location + reverse-derived address when geocoder succeeds |
-| Mismatch audit | `forwardGeocodeAddress` (no persist) + `locationMismatchMeters` on job | Audit only; upload stays complete |
+| Mismatch audit | `forwardGeocodeAddress` + `locationMismatchMeters` on job + DB write | Persisted to `media_items.location_mismatch_meters`; surfaced in detail UI; upload stays complete |
 
 ## Persistence matrix
 

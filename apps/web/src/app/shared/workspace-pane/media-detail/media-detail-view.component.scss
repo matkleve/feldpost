@@ -225,3 +225,49 @@
 .detail-reconciliation-banner__close {
   margin-left: auto;
 }
+
+// ─── Address notes chips ───
+
+// Preserved low-confidence filename parse fragments; evidence only, not geocodeable.
+// @see upload-manager-pipeline.md § Action 11c
+.detail-address-notes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+// Horizontal chip row for individual fragment strings.
+.detail-address-notes__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-1);
+}
+
+// Single fragment chip — read-only evidence badge.
+.detail-address-notes__chip {
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--radius-pill);
+  background: var(--action-hover);
+  color: var(--menu-item-text);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+}
+
+// ─── Location mismatch indicator ───
+
+// Inline warning row when EXIF GPS and title-derived coordinates diverge > 15m.
+// @see upload-manager-pipeline.md § Action 6
+.detail-location-mismatch {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) 0;
+  color: var(--muted-foreground);
+  font-size: var(--font-size-sm);
+}
+
+// Warning icon; inherits color from parent.
+.detail-location-mismatch__icon {
+  font-size: var(--font-size-base);
+  flex-shrink: 0;
+}

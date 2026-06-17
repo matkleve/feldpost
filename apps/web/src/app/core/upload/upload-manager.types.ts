@@ -118,8 +118,6 @@ export type UploadDisambiguationKind =
   | 'admin_level_conflict'
   | 'city_step'
   | 'house_step'
-  | 'project_address_a'
-  | 'project_address_b'
   | 'containment_check';
 
 export type UploadTrayStep = '1a' | '1b' | '2' | '3';
@@ -145,6 +143,12 @@ export interface UploadJob {
   titleAddressCoords?: ExifCoords;
   /** Distance between EXIF coords and title-derived coords when both are available. */
   locationMismatchMeters?: number;
+  /**
+   * Low-confidence or residual address fragments from filename/folder title parsing.
+   * Persisted to media_items.address_notes for display in detail view.
+   * @see docs/specs/service/media-upload-service/upload-manager-pipeline.md § Action 11c
+   */
+  addressNotes?: string[];
   direction?: number;
   /** Persisted `media_items` row id after save (canonical: mediaId). */
   mediaId?: string;

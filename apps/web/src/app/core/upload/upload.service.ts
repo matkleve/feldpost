@@ -127,9 +127,10 @@ export class UploadService {
     abortSignal?: AbortSignal,
     relativePath?: string,
     options?: { pendingPartialLocation?: boolean },
+    addressNotes?: string[],
   ): Promise<UploadResult> {
     return persistUploadFile(
-      { file, manualCoords, parsedExif, projectId, abortSignal, relativePath, options },
+      { file, manualCoords, parsedExif, projectId, abortSignal, relativePath, options, addressNotes },
       this.uploadFilePersistDeps(),
     );
   }

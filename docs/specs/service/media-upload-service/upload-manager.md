@@ -259,7 +259,7 @@ sequenceDiagram
 - [ ] Folder-level title addresses are applied as defaults to files without file-level title addresses.
 - [ ] File-level title addresses override folder-level defaults.
 - [ ] EXIF GPS is preserved even when textual location is present.
-- [ ] Title/folder-derived coordinates are compared against EXIF with a 15m tolerance and mismatches are persisted.
+- [x] Title/folder-derived coordinates are compared against EXIF with a 15m tolerance and mismatches are persisted.
 - [x] Hash dedupe runs for photo, document, and video (`photo_v1` / `binary_v1` per [dedup-scope supplement](./upload-manager-pipeline.dedup-scope.supplement.md)).
 - [ ] Duplicate hash matches are resolved via explicit user decision (`use_existing`, `upload_anyway`, `reject`) rather than auto-skip.
 - [ ] Duplicate resolution supports a batch apply option for matching items.
@@ -270,11 +270,11 @@ sequenceDiagram
 - [ ] `Change location` in uploaded rows exposes `Click on map` and `Enter address` as separate flows.
 - [ ] Address-suggestion hover previews map position without persisting until suggestion selection.
 - [ ] Ambiguous street+house matches are auto-assigned only when disambiguation probability is at or above threshold (default `0.95`).
-- [ ] Parser residual fragments are preserved as address notes and remain visible in media details.
+- [x] Parser residual fragments are preserved as address notes and remain visible in media details.
 - [x] Address resolution and coordinate resolution are enrichment — failure is silent
 - [ ] Geocoding enrichment `401` performs one silent auth refresh and one retry before failing
 - [ ] Persistent geocoding `401` causes controlled sign-out via `AuthService` (no manual storage-clearing workaround)
 - [x] Orphaned storage files are cleaned up when DB insert fails
 - [x] Auth change (logout) cancels all active jobs
-- [ ] Global progress indicator visible from any page when uploads are active
+- [x] Global progress indicator visible from any page when uploads are active
 - [x] `beforeunload` warning shown when `isBusy()` is true
