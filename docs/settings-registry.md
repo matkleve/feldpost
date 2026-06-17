@@ -25,6 +25,7 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | Identity Profile | ui/settings-overlay/account-settings-section.md | display name edit policy, formatting, and save behavior. |
 | Interaction & Shortcuts | ui/settings-overlay/settings-overlay.md | grouped keyboard shortcut reference by category, including implementation status visibility. |
 | Interaction & Shortcuts | ui/settings-overlay/shortcut-reference-settings.md | grouped keyboard shortcut reference by category, including implementation status visibility. |
+| Activity Log | component/org/org-administration-section.md | audit event visibility, pagination size, and action-type filters (admin-only). |
 | Invite Management | ui/settings-overlay/qr-invite-flow.md | one-shot creation, acceptance, and revocation controls. |
 | Invite Management | ui/settings-overlay/settings-overlay.md | invite creation, acceptance, revocation defaults and controls. |
 | Invite validity cap | ui/colleagues/colleagues-invites-workspace.md | hard product maximum **365 days** from effective start (`valid_from` or creation). Not configurable to unlimited; applies to **admin** the same as clerk/worker. |
@@ -36,6 +37,7 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | Map Preferences | ui/settings-overlay/settings-overlay.md | map tile and map-behavior defaults. |
 | Max distance for internet results (km) | ui/search-bar/search-tuning-settings.md | `contextDistanceMaxMeters`; realism cap from search anchor — also normative for upload forward-geocode far-hit rejection ([distance radii contract](../../service/search/search-tuning.distance-radii-contract.md)). |
 | Notifications | ui/settings-overlay/settings-overlay.md | preference defaults for in-app feedback and alerts. |
+| Organization Profile | component/org/org-administration-section.md | organization rename and identity metadata display (admin-only). |
 | Org Search Tuning (`contextDistanceMaxMeters`) | service/media-upload-service/address-resolution-model.md | km cap for unrealistic Internet/upload geocode distance from anchor ([distance radii contract](../search/search-tuning.distance-radii-contract.md)). |
 | Password Recovery | ui/settings-overlay/account-page.md | reset email behavior and redirect target. |
 | Password Recovery | ui/settings-overlay/account-settings-section.md | reset email trigger behavior and redirect target handling. |
@@ -47,11 +49,13 @@ Do not edit manually; update element specs and run `node scripts/lint-specs.mjs 
 | QR Invite Preferences | ui/settings-overlay/qr-invite-flow.md | default target role, auto-generate-on-open behavior, one-shot expiration window (7 days), and enabled share channels. |
 | QR Invite Preferences | ui/settings-overlay/settings-overlay.md | default role, auto-generation behavior, expiration policy, and allowed share channels for QR invites. |
 | Roles & Permissions | ui/settings-overlay/settings-overlay.md | role-based capability visibility and access constraints. |
+| Members & Roles | component/org/org-administration-section.md | member list visibility, role assignment, and member removal controls (admin-only). |
 | Search Tuning | ui/search-bar/search-tuning-settings.md | org-level geocoder/search filters, weights, penalties, orchestrator timing, provider limits. |
 | Search Tuning | ui/settings-overlay/settings-overlay.md | address/place search filters, ranking weights, penalties, and retry behavior. |
 | Selection Bulk Actions | ui/workspace/workspace-actions-bar.md | default delete confirmation behavior, whether address-change requires non-empty validation, and which project targets are shown first (recent vs alphabetical). |
 | Session | ui/settings-overlay/account-page.md | logout confirmation and scope behavior. |
 | Session | ui/settings-overlay/account-settings-section.md | explicit sign-out behavior and confirmation requirements. |
+| Sharing Administration | component/org/org-administration-section.md | org-wide share-link listing and revocation, including inactive-link visibility (admin-only). |
 | Theme | ui/settings-overlay/settings-overlay.md | active theme mode and persistence behavior. |
 | Upload location config (`exifAssistRadiusMeters`, `sourceAgreementRadiusMeters`) | service/media-upload-service/address-resolution-model.md | meter radii for EXIF fine-tune and text-vs-EXIF tray — not the org km slider ([upload-location-config.md](./upload-location-config.md)). |
 | Workspace Sort Defaults | ui/settings-overlay/settings-overlay.md | default sorting and ordering preferences. |
