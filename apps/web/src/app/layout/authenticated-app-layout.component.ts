@@ -32,7 +32,6 @@ import { DragDividerComponent } from '../shared/workspace-pane/shell/drag-divide
 import { WorkspacePaneComponent } from '../shared/workspace-pane/shell/workspace-pane.component';
 import { UploadPanelComponent } from '../features/upload/upload-panel/upload-panel.component';
 import { UploadShellComponent } from '../features/upload/upload-shell/upload-shell.component';
-import { UploadShellUiService } from '../features/upload/upload-shell/upload-shell-ui.service';
 import { MapShellState } from '../features/map/map-shell/component/map-shell.state';
 import { WorkspacePaneObserverAdapter } from '../core/workspace-pane/workspace-pane-observer.adapter';
 import { MapZoomOrchestratorService } from '../core/map-zoom/map-zoom-orchestrator.service';
@@ -69,8 +68,6 @@ const WORKSPACE_PANE_WIDTH_STORAGE_KEY = 'sitesnap.settings.layout.workspacePane
   templateUrl: './authenticated-app-layout.component.html',
   styleUrl: './authenticated-app-layout.component.scss',
   providers: [
-    MapShellState,
-    UploadShellUiService,
     { provide: WORKSPACE_PANE_SHELL_HOST, useExisting: AuthenticatedAppLayoutComponent },
   ],
 })

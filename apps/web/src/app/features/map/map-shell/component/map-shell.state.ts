@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import type { ProjectSelectOption } from '../../../../shared/project-select-dialog/project-select-dialog.component';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class MapShellState {
   private readonly _photoPanelOpen = signal(false);
   readonly photoPanelOpen = this._photoPanelOpen.asReadonly();

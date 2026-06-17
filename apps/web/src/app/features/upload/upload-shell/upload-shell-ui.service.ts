@@ -7,7 +7,7 @@ import { getLaneForJob } from '../upload-phase.helpers';
 import type { UploadPanelComponent } from '../upload-panel/upload-panel.component';
 
 /** Global upload shell open state + placement bridge (map shell, all authenticated routes). */
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class UploadShellUiService {
   private readonly uploadManager = inject(UploadManagerService);
   private readonly trayOrchestrator = inject(UploadResolverTrayOrchestratorService);
