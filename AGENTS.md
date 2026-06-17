@@ -129,9 +129,33 @@ CI workflow: `.github/workflows/i18n-check.yml`
 - **Glossary is canonical** — use exact names from `docs/glossary.md`
 - **Database-first debugging** — for overlaps, feasibility, uniqueness, publication, immutability, or history: inspect PostgreSQL constraints, triggers, and RLS **before** assuming frontend or adapter bugs (`supabase/migrations/`, `docs/architecture/database-schema.md`).
 
+## Change Classification (Fast Lane / Full Lane)
+
+Every change MUST declare a **class** before work starts (in the issue, PR description, or the agent's preflight). The class determines how much ceremony is required. This generalizes the Migration Exemption below: most changes do not need the full ownership-matrix ritual, and forcing them through it is the main source of process drag. **When unsure between two classes, pick the higher one.**
+
+| Class | Examples | Required before merge |
+| --- | --- | --- |
+| **Trivial** | typo, copy/label text, log line, comment, single token swap, pure rename, migration cleanup (see exemption below) | `ng build` passes + the gate script for the touched area (e.g. `npm run design-system:check` if SCSS/tokens). No ownership matrix, no FSM tables. |
+| **Standard** | new non-stateful component, new service method, list/filter/sort, a self-contained UI surface | spec touched first; `ng build`; component-reuse/registry check; `npm run lint:specs`; relevant gate script; `/code-review` skill on the diff. |
+| **Sensitive** | RLS or migrations, auth, billing/money, export, stateful/FSM UI, **the upload pipeline**, anything touching `organization_id` scoping | full ceremony: ownership matrix + FSM/transition tables; `/security-review` skill; the matching `validate-*-rls.sql` / `validate-dsgvo-security.sql`; **LIVE VERIFICATION** (`docs/agent-workflows/agent-communication.md`); fresh-context adversarial review by a different agent than the implementer. |
+
+The class is a **floor, not a ceiling** — reviewers may escalate. Anything that changes a security boundary or the data model is **Sensitive** regardless of how small the diff looks.
+
+### Change-Completeness Rule (all classes — Hard Blocker)
+
+**A change is not done until the thing it replaces is gone.** When you alter behavior, you MUST remove — in the *same* change — every artifact the old behavior left behind:
+
+- Dead code paths, now-unreachable branches, and unused exports/fields/types.
+- **Spec and type references to removed concepts** — specs and `types.ts` MUST NOT outlive the code they describe.
+- Obsolete tests, fixtures, and feature flags.
+
+Leftover-after-change is the single most expensive recurring failure in this codebase (see the upload pipeline: `project_address_a`/`project_address_b` survived as dead fields *and* lingered in the stepper-FSM spec and types after their producer was removed — `docs/ai-diary/2026-06-13.md`). Worked example and the standing checklist: [`docs/playbooks/change-classification-upload-example.md`](docs/playbooks/change-classification-upload-example.md).
+
+Verification floor for any behavior change: `grep` the removed symbol/field/concept across `apps/web/src` **and** `docs/specs` and confirm **0** stray references before declaring done. Do not layer a new fix on top of an old one without re-reading the current baseline first.
+
 ## Migration Exemption (Phase 6–8)
 
-Work classified as **migration cleanup** is exempt from the ownership matrix and FSM contract pre-requisites. Migration cleanup = replacing `ui-*` BEM with Tailwind/`hlm*`, wiring existing spartan directives, removing legacy SCSS, replacing `var(--color-*)` with tweakcn equivalents. Does NOT cover new components, new states/animations, or net-new visual decisions. If a change introduces a net-new visual element, the exemption does not apply.
+Migration cleanup is the canonical **Trivial**-class case. Work classified as **migration cleanup** is exempt from the ownership matrix and FSM contract pre-requisites. Migration cleanup = replacing `ui-*` BEM with Tailwind/`hlm*`, wiring existing spartan directives, removing legacy SCSS, replacing `var(--color-*)` with tweakcn equivalents. Does NOT cover new components, new states/animations, or net-new visual decisions. If a change introduces a net-new visual element, the exemption does not apply.
 
 ## Component Structure Rules (Hard Blockers)
 

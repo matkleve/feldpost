@@ -127,6 +127,13 @@ This is the single highest-leverage change. It tells contributors (and agents)
 *how much process to spend* up front, which is the thing that's currently
 ambiguous and therefore defaulted to "maximum."
 
+> **Implemented (this branch):** the change-class matrix and a
+> **Change-Completeness Rule** ("a change isn't done until what it replaces is
+> gone") are now in root `AGENTS.md`. A worked example on the upload pipeline —
+> the codebase's hardest subsystem, where dead `project_address_a/b` fields
+> outlived their producer in both code *and* spec — is in
+> [`change-classification-upload-example.md`](change-classification-upload-example.md).
+
 ### Move 2 — Turn advisory rules into deterministic gates
 
 For every `.cursor/rule` or AGENTS convention that can be checked by a script,
