@@ -76,8 +76,8 @@ import { PhotoMarkerZoomLevel } from '../../../../core/map/marker-factory';
 import { MapShellState } from './map-shell.state';
 import { PhotoMarkerState } from '../markers/map-marker-reconcile.facade';
 import { MapViewportCoordinatorService } from '../markers/map-viewport-coordinator.service';
-import { MapContextActionsService } from '../context-menu/map-context-actions.service';
 import { MapContextMenuHandlerService } from '../context-menu/map-context-menu-handler.service';
+import { MapContextMenuOpenService } from '../context-menu/map-context-menu-open.service';
 import { MapClickHandlerService } from '../handlers/map-click-handler.service';
 import { MapLocationPickService } from '../handlers/map-location-pick.service';
 import { PhotoMarkerLifecycleService } from '../markers/photo-marker-lifecycle.service';
@@ -93,14 +93,10 @@ import {
 } from '../markers/map-zoom-highlight-orchestrator.service';
 import { MapMarkerSelectionService } from '../markers/map-marker-selection.service';
 import { MapMarkerBindingService } from '../markers/map-marker-binding.service';
-import {
-  RadiusDrawingOrchestratorService,
-  RADIUS_CLICK_GUARD_MS,
-} from '../radius/radius-drawing-orchestrator.service';
+import { RadiusDrawingOrchestratorService } from '../radius/radius-drawing-orchestrator.service';
 import { MapShellBasemapService } from '../leaflet/map-shell-basemap.service';
 import {
   MapInstance,
-  MapLatLng,
   MapLayerGroup,
   MapMouseEvent,
   MapLeafletService,
@@ -181,8 +177,8 @@ export class MapShellComponent implements OnDestroy {
   private readonly routeSessionCache = inject(RouteSessionCacheService);
   private readonly state = inject(MapShellState);
   private readonly mapViewportCoordinatorService = inject(MapViewportCoordinatorService);
-  private readonly mapContextActionsService = inject(MapContextActionsService);
   private readonly mapContextMenuHandlerService = inject(MapContextMenuHandlerService);
+  private readonly mapContextMenuOpenService = inject(MapContextMenuOpenService);
   private readonly mapClickHandlerService = inject(MapClickHandlerService);
   private readonly mapLocationPickService = inject(MapLocationPickService);
   private readonly photoMarkerLifecycleService = inject(PhotoMarkerLifecycleService);
@@ -660,7 +656,7 @@ export class MapShellComponent implements OnDestroy {
 
   onMapMenuCloseRequested(): void {
     this.closeContextMenus();
-    this.focusMapContainer();
+    this.mapContainerRef()?.nativeElement?.focus();
   }
 
   mapMenuPanelClass(viewportWidth?: number): string {
@@ -1046,9 +1042,9 @@ export class MapShellComponent implements OnDestroy {
       handlePhotoMarkerClick: (markerKey, event) => this.photoMarkerLifecycleService.handlePhotoMarkerClick(markerKey, event),
       consumeNativeContextMenuBypass: () => this.mapClickHandlerService.consumeNativeContextMenuBypass(),
       clearPendingSecondaryPress: () => this.mapClickHandlerService.clearPendingSecondaryPress(),
-      openRadiusContextMenuAt: (latlng, x, y) => this.openRadiusContextMenuAt(latlng, x, y),
-      clearActiveRadiusSelection: () => this.clearActiveRadiusSelection(),
-      openMarkerContextMenu: (markerKey, event) => this.openMarkerContextMenu(markerKey, event),
+      openRadiusContextMenuAt: (latlng, x, y) => this.mapContextMenuOpenService.openRadiusContextMenuAt(latlng, x, y),
+      clearActiveRadiusSelection: () => this.mapClickHandlerService.clearActiveRadiusSelection(),
+      openMarkerContextMenu: (markerKey, event) => this.mapContextMenuOpenService.openMarkerContextMenu(markerKey, event),
       suppressMarkerContextMenuFor: (ms) => this.mapClickHandlerService.suppressMarkerContextMenuFor(ms),
     });
 
@@ -1108,6 +1104,13 @@ export class MapShellComponent implements OnDestroy {
       onImageUploaded: (event) => this.onImageUploaded(event),
     });
 
+    this.mapContextMenuOpenService.bind({
+      getMap: () => this.map,
+      getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
+      getSelectedMarkerKeys: () => this.selectedMarkerKeys(),
+      toMarkerKey: (lat, lng) => this.toMarkerKey(lat, lng),
+    });
+
     this.mapMediaDeleteSyncService.bind({
       getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
       getPhotoMarkerLayer: () => this.photoMarkerLayer,
@@ -1130,8 +1133,8 @@ export class MapShellComponent implements OnDestroy {
       setPlacementActive: (value) => this.placementActive.set(value),
       getLastMapMoveAt: () => this.lastMapMoveAt,
       closeContextMenus: () => this.closeContextMenus(),
-      openMapContextMenuAt: (latlng, x, y) => this.openMapContextMenuAt(latlng, x, y),
-      openRadiusContextMenuAt: (latlng, x, y) => this.openRadiusContextMenuAt(latlng, x, y),
+      openMapContextMenuAt: (latlng, x, y) => this.mapContextMenuOpenService.openMapContextMenuAt(latlng, x, y),
+      openRadiusContextMenuAt: (latlng, x, y) => this.mapContextMenuOpenService.openRadiusContextMenuAt(latlng, x, y),
       removeDraftMediaMarker: () => this.photoMarkerLifecycleService.removeDraftMediaMarker(),
       closeUploadPanel: () => this.uploadShellUi.closeUploadPanel(),
       closeWorkspacePane: () => this.workspacePaneShellHost.closeWorkspacePane(),
@@ -1336,107 +1339,6 @@ export class MapShellComponent implements OnDestroy {
     return this.mapViewportCoordinatorService.isViewportStillInFetchedBuffer(zoomChanged);
   }
 
-  /**
-   * Lazy-load thumbnails for single-image markers visible in the current viewport.
-   * Fires for all zoom levels — single-image markers always show a photo.
-   * Only requests signed URLs for markers without a URL yet, and proactively
-   * refreshes URLs older than 50 minutes.
-   */
-  private openMapContextMenuAt(latlng: MapLatLng, clientX: number, clientY: number): void {
-    const position = this.mapContextActionsService.clampContextMenuPosition(clientX, clientY);
-    this.state.setRadiusContextMenuOpen(false);
-    this.state.setMarkerContextMenuOpen(false);
-    this.state.setMapContextMenuCoords({ lat: latlng.lat, lng: latlng.lng });
-    this.state.setMapContextMenuPosition(position);
-    this.state.setMapContextMenuOpen(true);
-    this.focusFirstOpenMapMenuItem();
-    this.mapClickHandlerService.suppressMapClickFor(RADIUS_CLICK_GUARD_MS);
-  }
-
-  private openRadiusContextMenuAt(latlng: MapLatLng, clientX: number, clientY: number): void {
-    const position = this.mapContextActionsService.clampContextMenuPosition(clientX, clientY);
-    this.state.setMapContextMenuOpen(false);
-    this.state.setMarkerContextMenuOpen(false);
-    this.state.setRadiusContextMenuCoords({ lat: latlng.lat, lng: latlng.lng });
-    this.state.setRadiusContextMenuPosition(position);
-    this.state.setRadiusContextMenuOpen(true);
-    this.focusFirstOpenMapMenuItem();
-    this.mapClickHandlerService.suppressMapClickFor(RADIUS_CLICK_GUARD_MS);
-  }
-
-  private openMarkerContextMenu(markerKey: string, sourceEvent?: MouseEvent | PointerEvent): void {
-    const state = this.uploadedPhotoMarkers.get(markerKey);
-    if (!state) return;
-    const position = this.mapContextActionsService.resolveMarkerContextMenuPosition(
-      state,
-      sourceEvent,
-      this.map,
-    );
-
-    this.state.setMapContextMenuOpen(false);
-    this.state.setRadiusContextMenuOpen(false);
-    this.state.setMarkerContextMenuPosition(position);
-    const selectedMarkerKeys = this.selectedMarkerKeys();
-    const isMultiSelection = selectedMarkerKeys.size > 1 && selectedMarkerKeys.has(markerKey);
-
-    if (isMultiSelection) {
-      const multiStates = Array.from(selectedMarkerKeys)
-        .map((key) => this.uploadedPhotoMarkers.get(key))
-        .filter((candidate): candidate is NonNullable<typeof candidate> => !!candidate);
-
-      const combinedSourceCells = Array.from(
-        new Map(
-          multiStates
-            .flatMap((marker) => marker.sourceCells ?? [{ lat: marker.lat, lng: marker.lng }])
-            .map((cell) => [this.toMarkerKey(cell.lat, cell.lng), cell]),
-        ).values(),
-      );
-
-      const combinedCount = multiStates.reduce((sum, marker) => sum + Math.max(1, marker.count), 0);
-
-      this.state.setMarkerContextMenuPayload({
-        markerKey,
-        count: combinedCount,
-        lat: state.lat,
-        lng: state.lng,
-        isMultiSelection: true,
-        sourceCells: combinedSourceCells,
-      });
-    } else {
-      this.state.setMarkerContextMenuPayload({
-        markerKey,
-        count: state.count,
-        lat: state.lat,
-        lng: state.lng,
-        mediaId: state.mediaId,
-        isMultiSelection: false,
-        sourceCells: state.sourceCells ?? [{ lat: state.lat, lng: state.lng }],
-      });
-    }
-
-    this.state.setMarkerContextMenuOpen(true);
-    this.focusFirstOpenMapMenuItem();
-    this.mapClickHandlerService.suppressMapClickFor(RADIUS_CLICK_GUARD_MS);
-  }
-
-  private focusMapContainer(): void {
-    const mapContainer = this.mapContainerRef()?.nativeElement;
-    mapContainer?.focus();
-  }
-
-  private focusFirstOpenMapMenuItem(): void {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    window.requestAnimationFrame(() => {
-      const firstItem = document.querySelector<HTMLButtonElement>(
-        '.map-context-menu button[role="menuitem"]',
-      );
-      firstItem?.focus();
-    });
-  }
-
   private isMapMenuNavigationKey(key: string): boolean {
     return key === 'ArrowDown' || key === 'ArrowUp' || key === 'Home' || key === 'End';
   }
@@ -1462,15 +1364,6 @@ export class MapShellComponent implements OnDestroy {
     const delta = key === 'ArrowDown' ? 1 : -1;
     const nextIndex = (currentIndex + delta + focusableItems.length) % focusableItems.length;
     focusableItems[nextIndex]?.focus();
-  }
-
-  private clearActiveRadiusSelection(): void {
-    this.radiusDrawingService.clearSelectionVisuals();
-    this.markerSelectionService.setSelectedMarker(null);
-    this.markerSelectionService.setSelectedMarkerKeys(new Set());
-    this.patchDetailMediaId(null);
-    this.workspaceViewService.clearActiveSelection();
-    this.workspaceSelectionService.clearSelection();
   }
 
   onProjectSelectionDialogSelected(projectId: string): void {

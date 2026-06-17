@@ -129,6 +129,15 @@ export class MapClickHandlerService {
     this.pendingSecondaryPress = null;
   }
 
+  clearActiveRadiusSelection(): void {
+    this.radiusDrawingService.clearSelectionVisuals();
+    this.markerSelectionService.setSelectedMarker(null);
+    this.markerSelectionService.setSelectedMarkerKeys(new Set());
+    this.ctx?.patchDetailMediaId(null);
+    this.workspaceViewService.clearActiveSelection();
+    this.workspaceSelectionService.clearSelection();
+  }
+
   /**
    * Consumes the one-shot native context menu bypass flag.
    * Must remain PUBLIC — called by `MapMarkerBindingService`.
