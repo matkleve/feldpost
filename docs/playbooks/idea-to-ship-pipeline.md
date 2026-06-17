@@ -143,6 +143,44 @@ The runnable check is the first Gherkin scenario as a `vitest` component test:
 set channel A, assert all panes; switch to B, assert all panes including "no A
 residue." That test failing is what should have blocked the original change.
 
+### State coherence also applies to *services*, not just panes
+
+The UI-pane version above is the visible half. The other half — and the one a
+retrospective on the **upload queue** exposed — is **service state machines**.
+The re-upload-loop bug (`docs/ai-diary/2026-05-27.md`: a `queued` job that
+already had a `mediaId` got re-run by `drainQueue`, uploading the whole folder)
+was not a pane bug. It was a violated **state-machine invariant**: *a job with a
+`mediaId` is terminal and must never run again.*
+
+So the contract extends:
+
+> **Service state-machine invariants** — any stateful service (queues, FSMs,
+> resolvers) MUST declare in its spec: (a) the set of states, (b) the **terminal**
+> states, and (c) **idempotency rules** ("an action on a job in state X is a
+> no-op"). Acceptance criteria MUST assert these invariants directly.
+
+For the upload queue, the missing criteria were exactly:
+
+```gherkin
+Scenario: A job that already produced a media row is terminal
+  Given a job is "queued" and already has a mediaId
+  When drainQueue runs
+  Then that job does not start a second pipeline run
+  And no duplicate upload is attempted (no dedup_hashes 409)
+
+Scenario: Save applies only to the conflict group, not the whole batch
+  Given the resolver tray shows 1 conflict job out of an 8-file folder
+  When I Save a photo location
+  Then only the 1 tray job receives that location
+  And the other 7 keep their own EXIF / folder address
+```
+
+This connects to the existing FSM contract in `.cursor/rules/ui-state-machine.mdc`
+— previously that rule was framed for *UI* state machines; the pipeline now
+requires the same rigor for *service* state machines. **The lesson from the
+retrospective: "state coherence" is not just "panes agree" — it's "the state
+machine's invariants are written down and tested."**
+
 ---
 
 ## 5. Autonomy — the "80% without asking" policy

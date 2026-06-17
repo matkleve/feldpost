@@ -155,6 +155,8 @@ Verification floor for any behavior change: `grep` the removed symbol/field/conc
 
 **Red-test-first (Sensitive-class, Hard Blocker):** for Sensitive work (RLS, migrations, auth, money, stateful UI, the upload pipeline), the acceptance test MUST be shown **failing before** the implementation and **passing after**. A test that was never red proves nothing. A flaky test is not a gate — fix isolation first (e.g. the upload spec cross-file injector pollution noted in `docs/ai-diary/2026-05-27.md`).
 
+**State-machine invariants (stateful services, Hard Blocker):** any stateful service (queues, FSMs, resolvers — e.g. the upload queue) MUST declare in its spec its states, its **terminal** states, and its **idempotency rules** (an action on a job already in a terminal state is a no-op). Acceptance criteria MUST assert those invariants. This is the service-side counterpart to the UI FSM contract in `.cursor/rules/ui-state-machine.mdc`; see [`docs/playbooks/idea-to-ship-pipeline.md`](docs/playbooks/idea-to-ship-pipeline.md) § State coherence also applies to services.
+
 ## Migration Exemption (Phase 6–8)
 
 Migration cleanup is the canonical **Trivial**-class case. Work classified as **migration cleanup** is exempt from the ownership matrix and FSM contract pre-requisites. Migration cleanup = replacing `ui-*` BEM with Tailwind/`hlm*`, wiring existing spartan directives, removing legacy SCSS, replacing `var(--color-*)` with tweakcn equivalents. Does NOT cover new components, new states/animations, or net-new visual decisions. If a change introduces a net-new visual element, the exemption does not apply.
