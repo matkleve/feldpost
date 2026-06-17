@@ -49,10 +49,7 @@ import {
 import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-view.service';
 import { FilterService } from '../../../../core/filter/filter.service';
 import { WorkspaceSelectionService } from '../../../../core/workspace-selection/workspace-selection.service';
-import {
-  MediaDownloadService,
-  MEDIA_PLACEHOLDER_ICON,
-} from '../../../../core/media-download/media-download.service';
+import { MEDIA_PLACEHOLDER_ICON } from '../../../../core/media-download/media-download.service';
 import { ToastService } from '../../../../core/toast/toast.service';
 import type { ToastOptions, ToastType } from '../../../../core/toast/toast.types';
 import { I18nService } from '../../../../core/i18n/i18n.service';
@@ -61,7 +58,6 @@ import { MapFilterToolbarComponent } from '../../map-filter-toolbar/map-filter-t
 import { SearchQueryContext } from '../../../../core/search/search.models';
 import { searchQueryContextsEqual } from '../../../../core/search/search-bar-helpers';
 import type { ThumbnailCardHoverEvent } from '../../../../core/workspace-pane/workspace-pane-thumbnail-hover.types';
-import { SettingsPaneService } from '../../../../core/settings-pane/settings-pane.service';
 import { ROUTE_SESSION_SHELL_KEYS } from '../../../../core/route-session-cache/route-session-cache.keys';
 import { RouteSessionCacheService } from '../../../../core/route-session-cache/route-session-cache.service';
 import { ProjectSelectDialogComponent } from '../../../../shared/project-select-dialog/project-select-dialog.component';
@@ -70,8 +66,6 @@ import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggl
 import { HLM_TOGGLE_GROUP_IMPORTS } from '../../../../shared/ui/toggle-group';
 import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/shell/dropdown-shell.component';
 import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../../../shared/ui/menu';
-import { ActionEngineService } from '../../../../core/action/action-engine.service';
-import { ResolvedAction } from '../../../../core/action/action-types';
 import { MapShellState } from './map-shell.state';
 import { PhotoMarkerState } from '../markers/map-marker-reconcile.facade';
 import { MapViewportCoordinatorService } from '../markers/map-viewport-coordinator.service';
@@ -108,7 +102,6 @@ import { LocationMapPickNavigationService } from '../../../../core/workspace-pan
 import { MapShellGpsService } from '../leaflet/map-shell-gps.service';
 import { MapShellSearchService } from '../leaflet/map-shell-search.service';
 import { DeferredStartupHandles, MapDeferredStartupService } from '../leaflet/map-deferred-startup.service';
-import { MapProjectActionsService } from '../workspace/map-project-actions.service';
 import { MapProjectDialogService } from '../workspace/map-project-dialog.service';
 import { MarkerStateMutationsService } from '../markers/marker-state-mutations.service';
 import { getFirstMarkerKeyForMedia } from '../markers/marker-media-index.helpers';
@@ -117,19 +110,7 @@ import type { SelectedItemsContextPort } from '../../../../core/workspace-pane/w
 import { WORKSPACE_PANE_SHELL_HOST } from '../../../../core/workspace-pane/workspace-pane-shell-host.token';
 import type { WorkspacePaneLayoutMapEffects } from '../../../../core/workspace-pane/workspace-pane-layout-map-effects.service';
 import { WorkspacePaneLayoutMapEffectsService } from '../../../../core/workspace-pane/workspace-pane-layout-map-effects.service';
-import {
-  MAP_MENU_ACTION_DEFINITIONS,
-  MARKER_MENU_ACTION_DEFINITIONS,
-} from '../workspace/map-workspace-actions.registry';
-import { RADIUS_SELECTION_ACTION_DEFINITIONS } from '../radius/radius-selection-actions.registry';
-import { MapWorkspaceContextResolverService } from '../workspace/map-workspace-context-resolver.service';
-import { MapWorkspaceActionExecutorService } from '../workspace/map-workspace-action-executor.service';
-import type {
-  MapMenuActionId,
-  MarkerMenuActionId,
-  RadiusActionContext,
-  RadiusMenuActionId,
-} from '../workspace/map-workspace-actions.types';
+import { MapMenuViewModelService } from '../workspace/map-menu-view-model.service';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 
 
@@ -162,12 +143,10 @@ export class MapShellComponent implements OnDestroy {
   private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly filterService = inject(FilterService);
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
-  private readonly mediaDownloadService = inject(MediaDownloadService);
   private readonly toastService = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly i18nService = inject(I18nService);
   private readonly router = inject(Router);
-  private readonly settingsPaneService = inject(SettingsPaneService);
   private readonly routeSessionCache = inject(RouteSessionCacheService);
   private readonly state = inject(MapShellState);
   private readonly mapViewportCoordinatorService = inject(MapViewportCoordinatorService);
@@ -195,15 +174,12 @@ export class MapShellComponent implements OnDestroy {
   readonly gpsService = inject(MapShellGpsService);
   readonly searchService = inject(MapShellSearchService);
   private readonly mapDeferredStartupService = inject(MapDeferredStartupService);
-  private readonly mapProjectActionsService = inject(MapProjectActionsService);
   private readonly mapProjectDialogService = inject(MapProjectDialogService);
   private readonly markerStateMutationsService = inject(MarkerStateMutationsService);
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
   private readonly workspacePaneShellHost = inject(WORKSPACE_PANE_SHELL_HOST);
   private readonly workspacePaneLayoutMapEffectsService = inject(WorkspacePaneLayoutMapEffectsService);
-  private readonly actionEngineService = inject(ActionEngineService);
-  private readonly mapWorkspaceContextResolverService = inject(MapWorkspaceContextResolverService);
-  private readonly mapWorkspaceActionExecutorService = inject(MapWorkspaceActionExecutorService);
+  readonly menuVm = inject(MapMenuViewModelService);
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
   private showMapToast(
@@ -345,88 +321,18 @@ export class MapShellComponent implements OnDestroy {
   /** Current workspace pane width in px. Uses restored user preference or design-system default. */
   readonly workspacePaneWidth = this.state.workspacePaneWidth;
 
-  private get viewportWidth() {
-    return typeof window !== 'undefined' ? window.innerWidth : 1280;
-  }
-
-  readonly workspacePaneMinWidth = computed(() => this.viewportWidth * 0.25);
-
-  readonly workspacePaneMaxWidth = computed(() => this.viewportWidth * 0.75);
-
-  readonly workspacePaneDefaultWidth = computed(() => this.viewportWidth * 0.618);
   readonly selectedMarkerKey = this.state.selectedMarkerKey;
   readonly selectedMarkerKeys = this.state.selectedMarkerKeys;
   readonly linkedHoveredWorkspaceMediaIds = this.state.linkedHoveredWorkspaceMediaIds;
   readonly mapContextMenuOpen = this.state.mapContextMenuOpen;
   readonly mapContextMenuPosition = this.state.mapContextMenuPosition;
   readonly mapContextMenuCoords = this.state.mapContextMenuCoords;
-  readonly mapMenuContext = computed(() =>
-    this.mapWorkspaceContextResolverService.resolveMapContext(this.mapContextMenuCoords()),
-  );
-  readonly mapMenuActions = computed<ReadonlyArray<ResolvedAction<MapMenuActionId>>>(() => {
-    const context = this.mapMenuContext();
-    if (!context) {
-      return [];
-    }
-
-    return this.actionEngineService.resolveActions(MAP_MENU_ACTION_DEFINITIONS, context);
-  });
-  readonly mapPrimaryActions = computed(() =>
-    this.mapMenuActions().filter((action) => action.section === 'primary'),
-  );
-  readonly mapSecondaryActions = computed(() =>
-    this.mapMenuActions().filter((action) => action.section === 'secondary'),
-  );
   readonly radiusContextMenuOpen = this.state.radiusContextMenuOpen;
   readonly radiusContextMenuPosition = this.state.radiusContextMenuPosition;
   readonly radiusContextMenuCoords = this.state.radiusContextMenuCoords;
-  readonly radiusMenuContext = computed<RadiusActionContext>(() => ({
-    contextType: 'radius_selection',
-    count: this.mapProjectActionsService.getActiveSelectionImageIds(
-      this.workspaceViewService.rawImages(),
-    ).length,
-    mediaIds: this.mapProjectActionsService.getActiveSelectionImageIds(
-      this.workspaceViewService.rawImages(),
-    ),
-  }));
-  readonly radiusMenuActions = computed<ReadonlyArray<ResolvedAction<RadiusMenuActionId>>>(() =>
-    this.actionEngineService.resolveActions(
-      RADIUS_SELECTION_ACTION_DEFINITIONS,
-      this.radiusMenuContext(),
-    ),
-  );
-  readonly radiusPrimaryActions = computed(() =>
-    this.radiusMenuActions().filter((action) => action.section === 'primary'),
-  );
-  readonly radiusDestructiveActions = computed(() =>
-    this.radiusMenuActions().filter((action) => action.section === 'destructive'),
-  );
   readonly markerContextMenuOpen = this.state.markerContextMenuOpen;
   readonly markerContextMenuPosition = this.state.markerContextMenuPosition;
   readonly markerContextMenuPayload = this.state.markerContextMenuPayload;
-  readonly markerMenuContext = computed(() =>
-    this.mapWorkspaceContextResolverService.resolveMarkerContext(this.markerContextMenuPayload()),
-  );
-  readonly markerMenuActions = computed<ReadonlyArray<ResolvedAction<MarkerMenuActionId>>>(() => {
-    const context = this.markerMenuContext();
-    if (!context) {
-      return [];
-    }
-
-    return this.actionEngineService.resolveActions(MARKER_MENU_ACTION_DEFINITIONS, context);
-  });
-  readonly markerPrimaryActions = computed(() =>
-    this.markerMenuActions().filter((action) => action.section === 'primary'),
-  );
-  readonly markerSecondaryActions = computed(() =>
-    this.markerMenuActions().filter((action) => action.section === 'secondary'),
-  );
-  readonly markerDestructiveActions = computed(() =>
-    this.markerMenuActions().filter((action) => action.section === 'destructive'),
-  );
-  readonly anyContextMenuOpen = computed(
-    () => this.mapContextMenuOpen() || this.radiusContextMenuOpen() || this.markerContextMenuOpen(),
-  );
   readonly draftMediaMarker = this.state.draftMediaMarker;
   readonly projectSelectionDialogOpen = this.state.projectSelectionDialogOpen;
   readonly projectSelectionDialogTitle = this.state.projectSelectionDialogTitle;
@@ -448,21 +354,6 @@ export class MapShellComponent implements OnDestroy {
    * Set to null to return to the thumbnail grid.
    */
   readonly detailMediaId = this.state.detailMediaId;
-
-  /** Thumbnail URL for the currently selected single marker. */
-  readonly selectedMarkerThumbnail = computed(() => {
-    const key = this.selectedMarkerKey();
-    if (!key) return null;
-    const state = this.uploadedPhotoMarkers.get(key);
-    return state?.thumbnailUrl ?? null;
-  });
-
-  /** DB image UUID for the currently selected single marker. */
-  readonly selectedMarkerImageId = computed(() => {
-    const key = this.selectedMarkerKey();
-    if (!key) return null;
-    return this.uploadedPhotoMarkers.get(key)?.mediaId ?? null;
-  });
 
   // ── Private helpers ───────────────────────────────────────────────────────
 
@@ -727,7 +618,8 @@ export class MapShellComponent implements OnDestroy {
   }
 
   private clampWorkspacePaneWidth(width: number): number {
-    return Math.min(Math.max(width, this.workspacePaneMinWidth()), this.workspacePaneMaxWidth());
+    const vw = typeof window !== 'undefined' ? window.innerWidth : 1280;
+    return Math.min(Math.max(width, vw * 0.25), vw * 0.75);
   }
 
   private getWorkspacePaneOpeningWidth(): number {

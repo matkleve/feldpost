@@ -47,7 +47,7 @@
     tabindex="-1"
     aria-label="Site map"
     aria-haspopup="menu"
-    [attr.aria-expanded]="anyContextMenuOpen()"
+    [attr.aria-expanded]="menuVm.anyContextMenuOpen()"
   ></div>
 
   @if (mapContextMenuOpen() && mapContextMenuPosition(); as mapMenuPos) {
@@ -60,7 +60,7 @@
       (closeRequested)="onMapMenuCloseRequested()"
     >
       <div class="map-context-menu__items flex flex-col" role="menu" tabindex="-1" aria-label="Map context menu">
-        @for (action of mapPrimaryActions(); track action.id) {
+        @for (action of menuVm.mapPrimaryActions(); track action.id) {
           <button
             hlmMenuItem
             class="w-full"
@@ -75,10 +75,10 @@
           </button>
         }
 
-        @if (mapSecondaryActions().length > 0) {
+        @if (menuVm.mapSecondaryActions().length > 0) {
           <div hlmMenuSeparator aria-hidden="true"></div>
 
-          @for (action of mapSecondaryActions(); track action.id) {
+          @for (action of menuVm.mapSecondaryActions(); track action.id) {
             <button
               hlmMenuItem
               class="w-full"
@@ -109,7 +109,7 @@
       <div class="map-context-menu__header option-menu-header">Radius Auswahl</div>
 
       <div class="map-context-menu__items flex flex-col" role="menu" tabindex="-1" aria-label="Radius context menu">
-        @for (action of radiusPrimaryActions(); track action.id) {
+        @for (action of menuVm.radiusPrimaryActions(); track action.id) {
           <button
             hlmMenuItem
             class="w-full"
@@ -124,11 +124,11 @@
           </button>
         }
 
-        @if (radiusPrimaryActions().length > 0 && radiusDestructiveActions().length > 0) {
+        @if (menuVm.radiusPrimaryActions().length > 0 && menuVm.radiusDestructiveActions().length > 0) {
           <div hlmMenuSeparator aria-hidden="true"></div>
         }
 
-        @for (action of radiusDestructiveActions(); track action.id) {
+        @for (action of menuVm.radiusDestructiveActions(); track action.id) {
           <button
             hlmMenuItem
             class="w-full text-destructive"
@@ -167,7 +167,7 @@
         </div>
 
         <div class="map-context-menu__items flex flex-col" role="menu" tabindex="-1" aria-label="Marker context menu">
-          @for (action of markerPrimaryActions(); track action.id + '-' + action.label) {
+          @for (action of menuVm.markerPrimaryActions(); track action.id + '-' + action.label) {
             <button
               hlmMenuItem
               class="w-full"
@@ -182,11 +182,11 @@
             </button>
           }
 
-          @if (markerPrimaryActions().length > 0 && markerSecondaryActions().length > 0) {
+          @if (menuVm.markerPrimaryActions().length > 0 && menuVm.markerSecondaryActions().length > 0) {
             <div hlmMenuSeparator aria-hidden="true"></div>
           }
 
-          @for (action of markerSecondaryActions(); track action.id) {
+          @for (action of menuVm.markerSecondaryActions(); track action.id) {
             <button
               hlmMenuItem
               class="w-full"
@@ -201,10 +201,10 @@
             </button>
           }
 
-          @if (markerDestructiveActions().length > 0) {
+          @if (menuVm.markerDestructiveActions().length > 0) {
             <div hlmMenuSeparator aria-hidden="true"></div>
 
-            @for (action of markerDestructiveActions(); track action.id) {
+            @for (action of menuVm.markerDestructiveActions(); track action.id) {
               <button
                 hlmMenuItem
                 class="w-full text-destructive"

@@ -67,6 +67,7 @@ export type MarkerMenuActionId =
 
 export type RadiusMenuActionId =
   | 'open_selection'
+  | 'create_project'
   | 'assign_to_project'
   | 'remove_from_project'
   | 'delete_media';
