@@ -1,5 +1,5 @@
 import type { OnDestroy} from '@angular/core';
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Component, computed, ElementRef, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { UploadJob, UploadPhase } from '../../../core/upload/upload-manager.service';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
@@ -15,6 +15,7 @@ import type { MediaRenderState, UploadOverlayState } from '../../../core/media/m
 import { DropdownShellComponent } from '../../../shared/dropdown-trigger/shell/dropdown-shell.component';
 import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../../shared/ui/menu';
 import { ACTION_CONTEXT_IDS } from '../../../core/action/action-context-ids';
+import { TwoStepConfirmGroup } from '../../../shared/ui/button/destructive-confirm.interaction';
 
 
 export type UploadItemMenuAction =
@@ -89,6 +90,9 @@ export class UploadPanelItemComponent implements OnDestroy {
 
   private readonly i18nService = inject(I18nService);
   private readonly mediaOrchestrator = inject(MediaDownloadService);
+  // upload-panel.lane-and-row-actions.md § Two-Step Confirm Contract
+  private readonly el = inject(ElementRef<HTMLElement>);
+  private readonly twoStepGroup = new TwoStepConfirmGroup<UploadItemMenuAction>(this.el);
 
   readonly job = input.required<UploadJob>();
   readonly interactive = input<boolean>(false);
@@ -98,6 +102,7 @@ export class UploadPanelItemComponent implements OnDestroy {
   readonly showOpenProject = input<boolean>(false);
   readonly priorityEnabled = input<boolean>(false);
   readonly prioritized = input<boolean>(false);
+  readonly awaitingMapPick = input<boolean>(false);
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
   readonly requestPlacement = output<{ jobId: string; phase: UploadPhase; event: MouseEvent }>();
@@ -110,6 +115,11 @@ export class UploadPanelItemComponent implements OnDestroy {
   readonly menuOpen = signal(false);
   readonly menuAnchor = signal<HTMLElement | null>(null);
   readonly hasMenuActions = computed(() => this.availableMenuActions().length > 0);
+  // First destructive action in the list drives the single shared separator.
+  // upload-panel.lane-and-row-actions.md § Destructive Menu Convention
+  readonly firstDestructiveActionId = computed<UploadItemMenuAction | null>(() =>
+    this.availableMenuActions().find(a => this.isDestructiveAction(a)) ?? null,
+  );
   readonly showDuplicateExistingMediaShortcut = computed(() => {
     const job = this.job();
     return (
@@ -305,6 +315,22 @@ export class UploadPanelItemComponent implements OnDestroy {
     );
   }
 
+  // upload-panel.lane-and-row-actions.md § Two-Step Confirm Contract
+  isTwoStepDestructive(action: UploadItemMenuAction): boolean {
+    return action === 'remove_from_project' || action === 'delete_media';
+  }
+
+  isArmed(action: UploadItemMenuAction): boolean {
+    return this.twoStepGroup.isArmed(action);
+  }
+
+  armedLabelFor(action: UploadItemMenuAction): string {
+    if (action === 'delete_media') {
+      return this.t('upload.item.menu.destructive.confirmDelete', 'Confirm delete?');
+    }
+    return this.t('upload.item.menu.destructive.confirmRemove', 'Confirm remove?');
+  }
+
   actionIcon(action: UploadItemMenuAction): string {
     return actionIcon(action);
   }
@@ -314,6 +340,9 @@ export class UploadPanelItemComponent implements OnDestroy {
   }
 
   statusLabelText(): string {
+    if (this.awaitingMapPick()) {
+      return this.t('upload.status.awaitingMapPick', 'Click map to set location');
+    }
     return statusLabelText(this.job(), this.t);
   }
 
@@ -353,7 +382,22 @@ export class UploadPanelItemComponent implements OnDestroy {
   }
 
   onMenuAction(action: UploadItemMenuAction): void {
+    if (this.isTwoStepDestructive(action)) {
+      // upload-panel.lane-and-row-actions.md § Two-Step Confirm Contract:
+      // first click arms (menu stays open), second click fires + closes.
+      this.twoStepGroup.handleClick(action, () => {
+        this.closeMenu();
+        this.emitMenuAction(action);
+      });
+      return;
+    }
+    // Non-two-step: disarm any pending armed item, then fire immediately.
+    this.twoStepGroup.disarm();
     this.closeMenu();
+    this.emitMenuAction(action);
+  }
+
+  private emitMenuAction(action: UploadItemMenuAction): void {
     this.menuActionSelected.emit({
       job: this.job(),
       action,
@@ -393,6 +437,7 @@ export class UploadPanelItemComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.twoStepGroup.destroy();
     this.closeMenu();
   }
 
@@ -449,6 +494,7 @@ export class UploadPanelItemComponent implements OnDestroy {
   }
 
   private closeMenu(): void {
+    this.twoStepGroup.disarm();
     if (UploadPanelItemComponent.activeMenuOwner === this) {
       UploadPanelItemComponent.activeMenuOwner = null;
     }

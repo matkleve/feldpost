@@ -72,7 +72,8 @@ Row state rendering requirements:
 | `missing_data` + `document_unresolved`        | `Choose location or project`                 | `issues`    | Resolvable by location or project binding  |
 | `skipped` + `duplicate_photo`                 | `Already uploaded`                           | `issues`    | Duplicate review entry                     |
 | `error`                                       | `Upload failed`                              | `issues`    | Retry path allowed when supported          |
-| `complete`                                    | `Uploaded`                                   | `uploaded`  | Terminal success                           |
+| `complete`                                    | `Uploaded`                                   | `uploaded`  | Terminal success                                           |
+| `awaiting_map_pick` (uploaded row)            | `Click map to set location`                  | `uploaded`  | After `Add/Change GPS` until pick completes or panel hides |
 
 ### Media Item Menu Contract
 
@@ -170,19 +171,61 @@ sequenceDiagram
 
 ## Destructive Menu Convention
 
-The row 3-dot menu always ends with one destructive section (divider + one or more destructive entries).
+The row 3-dot menu always ends with **one destructive section**: exactly one divider, followed by one or more destructive entries as a group. Multiple destructive entries share the single divider — no additional dividers between them.
 
-| Row State                        | Destructive entries                                                           | Required operation                                    |
-| -------------------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Active upload (`uploading` lane) | `Cancel upload`                                                               | `cancelJob(jobId)`                                    |
-| Uploaded (`uploaded` lane)       | `Remove from project` or `Remove from projects` (when bound) + `Delete media` | unbind from one/many projects; delete persisted media |
-| Issue or failed (`issues` lane)  | `Dismiss`                                                                     | `dismissJob(jobId)`                                   |
+| Row State                        | Destructive entries                                                              | Required operation                                    |
+| -------------------------------- | -------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Active upload (`uploading` lane) | `Cancel upload`                                                                  | `cancelJob(jobId)`                                    |
+| Uploaded (`uploaded` lane)       | `Remove from project(s)` (when project-bound, else omitted) + `Delete media`    | unbind from one/many projects; delete persisted media |
+| Issue or failed (`issues` lane)  | `Dismiss`                                                                        | `dismissJob(jobId)`                                   |
 
 Notes:
 
 - Compact mode and embedded mode share the same destructive naming convention.
 - `Upload anyway` is a non-destructive duplicate-resolution action and MUST NOT replace the destructive section.
 - Every destructive menu entry uses danger styling for label and icon.
+- `Delete media` is always present for uploaded rows regardless of project binding. `Remove from project(s)` appears only when one or more project bindings exist.
+
+### Two-Step Confirm Contract for Destructive Menu Actions
+
+`remove_from_project` and `delete_media` require two deliberate clicks before the operation fires. This prevents accidental destructive actions in the compact panel context.
+
+**FSM per destructive menu button:**
+
+| State   | Trigger                          | Next state | Visual change                                           | Side effect             |
+| ------- | -------------------------------- | ---------- | ------------------------------------------------------- | ----------------------- |
+| `idle`  | First click on destructive item  | `armed`    | Label → "Confirm?" prefix; icon → `warning`; background → danger tint | Menu stays open; 5 s auto-disarm timer starts |
+| `armed` | Second click (within 5 s)        | `idle`     | Reverts to idle styling                                 | Operation fires; menu closes |
+| `armed` | 5 s timeout                      | `idle`    | Reverts to idle styling                                 | Nothing; menu stays open |
+| `armed` | Click outside menu (DropdownShell outside-close) | `idle` | Reverts to idle styling                    | Menu closes + disarm (outside is outside) |
+| `armed` | Click on non-destructive item    | `idle`     | Reverts to idle styling                                 | Non-destructive action fires; menu closes |
+
+**Wiring constraint:** `onMenuAction()` in `UploadPanelItemComponent` MUST NOT call `closeMenu()` when a destructive action is in `idle` state (i.e., first click). It calls `closeMenu()` only when a destructive action fires from `armed` state, or when any non-destructive action fires.
+
+**Implementation path:** Use `TwoStepConfirmInteraction` (at `shared/ui/button/destructive-confirm.interaction.ts`) inside `UploadPanelItemComponent`, shared across all destructive menu items via a `TwoStepConfirmGroup` instance. `TwoStepConfirmGroup` ensures only one armed item at a time per menu.
+
+**Label contract for armed state:**
+
+| Action                | Idle label                               | Armed label            |
+| --------------------- | ---------------------------------------- | ---------------------- |
+| `remove_from_project` | `Remove from project` / `Remove from projects` | `Confirm remove?`  |
+| `delete_media`        | `Delete media`                           | `Confirm delete?`      |
+
+After `delete_media` fires from `armed` state: the operation delegates to `MediaDeleteUndoService.deleteWithUndo()` (undo-toast with 5 s window) — no secondary confirm dialog needed.
+
+### Map-pick row state (uploaded lane)
+
+When the user chooses `Add GPS` or `Change GPS` on a persisted uploaded row (`change_location_map`):
+
+| State | Row status text (English fallback) | Clears when |
+| --- | --- | --- |
+| `awaiting_map_pick` | `Click map to set location` | Map pick succeeds (`imageUploaded` / location update for that `mediaId`), user starts a different map pick, or upload panel hides |
+
+Toast `Click on the map to set the location.` MAY still appear; row status is the canonical in-list affordance.
+
+### Embedded bulk selection (lane switch)
+
+When `embeddedInPane = true`, row checkboxes MAY select jobs across lanes internally, but **changing the selected lane tab MUST clear `selectedUploadJobIds`** before rendering the new lane list. Bulk toolbar actions therefore never operate on a cross-lane selection.
 
 ## Acceptance Criteria
 
@@ -190,3 +233,13 @@ Notes:
 - [ ] Status text follows **Status Text Contract** for every phase transition.
 - [ ] Action registry drives visibility; no scattered ad-hoc menu conditionals.
 - [ ] Destructive section is last in every row menu with danger styling.
+- [ ] Uploaded rows with no project binding show exactly one destructive entry: `Delete media`.
+- [ ] Uploaded rows with project binding show two entries in one section: `Remove from project(s)` then `Delete media` — preceded by exactly one divider.
+- [ ] `remove_from_project` requires two clicks: first arms (label → "Confirm remove?", danger tint), second fires; menu stays open between clicks.
+- [ ] `delete_media` requires two clicks: first arms (label → "Confirm delete?", danger tint), second fires; menu stays open between clicks.
+- [ ] Armed state auto-disarms after 5 s without second click; menu remains open.
+- [ ] Click outside the open menu while armed closes the menu and disarms without firing the destructive action.
+- [ ] Clicking a non-destructive item while a destructive item is armed disarms it and fires the non-destructive action.
+- [ ] After `delete_media` fires: undo-toast appears (5 s window); no separate confirm dialog.
+- [ ] Uploaded row entering map-pick shows status text `Click map to set location` until pick completes or panel hides.
+- [ ] Embedded mode clears row selection when the user switches Queue / Uploaded / Issues lane tabs.

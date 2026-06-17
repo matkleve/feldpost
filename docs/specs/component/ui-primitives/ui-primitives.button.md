@@ -12,10 +12,12 @@ Token borders and fills from tweakcn semantics (`--primary`, `--border`, `--mute
 | --------- | ---- | ------------- | -------------------------------- |
 | `default` | Solid `--primary`, light foreground | Darker primary (`primary/90`) | — |
 | `destructive` | Solid destructive | Darker destructive | — |
-| `outline` | Muted text, border, background | Primary ink + 10% primary wash | Selected ink via host state / parent (not CVA alone) |
+| `outline` | Muted text, border, background | **Gold** ink + gold wash (`emphasis.hover` semantics) | Selected ink via host state / parent |
 | `ghost` | Muted text, transparent | Same as outline hover | Same as outline |
 | `secondary` | Solid `--secondary` (olive light) | Darker secondary | Rare — prefer `outline` for new work |
 | `link` | Primary text | Underline | — |
+
+**Note:** `button-variants.ts` CVA may still emit `hover:text-primary` until aligned with gold hover — treat as **partial** per [`interaction-emphasis-rollout.md`](../../system/interaction-emphasis-rollout.md). Frosted hosts must not set `color: var(--foreground)` on the host (blocks ink hover).
 
 ## Where It Lives
 
@@ -41,7 +43,8 @@ button[hlmBtn] (host)
 ## Interaction emphasis
 
 - Canonical: [`docs/design/state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis
-- [x] This component implements the contract (`outline`, `ghost` in CVA; `default`/`destructive` documented filled exception)
+- Ink inheritance: [`interaction-emphasis-ink-contract.md`](../../system/interaction-emphasis-ink-contract.md)
+- [ ] `outline` / `ghost` implement gold hover + child ink inherit on frosted/map hosts
 
 ### Frosted chrome hosts (outline only)
 
@@ -52,7 +55,7 @@ On map/upload **frosted** shells (`frosted-chrome.surface`), `variant="outline"`
 | Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer | Test Oracle |
 | -------- | --------------------- | ---------------------- | --------------------------- | ------------- | ----- | ----------- |
 | Chrome | host `button` | parent | host | `button[hlmBtn]` | content | variant classes on host |
-| Quiet hover | host | host | host | `hover:` / `focus-visible:` utilities | states | primary ink + wash |
+| Quiet hover | host | host | host | `hover:` / `focus-visible:` utilities | states | gold ink + wash; children inherit |
 | Filled CTA | host | host | host | `bg-primary` / `bg-destructive` | states | solid fill |
 
 ## API

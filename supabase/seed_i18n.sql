@@ -33235,6 +33235,68 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.item.menu.destructive.confirmDelete', 'Confirm delete?', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel-item.component.ts armedLabelFor — two-step armed state for delete_media')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Confirm delete?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.destructive.confirmDelete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Wirklich löschen?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.destructive.confirmDelete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Conferma eliminazione?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.destructive.confirmDelete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.item.menu.destructive.confirmRemove', 'Confirm remove?', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel-item.component.ts armedLabelFor — two-step armed state for remove_from_project')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Confirm remove?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.destructive.confirmRemove'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Wirklich entfernen?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.destructive.confirmRemove'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Conferma rimozione?', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.item.menu.destructive.confirmRemove'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'upload.item.menu.project.remove.failed', 'Could not remove from project.', 'en', 'apps/web/src/app/features/upload/upload-panel.component.ts ts-prop:message')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -36113,6 +36175,37 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Caricato', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.status.complete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.status.awaitingMapPick', 'Click map to set location', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel-item.component.ts statusLabelText when awaitingMapPick')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Click map to set location', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.awaitingMapPick'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Klicke auf die Karte um den Standort zu setzen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.awaitingMapPick'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Clicca sulla mappa per impostare la posizione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.awaitingMapPick'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

@@ -17,14 +17,18 @@ Normative FSM and persistence matrix for **upload location routing**: panel mode
 
 **Cold start default:** `required` (Auto location ON). **Not** driven by `projects.location_required` (deprecated — see [deprecated-schema.md](../../../architecture/deprecated-schema.md)).
 
-### Session override (same browser session)
+### Session override (same browser tab)
 
 | Event | Behavior |
 | --- | --- |
-| User toggles mode while workspace has one selected project filter | Store choice in `sessionLocationModeOverrides[projectId]` |
+| User toggles mode while workspace has one selected project filter | Store choice in in-memory `sessionLocationModeOverrides[projectId]` |
 | User switches to another filtered project | Restore that project's override, or `required` if none |
 | No project filter active | Toggle updates global signal only; no map entry required |
 | Clear project filter | Overrides map is **not** cleared |
+| Upload panel closes | Overrides **remain** in memory |
+| Full page reload or tab close | Overrides **lost**; cold start default `required` (ON) |
+
+**Not in scope:** This override does **not** bind uploads to a project. It only changes whether auto location routing runs for intake while a project map filter is active.
 
 ## Pre-upload resolution (phased pipeline, OD-4)
 

@@ -296,6 +296,7 @@
             [showOpenProject]="!!job.projectId || !!job.projectIds?.length"
             [priorityEnabled]="priorityWorkflowEnabled()"
             [prioritized]="prioritizedUploadedJobIds().has(job.id)"
+            [awaitingMapPick]="pendingLocationPickMediaId() === job.mediaId"
             (requestPlacement)="
               rowInteractionHandlers.requestPlacement(job.id, job.phase, $event.event)
             "

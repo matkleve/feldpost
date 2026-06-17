@@ -140,21 +140,25 @@
         [attr.aria-label]="t('auto.0014.additional_upload_actions', 'Additional upload actions')"
       >
         @for (action of availableMenuActions(); track action) {
-          @if (isDestructiveAction(action)) {
+          @if (action === firstDestructiveActionId()) {
             <div hlmMenuSeparator aria-hidden="true"></div>
           }
           <button
             hlmMenuItem
             class="w-full"
             [class.text-destructive]="isDestructiveAction(action)"
+            [class.upload-panel__menu-item--armed]="isArmed(action)"
             type="button"
             role="menuitem"
+            [attr.data-two-step-state]="isTwoStepDestructive(action) ? (isArmed(action) ? 'armed' : 'idle') : null"
             (click)="onMenuAction(action)"
           >
             <span class="material-icons option-menu-item__icon" aria-hidden="true">{{
-              actionIcon(action)
+              isArmed(action) ? 'warning' : actionIcon(action)
             }}</span>
-            <span class="min-w-0 flex-1 text-left">{{ actionLabel(action) }}</span>
+            <span class="min-w-0 flex-1 text-left">{{
+              isArmed(action) ? armedLabelFor(action) : actionLabel(action)
+            }}</span>
           </button>
         }
       </div>

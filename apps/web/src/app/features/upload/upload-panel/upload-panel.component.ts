@@ -239,21 +239,35 @@ export class UploadPanelComponent implements OnDestroy {
   readonly locationAddressDialogSuggestions = this.dialogSignals.locationAddressDialogSuggestions;
   readonly duplicateResolutionDialogOpen = this.dialogSignals.duplicateResolutionDialogOpen;
   readonly duplicateResolutionApplyToBatch = this.dialogSignals.duplicateResolutionApplyToBatch;
+  readonly pendingLocationPickMediaId = signal<string | null>(null);
 
   constructor() {
     effect(() => {
       if (!this.visible()) {
         this.clearPinnedFileTypeGroup();
+        this.pendingLocationPickMediaId.set(null);
       }
+    });
+
+    this.laneHandlers.register({
+      clearSelection: () => this.selectedUploadJobIds.set(new Set()),
     });
 
     this.setup.initialize({
       destroyRef: this.destroyRef,
-      imageUploaded: (event) => this.imageUploaded.emit(event),
+      imageUploaded: (event) => {
+        if (this.pendingLocationPickMediaId() === event.id) {
+          this.pendingLocationPickMediaId.set(null);
+        }
+        this.imageUploaded.emit(event);
+      },
       placementRequested: (jobId) => this.placementRequested.emit(jobId),
       detailRequested: (mediaId) => this.detailRequested.emit(mediaId),
       zoomToLocationRequested: (event) => this.zoomToLocationRequested.emit(event),
-      locationMapPickRequested: (event) => this.locationMapPickRequested.emit(event),
+      locationMapPickRequested: (event) => {
+        this.pendingLocationPickMediaId.set(event.mediaId);
+        this.locationMapPickRequested.emit(event);
+      },
       locationPreviewRequested: (event) => this.locationPreviewRequested.emit(event),
       locationPreviewCleared: () => this.locationPreviewCleared.emit(),
       selectedUploadJobIds: this.selectedUploadJobIds,

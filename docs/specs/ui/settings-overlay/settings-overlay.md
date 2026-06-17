@@ -20,14 +20,14 @@ A two-column, iPad-Settings-style surface appears to the right of the sidebar wi
 
 ## Interaction emphasis
 
-Left **section rail** rows and detail **TOC chips** follow [`state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis:
+Left **section rail** rows and detail **TOC chips** follow [`state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis and [`interaction-emphasis-ink-contract.md`](../../system/interaction-emphasis-ink-contract.md):
 
-| Surface | Selected / active | Hover |
-| ------- | ----------------- | ----- |
-| `.settings-overlay__section-item--active` | `--interaction-selected-ink` + 10% mix | `--primary` wins |
-| `.settings-overlay__section-item` (idle) | — | `--primary` |
-| `.settings-overlay__section-media` icon | selected ink when parent active; muted when idle | primary when parent active + hovered |
-| `.settings-overlay__detail-toc-item` | — | primary (no `accent` wash) |
+| Surface | Selected / active | Hover (non-active) | Child slots |
+| ------- | ----------------- | ------------------ | ----------- |
+| `.settings-overlay__section-item--active` | `--interaction-selected-ink` + 10% mix | — | media icon inherits selected ink |
+| `.settings-overlay__section-item--active:hover` | — | `--primary` + selected-hover wash | media + chevron inherit host |
+| `.settings-overlay__section-item` (idle) | — | `--brand-gold` + gold wash | media + chevron + label **inherit** — no child `primary` override |
+| `.settings-overlay__detail-toc-item` | — | gold quiet hover | label inherits |
 
 Segmented controls (`hlmToggleGroup`) inherit global toggle-group CVA (selected ink when on).
 

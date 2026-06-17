@@ -13,7 +13,17 @@ import { UploadPanelSignalsService } from './upload-panel-signals.service';
 export class UploadPanelLaneHandlersService {
   private readonly signals = inject(UploadPanelSignalsService);
 
+  private clearSelection?: () => void;
+
+  register(options: { clearSelection: () => void }): void {
+    this.clearSelection = options.clearSelection;
+  }
+
   setSelectedLane(lane: UploadLane): void {
+    const previous = this.signals.selectedLane();
+    if (previous !== lane) {
+      this.clearSelection?.();
+    }
     this.signals.setSelectedLane(lane);
   }
 

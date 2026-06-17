@@ -28,8 +28,9 @@ The historical **`dd-*`** composable class library described in early drafts **i
 
 | Concern | Owner |
 | --- | --- |
-| Default row hover | `_option-menu-item-states.scss` — **`var(--primary)`** fill/text |
+| Default row hover | `_option-menu-item-states.scss` — `emphasis.hover` + child `color: inherit` |
 | Persistent sort selection | `sort-dropdown.component.scss` — **`var(--interaction-selected-ink)`** |
+| Toolbar trigger hover ink | `_toolbar-menu-trigger.scss` + per-toolbar SCSS — no foreground lock on frosted hosts |
 | Row padding / gap / radius | `_option-menu-list.scss` — `.option-menu-item` |
 | List vertical gap (2px) | `_option-menu-surface.scss` on `.standard-dropdown__items` and `[dropdown-items]` |
 

@@ -85,14 +85,14 @@ Fill width: `calc(var(--score-fill) * 1%)` where `--score-fill` is 0–100 from 
 
 ## Interaction emphasis
 
-Choice rows follow [`state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis:
+Choice rows follow [`state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis and [`interaction-emphasis-ink-contract.md`](../../system/interaction-emphasis-ink-contract.md):
 
 | State | Ink | Background |
 | ----- | --- | ------------ |
 | Idle | `--foreground` | transparent |
-| Hover / focus (unselected) | `--primary` | primary 8% mix |
+| Hover / focus (unselected) | `--brand-gold` on host; children inherit | `emphasis.hover` or matching gold wash + ink |
 | Selected (`__choice--selected`) | `--interaction-selected-ink` | selected-ink 10% mix |
-| Selected + hover | `--primary` (wins) | primary 8% mix |
+| Selected + hover | `--primary` (wins) | `emphasis.selected-hover` |
 
 **Test oracle:** Selected answer is blue at rest; hovering it turns orange; unselected rows only orange on hover.
 

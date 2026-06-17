@@ -35,6 +35,10 @@ Composable left-rail building blocks for `app-page-grid` gutter column 1.
 | Section collapse | `.rail-section__heading` | `.rail-section__header` | `.rail-section__heading` | `.rail-section__caret--collapsed` | 0 | aria-expanded |
 | Section header actions | `.rail-section__actions` | `.rail-section__header` | `button` | `.rail-section__actions` | 0 | visible on header hover |
 
+## Interaction emphasis
+
+All rail row hosts (`app-rail-nav-button`, `app-rail-detail-nav-item`, `app-rail-select-list` row wrap, `app-rail-section` header) follow [`state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis and [`interaction-emphasis-ink-contract.md`](../../system/interaction-emphasis-ink-contract.md). Icon, label, and chevron slots **inherit host ink** on hover — no child `var(--primary)` when host uses `emphasis.hover()`.
+
 ## Usage
 
 - **Projects:** shell + nav + search + toolbar + grouped `app-rail-select-list` + footer.
@@ -46,3 +50,4 @@ Composable left-rail building blocks for `app-page-grid` gutter column 1.
 - [ ] All three page rails use `app-page-rail` shell.
 - [ ] Collapsible sections use `app-rail-section`; list rows use `app-rail-select-list` or `app-rail-detail-nav-item`.
 - [ ] No duplicate rail padding/gap/scroll SCSS in feature sidebars.
+- [ ] Rail row hover: gold ink on host and all child slots (icon, label, chevron) — see ink inheritance contract.

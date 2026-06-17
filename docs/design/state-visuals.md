@@ -57,16 +57,20 @@ Rare. Must be justified in the component spec (e.g. loading handoff). Visuals **
 
 **Rule:** Quiet interactive controls (nav links, `hlmBtn` `outline`/`ghost`, toggle items, menu rows) use this recipe unless a **dedicated element spec** documents an exception with a test oracle.
 
-**Canonical tokens:** `--primary` (hover / attention), `--interaction-selected-ink` (persistent selected/on), `--muted-foreground` (idle ink), `--menu-item-hover` (= primary 8%), `--action-hover` (= primary 12%). Mix recipe: `color-mix(in srgb, <ink> 10%, transparent)` for fills; outline borders may use `color-mix(in srgb, <ink> 42%, var(--border))`. **Prefer the mixin/token — see Mandatory implementation contract below.**
+**Canonical tokens:** `--brand-gold` (hover / invitation ink), `--interaction-selected-ink` (persistent selected/on; equals `--primary` in default theme), `--primary` (selected+hover ink), `--muted-foreground` (idle ink), `--menu-item-hover` (= gold 8%), `--action-hover` (= gold 12%). **Prefer the mixin/token — see Mandatory implementation contract below.**
 
 | State | Ink | Background | Border (outline hosts) |
 | ----- | --- | ------------ | ---------------------- |
 | **Idle** | `--muted-foreground` | transparent or `--background` | `--input` / `--border` |
-| **Hover / focus-visible** | `--primary` | primary 10% mix | primary ~42% + border mix |
-| **Pressed (`:active`)** | `--primary` | primary ~15% mix | — |
+| **Hover / focus-visible** | `--brand-gold` | gold ~10% mix (`emphasis.hover`) | gold ~42% + border mix (outline hosts) |
+| **Pressed (`:active`)** | `--brand-gold` | gold ~15% mix | — |
 | **Selected / on** (`routerLinkActive`, `data-state=on`, `aria-pressed`) | `--interaction-selected-ink` | selected-ink 10% mix | selected ~42% + border mix (when bordered) |
-| **Selected + hover** | `--primary` (wins) | primary 10% mix | same as hover |
+| **Selected + hover** | `--primary` (wins) | primary 10% mix (`emphasis.selected-hover`) | same as selected+hover border |
 | **Destructive quiet row** | `--destructive` | destructive 10% mix (hover) / 15% (`:active`) | — |
+
+### Ink inheritance (blocker)
+
+On any quiet host using the mixins above, **icon, label, and chevron slots must inherit host ink** (`color: inherit`). Never set child slots to `var(--primary)` while the host uses `emphasis.hover()` (gold). Full scope matrix: [`docs/specs/system/interaction-emphasis-ink-contract.md`](../specs/system/interaction-emphasis-ink-contract.md).
 
 ### Mandatory implementation contract (blocker)
 
@@ -95,7 +99,10 @@ Rare. Must be justified in the component spec (e.g. loading handoff). Visuals **
 - `apps/web/src/app/shared/ui/tabs/tabs-variants.ts` — tab triggers
 - `apps/web/src/app/features/nav/nav.component.scss` — route links
 - `apps/web/src/app/features/map/map-shell/_map-shell-upload.scss` — map/media upload trigger (`.map-upload-btn`)
-- `apps/web/src/styles/_option-menu-item-states.scss` — menu rows (hover already primary; destructive branch unchanged)
+- `apps/web/src/styles/_option-menu-item-states.scss` — menu rows (`emphasis.hover` + child `color: inherit`)
+- `apps/web/src/app/features/map/map-filter-toolbar/map-filter-toolbar.component.scss` — frosted map filter triggers
+- `apps/web/src/app/shared/rail-detail-nav-item/rail-detail-nav-item.component.scss` — page-rail detail rows
+- `apps/web/src/app/shared/rail-section/rail-section.component.scss` — collapsible rail headers
 - `apps/web/src/styles/_interaction-emphasis-quiet-row.scss` — **canonical mixin source** for feature list rows
 - `apps/web/src/app/features/upload/upload-resolver-tray/upload-resolver-tray.component.scss` — resolver choice rows
 - `apps/web/src/app/features/settings-overlay/settings-overlay.component.scss` — section rail + TOC
@@ -117,7 +124,7 @@ Rare. Must be justified in the component spec (e.g. loading handoff). Visuals **
 | Map upload progress ring (`.map-upload-btn--uploading`) | Batch progress uses `--primary` on the ring/spinner only |
 | Media selection rings / tile FSM | Domain selection chrome — per media specs |
 
-**Test oracle:** Idle row is muted; hovering any enabled row tints orange; current route / selected toggle segment is cool blue at rest and orange on hover.
+**Test oracle:** Idle row is muted; hovering any enabled row tints **gold** on **host and all child slots**; current route / selected segment is cool blue at rest and **primary blue** on selected+hover (not gold split across icon vs label).
 
 ---
 
@@ -130,5 +137,6 @@ Rare. Must be justified in the component spec (e.g. loading handoff). Visuals **
 ## Changelog
 
 - **2026-06-16** — Added **Mandatory implementation contract** table: inline `color-mix` for hover/selected is now a CI-blocked pattern; all existing usages migrated to `emphasis.*` mixins or `--menu-item-hover`/`--action-hover` tokens. Guard added to `scripts/guard-interaction-emphasis.mjs` and wired into `design-system:check`.
-- **2026-05-27** — **Interaction emphasis** contract for quiet controls (hover primary, selected `--interaction-selected-ink`).
+- **2026-06-17** — **Ink inheritance** rule + hover ink = `--brand-gold` (aligned with `_interaction-emphasis-quiet-row.scss`); cross-component scope in [`interaction-emphasis-ink-contract.md`](../specs/system/interaction-emphasis-ink-contract.md).
+- **2026-05-27** — **Interaction emphasis** contract for quiet controls (hover gold, selected `--interaction-selected-ink`).
 - **2026-05-05** — Initial publication: **disabled** contract for native buttons and **Panel Trigger**; closes SPEC GAP referenced in `specs/panel-trigger.spec.md`.

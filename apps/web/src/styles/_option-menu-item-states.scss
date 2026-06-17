@@ -2,6 +2,8 @@
 // Layout stays in `_option-menu-list.scss` (@layer components).
 // @see apps/web/src/app/shared/ui/menu/menu-variants.ts
 
+@use 'interaction-emphasis-quiet-row' as emphasis;
+
 .option-menu-item > .option-menu-item__icon,
 .option-menu-item > .detail-actions__icon {
   color: var(--muted-foreground);
@@ -16,12 +18,11 @@
 .option-menu-item:hover:not(:disabled):not([disabled]),
 .option-menu-item:focus-visible:not(:disabled):not([disabled]),
 .option-menu-item[data-highlighted]:not(:disabled):not([disabled]) {
-  background: color-mix(in srgb, var(--primary) 10%, transparent);
-  color: var(--primary);
+  @include emphasis.hover(10%);
 
   > .option-menu-item__icon,
   > .detail-actions__icon {
-    color: var(--primary);
+    color: inherit;
   }
 }
 
@@ -40,7 +41,13 @@
 }
 
 .option-menu-item:active:not(:disabled):not([disabled]) {
-  background: color-mix(in srgb, var(--primary) 15%, transparent);
+  background: color-mix(in srgb, var(--brand-gold) 15%, transparent);
+  color: var(--brand-gold);
+
+  > .option-menu-item__icon,
+  > .detail-actions__icon {
+    color: inherit;
+  }
 }
 
 .option-menu-item.text-destructive:active:not(:disabled):not([disabled]),

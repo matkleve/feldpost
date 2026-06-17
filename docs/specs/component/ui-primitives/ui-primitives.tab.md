@@ -8,7 +8,7 @@ Tab strip chrome: list container (`[brnTabsList][hlmTabsList]`) and tab triggers
 
 ## What It Looks Like
 
-Muted-rail list (`bg-muted rounded-md p-1`) or line underline row. Active trigger uses **interaction-selected-ink** (blue) at rest; hover uses **primary** (orange). Focus ring via `focus-visible:ring-ring`. See [`state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis.
+Muted-rail list (`bg-muted rounded-md p-1`) or line underline row. Active trigger uses **interaction-selected-ink** (blue) at rest; hover uses **brand-gold** (invitation). Focus ring via `focus-visible:ring-ring`. See [`state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis and [`interaction-emphasis-ink-contract.md`](../../system/interaction-emphasis-ink-contract.md).
 
 ## Where It Lives
 

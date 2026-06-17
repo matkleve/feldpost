@@ -97,11 +97,19 @@ sequenceDiagram
 - [x] Compact intake layout does not render a `No uploads yet` placeholder block
 - [ ] Compact map-overlay panel keeps row actions menu-first and does not render selection checkboxes
 - [ ] Embedded workspace panel reveals row-selection checkbox on hover/focus for eligible rows
-- [x] Embedded workspace panel shows bottom selection toolbar only when one or more rows are selected
-- [ ] Embedded selection toolbar provides retry/download/remove/clear actions with lane-safe behavior
-- [x] 3-dot row menu always contains a divider followed by exactly one destructive bottom action
+- [ ] Embedded workspace panel shows bottom selection toolbar only when one or more rows are selected
+- [ ] Switching Queue / Uploaded / Issues lane tab clears embedded row selection (`selectedUploadJobIds`)
+- [ ] Embedded selection toolbar provides retry/download/remove/clear actions for the current lane selection only
+- [ ] 3-dot row menu always ends with exactly one divider followed by the destructive section (one or more entries sharing that single divider — no additional dividers between them)
 - [x] Destructive bottom action label is state-dependent: `Cancel upload` (active), `Remove from project` (uploaded), `Dismiss` (issues/failed)
 - [ ] Destructive bottom action uses danger styling for both label and icon
+- [ ] `Delete media` is always present for uploaded rows regardless of project binding
+- [ ] `Remove from project(s)` appears only when one or more project bindings exist, ordered before `Delete media` in the destructive section
+- [ ] `Delete media` uses two-step confirm in-menu: first click arms (label → "Confirm delete?", danger tint, icon → warning), menu stays open; second click fires delete + undo-toast; 5 s auto-disarm
+- [ ] `Remove from project(s)` uses two-step confirm in-menu: first click arms (label → "Confirm remove?", danger tint), menu stays open; second click fires removal
+- [ ] Armed state auto-disarms after 5 s; armed-state click on a non-destructive item disarms and fires that action normally
+- [ ] Click outside the open row menu while a destructive item is armed closes the menu and disarms without firing the action
+- [ ] `Add/Change GPS` on uploaded row shows status text `Click map to set location` until map pick completes or panel hides
 - [x] Clicking the map-marker action on a `missing_data` row emits a placement request
 - [x] Clicking an uploaded row with coordinates emits a zoom-to-location request
 - [x] Uploaded rows expose `Assign project` in all states (assign and reassign through one selector flow)
@@ -115,7 +123,7 @@ sequenceDiagram
 - [ ] `Add/Change GPS` enters map-pick mode and commits the clicked location for the selected media item
 - [ ] Location edits on already uploaded media never trigger re-upload or re-queue; they update persisted media location only
 - [x] `Download` always triggers file download behavior and never opens inline browser preview tabs
-- [ ] Uploaded rows with EXIF/text mismatch (>15m) expose a clear mismatch indicator for follow-up in media details.
+- [ ] Location mismatch (`location_mismatch_meters`) is surfaced in media detail only — upload panel rows do not show a mismatch badge
 - [ ] Duplicate-photo rows are shown in Issues and expose a secondary GPS action to open the existing placed media.
 - [ ] Duplicate-resolution modal appears for duplicate-photo issues with `use existing`, `upload anyway`, and `reject` options.
 - [ ] Duplicate-resolution modal provides "apply to all matching items in this batch" behavior.
@@ -133,11 +141,11 @@ sequenceDiagram
 - [x] Uploading/retrying rows show a spinning loading indicator overlay over the thumbnail
 - [ ] Hovering media rows with available previews always shows a stable thumbnail/media preview (no blank hover state)
 - [ ] Row status text updates live while retrying and uploading phases progress
-- [ ] Jobs with unresolved address fragments expose an address-note indicator that leads to detail evidence rows.
+- [ ] Parser residual `address_notes` are surfaced in media detail only — upload panel rows do not show address-note badges
 - [x] Lane tabs display live counts derived from the same lane bucket data as the list
 - [ ] Users can switch to an empty lane and keep that lane selected
 - [ ] Closing panel does not cancel active uploads
-- [ ] Viewer upload attempts are blocked by RLS and shown as a clear error state
+- [ ] Viewer upload attempts blocked by RLS show a global error toast (`You don't have permission to upload` or localized equivalent); no synthetic issue row is added to the lane list
 - [x] Upload intake accepts office documents (`.doc`, `.docx`, `.odt`, `.odg`, `.xls`, `.xlsx`, `.ods`, `.ppt`, `.pptx`, `.odp`) plus `.txt` and `.csv` in addition to photo/video/PDF types
 - [ ] Document uploads without preview show deterministic type fallback badge (`DOC`, `DOCX`, `ODT`, `ODG`, `TXT`, `XLS`, `XLSX`, `ODS`, `CSV`, `PPT`, `PPTX`, `ODP`, `PDF`)
 - [x] Upload Zone instructional text remains visible and stable across drag states, lane switches, and queue updates while panel is open

@@ -27,20 +27,21 @@ Source of truth for standardized sizing/tokens:
 ## Interaction emphasis
 
 - Canonical: [`docs/design/state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis
-- [x] This component implements the contract (nav links; avatar badge uses filled primary exception)
+- Ink inheritance: [`interaction-emphasis-ink-contract.md`](../../system/interaction-emphasis-ink-contract.md)
+- [ ] Nav links implement contract; avatar badge uses filled-primary exception only
 
 ## NavLink States
 
-Every nav link has these visual states. Agents must implement **all** of them — not just active.
+Every nav link has these visual states. Agents must implement **all** of them — not just active. **Icon and label must share host ink** on every state (see ink inheritance contract).
 
-| State         | Background                           | Text / Icon color        | Extra                                                                | Transition |
-| ------------- | ------------------------------------ | ------------------------ | -------------------------------------------------------------------- | ---------- |
-| Default       | `transparent`                        | `--muted-foreground`     | —                                                                    | —          |
-| Hover         | `color-mix(primary 10%)`             | `--primary`              | Active route uses same hover (primary overrides selection)           | 80ms       |
-| Active route  | `color-mix(--interaction-selected-ink 10%)`  | `--interaction-selected-ink` | —                                                          | —          |
-| Focus-visible | same as hover                        | `--primary`              | `--interactive-focus-ring`                                           | instant    |
-| Pressed       | `--color-bg-elevated` at 55% opacity | `--color-text-primary`   | —                                                                    | 40ms       |
-| Disabled      | `transparent`                        | `--color-text-disabled`  | `pointer-events: none`, `aria-disabled="true"`, `opacity: 0.6`       | —          |
+| State         | Background | Text / Icon color | Implementation | Extra |
+| ------------- | ---------- | ----------------- | -------------- | ----- |
+| Default       | transparent | `--muted-foreground` (inherit on `.nav__icon`, `.nav__label`) | idle | — |
+| Hover         | gold ~10% mix | `--brand-gold` on host; children `color: inherit` | `emphasis.hover(10%)` | Applies to non-active and active rows |
+| Active route  | selected-ink ~10% mix | `--interaction-selected-ink` on host; icon may inherit | `emphasis.selected(10%)` | `routerLinkActive` / `nav__link--active` |
+| Active + hover | primary ~10% mix | `--primary` on host; children inherit | `emphasis.selected-hover(10%)` | Primary wins over selected rest |
+| Focus-visible | same as hover or selected+hover | same ink as pointer hover for that row | + `--interactive-focus-ring` | Keyboard expands rail (desktop) |
+| Disabled      | transparent | muted at reduced opacity | — | `pointer-events: none`, `aria-disabled` |
 
 **Dark mode:** All tokens resolve correctly. The frosted glass (85% opacity surface + `backdrop-filter: blur(12px)`) must be verified against light and dark **`--background`** / surface semantics per [`docs/design/tokens.md`](../../../design/tokens.md).
 
@@ -233,14 +234,14 @@ sequenceDiagram
 - [x] Mobile: bottom tab bar, icons only, `3.5rem` tall
 - [x] Frosted glass effect on supporting browsers (with fallback solid bg)
 
-### States (all required)
+### States (interaction emphasis)
 
-- [x] NavLink default: transparent bg, `--color-text-secondary`
-- [ ] NavLink hover: `--color-bg-elevated` at 40%, `--color-text-primary`, 80ms
-- [ ] NavLink active route: `--color-clay` at 12% bg, `--color-clay` text/icon, 3px left border (desktop) / 2px bottom border (mobile)
-- [ ] NavLink focus-visible: 2px `--color-primary` ring, 2px offset
-- [ ] NavLink pressed: `--color-bg-elevated` at 55%
-- [ ] NavLink disabled: `--color-text-disabled`, `opacity: 0.6`, `pointer-events: none`, `aria-disabled`
+- [ ] NavLink idle: transparent bg; icon + label muted (`--muted-foreground`)
+- [ ] NavLink hover: gold wash + gold ink on **both** icon and label (no blue icon / gold text split)
+- [ ] NavLink active route: selected-ink wash + selected-ink on host; icon inherits
+- [ ] NavLink active + hover: primary wash + primary on host and children
+- [ ] NavLink focus-visible: same ink as hover for that row + focus ring
+- [ ] NavLink disabled: muted, non-interactive
 - [x] Account row uses the same row shell as nav items
 - [x] Expanded desktop account row shows avatar image or initial and visible account name
 - [x] Avatar loaded: avatar image when available, otherwise first letter of display name on `--color-clay` bg

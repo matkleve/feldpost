@@ -211,15 +211,11 @@
     gap: 0.125rem;
   }
 
-  // Hover — brand primary (attention), including over the active route
+  // Hover — warm gold emphasis; icon + label inherit host ink
   // @see docs/design/state-visuals.md § Interaction emphasis — use emphasis.hover()
   &:hover,
   &:focus-visible {
     @include emphasis.hover(10%);
-
-    .nav__icon {
-      color: var(--primary);
-    }
   }
 
   &:focus-visible {

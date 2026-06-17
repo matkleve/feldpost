@@ -8,8 +8,8 @@
  *  - Zoom to all selected jobs
  *
  * Ground rules:
- *  - Selection persists across lane switches
- *  - Bulk actions applied only to selected jobs in current lane
+ *  - Lane tab switch clears selection (upload-panel.lane-and-row-actions.md § Embedded bulk selection)
+ *  - Bulk actions apply to selected jobs in the active lane only
  *  - canZoomToJob() filters which files can show on map
  */
 

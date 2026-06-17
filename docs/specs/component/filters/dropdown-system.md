@@ -145,16 +145,18 @@ The filter flyout remains **inside** the shell DOM so shell **`contains()`** sti
 
 | State | Visual | Owner |
 | --- | --- | --- |
-| Menu row hover / focus | Primary fill + text | [`_option-menu-item-states.scss`](../../../../apps/web/src/styles/_option-menu-item-states.scss) |
-| Active sort row | Selected-ink background/text; direction chip primary on hover | `sort-dropdown.component.scss` |
+| Menu row hover / focus | Gold fill + gold ink on host; icon/label `color: inherit` | [`_option-menu-item-states.scss`](../../../../apps/web/src/styles/_option-menu-item-states.scss) |
+| Active sort row | Selected-ink at rest; primary on selected+hover | `sort-dropdown.component.scss` |
 | Grouping multi-select | Selected-ink border/fill | `grouping-dropdown.component.scss` `.grouping-row--selected` |
+| Toolbar trigger hover | Gold ink on host + all `[data-dd-part]` slots | `hlmBtn` outline + feature SCSS (no `color: var(--foreground)` lock) |
+| Map filter triggers | Same as toolbar triggers | `map-filter-toolbar.component.scss` |
 | Destructive row | Destructive token | `.option-menu-item.text-destructive` |
 
-See [`docs/design/state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis.
+See [`docs/design/state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis and [`interaction-emphasis-ink-contract.md`](../../system/interaction-emphasis-ink-contract.md).
 
 ## What It Looks Like
 
-Floating menus share **frosted panel chrome** (upload-resolver-tray reference) and **option-menu row geometry**. Default row hover uses **primary**; persistent sort selection uses **interaction-selected-ink**.
+Floating menus share **frosted panel chrome** (upload-resolver-tray reference) and **option-menu row geometry**. Default row hover uses **gold** (`emphasis.hover`); persistent sort selection uses **interaction-selected-ink**; toolbar triggers must not lock ink while background changes.
 
 ### Container shell (canonical)
 
@@ -189,7 +191,7 @@ box-shadow:    var(--shadow-md)
 | #   | Trigger                         | System Response                                             | Surface                          |
 | --- | ------------------------------- | ----------------------------------------------------------- | -------------------------------- |
 | 1   | Opens any toolbar dropdown      | Container shell renders with shared elevated surface tokens | Sort, Grouping, Projects, Filter |
-| 2   | Hovers an actionable row        | Primary hover on `.option-menu-item` (no geometry shift)    | Toolbar + context menus          |
+| 2   | Hovers an actionable row        | Gold hover on `.option-menu-item`; icon + label inherit host ink | Toolbar + context menus          |
 | 3   | Navigates item list via pointer | Icon/label/trailing align per `menu-variants` / option-menu-list | `hlmMenuItem` consumers     |
 | 4   | Opens dropdown with search      | `app-menu-panel-search-row` / `app-standard-dropdown`       | Sort, grouping, projects         |
 | 5   | Dropdown has no rows            | Empty copy in feature template                              | Sort, filter                     |
@@ -285,7 +287,9 @@ None - delegated to consumer feature services.
 - [x] Toolbar standard width **18rem**; filter **32rem** floor; TS clamp matches **`toolbarDropdownPositionWidthPx`**
 - [x] List rows use **`hlmMenuItem`** / `.option-menu-item` geometry from `_option-menu-list.scss`
 - [x] Sort/grouping/projects compose **`app-standard-dropdown`** + menu-panel primitives
-- [x] Sort active rows use **`interaction-selected-ink`**; hover uses primary (including direction chip on hover)
+- [ ] Sort active rows use **`interaction-selected-ink`** at rest; selected+hover uses primary on host **and** direction chip
+- [ ] Menu row hover: gold ink on icon + label (ink inheritance contract)
+- [ ] Map/workspace/media toolbar triggers: hover changes ink on icon, label, and chevron together
 - [x] Filter form rules stay component-specific; footer uses menu-panel footer action
 - [x] Media detail context menu uses option-menu list + destructive variant
 - [x] Shared project-selector flows reuse menu-panel search/footer primitives (media-detail inline section partial)

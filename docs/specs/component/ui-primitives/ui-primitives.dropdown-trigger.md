@@ -65,6 +65,7 @@ button [hlmBtn] + toolbar menu-trigger BEM class   ← hlmBtn outline + _toolbar
 | --- | --- | --- | --- | --- | --- | --- |
 | Open chevron rotation | `[data-dd-part='chevron']` | host (`button`) | host | `.*__menu-trigger--open [data-dd-part='chevron']` | content | Chevron rotates 180° when dropdown shell open |
 | Active filter/grouping tint | host (`button`) | host | host | `button.*__menu-trigger[data-active='true']` | — | Selected-ink wash when grouping/filter active |
+| Idle trigger hover ink | host (`button`) | host | host | `button.*__menu-trigger:hover` + `[data-dd-part]` | states | Gold ink on icon, label, chevron (ink inheritance) |
 
 ### Ownership matrix (archived: `ui-dropdown-trigger*`)
 

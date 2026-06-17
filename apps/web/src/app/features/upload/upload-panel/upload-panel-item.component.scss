@@ -403,6 +403,13 @@
   vertical-align: middle;
 }
 
+// Armed state for two-step confirm destructive menu items.
+// @see docs/specs/component/upload/upload-panel.lane-and-row-actions.md § Two-Step Confirm Contract
+.upload-panel__menu-item--armed {
+  background: color-mix(in srgb, var(--destructive) 12%, transparent);
+  color: var(--destructive);
+}
+
 // Context menu geometry (map-shell styles are encapsulated there).
 // @see apps/web/src/app/features/map/map-shell/_map-shell-context-menu.scss
 .map-context-menu {
