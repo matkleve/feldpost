@@ -153,6 +153,8 @@ Leftover-after-change is the single most expensive recurring failure in this cod
 
 Verification floor for any behavior change: `grep` the removed symbol/field/concept across `apps/web/src` **and** `docs/specs` and confirm **0** stray references before declaring done. Do not layer a new fix on top of an old one without re-reading the current baseline first.
 
+**Red-test-first (Sensitive-class, Hard Blocker):** for Sensitive work (RLS, migrations, auth, money, stateful UI, the upload pipeline), the acceptance test MUST be shown **failing before** the implementation and **passing after**. A test that was never red proves nothing. A flaky test is not a gate — fix isolation first (e.g. the upload spec cross-file injector pollution noted in `docs/ai-diary/2026-05-27.md`).
+
 ## Migration Exemption (Phase 6–8)
 
 Migration cleanup is the canonical **Trivial**-class case. Work classified as **migration cleanup** is exempt from the ownership matrix and FSM contract pre-requisites. Migration cleanup = replacing `ui-*` BEM with Tailwind/`hlm*`, wiring existing spartan directives, removing legacy SCSS, replacing `var(--color-*)` with tweakcn equivalents. Does NOT cover new components, new states/animations, or net-new visual decisions. If a change introduces a net-new visual element, the exemption does not apply.

@@ -57,6 +57,7 @@ the #1 source of rework.
 Done means **all** of:
 
 - [ ] Every acceptance criterion demonstrated with **evidence** (test output, screenshot, or live-check console) — not asserted.
+- [ ] **Red-test-first proven**: the acceptance test was shown **failing before** implementation and **passing after**. A test that was never red is not evidence — it may assert nothing. (Especially load-bearing for flaky areas like upload: a test that flakes is not a gate.)
 - [ ] `ng build` green; relevant gate scripts green (`design-system:check`, `i18n:check`, `lint:specs`, RLS/DSGVO for Sensitive).
 - [ ] **Change-Completeness** holds: `grep`-to-zero for every removed symbol/concept across `apps/web/src` *and* `docs/specs` (see `AGENTS.md`).
 - [ ] Spec synced to final behavior; no new component added without a registry/reuse decision.
