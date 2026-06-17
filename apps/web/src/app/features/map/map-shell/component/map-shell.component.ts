@@ -27,13 +27,11 @@ import {
   ElementRef,
   OnDestroy,
   afterNextRender,
-  computed,
   effect,
   inject,
   signal,
   viewChild,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { UploadShellUiService } from '../../../upload/upload-shell/upload-shell-ui.service';
 import type {
@@ -55,8 +53,7 @@ import type { ToastOptions, ToastType } from '../../../../core/toast/toast.types
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { SearchBarComponent } from '../../search-bar/search-bar.component';
 import { MapFilterToolbarComponent } from '../../map-filter-toolbar/map-filter-toolbar.component';
-import { SearchQueryContext } from '../../../../core/search/search.models';
-import { searchQueryContextsEqual } from '../../../../core/search/search-bar-helpers';
+import { MapSearchContextService } from '../handlers/map-search-context.service';
 import type { ThumbnailCardHoverEvent } from '../../../../core/workspace-pane/workspace-pane-thumbnail-hover.types';
 import { ROUTE_SESSION_SHELL_KEYS } from '../../../../core/route-session-cache/route-session-cache.keys';
 import { RouteSessionCacheService } from '../../../../core/route-session-cache/route-session-cache.service';
@@ -77,7 +74,6 @@ import { MapMoveEndHandlerService } from '../handlers/map-move-end-handler.servi
 import { MapViewFlyService } from '../handlers/map-view-fly.service';
 import { PhotoMarkerLifecycleService } from '../markers/photo-marker-lifecycle.service';
 import { MapMediaDeleteSyncService } from '../markers/map-media-delete-sync.service';
-import { PhotoMarkerIconStateService } from '../markers/photo-marker-icon-state.service';
 import { MarkerMotionService } from '../markers/marker-motion.service';
 import { MapPhotoMarkerRenderService } from '../markers/map-photo-marker-render.service';
 import type { MarkerRenderSnapshot } from '../markers/map-photo-marker-render.service';
@@ -158,7 +154,6 @@ export class MapShellComponent implements OnDestroy {
   private readonly mapLocationPickService = inject(MapLocationPickService);
   private readonly photoMarkerLifecycleService = inject(PhotoMarkerLifecycleService);
   private readonly mapMediaDeleteSyncService = inject(MapMediaDeleteSyncService);
-  private readonly photoMarkerIconStateService = inject(PhotoMarkerIconStateService);
   private readonly markerMotionService = inject(MarkerMotionService);
   private readonly markerRenderService = inject(MapPhotoMarkerRenderService);
   private readonly thumbnailLoaderService = inject(MapThumbnailLoaderService);
@@ -180,6 +175,7 @@ export class MapShellComponent implements OnDestroy {
   private readonly workspacePaneShellHost = inject(WORKSPACE_PANE_SHELL_HOST);
   private readonly workspacePaneLayoutMapEffectsService = inject(WorkspacePaneLayoutMapEffectsService);
   readonly menuVm = inject(MapMenuViewModelService);
+  readonly searchContext = inject(MapSearchContextService);
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
   private showMapToast(
@@ -239,79 +235,7 @@ export class MapShellComponent implements OnDestroy {
   /** Whether the map is in placement mode (drives the banner + cursor class). */
   readonly placementActive = signal(false);
 
-  private readonly searchDataCentroid = computed<{ lat: number; lng: number } | undefined>(() => {
-    const all = this.workspaceViewService.rawImages();
-    const selectedProjectIds = this.workspaceViewService.selectedProjectIds();
-    const scoped =
-      selectedProjectIds.size > 0
-        ? all.filter((img) => img.projectId && selectedProjectIds.has(img.projectId))
-        : all;
-
-    const points = scoped
-      .filter(
-        (img) =>
-          typeof img.latitude === 'number' &&
-          typeof img.longitude === 'number' &&
-          Number.isFinite(img.latitude) &&
-          Number.isFinite(img.longitude),
-      )
-      .map((img) => ({ lat: img.latitude, lng: img.longitude }));
-
-    if (points.length === 0) {
-      const pos = this.gpsService.userPosition();
-      if (!pos) return undefined;
-      return { lat: pos[0], lng: pos[1] };
-    }
-
-    const totals = points.reduce(
-      (acc, point) => {
-        acc.lat += point.lat;
-        acc.lng += point.lng;
-        return acc;
-      },
-      { lat: 0, lng: 0 },
-    );
-
-    return {
-      lat: totals.lat / points.length,
-      lng: totals.lng / points.length,
-    };
-  });
-
-  private readonly searchActiveMarkerCentroid = computed<{ lat: number; lng: number } | undefined>(
-    () => {
-      const selectedMarkerKey = this.selectedMarkerKey();
-      if (!selectedMarkerKey) return undefined;
-      const markerState = this.uploadedPhotoMarkers.get(selectedMarkerKey);
-      if (!markerState) return undefined;
-      return { lat: markerState.lat, lng: markerState.lng };
-    },
-  );
-
-  readonly searchQueryContext = computed<SearchQueryContext>(
-    () => {
-      const selectedProjectIds = this.workspaceViewService.selectedProjectIds();
-      const activeProjectId =
-        selectedProjectIds.size > 0 ? Array.from(selectedProjectIds.values())[0] : undefined;
-      const userPos = this.gpsService.userPosition();
-
-      return {
-        activeProjectId,
-        activeMarkerCentroid: this.searchActiveMarkerCentroid(),
-        activeProjectCentroid: this.searchDataCentroid(),
-        currentLocation: userPos
-          ? {
-              lat: userPos[0],
-              lng: userPos[1],
-            }
-          : undefined,
-        viewportBounds: this.searchService.searchViewportBounds(),
-        dataCentroid: this.searchDataCentroid(),
-        countryCodes: this.searchService.searchCountryCodes(),
-      };
-    },
-    { equal: searchQueryContextsEqual },
-  );
+  readonly searchQueryContext = this.searchContext.searchQueryContext;
 
   // ── Workspace pane / photo panel state ───────────────────────────────────
 
@@ -938,6 +862,10 @@ export class MapShellComponent implements OnDestroy {
       getMap: () => this.map,
       getPhotoPanelOpen: () => this.photoPanelOpen(),
       getWorkspacePaneWidth: () => this.workspacePaneWidth(),
+    });
+
+    this.searchContext.bind({
+      getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
     });
 
     this.searchService.updateViewportBounds(this.map);
