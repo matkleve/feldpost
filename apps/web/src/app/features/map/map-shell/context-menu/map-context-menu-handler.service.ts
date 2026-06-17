@@ -114,9 +114,6 @@ export class MapContextMenuHandlerService {
       case 'open_selection':
         this.onRadiusContextOpenSelection();
         return;
-      case 'create_project':
-        await this.onRadiusContextCreateProjectFromSelection();
-        return;
       case 'assign_to_project':
         await this.onRadiusContextAssignToProject();
         return;

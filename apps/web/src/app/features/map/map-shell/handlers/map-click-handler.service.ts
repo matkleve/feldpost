@@ -422,12 +422,4 @@ export class MapClickHandlerService {
     return false;
   }
 
-  private clearActiveRadiusSelection(): void {
-    this.radiusDrawingService.clearSelectionVisuals();
-    this.markerSelectionService.setSelectedMarker(null);
-    this.markerSelectionService.setSelectedMarkerKeys(new Set());
-    this.ctx?.patchDetailMediaId(null);
-    this.workspaceViewService.clearActiveSelection();
-    this.workspaceSelectionService.clearSelection();
-  }
 }
