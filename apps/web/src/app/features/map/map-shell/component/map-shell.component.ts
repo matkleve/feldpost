@@ -72,7 +72,6 @@ import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/shel
 import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../../../shared/ui/menu';
 import { ActionEngineService } from '../../../../core/action/action-engine.service';
 import { ResolvedAction } from '../../../../core/action/action-types';
-import { PhotoMarkerZoomLevel } from '../../../../core/map/marker-factory';
 import { MapShellState } from './map-shell.state';
 import { PhotoMarkerState } from '../markers/map-marker-reconcile.facade';
 import { MapViewportCoordinatorService } from '../markers/map-viewport-coordinator.service';
@@ -80,6 +79,8 @@ import { MapContextMenuHandlerService } from '../context-menu/map-context-menu-h
 import { MapContextMenuOpenService } from '../context-menu/map-context-menu-open.service';
 import { MapClickHandlerService } from '../handlers/map-click-handler.service';
 import { MapLocationPickService } from '../handlers/map-location-pick.service';
+import { MapMoveEndHandlerService } from '../handlers/map-move-end-handler.service';
+import { MapViewFlyService } from '../handlers/map-view-fly.service';
 import { PhotoMarkerLifecycleService } from '../markers/photo-marker-lifecycle.service';
 import { MapMediaDeleteSyncService } from '../markers/map-media-delete-sync.service';
 import { PhotoMarkerIconStateService } from '../markers/photo-marker-icon-state.service';
@@ -153,14 +154,7 @@ import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
   },
 })
 export class MapShellComponent implements OnDestroy {
-  private static readonly QUICK_RADIUS_METERS = 250;
-  private static readonly HOUSE_PROXIMITY_ZOOM = 19;
-  private static readonly STREET_PROXIMITY_ZOOM = 17;
   private static readonly CONTEXT_MENU_SHEET_BREAKPOINT_PX = 768;
-  private static readonly WORKSPACE_PANE_DEFAULT_WIDTH = 360;
-  private static readonly WORKSPACE_PANE_MIN_WIDTH = 280;
-  private static readonly WORKSPACE_PANE_MAX_WIDTH = 640;
-  private static readonly MAP_SAFE_MIN_WIDTH = 320;
 
   readonly placeholderIconUrl = `url("${MEDIA_PLACEHOLDER_ICON}")`;
   /** Template helper: icon/text layout for map style pill options. */
@@ -180,6 +174,8 @@ export class MapShellComponent implements OnDestroy {
   private readonly mapContextMenuHandlerService = inject(MapContextMenuHandlerService);
   private readonly mapContextMenuOpenService = inject(MapContextMenuOpenService);
   private readonly mapClickHandlerService = inject(MapClickHandlerService);
+  private readonly mapMoveEndHandlerService = inject(MapMoveEndHandlerService);
+  private readonly mapViewFlyService = inject(MapViewFlyService);
   private readonly mapLocationPickService = inject(MapLocationPickService);
   private readonly photoMarkerLifecycleService = inject(PhotoMarkerLifecycleService);
   private readonly mapMediaDeleteSyncService = inject(MapMediaDeleteSyncService);
@@ -475,20 +471,11 @@ export class MapShellComponent implements OnDestroy {
     PhotoMarkerState & { lastRendered?: MarkerRenderSnapshot }
   >();
 
-  /** Timer handle for the moveend debounce. */
-  private moveEndDebounceTimer: ReturnType<typeof setTimeout> | null = null;
-
-  /** Tracks the last zoom level to detect threshold crossings. */
-  private lastZoomLevel: PhotoMarkerZoomLevel = 'mid';
-
   /** LayerGroup for all photo markers — enables batch add/remove. */
   private photoMarkerLayer: MapLayerGroup | null = null;
 
   /** Set true after first Leaflet init; never cleared on activeShell hide/show. */
   private mapInitialized = false;
-
-  /** True while a zoom animation is in progress — suppresses moveend queries. */
-  private zoomAnimating = false;
 
   /**
    * Secondary index: mediaId → markerKey for O(1) lookups when
@@ -599,11 +586,7 @@ export class MapShellComponent implements OnDestroy {
   private cleanupDeferredAndQueryState(): void {
     this.cancelDeferredStartupWork();
 
-    if (this.moveEndDebounceTimer) {
-      clearTimeout(this.moveEndDebounceTimer);
-      this.moveEndDebounceTimer = null;
-    }
-
+    this.mapMoveEndHandlerService.clearDebounceTimer();
     this.mapViewportCoordinatorService.cancelPendingQuery();
   }
 
@@ -677,55 +660,7 @@ export class MapShellComponent implements OnDestroy {
   }
 
   onMapMenuKeydown(event: KeyboardEvent): void {
-    if (!this.isMapMenuNavigationKey(event.key)) {
-      return;
-    }
-
-    const currentTarget = event.currentTarget as HTMLElement | null;
-    const container = currentTarget?.closest('[role="menu"]') as HTMLElement | null;
-    if (!container) {
-      return;
-    }
-
-    const focusableItems = Array.from(
-      container.querySelectorAll<HTMLButtonElement>('button[role="menuitem"]:not(:disabled)'),
-    );
-
-    if (focusableItems.length === 0) {
-      return;
-    }
-
-    event.preventDefault();
-
-    if (this.focusBoundaryMapMenuItem(event.key, focusableItems)) {
-      return;
-    }
-
-    this.focusAdjacentMapMenuItem(event.key, focusableItems);
-  }
-
-  /**
-   * Centers the map on (lat, lng) at zoom, visually offsetting for the workspace pane.
-   * When the pane is open, Leaflet's center is shifted right by half the pane width so the
-   * target point appears centered in the visible (non-pane) map area.
-   * @see docs/specs/ui/workspace/workspace-view-system.md
-   */
-  private setViewWithPaneOffset(
-    lat: number,
-    lng: number,
-    zoom: number,
-    options?: Parameters<MapInstance['setView']>[2],
-  ): void {
-    if (!this.map) return;
-    const paneOffset = this.photoPanelOpen() ? this.workspacePaneWidth() / 2 : 0;
-    if (paneOffset === 0) {
-      this.map.setView([lat, lng], zoom, options);
-      return;
-    }
-    const targetPx = this.map.project([lat, lng], zoom);
-    const shiftedPx = targetPx.add([paneOffset, 0]);
-    const shiftedLatLng = this.map.unproject(shiftedPx, zoom);
-    this.map.setView(shiftedLatLng, zoom, options);
+    this.mapContextMenuOpenService.handleMenuKeydown(event);
   }
 
   async onMapMenuActionSelected(actionId: MapMenuActionId): Promise<void> {
@@ -799,49 +734,8 @@ export class MapShellComponent implements OnDestroy {
     return this.clampWorkspacePaneWidth(this.workspacePaneWidth());
   }
 
-  /**
-   * Handles the zoomToLocationRequested output from the detail view.
-   * Flies the map to the photo's coordinates at a tight zoom and pulses the marker.
-   */
-  onZoomToLocation(event: {
-    mediaId: string;
-    lat: number;
-    lng: number;
-    zoomMode?: 'house' | 'street';
-  }): void {
-    if (!this.map) {
-      this.mapZoomOrchestrator.deferUntilMapReady({
-        mediaId: event.mediaId,
-        lat: event.lat,
-        lng: event.lng,
-        zoomMode: event.zoomMode,
-      });
-      return;
-    }
-
-    // Spec link: docs/specs/ui/media-detail/media-detail-actions.md -> detail menu supports house/street zoom variants.
-    const requestedZoom =
-      event.zoomMode === 'house'
-        ? MapShellComponent.HOUSE_PROXIMITY_ZOOM
-        : event.zoomMode === 'street'
-          ? MapShellComponent.STREET_PROXIMITY_ZOOM
-          : DETAIL_LOCATION_FOCUS_ZOOM;
-
-    this.zoomHighlightOrchestrator.setPending(event.mediaId, event.lat, event.lng);
-
-    // Keep Leaflet dimensions in sync with the currently visible map area
-    // before calculating the fly-to center.
-    this.map.invalidateSize();
-    this.setViewWithPaneOffset(event.lat, event.lng, requestedZoom, {
-      animate: false,
-    });
-
-    this.zoomHighlightOrchestrator.waitForMapIdleThenFlushZoomHighlight();
-
-    // Safety flush while waiting for marker query / reconciliation.
-    setTimeout(() => this.zoomHighlightOrchestrator.flushPendingZoomHighlight(), 140);
-
-    void this.mapZoomOrchestrator.consumePending();
+  onZoomToLocation(event: { mediaId: string; lat: number; lng: number; zoomMode?: 'house' | 'street' }): void {
+    this.mapViewFlyService.onZoomToLocation(event);
   }
 
   onWorkspaceItemHoverStarted(event: ThumbnailCardHoverEvent): void {
@@ -921,21 +815,7 @@ export class MapShellComponent implements OnDestroy {
       this.searchService.pendingSearchMapCenter = event;
       return;
     }
-
-    this.applySearchMapCenter(event);
-  }
-
-  private applySearchMapCenter(event: { lat: number; lng: number; label: string }): void {
-    if (!this.map) {
-      return;
-    }
-
-    this.setViewWithPaneOffset(event.lat, event.lng, MapShellComponent.STREET_PROXIMITY_ZOOM, {
-      animate: false,
-    });
-    this.searchService.updateViewportBounds(this.map);
-    this.searchService.renderOrUpdateLocationMarker([event.lat, event.lng], this.map);
-    void this.searchService.refreshCountryCode(event.lat, event.lng);
+    this.mapViewFlyService.applySearchMapCenter(event);
   }
 
   onSearchClearRequested(): void {
@@ -1157,11 +1037,22 @@ export class MapShellComponent implements OnDestroy {
       },
     });
 
+    this.mapMoveEndHandlerService.bind({
+      closeContextMenus: () => this.closeContextMenus(),
+      getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
+    });
+
+    this.mapViewFlyService.bind({
+      getMap: () => this.map,
+      getPhotoPanelOpen: () => this.photoPanelOpen(),
+      getWorkspacePaneWidth: () => this.workspacePaneWidth(),
+    });
+
     this.searchService.updateViewportBounds(this.map);
     this.applyPendingMapFocus();
     this.applyPendingLocationMapPickNavigation();
     if (this.searchService.pendingSearchMapCenter) {
-      this.applySearchMapCenter(this.searchService.pendingSearchMapCenter);
+      this.mapViewFlyService.applySearchMapCenter(this.searchService.pendingSearchMapCenter);
       this.searchService.pendingSearchMapCenter = null;
     }
 
@@ -1184,20 +1075,11 @@ export class MapShellComponent implements OnDestroy {
       .getContainer()
       .addEventListener('contextmenu', this.mapClickHandlerService.getContainerContextMenuHandler(), true);
 
-    // Suppress viewport queries during zoom animation to avoid rapid
-    // fire-and-cancel cycles that cause visible lag.
-    this.map.on('zoomstart', () => {
-      this.zoomAnimating = true;
-    });
-    this.map.on('zoomend', () => {
-      this.zoomAnimating = false;
-    });
-
-    // Debounced moveend: refreshes markers only when zoom-level threshold changes.
-    // No marker DOM work during zoom animation — all updates fire after moveend.
+    this.map.on('zoomstart', () => this.mapMoveEndHandlerService.onZoomStart());
+    this.map.on('zoomend', () => this.mapMoveEndHandlerService.onZoomEnd());
     this.map.on('moveend', () => {
       this.lastMapMoveAt = Date.now();
-      this.handleMoveEnd();
+      this.mapMoveEndHandlerService.handleMoveEnd();
       this.searchService.updateViewportBounds(this.map);
     });
 
@@ -1259,7 +1141,7 @@ export class MapShellComponent implements OnDestroy {
       return;
     }
 
-    this.setViewWithPaneOffset(payload.lat, payload.lng, DETAIL_LOCATION_FOCUS_ZOOM);
+    this.mapViewFlyService.setViewWithPaneOffset(payload.lat, payload.lng, DETAIL_LOCATION_FOCUS_ZOOM);
     this.pendingMapFocus.set(null);
   }
 
@@ -1301,73 +1183,6 @@ export class MapShellComponent implements OnDestroy {
       }),
       // Upload failure toasts are owned by UploadNotificationService (global, deduped).
     );
-  }
-
-  /**
-   * Debounced handler for the Leaflet `moveend` event.
-   * Fires a viewport query on every moveend (pan or zoom) so the
-   * marker set always matches the visible area + zoom-level grid.
-   */
-  private handleMoveEnd(): void {
-    if (this.moveEndDebounceTimer) {
-      clearTimeout(this.moveEndDebounceTimer);
-    }
-
-    this.moveEndDebounceTimer = setTimeout(() => this.handleMoveEndDebounced(), 350);
-  }
-
-  private handleMoveEndDebounced(): void {
-    this.moveEndDebounceTimer = null;
-
-    // Skip query if still in a zoom animation — it'll fire after zoomend.
-    if (this.zoomAnimating) return;
-
-    const currentZoom = this.markerRenderService.getPhotoMarkerZoomLevel();
-    this.closeContextMenus();
-    const zoomChanged = currentZoom !== this.lastZoomLevel;
-
-    if (!this.isViewportStillInFetchedBuffer(zoomChanged)) {
-      void this.mapViewportCoordinatorService.queryViewportMarkers();
-    }
-
-    // Refresh existing marker icons if zoom-level threshold changed.
-    if (zoomChanged) {
-      this.lastZoomLevel = currentZoom;
-      for (const markerKey of this.uploadedPhotoMarkers.keys()) {
-        this.markerRenderService.refreshPhotoMarker(markerKey);
-      }
-    }
-  }
-
-  private isViewportStillInFetchedBuffer(zoomChanged: boolean): boolean {
-    return this.mapViewportCoordinatorService.isViewportStillInFetchedBuffer(zoomChanged);
-  }
-
-  private isMapMenuNavigationKey(key: string): boolean {
-    return key === 'ArrowDown' || key === 'ArrowUp' || key === 'Home' || key === 'End';
-  }
-
-  private focusBoundaryMapMenuItem(key: string, focusableItems: HTMLButtonElement[]): boolean {
-    if (key === 'Home') {
-      focusableItems[0]?.focus();
-      return true;
-    }
-
-    if (key === 'End') {
-      focusableItems[focusableItems.length - 1]?.focus();
-      return true;
-    }
-
-    return false;
-  }
-
-  private focusAdjacentMapMenuItem(key: string, focusableItems: HTMLButtonElement[]): void {
-    const activeIndex = focusableItems.findIndex((item) => item === document.activeElement);
-    const fallbackIndex = key === 'ArrowDown' ? -1 : 0;
-    const currentIndex = activeIndex >= 0 ? activeIndex : fallbackIndex;
-    const delta = key === 'ArrowDown' ? 1 : -1;
-    const nextIndex = (currentIndex + delta + focusableItems.length) % focusableItems.length;
-    focusableItems[nextIndex]?.focus();
   }
 
   onProjectSelectionDialogSelected(projectId: string): void {

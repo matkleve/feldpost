@@ -117,4 +117,31 @@ export class MapContextMenuOpenService {
       firstItem?.focus();
     });
   }
+
+  handleMenuKeydown(event: KeyboardEvent): void {
+    if (!this.isNavigationKey(event.key)) return;
+
+    const currentTarget = event.currentTarget as HTMLElement | null;
+    const container = currentTarget?.closest('[role="menu"]') as HTMLElement | null;
+    if (!container) return;
+
+    const items = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('button[role="menuitem"]:not(:disabled)'),
+    );
+    if (items.length === 0) return;
+
+    event.preventDefault();
+
+    if (event.key === 'Home') { items[0]?.focus(); return; }
+    if (event.key === 'End') { items[items.length - 1]?.focus(); return; }
+
+    const activeIndex = items.findIndex((item) => item === document.activeElement);
+    const delta = event.key === 'ArrowDown' ? 1 : -1;
+    const currentIndex = activeIndex >= 0 ? activeIndex : (delta === 1 ? -1 : 0);
+    items[(currentIndex + delta + items.length) % items.length]?.focus();
+  }
+
+  private isNavigationKey(key: string): boolean {
+    return key === 'ArrowDown' || key === 'ArrowUp' || key === 'Home' || key === 'End';
+  }
 }
