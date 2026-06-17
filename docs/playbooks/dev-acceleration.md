@@ -9,6 +9,11 @@ This is a strategy + tactics document, not a contract. It does not override
 `AGENTS.md` or anything under `docs/specs/`. It proposes how to *evolve* the
 process so the existing governance pays for itself in speed instead of taxing it.
 
+> **See also:** [`idea-to-ship-pipeline.md`](idea-to-ship-pipeline.md) — the
+> stage-by-stage pipeline (Ready → Specify → Plan → Tasks → Implement → Verify →
+> Done) with pass/fail criteria at each gate, the state-coherence contract that
+> kills "wrong pane updated" bugs, and the 80%-autonomy policy.
+
 Last reviewed: 2026-06-17.
 
 ---
