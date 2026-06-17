@@ -42,7 +42,6 @@ import type {
   UploadLocationPreviewEvent,
 } from '../../../../core/workspace-pane/workspace-pane-shell-events.types';
 import { ExifCoords } from '../../../../core/upload/upload.service';
-import { GeocodingService } from '../../../../core/geocoding/geocoding.service';
 import {
   UploadManagerService,
   ImageReplacedEvent,
@@ -57,7 +56,6 @@ import {
   MEDIA_PLACEHOLDER_ICON,
 } from '../../../../core/media-download/media-download.service';
 import { ToastService } from '../../../../core/toast/toast.service';
-import { truncateToastTechnicalDetail } from '../../../../core/toast/toast.helpers';
 import type { ToastOptions, ToastType } from '../../../../core/toast/toast.types';
 import { MediaDeleteUndoService } from '../../../../core/media-delete/media-delete-undo.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
@@ -84,11 +82,8 @@ import {
 import { MapShellState } from './map-shell.state';
 import { PhotoMarkerState } from '../markers/map-marker-reconcile.facade';
 import { MapViewportCoordinatorService } from '../markers/map-viewport-coordinator.service';
-import {
-  MapContextActionsService,
-  type RemoveImagesFromProjectsResult,
-} from '../context-menu/map-context-actions.service';
-import { MarkerContextPhotoDeleteService } from '../markers/marker-context-photo-delete.service';
+import { MapContextActionsService } from '../context-menu/map-context-actions.service';
+import { MapContextMenuHandlerService } from '../context-menu/map-context-menu-handler.service';
 import { PhotoMarkerIconStateService } from '../markers/photo-marker-icon-state.service';
 import { MarkerMotionService } from '../markers/marker-motion.service';
 import { MapPhotoMarkerRenderService } from '../markers/map-photo-marker-render.service';
@@ -135,7 +130,6 @@ import {
 import { WorkspacePaneObserverAdapter } from '../../../../core/workspace-pane/workspace-pane-observer.adapter';
 import { MediaLocationUpdateService } from '../../../../core/media-location-update/media-location-update.service';
 import { MediaLocationsService } from '../../../../core/media-locations/media-locations.service';
-import { LocationResolverService } from '../../../../core/location-resolver/location-resolver.service';
 import type { SelectedItemsContextPort } from '../../../../core/workspace-pane/workspace-pane-context.port';
 import { WORKSPACE_PANE_SHELL_HOST } from '../../../../core/workspace-pane/workspace-pane-shell-host.token';
 import type { WorkspacePaneLayoutMapEffects } from '../../../../core/workspace-pane/workspace-pane-layout-map-effects.service';
@@ -193,7 +187,6 @@ export class MapShellComponent implements OnDestroy {
 
   readonly placeholderIconUrl = `url("${MEDIA_PLACEHOLDER_ICON}")`;
   /** Template helper: icon/text layout for map style pill options. */
-  private readonly geocodingService = inject(GeocodingService);
   private readonly uploadManagerService = inject(UploadManagerService);
   private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly filterService = inject(FilterService);
@@ -210,7 +203,7 @@ export class MapShellComponent implements OnDestroy {
   private readonly state = inject(MapShellState);
   private readonly mapViewportCoordinatorService = inject(MapViewportCoordinatorService);
   private readonly mapContextActionsService = inject(MapContextActionsService);
-  private readonly markerContextPhotoDeleteService = inject(MarkerContextPhotoDeleteService);
+  private readonly mapContextMenuHandlerService = inject(MapContextMenuHandlerService);
   private readonly photoMarkerIconStateService = inject(PhotoMarkerIconStateService);
   private readonly markerMotionService = inject(MarkerMotionService);
   private readonly markerRenderService = inject(MapPhotoMarkerRenderService);
@@ -236,7 +229,6 @@ export class MapShellComponent implements OnDestroy {
   private readonly workspacePaneLayoutMapEffectsService = inject(WorkspacePaneLayoutMapEffectsService);
   private readonly mediaLocationUpdateService = inject(MediaLocationUpdateService);
   private readonly mediaLocationsService = inject(MediaLocationsService);
-  private readonly locationResolverService = inject(LocationResolverService);
   private readonly actionEngineService = inject(ActionEngineService);
   private readonly mapWorkspaceContextResolverService = inject(MapWorkspaceContextResolverService);
   private readonly mapWorkspaceActionExecutorService = inject(MapWorkspaceActionExecutorService);
@@ -781,54 +773,6 @@ export class MapShellComponent implements OnDestroy {
     this.focusAdjacentMapMenuItem(event.key, focusableItems);
   }
 
-  onMapContextCreateMarkerHere(): void {
-    const coords = this.mapContextMenuCoords();
-    if (!coords) return;
-    this.state.setDraftMediaMarker({ lat: coords.lat, lng: coords.lng, uploadCount: 0 });
-    this.renderOrUpdateDraftMediaMarker([coords.lat, coords.lng]);
-    this.searchService.setPlacementActive(false);
-    this.placementActive.set(false);
-    if (!this.photoPanelOpen()) {
-      this.state.setWorkspacePaneWidth(this.getWorkspacePaneOpeningWidth());
-    }
-    this.state.setPhotoPanelOpen(true);
-    this.patchDetailMediaId(null);
-    this.markerSelectionService.setSelectedMarker(null);
-    this.markerSelectionService.setSelectedMarkerKeys(new Set());
-    this.workspaceViewService.clearActiveSelection();
-    this.workspaceSelectionService.clearSelection();
-    this.uploadShellUi.openUploadPanel();
-    this.map?.getContainer().classList.remove('map-container--placing');
-    this.showMapToast(
-      'map.shell.toast.mediaMarkerCreated',
-      'Media marker created. Start upload.',
-      'success',
-    );
-    this.closeContextMenus();
-  }
-
-  onMapContextZoomHouseHere(): void {
-    const coords = this.mapContextMenuCoords();
-    if (!coords || !this.map) return;
-    this.setViewWithPaneOffset(coords.lat, coords.lng, MapShellComponent.HOUSE_PROXIMITY_ZOOM);
-    this.onMapMenuCloseRequested();
-  }
-
-  onMapContextZoomStreetHere(): void {
-    const coords = this.mapContextMenuCoords();
-    if (!coords) return;
-    this.zoomContextTo(coords.lat, coords.lng, MapShellComponent.STREET_PROXIMITY_ZOOM);
-    this.onMapMenuCloseRequested();
-  }
-
-  private zoomContextTo(lat: number, lng: number, zoomLevel: number): void {
-    if (!this.map) {
-      return;
-    }
-
-    this.setViewWithPaneOffset(lat, lng, zoomLevel);
-  }
-
   /**
    * Centers the map on (lat, lng) at zoom, visually offsetting for the workspace pane.
    * When the pane is open, Leaflet's center is shifted right by half the pane width so the
@@ -853,804 +797,34 @@ export class MapShellComponent implements OnDestroy {
     this.map.setView(shiftedLatLng, zoom, options);
   }
 
-  private async copyAddressWithFeedback(lat: number, lng: number): Promise<void> {
-    await this.mapContextActionsService.copyAddressWithFeedback(lat, lng, {
-      onCopied: () =>
-        this.showMapToast('map.shell.toast.addressCopied', 'Address copied.', 'success'),
-      onNotFound: () =>
-        this.showMapToast(
-          'map.shell.toast.addressResolveFailed',
-          'Could not resolve address.',
-          'warning',
-          {
-            codeRef: { file: 'map-shell.component.ts', fn: 'copyAddressWithFeedback' },
-          },
-        ),
-    });
-  }
-
-  private async copyGpsWithFeedback(lat: number, lng: number): Promise<void> {
-    await this.mapContextActionsService.copyGpsWithFeedback(lat, lng, {
-      onCopied: () =>
-        this.showMapToast('map.shell.toast.gpsCopied', 'GPS copied.', 'success'),
-      onFallback: (text) =>
-        this.showMapToastTitle(text, 'info'),
-    });
-  }
-
-  private openGoogleMapsForCoords(lat: number, lng: number): void {
-    this.mapContextActionsService.openGoogleMaps(lat, lng);
-  }
-
-  async onMapContextCopyAddress(): Promise<void> {
-    const coords = this.mapContextMenuCoords();
-    if (!coords) return;
-
-    await this.copyAddressWithFeedback(coords.lat, coords.lng);
-    this.onMapMenuCloseRequested();
-  }
-
-  async onMapContextCopyGps(): Promise<void> {
-    const coords = this.mapContextMenuCoords();
-    if (!coords) return;
-    await this.copyGpsWithFeedback(coords.lat, coords.lng);
-    this.onMapMenuCloseRequested();
-  }
-
-  onMapContextOpenGoogleMaps(): void {
-    const coords = this.mapContextMenuCoords();
-    if (!coords) return;
-    this.openGoogleMapsForCoords(coords.lat, coords.lng);
-    this.onMapMenuCloseRequested();
-  }
-
   async onMapMenuActionSelected(actionId: MapMenuActionId): Promise<void> {
-    await this.mapWorkspaceActionExecutorService.executeMapAction(actionId, {
-      createMarkerHere: () => this.onMapContextCreateMarkerHere(),
-      zoomHouse: () => this.onMapContextZoomHouseHere(),
-      zoomStreet: () => this.onMapContextZoomStreetHere(),
-      copyAddress: () => this.onMapContextCopyAddress(),
-      copyGps: () => this.onMapContextCopyGps(),
-      openGoogleMaps: () => this.onMapContextOpenGoogleMaps(),
-    });
-  }
-
-  // Backwards-compatible wrappers kept for existing tests and call sites.
-  onMapContextCenterHere(): void {
-    this.onMapContextZoomStreetHere();
-  }
-
-  async onMapContextCopyCoordinates(): Promise<void> {
-    await this.onMapContextCopyGps();
+    return this.mapContextMenuHandlerService.onMapMenuActionSelected(actionId);
   }
 
   async onMapContextStartRadiusFromHere(): Promise<void> {
-    const coords = this.mapContextMenuCoords();
-    if (!coords || !this.map) return;
-
-    const center = this.mapLeafletService.createLatLng(coords.lat, coords.lng);
-    await this.radiusDrawingService.startQuickRadius(center, MapShellComponent.QUICK_RADIUS_METERS);
-    this.onMapMenuCloseRequested();
-  }
-
-  async onRadiusContextCreateProjectFromSelection(): Promise<void> {
-    const mediaIds = this.radiusMenuContext().mediaIds;
-    if (mediaIds.length === 0) {
-      this.showMapToast(
-        'map.shell.toast.noMediaInRadiusSelection',
-        'No media available in radius selection.',
-        'warning',
-        {
-          codeRef: { file: 'map-shell.component.ts', fn: 'onRadiusContextAssignToProject' },
-        },
-      );
-      this.closeContextMenus();
-      return;
-    }
-
-    const projectName = await this.promptProjectNameFromRadius();
-    if (!projectName) {
-      this.closeContextMenus();
-      return;
-    }
-
-    const created = await this.mapProjectActionsService.createProjectFromFirstImage({
-      projectName,
-      firstImageId: mediaIds[0],
-    });
-    if (!created.ok || !created.project) {
-      if (created.reason === 'organization-missing') {
-        this.showMapToast(
-          'map.shell.toast.projectCreateOrganizationUnknown',
-          'Could not create project (organization unknown).',
-          'error',
-          {
-            codeRef: { file: 'map-shell.component.ts', fn: 'onRadiusContextCreateProject' },
-          },
-        );
-      } else {
-        this.showMapToast(
-          'map.shell.toast.projectCreateFailed',
-          'Could not create project.',
-          'error',
-          {
-            detail: created.errorMessage
-              ? truncateToastTechnicalDetail(created.errorMessage)
-              : undefined,
-            codeRef: { file: 'map-shell.component.ts', fn: 'onRadiusContextCreateProject' },
-          },
-        );
-      }
-      this.closeContextMenus();
-      return;
-    }
-
-    const assigned = await this.mapContextActionsService.assignImagesToProject(
-      mediaIds,
-      created.project.id,
-    );
-    const assignFailureMessage =
-      this.mapProjectActionsService.getAssignmentFailureMessage(assigned);
-    if (assignFailureMessage) {
-      this.showMapToastTitle(assignFailureMessage, assigned.reason === 'empty' ? 'warning' : 'error', {
-        codeRef: { file: 'map-shell.component.ts', fn: 'assignMediaToProject' },
-      });
-      this.closeContextMenus();
-      return;
-    }
-
-    this.showMapToastTitle(
-      this.t('map.shell.toast.projectCreatedAndAssigned', 'Project "{project}" created and {count} media items assigned.')
-        .replace('{project}', created.project.name)
-        .replace('{count}', String(mediaIds.length)),
-      'success',
-    );
-    this.closeContextMenus();
-  }
-
-  async onRadiusContextAssignToProject(): Promise<void> {
-    const mediaIds = this.radiusMenuContext().mediaIds;
-    if (mediaIds.length === 0) {
-      this.showMapToast(
-        'map.shell.toast.noMediaInRadiusSelection',
-        'No media available in radius selection.',
-        'warning',
-        {
-          codeRef: { file: 'map-shell.component.ts', fn: 'onRadiusContextAssignToProject' },
-        },
-      );
-      this.closeContextMenus();
-      return;
-    }
-
-    const project = await this.promptProjectSelection();
-    if (!project) {
-      this.closeContextMenus();
-      return;
-    }
-
-    const assigned = await this.mapContextActionsService.assignImagesToProject(mediaIds, project.id);
-    const assignFailureMessage =
-      this.mapProjectActionsService.getAssignmentFailureMessage(assigned);
-    if (!assignFailureMessage) {
-      this.showMapToastTitle(
-        this.mapProjectActionsService.formatProjectAssignmentSuccess(project.name, mediaIds.length),
-        'success',
-      );
-    } else {
-      this.showMapToastTitle(assignFailureMessage, assigned.reason === 'empty' ? 'warning' : 'error', {
-        codeRef: { file: 'map-shell.component.ts', fn: 'assignMediaToProject' },
-      });
-    }
-    this.closeContextMenus();
+    return this.mapContextMenuHandlerService.onMapContextStartRadiusFromHere();
   }
 
   async onRadiusMenuActionSelected(actionId: RadiusMenuActionId): Promise<void> {
-    switch (actionId) {
-      case 'open_selection':
-        this.onRadiusContextOpenSelection();
-        return;
-      case 'assign_to_project':
-        await this.onRadiusContextAssignToProject();
-        return;
-      case 'remove_from_project':
-        await this.onRadiusContextRemoveFromProject();
-        return;
-      case 'delete_media':
-        await this.onRadiusContextDeleteMedia();
-        return;
-      default:
-        return;
-    }
+    return this.mapContextMenuHandlerService.onRadiusMenuActionSelected(actionId);
   }
 
-  onRadiusContextOpenSelection(): void {
-    this.ensurePhotoPanelOpen();
-    this.patchDetailMediaId(null);
-    this.onMapMenuCloseRequested();
-  }
-
-  async onRadiusContextRemoveFromProject(): Promise<void> {
-    const uniqueImageIds = Array.from(new Set(this.radiusMenuContext().mediaIds));
-    if (uniqueImageIds.length === 0) {
-      this.showMapToast(
-        'map.shell.toast.noMediaForProjectRemoval',
-        'No media found for project removal.',
-        'warning',
-        {
-          codeRef: { file: 'map-shell.component.ts', fn: 'onRadiusContextRemoveFromProjects' },
-        },
-      );
-      this.onMapMenuCloseRequested();
-      return;
-    }
-
-    const removed = await this.mapContextActionsService.removeImagesFromProjects(uniqueImageIds);
-    if (!removed.ok) {
-      this.showMapToastTitle(
-        this.getRemoveImagesFromProjectsFailureMessage(removed),
-        removed.reason === 'empty' ? 'warning' : 'error',
-        {
-          codeRef: { file: 'map-shell.component.ts', fn: 'removeImagesFromProjects' },
-        },
-      );
-      this.onMapMenuCloseRequested();
-      return;
-    }
-
-    this.showMapToast('map.shell.toast.removedFromProjects', 'Media removed from projects.', 'success');
-    this.onMapMenuCloseRequested();
-  }
-
-  async onRadiusContextDeleteMedia(): Promise<void> {
-    const uniqueImageIds = Array.from(new Set(this.radiusMenuContext().mediaIds));
-    if (uniqueImageIds.length === 0) {
-      this.showMapToast(
-        'map.shell.toast.noMediaToDelete',
-        'No media found to delete.',
-        'warning',
-        {
-          codeRef: { file: 'map-shell.component.ts', fn: 'onRadiusContextDelete' },
-        },
-      );
-      this.onMapMenuCloseRequested();
-      return;
-    }
-
-    if (!this.markerContextPhotoDeleteService.confirmPhotoDeleteCount(uniqueImageIds.length)) {
-      this.onMapMenuCloseRequested();
-      return;
-    }
-
-    const result = await this.mediaDeleteUndo.deleteWithUndo({
-      mediaItemIds: uniqueImageIds,
-      onAfterDelete: async () => {
-        this.patchDetailMediaId(null);
-        this.markerSelectionService.setSelectedMarker(null);
-        this.markerSelectionService.setSelectedMarkerKeys(new Set());
-        this.workspaceSelectionService.clearSelection();
-        this.workspaceViewService.clearActiveSelection();
-        await this.mapViewportCoordinatorService.queryViewportMarkers();
-      },
-      onAfterUndo: async () => {
-        await this.mapViewportCoordinatorService.queryViewportMarkers();
-      },
-    });
-
-    if (!result.ok) {
-      this.showMapToast('map.shell.toast.deleteFailed', 'Delete failed.', 'error', {
-        detail: result.errorMessage
-          ? truncateToastTechnicalDetail(result.errorMessage)
-          : undefined,
-        codeRef: { file: 'map-shell.component.ts', fn: 'deleteSelectedMedia' },
-      });
-    }
-
-    this.onMapMenuCloseRequested();
-  }
-
-  get markerContextIsSingle(): boolean {
-    const payload = this.markerContextMenuPayload();
-    return !!payload && payload.count === 1;
-  }
-
-  get markerContextIsCluster(): boolean {
-    const payload = this.markerContextMenuPayload();
-    return !!payload && payload.count > 1 && !payload.isMultiSelection;
-  }
-
-  get markerContextIsMulti(): boolean {
-    const payload = this.markerContextMenuPayload();
-    return !!payload?.isMultiSelection;
-  }
+  get markerContextIsSingle(): boolean { return this.mapContextMenuHandlerService.markerContextIsSingle; }
+  get markerContextIsCluster(): boolean { return this.mapContextMenuHandlerService.markerContextIsCluster; }
+  get markerContextIsMulti(): boolean { return this.mapContextMenuHandlerService.markerContextIsMulti; }
 
   async onMarkerMenuActionSelected(actionId: MarkerMenuActionId): Promise<void> {
-    await this.mapWorkspaceActionExecutorService.executeMarkerAction(actionId, {
-      openDetailsOrSelection: () => this.onMarkerContextOpenDetailsOrSelection(),
-      openInMedia: () => this.onMarkerContextOpenInMedia(),
-      zoomHouse: () => this.onMarkerContextZoomHouse(),
-      zoomStreet: () => this.onMarkerContextZoomStreet(),
-      assignToProject: () => this.onMarkerContextAssignToProject(),
-      resolveLocation: () => this.onMarkerContextResolveLocation(),
-      changeLocationMap: () => this.onMarkerContextChangeLocationMap(),
-      changeLocationAddress: () => this.onMarkerContextChangeLocationAddress(),
-      copyAddress: () => this.onMarkerContextCopyAddress(),
-      copyGps: () => this.onMarkerContextCopyGps(),
-      openGoogleMaps: () => this.onMarkerContextOpenGoogleMaps(),
-      removeFromProject: () => this.onMarkerContextRemoveFromProject(),
-      deleteMedia: () => this.onMarkerContextDeletePhoto(),
-    });
+    return this.mapContextMenuHandlerService.onMarkerMenuActionSelected(actionId);
   }
 
-  onMarkerContextOpenDetailsOrSelection(): void {
-    const payload = this.markerContextMenuPayload();
-    if (!payload) return;
-    this.closeContextMenus();
-    this.handlePhotoMarkerClick(payload.markerKey);
-  }
-
-  async onMarkerContextOpenInMedia(): Promise<void> {
-    const payload = this.markerContextMenuPayload();
-    const mediaId = payload?.mediaId;
-    if (!mediaId) {
-      this.showMapToast(
-        'map.shell.toast.singleMarkerOnly',
-        'This action is only available for a single marker.',
-        'warning',
-        {
-          codeRef: { file: 'map-shell.component.ts', fn: 'onMarkerContextMoveMarker' },
-        },
-      );
-      this.onMapMenuCloseRequested();
-      return;
-    }
-
-    this.workspaceSelectionService.setSingle(mediaId);
-    this.workspacePaneShellHost.openDetailView(mediaId);
-    await this.router.navigate(['/media']);
-    this.onMapMenuCloseRequested();
-  }
-
-  onMarkerContextMoveMarker(): void {
-    void this.onMarkerContextChangeLocationMap();
-  }
-
-  async onMarkerContextChangeLocationMap(): Promise<void> {
-    const mediaIds = await this.resolveMarkerContextMediaIds();
-    if (mediaIds.length === 0) {
-      this.showMapToast(
-        'map.shell.toast.noMediaForLocationChange',
-        'No media found for location change.',
-        'warning',
-        {
-          codeRef: { file: 'map-shell.component.ts', fn: 'onRadiusContextChangeLocation' },
-        },
-      );
-      this.onMapMenuCloseRequested();
-      return;
-    }
-
-    if (mediaIds.length > 1) {
-      this.showMapToastTitle(
-        this.t(
-          'map.shell.toast.bulkLocationMovePending',
-          '{count} media selected. Map-based bulk move comes in the next step.',
-        ).replace('{count}', String(mediaIds.length)),
-        'info',
-      );
-      this.onMapMenuCloseRequested();
-      return;
-    }
-
-    const mediaId = mediaIds[0];
-
-    this.onUploadLocationMapPickRequested({
-      mediaId,
-      fileName: mediaId,
-    });
-    this.onMapMenuCloseRequested();
-  }
-
-  async onMarkerContextChangeLocationAddress(): Promise<void> {
-    const mediaIds = await this.resolveMarkerContextMediaIds();
-    if (mediaIds.length === 0) {
-      this.showMapToast(
-        'map.shell.toast.noMediaForAddressChange',
-        'No media found for address change.',
-        'warning',
-        {
-          codeRef: { file: 'map-shell.component.ts', fn: 'onRadiusContextChangeAddress' },
-        },
-      );
-      this.onMapMenuCloseRequested();
-      return;
-    }
-
-    if (mediaIds.length > 1) {
-      this.state.setBatchAddressDialogTitle('Adresse fuer Auswahl aendern');
-      this.state.setBatchAddressDialogMessage(
-        `${mediaIds.length} Medien erhalten dieselbe Adresse.`,
-      );
-      this.state.setBatchAddressTargetMediaIds(mediaIds);
-      this.state.setBatchAddressDialogOpen(true);
-      this.onMapMenuCloseRequested();
-      return;
-    }
-
-    const mediaId = mediaIds[0];
-
-    this.openDetailView(mediaId);
-    const currentRequestId = this.detailAddressSearchRequest()?.requestId ?? 0;
-    this.state.setDetailAddressSearchRequest({ mediaId, requestId: currentRequestId + 1 });
-    this.onMapMenuCloseRequested();
-  }
-
-  async onMarkerContextResolveLocation(): Promise<void> {
-    const mediaIds = await this.resolveMarkerContextMediaIds();
-    if (mediaIds.length !== 1) {
-      this.showMapToast(
-        'map.shell.toast.locationResolveSingleOnly',
-        'Location resolution is only available for a single item.',
-        'warning',
-        {
-          codeRef: { file: 'map-shell.component.ts', fn: 'onRadiusContextResolveLocation' },
-        },
-      );
-      this.onMapMenuCloseRequested();
-      return;
-    }
-
-    const result = await this.locationResolverService.resolvePendingMediaItem(mediaIds[0]);
-    if (result.status === 'resolved') {
-      this.showMapToast('map.shell.toast.locationResolved', 'Location resolved successfully.', 'success');
-      await this.mapViewportCoordinatorService.queryViewportMarkers();
-      this.onMapMenuCloseRequested();
-      return;
-    }
-
-    if (result.status === 'unresolvable') {
-      this.showMapToast(
-        'map.shell.toast.locationResolveTerminal',
-        'Location could not be resolved (terminal).',
-        'warning',
-        {
-          codeRef: { file: 'map-shell.component.ts', fn: 'onRadiusContextResolveLocation' },
-        },
-      );
-      if (result.changed) {
-        await this.mapViewportCoordinatorService.queryViewportMarkers();
-      }
-      this.onMapMenuCloseRequested();
-      return;
-    }
-
-    this.showMapToast(
-      'map.shell.toast.locationAlreadyResolved',
-      'Location is already resolved or not retryable.',
-      'info',
-    );
-    this.onMapMenuCloseRequested();
-  }
-
-  onBatchAddressDialogCancelled(): void {
-    this.state.setBatchAddressDialogOpen(false);
-    this.state.setBatchAddressTargetMediaIds([]);
-  }
+  onBatchAddressDialogCancelled(): void { this.mapContextMenuHandlerService.onBatchAddressDialogCancelled(); }
 
   async onBatchAddressDialogConfirmed(addressInput: string): Promise<void> {
-    const input = addressInput.trim();
-    if (!input) {
-      return;
-    }
-
-    const targetMediaIds = this.state.batchAddressTargetMediaIds();
-    if (targetMediaIds.length === 0) {
-      this.onBatchAddressDialogCancelled();
-      return;
-    }
-
-    const suggestion = await this.geocodingService.forward(input);
-    if (!suggestion) {
-      this.showMapToast(
-        'map.shell.toast.addressResolveFailed',
-        'Could not resolve address.',
-        'warning',
-        {
-          codeRef: { file: 'map-shell.component.ts', fn: 'onMarkerContextCopyAddress' },
-        },
-      );
-      return;
-    }
-
-    let updatedCount = 0;
-    for (const mediaId of targetMediaIds) {
-      const result = await this.mediaLocationUpdateService.updateFromAddressSuggestion(mediaId, {
-        lat: suggestion.lat,
-        lng: suggestion.lng,
-        addressLabel: suggestion.addressLabel,
-        city: suggestion.city,
-        district: suggestion.district,
-        street: suggestion.street,
-        streetNumber: suggestion.streetNumber,
-        zip: suggestion.zip,
-        country: suggestion.country,
-      });
-      if (result.ok) {
-        updatedCount += 1;
-      }
-    }
-
-    if (updatedCount === 0) {
-      this.showMapToast(
-        'map.shell.toast.addressChangeFailed',
-        'Address change failed.',
-        'error',
-        {
-          codeRef: { file: 'map-shell.component.ts', fn: 'onRadiusContextChangeAddress' },
-        },
-      );
-      return;
-    }
-
-    this.showMapToastTitle(
-      this.t('map.shell.toast.addressesUpdated', '{count} media address(es) updated.').replace(
-        '{count}',
-        String(updatedCount),
-      ),
-      'success',
-    );
-    this.onBatchAddressDialogCancelled();
-    await this.mapViewportCoordinatorService.queryViewportMarkers();
+    return this.mapContextMenuHandlerService.onBatchAddressDialogConfirmed(addressInput);
   }
 
   onDetailAddressSearchRequestConsumed(requestId: number): void {
-    this.workspacePaneShellHost.onDetailAddressSearchRequestConsumed(requestId);
-  }
-
-  async onMarkerContextAssignToProject(): Promise<void> {
-    const payload = this.markerContextMenuPayload();
-    if (!payload) return;
-
-    const project = await this.promptProjectSelection();
-    if (!project) {
-      this.closeContextMenus();
-      return;
-    }
-
-    const mediaIds = await this.mapContextActionsService.resolveMarkerContextMediaIds(
-      payload,
-      (cells, zoom) => this.workspaceViewService.fetchClusterImages(cells, zoom),
-      this.map?.getZoom() ?? 13,
-    );
-    if (mediaIds.length === 0) {
-      this.showMapToast(
-        'map.shell.toast.noMediaForProjectAssignment',
-        'No media found for project assignment.',
-        'warning',
-        {
-          codeRef: { file: 'map-shell.component.ts', fn: 'onMarkerContextAssignToProject' },
-        },
-      );
-      this.closeContextMenus();
-      return;
-    }
-
-    const assigned = await this.mapContextActionsService.assignImagesToProject(mediaIds, project.id);
-    const assignFailureMessage =
-      this.mapProjectActionsService.getAssignmentFailureMessage(assigned);
-    if (assignFailureMessage) {
-      this.showMapToastTitle(assignFailureMessage, assigned.reason === 'empty' ? 'warning' : 'error', {
-        codeRef: { file: 'map-shell.component.ts', fn: 'assignMediaToProject' },
-      });
-      this.closeContextMenus();
-      return;
-    }
-
-    this.showMapToastTitle(
-      this.mapProjectActionsService.formatProjectAssignmentSuccess(project.name, mediaIds.length),
-      'success',
-    );
-    this.closeContextMenus();
-  }
-
-  onMarkerContextZoomHouse(): void {
-    const payload = this.markerContextMenuPayload();
-    if (!payload || !this.map) return;
-    this.setViewWithPaneOffset(payload.lat, payload.lng, MapShellComponent.HOUSE_PROXIMITY_ZOOM);
-    this.onMapMenuCloseRequested();
-  }
-
-  onMarkerContextZoomStreet(): void {
-    const payload = this.markerContextMenuPayload();
-    if (!payload || !this.map) return;
-    this.setViewWithPaneOffset(payload.lat, payload.lng, MapShellComponent.STREET_PROXIMITY_ZOOM);
-    this.onMapMenuCloseRequested();
-  }
-
-  async onMarkerContextCopyAddress(): Promise<void> {
-    const payload = this.markerContextMenuPayload();
-    if (!payload) return;
-
-    const copied = await this.mapContextActionsService.copyAddressFromCoords(
-      payload.lat,
-      payload.lng,
-    );
-    if (copied) {
-      this.showMapToast('map.shell.toast.addressCopied', 'Address copied.', 'success');
-    } else {
-      this.showMapToast(
-        'map.shell.toast.addressResolveFailed',
-        'Could not resolve address.',
-        'warning',
-        {
-          codeRef: { file: 'map-shell.component.ts', fn: 'onMarkerContextCopyAddress' },
-        },
-      );
-    }
-    this.onMapMenuCloseRequested();
-  }
-
-  async onMarkerContextCopyGps(): Promise<void> {
-    const payload = this.markerContextMenuPayload();
-    if (!payload) return;
-    const text = this.mapContextActionsService.formatGps(payload.lat, payload.lng);
-    const copied = await this.mapContextActionsService.copyTextToClipboard(text);
-    if (copied) {
-      this.showMapToast('map.shell.toast.gpsCopied', 'GPS copied.', 'success');
-    } else {
-      this.showMapToastTitle(text, 'info');
-    }
-    this.onMapMenuCloseRequested();
-  }
-
-  onMarkerContextOpenGoogleMaps(): void {
-    const payload = this.markerContextMenuPayload();
-    if (!payload || typeof window === 'undefined') return;
-    const url = this.mapContextActionsService.buildGoogleMapsUrl(payload.lat, payload.lng);
-    window.open(url, '_blank', 'noopener,noreferrer');
-    this.onMapMenuCloseRequested();
-  }
-
-  async onMarkerContextRemoveFromProject(): Promise<void> {
-    const payload = this.markerContextMenuPayload();
-    if (!payload) {
-      return;
-    }
-
-    const mediaIds = await this.mapContextActionsService.resolveMarkerContextMediaIds(
-      payload,
-      (cells, zoom) => this.workspaceViewService.fetchClusterImages(cells, zoom),
-      this.map?.getZoom() ?? 13,
-    );
-    const uniqueImageIds = Array.from(new Set(mediaIds));
-    if (uniqueImageIds.length === 0) {
-      this.showMapToast(
-        'map.shell.toast.noMediaForProjectRemoval',
-        'No media found for project removal.',
-        'warning',
-        {
-          codeRef: { file: 'map-shell.component.ts', fn: 'onRadiusContextRemoveFromProjects' },
-        },
-      );
-      this.onMapMenuCloseRequested();
-      return;
-    }
-
-    const removed = await this.mapContextActionsService.removeImagesFromProjects(uniqueImageIds);
-    if (!removed.ok) {
-      this.showMapToastTitle(
-        this.getRemoveImagesFromProjectsFailureMessage(removed),
-        removed.reason === 'empty' ? 'warning' : 'error',
-        {
-          codeRef: { file: 'map-shell.component.ts', fn: 'removeImagesFromProjects' },
-        },
-      );
-      this.onMapMenuCloseRequested();
-      return;
-    }
-
-    this.showMapToast('map.shell.toast.removedFromProjects', 'Media removed from projects.', 'success');
-    this.onMapMenuCloseRequested();
-  }
-
-  // Backwards-compatible wrapper kept for existing tests/call sites.
-  async onMarkerContextCopyCoordinates(): Promise<void> {
-    await this.onMarkerContextCopyGps();
-  }
-
-  async onMarkerContextDeletePhoto(): Promise<void> {
-    const payload = this.markerContextMenuPayload();
-
-    if (payload && payload.count > 1) {
-      const mediaIds = await this.mapContextActionsService.resolveMarkerContextMediaIds(
-        payload,
-        (cells, zoom) => this.workspaceViewService.fetchClusterImages(cells, zoom),
-        this.map?.getZoom() ?? 13,
-      );
-      const uniqueImageIds = Array.from(new Set(mediaIds));
-      if (uniqueImageIds.length === 0) {
-        this.showMapToast(
-          'map.shell.toast.noMediaToDelete',
-          'No media found to delete.',
-          'warning',
-          {
-            codeRef: { file: 'map-shell.component.ts', fn: 'onMarkerContextDelete' },
-          },
-        );
-        this.onMapMenuCloseRequested();
-        return;
-      }
-
-      if (!this.markerContextPhotoDeleteService.confirmPhotoDeleteCount(uniqueImageIds.length)) {
-        this.onMapMenuCloseRequested();
-        return;
-      }
-
-      const result = await this.mediaDeleteUndo.deleteWithUndo({
-        mediaItemIds: uniqueImageIds,
-        onAfterDelete: async () => {
-          this.patchDetailMediaId(null);
-          this.markerSelectionService.setSelectedMarker(null);
-          this.markerSelectionService.setSelectedMarkerKeys(new Set());
-          this.workspaceSelectionService.clearSelection();
-          this.workspaceViewService.clearActiveSelection();
-          await this.mapViewportCoordinatorService.queryViewportMarkers();
-        },
-        onAfterUndo: async () => {
-          await this.mapViewportCoordinatorService.queryViewportMarkers();
-        },
-      });
-
-      if (!result.ok) {
-        this.showMapToast('map.shell.toast.deleteFailed', 'Delete failed.', 'error', {
-          detail: result.errorMessage
-            ? truncateToastTechnicalDetail(result.errorMessage)
-            : undefined,
-          codeRef: { file: 'map-shell.component.ts', fn: 'deleteSelectedMedia' },
-        });
-      }
-
-      this.onMapMenuCloseRequested();
-      return;
-    }
-
-    const target = this.markerContextPhotoDeleteService.getSingleImageTarget(payload);
-    if (!target || !this.markerContextPhotoDeleteService.confirmPhotoDelete()) return;
-
-    const result = await this.mediaDeleteUndo.deleteWithUndo({
-      mediaItemIds: [target.mediaId],
-      onAfterDelete: () => {
-        this.markerStateMutationsService.removeDeletedPhotoFromMapUi({
-          markerKey: target.markerKey,
-          mediaId: target.mediaId,
-          uploadedPhotoMarkers: this.uploadedPhotoMarkers,
-          photoMarkerLayer: this.photoMarkerLayer,
-          markersByMediaId: this.markersByMediaId,
-          selectedMarkerKey: this.selectedMarkerKey(),
-          selectedMarkerKeys: this.selectedMarkerKeys(),
-          detailMediaId: this.detailMediaId(),
-          cancelMarkerMoveAnimation: (marker) => this.markerBindingService.cancelMarkerMoveAnimation(marker),
-          setSelectedMarker: (markerKey) => this.markerSelectionService.setSelectedMarker(markerKey),
-          setSelectedMarkerKeys: (markerKeys) => this.markerSelectionService.setSelectedMarkerKeys(markerKeys),
-          setDetailImageId: (mediaId) => this.patchDetailMediaId(mediaId),
-        });
-      },
-      onAfterUndo: async () => {
-        await this.mapViewportCoordinatorService.queryViewportMarkers();
-      },
-    });
-
-    if (!result.ok) {
-      this.showMapToast('map.shell.toast.deleteFailed', 'Delete failed.', 'error', {
-        detail: result.errorMessage
-          ? truncateToastTechnicalDetail(result.errorMessage)
-          : undefined,
-        codeRef: { file: 'map-shell.component.ts', fn: 'deleteSelectedMedia' },
-      });
-      return;
-    }
-
-    this.onMapMenuCloseRequested();
+    this.mapContextMenuHandlerService.onDetailAddressSearchRequestConsumed(requestId);
   }
 
   // ── Workspace pane (DOM + split owned by AuthenticatedAppLayoutComponent) ─
@@ -1953,6 +1127,25 @@ export class MapShellComponent implements OnDestroy {
       getSelectedMarkerKeys: () => this.selectedMarkerKeys(),
       setSelectedMarkerKeys: (keys) => this.state.setSelectedMarkerKeys(keys),
       toMarkerKey: (lat, lng) => this.toMarkerKey(lat, lng),
+    });
+
+    this.mapContextMenuHandlerService.bind({
+      getMap: () => this.map,
+      showMapToast: (key, fallback, type, extra) => this.showMapToast(key, fallback, type, extra),
+      showMapToastTitle: (title, type, extra) => this.showMapToastTitle(title, type, extra),
+      closeContextMenus: () => this.closeContextMenus(),
+      onMapMenuCloseRequested: () => this.onMapMenuCloseRequested(),
+      handlePhotoMarkerClick: (markerKey) => this.handlePhotoMarkerClick(markerKey),
+      patchDetailMediaId: (id) => this.patchDetailMediaId(id),
+      onUploadLocationMapPickRequested: (event) => this.onUploadLocationMapPickRequested(event),
+      renderOrUpdateDraftMediaMarker: (latlng) => this.renderOrUpdateDraftMediaMarker(latlng),
+      setPlacementActive: (value) => this.placementActive.set(value),
+      getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
+      getPhotoMarkerLayer: () => this.photoMarkerLayer,
+      getMarkersByMediaId: () => this.markersByMediaId,
+      getSelectedMarkerKey: () => this.selectedMarkerKey(),
+      getSelectedMarkerKeys: () => this.selectedMarkerKeys(),
+      getDetailMediaId: () => this.detailMediaId(),
     });
 
     this.searchService.updateViewportBounds(this.map);
@@ -2960,98 +2153,24 @@ export class MapShellComponent implements OnDestroy {
     this.workspaceSelectionService.clearSelection();
   }
 
-  private async promptProjectSelection(): Promise<{ id: string; name: string } | null> {
-    const projects = await this.mapProjectActionsService.loadProjectOptions();
-
-    if (!projects.ok) {
-      this.showMapToast(
-        'map.shell.toast.noProjectsAvailable',
-        'No projects available.',
-        'warning',
-        {
-          codeRef: { file: 'map-shell.component.ts', fn: 'openProjectSelectionDialog' },
-        },
-      );
-      return null;
-    }
-
-    return this.mapProjectDialogService.openProjectSelectionDialog(
-      this.state,
-      projects.options,
-      'Projekt auswaehlen',
-      'Waehle ein bestehendes Projekt fuer die Zuweisung aus.',
-    );
-  }
-
-  private getRemoveImagesFromProjectsFailureMessage(
-    result: RemoveImagesFromProjectsResult,
-  ): string {
-    switch (result.reason) {
-      case 'lookup-error':
-        return this.t(
-          'map.shell.toast.removeFromProjects.lookupError',
-          'Could not load project assignments.',
-        );
-      case 'remove-error':
-        return this.t(
-          'map.shell.toast.removeFromProjects.removeError',
-          'Removing from projects failed.',
-        );
-      case 'empty':
-        return this.t(
-          'map.shell.toast.removeFromProjects.empty',
-          'No project assignments found.',
-        );
-      default:
-        return this.t(
-          'map.shell.toast.removeFromProjects.removeError',
-          'Removing from projects failed.',
-        );
-    }
-  }
-
-  private async promptProjectNameFromRadius(): Promise<string | null> {
-    return this.mapProjectDialogService.openProjectNameDialog(
-      this.state,
-      'Name fuer neues Projekt aus Radius',
-      'Neues Radius Projekt',
-      'Gib einen Projektnamen ein.',
-    );
-  }
-
   onProjectSelectionDialogSelected(projectId: string): void {
-    this.mapProjectDialogService.setProjectSelectionSelectedId(this.state, projectId);
+    this.mapContextMenuHandlerService.onProjectSelectionDialogSelected(projectId);
   }
 
   onProjectSelectionDialogConfirmed(projectId: string): void {
-    this.mapProjectDialogService.confirmProjectSelection(this.state, projectId);
+    this.mapContextMenuHandlerService.onProjectSelectionDialogConfirmed(projectId);
   }
 
   onProjectSelectionDialogCancelled(): void {
-    this.mapProjectDialogService.cancelProjectSelection(this.state);
+    this.mapContextMenuHandlerService.onProjectSelectionDialogCancelled();
   }
 
   onProjectNameDialogConfirmed(projectName: string): void {
-    this.mapProjectDialogService.confirmProjectName(this.state, projectName);
+    this.mapContextMenuHandlerService.onProjectNameDialogConfirmed(projectName);
   }
 
   onProjectNameDialogCancelled(): void {
-    this.mapProjectDialogService.cancelProjectName(this.state);
-  }
-
-  private async resolveMarkerContextMediaIds(): Promise<string[]> {
-    const payload = this.markerContextMenuPayload();
-    if (!payload) {
-      return [];
-    }
-
-    const mediaIds = await this.mapContextActionsService.resolveMarkerContextMediaIds(
-      payload,
-      (cells, zoom) => this.workspaceViewService.fetchClusterImages(cells, zoom),
-      this.map?.getZoom() ?? 13,
-    );
-
-    return Array.from(new Set(mediaIds));
+    this.mapContextMenuHandlerService.onProjectNameDialogCancelled();
   }
 
   /**
