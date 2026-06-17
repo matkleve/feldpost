@@ -49,7 +49,7 @@
   @include emphasis.selected(10%);
 
   > .option-menu-item__icon {
-    color: var(--interaction-selected-ink);
+    color: inherit;
   }
 }
 
@@ -58,7 +58,7 @@
   @include emphasis.selected-hover(10%);
 
   > .option-menu-item__icon {
-    color: var(--primary);
+    color: inherit;
   }
 }
 
@@ -84,7 +84,7 @@
 
   .sort-dropdown__option:hover & {
     opacity: 1;
-    color: var(--primary);
+    color: inherit;
   }
 
   .sort-dropdown__option--active & {
@@ -94,12 +94,12 @@
 
   .sort-dropdown__option--hovered & {
     opacity: 1;
-    color: var(--primary);
+    color: inherit;
   }
 
   &--visible {
     opacity: 1;
-    color: var(--primary);
+    color: inherit;
   }
 
   .sort-dropdown__option--active &--visible {
@@ -112,7 +112,7 @@
   .sort-dropdown__option--active:hover &--visible,
   .sort-dropdown__option--active:focus-visible &--visible,
   .sort-dropdown__option--active.sort-dropdown__option--hovered &--visible {
-    color: var(--primary);
+    color: inherit;
   }
 
   &--preview,

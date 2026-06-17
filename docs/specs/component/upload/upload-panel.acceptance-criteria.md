@@ -98,18 +98,18 @@ sequenceDiagram
 - [ ] Compact map-overlay panel keeps row actions menu-first and does not render selection checkboxes
 - [ ] Embedded workspace panel reveals row-selection checkbox on hover/focus for eligible rows
 - [ ] Embedded workspace panel shows bottom selection toolbar only when one or more rows are selected
-- [ ] Switching Queue / Uploaded / Issues lane tab clears embedded row selection (`selectedUploadJobIds`)
+- [x] Switching Queue / Uploaded / Issues lane tab clears embedded row selection (`selectedUploadJobIds`)
 - [ ] Embedded selection toolbar provides retry/download/remove/clear actions for the current lane selection only
-- [ ] 3-dot row menu always ends with exactly one divider followed by the destructive section (one or more entries sharing that single divider — no additional dividers between them)
+- [x] 3-dot row menu always ends with exactly one divider followed by the destructive section (one or more entries sharing that single divider — no additional dividers between them)
 - [x] Destructive bottom action label is state-dependent: `Cancel upload` (active), `Remove from project` (uploaded), `Dismiss` (issues/failed)
 - [ ] Destructive bottom action uses danger styling for both label and icon
-- [ ] `Delete media` is always present for uploaded rows regardless of project binding
-- [ ] `Remove from project(s)` appears only when one or more project bindings exist, ordered before `Delete media` in the destructive section
-- [ ] `Delete media` uses two-step confirm in-menu: first click arms (label → "Confirm delete?", danger tint, icon → warning), menu stays open; second click fires delete + undo-toast; 5 s auto-disarm
-- [ ] `Remove from project(s)` uses two-step confirm in-menu: first click arms (label → "Confirm remove?", danger tint), menu stays open; second click fires removal
-- [ ] Armed state auto-disarms after 5 s; armed-state click on a non-destructive item disarms and fires that action normally
-- [ ] Click outside the open row menu while a destructive item is armed closes the menu and disarms without firing the action
-- [ ] `Add/Change GPS` on uploaded row shows status text `Click map to set location` until map pick completes or panel hides
+- [x] `Delete media` is always present for uploaded rows regardless of project binding
+- [x] `Remove from project(s)` appears only when one or more project bindings exist, ordered before `Delete media` in the destructive section
+- [x] `Delete media` uses two-step confirm in-menu: first click arms (label → "Confirm delete?", danger tint, icon → warning), menu stays open; second click fires delete + undo-toast; 5 s auto-disarm
+- [x] `Remove from project(s)` uses two-step confirm in-menu: first click arms (label → "Confirm remove?", danger tint), menu stays open; second click fires removal
+- [x] Armed state auto-disarms after 5 s; armed-state click on a non-destructive item disarms and fires that action normally
+- [x] Click outside the open row menu while a destructive item is armed closes the menu and disarms without firing the action
+- [x] `Add/Change GPS` on uploaded row shows status text `Click map to set location` until map pick completes or panel hides
 - [x] Clicking the map-marker action on a `missing_data` row emits a placement request
 - [x] Clicking an uploaded row with coordinates emits a zoom-to-location request
 - [x] Uploaded rows expose `Assign project` in all states (assign and reassign through one selector flow)
@@ -123,7 +123,7 @@ sequenceDiagram
 - [ ] `Add/Change GPS` enters map-pick mode and commits the clicked location for the selected media item
 - [ ] Location edits on already uploaded media never trigger re-upload or re-queue; they update persisted media location only
 - [x] `Download` always triggers file download behavior and never opens inline browser preview tabs
-- [ ] Location mismatch (`location_mismatch_meters`) is surfaced in media detail only — upload panel rows do not show a mismatch badge
+- [x] Location mismatch (`location_mismatch_meters`) is surfaced in media detail only — upload panel rows do not show a mismatch badge
 - [ ] Duplicate-photo rows are shown in Issues and expose a secondary GPS action to open the existing placed media.
 - [ ] Duplicate-resolution modal appears for duplicate-photo issues with `use existing`, `upload anyway`, and `reject` options.
 - [ ] Duplicate-resolution modal provides "apply to all matching items in this batch" behavior.
@@ -141,7 +141,7 @@ sequenceDiagram
 - [x] Uploading/retrying rows show a spinning loading indicator overlay over the thumbnail
 - [ ] Hovering media rows with available previews always shows a stable thumbnail/media preview (no blank hover state)
 - [ ] Row status text updates live while retrying and uploading phases progress
-- [ ] Parser residual `address_notes` are surfaced in media detail only — upload panel rows do not show address-note badges
+- [x] Parser residual `address_notes` are surfaced in media detail only — upload panel rows do not show address-note badges
 - [x] Lane tabs display live counts derived from the same lane bucket data as the list
 - [ ] Users can switch to an empty lane and keep that lane selected
 - [ ] Closing panel does not cancel active uploads

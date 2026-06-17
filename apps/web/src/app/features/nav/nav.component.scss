@@ -227,10 +227,6 @@
   // @see docs/design/state-visuals.md § Interaction emphasis — use emphasis.selected()
   &--active {
     @include emphasis.selected(10%);
-
-    .nav__icon {
-      color: var(--interaction-selected-ink);
-    }
   }
 
   // Selected row still uses primary on hover/focus (wins over --active)
@@ -238,10 +234,6 @@
   &--active:hover,
   &--active:focus-visible {
     @include emphasis.selected-hover(10%);
-
-    .nav__icon {
-      color: var(--primary);
-    }
   }
 
   &--disabled {
@@ -259,6 +251,7 @@
   line-height: var(--line-height-solid);
   flex-shrink: 0;
   text-align: center;
+  color: inherit;
 }
 
 .nav__media {

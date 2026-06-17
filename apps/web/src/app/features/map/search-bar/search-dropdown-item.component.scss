@@ -34,9 +34,14 @@
 .search-dropdown-item--active {
   @include emphasis.hover(12%);
 
+  .search-dropdown-item__icon,
+  .search-dropdown-item__label {
+    color: inherit;
+  }
+
   .search-dropdown-item__secondary,
   .search-dropdown-item__meta {
-    color: color-mix(in srgb, var(--primary) 72%, var(--muted-foreground));
+    color: color-mix(in srgb, var(--brand-gold) 72%, var(--muted-foreground));
   }
 }
 

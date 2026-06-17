@@ -33,15 +33,18 @@
 @include fp-toolbar-breakpoints.toolbar-menu-trigger-responsive('map-filter-toolbar', map-filter-toolbar);
 
 // Frosted glass surface — map-specific chrome; beats hlmBtn outline `bg-background`.
-// Active/open/hover states handled by toolbar-menu-trigger-states above.
 // @see apps/web/src/app/features/map/search-bar/search-bar.component.scss
 button.map-filter-toolbar__menu-trigger {
   @include frosted-chrome.surface;
-  color: var(--foreground);
+  color: var(--muted-foreground);
   border-radius: var(--radius-md);
   transition:
     background var(--motion-duration-fast) var(--motion-ease-out),
     border-color var(--motion-duration-fast) var(--motion-ease-out),
     box-shadow var(--motion-duration-fast) var(--motion-ease-out),
     color var(--motion-duration-fast) var(--motion-ease-out);
+
+  [data-dd-part] {
+    color: inherit;
+  }
 }

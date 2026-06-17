@@ -194,7 +194,7 @@
     .settings-overlay__section-media,
     .settings-overlay__section-chevron,
     .settings-overlay__section-label strong {
-      color: var(--primary);
+      color: inherit;
     }
   }
 
@@ -215,7 +215,7 @@
 
     .settings-overlay__section-media,
     .settings-overlay__section-chevron {
-      color: var(--primary);
+      color: inherit;
     }
   }
 

@@ -32584,6 +32584,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.permission.denied', 'You don''t have permission to upload', 'en', 'apps/web/src/app/core/upload/support/upload-error-messages.util.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'You don''t have permission to upload', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.permission.denied'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Du hast keine Berechtigung zum Hochladen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.permission.denied'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Non hai l''autorizzazione per caricare.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.permission.denied'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'upload.error.hint.localDevProfile', 'For local dev', 'en', 'apps/web/src/app/core/media-location-update/media-location-update.helpers.ts')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

@@ -68,11 +68,11 @@
 
   &:hover,
   &:focus-visible {
-    background: var(--menu-item-hover);
+    @include emphasis.hover(10%);
 
     .metadata-type-picker__result-icon,
     .metadata-type-picker__result-label {
-      color: var(--primary);
+      color: inherit;
     }
   }
 }

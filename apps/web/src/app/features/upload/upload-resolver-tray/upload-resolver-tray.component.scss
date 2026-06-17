@@ -185,11 +185,11 @@
 
     &:hover,
     &:focus-visible {
-      background: var(--menu-item-hover);
+      @include emphasis.hover(10%);
 
       .upload-resolver-tray__choice-label,
       .upload-resolver-tray__choice-score {
-        color: var(--primary);
+        color: inherit;
       }
     }
 
@@ -200,7 +200,7 @@
 
       .upload-resolver-tray__choice-label,
       .upload-resolver-tray__choice-score {
-        color: var(--interaction-selected-ink);
+        color: inherit;
       }
     }
 
@@ -210,7 +210,7 @@
 
       .upload-resolver-tray__choice-label,
       .upload-resolver-tray__choice-score {
-        color: var(--primary);
+        color: inherit;
       }
     }
   }

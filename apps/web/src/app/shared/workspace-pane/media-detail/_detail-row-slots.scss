@@ -34,14 +34,14 @@
 
   &:hover:not(.detail-row--editing):not(.detail-row--readonly) .detail-row__center,
   &:focus-within:not(.detail-row--editing):not(.detail-row--readonly) .detail-row__center {
-    background: var(--menu-item-hover);
+    @include emphasis.hover(10%);
 
     .detail-row__icon,
     .detail-row__label,
     .detail-row__value,
     .detail-row__value--static,
     .detail-row__field-trigger {
-      color: var(--primary);
+      color: inherit;
     }
   }
 

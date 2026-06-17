@@ -44,7 +44,7 @@
     .rail-section__heading,
     .rail-section__icon .material-icons,
     .rail-section__actions :where(button) {
-      color: var(--primary);
+      color: inherit;
     }
   }
 }

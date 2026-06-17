@@ -104,8 +104,7 @@ export function formatUploadFailureMessage(rawError: string | null | undefined):
   if (described.code === '42501' || /permission denied|row-level security/i.test(normalized)) {
     return {
       title: 'Upload failed',
-      summary: 'Database permission denied.',
-      hint: 'Confirm you are signed into the same Supabase target as the app (local vs cloud).',
+      summary: "You don't have permission to upload",
       technicalDetail: truncateToastTechnicalDetail(message),
     };
   }

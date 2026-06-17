@@ -40,32 +40,18 @@
   position: relative;
   border-radius: var(--container-radius-control);
 
-  // Row hover — matches media-detail `.detail-row` center tint + primary ink.
-  // @see apps/web/src/app/shared/workspace-pane/media-detail/_detail-row-slots.scss
+  // Row hover — gold emphasis; text/icon inherit host ink.
+  // @see docs/specs/system/interaction-emphasis-ink-contract.md
   &:hover:not(.upload-panel__file-main--selected),
   &:focus-within:not(.upload-panel__file-main--selected) {
-    background: var(--menu-item-hover);
+    @include emphasis.hover(10%);
 
     .upload-panel__file-name,
     .upload-panel__file-status,
     .upload-panel__file-status .material-icons,
-    .upload-panel__success-indicator {
-      color: var(--primary);
-    }
-
+    .upload-panel__success-indicator,
     .upload-panel__row-action--menu {
-      color: var(--primary);
-    }
-
-    .upload-panel__filetype-chip ::ng-deep .chip,
-    .upload-panel__filetype-chip ::ng-deep .chip__icon {
-      --chip-ink: var(--primary);
-      color: var(--primary);
-    }
-
-    .upload-panel__filetype-chip ::ng-deep .chip {
-      border-color: color-mix(in srgb, var(--primary) 38%, var(--border));
-      background: color-mix(in srgb, var(--primary) 14%, var(--background));
+      color: inherit;
     }
   }
 }

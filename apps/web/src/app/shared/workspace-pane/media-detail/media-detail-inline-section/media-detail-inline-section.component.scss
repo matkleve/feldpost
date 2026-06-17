@@ -83,7 +83,11 @@
     }
 
     &:hover {
-      background: var(--menu-item-hover);
+      @include emphasis.hover(10%);
+
+      .material-icons {
+        color: inherit;
+      }
     }
   }
 
@@ -173,7 +177,11 @@
     cursor: pointer;
 
     &:hover {
-      background: var(--menu-item-hover);
+      @include emphasis.hover(10%);
+
+      .material-icons {
+        color: inherit;
+      }
     }
 
     &:disabled {

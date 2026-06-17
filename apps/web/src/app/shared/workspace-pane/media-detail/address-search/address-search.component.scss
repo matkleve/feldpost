@@ -3,6 +3,7 @@
 
 @use '../detail-row-slots';
 @use '../detail-row-value-flash';
+@use '../../../../../styles/interaction-emphasis-quiet-row' as emphasis;
 
 :host {
   display: grid;
@@ -113,11 +114,11 @@
 
   &:hover,
   &.address-search__result-item--focused {
-    background: var(--menu-item-hover);
+    @include emphasis.hover(10%);
 
     .address-search__result-icon,
     .address-search__result-label {
-      color: var(--primary);
+      color: inherit;
     }
   }
 }

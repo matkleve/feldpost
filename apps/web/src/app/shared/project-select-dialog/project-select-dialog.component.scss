@@ -43,7 +43,7 @@
     cursor: pointer;
 
     &:hover {
-      background: var(--menu-item-hover);
+      @include emphasis.hover(10%);
     }
 
     &:focus-visible {

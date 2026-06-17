@@ -34,6 +34,21 @@
   // @see docs/specs/component/ui-primitives/ui-primitives.dropdown-trigger.md
   button.#{$block}__menu-trigger[data-active='true'] {
     @include emphasis.selected-bordered(10%, 24%);
+
+    [data-dd-part] {
+      color: inherit;
+    }
+  }
+
+  // Idle trigger hover — gold emphasis; parts inherit host ink.
+  // @see docs/specs/system/interaction-emphasis-ink-contract.md
+  button.#{$block}__menu-trigger:not([data-active='true']):hover:not(:disabled),
+  button.#{$block}__menu-trigger:not([data-active='true']):focus-visible:not(:disabled) {
+    @include emphasis.hover(10%);
+
+    [data-dd-part] {
+      color: inherit;
+    }
   }
 
   // Selected trigger on hover/focus — primary wins (same contract as toggle `data-[state=on]:hover`).
@@ -42,6 +57,10 @@
   button.#{$block}__menu-trigger[data-active='true']:focus-visible:not(:disabled) {
     @include emphasis.selected-hover(10%);
     border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
+
+    [data-dd-part] {
+      color: inherit;
+    }
   }
 
   // Open shell: rotate trailing chevron.

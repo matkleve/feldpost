@@ -20,6 +20,15 @@ describe('upload-error-messages.util', () => {
     expect(parts.hint).toContain('supabase db reset');
   });
 
+  it('maps RLS permission errors to viewer-facing upload denial copy', () => {
+    const parts = formatUploadFailureMessage(
+      'new row violates row-level security policy for table "media"',
+    );
+    expect(parts.title).toBe('Upload failed');
+    expect(parts.summary).toBe("You don't have permission to upload");
+    expect(parts.hint).toBeUndefined();
+  });
+
   it('joins summary and hint for legacy toast text', () => {
     const text = uploadFailureMessageToToastText(
       formatUploadFailureMessage('Storage bucket "media" is missing'),

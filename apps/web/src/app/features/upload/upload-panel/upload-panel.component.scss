@@ -762,8 +762,11 @@
       color 120ms ease-out;
 
     &:hover:not(:disabled) {
-      color: var(--primary);
-      background: var(--menu-item-hover);
+      @include emphasis.hover(10%);
+
+      .material-icons {
+        color: inherit;
+      }
     }
 
     &:focus-visible {

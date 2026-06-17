@@ -167,7 +167,7 @@
       color 80ms ease-out;
 
     &:hover:not(&--selected) {
-      background: var(--menu-item-hover);
+      @include emphasis.hover(10%);
     }
 
     &--other-month {

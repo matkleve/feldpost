@@ -884,11 +884,13 @@ export class MapShellComponent implements OnDestroy {
 
   /** Cancels placement mode without placing the image. */
   cancelPlacement(): void {
+    const pendingUploadedPick = this.pendingUploadedLocationMapPick;
     this.pendingPlacementKey = null;
     this.pendingUploadedLocationMapPick = null;
     this.placementActive.set(false);
     this.searchService.setPlacementActive(false);
     this.map?.getContainer().classList.remove('map-container--placing');
+    this.uploadShellUi.clearPendingLocationMapPick(pendingUploadedPick?.mediaId);
     this.mapLocationPickService.navigateBackAfterLocationMapPick();
   }
 

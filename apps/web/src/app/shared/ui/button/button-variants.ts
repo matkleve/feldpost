@@ -1,11 +1,11 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 
-/** Quiet control hover/focus/active — primary ink + wash (@see docs/design/state-visuals.md § Interaction emphasis). */
+/** Quiet control hover/focus/active — gold invitation ink + wash (@see docs/design/state-visuals.md § Interaction emphasis). */
 const quietInteractionEmphasis =
-  'text-muted-foreground hover:bg-[color:color-mix(in_srgb,var(--primary)_10%,transparent)] hover:text-primary focus-visible:bg-[color:color-mix(in_srgb,var(--primary)_10%,transparent)] focus-visible:text-primary active:bg-[color:color-mix(in_srgb,var(--primary)_15%,transparent)] active:text-primary';
+  'text-muted-foreground hover:bg-[color:color-mix(in_srgb,var(--brand-gold)_10%,transparent)] hover:text-[color:var(--brand-gold)] focus-visible:bg-[color:color-mix(in_srgb,var(--brand-gold)_10%,transparent)] focus-visible:text-[color:var(--brand-gold)] active:bg-[color:color-mix(in_srgb,var(--brand-gold)_15%,transparent)] active:text-[color:var(--brand-gold)] [&_.material-icons]:text-inherit';
 
-/** Outline quiet control — bordered rest + primary-tinted border on hover. */
-const outlineInteractionEmphasis = `border border-input bg-background hover:border-[color:color-mix(in_srgb,var(--primary)_42%,var(--border))] focus-visible:border-[color:color-mix(in_srgb,var(--primary)_42%,var(--border))] ${quietInteractionEmphasis}`;
+/** Outline quiet control — bordered rest + gold-tinted border on hover. */
+const outlineInteractionEmphasis = `border border-input bg-background hover:border-[color:color-mix(in_srgb,var(--brand-gold)_42%,var(--border))] focus-visible:border-[color:color-mix(in_srgb,var(--brand-gold)_42%,var(--border))] ${quietInteractionEmphasis}`;
 
 /** Destructive quiet control — destructive ink + wash (@see docs/design/state-visuals.md § Interaction emphasis). */
 const destructiveInteractionEmphasis =

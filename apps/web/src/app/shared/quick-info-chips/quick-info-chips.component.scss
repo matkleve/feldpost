@@ -1,3 +1,5 @@
+@use '../../../styles/interaction-emphasis-quiet-row' as emphasis;
+
 :host {
   display: flex;
   flex-wrap: wrap;
@@ -35,9 +37,8 @@
     cursor: pointer;
 
     &:hover {
-      background: var(--menu-item-hover);
+      @include emphasis.hover(10%);
       border-color: color-mix(in srgb, var(--border) 78%, var(--foreground)); /* TODO(phase8): no tweakcn equiv yet */
-      color: var(--foreground);
     }
   }
 

@@ -68,4 +68,9 @@ export class UploadShellUiService {
   placeFile(key: string, coords: ExifCoords): void {
     this.placementPanel?.placeFile(key, coords);
   }
+
+  /** Clears upload-panel row state after map location-pick is cancelled. */
+  clearPendingLocationMapPick(mediaId?: string): void {
+    this.placementPanel?.clearPendingLocationMapPick(mediaId);
+  }
 }

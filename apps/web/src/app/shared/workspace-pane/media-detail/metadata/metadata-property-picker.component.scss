@@ -1,3 +1,5 @@
+@use '../../../../../styles/interaction-emphasis-quiet-row' as emphasis;
+
 // Property picker — field input + country-style combobox dropdown (address-field-combobox).
 // @see docs/specs/ui/media-detail/metadata-property-picker.md
 // @see address-field-combobox.component.scss
@@ -62,10 +64,10 @@
 
   &:hover,
   &:focus-visible {
-    background: var(--menu-item-hover);
+    @include emphasis.hover(10%);
 
     .metadata-property-picker__result-label {
-      color: var(--primary);
+      color: inherit;
     }
   }
 }

@@ -2,6 +2,7 @@
 // @see docs/specs/ui/media-detail/address-search.md
 
 @use '../detail-row-slots';
+@use '../../../../../styles/interaction-emphasis-quiet-row' as emphasis;
 
 :host {
   display: grid;
@@ -88,11 +89,11 @@
 
   &:hover,
   &.address-field-combobox__result-item--focused {
-    background: var(--menu-item-hover);
+    @include emphasis.hover(10%);
 
     .address-field-combobox__result-label,
     .address-field-combobox__result-subtitle {
-      color: var(--primary);
+      color: inherit;
     }
   }
 }

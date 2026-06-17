@@ -2,6 +2,7 @@
 // @see docs/specs/ui/media-detail/media-detail-actions.md
 
 @use '../workspace-pane/media-detail/detail-row-slots';
+@use '../../../styles/interaction-emphasis-quiet-row' as emphasis;
 
 :host {
   display: block;
@@ -72,11 +73,11 @@
 
   &:hover:not(:disabled):not([disabled]),
   &:focus-visible {
-    background: var(--menu-item-hover);
+    @include emphasis.hover(10%);
 
     .context-action-bar__icon,
     .context-action-bar__label {
-      color: var(--primary);
+      color: inherit;
     }
   }
 }

@@ -285,6 +285,18 @@ export class UploadPanelComponent implements OnDestroy {
     this.rows.placeFile(key, coords);
   }
 
+  /** upload-panel.lane-and-row-actions.md § Map-pick row state — clear on pick cancel. */
+  clearPendingLocationMapPick(mediaId?: string): void {
+    const pending = this.pendingLocationPickMediaId();
+    if (!pending) {
+      return;
+    }
+    if (mediaId !== undefined && pending !== mediaId) {
+      return;
+    }
+    this.pendingLocationPickMediaId.set(null);
+  }
+
   dismissFile(jobId: string): void {
     this.rows.dismissFile(jobId);
     this.selectedUploadJobIds.update((selected) => {
