@@ -22,7 +22,6 @@ import { MarkerStateMutationsService } from '../markers/marker-state-mutations.s
 import { MarkerContextPhotoDeleteService } from '../markers/marker-context-photo-delete.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { truncateToastTechnicalDetail } from '../../../../core/toast/toast.helpers';
-import { WORKSPACE_PANE_SHELL_HOST } from '../../../../core/workspace-pane/workspace-pane-shell-host.token';
 import type { ToastOptions, ToastType } from '../../../../core/toast/toast.types';
 import type { UploadLocationMapPickRequest } from '../../../../core/workspace-pane/workspace-pane-shell-events.types';
 import type { PhotoMarkerState } from '../markers/map-marker-reconcile.facade';
@@ -39,6 +38,8 @@ export interface ContextMenuHandlerContext {
   showMapToastTitle(title: string, type: ToastType, extra?: Omit<ToastOptions, 'title' | 'type'>): void;
   closeContextMenus(): void;
   onMapMenuCloseRequested(): void;
+  openDetailView(mediaId: string): void;
+  onDetailAddressSearchRequestConsumed(requestId: number): void;
   handlePhotoMarkerClick(markerKey: string): void;
   patchDetailMediaId(id: string | null): void;
   onUploadLocationMapPickRequested(event: UploadLocationMapPickRequest): void;
@@ -75,7 +76,6 @@ export class MapContextMenuHandlerService {
   private readonly markerStateMutationsService = inject(MarkerStateMutationsService);
   private readonly markerContextPhotoDeleteService = inject(MarkerContextPhotoDeleteService);
   private readonly i18nService = inject(I18nService);
-  private readonly workspacePaneShellHost = inject(WORKSPACE_PANE_SHELL_HOST);
   private readonly router = inject(Router);
 
   private ctx: ContextMenuHandlerContext | null = null;
@@ -211,7 +211,7 @@ export class MapContextMenuHandlerService {
   }
 
   onDetailAddressSearchRequestConsumed(requestId: number): void {
-    this.workspacePaneShellHost.onDetailAddressSearchRequestConsumed(requestId);
+    this.ctx?.onDetailAddressSearchRequestConsumed(requestId);
   }
 
   onProjectSelectionDialogSelected(projectId: string): void {
@@ -546,7 +546,7 @@ export class MapContextMenuHandlerService {
       return;
     }
     this.workspaceSelectionService.setSingle(mediaId);
-    this.workspacePaneShellHost.openDetailView(mediaId);
+    this.ctx?.openDetailView(mediaId);
     await this.router.navigate(['/media']);
     this.ctx?.onMapMenuCloseRequested();
   }
@@ -608,7 +608,7 @@ export class MapContextMenuHandlerService {
     }
 
     const mediaId = mediaIds[0];
-    this.workspacePaneShellHost.openDetailView(mediaId);
+    this.ctx?.openDetailView(mediaId);
     const currentRequestId = this.state.detailAddressSearchRequest()?.requestId ?? 0;
     this.state.setDetailAddressSearchRequest({ mediaId, requestId: currentRequestId + 1 });
     this.ctx?.onMapMenuCloseRequested();

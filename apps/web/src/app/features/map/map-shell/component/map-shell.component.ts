@@ -1068,6 +1068,8 @@ export class MapShellComponent implements OnDestroy {
       showMapToastTitle: (title, type, extra) => this.showMapToastTitle(title, type, extra),
       closeContextMenus: () => this.closeContextMenus(),
       onMapMenuCloseRequested: () => this.onMapMenuCloseRequested(),
+      openDetailView: (mediaId) => this.openDetailView(mediaId),
+      onDetailAddressSearchRequestConsumed: (requestId) => this.workspacePaneShellHost.onDetailAddressSearchRequestConsumed(requestId),
       handlePhotoMarkerClick: (markerKey) => this.photoMarkerLifecycleService.handlePhotoMarkerClick(markerKey),
       patchDetailMediaId: (id) => this.patchDetailMediaId(id),
       onUploadLocationMapPickRequested: (event) => this.onUploadLocationMapPickRequested(event),
