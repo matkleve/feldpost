@@ -8,7 +8,6 @@
 | --- | --- | --- | --- |
 | 1A | `1a` | `city_step` | Branch C; Branch B 0-hit fallback |
 | 1B | `1b` | `house_step` | After 1A confirmed (`step1bGate: active`) |
-| 2 | `2` | `project_address_a` / `project_address_b` | Batch once |
 | 3 | `3` | `geocode` | Multiple hits Branch A/B |
 
 ## 1A → 1B gate
