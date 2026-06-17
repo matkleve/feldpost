@@ -54,6 +54,7 @@ import { I18nService } from '../../../../core/i18n/i18n.service';
 import { SearchBarComponent } from '../../search-bar/search-bar.component';
 import { MapFilterToolbarComponent } from '../../map-filter-toolbar/map-filter-toolbar.component';
 import { MapSearchContextService } from '../handlers/map-search-context.service';
+import type { MapMenuActionId, MarkerMenuActionId, RadiusMenuActionId } from '../workspace/map-workspace-actions.types';
 import type { ThumbnailCardHoverEvent } from '../../../../core/workspace-pane/workspace-pane-thumbnail-hover.types';
 import { ROUTE_SESSION_SHELL_KEYS } from '../../../../core/route-session-cache/route-session-cache.keys';
 import { RouteSessionCacheService } from '../../../../core/route-session-cache/route-session-cache.service';
