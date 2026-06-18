@@ -30,17 +30,7 @@ export interface PhotoMarkerLifecycleContext {
   getPhotoMarkerLayer(): MapLayerGroup | null;
   getUploadedPhotoMarkers(): Map<string, PhotoMarkerState & { lastRendered?: MarkerRenderSnapshot }>;
   getMarkersByMediaId(): MarkersByMediaIdMap;
-  getDraftMediaMarker(): { lat: number; lng: number; uploadCount: number } | null;
-  getSelectedMarkerKey(): string | null;
-  getSelectedMarkerKeys(): Set<string>;
-  setPhotoPanelOpen(open: boolean): void;
-  getPhotoPanelOpen(): boolean;
-  getWorkspacePaneWidth(): number;
-  setWorkspacePaneWidth(width: number): void;
   getWorkspacePaneOpeningWidth(): number;
-  setDraftMediaMarker(marker: { lat: number; lng: number; uploadCount: number } | null): void;
-  setSelectedMarker(key: string | null): void;
-  setSelectedMarkerKeys(keys: Set<string>): void;
   patchDetailMediaId(id: string | null): void;
   openDetailView(mediaId: string): void;
 }
@@ -117,7 +107,7 @@ export class PhotoMarkerLifecycleService {
   }
 
   resolveDraftMediaMarkerUpload(event: ImageUploadedEvent): void {
-    const draft = this.ctx?.getDraftMediaMarker();
+    const draft = this.state.draftMediaMarker();
     if (!draft) return;
 
     const draftKey = toMarkerKey(draft.lat, draft.lng);
@@ -194,7 +184,7 @@ export class PhotoMarkerLifecycleService {
       existing.thumbnailUrl = nextThumb;
       existing.direction ??= event.direction;
 
-      if (nextCount > 1 && this.ctx.getSelectedMarkerKey() === markerKey) {
+      if (nextCount > 1 && this.state.selectedMarkerKey() === markerKey) {
         this.markerSelectionService.setSelectedMarker(null);
         this.state.setPhotoPanelOpen(false);
       }
@@ -268,7 +258,7 @@ export class PhotoMarkerLifecycleService {
   }
 
   ensurePhotoPanelOpen(): void {
-    if (!this.ctx?.getPhotoPanelOpen()) {
+    if (!this.state.photoPanelOpen()) {
       this.state.setWorkspacePaneWidth(this.ctx!.getWorkspacePaneOpeningWidth());
     }
     this.state.setPhotoPanelOpen(true);
@@ -284,7 +274,7 @@ export class PhotoMarkerLifecycleService {
     zoom: number,
   ): void {
     // Ctrl/Meta-click appends marker results to the current active selection.
-    const selectedKeys = new Set(this.ctx!.getSelectedMarkerKeys());
+    const selectedKeys = new Set(this.state.selectedMarkerKeys());
     selectedKeys.add(markerKey);
     this.markerSelectionService.setSelectedMarkerKeys(selectedKeys);
     void this.markerBindingService.addMarkerCellsToSelection(cells, zoom);

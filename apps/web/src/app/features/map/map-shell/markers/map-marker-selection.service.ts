@@ -2,15 +2,11 @@ import { Injectable, inject } from '@angular/core';
 import { MarkerSelectionSyncService } from './marker-selection-sync.service';
 import { MapPhotoMarkerRenderService } from './map-photo-marker-render.service';
 import { MapZoomHighlightOrchestratorService } from './map-zoom-highlight-orchestrator.service';
+import { MapShellState } from '../component/map-shell.state';
 import type { ThumbnailCardHoverEvent } from '../../../../core/workspace-pane/workspace-pane-thumbnail-hover.types';
 import { toMarkerKey } from './marker-media-index.helpers';
 
 export interface MarkerSelectionContext {
-  getSelectedMarkerKey(): string | null;
-  getSelectedMarkerKeys(): Set<string>;
-  setSelectedMarkerKey(key: string | null): void;
-  setSelectedMarkerKeys(keys: Set<string>): void;
-  setLinkedHoveredWorkspaceMediaIds(ids: Set<string>): void;
   isRadiusDraftHighlighted(markerKey: string): boolean;
   getUploadedPhotoMarkers(): Map<string, {
     count: number;
@@ -27,6 +23,7 @@ export class MapMarkerSelectionService {
   private readonly markerSelectionSyncService = inject(MarkerSelectionSyncService);
   private readonly markerRenderService = inject(MapPhotoMarkerRenderService);
   private readonly zoomHighlightOrchestrator = inject(MapZoomHighlightOrchestratorService);
+  private readonly state = inject(MapShellState);
 
   private ctx: MarkerSelectionContext | null = null;
 
@@ -44,8 +41,8 @@ export class MapMarkerSelectionService {
 
   isMarkerSelected(markerKey: string): boolean {
     return (
-      markerKey === this.ctx?.getSelectedMarkerKey() ||
-      (this.ctx?.getSelectedMarkerKeys().has(markerKey) ?? false) ||
+      markerKey === this.state.selectedMarkerKey() ||
+      this.state.selectedMarkerKeys().has(markerKey) ||
       (this.ctx?.isRadiusDraftHighlighted(markerKey) ?? false)
     );
   }
@@ -55,17 +52,17 @@ export class MapMarkerSelectionService {
   }
 
   setSelectedMarker(markerKey: string | null): void {
-    const previousMarkerKey = this.ctx?.getSelectedMarkerKey() ?? null;
+    const previousMarkerKey = this.state.selectedMarkerKey();
     if (previousMarkerKey === markerKey) return;
-    this.ctx?.setSelectedMarkerKey(markerKey);
+    this.state.setSelectedMarkerKey(markerKey);
     if (previousMarkerKey) this.markerRenderService.refreshPhotoMarker(previousMarkerKey);
     if (markerKey) this.markerRenderService.refreshPhotoMarker(markerKey);
   }
 
   setSelectedMarkerKeys(nextKeys: Set<string>): void {
-    const previousKeys = this.ctx?.getSelectedMarkerKeys() ?? new Set<string>();
+    const previousKeys = this.state.selectedMarkerKeys();
     if (this.markerSelectionSyncService.areSameKeySet(previousKeys, nextKeys)) return;
-    this.ctx?.setSelectedMarkerKeys(nextKeys);
+    this.state.setSelectedMarkerKeys(nextKeys);
     this.markerSelectionSyncService.refreshChangedKeySet(previousKeys, nextKeys, (k) =>
       this.markerRenderService.refreshPhotoMarker(k),
     );
@@ -89,7 +86,7 @@ export class MapMarkerSelectionService {
 
   setLinkedHoveredWorkspaceImageIdsForMarker(markerKey: string | null): void {
     if (!markerKey) {
-      this.ctx?.setLinkedHoveredWorkspaceMediaIds(new Set());
+      this.state.setLinkedHoveredWorkspaceMediaIds(new Set());
       return;
     }
     const markerState = this.ctx?.getUploadedPhotoMarkers().get(markerKey);
@@ -98,7 +95,7 @@ export class MapMarkerSelectionService {
       this.ctx?.getRawImages() ?? [],
       toMarkerKey,
     );
-    this.ctx?.setLinkedHoveredWorkspaceMediaIds(matchedIds);
+    this.state.setLinkedHoveredWorkspaceMediaIds(matchedIds);
   }
 
   onWorkspaceHoverStarted(event: ThumbnailCardHoverEvent): void {

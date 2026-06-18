@@ -21,9 +21,6 @@ export interface RadiusDrawingContext {
   isPlacementActive(): boolean;
   isSearchPlacementActive(): boolean;
   getUploadedPhotoMarkers(): Map<string, PhotoMarkerState>;
-  getSelectedMarkerKeys(): Set<string>;
-  isPhotoPanelOpen(): boolean;
-  setWorkspacePaneWidth(width: number): void;
   patchDetailMediaId(id: string | null): void;
   closeContextMenus(): void;
   suppressMapClickFor(ms: number): void;
@@ -215,7 +212,7 @@ export class RadiusDrawingOrchestratorService {
       radiusMeters,
       additive,
       uploadedPhotoMarkers: this.ctx!.getUploadedPhotoMarkers(),
-      selectedMarkerKeys: this.ctx!.getSelectedMarkerKeys(),
+      selectedMarkerKeys: this.state.selectedMarkerKeys(),
       toMarkerKey,
       currentImages: this.workspaceViewService.rawImages(),
       fetchClusterImages: (cells, zoom) => this.workspaceViewService.fetchClusterImages(cells, zoom),
@@ -232,8 +229,8 @@ export class RadiusDrawingOrchestratorService {
       this.workspaceSelectionService.selectAllInScope(imageIds);
     }
 
-    if (!this.ctx?.isPhotoPanelOpen()) {
-      this.ctx?.setWorkspacePaneWidth(this.ctx.getWorkspacePaneOpeningWidth());
+    if (!this.state.photoPanelOpen()) {
+      this.state.setWorkspacePaneWidth(this.ctx!.getWorkspacePaneOpeningWidth());
     }
     this.state.setPhotoPanelOpen(true);
     this.ctx?.patchDetailMediaId(null);

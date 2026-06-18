@@ -30,10 +30,6 @@ export interface ViewportCoordinatorContext {
   getUploadedPhotoMarkers(): Map<string, PhotoMarkerState & { lastRendered?: MarkerRenderSnapshot }>;
   getPhotoMarkerLayer(): MapLayerGroup | null;
   getMarkersByMediaId(): Map<string, string[]>;
-  getSelectedMarkerKey(): string | null;
-  setSelectedMarkerKey(key: string | null): void;
-  getSelectedMarkerKeys(): Set<string>;
-  setSelectedMarkerKeys(keys: Set<string>): void;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -232,8 +228,8 @@ export class MapViewportCoordinatorService {
       photoMarkerLayer: this.ctx!.getPhotoMarkerLayer()!,
       uploadedPhotoMarkers: this.ctx!.getUploadedPhotoMarkers(),
       markersByMediaId: this.ctx!.getMarkersByMediaId(),
-      selectedMarkerKey: () => this.ctx!.getSelectedMarkerKey(),
-      setSelectedMarkerKey: (markerKey) => this.ctx!.setSelectedMarkerKey(markerKey),
+      selectedMarkerKey: () => this.state.selectedMarkerKey(),
+      setSelectedMarkerKey: (markerKey) => this.state.setSelectedMarkerKey(markerKey),
       findReusableMarkerKey: (row, keys) =>
         this.mapMarkerReuseStrategyService.findReusableMarkerKey(
           map,
@@ -270,7 +266,7 @@ export class MapViewportCoordinatorService {
   }
 
   private pruneStaleSelectedMarkerKeys(): void {
-    const staleSelectedKeys = new Set(this.ctx!.getSelectedMarkerKeys());
+    const staleSelectedKeys = new Set(this.state.selectedMarkerKeys());
     let selectedKeysChanged = false;
     for (const markerKey of staleSelectedKeys) {
       if (this.ctx!.getUploadedPhotoMarkers().has(markerKey)) {
@@ -280,7 +276,7 @@ export class MapViewportCoordinatorService {
       selectedKeysChanged = true;
     }
     if (selectedKeysChanged) {
-      this.ctx!.setSelectedMarkerKeys(staleSelectedKeys);
+      this.state.setSelectedMarkerKeys(staleSelectedKeys);
     }
   }
 

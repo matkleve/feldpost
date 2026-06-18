@@ -7,6 +7,8 @@ import { MarkerStateMutationsService } from './marker-state-mutations.service';
 import { MapMarkerSelectionService } from './map-marker-selection.service';
 import { MapMarkerBindingService } from './map-marker-binding.service';
 import { MapViewportCoordinatorService } from './map-viewport-coordinator.service';
+import { MapShellState } from '../component/map-shell.state';
+import { WorkspacePaneObserverAdapter } from '../../../../core/workspace-pane/workspace-pane-observer.adapter';
 import { getMarkerKeysForMedia } from './marker-media-index.helpers';
 import type { PhotoMarkerState } from './map-marker-reconcile.facade';
 import type { MarkerRenderSnapshot } from './map-photo-marker-render.service';
@@ -16,10 +18,6 @@ export interface MediaDeleteSyncContext {
   getUploadedPhotoMarkers(): Map<string, PhotoMarkerState & { lastRendered?: MarkerRenderSnapshot }>;
   getPhotoMarkerLayer(): MapLayerGroup | null;
   getMarkersByMediaId(): Map<string, string[]>;
-  getSelectedMarkerKey(): string | null;
-  getSelectedMarkerKeys(): Set<string>;
-  getDetailMediaId(): string | null;
-  patchDetailMediaId(id: string | null): void;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -30,6 +28,8 @@ export class MapMediaDeleteSyncService {
   private readonly markerSelectionService = inject(MapMarkerSelectionService);
   private readonly markerBindingService = inject(MapMarkerBindingService);
   private readonly mapViewportCoordinatorService = inject(MapViewportCoordinatorService);
+  private readonly state = inject(MapShellState);
+  private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
 
   private ctx: MediaDeleteSyncContext | null = null;
 
@@ -75,16 +75,19 @@ export class MapMediaDeleteSyncService {
       this.markerStateMutationsService.removeDeletedPhotoFromMapUi({
         markerKey,
         mediaId,
-        uploadedPhotoMarkers: this.ctx.getUploadedPhotoMarkers(),
-        photoMarkerLayer: this.ctx.getPhotoMarkerLayer(),
-        markersByMediaId: this.ctx.getMarkersByMediaId(),
-        selectedMarkerKey: this.ctx.getSelectedMarkerKey(),
-        selectedMarkerKeys: this.ctx.getSelectedMarkerKeys(),
-        detailMediaId: this.ctx.getDetailMediaId(),
+        uploadedPhotoMarkers: this.ctx!.getUploadedPhotoMarkers(),
+        photoMarkerLayer: this.ctx!.getPhotoMarkerLayer(),
+        markersByMediaId: this.ctx!.getMarkersByMediaId(),
+        selectedMarkerKey: this.state.selectedMarkerKey(),
+        selectedMarkerKeys: this.state.selectedMarkerKeys(),
+        detailMediaId: this.state.detailMediaId(),
         cancelMarkerMoveAnimation: (marker) => this.markerBindingService.cancelMarkerMoveAnimation(marker),
         setSelectedMarker: (key) => this.markerSelectionService.setSelectedMarker(key),
         setSelectedMarkerKeys: (keys) => this.markerSelectionService.setSelectedMarkerKeys(keys),
-        setDetailImageId: (id) => this.ctx!.patchDetailMediaId(id),
+        setDetailImageId: (id) => {
+          this.state.setDetailMediaId(id);
+          this.workspacePaneObserver.setDetailImageId(id);
+        },
       });
     }
 

@@ -578,11 +578,6 @@ export class MapShellComponent implements OnDestroy {
     this.photoMarkerLayer = this.mapLeafletService.createPhotoMarkerLayer(this.map);
 
     this.markerSelectionService.bind({
-      getSelectedMarkerKey: () => this.selectedMarkerKey(),
-      getSelectedMarkerKeys: () => this.selectedMarkerKeys(),
-      setSelectedMarkerKey: (key) => this.state.setSelectedMarkerKey(key),
-      setSelectedMarkerKeys: (keys) => this.state.setSelectedMarkerKeys(keys),
-      setLinkedHoveredWorkspaceMediaIds: (ids) => this.state.setLinkedHoveredWorkspaceMediaIds(ids),
       isRadiusDraftHighlighted: (key) => this.radiusDrawingService.isDraftHighlighted(key),
       getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
       getRawImages: () => this.workspaceViewService.rawImages(),
@@ -613,9 +608,6 @@ export class MapShellComponent implements OnDestroy {
       isPlacementActive: () => this.placementActive(),
       isSearchPlacementActive: () => this.searchService.searchPlacementActive(),
       getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
-      getSelectedMarkerKeys: () => this.selectedMarkerKeys(),
-      isPhotoPanelOpen: () => this.photoPanelOpen(),
-      setWorkspacePaneWidth: (width) => this.state.setWorkspacePaneWidth(width),
       patchDetailMediaId: (id) => this.patchDetailMediaId(id),
       closeContextMenus: () => this.closeContextMenus(),
       suppressMapClickFor: (ms) => this.mapClickHandlerService.suppressMapClickFor(ms),
@@ -638,10 +630,6 @@ export class MapShellComponent implements OnDestroy {
       getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
       getPhotoMarkerLayer: () => this.photoMarkerLayer,
       getMarkersByMediaId: () => this.markersByMediaId,
-      getSelectedMarkerKey: () => this.selectedMarkerKey(),
-      setSelectedMarkerKey: (key) => this.state.setSelectedMarkerKey(key),
-      getSelectedMarkerKeys: () => this.selectedMarkerKeys(),
-      setSelectedMarkerKeys: (keys) => this.state.setSelectedMarkerKeys(keys),
     });
 
     this.mapContextMenuHandlerService.bind({
@@ -670,17 +658,7 @@ export class MapShellComponent implements OnDestroy {
       getPhotoMarkerLayer: () => this.photoMarkerLayer,
       getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
       getMarkersByMediaId: () => this.markersByMediaId,
-      getDraftMediaMarker: () => this.draftMediaMarker(),
-      getSelectedMarkerKey: () => this.selectedMarkerKey(),
-      getSelectedMarkerKeys: () => this.selectedMarkerKeys(),
-      setPhotoPanelOpen: (open) => this.state.setPhotoPanelOpen(open),
-      getPhotoPanelOpen: () => this.photoPanelOpen(),
-      getWorkspacePaneWidth: () => this.workspacePaneWidth(),
-      setWorkspacePaneWidth: (width) => this.state.setWorkspacePaneWidth(width),
       getWorkspacePaneOpeningWidth: () => this.getWorkspacePaneOpeningWidth(),
-      setDraftMediaMarker: (marker) => this.state.setDraftMediaMarker(marker),
-      setSelectedMarker: (key) => this.markerSelectionService.setSelectedMarker(key),
-      setSelectedMarkerKeys: (keys) => this.markerSelectionService.setSelectedMarkerKeys(keys),
       patchDetailMediaId: (id) => this.patchDetailMediaId(id),
       openDetailView: (mediaId) => this.openDetailView(mediaId),
     });
@@ -699,10 +677,6 @@ export class MapShellComponent implements OnDestroy {
       getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
       getPhotoMarkerLayer: () => this.photoMarkerLayer,
       getMarkersByMediaId: () => this.markersByMediaId,
-      getSelectedMarkerKey: () => this.selectedMarkerKey(),
-      getSelectedMarkerKeys: () => this.selectedMarkerKeys(),
-      getDetailMediaId: () => this.detailMediaId(),
-      patchDetailMediaId: (id) => this.patchDetailMediaId(id),
     });
 
     this.mapClickHandlerService.bind({
