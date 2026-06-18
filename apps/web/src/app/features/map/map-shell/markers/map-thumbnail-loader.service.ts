@@ -1,33 +1,17 @@
 import { Injectable, inject } from '@angular/core';
 import { MediaDownloadService } from '../../../../core/media-download/media-download.service';
 import { MapPhotoMarkerRenderService } from './map-photo-marker-render.service';
-import type { PhotoMarkerState } from './map-marker-reconcile.facade';
-import type { MapInstance, MapLatLngBounds } from '../leaflet/map-leaflet.service';
-
-type ThumbnailMarkerState = PhotoMarkerState & {
-  thumbnailUrl?: string;
-  thumbnailLoading?: boolean;
-  signedAt?: number;
-};
-
-export interface ThumbnailLoaderContext {
-  getMap(): MapInstance | undefined;
-  getMarkers(): Map<string, ThumbnailMarkerState>;
-}
+import type { MapLatLngBounds } from '../leaflet/map-leaflet.service';
+import { MapShellInstanceService } from '../component/map-shell-instance.service';
 
 @Injectable({ providedIn: 'root' })
 export class MapThumbnailLoaderService {
   private readonly mediaDownloadService = inject(MediaDownloadService);
   private readonly markerRenderService = inject(MapPhotoMarkerRenderService);
-
-  private ctx: ThumbnailLoaderContext | null = null;
-
-  bind(ctx: ThumbnailLoaderContext): void {
-    this.ctx = ctx;
-  }
+  private readonly instance = inject(MapShellInstanceService);
 
   maybeLoadThumbnails(): void {
-    const map = this.ctx?.getMap();
+    const map = this.instance.map;
     if (!map) return;
 
     const bounds = map.getBounds();
@@ -35,7 +19,7 @@ export class MapThumbnailLoaderService {
 
     this.mediaDownloadService.invalidateStale(staleThreshold);
 
-    for (const [key, state] of this.ctx!.getMarkers()) {
+    for (const [key, state] of this.instance.uploadedPhotoMarkers) {
       if (!this.isSingleMarkerInBounds(state, bounds)) continue;
       this.clearStaleThumbnailIfNeeded(state, staleThreshold);
       this.scheduleThumbnailLoadIfNeeded(key, state);

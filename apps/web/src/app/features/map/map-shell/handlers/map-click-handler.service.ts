@@ -8,8 +8,9 @@ import { WorkspaceSelectionService } from '../../../../core/workspace-selection/
 import { UploadShellUiService } from '../../../upload/upload-shell/upload-shell-ui.service';
 import { MapShellState } from '../component/map-shell.state';
 import { MapShellSearchService } from '../leaflet/map-shell-search.service';
+import { MapShellInstanceService } from '../component/map-shell-instance.service';
 import { WorkspacePaneObserverAdapter } from '../../../../core/workspace-pane/workspace-pane-observer.adapter';
-import type { MapInstance, MapLatLng, MapMouseEvent, MapPoint } from '../leaflet/map-leaflet.service';
+import type { MapLatLng, MapMouseEvent, MapPoint } from '../leaflet/map-leaflet.service';
 import type { UploadLocationMapPickRequest } from '../../../../core/workspace-pane/workspace-pane-shell-events.types';
 
 // ── Module-level constants (migrated from MapShellComponent static fields) ──
@@ -23,18 +24,12 @@ const CONTEXT_MENU_NATIVE_BYPASS_TTL_MS = 250;
 // ── Context interface ────────────────────────────────────────────────────────
 
 export interface ClickHandlerContext {
-  getMap(): MapInstance | undefined;
-  getPendingPlacementKey(): string | null;
-  setPendingPlacementKey(key: string | null): void;
-  getLastMapMoveAt(): number;
   openMapContextMenuAt(latlng: MapLatLng, clientX: number, clientY: number): void;
   openRadiusContextMenuAt(latlng: MapLatLng, clientX: number, clientY: number): void;
   removeDraftMediaMarker(): void;
   closeWorkspacePane(): void;
   renderOrUpdateSearchLocationMarker(latlng: [number, number]): void;
   clearSearchPlacement(): void;
-  getPendingUploadedLocationMapPick(): UploadLocationMapPickRequest | null;
-  setPendingUploadedLocationMapPick(value: UploadLocationMapPickRequest | null): void;
   onCompleteLocationMapPick(pick: UploadLocationMapPickRequest, coords: { lat: number; lng: number }): void;
 }
 
@@ -49,6 +44,7 @@ export class MapClickHandlerService {
   private readonly uploadShellUiService = inject(UploadShellUiService);
   private readonly state = inject(MapShellState);
   private readonly searchService = inject(MapShellSearchService);
+  private readonly instance = inject(MapShellInstanceService);
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
 
   private ctx: ClickHandlerContext | null = null;
@@ -196,7 +192,7 @@ export class MapClickHandlerService {
 
     event.originalEvent.preventDefault();
 
-    const map = this.ctx?.getMap();
+    const map = this.instance.map;
     if (!map || this.state.placementActive() || this.searchService.searchPlacementActive()) {
       return;
     }
@@ -212,7 +208,7 @@ export class MapClickHandlerService {
   }
 
   handleMapMouseMove(event: MapMouseEvent): void {
-    const map = this.ctx?.getMap();
+    const map = this.instance.map;
     if (!map || !this.pendingSecondaryPress || this.radiusDrawingService.isDrawActive()) {
       return;
     }
@@ -310,7 +306,7 @@ export class MapClickHandlerService {
       !isPrimaryClick ||
       !activeDraft ||
       activeDraft.uploadCount !== 0 ||
-      !!this.ctx?.getPendingPlacementKey() ||
+      !!this.state.pendingPlacementKey() ||
       this.searchService.searchPlacementActive()
     ) {
       return false;
@@ -323,13 +319,13 @@ export class MapClickHandlerService {
   }
 
   private tryCompletePendingPlacement(latlng: MapLatLng): boolean {
-    const pendingPlacementKey = this.ctx?.getPendingPlacementKey();
+    const pendingPlacementKey = this.state.pendingPlacementKey();
     if (!pendingPlacementKey) {
       return false;
     }
 
     // Prevent accidental placement immediately after drag/pan movement.
-    const lastMapMoveAt = this.ctx?.getLastMapMoveAt() ?? 0;
+    const lastMapMoveAt = this.instance.lastMapMoveAt;
     if (Date.now() - lastMapMoveAt < PLACEMENT_CLICK_GUARD_MS) {
       return true;
     }
@@ -337,9 +333,9 @@ export class MapClickHandlerService {
     const coords = { lat: latlng.lat, lng: latlng.lng };
     this.uploadShellUiService.placeFile(pendingPlacementKey, coords);
 
-    this.ctx?.setPendingPlacementKey(null);
+    this.state.setPendingPlacementKey(null);
     this.state.setPlacementActive(false);
-    this.ctx?.getMap()?.getContainer().classList.remove('map-container--placing');
+    this.instance.map?.getContainer().classList.remove('map-container--placing');
     return true;
   }
 
@@ -357,8 +353,8 @@ export class MapClickHandlerService {
 
   private completeSearchPlacement(latlng: MapLatLng): void {
     this.ctx?.renderOrUpdateSearchLocationMarker([latlng.lat, latlng.lng]);
-    const pendingUploadLocation = this.ctx?.getPendingUploadedLocationMapPick() ?? null;
-    this.ctx?.setPendingUploadedLocationMapPick(null);
+    const pendingUploadLocation = this.state.pendingUploadedLocationMapPick();
+    this.state.setPendingUploadedLocationMapPick(null);
     this.ctx?.clearSearchPlacement();
 
     if (!pendingUploadLocation) {

@@ -58,7 +58,6 @@ import { HLM_TOGGLE_GROUP_IMPORTS } from '../../../../shared/ui/toggle-group';
 import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/shell/dropdown-shell.component';
 import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../../../shared/ui/menu';
 import { MapShellState } from './map-shell.state';
-import { PhotoMarkerState } from '../markers/map-marker-reconcile.facade';
 import { MapViewportCoordinatorService } from '../markers/map-viewport-coordinator.service';
 import { MapContextMenuHandlerService } from '../context-menu/map-context-menu-handler.service';
 import { MapContextMenuOpenService } from '../context-menu/map-context-menu-open.service';
@@ -72,7 +71,6 @@ import { PhotoMarkerLifecycleService } from '../markers/photo-marker-lifecycle.s
 import { MapMediaDeleteSyncService } from '../markers/map-media-delete-sync.service';
 import { MarkerMotionService } from '../markers/marker-motion.service';
 import { MapPhotoMarkerRenderService } from '../markers/map-photo-marker-render.service';
-import type { MarkerRenderSnapshot } from '../markers/map-photo-marker-render.service';
 import { MapThumbnailLoaderService } from '../markers/map-thumbnail-loader.service';
 import {
   MapZoomHighlightOrchestratorService,
@@ -84,7 +82,6 @@ import { RadiusDrawingOrchestratorService } from '../radius/radius-drawing-orche
 import { MapShellBasemapService } from '../leaflet/map-shell-basemap.service';
 import {
   MapInstance,
-  MapLayerGroup,
   MapMouseEvent,
   MapLeafletService,
 } from '../leaflet/map-leaflet.service';
@@ -104,6 +101,7 @@ import type { WorkspacePaneLayoutMapEffects } from '../../../../core/workspace-p
 import { WorkspacePaneLayoutMapEffectsService } from '../../../../core/workspace-pane/workspace-pane-layout-map-effects.service';
 import { MapMenuViewModelService } from '../workspace/map-menu-view-model.service';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
+import { MapShellInstanceService } from './map-shell-instance.service';
 
 
 @Component({
@@ -172,6 +170,7 @@ export class MapShellComponent implements OnDestroy {
   readonly searchContext = inject(MapSearchContextService);
   private readonly mapPlacementService = inject(MapPlacementService);
   private readonly mapSubscriptionService = inject(MapSubscriptionService);
+  private readonly mapShellInstance = inject(MapShellInstanceService);
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
   private showMapToast(
@@ -220,13 +219,6 @@ export class MapShellComponent implements OnDestroy {
   /** Global upload shell (layout); map shell toggles panel for placement flows. */
   readonly uploadPanelPinned = this.uploadShellUi.uploadPanelPinned;
   readonly uploadPanelOpen = this.uploadShellUi.uploadPanelOpen;
-
-  /**
-   * When non-null the map is in "placement mode": the next click places an
-   * image that had no GPS EXIF data. Holds the upload-panel row key.
-   */
-  private pendingPlacementKey: string | null = null;
-  private pendingUploadedLocationMapPick: UploadLocationMapPickRequest | null = null;
 
   /** Whether the map is in placement mode (drives the banner + cursor class). */
   readonly placementActive = this.state.placementActive;
@@ -277,30 +269,19 @@ export class MapShellComponent implements OnDestroy {
 
   // ── Private helpers ───────────────────────────────────────────────────────
 
-  private readonly uploadedPhotoMarkers = new Map<
-    string,
-    PhotoMarkerState & { lastRendered?: MarkerRenderSnapshot }
-  >();
-
-  /** LayerGroup for all photo markers — enables batch add/remove. */
-  private photoMarkerLayer: MapLayerGroup | null = null;
+  /** Aliased from MapShellInstanceService for local brevity. */
+  private get uploadedPhotoMarkers() { return this.mapShellInstance.uploadedPhotoMarkers; }
+  private get photoMarkerLayer() { return this.mapShellInstance.photoMarkerLayer; }
+  private get markersByMediaId() { return this.mapShellInstance.markersByMediaId; }
 
   /** Set true after first Leaflet init; never cleared on activeShell hide/show. */
   private mapInitialized = false;
-
-  /**
-   * Secondary index: mediaId → markerKey for O(1) lookups when
-   * handling upload manager events (replace, attach).
-   */
-  private readonly markersByMediaId = new Map<string, string[]>();
 
   private readonly deferredStartupHandles: DeferredStartupHandles = {
     rafId: null,
     startupTimer: null,
     markerBootstrapTimer: null,
   };
-  private lastMapMoveAt = 0;
-  private lastMapIdleAt = 0;
   private workspacePaneMapEffectsRegistration: WorkspacePaneLayoutMapEffects | null = null;
   private readonly mapSelectedItemsContext: SelectedItemsContextPort = {
     contextKey: 'map',
@@ -428,6 +409,8 @@ export class MapShellComponent implements OnDestroy {
       mapContainer.removeEventListener('contextmenu', this.mapClickHandlerService.getContainerContextMenuHandler(), true);
     }
     this.map?.remove?.();
+    this.mapShellInstance.map = undefined;
+    this.mapShellInstance.photoMarkerLayer = null;
     this.mapInitialized = false;
   }
 
@@ -560,46 +543,27 @@ export class MapShellComponent implements OnDestroy {
     }
 
     this.map = this.mapLeafletService.createMap(containerRef.nativeElement);
+    this.mapShellInstance.map = this.map;
 
     this.applyMapBasemapLayer();
 
     // LayerGroup for all photo markers — batch add/remove.
-    this.photoMarkerLayer = this.mapLeafletService.createPhotoMarkerLayer(this.map);
+    this.mapShellInstance.photoMarkerLayer = this.mapLeafletService.createPhotoMarkerLayer(this.map);
 
     this.markerSelectionService.bind({
       isRadiusDraftHighlighted: (key) => this.radiusDrawingService.isDraftHighlighted(key),
-      getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
-      getRawImages: () => this.workspaceViewService.rawImages(),
     });
 
     this.markerRenderService.bind({
       isSelected: (key) => this.markerSelectionService.isMarkerSelected(key),
       isLinkedHovered: (key) => this.markerSelectionService.isMarkerLinkedHovered(key),
-      getMap: () => this.map,
-      getMarkers: () => this.uploadedPhotoMarkers,
-    });
-
-    this.thumbnailLoaderService.bind({
-      getMap: () => this.map,
-      getMarkers: () => this.uploadedPhotoMarkers,
-    });
-
-    this.zoomHighlightOrchestrator.bind({
-      getMap: () => this.map,
-      getLastMapIdleAt: () => this.lastMapIdleAt,
-      getLastMapMoveAt: () => this.lastMapMoveAt,
-      getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
-      getMarkersByMediaId: () => this.markersByMediaId,
     });
 
     this.radiusDrawingService.bind({
-      getMap: () => this.map,
-      getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
       suppressMapClickFor: (ms) => this.mapClickHandlerService.suppressMapClickFor(ms),
     });
 
     this.markerBindingService.bind({
-      getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
       handlePhotoMarkerClick: (markerKey, event) => this.photoMarkerLifecycleService.handlePhotoMarkerClick(markerKey, event),
       consumeNativeContextMenuBypass: () => this.mapClickHandlerService.consumeNativeContextMenuBypass(),
       clearPendingSecondaryPress: () => this.mapClickHandlerService.clearPendingSecondaryPress(),
@@ -609,15 +573,7 @@ export class MapShellComponent implements OnDestroy {
       suppressMarkerContextMenuFor: (ms) => this.mapClickHandlerService.suppressMarkerContextMenuFor(ms),
     });
 
-    this.mapViewportCoordinatorService.bind({
-      getMap: () => this.map,
-      getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
-      getPhotoMarkerLayer: () => this.photoMarkerLayer,
-      getMarkersByMediaId: () => this.markersByMediaId,
-    });
-
     this.mapContextMenuHandlerService.bind({
-      getMap: () => this.map,
       showMapToast: (key, fallback, type, extra) => this.showMapToast(key, fallback, type, extra),
       showMapToastTitle: (title, type, extra) => this.showMapToastTitle(title, type, extra),
       onMapMenuCloseRequested: () => this.onMapMenuCloseRequested(),
@@ -626,16 +582,9 @@ export class MapShellComponent implements OnDestroy {
       handlePhotoMarkerClick: (markerKey) => this.photoMarkerLifecycleService.handlePhotoMarkerClick(markerKey),
       onUploadLocationMapPickRequested: (event) => this.onUploadLocationMapPickRequested(event),
       renderOrUpdateDraftMediaMarker: (latlng) => this.photoMarkerLifecycleService.renderOrUpdateDraftMediaMarker(latlng),
-      getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
-      getPhotoMarkerLayer: () => this.photoMarkerLayer,
-      getMarkersByMediaId: () => this.markersByMediaId,
     });
 
     this.photoMarkerLifecycleService.bind({
-      getMap: () => this.map,
-      getPhotoMarkerLayer: () => this.photoMarkerLayer,
-      getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
-      getMarkersByMediaId: () => this.markersByMediaId,
       patchDetailMediaId: (id) => this.patchDetailMediaId(id),
       openDetailView: (mediaId) => this.openDetailView(mediaId),
     });
@@ -644,22 +593,7 @@ export class MapShellComponent implements OnDestroy {
       onImageUploaded: (event) => this.onImageUploaded(event),
     });
 
-    this.mapContextMenuOpenService.bind({
-      getMap: () => this.map,
-      getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
-    });
-
-    this.mapMediaDeleteSyncService.bind({
-      getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
-      getPhotoMarkerLayer: () => this.photoMarkerLayer,
-      getMarkersByMediaId: () => this.markersByMediaId,
-    });
-
     this.mapClickHandlerService.bind({
-      getMap: () => this.map,
-      getPendingPlacementKey: () => this.pendingPlacementKey,
-      setPendingPlacementKey: (key) => { this.pendingPlacementKey = key; },
-      getLastMapMoveAt: () => this.lastMapMoveAt,
       openMapContextMenuAt: (latlng, x, y) => this.mapContextMenuOpenService.openMapContextMenuAt(latlng, x, y),
       openRadiusContextMenuAt: (latlng, x, y) => this.mapContextMenuOpenService.openRadiusContextMenuAt(latlng, x, y),
       removeDraftMediaMarker: () => this.photoMarkerLifecycleService.removeDraftMediaMarker(),
@@ -669,35 +603,9 @@ export class MapShellComponent implements OnDestroy {
         this.searchService.setPlacementActive(false);
         this.map?.getContainer().classList.remove('map-container--placing');
       },
-      getPendingUploadedLocationMapPick: () => this.pendingUploadedLocationMapPick,
-      setPendingUploadedLocationMapPick: (value) => { this.pendingUploadedLocationMapPick = value; },
       onCompleteLocationMapPick: (pick, coords) => {
         void this.mapLocationPickService.applyAndNavigate(pick, coords);
       },
-    });
-
-    this.mapMoveEndHandlerService.bind({
-      getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
-    });
-
-    this.mapViewFlyService.bind({
-      getMap: () => this.map,
-    });
-
-    this.searchContext.bind({
-      getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
-    });
-
-    this.mapPlacementService.bind({
-      getMap: () => this.map,
-      getPendingPlacementKey: () => this.pendingPlacementKey,
-      setPendingPlacementKey: (key) => { this.pendingPlacementKey = key; },
-      getPendingUploadedLocationMapPick: () => this.pendingUploadedLocationMapPick,
-      setPendingUploadedLocationMapPick: (v) => { this.pendingUploadedLocationMapPick = v; },
-    });
-
-    this.mapSubscriptionService.bind({
-      getMap: () => this.map,
     });
 
     this.searchService.updateViewportBounds(this.map);
@@ -730,13 +638,13 @@ export class MapShellComponent implements OnDestroy {
     this.map.on('zoomstart', () => this.mapMoveEndHandlerService.onZoomStart());
     this.map.on('zoomend', () => this.mapMoveEndHandlerService.onZoomEnd());
     this.map.on('moveend', () => {
-      this.lastMapMoveAt = Date.now();
+      this.mapShellInstance.lastMapMoveAt = Date.now();
       this.mapMoveEndHandlerService.handleMoveEnd();
       this.searchService.updateViewportBounds(this.map);
     });
 
     this.map.on('idle', () => {
-      this.lastMapIdleAt = Date.now();
+      this.mapShellInstance.lastMapIdleAt = Date.now();
       this.zoomHighlightOrchestrator.flushPendingZoomHighlight();
     });
   }

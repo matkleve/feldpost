@@ -8,10 +8,10 @@ import { WorkspaceSelectionService } from '../../../../core/workspace-selection/
 import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-view.service';
 import { MapShellState } from '../component/map-shell.state';
 import { MapShellSearchService } from '../leaflet/map-shell-search.service';
+import { MapShellInstanceService } from '../component/map-shell-instance.service';
 import { WorkspacePaneObserverAdapter } from '../../../../core/workspace-pane/workspace-pane-observer.adapter';
 import type { RadiusCommittedVisual } from './radius-visuals.service';
-import type { PhotoMarkerState } from '../markers/map-marker-reconcile.facade';
-import type { MapCircle, MapInstance, MapLatLng, MapMarker, MapMouseEvent, MapPolyline } from '../leaflet/map-leaflet.service';
+import type { MapCircle, MapLatLng, MapMarker, MapMouseEvent, MapPolyline } from '../leaflet/map-leaflet.service';
 import { MapLeafletService } from '../leaflet/map-leaflet.service';
 import { toMarkerKey } from '../markers/marker-media-index.helpers';
 
@@ -19,8 +19,6 @@ export const RADIUS_CLICK_GUARD_MS = 220;
 const RADIUS_SELECTION_MIN_METERS = 10;
 
 export interface RadiusDrawingContext {
-  getMap(): MapInstance | undefined;
-  getUploadedPhotoMarkers(): Map<string, PhotoMarkerState>;
   suppressMapClickFor(ms: number): void;
 }
 
@@ -36,6 +34,7 @@ export class RadiusDrawingOrchestratorService {
   private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly state = inject(MapShellState);
   private readonly searchService = inject(MapShellSearchService);
+  private readonly instance = inject(MapShellInstanceService);
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
 
   private ctx: RadiusDrawingContext | null = null;
@@ -69,14 +68,14 @@ export class RadiusDrawingOrchestratorService {
 
   isInsideAnyCommittedRadius(latlng: MapLatLng): boolean {
     return this.radiusSelectionService.isInsideAnyCommittedRadius(
-      this.ctx?.getMap(),
+      this.instance.map,
       this.radiusCommittedVisuals,
       latlng,
     );
   }
 
   startDraw(startLatLng: MapLatLng, additive: boolean): void {
-    if (!this.ctx?.getMap() || this.state.placementActive() || this.searchService.searchPlacementActive()) {
+    if (!this.instance.map || this.state.placementActive() || this.searchService.searchPlacementActive()) {
       return;
     }
 
@@ -86,9 +85,9 @@ export class RadiusDrawingOrchestratorService {
     this._radiusDrawActive = true;
     this.radiusDrawAdditive = additive;
     this.radiusDrawStartLatLng = startLatLng;
-    this.ctx.suppressMapClickFor(RADIUS_CLICK_GUARD_MS);
+    this.ctx?.suppressMapClickFor(RADIUS_CLICK_GUARD_MS);
 
-    const map = this.ctx.getMap()!;
+    const map = this.instance.map;
     this.radiusDraftLine = this.mapLeafletService.createRadiusDraftLine(map, startLatLng);
     this.radiusDraftCircle = this.mapLeafletService.createRadiusDraftCircle(map, startLatLng);
     this.radiusDraftLabel = this.radiusVisualsService.createLabelMarker(startLatLng, 0, 0).addTo(map);
@@ -105,7 +104,7 @@ export class RadiusDrawingOrchestratorService {
   }
 
   updateDraft(currentLatLng: MapLatLng): void {
-    const map = this.ctx?.getMap();
+    const map = this.instance.map;
     if (!map || !this.radiusDrawStartLatLng) return;
 
     const radiusMeters = map.distance(this.radiusDrawStartLatLng, currentLatLng);
@@ -127,7 +126,7 @@ export class RadiusDrawingOrchestratorService {
   }
 
   async commitDraw(endLatLng: MapLatLng): Promise<void> {
-    const map = this.ctx?.getMap();
+    const map = this.instance.map;
     if (!map || !this.radiusDrawStartLatLng) {
       this.cancelDraw();
       return;
@@ -155,7 +154,7 @@ export class RadiusDrawingOrchestratorService {
   }
 
   cancelDraw(preserveDraftHighlights = false): void {
-    const map = this.ctx?.getMap();
+    const map = this.instance.map;
 
     if (map && this.radiusDrawMoveHandler) {
       map.off('mousemove', this.radiusDrawMoveHandler);
@@ -187,7 +186,7 @@ export class RadiusDrawingOrchestratorService {
   }
 
   addSelectionVisual(center: MapLatLng, radiusMeters: number, edge: MapLatLng): void {
-    const map = this.ctx?.getMap();
+    const map = this.instance.map;
     if (!map) return;
     this.radiusCommittedVisuals.push(
       this.radiusVisualsService.addCommittedSelectionVisual(map, center, radiusMeters, edge),
@@ -202,7 +201,7 @@ export class RadiusDrawingOrchestratorService {
   }
 
   async selectImages(center: MapLatLng, radiusMeters: number, additive: boolean): Promise<void> {
-    const map = this.ctx?.getMap();
+    const map = this.instance.map;
     if (!map) return;
 
     const result = await this.radiusSelectionService.selectRadiusImages({
@@ -210,7 +209,7 @@ export class RadiusDrawingOrchestratorService {
       center,
       radiusMeters,
       additive,
-      uploadedPhotoMarkers: this.ctx!.getUploadedPhotoMarkers(),
+      uploadedPhotoMarkers: this.instance.uploadedPhotoMarkers,
       selectedMarkerKeys: this.state.selectedMarkerKeys(),
       toMarkerKey,
       currentImages: this.workspaceViewService.rawImages(),
@@ -242,13 +241,13 @@ export class RadiusDrawingOrchestratorService {
   }
 
   private updateDraftMarkerHighlights(center: MapLatLng, radiusMeters: number): void {
-    const map = this.ctx?.getMap();
+    const map = this.instance.map;
     if (!map) return;
 
     const previousKeys = this.radiusDraftHighlightedKeys;
     const nextKeys = this.radiusDraftHighlightService.updateDraftHighlights({
       map,
-      uploadedPhotoMarkers: this.ctx!.getUploadedPhotoMarkers(),
+      uploadedPhotoMarkers: this.instance.uploadedPhotoMarkers,
       currentKeys: previousKeys,
       center,
       radiusMeters,

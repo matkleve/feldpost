@@ -7,29 +7,21 @@ import { WorkspaceSelectionService } from '../../../../core/workspace-selection/
 import {
   MapLeafletService,
   type MapDivIcon,
-  type MapInstance,
-  type MapLayerGroup,
   type MapMarker,
   type MapMouseEvent,
 } from '../leaflet/map-leaflet.service';
 import { MapPhotoMarkerRenderService } from './map-photo-marker-render.service';
-import type { MarkerRenderSnapshot } from './map-photo-marker-render.service';
 import { MapMarkerSelectionService } from './map-marker-selection.service';
 import { MapMarkerBindingService } from './map-marker-binding.service';
 import { MapShellState } from '../component/map-shell.state';
-import type { PhotoMarkerState } from './map-marker-reconcile.facade';
+import { MapShellInstanceService } from '../component/map-shell-instance.service';
 import {
   registerMarkerKeyForMedia,
   getMarkerKeysForMedia,
   toMarkerKey,
 } from './marker-media-index.helpers';
-import type { MarkersByMediaIdMap } from './marker-media-index.helpers';
 
 export interface PhotoMarkerLifecycleContext {
-  getMap(): MapInstance | undefined;
-  getPhotoMarkerLayer(): MapLayerGroup | null;
-  getUploadedPhotoMarkers(): Map<string, PhotoMarkerState & { lastRendered?: MarkerRenderSnapshot }>;
-  getMarkersByMediaId(): MarkersByMediaIdMap;
   patchDetailMediaId(id: string | null): void;
   openDetailView(mediaId: string): void;
 }
@@ -43,6 +35,7 @@ export class PhotoMarkerLifecycleService {
   private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
   private readonly state = inject(MapShellState);
+  private readonly instance = inject(MapShellInstanceService);
 
   private ctx: PhotoMarkerLifecycleContext | null = null;
   private draftMediaMarkerLeaflet: MapMarker | null = null;
@@ -56,18 +49,18 @@ export class PhotoMarkerLifecycleService {
   // ---------------------------------------------------------------------------
 
   renderOrUpdateDraftMediaMarker(coords: [number, number]): void {
-    if (!this.ctx?.getMap()) return;
+    if (!this.instance.map) return;
 
     const icon = this.buildDraftMediaMarkerIcon();
     if (!this.draftMediaMarkerLeaflet) {
       this.draftMediaMarkerLeaflet = this.mapLeafletService.createStaticPhotoMarker(coords, icon);
 
       try {
-        const photoMarkerLayer = this.ctx.getPhotoMarkerLayer();
+        const photoMarkerLayer = this.instance.photoMarkerLayer;
         if (photoMarkerLayer) {
           photoMarkerLayer.addLayer(this.draftMediaMarkerLeaflet);
         } else {
-          this.draftMediaMarkerLeaflet.addTo(this.ctx.getMap()!);
+          this.draftMediaMarkerLeaflet.addTo(this.instance.map!);
         }
       } catch {
         // Leaflet map not yet fully initialized (panes not ready).
@@ -94,7 +87,7 @@ export class PhotoMarkerLifecycleService {
 
   removeDraftMediaMarker(): void {
     if (this.draftMediaMarkerLeaflet) {
-      const photoMarkerLayer = this.ctx?.getPhotoMarkerLayer();
+      const photoMarkerLayer = this.instance.photoMarkerLayer;
       if (photoMarkerLayer) {
         photoMarkerLayer.removeLayer(this.draftMediaMarkerLeaflet);
       } else {
@@ -129,10 +122,8 @@ export class PhotoMarkerLifecycleService {
    * localObjectUrl so the thumbnail swaps instantly (no placeholder flash).
    */
   handleImageReplaced(event: ImageReplacedEvent): void {
-    if (!this.ctx) return;
-
-    for (const markerKey of getMarkerKeysForMedia(this.ctx.getMarkersByMediaId(), event.mediaId)) {
-      const state = this.ctx.getUploadedPhotoMarkers().get(markerKey);
+    for (const markerKey of getMarkerKeysForMedia(this.instance.markersByMediaId, event.mediaId)) {
+      const state = this.instance.uploadedPhotoMarkers.get(markerKey);
       if (!state) continue;
 
       if (state.thumbnailUrl?.startsWith('blob:')) {
@@ -151,10 +142,8 @@ export class PhotoMarkerLifecycleService {
    * to real thumbnail using the localObjectUrl from the upload.
    */
   handleImageAttached(event: ImageAttachedEvent): void {
-    if (!this.ctx) return;
-
-    for (const markerKey of getMarkerKeysForMedia(this.ctx.getMarkersByMediaId(), event.mediaId)) {
-      const state = this.ctx.getUploadedPhotoMarkers().get(markerKey);
+    for (const markerKey of getMarkerKeysForMedia(this.instance.markersByMediaId, event.mediaId)) {
+      const state = this.instance.uploadedPhotoMarkers.get(markerKey);
       if (!state) continue;
 
       if (state.thumbnailUrl?.startsWith('blob:')) {
@@ -170,10 +159,10 @@ export class PhotoMarkerLifecycleService {
   }
 
   upsertUploadedPhotoMarker(event: ImageUploadedEvent): void {
-    if (!this.ctx?.getMap()) return;
+    if (!this.instance.map) return;
 
     const markerKey = toMarkerKey(event.lat, event.lng);
-    const uploadedPhotoMarkers = this.ctx.getUploadedPhotoMarkers();
+    const uploadedPhotoMarkers = this.instance.uploadedPhotoMarkers;
     const existing = uploadedPhotoMarkers.get(markerKey);
 
     if (existing) {
@@ -201,7 +190,7 @@ export class PhotoMarkerLifecycleService {
       }),
     );
 
-    this.ctx.getPhotoMarkerLayer()!.addLayer(marker);
+    this.instance.photoMarkerLayer!.addLayer(marker);
     this.markerBindingService.attachMarkerInteractions(markerKey, marker);
 
     uploadedPhotoMarkers.set(markerKey, {
@@ -217,7 +206,7 @@ export class PhotoMarkerLifecycleService {
 
     // Maintain secondary index for upload manager event lookups.
     if (event.id) {
-      registerMarkerKeyForMedia(this.ctx.getMarkersByMediaId(), event.id, markerKey);
+      registerMarkerKeyForMedia(this.instance.markersByMediaId, event.id, markerKey);
     }
   }
 
@@ -226,9 +215,7 @@ export class PhotoMarkerLifecycleService {
   // ---------------------------------------------------------------------------
 
   handlePhotoMarkerClick(markerKey: string, clickEvent?: MapMouseEvent): void {
-    if (!this.ctx) return;
-
-    const markerState = this.ctx.getUploadedPhotoMarkers().get(markerKey);
+    const markerState = this.instance.uploadedPhotoMarkers.get(markerKey);
     if (!markerState) {
       return;
     }
@@ -238,7 +225,7 @@ export class PhotoMarkerLifecycleService {
     this.ensurePhotoPanelOpen();
 
     // Load images at this marker's grid position(s) into the workspace view.
-    const zoom = Math.round(this.ctx.getMap()?.getZoom() ?? 13);
+    const zoom = Math.round(this.instance.map?.getZoom() ?? 13);
     const cells = markerState.sourceCells ?? [{ lat: markerState.lat, lng: markerState.lng }];
     const additive = this.isAdditiveMarkerSelection(clickEvent);
 

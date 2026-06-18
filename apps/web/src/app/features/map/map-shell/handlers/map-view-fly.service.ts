@@ -4,11 +4,8 @@ import { MapZoomHighlightOrchestratorService, DETAIL_LOCATION_FOCUS_ZOOM } from 
 import { MapZoomOrchestratorService } from '../../../../core/map-zoom/map-zoom-orchestrator.service';
 import { MapShellSearchService } from '../leaflet/map-shell-search.service';
 import { MapShellState } from '../component/map-shell.state';
+import { MapShellInstanceService } from '../component/map-shell-instance.service';
 import type { MapInstance } from '../leaflet/map-leaflet.service';
-
-export interface MapViewFlyContext {
-  getMap(): MapInstance | undefined;
-}
 
 @Injectable({ providedIn: 'root' })
 export class MapViewFlyService {
@@ -19,12 +16,7 @@ export class MapViewFlyService {
   private readonly mapZoomOrchestrator = inject(MapZoomOrchestratorService);
   private readonly searchService = inject(MapShellSearchService);
   private readonly state = inject(MapShellState);
-
-  private ctx: MapViewFlyContext | null = null;
-
-  bind(ctx: MapViewFlyContext): void {
-    this.ctx = ctx;
-  }
+  private readonly instance = inject(MapShellInstanceService);
 
   setViewWithPaneOffset(
     lat: number,
@@ -32,7 +24,7 @@ export class MapViewFlyService {
     zoom: number,
     options?: Parameters<MapInstance['setView']>[2],
   ): void {
-    const map = this.ctx?.getMap();
+    const map = this.instance.map;
     if (!map) return;
     const paneOffset = this.state.photoPanelOpen() ? (this.state.workspacePaneWidth() / 2) : 0;
     if (paneOffset === 0) {
@@ -51,7 +43,7 @@ export class MapViewFlyService {
     lng: number;
     zoomMode?: 'house' | 'street';
   }): void {
-    const map = this.ctx?.getMap();
+    const map = this.instance.map;
     if (!map) {
       this.mapZoomOrchestrator.deferUntilMapReady({
         mediaId: event.mediaId,
@@ -78,7 +70,7 @@ export class MapViewFlyService {
   }
 
   applySearchMapCenter(event: { lat: number; lng: number; label: string }): void {
-    const map = this.ctx?.getMap();
+    const map = this.instance.map;
     if (!map) return;
     this.setViewWithPaneOffset(event.lat, event.lng, MapViewFlyService.STREET_PROXIMITY_ZOOM, { animate: false });
     this.searchService.updateViewportBounds(map);

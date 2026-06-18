@@ -22,11 +22,10 @@ import { MediaDeleteUndoService } from '../../../../core/media-delete/media-dele
 import { MarkerStateMutationsService } from '../markers/marker-state-mutations.service';
 import { MarkerContextPhotoDeleteService } from '../markers/marker-context-photo-delete.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
+import { MapShellInstanceService } from '../component/map-shell-instance.service';
 import { truncateToastTechnicalDetail } from '../../../../core/toast/toast.helpers';
 import type { ToastOptions, ToastType } from '../../../../core/toast/toast.types';
 import type { UploadLocationMapPickRequest } from '../../../../core/workspace-pane/workspace-pane-shell-events.types';
-import type { PhotoMarkerState } from '../markers/map-marker-reconcile.facade';
-import type { MapInstance, MapLayerGroup } from '../leaflet/map-leaflet.service';
 import type { MapMenuActionId, MarkerMenuActionId, RadiusMenuActionId } from '../workspace/map-workspace-actions.types';
 
 const HOUSE_PROXIMITY_ZOOM = 19;
@@ -34,7 +33,6 @@ const STREET_PROXIMITY_ZOOM = 17;
 const QUICK_RADIUS_METERS = 250;
 
 export interface ContextMenuHandlerContext {
-  getMap(): MapInstance | undefined;
   showMapToast(key: string, fallback: string, type: ToastType, extra?: Omit<ToastOptions, 'title' | 'type'>): void;
   showMapToastTitle(title: string, type: ToastType, extra?: Omit<ToastOptions, 'title' | 'type'>): void;
   onMapMenuCloseRequested(): void;
@@ -43,9 +41,6 @@ export interface ContextMenuHandlerContext {
   handlePhotoMarkerClick(markerKey: string): void;
   onUploadLocationMapPickRequested(event: UploadLocationMapPickRequest): void;
   renderOrUpdateDraftMediaMarker(latlng: [number, number]): void;
-  getUploadedPhotoMarkers(): Map<string, PhotoMarkerState>;
-  getPhotoMarkerLayer(): MapLayerGroup | null;
-  getMarkersByMediaId(): Map<string, string[]>;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -73,6 +68,7 @@ export class MapContextMenuHandlerService {
   private readonly markerContextPhotoDeleteService = inject(MarkerContextPhotoDeleteService);
   private readonly i18nService = inject(I18nService);
   private readonly router = inject(Router);
+  private readonly instance = inject(MapShellInstanceService);
 
   private ctx: ContextMenuHandlerContext | null = null;
 
@@ -237,7 +233,7 @@ export class MapContextMenuHandlerService {
 
   async onMapContextStartRadiusFromHere(): Promise<void> {
     const coords = this.state.mapContextMenuCoords();
-    const map = this.ctx?.getMap();
+    const map = this.instance.map;
     if (!coords || !map) return;
     const center = this.mapLeafletService.createLatLng(coords.lat, coords.lng);
     await this.radiusDrawingService.startQuickRadius(center, QUICK_RADIUS_METERS);
@@ -261,7 +257,7 @@ export class MapContextMenuHandlerService {
     this.workspaceViewService.clearActiveSelection();
     this.workspaceSelectionService.clearSelection();
     this.uploadShellUi.openUploadPanel();
-    this.ctx?.getMap()?.getContainer().classList.remove('map-container--placing');
+    this.instance.map?.getContainer().classList.remove('map-container--placing');
     this.ctx?.showMapToast(
       'map.shell.toast.mediaMarkerCreated',
       'Media marker created. Start upload.',
@@ -272,7 +268,7 @@ export class MapContextMenuHandlerService {
 
   private onMapContextZoomHouseHere(): void {
     const coords = this.state.mapContextMenuCoords();
-    if (!coords || !this.ctx?.getMap()) return;
+    if (!coords || !this.instance.map) return;
     this.setViewWithPaneOffset(coords.lat, coords.lng, HOUSE_PROXIMITY_ZOOM);
     this.ctx?.onMapMenuCloseRequested();
   }
@@ -664,14 +660,14 @@ export class MapContextMenuHandlerService {
 
   private onMarkerContextZoomHouse(): void {
     const payload = this.state.markerContextMenuPayload();
-    if (!payload || !this.ctx?.getMap()) return;
+    if (!payload || !this.instance.map) return;
     this.setViewWithPaneOffset(payload.lat, payload.lng, HOUSE_PROXIMITY_ZOOM);
     this.ctx?.onMapMenuCloseRequested();
   }
 
   private onMarkerContextZoomStreet(): void {
     const payload = this.state.markerContextMenuPayload();
-    if (!payload || !this.ctx?.getMap()) return;
+    if (!payload || !this.instance.map) return;
     this.setViewWithPaneOffset(payload.lat, payload.lng, STREET_PROXIMITY_ZOOM);
     this.ctx?.onMapMenuCloseRequested();
   }
@@ -725,7 +721,7 @@ export class MapContextMenuHandlerService {
     const mediaIds = await this.mapContextActionsService.resolveMarkerContextMediaIds(
       payload,
       (cells, zoom) => this.workspaceViewService.fetchClusterImages(cells, zoom),
-      this.ctx?.getMap()?.getZoom() ?? 13,
+      this.instance.map?.getZoom() ?? 13,
     );
     if (mediaIds.length === 0) {
       this.ctx?.showMapToast(
@@ -768,7 +764,7 @@ export class MapContextMenuHandlerService {
     const mediaIds = await this.mapContextActionsService.resolveMarkerContextMediaIds(
       payload,
       (cells, zoom) => this.workspaceViewService.fetchClusterImages(cells, zoom),
-      this.ctx?.getMap()?.getZoom() ?? 13,
+      this.instance.map?.getZoom() ?? 13,
     );
     const uniqueImageIds = Array.from(new Set(mediaIds));
     if (uniqueImageIds.length === 0) {
@@ -808,7 +804,7 @@ export class MapContextMenuHandlerService {
       const mediaIds = await this.mapContextActionsService.resolveMarkerContextMediaIds(
         payload,
         (cells, zoom) => this.workspaceViewService.fetchClusterImages(cells, zoom),
-        this.ctx?.getMap()?.getZoom() ?? 13,
+        this.instance.map?.getZoom() ?? 13,
       );
       const uniqueImageIds = Array.from(new Set(mediaIds));
       if (uniqueImageIds.length === 0) {
@@ -864,9 +860,9 @@ export class MapContextMenuHandlerService {
         this.markerStateMutationsService.removeDeletedPhotoFromMapUi({
           markerKey: target.markerKey,
           mediaId: target.mediaId,
-          uploadedPhotoMarkers: this.ctx!.getUploadedPhotoMarkers(),
-          photoMarkerLayer: this.ctx!.getPhotoMarkerLayer(),
-          markersByMediaId: this.ctx!.getMarkersByMediaId(),
+          uploadedPhotoMarkers: this.instance.uploadedPhotoMarkers,
+          photoMarkerLayer: this.instance.photoMarkerLayer,
+          markersByMediaId: this.instance.markersByMediaId,
           selectedMarkerKey: this.state.selectedMarkerKey(),
           selectedMarkerKeys: this.state.selectedMarkerKeys(),
           detailMediaId: this.state.detailMediaId(),
@@ -956,7 +952,7 @@ export class MapContextMenuHandlerService {
     const mediaIds = await this.mapContextActionsService.resolveMarkerContextMediaIds(
       payload,
       (cells, zoom) => this.workspaceViewService.fetchClusterImages(cells, zoom),
-      this.ctx?.getMap()?.getZoom() ?? 13,
+      this.instance.map?.getZoom() ?? 13,
     );
     return Array.from(new Set(mediaIds));
   }
@@ -968,7 +964,7 @@ export class MapContextMenuHandlerService {
   }
 
   private setViewWithPaneOffset(lat: number, lng: number, zoom: number): void {
-    const map = this.ctx?.getMap();
+    const map = this.instance.map;
     if (!map) return;
     const paneOffset = this.state.photoPanelOpen() ? this.state.workspacePaneWidth() / 2 : 0;
     if (paneOffset === 0) {

@@ -7,13 +7,13 @@ import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-
 import { WorkspaceSelectionService } from '../../../../core/workspace-selection/workspace-selection.service';
 import { MapLeafletService } from '../leaflet/map-leaflet.service';
 import type { MapLatLng, MapMarker, MapMouseEvent } from '../leaflet/map-leaflet.service';
+import { MapShellInstanceService } from '../component/map-shell-instance.service';
 
 const MARKER_LONG_PRESS_MS = 500;
 const MARKER_MOVE_DURATION_MS = 320;
 const MARKER_CONTEXT_MENU_SUPPRESS_MS = 320;
 
 export interface MarkerBindingContext {
-  getUploadedPhotoMarkers(): Map<string, { lat: number; lng: number }>;
   handlePhotoMarkerClick(markerKey: string, event?: MapMouseEvent): void;
   consumeNativeContextMenuBypass(): boolean;
   clearPendingSecondaryPress(): void;
@@ -32,6 +32,7 @@ export class MapMarkerBindingService {
   private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
   private readonly mapLeafletService = inject(MapLeafletService);
+  private readonly instance = inject(MapShellInstanceService);
 
   private ctx: MarkerBindingContext | null = null;
 
@@ -131,7 +132,7 @@ export class MapMarkerBindingService {
 
   private handleMarkerSecondaryOpen(markerKey: string, event: MouseEvent | PointerEvent): void {
     if (this.radiusDrawingService.hasCommittedSelection()) {
-      const state = this.ctx?.getUploadedPhotoMarkers().get(markerKey);
+      const state = this.instance.uploadedPhotoMarkers.get(markerKey);
       if (state) {
         const markerLatLng = this.mapLeafletService.createLatLng(state.lat, state.lng);
         if (this.radiusDrawingService.isInsideAnyCommittedRadius(markerLatLng)) {

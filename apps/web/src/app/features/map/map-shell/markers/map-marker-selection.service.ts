@@ -3,19 +3,13 @@ import { MarkerSelectionSyncService } from './marker-selection-sync.service';
 import { MapPhotoMarkerRenderService } from './map-photo-marker-render.service';
 import { MapZoomHighlightOrchestratorService } from './map-zoom-highlight-orchestrator.service';
 import { MapShellState } from '../component/map-shell.state';
+import { MapShellInstanceService } from '../component/map-shell-instance.service';
+import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-view.service';
 import type { ThumbnailCardHoverEvent } from '../../../../core/workspace-pane/workspace-pane-thumbnail-hover.types';
 import { toMarkerKey } from './marker-media-index.helpers';
 
 export interface MarkerSelectionContext {
   isRadiusDraftHighlighted(markerKey: string): boolean;
-  getUploadedPhotoMarkers(): Map<string, {
-    count: number;
-    mediaId?: string;
-    lat: number;
-    lng: number;
-    sourceCells?: Array<{ lat: number; lng: number }>;
-  }>;
-  getRawImages(): ReadonlyArray<{ id: string; latitude: number; longitude: number }>;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -24,6 +18,8 @@ export class MapMarkerSelectionService {
   private readonly markerRenderService = inject(MapPhotoMarkerRenderService);
   private readonly zoomHighlightOrchestrator = inject(MapZoomHighlightOrchestratorService);
   private readonly state = inject(MapShellState);
+  private readonly instance = inject(MapShellInstanceService);
+  private readonly workspaceViewService = inject(WorkspaceViewService);
 
   private ctx: MarkerSelectionContext | null = null;
 
@@ -89,10 +85,10 @@ export class MapMarkerSelectionService {
       this.state.setLinkedHoveredWorkspaceMediaIds(new Set());
       return;
     }
-    const markerState = this.ctx?.getUploadedPhotoMarkers().get(markerKey);
+    const markerState = this.instance.uploadedPhotoMarkers.get(markerKey);
     const matchedIds = this.markerSelectionSyncService.buildLinkedWorkspaceImageIds(
       markerState,
-      this.ctx?.getRawImages() ?? [],
+      this.workspaceViewService.rawImages(),
       toMarkerKey,
     );
     this.state.setLinkedHoveredWorkspaceMediaIds(matchedIds);
@@ -134,7 +130,7 @@ export class MapMarkerSelectionService {
   pruneStaleLinkedHoverFromMap(): void {
     if (
       this._linkedHoverMarkerFromMapKey &&
-      !this.ctx?.getUploadedPhotoMarkers().has(this._linkedHoverMarkerFromMapKey)
+      !this.instance.uploadedPhotoMarkers.has(this._linkedHoverMarkerFromMapKey)
     ) {
       this.setLinkedHoverMarkerFromMap(null);
       this.state.setLinkedHoveredWorkspaceMediaIds(new Set());

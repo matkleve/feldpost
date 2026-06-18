@@ -3,28 +3,17 @@ import { Injectable, inject } from '@angular/core';
 import { MapContextActionsService } from './map-context-actions.service';
 import { MapShellState } from '../component/map-shell.state';
 import { MapClickHandlerService } from '../handlers/map-click-handler.service';
+import { MapShellInstanceService } from '../component/map-shell-instance.service';
 import { RADIUS_CLICK_GUARD_MS } from '../radius/radius-drawing-orchestrator.service';
 import { toMarkerKey } from '../markers/marker-media-index.helpers';
-import type { PhotoMarkerState } from '../markers/map-marker-reconcile.facade';
-import type { MarkerRenderSnapshot } from '../markers/map-photo-marker-render.service';
-import type { MapInstance, MapLatLng } from '../leaflet/map-leaflet.service';
-
-export interface ContextMenuOpenContext {
-  getMap(): MapInstance | undefined;
-  getUploadedPhotoMarkers(): Map<string, PhotoMarkerState & { lastRendered?: MarkerRenderSnapshot }>;
-}
+import type { MapLatLng } from '../leaflet/map-leaflet.service';
 
 @Injectable({ providedIn: 'root' })
 export class MapContextMenuOpenService {
   private readonly mapContextActionsService = inject(MapContextActionsService);
   private readonly state = inject(MapShellState);
   private readonly mapClickHandlerService = inject(MapClickHandlerService);
-
-  private ctx: ContextMenuOpenContext | null = null;
-
-  bind(ctx: ContextMenuOpenContext): void {
-    this.ctx = ctx;
-  }
+  private readonly instance = inject(MapShellInstanceService);
 
   openMapContextMenuAt(latlng: MapLatLng, clientX: number, clientY: number): void {
     const position = this.mapContextActionsService.clampContextMenuPosition(clientX, clientY);
@@ -49,13 +38,12 @@ export class MapContextMenuOpenService {
   }
 
   openMarkerContextMenu(markerKey: string, sourceEvent?: MouseEvent | PointerEvent): void {
-    if (!this.ctx) return;
-    const state = this.ctx.getUploadedPhotoMarkers().get(markerKey);
+    const state = this.instance.uploadedPhotoMarkers.get(markerKey);
     if (!state) return;
     const position = this.mapContextActionsService.resolveMarkerContextMenuPosition(
       state,
       sourceEvent,
-      this.ctx.getMap(),
+      this.instance.map,
     );
 
     this.state.setMapContextMenuOpen(false);
@@ -66,7 +54,7 @@ export class MapContextMenuOpenService {
 
     if (isMultiSelection) {
       const multiStates = Array.from(selectedMarkerKeys)
-        .map((key) => this.ctx!.getUploadedPhotoMarkers().get(key))
+        .map((key) => this.instance.uploadedPhotoMarkers.get(key))
         .filter((candidate): candidate is NonNullable<typeof candidate> => !!candidate);
 
       const combinedSourceCells = Array.from(

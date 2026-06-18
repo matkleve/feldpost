@@ -3,14 +3,9 @@ import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-
 import { MapShellGpsService } from '../leaflet/map-shell-gps.service';
 import { MapShellSearchService } from '../leaflet/map-shell-search.service';
 import { MapShellState } from '../component/map-shell.state';
+import { MapShellInstanceService } from '../component/map-shell-instance.service';
 import { searchQueryContextsEqual } from '../../../../core/search/search-bar-helpers';
 import type { SearchQueryContext } from '../../../../core/search/search.models';
-import type { PhotoMarkerState } from '../markers/map-marker-reconcile.facade';
-import type { MarkerRenderSnapshot } from '../markers/map-photo-marker-render.service';
-
-export interface SearchContextBindTarget {
-  getUploadedPhotoMarkers(): Map<string, PhotoMarkerState & { lastRendered?: MarkerRenderSnapshot }>;
-}
 
 @Injectable({ providedIn: 'root' })
 export class MapSearchContextService {
@@ -18,12 +13,7 @@ export class MapSearchContextService {
   private readonly gpsService = inject(MapShellGpsService);
   private readonly searchService = inject(MapShellSearchService);
   private readonly state = inject(MapShellState);
-
-  private ctx: SearchContextBindTarget | null = null;
-
-  bind(ctx: SearchContextBindTarget): void {
-    this.ctx = ctx;
-  }
+  private readonly instance = inject(MapShellInstanceService);
 
   private readonly searchDataCentroid = computed<{ lat: number; lng: number } | undefined>(() => {
     const all = this.workspaceViewService.rawImages();
@@ -68,7 +58,7 @@ export class MapSearchContextService {
     () => {
       const selectedMarkerKey = this.state.selectedMarkerKey();
       if (!selectedMarkerKey) return undefined;
-      const markerState = this.ctx?.getUploadedPhotoMarkers().get(selectedMarkerKey);
+      const markerState = this.instance.uploadedPhotoMarkers.get(selectedMarkerKey);
       if (!markerState) return undefined;
       return { lat: markerState.lat, lng: markerState.lng };
     },

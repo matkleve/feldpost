@@ -1,8 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { DetailZoomHighlightService } from './detail-zoom-highlight.service';
 import { ZoomTargetMarkerService } from './zoom-target-marker.service';
-import type { PhotoMarkerState } from './map-marker-reconcile.facade';
-import type { MapInstance } from '../leaflet/map-leaflet.service';
+import { MapShellInstanceService } from '../component/map-shell-instance.service';
 import { toMarkerKey } from './marker-media-index.helpers';
 
 const DETAIL_LOCATION_FOCUS_ZOOM = 21;
@@ -15,22 +14,13 @@ const DETAIL_LOCATION_WAIT_FOR_SINGLE_MS = 2800;
 const DETAIL_LOCATION_IDLE_FALLBACK_MS = 1400;
 const DETAIL_LOCATION_PENDING_TTL_MS = 12000;
 
-export interface ZoomHighlightContext {
-  getMap(): MapInstance | undefined;
-  getLastMapIdleAt(): number;
-  getLastMapMoveAt(): number;
-  getUploadedPhotoMarkers(): Map<string, PhotoMarkerState>;
-  getMarkersByMediaId(): Map<string, string[]>;
-}
-
 export { DETAIL_LOCATION_FOCUS_ZOOM };
 
 @Injectable({ providedIn: 'root' })
 export class MapZoomHighlightOrchestratorService {
   private readonly detailZoomHighlightService = inject(DetailZoomHighlightService);
   private readonly zoomTargetMarkerService = inject(ZoomTargetMarkerService);
-
-  private ctx: ZoomHighlightContext | null = null;
+  private readonly instance = inject(MapShellInstanceService);
 
   private pendingZoomHighlight: {
     mediaId: string;
@@ -38,10 +28,6 @@ export class MapZoomHighlightOrchestratorService {
     lng: number;
     requestedAt: number;
   } | null = null;
-
-  bind(ctx: ZoomHighlightContext): void {
-    this.ctx = ctx;
-  }
 
   setPending(mediaId: string, lat: number, lng: number): void {
     this.pendingZoomHighlight = { mediaId, lat, lng, requestedAt: Date.now() };
@@ -60,7 +46,7 @@ export class MapZoomHighlightOrchestratorService {
   }
 
   waitForMapIdleThenFlushZoomHighlight(): void {
-    const map = this.ctx?.getMap();
+    const map = this.instance.map;
     if (!map) return;
 
     this.detailZoomHighlightService.waitForIdleOrTimeout(
@@ -89,7 +75,7 @@ export class MapZoomHighlightOrchestratorService {
     if (
       this.detailZoomHighlightService.shouldWaitForMapIdle(
         pendingForImage,
-        this.ctx?.getLastMapIdleAt() ?? 0,
+        this.instance.lastMapIdleAt,
         DETAIL_LOCATION_IDLE_FALLBACK_MS,
       )
     ) {
@@ -124,8 +110,7 @@ export class MapZoomHighlightOrchestratorService {
   }
 
   private resolveZoomHighlightMarkerWrapper(markerKey: string): HTMLElement | null {
-    const markerElement = this.ctx
-      ?.getUploadedPhotoMarkers()
+    const markerElement = this.instance.uploadedPhotoMarkers
       .get(markerKey)
       ?.marker.getElement() as HTMLElement | null;
     return this.detailZoomHighlightService.resolveMarkerWrapper(markerElement);
@@ -134,7 +119,7 @@ export class MapZoomHighlightOrchestratorService {
   private isZoomHighlightRenderReady(markerElement: HTMLElement): boolean {
     return this.detailZoomHighlightService.isRenderReady(
       markerElement,
-      this.ctx?.getLastMapMoveAt() ?? 0,
+      this.instance.lastMapMoveAt,
       DETAIL_LOCATION_RENDER_SETTLE_MS,
     );
   }
@@ -145,15 +130,14 @@ export class MapZoomHighlightOrchestratorService {
     lng: number,
     allowClusterFallback: boolean,
   ): string | null {
-    if (!this.ctx) return null;
     return this.zoomTargetMarkerService.findMarkerKeyForZoomTarget({
       mediaId,
       lat,
       lng,
       allowClusterFallback,
-      map: this.ctx.getMap(),
-      markersByMediaId: this.ctx.getMarkersByMediaId(),
-      uploadedPhotoMarkers: this.ctx.getUploadedPhotoMarkers(),
+      map: this.instance.map,
+      markersByMediaId: this.instance.markersByMediaId,
+      uploadedPhotoMarkers: this.instance.uploadedPhotoMarkers,
       toMarkerKey,
       clusterFallbackMaxMeters: DETAIL_LOCATION_CLUSTER_FALLBACK_MAX_METERS,
     });

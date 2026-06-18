@@ -1,8 +1,12 @@
 import { Injectable, signal } from '@angular/core';
 import type { ProjectSelectOption } from '../../../../shared/project-select-dialog/project-select-dialog.component';
+import type { UploadLocationMapPickRequest } from '../../../../core/workspace-pane/workspace-pane-shell-events.types';
 
 @Injectable({ providedIn: 'root' })
 export class MapShellState {
+  private readonly _placementActive = signal(false);
+  readonly placementActive = this._placementActive.asReadonly();
+
   private readonly _photoPanelOpen = signal(false);
   readonly photoPanelOpen = this._photoPanelOpen.asReadonly();
 
@@ -102,6 +106,12 @@ export class MapShellState {
   private readonly _detailAddressSearchRequest = signal<{ mediaId: string; requestId: number } | null>(null);
   readonly detailAddressSearchRequest = this._detailAddressSearchRequest.asReadonly();
 
+  private readonly _pendingPlacementKey = signal<string | null>(null);
+  readonly pendingPlacementKey = this._pendingPlacementKey.asReadonly();
+
+  private readonly _pendingUploadedLocationMapPick = signal<UploadLocationMapPickRequest | null>(null);
+  readonly pendingUploadedLocationMapPick = this._pendingUploadedLocationMapPick.asReadonly();
+
   setPhotoPanelOpen(value: boolean): void {
     this._photoPanelOpen.set(value);
   }
@@ -120,6 +130,10 @@ export class MapShellState {
 
   setLinkedHoveredWorkspaceMediaIds(value: Set<string>): void {
     this._linkedHoveredWorkspaceMediaIds.set(value);
+  }
+
+  setPlacementActive(value: boolean): void {
+    this._placementActive.set(value);
   }
 
   getWorkspacePaneOpeningWidth(): number {
@@ -241,5 +255,13 @@ export class MapShellState {
 
   setDetailAddressSearchRequest(value: { mediaId: string; requestId: number } | null): void {
     this._detailAddressSearchRequest.set(value);
+  }
+
+  setPendingPlacementKey(value: string | null): void {
+    this._pendingPlacementKey.set(value);
+  }
+
+  setPendingUploadedLocationMapPick(value: UploadLocationMapPickRequest | null): void {
+    this._pendingUploadedLocationMapPick.set(value);
   }
 }

@@ -8,17 +8,9 @@ import { MapMarkerSelectionService } from './map-marker-selection.service';
 import { MapMarkerBindingService } from './map-marker-binding.service';
 import { MapViewportCoordinatorService } from './map-viewport-coordinator.service';
 import { MapShellState } from '../component/map-shell.state';
+import { MapShellInstanceService } from '../component/map-shell-instance.service';
 import { WorkspacePaneObserverAdapter } from '../../../../core/workspace-pane/workspace-pane-observer.adapter';
 import { getMarkerKeysForMedia } from './marker-media-index.helpers';
-import type { PhotoMarkerState } from './map-marker-reconcile.facade';
-import type { MarkerRenderSnapshot } from './map-photo-marker-render.service';
-import type { MapLayerGroup } from '../leaflet/map-leaflet.service';
-
-export interface MediaDeleteSyncContext {
-  getUploadedPhotoMarkers(): Map<string, PhotoMarkerState & { lastRendered?: MarkerRenderSnapshot }>;
-  getPhotoMarkerLayer(): MapLayerGroup | null;
-  getMarkersByMediaId(): Map<string, string[]>;
-}
 
 @Injectable({ providedIn: 'root' })
 export class MapMediaDeleteSyncService {
@@ -29,13 +21,8 @@ export class MapMediaDeleteSyncService {
   private readonly markerBindingService = inject(MapMarkerBindingService);
   private readonly mapViewportCoordinatorService = inject(MapViewportCoordinatorService);
   private readonly state = inject(MapShellState);
+  private readonly instance = inject(MapShellInstanceService);
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
-
-  private ctx: MediaDeleteSyncContext | null = null;
-
-  bind(ctx: MediaDeleteSyncContext): void {
-    this.ctx = ctx;
-  }
 
   subscribe(destroyRef: DestroyRef): void {
     this.mediaDeleteUndo.mediaDeleted$
@@ -52,7 +39,7 @@ export class MapMediaDeleteSyncService {
   }
 
   private syncMapAfterMediaDeleted(mediaItemIds: readonly string[]): void {
-    if (!this.ctx || mediaItemIds.length === 0) {
+    if (mediaItemIds.length === 0) {
       return;
     }
 
@@ -60,12 +47,12 @@ export class MapMediaDeleteSyncService {
     const removals = new Map<string, string>();
 
     for (const mediaId of deleted) {
-      for (const markerKey of getMarkerKeysForMedia(this.ctx.getMarkersByMediaId(), mediaId)) {
+      for (const markerKey of getMarkerKeysForMedia(this.instance.markersByMediaId, mediaId)) {
         removals.set(markerKey, mediaId);
       }
     }
 
-    for (const [markerKey, state] of this.ctx.getUploadedPhotoMarkers().entries()) {
+    for (const [markerKey, state] of this.instance.uploadedPhotoMarkers.entries()) {
       if (state.mediaId && deleted.has(state.mediaId) && !removals.has(markerKey)) {
         removals.set(markerKey, state.mediaId);
       }
@@ -75,9 +62,9 @@ export class MapMediaDeleteSyncService {
       this.markerStateMutationsService.removeDeletedPhotoFromMapUi({
         markerKey,
         mediaId,
-        uploadedPhotoMarkers: this.ctx!.getUploadedPhotoMarkers(),
-        photoMarkerLayer: this.ctx!.getPhotoMarkerLayer(),
-        markersByMediaId: this.ctx!.getMarkersByMediaId(),
+        uploadedPhotoMarkers: this.instance.uploadedPhotoMarkers,
+        photoMarkerLayer: this.instance.photoMarkerLayer,
+        markersByMediaId: this.instance.markersByMediaId,
         selectedMarkerKey: this.state.selectedMarkerKey(),
         selectedMarkerKeys: this.state.selectedMarkerKeys(),
         detailMediaId: this.state.detailMediaId(),

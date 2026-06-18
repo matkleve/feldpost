@@ -5,9 +5,9 @@ import {
   type PhotoMarkerZoomLevel,
 } from '../../../../core/map/marker-factory';
 import { PhotoMarkerIconStateService } from './photo-marker-icon-state.service';
-import type { PhotoMarkerState } from './map-marker-reconcile.facade';
-import type { MapDivIcon, MapInstance, MapMarker } from '../leaflet/map-leaflet.service';
+import type { MapDivIcon, MapMarker } from '../leaflet/map-leaflet.service';
 import { MapLeafletService } from '../leaflet/map-leaflet.service';
+import { MapShellInstanceService } from '../component/map-shell-instance.service';
 
 export type MarkerRenderSnapshot = {
   count: number;
@@ -22,19 +22,16 @@ export type MarkerRenderSnapshot = {
   zoomLevel: PhotoMarkerZoomLevel;
 };
 
-type PhotoMarkerStateWithRender = PhotoMarkerState & { lastRendered?: MarkerRenderSnapshot };
-
 export interface MarkerRenderContext {
   isSelected(markerKey: string): boolean;
   isLinkedHovered(markerKey: string): boolean;
-  getMap(): MapInstance | undefined;
-  getMarkers(): Map<string, PhotoMarkerStateWithRender>;
 }
 
 @Injectable({ providedIn: 'root' })
 export class MapPhotoMarkerRenderService {
   private readonly photoMarkerIconStateService = inject(PhotoMarkerIconStateService);
   private readonly mapLeafletService = inject(MapLeafletService);
+  private readonly instance = inject(MapShellInstanceService);
 
   private ctx: MarkerRenderContext | null = null;
 
@@ -43,7 +40,7 @@ export class MapPhotoMarkerRenderService {
   }
 
   getPhotoMarkerZoomLevel(): PhotoMarkerZoomLevel {
-    const zoom = this.ctx?.getMap()?.getZoom() ?? 13;
+    const zoom = this.instance.map?.getZoom() ?? 13;
     if (zoom >= 16) return 'near';
     if (zoom >= 13) return 'mid';
     return 'far';
@@ -118,7 +115,7 @@ export class MapPhotoMarkerRenderService {
       uploading?: boolean;
     }>,
   ): MapDivIcon {
-    const markerState = this.ctx?.getMarkers().get(markerKey);
+    const markerState = this.instance.uploadedPhotoMarkers.get(markerKey);
     const fallbackLabel =
       override?.fallbackLabel ?? markerState?.fallbackLabel ?? this.getMarkerFallbackLabel(markerState);
     const iconState = this.photoMarkerIconStateService.resolveIconState(
@@ -180,7 +177,7 @@ export class MapPhotoMarkerRenderService {
   }
 
   refreshPhotoMarker(markerKey: string): void {
-    const markerState = this.ctx?.getMarkers().get(markerKey);
+    const markerState = this.instance.uploadedPhotoMarkers.get(markerKey);
     if (!markerState) return;
 
     const snapshot = this.buildMarkerRenderSnapshot(markerKey, markerState);

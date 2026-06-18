@@ -2,7 +2,6 @@ import { Injectable, inject } from '@angular/core';
 import { ViewportMarkerQueryService } from './viewport-marker-query.service';
 import {
   MapMarkerReconcileFacade,
-  type PhotoMarkerState,
   type ReconcileDependencies,
   type ReconcileIncomingRow,
 } from './map-marker-reconcile.facade';
@@ -17,20 +16,13 @@ import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-
 import { MapLeafletService } from '../leaflet/map-leaflet.service';
 import { MapSessionCacheService } from '../../../../core/map-session-cache/map-session-cache.service';
 import { MapShellState } from '../component/map-shell.state';
-import type { MarkerRenderSnapshot } from './map-photo-marker-render.service';
-import type { MapInstance, MapLatLngBounds, MapLayerGroup } from '../leaflet/map-leaflet.service';
+import { MapShellInstanceService } from '../component/map-shell-instance.service';
+import type { MapLatLngBounds } from '../leaflet/map-leaflet.service';
 import type { MapSessionSnapshot, MapViewportMarkerRow } from '../../../../core/map-session-cache/map-session-cache.types';
 import { PHOTO_MARKER_ICON_SIZE } from '../../../../core/map/marker-factory';
 import { toMarkerKey } from './marker-media-index.helpers';
 
 type MergedViewportRow = ClusterMergedRow<MapViewportMarkerRow>;
-
-export interface ViewportCoordinatorContext {
-  getMap(): MapInstance | undefined;
-  getUploadedPhotoMarkers(): Map<string, PhotoMarkerState & { lastRendered?: MarkerRenderSnapshot }>;
-  getPhotoMarkerLayer(): MapLayerGroup | null;
-  getMarkersByMediaId(): Map<string, string[]>;
-}
 
 @Injectable({ providedIn: 'root' })
 export class MapViewportCoordinatorService {
@@ -47,8 +39,7 @@ export class MapViewportCoordinatorService {
   private readonly mapLeafletService = inject(MapLeafletService);
   private readonly mapSessionCache = inject(MapSessionCacheService);
   private readonly state = inject(MapShellState);
-
-  private ctx: ViewportCoordinatorContext | null = null;
+  private readonly instance = inject(MapShellInstanceService);
 
   private viewportQueryController: AbortController | null = null;
   private lastFetchedBounds: MapLatLngBounds | null = null;
@@ -56,17 +47,13 @@ export class MapViewportCoordinatorService {
   private lastViewportRpcRows: MapViewportMarkerRow[] | null = null;
   private isRestoringFromSessionCache = false;
 
-  bind(ctx: ViewportCoordinatorContext): void {
-    this.ctx = ctx;
-  }
-
   cancelPendingQuery(): void {
     this.viewportQueryController?.abort();
     this.viewportQueryController = null;
   }
 
   isViewportStillInFetchedBuffer(zoomChanged: boolean): boolean {
-    const map = this.ctx?.getMap();
+    const map = this.instance.map;
     if (zoomChanged || !this.lastFetchedBounds || !map) {
       return false;
     }
@@ -75,7 +62,7 @@ export class MapViewportCoordinatorService {
   }
 
   async queryViewportMarkers(): Promise<void> {
-    const map = this.ctx?.getMap();
+    const map = this.instance.map;
     if (!map) return;
 
     this.viewportQueryController?.abort();
@@ -104,7 +91,7 @@ export class MapViewportCoordinatorService {
     this.lastViewportRpcRows = result.data;
     this.reconcileViewportMarkerRows(result.data);
 
-    for (const state of this.ctx!.getUploadedPhotoMarkers().values()) {
+    for (const state of this.instance.uploadedPhotoMarkers.values()) {
       state.optimistic = false;
     }
 
@@ -112,7 +99,7 @@ export class MapViewportCoordinatorService {
   }
 
   reapplyViewportMarkerFilter(): void {
-    const map = this.ctx?.getMap();
+    const map = this.instance.map;
     if (!map || !this.lastViewportRpcRows) {
       return;
     }
@@ -120,12 +107,12 @@ export class MapViewportCoordinatorService {
   }
 
   tryRestoreViewportFromSessionCache(): boolean {
-    if ((this.ctx?.getUploadedPhotoMarkers().size ?? 0) > 0) {
+    if (this.instance.uploadedPhotoMarkers.size > 0) {
       return true;
     }
 
     const snapshot = this.mapSessionCache.read();
-    if (!snapshot || !this.ctx?.getMap()) {
+    if (!snapshot || !this.instance.map) {
       return false;
     }
 
@@ -138,7 +125,7 @@ export class MapViewportCoordinatorService {
   }
 
   persistMapSessionCache(): void {
-    const map = this.ctx?.getMap();
+    const map = this.instance.map;
     if (!map || !this.lastFetchedBounds || this.lastFetchedZoom === null || !this.lastViewportRpcRows) {
       return;
     }
@@ -176,7 +163,7 @@ export class MapViewportCoordinatorService {
   }
 
   private buildIncomingViewportMarkers(rows: MapViewportMarkerRow[]): Map<string, MergedViewportRow> {
-    const map = this.ctx?.getMap();
+    const map = this.instance.map;
     const merged = this.mapMarkerClusterMergeService.mergeOverlappingClusters(
       map,
       rows,
@@ -213,7 +200,7 @@ export class MapViewportCoordinatorService {
 
   private collectRecyclableMarkerKeys(incoming: Map<string, MergedViewportRow>): Set<string> {
     const recyclableKeys = new Set<string>();
-    for (const [key, state] of this.ctx!.getUploadedPhotoMarkers()) {
+    for (const [key, state] of this.instance.uploadedPhotoMarkers) {
       if (state.optimistic) continue;
       if (!incoming.has(key)) {
         recyclableKeys.add(key);
@@ -223,25 +210,25 @@ export class MapViewportCoordinatorService {
   }
 
   private getReconcileDependencies(): ReconcileDependencies {
-    const map = this.ctx?.getMap();
+    const map = this.instance.map;
     return {
-      photoMarkerLayer: this.ctx!.getPhotoMarkerLayer()!,
-      uploadedPhotoMarkers: this.ctx!.getUploadedPhotoMarkers(),
-      markersByMediaId: this.ctx!.getMarkersByMediaId(),
+      photoMarkerLayer: this.instance.photoMarkerLayer!,
+      uploadedPhotoMarkers: this.instance.uploadedPhotoMarkers,
+      markersByMediaId: this.instance.markersByMediaId,
       selectedMarkerKey: () => this.state.selectedMarkerKey(),
       setSelectedMarkerKey: (markerKey) => this.state.setSelectedMarkerKey(markerKey),
       findReusableMarkerKey: (row, keys) =>
         this.mapMarkerReuseStrategyService.findReusableMarkerKey(
           map,
-          this.ctx!.getMarkersByMediaId(),
-          this.ctx!.getUploadedPhotoMarkers(),
+          this.instance.markersByMediaId,
+          this.instance.uploadedPhotoMarkers,
           row,
           keys,
         ),
       findSpawnOriginForIncomingRow: (row, keys) =>
         this.mapMarkerReuseStrategyService.findSpawnOriginForIncomingRow(
           map,
-          this.ctx!.getUploadedPhotoMarkers(),
+          this.instance.uploadedPhotoMarkers,
           row,
           keys,
         ),
@@ -269,7 +256,7 @@ export class MapViewportCoordinatorService {
     const staleSelectedKeys = new Set(this.state.selectedMarkerKeys());
     let selectedKeysChanged = false;
     for (const markerKey of staleSelectedKeys) {
-      if (this.ctx!.getUploadedPhotoMarkers().has(markerKey)) {
+      if (this.instance.uploadedPhotoMarkers.has(markerKey)) {
         continue;
       }
       staleSelectedKeys.delete(markerKey);
@@ -281,7 +268,7 @@ export class MapViewportCoordinatorService {
   }
 
   private restoreViewportFromSessionSnapshot(snapshot: MapSessionSnapshot): boolean {
-    const map = this.ctx?.getMap();
+    const map = this.instance.map;
     if (!map) return false;
 
     map.setView([snapshot.centerLat, snapshot.centerLng], snapshot.zoom, { animate: false });
@@ -305,7 +292,7 @@ export class MapViewportCoordinatorService {
 
     this.pruneStaleSelectedMarkerKeys();
 
-    for (const state of this.ctx!.getUploadedPhotoMarkers().values()) {
+    for (const state of this.instance.uploadedPhotoMarkers.values()) {
       state.optimistic = false;
     }
 
