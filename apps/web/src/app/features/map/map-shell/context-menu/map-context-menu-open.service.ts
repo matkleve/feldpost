@@ -12,7 +12,6 @@ import type { MapInstance, MapLatLng } from '../leaflet/map-leaflet.service';
 export interface ContextMenuOpenContext {
   getMap(): MapInstance | undefined;
   getUploadedPhotoMarkers(): Map<string, PhotoMarkerState & { lastRendered?: MarkerRenderSnapshot }>;
-  getSelectedMarkerKeys(): Set<string>;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -62,7 +61,7 @@ export class MapContextMenuOpenService {
     this.state.setMapContextMenuOpen(false);
     this.state.setRadiusContextMenuOpen(false);
     this.state.setMarkerContextMenuPosition(position);
-    const selectedMarkerKeys = this.ctx.getSelectedMarkerKeys();
+    const selectedMarkerKeys = this.state.selectedMarkerKeys();
     const isMultiSelection = selectedMarkerKeys.size > 1 && selectedMarkerKeys.has(markerKey);
 
     if (isMultiSelection) {

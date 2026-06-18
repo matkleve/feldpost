@@ -253,7 +253,7 @@ export class MapContextMenuHandlerService {
     this.searchService.setPlacementActive(false);
     this.ctx?.setPlacementActive(false);
     if (!this.state.photoPanelOpen()) {
-      this.state.setWorkspacePaneWidth(this.getWorkspacePaneOpeningWidth());
+      this.state.setWorkspacePaneWidth(this.state.getWorkspacePaneOpeningWidth());
     }
     this.state.setPhotoPanelOpen(true);
     this.patchDetailMediaId(null);
@@ -984,15 +984,9 @@ export class MapContextMenuHandlerService {
 
   private ensurePhotoPanelOpen(): void {
     if (!this.state.photoPanelOpen()) {
-      this.state.setWorkspacePaneWidth(this.getWorkspacePaneOpeningWidth());
+      this.state.setWorkspacePaneWidth(this.state.getWorkspacePaneOpeningWidth());
     }
     this.state.setPhotoPanelOpen(true);
   }
 
-  private getWorkspacePaneOpeningWidth(): number {
-    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1280;
-    const minWidth = viewportWidth * 0.25;
-    const maxWidth = viewportWidth * 0.75;
-    return Math.min(Math.max(this.state.workspacePaneWidth(), minWidth), maxWidth);
-  }
 }

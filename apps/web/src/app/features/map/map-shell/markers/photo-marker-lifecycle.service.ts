@@ -30,7 +30,6 @@ export interface PhotoMarkerLifecycleContext {
   getPhotoMarkerLayer(): MapLayerGroup | null;
   getUploadedPhotoMarkers(): Map<string, PhotoMarkerState & { lastRendered?: MarkerRenderSnapshot }>;
   getMarkersByMediaId(): MarkersByMediaIdMap;
-  getWorkspacePaneOpeningWidth(): number;
   patchDetailMediaId(id: string | null): void;
   openDetailView(mediaId: string): void;
 }
@@ -259,7 +258,7 @@ export class PhotoMarkerLifecycleService {
 
   ensurePhotoPanelOpen(): void {
     if (!this.state.photoPanelOpen()) {
-      this.state.setWorkspacePaneWidth(this.ctx!.getWorkspacePaneOpeningWidth());
+      this.state.setWorkspacePaneWidth(this.state.getWorkspacePaneOpeningWidth());
     }
     this.state.setPhotoPanelOpen(true);
   }

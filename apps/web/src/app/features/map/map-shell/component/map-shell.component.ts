@@ -524,15 +524,6 @@ export class MapShellComponent implements OnDestroy {
     this.workspacePaneObserver.setDetailImageId(mediaId);
   }
 
-  private clampWorkspacePaneWidth(width: number): number {
-    const vw = typeof window !== 'undefined' ? window.innerWidth : 1280;
-    return Math.min(Math.max(width, vw * 0.25), vw * 0.75);
-  }
-
-  private getWorkspacePaneOpeningWidth(): number {
-    return this.clampWorkspacePaneWidth(this.workspacePaneWidth());
-  }
-
   onZoomToLocation(event: { mediaId: string; lat: number; lng: number; zoomMode?: 'house' | 'street' }): void {
     this.mapViewFlyService.onZoomToLocation(event);
   }
@@ -608,7 +599,6 @@ export class MapShellComponent implements OnDestroy {
       getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
       patchDetailMediaId: (id) => this.patchDetailMediaId(id),
       suppressMapClickFor: (ms) => this.mapClickHandlerService.suppressMapClickFor(ms),
-      getWorkspacePaneOpeningWidth: () => this.getWorkspacePaneOpeningWidth(),
     });
 
     this.markerBindingService.bind({
@@ -650,7 +640,6 @@ export class MapShellComponent implements OnDestroy {
       getPhotoMarkerLayer: () => this.photoMarkerLayer,
       getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
       getMarkersByMediaId: () => this.markersByMediaId,
-      getWorkspacePaneOpeningWidth: () => this.getWorkspacePaneOpeningWidth(),
       patchDetailMediaId: (id) => this.patchDetailMediaId(id),
       openDetailView: (mediaId) => this.openDetailView(mediaId),
     });
@@ -662,7 +651,6 @@ export class MapShellComponent implements OnDestroy {
     this.mapContextMenuOpenService.bind({
       getMap: () => this.map,
       getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
-      getSelectedMarkerKeys: () => this.selectedMarkerKeys(),
     });
 
     this.mapMediaDeleteSyncService.bind({

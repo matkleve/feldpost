@@ -122,6 +122,11 @@ export class MapShellState {
     this._linkedHoveredWorkspaceMediaIds.set(value);
   }
 
+  getWorkspacePaneOpeningWidth(): number {
+    const vw = typeof window !== 'undefined' ? window.innerWidth : 1280;
+    return Math.min(Math.max(this._workspacePaneWidth(), vw * 0.25), vw * 0.75);
+  }
+
   closeAllContextMenus(): void {
     this._mapContextMenuOpen.set(false);
     this._radiusContextMenuOpen.set(false);
