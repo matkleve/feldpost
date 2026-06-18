@@ -137,7 +137,7 @@ export class MapMarkerSelectionService {
       !this.ctx?.getUploadedPhotoMarkers().has(this._linkedHoverMarkerFromMapKey)
     ) {
       this.setLinkedHoverMarkerFromMap(null);
-      this.ctx?.setLinkedHoveredWorkspaceMediaIds(new Set());
+      this.state.setLinkedHoveredWorkspaceMediaIds(new Set());
     }
   }
 }
