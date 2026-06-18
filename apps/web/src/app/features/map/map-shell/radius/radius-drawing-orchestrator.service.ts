@@ -22,7 +22,6 @@ export interface RadiusDrawingContext {
   isSearchPlacementActive(): boolean;
   getUploadedPhotoMarkers(): Map<string, PhotoMarkerState>;
   patchDetailMediaId(id: string | null): void;
-  closeContextMenus(): void;
   suppressMapClickFor(ms: number): void;
   getWorkspacePaneOpeningWidth(): number;
 }
@@ -82,7 +81,7 @@ export class RadiusDrawingOrchestratorService {
     }
 
     this.cancelDraw();
-    this.ctx.closeContextMenus();
+    this.state.closeAllContextMenus();
 
     this._radiusDrawActive = true;
     this.radiusDrawAdditive = additive;

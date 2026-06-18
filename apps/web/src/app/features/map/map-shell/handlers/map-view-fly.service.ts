@@ -3,12 +3,11 @@ import { Injectable, inject } from '@angular/core';
 import { MapZoomHighlightOrchestratorService, DETAIL_LOCATION_FOCUS_ZOOM } from '../markers/map-zoom-highlight-orchestrator.service';
 import { MapZoomOrchestratorService } from '../../../../core/map-zoom/map-zoom-orchestrator.service';
 import { MapShellSearchService } from '../leaflet/map-shell-search.service';
+import { MapShellState } from '../component/map-shell.state';
 import type { MapInstance } from '../leaflet/map-leaflet.service';
 
 export interface MapViewFlyContext {
   getMap(): MapInstance | undefined;
-  getPhotoPanelOpen(): boolean;
-  getWorkspacePaneWidth(): number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -19,6 +18,7 @@ export class MapViewFlyService {
   private readonly zoomHighlightOrchestrator = inject(MapZoomHighlightOrchestratorService);
   private readonly mapZoomOrchestrator = inject(MapZoomOrchestratorService);
   private readonly searchService = inject(MapShellSearchService);
+  private readonly state = inject(MapShellState);
 
   private ctx: MapViewFlyContext | null = null;
 
@@ -34,7 +34,7 @@ export class MapViewFlyService {
   ): void {
     const map = this.ctx?.getMap();
     if (!map) return;
-    const paneOffset = this.ctx?.getPhotoPanelOpen() ? (this.ctx.getWorkspacePaneWidth() / 2) : 0;
+    const paneOffset = this.state.photoPanelOpen() ? (this.state.workspacePaneWidth() / 2) : 0;
     if (paneOffset === 0) {
       map.setView([lat, lng], zoom, options);
       return;

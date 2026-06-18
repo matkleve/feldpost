@@ -2,10 +2,10 @@
 import { Injectable, inject } from '@angular/core';
 import { MapViewportCoordinatorService } from '../markers/map-viewport-coordinator.service';
 import { MapPhotoMarkerRenderService } from '../markers/map-photo-marker-render.service';
+import { MapShellState } from '../component/map-shell.state';
 import type { PhotoMarkerZoomLevel } from '../../../../core/map/marker-factory';
 
 export interface MoveEndHandlerContext {
-  closeContextMenus(): void;
   getUploadedPhotoMarkers(): Map<string, unknown>;
 }
 
@@ -13,6 +13,7 @@ export interface MoveEndHandlerContext {
 export class MapMoveEndHandlerService {
   private readonly mapViewportCoordinatorService = inject(MapViewportCoordinatorService);
   private readonly markerRenderService = inject(MapPhotoMarkerRenderService);
+  private readonly state = inject(MapShellState);
 
   private ctx: MoveEndHandlerContext | null = null;
   private moveEndDebounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -50,7 +51,7 @@ export class MapMoveEndHandlerService {
     if (this.zoomAnimating) return;
 
     const currentZoom = this.markerRenderService.getPhotoMarkerZoomLevel();
-    this.ctx?.closeContextMenus();
+    this.state.closeAllContextMenus();
     const zoomChanged = currentZoom !== this.lastZoomLevel;
 
     if (!this.mapViewportCoordinatorService.isViewportStillInFetchedBuffer(zoomChanged)) {

@@ -6,6 +6,7 @@ import { MapMarkerSelectionService } from '../markers/map-marker-selection.servi
 import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-view.service';
 import { WorkspaceSelectionService } from '../../../../core/workspace-selection/workspace-selection.service';
 import { UploadShellUiService } from '../../../upload/upload-shell/upload-shell-ui.service';
+import { MapShellState } from '../component/map-shell.state';
 import type { MapInstance, MapLatLng, MapMouseEvent, MapPoint } from '../leaflet/map-leaflet.service';
 import type { UploadLocationMapPickRequest } from '../../../../core/workspace-pane/workspace-pane-shell-events.types';
 
@@ -23,23 +24,16 @@ export interface ClickHandlerContext {
   getMap(): MapInstance | undefined;
   getPlacementActive(): boolean;
   getSearchPlacementActive(): boolean;
-  getSelectedMarkerKey(): string | null;
-  getSelectedMarkerKeys(): Set<string>;
-  getDraftMediaMarker(): { lat: number; lng: number; uploadCount: number } | null;
   getPendingPlacementKey(): string | null;
   setPendingPlacementKey(key: string | null): void;
   setPlacementActive(value: boolean): void;
   getLastMapMoveAt(): number;
-  closeContextMenus(): void;
   openMapContextMenuAt(latlng: MapLatLng, clientX: number, clientY: number): void;
   openRadiusContextMenuAt(latlng: MapLatLng, clientX: number, clientY: number): void;
   removeDraftMediaMarker(): void;
-  closeUploadPanel(): void;
   closeWorkspacePane(): void;
-  placeFile(key: string, coords: { lat: number; lng: number }): void;
   renderOrUpdateSearchLocationMarker(latlng: [number, number]): void;
   clearSearchPlacement(): void;
-  clearMapSelectionStateCallbacks(): void;
   patchDetailMediaId(id: string | null): void;
   getPendingUploadedLocationMapPick(): UploadLocationMapPickRequest | null;
   setPendingUploadedLocationMapPick(value: UploadLocationMapPickRequest | null): void;
@@ -55,6 +49,7 @@ export class MapClickHandlerService {
   private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
   private readonly uploadShellUiService = inject(UploadShellUiService);
+  private readonly state = inject(MapShellState);
 
   private ctx: ClickHandlerContext | null = null;
 
@@ -91,7 +86,7 @@ export class MapClickHandlerService {
     if (this.shouldAllowNativeContextMenu(event)) {
       this.nativeContextMenuBypassUntil = Date.now() + CONTEXT_MENU_NATIVE_BYPASS_TTL_MS;
       this.pendingSecondaryPress = null;
-      this.ctx?.closeContextMenus();
+      this.state.closeAllContextMenus();
       return;
     }
 
@@ -168,7 +163,7 @@ export class MapClickHandlerService {
   // ── Map event handlers ────────────────────────────────────────────────────
 
   handleMapClick(e: MapMouseEvent): void {
-    this.ctx?.closeContextMenus();
+    this.state.closeAllContextMenus();
 
     const clickButton = e.originalEvent?.button ?? 0;
     const isPrimaryClick = clickButton === 0;
@@ -213,7 +208,7 @@ export class MapClickHandlerService {
       startClientY: event.originalEvent.clientY,
       additive: !!(event.originalEvent.ctrlKey || event.originalEvent.metaKey),
     };
-    this.ctx?.closeContextMenus();
+    this.state.closeAllContextMenus();
   }
 
   handleMapMouseMove(event: MapMouseEvent): void {
@@ -302,15 +297,15 @@ export class MapClickHandlerService {
     }
 
     const hasMarkerSelection =
-      (this.ctx?.getSelectedMarkerKey() ?? null) !== null ||
-      (this.ctx?.getSelectedMarkerKeys().size ?? 0) > 0;
+      this.state.selectedMarkerKey() !== null ||
+      this.state.selectedMarkerKeys().size > 0;
     const hasRadiusSelection = this.radiusDrawingService.hasCommittedSelection();
     const hasWorkspaceSelection = this.workspaceViewService.selectionActive();
     return hasMarkerSelection || hasRadiusSelection || hasWorkspaceSelection;
   }
 
   private tryClearEmptyDraftOnPrimaryClick(isPrimaryClick: boolean): boolean {
-    const activeDraft = this.ctx?.getDraftMediaMarker();
+    const activeDraft = this.state.draftMediaMarker();
     if (
       !isPrimaryClick ||
       !activeDraft ||
@@ -388,7 +383,7 @@ export class MapClickHandlerService {
       }
 
       this.clearActiveRadiusSelection();
-      this.ctx?.closeContextMenus();
+      this.state.closeAllContextMenus();
       this.suppressMapClickUntil = Date.now() + RADIUS_CLICK_GUARD_MS;
       return;
     }

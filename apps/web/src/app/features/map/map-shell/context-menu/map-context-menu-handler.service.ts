@@ -5,6 +5,7 @@ import { MapProjectActionsService } from '../workspace/map-project-actions.servi
 import { MapProjectDialogService } from '../workspace/map-project-dialog.service';
 import { MapWorkspaceActionExecutorService } from '../workspace/map-workspace-action-executor.service';
 import { MapShellState } from '../component/map-shell.state';
+import { WorkspacePaneObserverAdapter } from '../../../../core/workspace-pane/workspace-pane-observer.adapter';
 import { MapViewportCoordinatorService } from '../markers/map-viewport-coordinator.service';
 import { MapMarkerSelectionService } from '../markers/map-marker-selection.service';
 import { MapMarkerBindingService } from '../markers/map-marker-binding.service';
@@ -36,21 +37,16 @@ export interface ContextMenuHandlerContext {
   getMap(): MapInstance | undefined;
   showMapToast(key: string, fallback: string, type: ToastType, extra?: Omit<ToastOptions, 'title' | 'type'>): void;
   showMapToastTitle(title: string, type: ToastType, extra?: Omit<ToastOptions, 'title' | 'type'>): void;
-  closeContextMenus(): void;
   onMapMenuCloseRequested(): void;
   openDetailView(mediaId: string): void;
   onDetailAddressSearchRequestConsumed(requestId: number): void;
   handlePhotoMarkerClick(markerKey: string): void;
-  patchDetailMediaId(id: string | null): void;
   onUploadLocationMapPickRequested(event: UploadLocationMapPickRequest): void;
   renderOrUpdateDraftMediaMarker(latlng: [number, number]): void;
   setPlacementActive(value: boolean): void;
   getUploadedPhotoMarkers(): Map<string, PhotoMarkerState>;
   getPhotoMarkerLayer(): MapLayerGroup | null;
   getMarkersByMediaId(): Map<string, string[]>;
-  getSelectedMarkerKey(): string | null;
-  getSelectedMarkerKeys(): Set<string>;
-  getDetailMediaId(): string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -60,6 +56,7 @@ export class MapContextMenuHandlerService {
   private readonly mapProjectDialogService = inject(MapProjectDialogService);
   private readonly mapWorkspaceActionExecutorService = inject(MapWorkspaceActionExecutorService);
   private readonly state = inject(MapShellState);
+  private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
   private readonly mapViewportCoordinatorService = inject(MapViewportCoordinatorService);
   private readonly markerSelectionService = inject(MapMarkerSelectionService);
   private readonly markerBindingService = inject(MapMarkerBindingService);
@@ -82,6 +79,11 @@ export class MapContextMenuHandlerService {
 
   bind(ctx: ContextMenuHandlerContext): void {
     this.ctx = ctx;
+  }
+
+  private patchDetailMediaId(mediaId: string | null): void {
+    this.state.setDetailMediaId(mediaId);
+    this.workspacePaneObserver.setDetailImageId(mediaId);
   }
 
   get markerContextIsSingle(): boolean {
@@ -254,7 +256,7 @@ export class MapContextMenuHandlerService {
       this.state.setWorkspacePaneWidth(this.getWorkspacePaneOpeningWidth());
     }
     this.state.setPhotoPanelOpen(true);
-    this.ctx?.patchDetailMediaId(null);
+    this.patchDetailMediaId(null);
     this.markerSelectionService.setSelectedMarker(null);
     this.markerSelectionService.setSelectedMarkerKeys(new Set());
     this.workspaceViewService.clearActiveSelection();
@@ -266,7 +268,7 @@ export class MapContextMenuHandlerService {
       'Media marker created. Start upload.',
       'success',
     );
-    this.ctx?.closeContextMenus();
+    this.state.closeAllContextMenus();
   }
 
   private onMapContextZoomHouseHere(): void {
@@ -320,7 +322,7 @@ export class MapContextMenuHandlerService {
 
   private onRadiusContextOpenSelection(): void {
     this.ensurePhotoPanelOpen();
-    this.ctx?.patchDetailMediaId(null);
+    this.patchDetailMediaId(null);
     this.ctx?.onMapMenuCloseRequested();
   }
 
@@ -333,13 +335,13 @@ export class MapContextMenuHandlerService {
         'warning',
         { codeRef: { file: 'map-shell.component.ts', fn: 'onRadiusContextAssignToProject' } },
       );
-      this.ctx?.closeContextMenus();
+      this.state.closeAllContextMenus();
       return;
     }
 
     const projectName = await this.promptProjectNameFromRadius();
     if (!projectName) {
-      this.ctx?.closeContextMenus();
+      this.state.closeAllContextMenus();
       return;
     }
 
@@ -368,7 +370,7 @@ export class MapContextMenuHandlerService {
           },
         );
       }
-      this.ctx?.closeContextMenus();
+      this.state.closeAllContextMenus();
       return;
     }
 
@@ -384,7 +386,7 @@ export class MapContextMenuHandlerService {
         assigned.reason === 'empty' ? 'warning' : 'error',
         { codeRef: { file: 'map-shell.component.ts', fn: 'assignMediaToProject' } },
       );
-      this.ctx?.closeContextMenus();
+      this.state.closeAllContextMenus();
       return;
     }
 
@@ -398,7 +400,7 @@ export class MapContextMenuHandlerService {
         .replace('{count}', String(mediaIds.length)),
       'success',
     );
-    this.ctx?.closeContextMenus();
+    this.state.closeAllContextMenus();
   }
 
   private async onRadiusContextAssignToProject(): Promise<void> {
@@ -410,13 +412,13 @@ export class MapContextMenuHandlerService {
         'warning',
         { codeRef: { file: 'map-shell.component.ts', fn: 'onRadiusContextAssignToProject' } },
       );
-      this.ctx?.closeContextMenus();
+      this.state.closeAllContextMenus();
       return;
     }
 
     const project = await this.promptProjectSelection();
     if (!project) {
-      this.ctx?.closeContextMenus();
+      this.state.closeAllContextMenus();
       return;
     }
 
@@ -441,7 +443,7 @@ export class MapContextMenuHandlerService {
         { codeRef: { file: 'map-shell.component.ts', fn: 'assignMediaToProject' } },
       );
     }
-    this.ctx?.closeContextMenus();
+    this.state.closeAllContextMenus();
   }
 
   private async onRadiusContextRemoveFromProject(): Promise<void> {
@@ -497,7 +499,7 @@ export class MapContextMenuHandlerService {
     const result = await this.mediaDeleteUndo.deleteWithUndo({
       mediaItemIds: uniqueImageIds,
       onAfterDelete: async () => {
-        this.ctx?.patchDetailMediaId(null);
+        this.patchDetailMediaId(null);
         this.markerSelectionService.setSelectedMarker(null);
         this.markerSelectionService.setSelectedMarkerKeys(new Set());
         this.workspaceSelectionService.clearSelection();
@@ -528,7 +530,7 @@ export class MapContextMenuHandlerService {
   private onMarkerContextOpenDetailsOrSelection(): void {
     const payload = this.state.markerContextMenuPayload();
     if (!payload) return;
-    this.ctx?.closeContextMenus();
+    this.state.closeAllContextMenus();
     this.ctx?.handlePhotoMarkerClick(payload.markerKey);
   }
 
@@ -717,7 +719,7 @@ export class MapContextMenuHandlerService {
 
     const project = await this.promptProjectSelection();
     if (!project) {
-      this.ctx?.closeContextMenus();
+      this.state.closeAllContextMenus();
       return;
     }
 
@@ -733,7 +735,7 @@ export class MapContextMenuHandlerService {
         'warning',
         { codeRef: { file: 'map-shell.component.ts', fn: 'onMarkerContextAssignToProject' } },
       );
-      this.ctx?.closeContextMenus();
+      this.state.closeAllContextMenus();
       return;
     }
 
@@ -749,7 +751,7 @@ export class MapContextMenuHandlerService {
         assigned.reason === 'empty' ? 'warning' : 'error',
         { codeRef: { file: 'map-shell.component.ts', fn: 'assignMediaToProject' } },
       );
-      this.ctx?.closeContextMenus();
+      this.state.closeAllContextMenus();
       return;
     }
 
@@ -757,7 +759,7 @@ export class MapContextMenuHandlerService {
       this.mapProjectActionsService.formatProjectAssignmentSuccess(project.name, mediaIds.length),
       'success',
     );
-    this.ctx?.closeContextMenus();
+    this.state.closeAllContextMenus();
   }
 
   private async onMarkerContextRemoveFromProject(): Promise<void> {
@@ -829,7 +831,7 @@ export class MapContextMenuHandlerService {
       const result = await this.mediaDeleteUndo.deleteWithUndo({
         mediaItemIds: uniqueImageIds,
         onAfterDelete: async () => {
-          this.ctx?.patchDetailMediaId(null);
+          this.patchDetailMediaId(null);
           this.markerSelectionService.setSelectedMarker(null);
           this.markerSelectionService.setSelectedMarkerKeys(new Set());
           this.workspaceSelectionService.clearSelection();
@@ -866,16 +868,16 @@ export class MapContextMenuHandlerService {
           uploadedPhotoMarkers: this.ctx!.getUploadedPhotoMarkers(),
           photoMarkerLayer: this.ctx!.getPhotoMarkerLayer(),
           markersByMediaId: this.ctx!.getMarkersByMediaId(),
-          selectedMarkerKey: this.ctx!.getSelectedMarkerKey(),
-          selectedMarkerKeys: this.ctx!.getSelectedMarkerKeys(),
-          detailMediaId: this.ctx!.getDetailMediaId(),
+          selectedMarkerKey: this.state.selectedMarkerKey(),
+          selectedMarkerKeys: this.state.selectedMarkerKeys(),
+          detailMediaId: this.state.detailMediaId(),
           cancelMarkerMoveAnimation: (marker) =>
             this.markerBindingService.cancelMarkerMoveAnimation(marker),
           setSelectedMarker: (markerKey) =>
             this.markerSelectionService.setSelectedMarker(markerKey),
           setSelectedMarkerKeys: (markerKeys) =>
             this.markerSelectionService.setSelectedMarkerKeys(markerKeys),
-          setDetailImageId: (mediaId) => this.ctx?.patchDetailMediaId(mediaId),
+          setDetailImageId: (mediaId) => this.patchDetailMediaId(mediaId),
         });
       },
       onAfterUndo: async () => {

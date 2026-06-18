@@ -122,6 +122,12 @@ export class MapShellState {
     this._linkedHoveredWorkspaceMediaIds.set(value);
   }
 
+  closeAllContextMenus(): void {
+    this._mapContextMenuOpen.set(false);
+    this._radiusContextMenuOpen.set(false);
+    this._markerContextMenuOpen.set(false);
+  }
+
   setMapContextMenuOpen(value: boolean): void {
     this._mapContextMenuOpen.set(value);
   }

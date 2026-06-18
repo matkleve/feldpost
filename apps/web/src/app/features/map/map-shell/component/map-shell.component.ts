@@ -432,9 +432,7 @@ export class MapShellComponent implements OnDestroy {
   }
 
   closeContextMenus(): void {
-    this.state.setMapContextMenuOpen(false);
-    this.state.setRadiusContextMenuOpen(false);
-    this.state.setMarkerContextMenuOpen(false);
+    this.state.closeAllContextMenus();
   }
 
   onMapMenuCloseRequested(): void {
@@ -609,7 +607,6 @@ export class MapShellComponent implements OnDestroy {
       isSearchPlacementActive: () => this.searchService.searchPlacementActive(),
       getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
       patchDetailMediaId: (id) => this.patchDetailMediaId(id),
-      closeContextMenus: () => this.closeContextMenus(),
       suppressMapClickFor: (ms) => this.mapClickHandlerService.suppressMapClickFor(ms),
       getWorkspacePaneOpeningWidth: () => this.getWorkspacePaneOpeningWidth(),
     });
@@ -636,21 +633,16 @@ export class MapShellComponent implements OnDestroy {
       getMap: () => this.map,
       showMapToast: (key, fallback, type, extra) => this.showMapToast(key, fallback, type, extra),
       showMapToastTitle: (title, type, extra) => this.showMapToastTitle(title, type, extra),
-      closeContextMenus: () => this.closeContextMenus(),
       onMapMenuCloseRequested: () => this.onMapMenuCloseRequested(),
       openDetailView: (mediaId) => this.openDetailView(mediaId),
       onDetailAddressSearchRequestConsumed: (requestId) => this.workspacePaneShellHost.onDetailAddressSearchRequestConsumed(requestId),
       handlePhotoMarkerClick: (markerKey) => this.photoMarkerLifecycleService.handlePhotoMarkerClick(markerKey),
-      patchDetailMediaId: (id) => this.patchDetailMediaId(id),
       onUploadLocationMapPickRequested: (event) => this.onUploadLocationMapPickRequested(event),
       renderOrUpdateDraftMediaMarker: (latlng) => this.photoMarkerLifecycleService.renderOrUpdateDraftMediaMarker(latlng),
       setPlacementActive: (value) => this.placementActive.set(value),
       getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
       getPhotoMarkerLayer: () => this.photoMarkerLayer,
       getMarkersByMediaId: () => this.markersByMediaId,
-      getSelectedMarkerKey: () => this.selectedMarkerKey(),
-      getSelectedMarkerKeys: () => this.selectedMarkerKeys(),
-      getDetailMediaId: () => this.detailMediaId(),
     });
 
     this.photoMarkerLifecycleService.bind({
@@ -683,26 +675,19 @@ export class MapShellComponent implements OnDestroy {
       getMap: () => this.map,
       getPlacementActive: () => this.placementActive(),
       getSearchPlacementActive: () => this.searchService.searchPlacementActive(),
-      getSelectedMarkerKey: () => this.selectedMarkerKey(),
-      getSelectedMarkerKeys: () => this.selectedMarkerKeys(),
-      getDraftMediaMarker: () => this.draftMediaMarker(),
       getPendingPlacementKey: () => this.pendingPlacementKey,
       setPendingPlacementKey: (key) => { this.pendingPlacementKey = key; },
       setPlacementActive: (value) => this.placementActive.set(value),
       getLastMapMoveAt: () => this.lastMapMoveAt,
-      closeContextMenus: () => this.closeContextMenus(),
       openMapContextMenuAt: (latlng, x, y) => this.mapContextMenuOpenService.openMapContextMenuAt(latlng, x, y),
       openRadiusContextMenuAt: (latlng, x, y) => this.mapContextMenuOpenService.openRadiusContextMenuAt(latlng, x, y),
       removeDraftMediaMarker: () => this.photoMarkerLifecycleService.removeDraftMediaMarker(),
-      closeUploadPanel: () => this.uploadShellUi.closeUploadPanel(),
       closeWorkspacePane: () => this.workspacePaneShellHost.closeWorkspacePane(),
-      placeFile: (key, coords) => this.uploadShellUi.placeFile(key, coords),
       renderOrUpdateSearchLocationMarker: (latlng) => this.searchService.renderOrUpdateLocationMarker(latlng, this.map),
       clearSearchPlacement: () => {
         this.searchService.setPlacementActive(false);
         this.map?.getContainer().classList.remove('map-container--placing');
       },
-      clearMapSelectionStateCallbacks: () => {},
       patchDetailMediaId: (id) => this.patchDetailMediaId(id),
       getPendingUploadedLocationMapPick: () => this.pendingUploadedLocationMapPick,
       setPendingUploadedLocationMapPick: (value) => { this.pendingUploadedLocationMapPick = value; },
@@ -712,14 +697,11 @@ export class MapShellComponent implements OnDestroy {
     });
 
     this.mapMoveEndHandlerService.bind({
-      closeContextMenus: () => this.closeContextMenus(),
       getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
     });
 
     this.mapViewFlyService.bind({
       getMap: () => this.map,
-      getPhotoPanelOpen: () => this.photoPanelOpen(),
-      getWorkspacePaneWidth: () => this.workspacePaneWidth(),
     });
 
     this.searchContext.bind({
