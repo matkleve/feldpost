@@ -11,6 +11,7 @@ import type { RadiusCommittedVisual } from './radius-visuals.service';
 import type { PhotoMarkerState } from '../markers/map-marker-reconcile.facade';
 import type { MapCircle, MapInstance, MapLatLng, MapMarker, MapMouseEvent, MapPolyline } from '../leaflet/map-leaflet.service';
 import { MapLeafletService } from '../leaflet/map-leaflet.service';
+import { toMarkerKey } from '../markers/marker-media-index.helpers';
 
 export const RADIUS_CLICK_GUARD_MS = 220;
 const RADIUS_SELECTION_MIN_METERS = 10;
@@ -27,7 +28,6 @@ export interface RadiusDrawingContext {
   closeContextMenus(): void;
   suppressMapClickFor(ms: number): void;
   getWorkspacePaneOpeningWidth(): number;
-  toMarkerKey(lat: number, lng: number): string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -216,7 +216,7 @@ export class RadiusDrawingOrchestratorService {
       additive,
       uploadedPhotoMarkers: this.ctx!.getUploadedPhotoMarkers(),
       selectedMarkerKeys: this.ctx!.getSelectedMarkerKeys(),
-      toMarkerKey: (lat, lng) => this.ctx!.toMarkerKey(lat, lng),
+      toMarkerKey,
       currentImages: this.workspaceViewService.rawImages(),
       fetchClusterImages: (cells, zoom) => this.workspaceViewService.fetchClusterImages(cells, zoom),
     });

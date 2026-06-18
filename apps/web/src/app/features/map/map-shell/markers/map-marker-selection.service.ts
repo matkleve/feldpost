@@ -3,6 +3,7 @@ import { MarkerSelectionSyncService } from './marker-selection-sync.service';
 import { MapPhotoMarkerRenderService } from './map-photo-marker-render.service';
 import { MapZoomHighlightOrchestratorService } from './map-zoom-highlight-orchestrator.service';
 import type { ThumbnailCardHoverEvent } from '../../../../core/workspace-pane/workspace-pane-thumbnail-hover.types';
+import { toMarkerKey } from './marker-media-index.helpers';
 
 export interface MarkerSelectionContext {
   getSelectedMarkerKey(): string | null;
@@ -19,7 +20,6 @@ export interface MarkerSelectionContext {
     sourceCells?: Array<{ lat: number; lng: number }>;
   }>;
   getRawImages(): ReadonlyArray<{ id: string; latitude: number; longitude: number }>;
-  toMarkerKey(lat: number, lng: number): string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -96,7 +96,7 @@ export class MapMarkerSelectionService {
     const matchedIds = this.markerSelectionSyncService.buildLinkedWorkspaceImageIds(
       markerState,
       this.ctx?.getRawImages() ?? [],
-      (lat, lng) => this.ctx!.toMarkerKey(lat, lng),
+      toMarkerKey,
     );
     this.ctx?.setLinkedHoveredWorkspaceMediaIds(matchedIds);
   }

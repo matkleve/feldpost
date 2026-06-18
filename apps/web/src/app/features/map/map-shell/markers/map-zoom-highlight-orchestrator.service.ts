@@ -3,6 +3,7 @@ import { DetailZoomHighlightService } from './detail-zoom-highlight.service';
 import { ZoomTargetMarkerService } from './zoom-target-marker.service';
 import type { PhotoMarkerState } from './map-marker-reconcile.facade';
 import type { MapInstance } from '../leaflet/map-leaflet.service';
+import { toMarkerKey } from './marker-media-index.helpers';
 
 const DETAIL_LOCATION_FOCUS_ZOOM = 21;
 const DETAIL_LOCATION_MARKER_PULSE_MS = 1500;
@@ -20,7 +21,6 @@ export interface ZoomHighlightContext {
   getLastMapMoveAt(): number;
   getUploadedPhotoMarkers(): Map<string, PhotoMarkerState>;
   getMarkersByMediaId(): Map<string, string[]>;
-  toMarkerKey(lat: number, lng: number): string;
 }
 
 export { DETAIL_LOCATION_FOCUS_ZOOM };
@@ -154,7 +154,7 @@ export class MapZoomHighlightOrchestratorService {
       map: this.ctx.getMap(),
       markersByMediaId: this.ctx.getMarkersByMediaId(),
       uploadedPhotoMarkers: this.ctx.getUploadedPhotoMarkers(),
-      toMarkerKey: (latValue, lngValue) => this.ctx!.toMarkerKey(latValue, lngValue),
+      toMarkerKey,
       clusterFallbackMaxMeters: DETAIL_LOCATION_CLUSTER_FALLBACK_MAX_METERS,
     });
   }

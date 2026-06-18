@@ -21,6 +21,7 @@ import type { PhotoMarkerState } from './map-marker-reconcile.facade';
 import {
   registerMarkerKeyForMedia,
   getMarkerKeysForMedia,
+  toMarkerKey,
 } from './marker-media-index.helpers';
 import type { MarkersByMediaIdMap } from './marker-media-index.helpers';
 
@@ -42,7 +43,6 @@ export interface PhotoMarkerLifecycleContext {
   setSelectedMarkerKeys(keys: Set<string>): void;
   patchDetailMediaId(id: string | null): void;
   openDetailView(mediaId: string): void;
-  toMarkerKey(lat: number, lng: number): string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -120,8 +120,8 @@ export class PhotoMarkerLifecycleService {
     const draft = this.ctx?.getDraftMediaMarker();
     if (!draft) return;
 
-    const draftKey = this.ctx!.toMarkerKey(draft.lat, draft.lng);
-    const uploadedKey = this.ctx!.toMarkerKey(event.lat, event.lng);
+    const draftKey = toMarkerKey(draft.lat, draft.lng);
+    const uploadedKey = toMarkerKey(event.lat, event.lng);
     if (draftKey !== uploadedKey) {
       return;
     }
@@ -183,7 +183,7 @@ export class PhotoMarkerLifecycleService {
   upsertUploadedPhotoMarker(event: ImageUploadedEvent): void {
     if (!this.ctx?.getMap()) return;
 
-    const markerKey = this.ctx.toMarkerKey(event.lat, event.lng);
+    const markerKey = toMarkerKey(event.lat, event.lng);
     const uploadedPhotoMarkers = this.ctx.getUploadedPhotoMarkers();
     const existing = uploadedPhotoMarkers.get(markerKey);
 

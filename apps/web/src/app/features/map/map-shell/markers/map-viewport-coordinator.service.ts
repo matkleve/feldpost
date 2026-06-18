@@ -21,6 +21,7 @@ import type { MarkerRenderSnapshot } from './map-photo-marker-render.service';
 import type { MapInstance, MapLatLngBounds, MapLayerGroup } from '../leaflet/map-leaflet.service';
 import type { MapSessionSnapshot, MapViewportMarkerRow } from '../../../../core/map-session-cache/map-session-cache.types';
 import { PHOTO_MARKER_ICON_SIZE } from '../../../../core/map/marker-factory';
+import { toMarkerKey } from './marker-media-index.helpers';
 
 type MergedViewportRow = ClusterMergedRow<MapViewportMarkerRow>;
 
@@ -33,7 +34,6 @@ export interface ViewportCoordinatorContext {
   setSelectedMarkerKey(key: string | null): void;
   getSelectedMarkerKeys(): Set<string>;
   setSelectedMarkerKeys(keys: Set<string>): void;
-  toMarkerKey(lat: number, lng: number): string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -208,7 +208,7 @@ export class MapViewportCoordinatorService {
       const key =
         row.image_count === 1 && row.location_id
           ? `loc:${row.location_id}`
-          : this.ctx!.toMarkerKey(row.cluster_lat, row.cluster_lng);
+          : toMarkerKey(row.cluster_lat, row.cluster_lng);
       incoming.set(key, row);
     }
 

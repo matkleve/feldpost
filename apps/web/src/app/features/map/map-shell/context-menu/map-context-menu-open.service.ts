@@ -4,6 +4,7 @@ import { MapContextActionsService } from './map-context-actions.service';
 import { MapShellState } from '../component/map-shell.state';
 import { MapClickHandlerService } from '../handlers/map-click-handler.service';
 import { RADIUS_CLICK_GUARD_MS } from '../radius/radius-drawing-orchestrator.service';
+import { toMarkerKey } from '../markers/marker-media-index.helpers';
 import type { PhotoMarkerState } from '../markers/map-marker-reconcile.facade';
 import type { MarkerRenderSnapshot } from '../markers/map-photo-marker-render.service';
 import type { MapInstance, MapLatLng } from '../leaflet/map-leaflet.service';
@@ -12,7 +13,6 @@ export interface ContextMenuOpenContext {
   getMap(): MapInstance | undefined;
   getUploadedPhotoMarkers(): Map<string, PhotoMarkerState & { lastRendered?: MarkerRenderSnapshot }>;
   getSelectedMarkerKeys(): Set<string>;
-  toMarkerKey(lat: number, lng: number): string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -74,7 +74,7 @@ export class MapContextMenuOpenService {
         new Map(
           multiStates
             .flatMap((marker) => marker.sourceCells ?? [{ lat: marker.lat, lng: marker.lng }])
-            .map((cell) => [this.ctx!.toMarkerKey(cell.lat, cell.lng), cell]),
+            .map((cell) => [toMarkerKey(cell.lat, cell.lng), cell]),
         ).values(),
       );
 

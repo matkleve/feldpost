@@ -586,7 +586,6 @@ export class MapShellComponent implements OnDestroy {
       isRadiusDraftHighlighted: (key) => this.radiusDrawingService.isDraftHighlighted(key),
       getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
       getRawImages: () => this.workspaceViewService.rawImages(),
-      toMarkerKey: (lat, lng) => this.toMarkerKey(lat, lng),
     });
 
     this.markerRenderService.bind({
@@ -607,7 +606,6 @@ export class MapShellComponent implements OnDestroy {
       getLastMapMoveAt: () => this.lastMapMoveAt,
       getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
       getMarkersByMediaId: () => this.markersByMediaId,
-      toMarkerKey: (lat, lng) => this.toMarkerKey(lat, lng),
     });
 
     this.radiusDrawingService.bind({
@@ -622,7 +620,6 @@ export class MapShellComponent implements OnDestroy {
       closeContextMenus: () => this.closeContextMenus(),
       suppressMapClickFor: (ms) => this.mapClickHandlerService.suppressMapClickFor(ms),
       getWorkspacePaneOpeningWidth: () => this.getWorkspacePaneOpeningWidth(),
-      toMarkerKey: (lat, lng) => this.toMarkerKey(lat, lng),
     });
 
     this.markerBindingService.bind({
@@ -645,7 +642,6 @@ export class MapShellComponent implements OnDestroy {
       setSelectedMarkerKey: (key) => this.state.setSelectedMarkerKey(key),
       getSelectedMarkerKeys: () => this.selectedMarkerKeys(),
       setSelectedMarkerKeys: (keys) => this.state.setSelectedMarkerKeys(keys),
-      toMarkerKey: (lat, lng) => this.toMarkerKey(lat, lng),
     });
 
     this.mapContextMenuHandlerService.bind({
@@ -687,7 +683,6 @@ export class MapShellComponent implements OnDestroy {
       setSelectedMarkerKeys: (keys) => this.markerSelectionService.setSelectedMarkerKeys(keys),
       patchDetailMediaId: (id) => this.patchDetailMediaId(id),
       openDetailView: (mediaId) => this.openDetailView(mediaId),
-      toMarkerKey: (lat, lng) => this.toMarkerKey(lat, lng),
     });
 
     this.mapLocationPickService.bind({
@@ -698,7 +693,6 @@ export class MapShellComponent implements OnDestroy {
       getMap: () => this.map,
       getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
       getSelectedMarkerKeys: () => this.selectedMarkerKeys(),
-      toMarkerKey: (lat, lng) => this.toMarkerKey(lat, lng),
     });
 
     this.mapMediaDeleteSyncService.bind({
@@ -902,12 +896,4 @@ export class MapShellComponent implements OnDestroy {
     this.mapContextMenuHandlerService.onProjectNameDialogCancelled();
   }
 
-  /**
-   * Build a stable key from snapped coordinates the server returns.
-   * Uses 7 decimal places (server rounds to 7) so the key matches
-   * exactly as long as the same server row is returned.
-   */
-  private toMarkerKey(lat: number, lng: number): string {
-    return `${lat.toFixed(7)}:${lng.toFixed(7)}`;
-  }
 }

@@ -1,6 +1,15 @@
 /** Multi-pin index: one media item may own several marker keys. */
 export type MarkersByMediaIdMap = Map<string, string[]>;
 
+/**
+ * Builds a stable string key from server-snapped coordinates (7 decimal places).
+ * Used across all marker services — extracted here to avoid threading it through
+ * context interfaces.
+ */
+export function toMarkerKey(lat: number, lng: number): string {
+  return `${lat.toFixed(7)}:${lng.toFixed(7)}`;
+}
+
 export function getMarkerKeysForMedia(map: MarkersByMediaIdMap, mediaId: string): readonly string[] {
   return map.get(mediaId) ?? [];
 }
