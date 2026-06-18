@@ -7,6 +7,8 @@ import { MapMarkerSelectionService } from '../markers/map-marker-selection.servi
 import { WorkspaceSelectionService } from '../../../../core/workspace-selection/workspace-selection.service';
 import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-view.service';
 import { MapShellState } from '../component/map-shell.state';
+import { MapShellSearchService } from '../leaflet/map-shell-search.service';
+import { WorkspacePaneObserverAdapter } from '../../../../core/workspace-pane/workspace-pane-observer.adapter';
 import type { RadiusCommittedVisual } from './radius-visuals.service';
 import type { PhotoMarkerState } from '../markers/map-marker-reconcile.facade';
 import type { MapCircle, MapInstance, MapLatLng, MapMarker, MapMouseEvent, MapPolyline } from '../leaflet/map-leaflet.service';
@@ -18,10 +20,7 @@ const RADIUS_SELECTION_MIN_METERS = 10;
 
 export interface RadiusDrawingContext {
   getMap(): MapInstance | undefined;
-  isPlacementActive(): boolean;
-  isSearchPlacementActive(): boolean;
   getUploadedPhotoMarkers(): Map<string, PhotoMarkerState>;
-  patchDetailMediaId(id: string | null): void;
   suppressMapClickFor(ms: number): void;
 }
 
@@ -36,6 +35,8 @@ export class RadiusDrawingOrchestratorService {
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
   private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly state = inject(MapShellState);
+  private readonly searchService = inject(MapShellSearchService);
+  private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
 
   private ctx: RadiusDrawingContext | null = null;
 
@@ -75,7 +76,7 @@ export class RadiusDrawingOrchestratorService {
   }
 
   startDraw(startLatLng: MapLatLng, additive: boolean): void {
-    if (!this.ctx?.getMap() || this.ctx.isPlacementActive() || this.ctx.isSearchPlacementActive()) {
+    if (!this.ctx?.getMap() || this.state.placementActive() || this.searchService.searchPlacementActive()) {
       return;
     }
 
@@ -231,8 +232,13 @@ export class RadiusDrawingOrchestratorService {
       this.state.setWorkspacePaneWidth(this.state.getWorkspacePaneOpeningWidth());
     }
     this.state.setPhotoPanelOpen(true);
-    this.ctx?.patchDetailMediaId(null);
+    this.patchDetailMediaId(null);
     this.selectionService.setSelectedMarker(null);
+  }
+
+  private patchDetailMediaId(mediaId: string | null): void {
+    this.state.setDetailMediaId(mediaId);
+    this.workspacePaneObserver.setDetailImageId(mediaId);
   }
 
   private updateDraftMarkerHighlights(center: MapLatLng, radiusMeters: number): void {

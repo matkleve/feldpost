@@ -43,7 +43,6 @@ export interface ContextMenuHandlerContext {
   handlePhotoMarkerClick(markerKey: string): void;
   onUploadLocationMapPickRequested(event: UploadLocationMapPickRequest): void;
   renderOrUpdateDraftMediaMarker(latlng: [number, number]): void;
-  setPlacementActive(value: boolean): void;
   getUploadedPhotoMarkers(): Map<string, PhotoMarkerState>;
   getPhotoMarkerLayer(): MapLayerGroup | null;
   getMarkersByMediaId(): Map<string, string[]>;
@@ -251,7 +250,7 @@ export class MapContextMenuHandlerService {
     this.state.setDraftMediaMarker({ lat: coords.lat, lng: coords.lng, uploadCount: 0 });
     this.ctx?.renderOrUpdateDraftMediaMarker([coords.lat, coords.lng]);
     this.searchService.setPlacementActive(false);
-    this.ctx?.setPlacementActive(false);
+    this.state.setPlacementActive(false);
     if (!this.state.photoPanelOpen()) {
       this.state.setWorkspacePaneWidth(this.state.getWorkspacePaneOpeningWidth());
     }

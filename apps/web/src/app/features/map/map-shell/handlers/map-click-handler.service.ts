@@ -7,6 +7,8 @@ import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-
 import { WorkspaceSelectionService } from '../../../../core/workspace-selection/workspace-selection.service';
 import { UploadShellUiService } from '../../../upload/upload-shell/upload-shell-ui.service';
 import { MapShellState } from '../component/map-shell.state';
+import { MapShellSearchService } from '../leaflet/map-shell-search.service';
+import { WorkspacePaneObserverAdapter } from '../../../../core/workspace-pane/workspace-pane-observer.adapter';
 import type { MapInstance, MapLatLng, MapMouseEvent, MapPoint } from '../leaflet/map-leaflet.service';
 import type { UploadLocationMapPickRequest } from '../../../../core/workspace-pane/workspace-pane-shell-events.types';
 
@@ -22,11 +24,8 @@ const CONTEXT_MENU_NATIVE_BYPASS_TTL_MS = 250;
 
 export interface ClickHandlerContext {
   getMap(): MapInstance | undefined;
-  getPlacementActive(): boolean;
-  getSearchPlacementActive(): boolean;
   getPendingPlacementKey(): string | null;
   setPendingPlacementKey(key: string | null): void;
-  setPlacementActive(value: boolean): void;
   getLastMapMoveAt(): number;
   openMapContextMenuAt(latlng: MapLatLng, clientX: number, clientY: number): void;
   openRadiusContextMenuAt(latlng: MapLatLng, clientX: number, clientY: number): void;
@@ -34,7 +33,6 @@ export interface ClickHandlerContext {
   closeWorkspacePane(): void;
   renderOrUpdateSearchLocationMarker(latlng: [number, number]): void;
   clearSearchPlacement(): void;
-  patchDetailMediaId(id: string | null): void;
   getPendingUploadedLocationMapPick(): UploadLocationMapPickRequest | null;
   setPendingUploadedLocationMapPick(value: UploadLocationMapPickRequest | null): void;
   onCompleteLocationMapPick(pick: UploadLocationMapPickRequest, coords: { lat: number; lng: number }): void;
@@ -50,6 +48,8 @@ export class MapClickHandlerService {
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
   private readonly uploadShellUiService = inject(UploadShellUiService);
   private readonly state = inject(MapShellState);
+  private readonly searchService = inject(MapShellSearchService);
+  private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
 
   private ctx: ClickHandlerContext | null = null;
 
@@ -128,7 +128,7 @@ export class MapClickHandlerService {
     this.radiusDrawingService.clearSelectionVisuals();
     this.markerSelectionService.setSelectedMarker(null);
     this.markerSelectionService.setSelectedMarkerKeys(new Set());
-    this.ctx?.patchDetailMediaId(null);
+    this.patchDetailMediaId(null);
     this.workspaceViewService.clearActiveSelection();
     this.workspaceSelectionService.clearSelection();
   }
@@ -181,7 +181,7 @@ export class MapClickHandlerService {
       return;
     }
 
-    if (!this.ctx?.getSearchPlacementActive()) {
+    if (!this.searchService.searchPlacementActive()) {
       this.clearMapSelectionState();
       return;
     }
@@ -197,7 +197,7 @@ export class MapClickHandlerService {
     event.originalEvent.preventDefault();
 
     const map = this.ctx?.getMap();
-    if (!map || this.ctx?.getPlacementActive() || this.ctx?.getSearchPlacementActive()) {
+    if (!map || this.state.placementActive() || this.searchService.searchPlacementActive()) {
       return;
     }
 
@@ -292,7 +292,7 @@ export class MapClickHandlerService {
   // ── Private helpers ───────────────────────────────────────────────────────
 
   private shouldAllowPrimaryDeselection(isPrimaryClick: boolean): boolean {
-    if (!isPrimaryClick || this.ctx?.getSearchPlacementActive()) {
+    if (!isPrimaryClick || this.searchService.searchPlacementActive()) {
       return false;
     }
 
@@ -311,7 +311,7 @@ export class MapClickHandlerService {
       !activeDraft ||
       activeDraft.uploadCount !== 0 ||
       !!this.ctx?.getPendingPlacementKey() ||
-      this.ctx?.getSearchPlacementActive()
+      this.searchService.searchPlacementActive()
     ) {
       return false;
     }
@@ -338,7 +338,7 @@ export class MapClickHandlerService {
     this.uploadShellUiService.placeFile(pendingPlacementKey, coords);
 
     this.ctx?.setPendingPlacementKey(null);
-    this.ctx?.setPlacementActive(false);
+    this.state.setPlacementActive(false);
     this.ctx?.getMap()?.getContainer().classList.remove('map-container--placing');
     return true;
   }
@@ -349,7 +349,7 @@ export class MapClickHandlerService {
     // The pane is closed only via its own close button.
     this.markerSelectionService.setSelectedMarker(null);
     this.markerSelectionService.setSelectedMarkerKeys(new Set());
-    this.ctx?.patchDetailMediaId(null);
+    this.patchDetailMediaId(null);
     this.workspaceViewService.clearActiveSelection();
     this.workspaceSelectionService.clearSelection();
     this.radiusDrawingService.clearSelectionVisuals();
@@ -389,6 +389,11 @@ export class MapClickHandlerService {
     }
 
     this.ctx?.openMapContextMenuAt(latlng, clientX, clientY);
+  }
+
+  private patchDetailMediaId(mediaId: string | null): void {
+    this.state.setDetailMediaId(mediaId);
+    this.workspacePaneObserver.setDetailImageId(mediaId);
   }
 
   private shouldAllowNativeContextMenu(event: MouseEvent): boolean {
