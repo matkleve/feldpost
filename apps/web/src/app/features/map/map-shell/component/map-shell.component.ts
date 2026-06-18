@@ -39,11 +39,6 @@ import type {
   UploadLocationMapPickRequest,
   UploadLocationPreviewEvent,
 } from '../../../../core/workspace-pane/workspace-pane-shell-events.types';
-import {
-  UploadManagerService,
-  ImageReplacedEvent,
-  ImageAttachedEvent,
-} from '../../../../core/upload/upload-manager.service';
 import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-view.service';
 import { FilterService } from '../../../../core/filter/filter.service';
 import { WorkspaceSelectionService } from '../../../../core/workspace-selection/workspace-selection.service';
@@ -56,8 +51,6 @@ import { MapFilterToolbarComponent } from '../../map-filter-toolbar/map-filter-t
 import { MapSearchContextService } from '../handlers/map-search-context.service';
 import type { MapMenuActionId, MarkerMenuActionId, RadiusMenuActionId } from '../workspace/map-workspace-actions.types';
 import type { ThumbnailCardHoverEvent } from '../../../../core/workspace-pane/workspace-pane-thumbnail-hover.types';
-import { ROUTE_SESSION_SHELL_KEYS } from '../../../../core/route-session-cache/route-session-cache.keys';
-import { RouteSessionCacheService } from '../../../../core/route-session-cache/route-session-cache.service';
 import { ProjectSelectDialogComponent } from '../../../../shared/project-select-dialog/project-select-dialog.component';
 import { TextInputDialogComponent } from '../../../../shared/text-input-dialog/text-input-dialog.component';
 import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
@@ -73,6 +66,8 @@ import { MapClickHandlerService } from '../handlers/map-click-handler.service';
 import { MapLocationPickService } from '../handlers/map-location-pick.service';
 import { MapMoveEndHandlerService } from '../handlers/map-move-end-handler.service';
 import { MapViewFlyService } from '../handlers/map-view-fly.service';
+import { MapPlacementService } from '../handlers/map-placement.service';
+import { MapSubscriptionService } from '../handlers/map-subscription.service';
 import { PhotoMarkerLifecycleService } from '../markers/photo-marker-lifecycle.service';
 import { MapMediaDeleteSyncService } from '../markers/map-media-delete-sync.service';
 import { MarkerMotionService } from '../markers/marker-motion.service';
@@ -136,7 +131,6 @@ export class MapShellComponent implements OnDestroy {
 
   readonly placeholderIconUrl = `url("${MEDIA_PLACEHOLDER_ICON}")`;
   /** Template helper: icon/text layout for map style pill options. */
-  private readonly uploadManagerService = inject(UploadManagerService);
   private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly filterService = inject(FilterService);
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
@@ -144,7 +138,6 @@ export class MapShellComponent implements OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
   private readonly i18nService = inject(I18nService);
   private readonly router = inject(Router);
-  private readonly routeSessionCache = inject(RouteSessionCacheService);
   private readonly state = inject(MapShellState);
   private readonly mapViewportCoordinatorService = inject(MapViewportCoordinatorService);
   private readonly mapContextMenuHandlerService = inject(MapContextMenuHandlerService);
@@ -177,6 +170,8 @@ export class MapShellComponent implements OnDestroy {
   private readonly workspacePaneLayoutMapEffectsService = inject(WorkspacePaneLayoutMapEffectsService);
   readonly menuVm = inject(MapMenuViewModelService);
   readonly searchContext = inject(MapSearchContextService);
+  private readonly mapPlacementService = inject(MapPlacementService);
+  private readonly mapSubscriptionService = inject(MapSubscriptionService);
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
   private showMapToast(
@@ -299,8 +294,6 @@ export class MapShellComponent implements OnDestroy {
    */
   private readonly markersByMediaId = new Map<string, string[]>();
 
-  /** Subscriptions for upload manager events — cleaned up in ngOnDestroy. */
-  private uploadManagerSubs: { unsubscribe(): void }[] = [];
   private readonly deferredStartupHandles: DeferredStartupHandles = {
     rafId: null,
     startupTimer: null,
@@ -367,9 +360,8 @@ export class MapShellComponent implements OnDestroy {
 
       this.markerMotionService.initPreference();
       this.initMap();
-      this.subscribeToUploadManagerEvents();
+      this.mapSubscriptionService.subscribe(this.destroyRef);
       this.mapMediaDeleteSyncService.subscribe(this.destroyRef);
-      this.subscribeRouteSessionInvalidation();
       this.scheduleDeferredStartupWork();
       this.mapInitialized = true;
     });
@@ -388,7 +380,6 @@ export class MapShellComponent implements OnDestroy {
     this.cleanupDeferredAndQueryState();
     this.detachGlobalListeners();
     this.cleanupMarkerLayersAndCaches();
-    this.cleanupUploadManagerSubscriptions();
     this.cleanupMapUiState();
     this.mapViewportCoordinatorService.persistMapSessionCache();
     this.destroyMapInstance();
@@ -417,13 +408,6 @@ export class MapShellComponent implements OnDestroy {
       markersByMediaId: this.markersByMediaId,
       cancelMarkerMoveAnimation: (marker) => this.markerBindingService.cancelMarkerMoveAnimation(marker),
     });
-  }
-
-  private cleanupUploadManagerSubscriptions(): void {
-    for (const sub of this.uploadManagerSubs) {
-      sub.unsubscribe();
-    }
-    this.uploadManagerSubs = [];
   }
 
   private cleanupMapUiState(): void {
@@ -565,113 +549,18 @@ export class MapShellComponent implements OnDestroy {
 
   // ── Upload panel ──────────────────────────────────────────────────────────
 
-  toggleUploadPanel(): void {
-    this.uploadShellUi.toggleUploadPanel();
-  }
-
-  /**
-   * Called when an image with GPS coords is uploaded. Adds a Leaflet marker.
-   * Clicking the marker pins the side panel open (M-UI4 will populate it).
-   */
-  onImageUploaded(event: ImageUploadedEvent): void {
-    if (!this.map) return;
-    this.photoMarkerLifecycleService.upsertUploadedPhotoMarker(event);
-    this.photoMarkerLifecycleService.resolveDraftMediaMarkerUpload(event);
-    void this.mapViewportCoordinatorService.queryViewportMarkers();
-  }
-
-  /** Enters placement mode for a file with no GPS EXIF data. */
-  enterPlacementMode(key: string): void {
-    const draft = this.draftMediaMarker();
-    if (draft) {
-      this.uploadShellUi.placeFile(key, { lat: draft.lat, lng: draft.lng });
-      return;
-    }
-
-    this.pendingPlacementKey = key;
-    this.placementActive.set(true);
-    this.map?.getContainer().classList.add('map-container--placing');
-  }
-
-  /** Cancels placement mode without placing the image. */
-  cancelPlacement(): void {
-    const pendingUploadedPick = this.pendingUploadedLocationMapPick;
-    this.pendingPlacementKey = null;
-    this.pendingUploadedLocationMapPick = null;
-    this.placementActive.set(false);
-    this.searchService.setPlacementActive(false);
-    this.map?.getContainer().classList.remove('map-container--placing');
-    this.uploadShellUi.clearPendingLocationMapPick(pendingUploadedPick?.mediaId);
-    this.mapLocationPickService.navigateBackAfterLocationMapPick();
-  }
-
-  // ── GPS button ────────────────────────────────────────────────────────────
-
-  /**
-   * Activates GPS tracking and recenters only after a fresh browser fix resolves.
-   * @see docs/specs/component/map/gps-button.md
-   */
-  goToUserPosition(): void {
-    this.gpsService.goTo(
-      this.map,
-      (coords) => {
-        this.gpsService.renderOrUpdateLocationMarker(coords, this.map);
-        this.gpsService.triggerLocationFoundState();
-        void this.searchService.refreshCountryCode(coords[0], coords[1]);
-      },
-      () => this.gpsService.removeLocationMarker(),
-    );
-  }
-
-  onMapViewModeChange(raw: ToggleValue<string>): void {
-    this.basemapService.onViewModeChange(raw, this.map);
-  }
-
-  onSearchMapCenterRequested(event: { lat: number; lng: number; label: string }): void {
-    if (!this.map) {
-      this.searchService.pendingSearchMapCenter = event;
-      return;
-    }
-    this.mapViewFlyService.applySearchMapCenter(event);
-  }
-
-  onSearchClearRequested(): void {
-    this.searchService.clearLocationMarker();
-  }
-
-  onUploadLocationPreviewRequested(event: UploadLocationPreviewEvent): void {
-    const points =
-      event.points?.length && event.points.length > 0
-        ? event.points
-        : [{ lat: event.lat, lng: event.lng }];
-    this.searchService.renderPreviewMarkers(points, this.map);
-  }
-
-  onUploadLocationPreviewCleared(): void {
-    if (this.searchService.searchPlacementActive()) {
-      return;
-    }
-    this.searchService.clearPreviewMarkers();
-  }
-
-  onUploadLocationMapPickRequested(event: UploadLocationMapPickRequest): void {
-    this.pendingPlacementKey = null;
-    this.pendingUploadedLocationMapPick = event;
-    this.placementActive.set(false);
-    this.searchService.setPlacementActive(true);
-    this.map?.getContainer().classList.add('map-container--placing');
-  }
-
-  placementBannerText(): string {
-    if (this.placementActive()) {
-      return this.t('upload.placement.banner.placeImage', 'Click the map to place the image');
-    }
-
-    return this.t(
-      'upload.placement.banner.setNewLocation',
-      'Click the map to set the new location',
-    );
-  }
+  toggleUploadPanel(): void { this.uploadShellUi.toggleUploadPanel(); }
+  onImageUploaded(event: ImageUploadedEvent): void { this.mapPlacementService.onImageUploaded(event); }
+  enterPlacementMode(key: string): void { this.mapPlacementService.enterPlacementMode(key); }
+  cancelPlacement(): void { this.mapPlacementService.cancelPlacement(); }
+  goToUserPosition(): void { this.mapPlacementService.goToUserPosition(); }
+  onMapViewModeChange(raw: ToggleValue<string>): void { this.mapPlacementService.onMapViewModeChange(raw); }
+  onSearchMapCenterRequested(event: { lat: number; lng: number; label: string }): void { this.mapPlacementService.onSearchMapCenterRequested(event); }
+  onSearchClearRequested(): void { this.mapPlacementService.onSearchClearRequested(); }
+  onUploadLocationPreviewRequested(event: UploadLocationPreviewEvent): void { this.mapPlacementService.onUploadLocationPreviewRequested(event); }
+  onUploadLocationPreviewCleared(): void { this.mapPlacementService.onUploadLocationPreviewCleared(); }
+  onUploadLocationMapPickRequested(event: UploadLocationMapPickRequest): void { this.mapPlacementService.onUploadLocationMapPickRequested(event); }
+  placementBannerText(): string { return this.mapPlacementService.placementBannerText(); }
 
   // ── Map init ──────────────────────────────────────────────────────────────
 
@@ -869,6 +758,21 @@ export class MapShellComponent implements OnDestroy {
       getUploadedPhotoMarkers: () => this.uploadedPhotoMarkers,
     });
 
+    this.mapPlacementService.bind({
+      getMap: () => this.map,
+      setPlacementActive: (v) => this.placementActive.set(v),
+      getPlacementActive: () => this.placementActive(),
+      getDraftMediaMarker: () => this.draftMediaMarker(),
+      getPendingPlacementKey: () => this.pendingPlacementKey,
+      setPendingPlacementKey: (key) => { this.pendingPlacementKey = key; },
+      getPendingUploadedLocationMapPick: () => this.pendingUploadedLocationMapPick,
+      setPendingUploadedLocationMapPick: (v) => { this.pendingUploadedLocationMapPick = v; },
+    });
+
+    this.mapSubscriptionService.bind({
+      getMap: () => this.map,
+    });
+
     this.searchService.updateViewportBounds(this.map);
     this.applyPendingMapFocus();
     this.applyPendingLocationMapPickNavigation();
@@ -976,34 +880,6 @@ export class MapShellComponent implements OnDestroy {
     this.pendingLocationMapPickNav.set(null);
     this.mapLocationPickService.setReturnUrl(payload.returnUrl);
     this.onUploadLocationMapPickRequested(payload.request);
-  }
-
-  /**
-   * Subscribe to UploadManagerService events for replace/attach photo flows.
-   * Updates marker thumbnails without a full viewport refresh.
-   */
-  private subscribeRouteSessionInvalidation(): void {
-    this.uploadManagerSubs.push(
-      this.routeSessionCache.shellInvalidated$.subscribe((shellKey) => {
-        if (shellKey !== ROUTE_SESSION_SHELL_KEYS.MAP || !this.map) {
-          return;
-        }
-
-        void this.mapViewportCoordinatorService.queryViewportMarkers();
-      }),
-    );
-  }
-
-  private subscribeToUploadManagerEvents(): void {
-    this.uploadManagerSubs.push(
-      this.uploadManagerService.imageReplaced$.subscribe((event: ImageReplacedEvent) => {
-        this.photoMarkerLifecycleService.handleImageReplaced(event);
-      }),
-      this.uploadManagerService.imageAttached$.subscribe((event: ImageAttachedEvent) => {
-        this.photoMarkerLifecycleService.handleImageAttached(event);
-      }),
-      // Upload failure toasts are owned by UploadNotificationService (global, deduped).
-    );
   }
 
   onProjectSelectionDialogSelected(projectId: string): void {
