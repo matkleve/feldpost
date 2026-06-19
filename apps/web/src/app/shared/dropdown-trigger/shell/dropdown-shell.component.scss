@@ -59,6 +59,12 @@
     overflow: visible;
   }
 
+  // Calendar picker popover — panel content is not clipped by hlmMenuContent overflow.
+  // @see docs/specs/component/filters/calendar-dropdown.md
+  :host.calendar-dropdown-panel {
+    overflow: visible;
+  }
+
   // Media-detail project picker: content-sized panel (no 18rem×1.6 empty tail).
   // Standalone rule — does NOT require toolbar-dropdown because the media-detail shell uses anchor
   // positioning, not the toolbar width floor. Max-width caps at 20rem per spec table.

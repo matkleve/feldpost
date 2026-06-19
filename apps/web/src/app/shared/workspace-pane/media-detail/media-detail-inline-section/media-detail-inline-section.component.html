@@ -116,19 +116,13 @@
         <span class="detail-row__label">{{
           t('workspace.imageDetail.field.captured', 'Captured')
         }}</span>
-        <input
-          class="detail-row__field-input detail-row__field-slot detail-row__field-input--trigger"
-          type="text"
-          readonly
-          tabindex="0"
-          [value]="captureDate() ?? ''"
-          [attr.aria-label]="t('workspace.imageDetail.action.editCaptured.aria', 'Edit captured date')"
-        />
-        <app-captured-date-editor
-          [initialDate]="editDate()"
-          [initialTime]="editTime()"
-          (save)="capturedAtSaved.emit($event)"
-          (cancel)="editingCancelled.emit()"
+        <app-calendar-dropdown
+          class="detail-row__field-slot"
+          timeMode="optionalTime"
+          [nullable]="true"
+          [value]="capturedDropdownValue()"
+          [ariaLabel]="t('workspace.imageDetail.action.editCaptured.aria', 'Edit captured date')"
+          (valueChange)="capturedAtSaved.emit($event)"
         />
       </div>
       <button

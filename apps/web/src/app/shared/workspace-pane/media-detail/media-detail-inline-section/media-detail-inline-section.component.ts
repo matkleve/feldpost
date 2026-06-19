@@ -9,8 +9,8 @@ import {
   output,
   viewChild,
 } from '@angular/core';
-import type { DateSaveEvent } from '../captured-date-editor.component';
-import { CapturedDateEditorComponent } from '../captured-date-editor.component';
+import type { DateSaveEvent } from '../../../calendar-dropdown/calendar-dropdown.types';
+import { CalendarDropdownComponent } from '../../../calendar-dropdown/calendar-dropdown.component';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import type { DetailEditingField, MediaRecord, SelectOption } from '../media-detail-view.types';
 import { formatCoordinate, splitOriginalFilePath } from '../media-detail-view.utils';
@@ -26,7 +26,7 @@ import {
   selector: 'app-media-detail-inline-section',
   standalone: true,
   imports: [
-    CapturedDateEditorComponent,
+    CalendarDropdownComponent,
     DropdownShellComponent,
     ProjectsDropdownComponent,
     ...HLM_BUTTON_IMPORTS,
@@ -56,6 +56,15 @@ export class MediaDetailInlineSectionComponent {
   readonly isImageLike = input(false);
   readonly saving = input(false);
   readonly exifLocationAddState = input<ExifLocationAddState>('hidden');
+
+  readonly capturedDropdownValue = computed(() => {
+    const date = this.editDate();
+    if (!date) {
+      return null;
+    }
+    const time = this.editTime();
+    return { date, time: time || null };
+  });
 
   readonly projectsForDropdown = computed((): readonly ProjectsDropdownProject[] =>
     this.projectOptions().map((opt) => ({
@@ -102,7 +111,7 @@ export class MediaDetailInlineSectionComponent {
   readonly fieldSaveRequested = output<{ field: string; value: string }>();
   readonly editingCancelled = output<void>();
   readonly capturedAtEditRequested = output<void>();
-  readonly capturedAtSaved = output<DateSaveEvent>();
+  readonly capturedAtSaved = output<DateSaveEvent | null>();
   readonly projectsChanged = output<Set<string>>();
 
   formatCoord(value: number | null | undefined): string {

@@ -18,7 +18,8 @@ Check before adding net-new shared UI: **[registry.md](registry.md)** (parent in
 Filter chips, dropdowns, grouping, sort, and related controls.
 
 - [active-filter-chips](filters/active-filter-chips.md)
-- [captured-date-editor](filters/captured-date-editor.md)
+- [calendar-dropdown](filters/calendar-dropdown.md) (+ [acceptance criteria](filters/calendar-dropdown.acceptance-criteria.md), [panel](filters/calendar-picker-panel.md))
+- [captured-date-editor](filters/captured-date-editor.md) *(legacy — migrating to calendar-dropdown)*
 - [chip](filters/chip.md)
 - [dropdown-system](filters/dropdown-system.md) (+ [class library supplement](filters/dropdown-system.class-library.supplement.md))
 - [filter-dropdown](filters/filter-dropdown.md)

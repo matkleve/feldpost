@@ -198,15 +198,27 @@
 
 ---
 
-### `<app-captured-date-editor>` — Captured Date Editor
+### `<app-calendar-dropdown>` — Calendar Dropdown
+
+- **File**: `apps/web/src/app/shared/calendar-dropdown/calendar-dropdown.component.ts` *(planned)*
+- **Purpose**: Locale-aware date/time field + body-portaled calendar popover; shared across Timespace and Media Detail.
+- **Spec**: [`docs/specs/component/filters/calendar-dropdown.md`](filters/calendar-dropdown.md)
+- **Variant axes**: `timeMode` (`dateOnly` \| `optionalTime` \| `requiredTime`), `minDate`, `maxDate`, `nullable`
+- **Composed of**: `app-calendar-picker-panel` (portal)
+- **Used in**: `app-timespace-dropdown`, `app-media-detail-inline-section` *(after migration)*
+- **Gaps**: not implemented — replaces `app-compact-date-field`, `app-captured-date-editor`
+
+---
+
+### `<app-captured-date-editor>` — Captured Date Editor *(legacy)*
 
 - **File**: `apps/web/src/app/shared/workspace-pane/media-detail/captured-date-editor.component.ts`
 - **Purpose**: Inline date+time editor for the image capture timestamp.
-- **Spec**: [`docs/specs/component/filters/captured-date-editor.md`](filters/captured-date-editor.md)
-- **Variant axes**: none (internal state machine; state not surfaced as input)
+- **Spec**: [`docs/specs/component/filters/captured-date-editor.md`](filters/captured-date-editor.md) — **superseded by** [`calendar-dropdown.md`](filters/calendar-dropdown.md)
+- **Variant axes**: `dateOnly` input only
 - **Composed of**: standalone
-- **Used in**: `app-media-detail-inline-section`
-- **Gaps**: none
+- **Used in**: `app-media-detail-inline-section`, `app-compact-date-field`
+- **Gaps**: migrate to `app-calendar-dropdown`; then delete
 
 ---
 
@@ -268,7 +280,7 @@
 - **Spec**: @no-spec
 - **Variant axes**: none
 - **Other inputs**: `detailViewLabel`, `mediaTypeLabel`, `editDate`, `editTime`, `projectName`, `fullAddress`, `projectSearch`, `projectCanCreate`, `canAssignMultipleProjects`, `isGpsAssignmentLocked`, `isCorrected`, `saving`
-- **Composed of**: `app-editable-property-row`, `app-captured-date-editor`, `app-address-search`
+- **Composed of**: `app-editable-property-row`, `app-calendar-dropdown` *(target)*, `app-address-search`
 - **Used in**: `app-media-detail-view`
 - **Gaps**: none
 

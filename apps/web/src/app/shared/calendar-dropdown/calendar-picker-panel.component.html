@@ -1,0 +1,105 @@
+<div class="calendar-picker-panel">
+  <div
+    class="calendar-picker-panel__header"
+    [class.calendar-picker-panel__header--date-only]="!showTime()"
+  >
+    <input
+      #dateField
+      hlmInput
+      class="calendar-picker-panel__date-input"
+      type="text"
+      [placeholder]="i18nService.dateFieldPlaceholder()"
+      [value]="dateInput()"
+      [attr.aria-label]="t('workspace.capturedDate.aria.editDate', 'Edit date')"
+      (input)="dateInput.set(dateField.value)"
+      (blur)="onDateBlur()"
+      (keydown)="onDateKeydown($event)"
+    />
+    @if (showTime()) {
+      <input
+        #timeField
+        hlmInput
+        class="calendar-picker-panel__time-input"
+        type="text"
+        inputmode="numeric"
+        [placeholder]="t('workspace.capturedDate.placeholder.time', 'No time')"
+        [value]="timeInput()"
+        [attr.aria-label]="t('workspace.capturedDate.aria.editTime', 'Edit time (24h format)')"
+        (input)="onTimeInput(timeField.value)"
+        (blur)="onTimeBlur()"
+        (keydown)="onTimeKeydown($event)"
+      />
+    }
+  </div>
+
+  <div class="calendar-picker-panel__month-nav">
+    <span class="calendar-picker-panel__month-label">{{ monthLabel() }}</span>
+    <button
+      class="calendar-picker-panel__now-btn focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-primary focus-visible:outline-offset-2"
+      type="button"
+      (click)="setToday()"
+    >
+      {{ t('workspace.capturedDate.action.today', 'Today') }}
+    </button>
+    <button
+      class="calendar-picker-panel__nav-btn focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-primary focus-visible:outline-offset-2"
+      type="button"
+      [attr.aria-label]="t('workspace.capturedDate.aria.previousMonth', 'Previous month')"
+      (click)="prevMonth()"
+    >
+      <span class="material-icons" aria-hidden="true">chevron_left</span>
+    </button>
+    <button
+      class="calendar-picker-panel__nav-btn focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-primary focus-visible:outline-offset-2"
+      type="button"
+      [attr.aria-label]="t('workspace.capturedDate.aria.nextMonth', 'Next month')"
+      (click)="nextMonth()"
+    >
+      <span class="material-icons" aria-hidden="true">chevron_right</span>
+    </button>
+  </div>
+
+  <div class="calendar-picker-panel__grid">
+    @for (day of weekdays(); track day) {
+      <span class="calendar-picker-panel__weekday">{{ day }}</span>
+    }
+    @for (day of calendarDays(); track day.date) {
+      <button
+        class="calendar-picker-panel__day focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-primary focus-visible:outline-offset-2"
+        type="button"
+        [class.calendar-picker-panel__day--other-month]="!day.isCurrentMonth"
+        [class.calendar-picker-panel__day--today]="day.isToday"
+        [class.calendar-picker-panel__day--selected]="day.isSelected"
+        [class.calendar-picker-panel__day--disabled]="day.isDisabled"
+        [disabled]="day.isDisabled"
+        [attr.aria-label]="day.date"
+        [attr.aria-current]="day.isToday ? 'date' : null"
+        (click)="selectDay(day)"
+      >
+        {{ day.day }}
+      </button>
+    }
+  </div>
+
+  <div class="calendar-picker-panel__actions">
+    @if (nullable()) {
+      <button
+        class="calendar-picker-panel__clear-btn focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-primary focus-visible:outline-offset-2"
+        type="button"
+        (click)="onClearClick()"
+      >
+        {{ t('workspace.capturedDate.action.clear', 'Clear') }}
+      </button>
+    } @else {
+      <span></span>
+    }
+    <button
+      class="calendar-picker-panel__done-btn focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-success focus-visible:outline-offset-2"
+      type="button"
+      [disabled]="!canDone()"
+      (click)="onDoneClick()"
+    >
+      {{ t('workspace.capturedDate.action.done', 'Done') }}
+    </button>
+  </div>
+</div>

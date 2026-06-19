@@ -1,0 +1,53 @@
+<label class="calendar-dropdown">
+  @if (label()) {
+    <span class="calendar-dropdown__label">{{ label() }}</span>
+  }
+  <div
+    #control
+    class="calendar-dropdown__control"
+    [attr.lang]="i18nService.locale()"
+  >
+    <input
+      class="calendar-dropdown__input"
+      type="text"
+      inputmode="numeric"
+      autocomplete="off"
+      [attr.placeholder]="placeholder()"
+      [attr.aria-label]="ariaLabel() || label()"
+      [value]="shellDisplayText()"
+      (change)="onShellTextCommit($event)"
+      (keydown.enter)="onShellTextCommit($event)"
+    />
+    <button
+      type="button"
+      class="calendar-dropdown__trigger"
+      [attr.aria-label]="t('shared.dateField.openCalendar', 'Open calendar')"
+      [attr.aria-expanded]="popoverOpen()"
+      (click)="togglePopover($event)"
+    >
+      <span class="material-icons" aria-hidden="true">calendar_today</span>
+    </button>
+  </div>
+</label>
+
+@if (popoverOpen()) {
+  <app-dropdown-shell
+    panelClass="calendar-dropdown-panel"
+    placement="end"
+    [anchor]="anchorEl()"
+    (closeRequested)="onPopoverCloseRequested()"
+  >
+    <app-calendar-picker-panel
+      [timeMode]="timeMode()"
+      [minDate]="minDate()"
+      [maxDate]="maxDate()"
+      [disabledDates]="disabledDates()"
+      [nullable]="nullable()"
+      [draft]="draft()"
+      (draftChange)="onDraftChange($event)"
+      (done)="onPanelDone()"
+      (clear)="onPanelClear()"
+      (cancel)="onPopoverCloseRequested()"
+    />
+  </app-dropdown-shell>
+}

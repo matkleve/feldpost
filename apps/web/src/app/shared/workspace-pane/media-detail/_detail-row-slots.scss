@@ -131,13 +131,9 @@
   @include detail-row-field.detail-row-editing-center;
   position: relative;
 
-  app-captured-date-editor {
-    position: absolute;
-    top: 100%;
-    left: auto;
-    right: 0;
-    z-index: 300;
-    margin-top: var(--spacing-1);
+  app-calendar-dropdown.detail-row__field-slot {
+    flex: 1 1 auto;
+    min-width: 0;
   }
 }
 

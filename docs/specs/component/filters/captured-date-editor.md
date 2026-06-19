@@ -1,5 +1,7 @@
 # Captured Date Editor
 
+> **Migration:** Superseded by [`calendar-dropdown.md`](calendar-dropdown.md) + [`calendar-picker-panel.md`](calendar-picker-panel.md). Do not extend this contract; remove `app-captured-date-editor` after cutover.
+
 ## What It Is
 
 The Captured Date Editor is the inline date-editing control used in Media Detail View for a media item's `captured_at` value. It allows quick correction when EXIF timestamps are missing or inaccurate.

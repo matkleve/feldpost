@@ -9,13 +9,15 @@
 // Applies default trigger flex distribution and horizontal inset (overrides hlmBtn kernel `ps-2`/`pe-2` for this pattern).
 // @see docs/specs/component/ui-primitives/ui-primitives.dropdown-trigger.md
 @mixin toolbar-menu-trigger-components($block) {
-  // Toolbar dropdown trigger: label + trailing chevron (hlmBtn supplies base control chrome).
+  // Toolbar dropdown trigger: icon + label + trailing chevron (hlmBtn supplies base control chrome).
   // @see docs/specs/component/ui-primitives/ui-primitives.dropdown-trigger.md
   .#{$block}__menu-trigger {
     justify-content: space-between;
     // Adds symmetric horizontal inset on the closed trigger (popover list uses `.standard-dropdown` padding separately).
     // @see docs/specs/component/ui-primitives/ui-primitives.dropdown-trigger.md
     padding-inline: var(--spacing-3);
+    // Gap between icon and label in spacious (icon + text) mode; no effect in compact (single icon).
+    gap: var(--spacing-1);
   }
 
   // Chevron rotation target for open dropdown shell.

@@ -7,8 +7,8 @@
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  // Container for icon-only collapse — same breakpoint contract as workspace toolbar.
-  // @see docs/specs/ui/workspace/workspace-pane.md
+  // Container for icon-only collapse when three labeled triggers no longer fit.
+  // @see docs/specs/component/map/map-filter-toolbar.md
   container-type: inline-size;
   container-name: map-filter-toolbar;
 }
@@ -53,4 +53,8 @@
   @include fp-toolbar-menu-trigger.toolbar-menu-trigger-states('map-filter-toolbar');
 }
 
-@include fp-toolbar-breakpoints.toolbar-menu-trigger-responsive('map-filter-toolbar', map-filter-toolbar);
+@include fp-toolbar-breakpoints.toolbar-menu-trigger-responsive(
+  'map-filter-toolbar',
+  map-filter-toolbar,
+  fp-toolbar-breakpoints.$map-filter-toolbar-compact-max
+);

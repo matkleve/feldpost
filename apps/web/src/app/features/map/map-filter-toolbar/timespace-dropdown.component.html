@@ -48,15 +48,23 @@
 </div>
 
 <div class="timespace-dropdown__dates-row">
-  <app-compact-date-field
+  <app-calendar-dropdown
     [label]="t('map.filter.timespace.from', 'From')"
-    [value]="effectiveRange()?.from ?? null"
+    [value]="fromDropdownValue()"
+    [minDate]="domainMinDate()"
+    [maxDate]="domainMaxDate()"
+    [nullable]="true"
+    timeMode="dateOnly"
     [ariaLabel]="t('map.filter.timespace.from', 'From')"
     (valueChange)="onFromDateChange($event)"
   />
-  <app-compact-date-field
+  <app-calendar-dropdown
     [label]="t('map.filter.timespace.to', 'To')"
-    [value]="effectiveRange()?.to ?? null"
+    [value]="toDropdownValue()"
+    [minDate]="domainMinDate()"
+    [maxDate]="domainMaxDate()"
+    [nullable]="true"
+    timeMode="dateOnly"
     [ariaLabel]="t('map.filter.timespace.to', 'To')"
     (valueChange)="onToDateChange($event)"
   />

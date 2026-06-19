@@ -47,7 +47,8 @@ When an interactive component spec is next edited, add **§ Interaction emphasis
 | Projects dropdown picker rows | media-detail-inline-section spec | **done** | `--selected` in projects picker |
 | Grouping dropdown multi-select | [`dropdown-system.md`](../component/filters/dropdown-system.md) | **done** | `.grouping-row--selected` |
 | Filter dropdown rule rows | [`filter-dropdown.md`](../component/filters/filter-dropdown.md) | **done** | row hover gold; picker `data-selected` = primary `engaged` |
-| Timespace histogram + date fields | [`map-filter-toolbar.md`](../component/map/map-filter-toolbar.md) | **done** | drag = gold engaged; committed range = secondary |
+| Timespace histogram + date fields | [`map-filter-toolbar.md`](../component/map/map-filter-toolbar.md) | **partial** | drag gold pending Brix; migrate to `calendar-dropdown` |
+| Calendar dropdown | [`calendar-dropdown.md`](../component/filters/calendar-dropdown.md) | **done** | replaces compact-date-field + inline captured-date-editor |
 | Media detail inline `__option--selected` | media-detail-inline-section spec | **done** | Tag chips unchanged |
 | Search / address typeahead rows | address-search, metadata pickers | **pending** | Align to ink contract |
 | `hlmBtn` secondary call sites | [`ui-primitives.button.md`](../component/ui-primitives/ui-primitives.button.md) | **done** | Migrated to `outline` (projects retry, media-empty) |

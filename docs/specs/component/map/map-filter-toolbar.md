@@ -6,7 +6,7 @@ Floating row of **three dropdown triggers** (Filter, Projects, Timespace) direct
 
 ## What It Looks Like
 
-Horizontal trigger row, left-aligned under `ss-search-bar` inside `.map-search-chrome`. Each trigger: icon + label + chevron in spacious mode; **icon-only** below the shared container-query breakpoint (`42.5rem` on `map-filter-toolbar` container). Active filters / project / timespace set `data-active='true'` → **secondary** selected-ink at rest; hover → **primary** gold.
+Horizontal trigger row, left-aligned under `ss-search-bar` inside `.map-search-chrome`. Each trigger: **icon + label + chevron** in spacious mode (default at typical search-chrome widths up to `36rem`); **icon-only** below the map-specific container-query breakpoint (`22rem` on `map-filter-toolbar` container — three triggers, not workspace’s four-trigger `42.5rem` contract). Active filters / project / timespace set `data-active='true'` → **secondary** selected-ink at rest; hover → **primary** gold.
 
 ## Where It Lives
 
@@ -35,9 +35,9 @@ Horizontal trigger row, left-aligned under `ss-search-bar` inside `.map-search-c
 | `.timespace-dropdown__selection--committed` | **Secondary** | selected-ink border + wash | — | `timespace-dropdown.component.scss` |
 | `.timespace-dropdown__selection--engaged` | **Primary** | — | gold border + wash + outer ring | same |
 | `.timespace-dropdown__chart--engaged` | **Primary** | — | gold track border during pointer drag | same |
-| `app-compact-date-field` `:focus-within` | **Primary** | neutral border | gold border + focus ring | `compact-date-field.component.scss` |
+| `app-compact-date-field` `:focus-within` | **Primary** | neutral border | gold border + focus ring | `calendar-dropdown.component.scss` (replaces `compact-date-field`) |
 
-**Normative:** Histogram brush uses **primary gold** only while `isDragging()`; committed range at rest uses **secondary** selected ink. Date fields use gold on `:focus-within`, not `--primary`.
+**Normative:** Histogram brush uses **primary gold** only while `isDragging()`; committed range at rest uses **secondary** selected ink. Date fields use `app-calendar-dropdown` ([`calendar-dropdown.md`](../filters/calendar-dropdown.md)) — gold on `:focus-within`, body-portaled panel (no clip).
 
 ## File Map
 
@@ -53,5 +53,6 @@ Horizontal trigger row, left-aligned under `ss-search-bar` inside `.map-search-c
 - [x] Three triggers: Filter, Projects, Timespace with `data-dd-part` icon/label/chevron slots
 - [x] Triggers use `toolbar-menu-trigger` gold hover + secondary `data-active` emphasis
 - [x] Frosted `outline-control` shells in `@layer components`; hover states in `@layer states`
-- [x] Container query collapses to icon-only below `42.5rem` (aria-label + title on each button)
+- [x] Spacious default shows icon + label + chevron on each trigger
+- [x] Container query collapses to icon-only below `22rem` (aria-label + title on each button)
 - [ ] Filter trigger shows active count badge when filters applied (workspace parity — future)

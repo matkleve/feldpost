@@ -21,13 +21,15 @@ import {
   type TimeRange,
   type TimespaceBin,
 } from '../../../core/workspace-view/timespace.helpers';
-import { CompactDateFieldComponent } from '../../../shared/ui/compact-date-field/compact-date-field.component';
+import { toIsoDateValue, parseIsoDateValue } from '../../../core/i18n/date-field.helpers';
+import { CalendarDropdownComponent } from '../../../shared/calendar-dropdown/calendar-dropdown.component';
+import type { CalendarDropdownValue } from '../../../shared/calendar-dropdown/calendar-dropdown.types';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 
 @Component({
   selector: 'app-timespace-dropdown',
   standalone: true,
-  imports: [CompactDateFieldComponent, ...HLM_BUTTON_IMPORTS],
+  imports: [CalendarDropdownComponent, ...HLM_BUTTON_IMPORTS],
   templateUrl: './timespace-dropdown.component.html',
   styleUrl: './timespace-dropdown.component.scss',
   host: {
@@ -78,6 +80,38 @@ export class TimespaceDropdownComponent implements OnInit {
 
   readonly histogram = computed(() => buildTimespaceHistogram(this.scopedEntries()));
 
+  readonly domainMinDate = computed((): Date | null => {
+    const hist = this.histogram();
+    if (!hist) {
+      return null;
+    }
+    return new Date(hist.domainStartMs);
+  });
+
+  readonly domainMaxDate = computed((): Date | null => {
+    const hist = this.histogram();
+    if (!hist) {
+      return null;
+    }
+    return new Date(hist.domainEndMs);
+  });
+
+  readonly fromDropdownValue = computed((): CalendarDropdownValue | null => {
+    const from = this.effectiveRange()?.from;
+    if (!from) {
+      return null;
+    }
+    return { date: toIsoDateValue(from), time: null };
+  });
+
+  readonly toDropdownValue = computed((): CalendarDropdownValue | null => {
+    const to = this.effectiveRange()?.to;
+    if (!to) {
+      return null;
+    }
+    return { date: toIsoDateValue(to), time: null };
+  });
+
   readonly matchedItemCount = computed(() => {
     const entries = this.scopedEntries();
     const range = this.effectiveRange();
@@ -113,12 +147,14 @@ export class TimespaceDropdownComponent implements OnInit {
     return this.viewService.timeRange();
   });
 
-  onFromDateChange(from: Date | null): void {
+  onFromDateChange(value: CalendarDropdownValue | null): void {
+    const from = value?.date ? parseIsoDateValue(value.date) : null;
     const current = this.viewService.timeRange();
     this.commitRange({ from, to: current?.to ?? null });
   }
 
-  onToDateChange(to: Date | null): void {
+  onToDateChange(value: CalendarDropdownValue | null): void {
+    const to = value?.date ? parseIsoDateValue(value.date) : null;
     const current = this.viewService.timeRange();
     this.commitRange({ from: current?.from ?? null, to });
   }

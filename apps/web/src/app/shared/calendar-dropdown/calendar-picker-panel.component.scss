@@ -1,20 +1,14 @@
-@use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
+@use '../../../styles/interaction-emphasis-quiet-row' as emphasis;
 
-// CapturedDateEditorComponent — Notion-style calendar styles.
-
-// Ex-bridge `--menu-*` (Phase 7 Batch 48): standalone host + sandstone (ex global bridge).
-// @see docs/migration/phase-7-token-migration.md §Batch 48
-// Ex-bridge `--action-bg-hover` (Phase 7 Batch 49) — global `:root` + sandstone (`--action-text-active` was `var(--primary)`).
-// @see docs/migration/phase-7-token-migration.md §Batch 49
-// Flex child in detail row — calendar popover host
-// @see docs/specs/ui/workspace/workspace-pane.md
+// Popover content for app-calendar-dropdown — month grid + optional time row.
+// @see docs/specs/component/filters/calendar-picker-panel.md
 :host {
   display: block;
   min-height: 0;
   min-width: 0;
 }
 
-.captured-date-editor {
+.calendar-picker-panel {
   background: var(--popover);
   border: 1px solid var(--menu-border-subtle);
   border-radius: var(--radius-md);
@@ -25,8 +19,6 @@
   flex-direction: column;
   gap: var(--spacing-1);
 
-  // ── Header: date + time ──
-
   &__header {
     display: flex;
     align-items: center;
@@ -36,7 +28,7 @@
   }
 
   &__header--date-only {
-    .captured-date-editor__date-input {
+    .calendar-picker-panel__date-input {
       flex: 1 1 100%;
     }
   }
@@ -54,15 +46,15 @@
     font-family: inherit;
     outline: none;
     transition:
-      border-color 80ms ease-out,
-      box-shadow 80ms ease-out;
+      border-color var(--motion-duration-fast) var(--motion-ease-out),
+      box-shadow var(--motion-duration-fast) var(--motion-ease-out);
 
     &::placeholder {
       color: var(--text-disabled);
     }
 
     &:focus {
-      border-color: var(--primary);
+      border-color: color-mix(in srgb, var(--brand-gold) 42%, var(--border));
       box-shadow: var(--interactive-focus-ring);
     }
   }
@@ -70,8 +62,6 @@
   &__time-input {
     text-align: left;
   }
-
-  // ── Month navigation ──
 
   &__month-nav {
     display: flex;
@@ -96,8 +86,8 @@
     cursor: pointer;
     font-family: inherit;
     transition:
-      color 80ms ease-out,
-      background 80ms ease-out;
+      color var(--motion-duration-fast) var(--motion-ease-out),
+      background var(--motion-duration-fast) var(--motion-ease-out);
 
     &:hover {
       @include emphasis.hover(10%);
@@ -116,8 +106,8 @@
     color: var(--muted-foreground);
     cursor: pointer;
     transition:
-      color 80ms ease-out,
-      background 80ms ease-out;
+      color var(--motion-duration-fast) var(--motion-ease-out),
+      background var(--motion-duration-fast) var(--motion-ease-out);
 
     .material-icons {
       font-size: var(--font-size-md);
@@ -131,8 +121,6 @@
       }
     }
   }
-
-  // ── Calendar grid ──
 
   &__grid {
     display: grid;
@@ -165,34 +153,36 @@
     cursor: pointer;
     font-family: inherit;
     transition:
-      background 80ms ease-out,
-      color 80ms ease-out;
+      background var(--motion-duration-fast) var(--motion-ease-out),
+      color var(--motion-duration-fast) var(--motion-ease-out);
 
-    &:hover:not(&--selected) {
+    &:hover:not(&--selected):not(&--disabled) {
       @include emphasis.hover(10%);
     }
 
     &--other-month {
-      color: color-mix(in srgb, var(--muted-foreground) 52%, transparent); /* TODO(phase8): no tweakcn equiv yet */
+      color: color-mix(in srgb, var(--muted-foreground) 52%, transparent);
     }
 
     &--today:not(&--selected) {
-      box-shadow: inset 0 0 0 1.5px var(--primary);
+      box-shadow: inset 0 0 0 1.5px var(--border);
     }
 
-    // Stable state: picked calendar day — selected ink (quiet emphasis, not filled CTA)
-    // @see docs/design/state-visuals.md § Interaction emphasis
     &--selected {
       @include emphasis.selected(12%);
       font-weight: var(--font-weight-semibold);
     }
 
-    &--selected:hover {
-      @include emphasis.selected-hover(12%);
+    &--selected:hover:not(&--disabled) {
+      @include emphasis.hover(12%);
+    }
+
+    &--disabled {
+      opacity: 0.38;
+      pointer-events: none;
+      cursor: default;
     }
   }
-
-  // ── Action row ──
 
   &__actions {
     display: flex;
@@ -212,8 +202,8 @@
     padding: var(--spacing-1) var(--spacing-2);
     cursor: pointer;
     transition:
-      color 80ms ease-out,
-      background 80ms ease-out;
+      color var(--motion-duration-fast) var(--motion-ease-out),
+      background var(--motion-duration-fast) var(--motion-ease-out);
   }
 
   &__clear-btn {
@@ -231,8 +221,13 @@
     background: var(--success);
     border-radius: var(--radius-sm);
 
-    &:hover {
+    &:hover:not(:disabled) {
       background: color-mix(in srgb, var(--success) 88%, black);
+    }
+
+    &:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
     }
   }
 }

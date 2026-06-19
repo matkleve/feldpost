@@ -14,7 +14,7 @@ import type { MediaItemLocationRow } from '../../../core/media-locations/media-l
 import type { MediaLocationAddressPatch } from '../../../core/media-locations/media-locations.types';
 import type { SupabaseService } from '../../../core/supabase/supabase.service';
 import type { ToastService } from '../../../core/toast/toast.service';
-import type { DateSaveEvent } from './captured-date-editor.component';
+import type { DateSaveEvent } from '../../calendar-dropdown/calendar-dropdown.types';
 import type { DetailEditingField, MediaRecord } from './media-detail-view.types';
 
 type DetailTranslateFn = (key: string, fallback: string) => string;
@@ -294,12 +294,12 @@ export class MediaDetailFieldsHelper {
     this.deps.signals.editingField.set('captured_at');
   }
 
-  async saveCapturedAt(event: DateSaveEvent): Promise<void> {
+  async saveCapturedAt(event: DateSaveEvent | null): Promise<void> {
     this.deps.signals.editingField.set(null);
     const img = this.deps.signals.media();
     if (!img) return;
 
-    if (!event.date) {
+    if (!event?.date) {
       const oldCapturedAt = img.captured_at;
       const oldHasTime = img.has_time;
       this.deps.signals.media.update((prev) =>

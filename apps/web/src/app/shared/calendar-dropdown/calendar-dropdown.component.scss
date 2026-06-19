@@ -1,16 +1,16 @@
-@use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
+@use '../../../styles/interaction-emphasis-quiet-row' as emphasis;
 
 @layer components {
-  // Labeled compact date row — single thin shell aligned to hlmBtn size="sm" (2.25rem).
-  // @see apps/web/src/app/shared/ui/button/button-variants.ts
-  // @see apps/web/src/app/shared/dropdown-trigger/scss/_toolbar-breakpoints.scss
+  // Labeled date/time control row — toolbar hlmBtn size="sm" parity (2.25rem).
+  // @see docs/specs/component/filters/calendar-dropdown.md
   :host {
     display: block;
     width: 100%;
     min-width: 0;
+    min-height: 0;
   }
 
-  .compact-date-field {
+  .calendar-dropdown {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-1);
@@ -18,16 +18,12 @@
     min-width: 0;
   }
 
-  // Field label above control.
-  // @see docs/specs/component/map/map-filter-toolbar.md
-  .compact-date-field__label {
+  .calendar-dropdown__label {
     font-size: var(--font-size-2xs);
     color: var(--muted-foreground);
   }
 
-  // Single bordered control — matches toolbar `hlmBtn size="sm"` height (mid / 2.25rem).
-  // @see docs/specs/component/map/map-filter-toolbar.md
-  .compact-date-field__control {
+  .calendar-dropdown__control {
     position: relative;
     display: flex;
     align-items: center;
@@ -41,15 +37,17 @@
     background: var(--background);
     box-sizing: border-box;
 
+    &:hover {
+      @include emphasis.hover(8%);
+    }
+
     &:focus-within {
       border-color: color-mix(in srgb, var(--brand-gold) 42%, var(--border));
       box-shadow: var(--interactive-focus-ring);
     }
   }
 
-  // Borderless text — geometry owned by __control only (no hlmInput second shell).
-  // @see docs/specs/component/map/map-filter-toolbar.md
-  .compact-date-field__input {
+  .calendar-dropdown__input {
     flex: 1 1 auto;
     min-width: 0;
     height: 100%;
@@ -67,9 +65,7 @@
     }
   }
 
-  // Trailing calendar affordance — no extra button chrome inside the shell.
-  // @see docs/specs/component/map/map-filter-toolbar.md
-  .compact-date-field__calendar-btn {
+  .calendar-dropdown__trigger {
     display: inline-flex;
     flex-shrink: 0;
     align-items: center;
@@ -96,14 +92,5 @@
       outline: none;
       box-shadow: var(--interactive-focus-ring);
     }
-  }
-
-  // Reuses media-detail calendar editor below the control.
-  // @see docs/specs/component/filters/captured-date-editor.md
-  .compact-date-field__popover {
-    position: absolute;
-    top: calc(100% + var(--spacing-1));
-    right: 0;
-    z-index: 300;
   }
 }

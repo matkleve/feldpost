@@ -29,7 +29,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { filter } from 'rxjs';
 import { HLM_BUTTON_IMPORTS } from '../../ui/button';
-import type { DateSaveEvent } from './captured-date-editor.component';
+import type { DateSaveEvent } from '../../calendar-dropdown/calendar-dropdown.types';
 import { SupabaseService } from '../../../core/supabase/supabase.service';
 import { MetadataService } from '../../../core/metadata/metadata.service';
 import { UploadService, ALLOWED_MIME_TYPES } from '../../../core/upload/upload.service';
@@ -1371,7 +1371,7 @@ export class MediaDetailViewComponent implements OnDestroy {
     this.fieldsHelper.openCapturedAtEditor();
   }
 
-  async saveCapturedAt(event: DateSaveEvent): Promise<void> {
+  async saveCapturedAt(event: DateSaveEvent | null): Promise<void> {
     await this.fieldsHelper.saveCapturedAt(event);
   }
 

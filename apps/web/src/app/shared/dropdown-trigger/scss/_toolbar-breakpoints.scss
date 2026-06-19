@@ -6,19 +6,18 @@
 // Icon-only menu triggers when toolbar is narrower than four labeled triggers + view toggle.
 $toolbar-menu-compact-max: 42.5rem;
 
+// Map filter row: three triggers under search chrome (max ~36rem) — collapse only when labels cannot fit.
+$map-filter-toolbar-compact-max: 22rem;
+
 // Single cycle button replaces full card-variant toggle group.
 $toolbar-view-toggle-compact-max: 23.75rem;
 
-// Applies spacious default and compact icon-only rules for toolbar dropdown triggers.
+// Spacious default: icon + text + chevron. Compact (container narrow): icon only.
+// @param $compact-max Optional container max-width; defaults to $toolbar-menu-compact-max.
 // @see docs/specs/ui/workspace/workspace-pane.md
-@mixin toolbar-menu-trigger-responsive($block, $container) {
-  .#{$block}__menu-trigger-icon {
-    display: none;
-  }
-
-  @container #{$container} (max-width: #{$toolbar-menu-compact-max}) {
+@mixin toolbar-menu-trigger-responsive($block, $container, $compact-max: $toolbar-menu-compact-max) {
+  @container #{$container} (max-width: #{$compact-max}) {
     .#{$block}__menu-trigger-icon {
-      display: inline-flex;
       font-size: 22px;
       line-height: 1;
     }
