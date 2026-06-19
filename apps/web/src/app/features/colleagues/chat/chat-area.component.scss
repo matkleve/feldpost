@@ -1,4 +1,5 @@
 @use '../../../../styles/frosted-chrome';
+@use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
 
 .chat-area {
   container-type: inline-size;
@@ -225,14 +226,13 @@
   cursor: pointer;
   transition: background var(--motion-duration-fast) var(--motion-ease-out);
 
-  &:hover {
-    background: var(--action-hover);
-    color: var(--foreground);
-  }
+  &:hover,
+  &:focus-visible {
+    @include emphasis.hover(10%);
 
-  .material-icons {
-    font-size: 1.125rem;
-    line-height: 1;
+    .material-icons {
+      color: inherit;
+    }
   }
 }
 

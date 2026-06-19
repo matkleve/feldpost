@@ -42,6 +42,7 @@ When an interactive component spec is next edited, add **§ Interaction emphasis
 | Upload panel file row selection | [`upload-panel.md`](../component/upload/upload-panel.md) | **done** | Embedded `--selected` |
 | Projects dropdown picker rows | media-detail-inline-section spec | **done** | `--selected` in projects picker |
 | Grouping dropdown multi-select | [`dropdown-system.md`](../component/filters/dropdown-system.md) | **done** | `.grouping-row--selected` |
+| Filter dropdown rule rows | [`filter-dropdown.md`](../component/filters/filter-dropdown.md) | **done** | `emphasis.hover` on `.filter-rule`; chevron + × exceptions |
 | Media detail inline `__option--selected` | media-detail-inline-section spec | **done** | Tag chips unchanged |
 | Search / address typeahead rows | address-search, metadata pickers | **pending** | Align to ink contract |
 | `hlmBtn` secondary call sites | [`ui-primitives.button.md`](../component/ui-primitives/ui-primitives.button.md) | **done** | Migrated to `outline` (projects retry, media-empty) |

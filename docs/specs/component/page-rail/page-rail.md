@@ -50,4 +50,4 @@ All rail row hosts (`app-rail-nav-button`, `app-rail-detail-nav-item`, `app-rail
 - [ ] All three page rails use `app-page-rail` shell.
 - [ ] Collapsible sections use `app-rail-section`; list rows use `app-rail-select-list` or `app-rail-detail-nav-item`.
 - [ ] No duplicate rail padding/gap/scroll SCSS in feature sidebars.
-- [ ] Rail row hover: gold ink on host and all child slots (icon, label, chevron) — see ink inheritance contract.
+- [x] Rail row hover: gold ink on host and all child slots (icon, label, chevron) — see ink inheritance contract.

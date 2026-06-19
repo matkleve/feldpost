@@ -1,5 +1,7 @@
 // Host — fills the tab panel slot, scrollable vertically
 // @see docs/specs/ui/workspace/workspace-pane-projects-tab.md
+@use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
+
 :host {
   display: flex;
   flex-direction: column;
@@ -106,8 +108,7 @@
   border-radius: 4px;
 
   &:hover {
-    color: var(--foreground);
-    background-color: var(--muted);
+    @include emphasis.hover(10%);
   }
 
   .material-icons {
@@ -142,7 +143,7 @@
   transition: background-color 120ms ease;
 
   &:hover {
-    background-color: var(--accent);
+    @include emphasis.hover(10%);
   }
 }
 
@@ -192,9 +193,13 @@
   border-radius: 4px;
   transition: background-color 120ms ease, color 120ms ease;
 
-  &:hover {
-    background-color: var(--accent);
-    color: var(--foreground);
+  &:hover,
+  &:focus-visible {
+    @include emphasis.hover(10%);
+
+    .material-icons {
+      color: inherit;
+    }
   }
 
   .material-icons {
@@ -334,8 +339,12 @@
   color: var(--foreground);
   transition: background-color 120ms ease, color 120ms ease;
 
-  &:hover {
-    background-color: var(--accent);
+  &:hover:not(.projects-panel-detail__action-btn--danger) {
+    @include emphasis.hover(10%);
+
+    .material-icons {
+      color: inherit;
+    }
   }
 
   .material-icons {

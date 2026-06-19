@@ -70,9 +70,9 @@ Feature SCSS must not reintroduce child `primary` overrides after host `emphasis
 ## Acceptance criteria
 
 - [ ] **Given** a quiet row at idle, **when** the user hovers or focus-visible activates it, **then** host background and **all** icon/label/chevron slots show **gold** ink (`--brand-gold`) with no slot left muted or blue unless the row is **selected**.
-- [ ] **Given** a selected quiet row, **when** the user hovers it, **then** host and all slots show **primary** ink with selected-hover wash.
-- [ ] **Given** a toolbar `hlmBtn` outline trigger on a frosted shell, **when** hovered, **then** icon, label, and chevron change ink together (no foreground lock on the host).
-- [ ] **Given** an `hlmMenuItem` row in any dropdown (filter, sort, grouping, timespace panel actions), **when** hovered, **then** leading icon and label match host gold ink.
+- [x] **Given** a selected quiet row, **when** the user hovers it, **then** host and all slots show **primary** ink with selected-hover wash.
+- [x] **Given** a toolbar `hlmBtn` outline trigger on a frosted shell, **when** hovered, **then** icon, label, and chevron change ink together (no foreground lock on the host).
+- [x] **Given** an `hlmMenuItem` row in any dropdown (filter, sort, grouping, timespace panel actions), **when** hovered, **then** leading icon and label match host gold ink.
 - [ ] **Given** sandstone theme (`--primary` = gold), **when** hovering a non-selected row, **then** no blue/gold split appears on icon vs label.
 
 ## Changelog

@@ -1,9 +1,11 @@
 // Stable inline field in detail rows — same geometry as address search (width/height do not jump).
 // @see docs/specs/ui/media-detail/media-detail-inline-section.md
 
+@use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
+
 @mixin detail-row-editing-center {
   --detail-row-field-inset: 0.125rem;
-  background: var(--action-hover);
+  @include emphasis.selected(10%);
   align-items: stretch;
   padding-block: var(--detail-row-field-inset);
   padding-inline-end: var(--detail-row-field-inset);
@@ -16,16 +18,16 @@
   &:focus-within {
     .detail-row__icon,
     .detail-row__label {
-      color: var(--primary);
+      color: inherit;
     }
   }
 }
 
-// Value column trigger (idle) — matches field-input footprint.
-// @see docs/specs/ui/media-detail/media-detail-inline-section.md
+// Value column trigger (idle) — inherits gold ink from detail-row center emphasis.
+// @see docs/specs/system/interaction-emphasis-ink-contract.md
 .detail-row:hover:not(.detail-row--editing):not(.detail-row--readonly) .detail-row__field-trigger,
 .detail-row:focus-within:not(.detail-row--editing):not(.detail-row--readonly) .detail-row__field-trigger {
-  color: var(--primary);
+  color: inherit;
 }
 
 .detail-row:not(.detail-row--readonly):not(.detail-row--editing) .detail-row__field-trigger {

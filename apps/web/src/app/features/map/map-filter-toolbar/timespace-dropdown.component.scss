@@ -1,4 +1,5 @@
 @use '../../../shared/dropdown-trigger/scss/dropdown-panel-flex-chain' as panel-flex;
+@use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
 
 :host {
   @include panel-flex.panel-flex-child;
@@ -40,6 +41,12 @@
     overflow: hidden;
     --timespace-selection-inset: var(--spacing-1);
     --timespace-bars-inset: var(--spacing-2);
+
+    &:focus-visible {
+      outline: none;
+      border-color: color-mix(in srgb, var(--brand-gold) 42%, var(--border));
+      box-shadow: var(--interactive-focus-ring);
+    }
   }
 
   // Bar row — inset spacing-2 from chart border; bars align to bottom edge.

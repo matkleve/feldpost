@@ -101,6 +101,7 @@ export class WorkspaceToolbarComponent implements OnInit {
   // Active-state indicators — wired to services
   readonly hasGrouping = computed(() => this.viewService.activeGroupings().length > 0);
   readonly hasFilters = computed(() => this.filterService.activeCount() > 0);
+  readonly filterActiveCount = computed(() => this.filterService.activeCount());
   readonly hasCustomSort = computed(() => {
     const sorts = this.viewService.activeSorts();
     return sorts.length !== 1 || sorts[0].key !== 'date-captured' || sorts[0].direction !== 'desc';

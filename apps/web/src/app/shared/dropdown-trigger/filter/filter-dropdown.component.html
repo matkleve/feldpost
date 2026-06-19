@@ -15,7 +15,7 @@
           hlmBtn
           variant="outline"
           size="sm"
-          class="filter-rule__conj shrink-0 font-normal text-muted-foreground"
+          class="filter-rule__conj shrink-0 font-normal"
           type="button"
           tabindex="-1"
           disabled
@@ -35,7 +35,7 @@
           >
             <span class="filter-rule__picker-label-stack">
               <span class="filter-rule__picker-sizer">{{ longestPropertySizingLabel() }}</span>
-              <span class="filter-rule__picker-value truncate text-left text-foreground">{{
+              <span class="filter-rule__picker-value truncate text-left">{{
                 longestPropertySizingLabel()
               }}</span>
             </span>
@@ -59,7 +59,7 @@
           >
             <span class="filter-rule__picker-label-stack">
               <span class="filter-rule__picker-sizer">{{ longestOperatorSizingLabelAll() }}</span>
-              <span class="filter-rule__picker-value truncate text-left text-foreground">{{
+              <span class="filter-rule__picker-value truncate text-left">{{
                 longestOperatorSizingLabelAll()
               }}</span>
             </span>
@@ -103,7 +103,7 @@
                 hlmBtn
                 variant="outline"
                 size="sm"
-                class="filter-rule__conj shrink-0 font-normal text-muted-foreground"
+                class="filter-rule__conj shrink-0 font-normal"
                 type="button"
                 (click)="toggleConjunction(rule.id)"
               >
@@ -129,7 +129,7 @@
                     <span class="filter-rule__picker-sizer" aria-hidden="true">{{
                       longestPropertySizingLabel()
                     }}</span>
-                    <span class="filter-rule__picker-value truncate text-left text-foreground">{{
+                    <span class="filter-rule__picker-value truncate text-left">{{
                       propertyTriggerLabel(rule.property)
                     }}</span>
                   </span>
@@ -161,7 +161,7 @@
                     <span class="filter-rule__picker-sizer" aria-hidden="true">{{
                       longestOperatorSizingLabel(rule.property)
                     }}</span>
-                    <span class="filter-rule__picker-value truncate text-left text-foreground">{{
+                    <span class="filter-rule__picker-value truncate text-left">{{
                       operatorTriggerLabel(rule.operator)
                     }}</span>
                   </span>
@@ -174,14 +174,46 @@
                 </button>
               </div>
 
-              <input
-                hlmInput
-                class="filter-rule__value"
-                [type]="getInputType(rule.property)"
-                [placeholder]="t('workspace.filter.value.placeholder', 'Value…')"
-                [value]="rule.value"
-                (input)="updateValue(rule.id, $any($event.target).value)"
-              />
+              @switch (getValueInputKind(rule.property)) {
+                @case ('select') {
+                  <div
+                    class="filter-rule__picker filter-rule__picker--value"
+                    [attr.data-filter-picker]="rule.id + '-value'"
+                  >
+                    <button
+                      hlmBtn
+                      variant="outline"
+                      size="sm"
+                      iconPlacement="end"
+                      class="filter-rule__picker-trigger font-normal"
+                      type="button"
+                      [attr.aria-expanded]="isPickerOpen(rule.id, 'value')"
+                      aria-haspopup="listbox"
+                      (click)="togglePicker($event, rule.id, 'value')"
+                    >
+                      <span class="filter-rule__picker-value truncate text-left">{{
+                        valueTriggerLabel(rule)
+                      }}</span>
+                      <span
+                        data-dd-part="chevron"
+                        class="material-icons filter-rule__picker-chevron shrink-0 text-base leading-none"
+                        aria-hidden="true"
+                        >expand_more</span
+                      >
+                    </button>
+                  </div>
+                }
+                @default {
+                  <input
+                    hlmInput
+                    class="filter-rule__value"
+                    [type]="getInputType(rule.property)"
+                    [placeholder]="t('workspace.filter.value.placeholder', 'Value…')"
+                    [value]="rule.value"
+                    (input)="updateValue(rule.id, $any($event.target).value)"
+                  />
+                }
+              }
               <button
                 hlmBtn
                 variant="ghost"
@@ -228,7 +260,7 @@
               {{ prop.label }}
             </button>
           }
-        } @else {
+        } @else if (pk.field === 'operator') {
           @for (op of getOperatorsForRule(activeRule.property); track op) {
             <button
               hlmMenuItem
@@ -238,6 +270,18 @@
               (click)="pickOperator($event, pk.ruleId, op)"
             >
               {{ operatorLabel(op) }}
+            </button>
+          }
+        } @else {
+          @for (opt of valueOptionsForProperty(activeRule.property); track opt.id) {
+            <button
+              hlmMenuItem
+              type="button"
+              class="filter-rule__picker-option w-full justify-start font-normal"
+              [attr.data-selected]="opt.id === activeRule.value ? 'true' : null"
+              (click)="pickValue($event, pk.ruleId, opt.id)"
+            >
+              {{ opt.label }}
             </button>
           }
         }

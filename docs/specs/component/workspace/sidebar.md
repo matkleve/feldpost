@@ -236,11 +236,11 @@ sequenceDiagram
 
 ### States (interaction emphasis)
 
-- [ ] NavLink idle: transparent bg; icon + label muted (`--muted-foreground`)
-- [ ] NavLink hover: gold wash + gold ink on **both** icon and label (no blue icon / gold text split)
-- [ ] NavLink active route: selected-ink wash + selected-ink on host; icon inherits
-- [ ] NavLink active + hover: primary wash + primary on host and children
-- [ ] NavLink focus-visible: same ink as hover for that row + focus ring
+- [x] NavLink idle: transparent bg; icon + label muted (`--muted-foreground`)
+- [x] NavLink hover: gold wash + gold ink on **both** icon and label (no blue icon / gold text split)
+- [x] NavLink active route: selected-ink wash + selected-ink on host; icon inherits
+- [x] NavLink active + hover: primary wash + primary on host and children
+- [x] NavLink focus-visible: same ink as hover for that row + focus ring
 - [ ] NavLink disabled: muted, non-interactive
 - [x] Account row uses the same row shell as nav items
 - [x] Expanded desktop account row shows avatar image or initial and visible account name

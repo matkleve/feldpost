@@ -1,4 +1,5 @@
 import type { MetadataValueType } from '../metadata/metadata.types';
+import { isFilterRuleComplete } from './filter.helpers';
 
 export type FilterRuleLike = {
   conjunction: string;
@@ -27,12 +28,13 @@ export function evaluateRulesForItem<T>(
   rules: ReadonlyArray<FilterRuleLike>,
   getFieldValue: (item: T, property: string) => string | number | null,
 ): boolean {
-  if (rules.length === 0) return true;
+  const applicable = rules.filter(isFilterRuleComplete);
+  if (applicable.length === 0) return true;
 
-  let result = evaluateRuleForItem(item, rules[0]!, getFieldValue);
+  let result = evaluateRuleForItem(item, applicable[0]!, getFieldValue);
 
-  for (let i = 1; i < rules.length; i += 1) {
-    const rule = rules[i]!;
+  for (let i = 1; i < applicable.length; i += 1) {
+    const rule = applicable[i]!;
     const ruleResult = evaluateRuleForItem(item, rule, getFieldValue);
     if (rule.conjunction === 'or') {
       result = result || ruleResult;
@@ -49,14 +51,14 @@ export function evaluateRuleForItem<T>(
   rule: FilterRuleLike,
   getFieldValue: (item: T, property: string) => string | number | null,
 ): boolean {
+  const ruleValue = normalizeComparableValue(rule.value);
   const fieldValue = getFieldValue(item, rule.property);
-  const ruleValue = rule.value.toLowerCase();
 
   if (fieldValue == null) {
     return rule.operator === 'is not' || rule.operator === '≠' ? ruleValue !== '' : false;
   }
 
-  const fieldStr = String(fieldValue).toLowerCase();
+  const fieldStr = normalizeComparableValue(String(fieldValue));
   if (NUMBER_FILTER_OPERATORS.includes(rule.operator)) {
     const numField = parseFloat(fieldStr);
     const numRule = parseFloat(ruleValue);
@@ -95,4 +97,13 @@ export function evaluateRuleForItem<T>(
     default:
       return true;
   }
+}
+
+/** Lowercase + ISO date prefix so `type="date"` values match timestamp fields. */
+function normalizeComparableValue(raw: string): string {
+  const lower = raw.trim().toLowerCase();
+  if (lower.length >= 10 && lower[4] === '-' && lower[7] === '-') {
+    return lower.slice(0, 10);
+  }
+  return lower;
 }

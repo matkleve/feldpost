@@ -44,7 +44,7 @@ button[hlmBtn] (host)
 
 - Canonical: [`docs/design/state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis
 - Ink inheritance: [`interaction-emphasis-ink-contract.md`](../../system/interaction-emphasis-ink-contract.md)
-- [ ] `outline` / `ghost` implement gold hover + child ink inherit on frosted/map hosts
+- [x] `outline` / `ghost` implement gold hover + child ink inherit on frosted/map hosts
 
 ### Frosted chrome hosts (outline only)
 

@@ -29,12 +29,24 @@ Below the rules: "+ Add a filter" ghost button.
 
 ## Visual behavior contract (toolbar-aligned)
 
-- **Row container**: **No** `hlmMenuItem` on the full row (avoids primary-tint hover washing conjunction + fields). Row hover = **neutral** `muted-foreground` **8%** surface mix only.
+- **Row container**: **No** `hlmMenuItem` on the full row (avoids primary-tint hover washing conjunction + fields). Row hover on **`.filter-rule`** uses **`emphasis.hover(10%)`** — gold wash + **`--brand-gold`** ink on the row host per [`interaction-emphasis-ink-contract.md`](../../system/interaction-emphasis-ink-contract.md).
+- **Row-hover exceptions**: Picker chevrons (`.filter-rule__picker-chevron`) stay **`muted-foreground`**; remove (×) stays **muted** on row hover and switches to **destructive** ink + wash **only** on × hover / focus-visible.
 - **Rhythm**: Rule stack uses **`spacing-2`** gap and row padding (quiet density).
 - **Picker flyout**: **`position: fixed`**, **`z-index: 302`** (dropdown plane **`300`** + **2**) so lists render above the rule stack and escape `.filter-rules` scroll clipping; closes on **outside click**, **rule-list scroll**, or **window resize**.
-- **Chevron**: Trigger chevrons use **`data-dd-part="chevron"`** + **explicit muted** color so they **do not** pick up row-hover emphasis.
 
 Shared shell width / scroll chrome: [`dropdown-system.md`](./dropdown-system.md).
+
+## Interaction emphasis
+
+- Canonical: [`state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis; ink: [`interaction-emphasis-ink-contract.md`](../../system/interaction-emphasis-ink-contract.md)
+- [x] This component implements the contract (or documented exception below)
+
+| Surface | Hover / focus | Selected | Owner |
+| --- | --- | --- | --- |
+| Filter rule row (`.filter-rule`) | Gold via `emphasis.hover(10%)` | — | `filter-dropdown.component.scss` |
+| Picker flyout option | Gold menu-row emphasis | `emphasis.selected(12%)` when `[data-selected='true']` | same |
+| Remove (×) | Destructive on control hover only | — | `.filter-rule__remove` |
+| Picker chevron | Stays **muted** (documented exception) | — | `.filter-rule__picker-chevron` |
 
 ### Interaction ownership (`document:click`)
 
@@ -156,16 +168,16 @@ Where `FilterRule` = `{ id: string; conjunction: 'and' | 'or'; property: Propert
 - [x] Empty state "No filters applied" + "Add a filter" button
 - [x] Each rule is a horizontal row: conjunction + property + operator + value + ×
 - [x] Conjunction toggles between "And" / "Or" on click
-- [ ] Property dropdown shows built-in + custom metadata keys
-- [ ] Operator list changes based on property type
-- [ ] Value input adapts: text, date picker, multi-select, number
-- [ ] Filters apply immediately on value change
+- [x] Property dropdown shows built-in + custom metadata keys
+- [x] Operator list changes based on property type
+- [x] Value input adapts: text, date picker, multi-select, number
+- [x] Filters apply immediately on value change
 - [x] × removes a rule (visible on hover)
 - [x] Multiple rules can be combined
-- [ ] Closing dropdown does NOT clear filters
-- [ ] Active filter count shown on toolbar button
+- [x] Closing dropdown does NOT clear filters
+- [x] Active filter count shown on toolbar button
 - [x] Dropdown uses `position: fixed` to escape overflow
-- [x] Row hover: clay 8% background tint, × appears
+- [x] Row hover: gold quiet emphasis on rule row (`emphasis.hover`); × becomes visible (destructive only on × hover)
 
 ---
 
@@ -336,7 +348,7 @@ stateDiagram-v2
         [*]: bg transparent\n× hidden\nall dropdowns closed
     }
     state "Row Hover" as Hover {
-        [*]: bg surface-hover\n× visible (clay on hover)\ncursor pointer on dropdowns
+        [*]: gold wash + gold ink on row host\n× visible (muted; destructive on × hover)\ncursor pointer on controls
     }
     state "Dropdown Open" as DropOpen {
         [*]: property/operator/value dropdown expanded\nfocused field highlighted\nother fields dimmed slightly

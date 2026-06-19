@@ -1,6 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import type { WorkspaceImage } from '../workspace-view/workspace-view.types';
 import type { FilterRule } from './filter.types';
+import { isFilterRuleComplete } from './filter.helpers';
 import { evaluateRulesForItem } from './filter-rule-evaluator';
 import { MetadataService } from '../metadata/metadata.service';
 
@@ -12,7 +13,9 @@ export class FilterService {
   private readonly _rules = signal<FilterRule[]>([]);
   readonly rules = this._rules.asReadonly();
 
-  readonly activeCount = computed(() => this._rules().length);
+  readonly activeCount = computed(
+    () => this._rules().filter((rule) => isFilterRuleComplete(rule)).length,
+  );
 
   addRule(): void {
     this._rules.update((list) => [

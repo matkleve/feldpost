@@ -19,7 +19,7 @@
   gap: var(--spacing-2);
 }
 
-// Stable state: rule row idle / hover — neutral surface tint (quiet toolbar vocabulary).
+// Stable state: rule row idle / hover — gold quiet emphasis on host; children inherit except documented slots.
 // @see docs/specs/component/filters/filter-dropdown.md
 .filter-rule {
   display: flex;
@@ -29,7 +29,13 @@
   border-radius: var(--radius-sm);
 
   &:hover {
-    background-color: color-mix(in srgb, var(--muted-foreground) 8%, transparent);
+    @include emphasis.hover(10%);
+
+    .filter-rule__conj,
+    .filter-rule__picker-trigger,
+    .filter-rule__picker-value {
+      color: inherit;
+    }
   }
 
   &:hover .filter-rule__remove {
@@ -37,11 +43,12 @@
   }
 }
 
-// Stable state: conjunction control — outline chip, muted label (not primary-tint row chrome).
+// Stable state: conjunction control — outline chip, muted label at idle (inherits gold on row hover).
 // @see docs/specs/component/filters/filter-dropdown.md
 .filter-rule__conj {
   flex: 0 0 auto;
   min-width: 3.25rem;
+  color: var(--muted-foreground);
 }
 
 .filter-rule__picker {
@@ -83,6 +90,12 @@
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--foreground);
+}
+
+.filter-rule__picker--value {
+  flex: 1.5 1 0;
+  min-width: 0;
 }
 
 // Projected `[dropdown-items]` band — must not grow inside scroll host (shell sizes to content).
@@ -126,6 +139,10 @@
 }
 
 .filter-rule__picker-chevron {
+  color: var(--muted-foreground);
+}
+
+.filter-rule:hover .filter-rule__picker-chevron {
   color: var(--muted-foreground);
 }
 

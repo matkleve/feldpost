@@ -38,6 +38,50 @@
   flex: 1;
 }
 
+// Active filter count beside toolbar Filter label (and icon-only compact layout).
+// @see docs/specs/component/filters/filter-dropdown.md
+.workspace-toolbar__menu-trigger {
+  position: relative;
+}
+
+.workspace-toolbar__menu-trigger-count {
+  margin-inline-start: var(--spacing-1);
+  font-size: var(--font-size-2xs);
+  font-weight: 600;
+  line-height: 1;
+  color: inherit;
+}
+
+.workspace-toolbar__menu-trigger-count--compact {
+  display: none;
+  position: absolute;
+  top: 0;
+  inset-inline-end: 0;
+  margin: 0;
+  min-width: 1rem;
+  padding-inline: var(--spacing-1);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--interaction-selected-ink) 14%, transparent);
+  font-size: var(--font-size-2xs);
+  font-weight: 600;
+  line-height: 1.25rem;
+  text-align: center;
+  color: var(--interaction-selected-ink);
+  pointer-events: none;
+}
+
+@container workspace-toolbar (max-width: 42.5rem) {
+  .workspace-toolbar__menu-trigger-label .workspace-toolbar__menu-trigger-count {
+    display: none;
+  }
+
+  .workspace-toolbar__menu-trigger-count--compact {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
 @layer components {
   @include fp-toolbar-menu-trigger.toolbar-menu-trigger-components('workspace-toolbar');
   @include fp-toolbar-breakpoints.toolbar-menu-trigger-parts('workspace-toolbar');

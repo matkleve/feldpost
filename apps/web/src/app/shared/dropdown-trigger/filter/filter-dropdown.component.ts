@@ -16,6 +16,8 @@ import { operatorsForPropertyType, TEXT_FILTER_OPERATORS } from '../../../core/f
 import { FilterService } from '../../../core/filter/filter.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { MetadataService } from '../../../core/metadata/metadata.service';
+import { ProjectsService } from '../../../core/projects/projects.service';
+import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
 import type { FilterRule } from '../../../core/filter/filter.types';
 import type { MetadataValueType } from '../../../core/metadata/metadata.types';
 import { StandardDropdownComponent } from '../standard/standard-dropdown.component';
@@ -32,6 +34,13 @@ export interface FilterDropdownPropertyOption {
   type: MetadataValueType;
 }
 
+export interface FilterValueSelectOption {
+  id: string;
+  label: string;
+}
+
+export type FilterValueInputKind = 'text' | 'number' | 'date' | 'select';
+
 @Component({
   selector: 'app-filter-dropdown',
   templateUrl: './filter-dropdown.component.html',
@@ -47,12 +56,18 @@ export class FilterDropdownComponent {
   protected readonly filterService = inject(FilterService);
   private readonly i18nService = inject(I18nService);
   private readonly metadata = inject(MetadataService);
+  private readonly projectsService = inject(ProjectsService);
+  private readonly workspaceView = inject(WorkspaceViewService);
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
   private readonly pickerFlyoutRef = viewChild<ElementRef<HTMLElement>>('pickerFlyout');
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
   constructor() {
+    void this.projectsService.loadProjects().then((projects) => {
+      this.projectOptions.set(projects.map((project) => ({ id: project.id, name: project.name })));
+    });
+
     effect(() => {
       const open = this.openRulePicker();
       if (!open) {
@@ -98,6 +113,9 @@ export class FilterDropdownComponent {
   protected readonly pickerFlyoutGeom = signal<PickerFlyoutGeom | null>(null);
 
   readonly propertyOptionsInput = input<FilterDropdownPropertyOption[] | null>(null);
+
+  /** Project names for the project-property value picker. */
+  private readonly projectOptions = signal<ReadonlyArray<{ id: string; name: string }>>([]);
 
   readonly propertyOptions = computed(() => {
     const provided = this.propertyOptionsInput();
@@ -192,6 +210,12 @@ export class FilterDropdownComponent {
     this.closePickerFlyout();
   }
 
+  protected pickValue(event: MouseEvent, ruleId: string, value: string): void {
+    event.stopPropagation();
+    this.updateValue(ruleId, value);
+    this.closePickerFlyout();
+  }
+
   protected propertyTriggerLabel(propertyId: string): string {
     if (!propertyId) {
       return this.t('workspace.filter.property', 'Property');
@@ -282,7 +306,7 @@ export class FilterDropdownComponent {
     const validOps = operatorsForPropertyType(propType);
     const rules = this.filterService.rules();
     const rule = rules.find((r) => r.id === id);
-    const patch: Record<string, string> = { property: value };
+    const patch: Record<string, string> = { property: value, value: '' };
     if (rule && !validOps.includes(rule.operator)) {
       patch['operator'] = '';
     }
@@ -303,8 +327,50 @@ export class FilterDropdownComponent {
   }
 
   getInputType(propertyId: string): string {
+    const kind = this.getValueInputKind(propertyId);
+    if (kind === 'number') return 'number';
+    if (kind === 'date') return 'date';
+    return 'text';
+  }
+
+  getValueInputKind(propertyId: string): FilterValueInputKind {
     if (!propertyId) return 'text';
-    return this.getPropertyType(propertyId) === 'number' ? 'number' : 'text';
+    const type = this.getPropertyType(propertyId);
+    if (type === 'number') return 'number';
+    if (type === 'date') return 'date';
+    if (propertyId === 'project' || type === 'select') return 'select';
+    return 'text';
+  }
+
+  valueTriggerLabel(rule: FilterRule): string {
+    if (!rule.value) {
+      return this.t('workspace.filter.value.placeholder', 'Value…');
+    }
+    const option = this.valueOptionsForProperty(rule.property).find((opt) => opt.id === rule.value);
+    return option?.label ?? rule.value;
+  }
+
+  valueOptionsForProperty(propertyId: string): FilterValueSelectOption[] {
+    if (!propertyId) return [];
+    if (propertyId === 'project') {
+      return this.projectOptions().map((project) => ({
+        id: project.name,
+        label: project.name,
+      }));
+    }
+    if (this.getPropertyType(propertyId) === 'select') {
+      const distinct = new Set<string>();
+      for (const image of this.workspaceView.rawImages()) {
+        const value = this.metadata.getFilterValue(image, propertyId);
+        if (value == null) continue;
+        const text = String(value).trim();
+        if (text) distinct.add(text);
+      }
+      return [...distinct]
+        .sort((a, b) => a.localeCompare(b))
+        .map((value) => ({ id: value, label: value }));
+    }
+    return [];
   }
 
   private getPropertyType(propertyId: string): MetadataValueType | undefined {

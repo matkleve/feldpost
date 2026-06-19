@@ -1,4 +1,4 @@
-export type FilterRulePickerField = 'property' | 'operator';
+export type FilterRulePickerField = 'property' | 'operator' | 'value';
 
 export interface OpenFilterRulePicker {
   ruleId: string;

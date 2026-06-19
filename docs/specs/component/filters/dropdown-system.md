@@ -150,6 +150,7 @@ The filter flyout remains **inside** the shell DOM so shell **`contains()`** sti
 | Grouping multi-select | Selected-ink border/fill | `grouping-dropdown.component.scss` `.grouping-row--selected` |
 | Toolbar trigger hover | Gold ink on host + all `[data-dd-part]` slots | `hlmBtn` outline + feature SCSS (no `color: var(--foreground)` lock) |
 | Map filter triggers | Same as toolbar triggers | `map-filter-toolbar.component.scss` |
+| Filter rule row | Gold via `emphasis.hover(10%)` on `.filter-rule`; chevrons stay muted; × destructive on control hover only | `filter-dropdown.component.scss` |
 | Destructive row | Destructive token | `.option-menu-item.text-destructive` |
 
 See [`docs/design/state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis and [`interaction-emphasis-ink-contract.md`](../../system/interaction-emphasis-ink-contract.md).
@@ -287,9 +288,9 @@ None - delegated to consumer feature services.
 - [x] Toolbar standard width **18rem**; filter **32rem** floor; TS clamp matches **`toolbarDropdownPositionWidthPx`**
 - [x] List rows use **`hlmMenuItem`** / `.option-menu-item` geometry from `_option-menu-list.scss`
 - [x] Sort/grouping/projects compose **`app-standard-dropdown`** + menu-panel primitives
-- [ ] Sort active rows use **`interaction-selected-ink`** at rest; selected+hover uses primary on host **and** direction chip
-- [ ] Menu row hover: gold ink on icon + label (ink inheritance contract)
-- [ ] Map/workspace/media toolbar triggers: hover changes ink on icon, label, and chevron together
+- [x] Sort active rows use **`interaction-selected-ink`** at rest; selected+hover uses primary on host **and** direction chip
+- [x] Menu row hover: gold ink on icon + label (ink inheritance contract)
+- [x] Map/workspace/media toolbar triggers: hover changes ink on icon, label, and chevron together
 - [x] Filter form rules stay component-specific; footer uses menu-panel footer action
 - [x] Media detail context menu uses option-menu list + destructive variant
 - [x] Shared project-selector flows reuse menu-panel search/footer primitives (media-detail inline section partial)

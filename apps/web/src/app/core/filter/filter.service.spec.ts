@@ -220,6 +220,14 @@ describe('FilterService', () => {
     });
   });
 
+  describe('date operators', () => {
+    it('"is" matches ISO date prefix from date input', () => {
+      const img = makeImage({ capturedAt: '2025-06-01T12:00:00Z' });
+      const rule = makeRule({ property: 'date-captured', operator: 'is', value: '2025-06-01' });
+      expect(service.matchesClientSide(img, [rule])).toBe(true);
+    });
+  });
+
   // â”€â”€ Conjunction logic â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   describe('conjunction logic', () => {
@@ -291,10 +299,20 @@ describe('FilterService', () => {
       expect(service.matchesClientSide(img, [])).toBe(true);
     });
 
-    it('incomplete rules (no property) fail', () => {
+    it('incomplete rules are ignored (no filtering effect)', () => {
       const img = makeImage();
       const rule = makeRule({ property: '', operator: 'contains', value: 'test' });
-      expect(service.matchesClientSide(img, [rule])).toBe(false);
+      expect(service.matchesClientSide(img, [rule])).toBe(true);
+    });
+
+    it('activeCount counts only complete rules', () => {
+      service.addRule();
+      const id = service.rules()[0].id;
+      expect(service.activeCount()).toBe(0);
+      service.updateRule(id, { property: 'city', operator: 'is', value: 'Zurich' });
+      expect(service.activeCount()).toBe(1);
+      service.addRule();
+      expect(service.activeCount()).toBe(1);
     });
   });
 });

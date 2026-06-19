@@ -100,9 +100,13 @@
       font-size: 1rem;
     }
 
-    &:hover:not(:disabled) {
-      background: color-mix(in srgb, var(--muted) 60%, transparent);
-      color: var(--foreground);
+    &:hover:not(:disabled),
+    &:focus-visible:not(:disabled) {
+      @include emphasis.hover(10%);
+
+      .material-icons {
+        color: inherit;
+      }
     }
 
     &:disabled {
@@ -379,8 +383,9 @@
     text-decoration: underline;
     text-underline-offset: 2px;
 
-    &:hover {
-      color: var(--foreground);
+    &:hover,
+    &:focus-visible {
+      @include emphasis.hover(10%);
     }
   }
 
@@ -405,8 +410,9 @@
     border: none;
     cursor: pointer;
 
-    &:hover {
-      color: var(--foreground);
+    &:hover,
+    &:focus-visible {
+      @include emphasis.hover(10%);
     }
   }
 
