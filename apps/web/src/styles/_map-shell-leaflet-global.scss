@@ -105,9 +105,8 @@ app-map-shell {
     transform: scale(1.05);
 
     .map-photo-marker__body {
-      border-color: transparent;
-      outline: 2px solid var(--primary);
-      outline-offset: -1px;
+      border: 2px solid var(--primary);
+      outline: none;
       background: color-mix(in srgb, var(--primary) 22%, var(--card));
     }
 
@@ -119,16 +118,16 @@ app-map-shell {
   .map-photo-marker--linked-hover,
   .map-photo-marker:hover {
     .map-photo-marker__body {
-      outline: 2px solid color-mix(in srgb, var(--brand-gold) 78%, var(--border));
-      outline-offset: 1px;
+      outline: none;
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-gold) 78%, var(--border));
     }
   }
 
   .map-photo-marker--selected.map-photo-marker--linked-hover,
   .map-photo-marker--selected:hover {
     .map-photo-marker__body {
-      outline: 2px solid var(--brand-gold);
-      outline-offset: -1px;
+      border-color: var(--brand-gold);
+      outline: none;
       box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-gold) 32%, transparent);
     }
   }

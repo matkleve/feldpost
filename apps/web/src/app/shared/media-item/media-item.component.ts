@@ -71,6 +71,7 @@ export type MediaItemState = 'idle' | 'selected' | 'uploading' | 'error';
     '[class.media-item]': 'true',
     '[class.media-item--selected]': 'selected()',
     '[class.media-item--detail-embed]': '!showInteractionChrome()',
+    '[attr.data-linked-hover]': "linkedHover() ? 'true' : null",
     '(contextmenu)': 'onContextMenu($event)',
     '(dblclick)': 'onOpenDoubleClick($event)',
   },
@@ -90,6 +91,8 @@ export class MediaItemComponent {
   /** When false, hides grid chrome (quiet actions, file-type chip) for detail-pane embed. */
   readonly showInteractionChrome = input(true);
   readonly downloadContext = input<MediaContext>('grid');
+  /** Cross-surface highlight when map marker (or peer grid) is hovered — primary gold on slot. */
+  readonly linkedHover = input(false);
 
   readonly selectedChange = output<boolean>();
   /** Primary tile click with modifier keys for range / additive selection. */

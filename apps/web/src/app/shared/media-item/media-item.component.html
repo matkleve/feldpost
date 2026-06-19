@@ -45,6 +45,7 @@
   <div
     class="media-item__slot"
     [class.media-item__slot--selected]="selected()"
+    [class.media-item__slot--linked-hover]="linkedHover()"
     [class.media-item__slot--map-enabled]="hasMapLocation()"
     [class.media-item__slot--detail-pending-ratio]="detailSlotRatioPending()"
     [style.--media-aspect-ratio]="mediaAspectRatio()"

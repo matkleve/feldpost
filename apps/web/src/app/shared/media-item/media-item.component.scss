@@ -153,6 +153,14 @@
   @include emphasis.selected-hover(10%);
 }
 
+:host([data-linked-hover='true']) .media-item__surface--row {
+  @include emphasis.hover(10%);
+}
+
+:host([data-state='selected'][data-linked-hover='true']) .media-item__surface--row {
+  @include emphasis.selected-hover(10%);
+}
+
 // Inset ring avoids border box growth when toggling selection.
 // @see docs/specs/component/media/media-item.row-mode.supplement.md
 :host([data-state='selected']) .media-item__surface--row {
@@ -298,16 +306,20 @@
 
 // Hover/focus-within on slot only (not empty square host padding) — gold quiet emphasis.
 // @see docs/specs/component/media/media-item.md § Interaction emphasis
+// Use box-shadow (not outline) so emphasis follows border-radius on the slot.
 .media-item__slot:hover,
-.media-item__slot:focus-within {
-  box-shadow: var(--shadow-sm);
+.media-item__slot:focus-within,
+.media-item__slot--linked-hover {
+  box-shadow:
+    var(--shadow-sm),
+    0 0 0 2px color-mix(in srgb, var(--brand-gold) 78%, transparent);
   border-color: color-mix(in srgb, var(--brand-gold) 55%, var(--border));
-  outline: 2px solid color-mix(in srgb, var(--brand-gold) 78%, transparent);
-  outline-offset: 1px;
+  outline: none;
 }
 
 .media-item__slot--selected:hover,
-.media-item__slot--selected:focus-within {
+.media-item__slot--selected:focus-within,
+.media-item__slot--selected.media-item__slot--linked-hover {
   border-color: color-mix(in srgb, var(--brand-gold) 55%, var(--primary));
   box-shadow:
     var(--shadow-sm),
@@ -348,8 +360,10 @@
 
 .media-item__slot:hover .media-item__quiet-actions,
 .media-item__slot:focus-within .media-item__quiet-actions,
+.media-item__slot--linked-hover .media-item__quiet-actions,
 .media-item__surface--row:hover .media-item__quiet-actions,
-.media-item__surface--row:focus-within .media-item__quiet-actions {
+.media-item__surface--row:focus-within .media-item__quiet-actions,
+:host([data-linked-hover='true']) .media-item__surface--row .media-item__quiet-actions {
   opacity: 1;
   transition: opacity var(--motion-duration-fast) var(--motion-ease-out);
 }
@@ -375,7 +389,8 @@
 }
 
 .media-item__slot--selected:hover app-media-item-map-action,
-.media-item__slot--selected:focus-within app-media-item-map-action {
+.media-item__slot--selected:focus-within app-media-item-map-action,
+.media-item__slot--selected.media-item__slot--linked-hover app-media-item-map-action {
   pointer-events: auto;
 }
 

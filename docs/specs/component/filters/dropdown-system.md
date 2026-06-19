@@ -150,7 +150,7 @@ The filter flyout remains **inside** the shell DOM so shell **`contains()`** sti
 | Grouping multi-select | **Primary** gold border/fill at rest (`emphasis.engaged`); gold on hover | `grouping-dropdown.component.scss` `.grouping-row--selected` |
 | Toolbar trigger idle hover | Gold ink on host + all `[data-dd-part]` slots | `hlmBtn` outline + `_toolbar-menu-trigger.scss` |
 | Toolbar trigger `data-active` + hover | **Gold** ink + wash (not primary deepening) | `_toolbar-menu-trigger.scss` |
-| Map filter triggers | Same as toolbar triggers | `map-filter-toolbar.component.scss` |
+| Map filter triggers | Same as toolbar triggers | [`map-filter-toolbar.md`](../map/map-filter-toolbar.md) |
 | Filter rule row | Gold via `emphasis.hover(10%)` on `.filter-rule`; chevrons stay muted; × destructive on control hover only | `filter-dropdown.component.scss` |
 | Destructive row | Destructive token | `.option-menu-item.text-destructive` |
 

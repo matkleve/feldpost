@@ -229,7 +229,16 @@ sequenceDiagram
 | ------------------- | ------------------------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | Select active style | `.media-item-quiet-actions__button--select` | `.media-item-quiet-actions__button--select-active`                       | `.media-item-quiet-actions__button--select-active` | ✅                                                                                 |
 | Focus ring          | `.media-item-quiet-actions__button`         | `.media-item-quiet-actions__button:focus-visible`                        | `.media-item-quiet-actions__button:focus-visible`  | ✅                                                                                 |
-| Action reveal       | `.media-item__quiet-actions`                | `.media-item--selected` / `:hover` / `:focus-within` (parent state gate) | `.media-item__quiet-actions`                       | ⚠️ exception — CSS cascade trigger only — no FSM state crosses component boundary. |
+| Action reveal       | `.media-item__quiet-actions`                | `.media-item__slot:hover` / `:focus-within` / `.media-item__slot--selected` | `.media-item__quiet-actions`                       | ⚠️ exception — CSS cascade trigger only — no FSM state crosses component boundary. |
+
+**Reveal policy (normative):**
+
+| Control | Visible when |
+| --- | --- |
+| Select (top-left) | Slot hovered/focused **or** item `selected` |
+| Map (top-right) | Slot hovered/focused **or** (`selected` **and** `hasMapLocation` / map-enabled) |
+
+Map trigger uses frosted `outline-control` square (`hlmBtn` `icon-sm`) — not interaction-tier emphasis; parent [`media-item.md`](media-item.md) owns when it is shown.
 
 ### Stacking Context
 

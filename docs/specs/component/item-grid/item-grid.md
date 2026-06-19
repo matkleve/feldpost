@@ -22,8 +22,9 @@ This system is a full replacement contract: once a surface is migrated, legacy g
 | --- | --- | --- | --- | --- | --- | --- |
 | Grid layout columns/gaps | `.item-grid` | `.item-grid` | `.item-grid` | `.item-grid--grid-sm`, `.item-grid--grid-md`, `.item-grid--grid-lg`, `.item-grid--row`, `.item-grid--card` | layout tokens only | mode switch preserves stable outer bounds |
 | Item slot projection | `ItemGridComponent` content host | `ItemGridComponent` | domain item root | projected domain items | n/a (child owns layer order) | domain item fills slot; grid does not paint domain text |
+| Selection state propagation | — (signal only) | — | — | parent passes `state` to `MediaItemComponent` | n/a | **ItemGrid MUST NOT** paint selected ring, hover chrome, or quiet actions |
 
-Domain item visuals (media, project) are owned by their dedicated specs; this matrix covers the shared `ItemGridComponent` shell only. **Media tile hover emphasis** is defined in [`media-item.md`](../media/media-item.md) § Interaction emphasis (grid does not paint hover chrome itself).
+Domain item visuals (media, project) are owned by their dedicated specs; this matrix covers the shared `ItemGridComponent` shell only. **Media tile selection + hover** are owned entirely by [`media-item.md`](../media/media-item.md) § Visual Behavior Contract and § Interaction emphasis — the grid only forwards `state='selected'` and optional `linkedHoveredMediaIds` (wiring).
 
 ## What It Looks Like
 

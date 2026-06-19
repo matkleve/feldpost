@@ -28,7 +28,7 @@ Source of truth for standardized sizing/tokens:
 
 - Canonical: [`docs/design/state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis
 - Ink inheritance: [`interaction-emphasis-ink-contract.md`](../../system/interaction-emphasis-ink-contract.md)
-- [ ] Nav links implement three-tier contract (tertiary violet at rest, gold hover); avatar badge uses filled-primary exception only
+- [x] Nav links implement three-tier contract (tertiary violet at rest, gold hover); avatar badge uses filled-primary exception only
 
 ## NavLink States
 
@@ -238,8 +238,8 @@ sequenceDiagram
 
 - [x] NavLink idle: transparent bg; icon + label muted (`--muted-foreground`)
 - [x] NavLink hover: gold wash + gold ink on **both** icon and label (no blue icon / gold text split)
-- [ ] NavLink active route: **tertiary** nav-ink wash + violet on host; icon inherits
-- [x] NavLink active + hover: primary wash + primary on host and children
+- [x] NavLink active route: **tertiary** nav-ink wash + violet on host; icon inherits
+- [x] NavLink active + hover: gold wash + gold ink on host and children
 - [x] NavLink focus-visible: same ink as hover for that row + focus ring
 - [ ] NavLink disabled: muted, non-interactive
 - [x] Account row uses the same row shell as nav items

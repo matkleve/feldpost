@@ -20,16 +20,16 @@ A two-column, iPad-Settings-style surface appears to the right of the sidebar wi
 
 ## Interaction emphasis
 
-Left **section rail** rows and detail **TOC chips** follow [`state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis and [`interaction-emphasis-ink-contract.md`](../../system/interaction-emphasis-ink-contract.md):
+Left **section rail** rows and detail **TOC chips** follow [`state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis (three-tier budget) and [`interaction-emphasis-ink-contract.md`](../../system/interaction-emphasis-ink-contract.md):
 
-| Surface | Selected / active | Hover (non-active) | Child slots |
-| ------- | ----------------- | ------------------ | ----------- |
-| `.settings-overlay__section-item--active` | `--interaction-selected-ink` + 10% mix | — | media icon inherits selected ink |
-| `.settings-overlay__section-item--active:hover` | — | `--brand-gold` + gold wash (same as idle hover) | media + chevron inherit host |
-| `.settings-overlay__section-item` (idle) | — | `--brand-gold` + gold wash | media + chevron + label **inherit** — no child `primary` override |
-| `.settings-overlay__detail-toc-item` | — | gold quiet hover | label inherits |
+| Surface | Tier | Selected / active (at rest) | Hover (any row) | Child slots |
+| ------- | ---- | ----------------------------- | --------------- | ----------- |
+| `.settings-overlay__section-item--active` | **Tertiary** | `--interaction-nav-ink` + 10% mix (`emphasis.nav-bordered`) | — | media icon inherits |
+| `.settings-overlay__section-item--active:hover` | **Primary** | — | `--brand-gold` + gold wash | media + chevron inherit |
+| `.settings-overlay__section-item` (idle) | — | — | `--brand-gold` + gold wash | media + chevron + label **inherit** |
+| `.settings-overlay__detail-toc-item` | — | — | gold quiet hover | label inherits |
 
-Segmented controls (`hlmToggleGroup`) inherit global toggle-group CVA (selected ink when on).
+Segmented controls (`hlmToggleGroup`) use **secondary** selected-ink when `data-state=on` (context set, not primary focus).
 
 ## Where It Lives
 

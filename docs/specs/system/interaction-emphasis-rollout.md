@@ -28,7 +28,7 @@ When an interactive component spec is next edited, add **§ Interaction emphasis
 | Nav sidebar links | [`sidebar.md`](../component/workspace/sidebar.md) | **done** | tertiary `emphasis.nav()`; gold hover |
 | Menu rows | [`_option-menu-item-states.scss`](../../../apps/web/src/styles/_option-menu-item-states.scss) | **partial** | Mixin fix in progress; verify all consumers |
 | Dropdown toolbar triggers | [`dropdown-system.md`](../component/filters/dropdown-system.md) | **done** | `data-active` + hover = gold |
-| Map filter toolbar | [`dropdown-system.md`](../component/filters/dropdown-system.md) | **done** | `outline-control` + `toolbar-menu-trigger` states; container-query icon-only |
+| Map filter toolbar | [`map-filter-toolbar.md`](../component/map/map-filter-toolbar.md) | **done** | `outline-control` + `toolbar-menu-trigger`; container-query icon-only |
 | Page rail rows | [`page-rail.md`](../component/page-rail/page-rail.md) | **pending** | rail-detail-nav-item, rail-section child overrides |
 | Settings overlay rail | [`settings-overlay.md`](../ui/settings-overlay/settings-overlay.md) | **done** | tertiary `nav-bordered`; gold hover |
 | Tabs (`hlmTabsTrigger`) | [`tabs-variants.ts`](../../../apps/web/src/app/shared/ui/tabs/tabs-variants.ts), [`ui-primitives.tab.md`](../component/ui-primitives/ui-primitives.tab.md) | **done** | active+hover = gold |

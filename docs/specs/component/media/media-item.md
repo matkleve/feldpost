@@ -237,19 +237,19 @@ Remount rules:
 
 | Behavior             | Visual Geometry Owner         | Stacking Context Owner | Interaction Hit-Area Owner           | Selector(s)                    | Layer (z-index/token) | Test Oracle                                                   |
 | -------------------- | ----------------------------- | ---------------------- | ------------------------------------ | ------------------------------ | --------------------- | ------------------------------------------------------------- |
-| Selected emphasis    | `.media-item__slot`           | `app-media-item:host`  | `.media-item__open`                  | `.media-item__slot--selected` | layer/selected (2)    | Emphasis stays on media slot only                             |
+| Selected emphasis    | `.media-item__slot`           | `app-media-item:host`  | `.media-item__open`                  | `.media-item__slot--selected` | layer/selected (2)    | **Secondary** blue ring on slot only — not square `:host` letterbox |
 | Upload overlay       | `.media-item__upload-overlay` | `app-media-item:host`  | none (passive)                       | `.media-item__upload-overlay`  | layer/upload (3)      | Upload layer sits above media content and below quiet actions |
-| Quiet actions reveal | `.media-item__quiet-actions`  | `.media-item__slot`    | `.media-item-quiet-actions__button*` | `.media-item__quiet-actions`   | layer/actions (4)     | Reveal on slot hover/focus only                               |
-| Tile hover emphasis  | `.media-item__slot`           | `app-media-item:host`  | `.media-item__slot`                  | `.media-item__slot:hover`, `.media-item__slot--linked-hover` | layer/hover (1b)      | Gold border/wash on pointer hover — **including when `--selected`** |
+| Quiet actions reveal | `.media-item__quiet-actions`  | `.media-item__slot`    | `.media-item-quiet-actions__button*` | `.media-item__quiet-actions`   | layer/actions (4)     | Select visible when selected; map visible on hover **or** when selected + `map-enabled` |
+| Tile hover emphasis  | `.media-item__slot`           | `app-media-item:host`  | `.media-item__slot`                  | `.media-item__slot:hover`, `.media-item__slot--linked-hover` | layer/hover (1b)      | **Primary** gold; `box-shadow` / `border-color` only — **no CSS `outline`** on rounded slot |
 
 ### Ownership Triad Declaration
 
 | Behavior             | Geometry Owner                | State Owner                          | Visual Owner                   | Same element?                                                                  |
 | -------------------- | ----------------------------- | ------------------------------------ | ------------------------------ | ------------------------------------------------------------------------------ |
-| Selected emphasis    | `.media-item__slot`           | `.media-item__slot--selected`        | `.media-item__slot--selected`  | yes — `box-shadow: var(--shadow-sm)`; **1px** border only (no width change)   |
+| Selected emphasis    | `.media-item__slot`           | `.media-item__slot--selected`        | `.media-item__slot--selected`  | yes — secondary `--interaction-selected-ink` inset + border; **no width change** |
 | Upload overlay       | `.media-item__upload-overlay` | `.media-item__upload-overlay`        | `.media-item__upload-overlay`  | yes                                                                            |
 | Quiet actions reveal | `.media-item__quiet-actions`  | `.media-item__slot:hover` / `--selected` | `.media-item__quiet-actions`   | exception: slot-scoped CSS only — not `:host(:hover)`.                          |
-| Tile hover emphasis  | `.media-item__slot`           | `.media-item__slot:hover` / `--linked-hover` | `.media-item__slot`            | yes — gold wash + border; applies when selected too                             |
+| Tile hover emphasis  | `.media-item__slot`           | `.media-item__slot:hover` / `--linked-hover` | `.media-item__slot`            | yes — primary gold `box-shadow`; **forbidden:** `outline` on rounded slot       |
 
 ### Stacking Context
 
@@ -269,15 +269,20 @@ Remount rules:
 
 ## Interaction emphasis
 
-- Canonical: [`state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis
+- Canonical: [`state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis (three-tier budget)
 - Ink: [`interaction-emphasis-ink-contract.md`](../../system/interaction-emphasis-ink-contract.md)
 - [ ] This component implements the contract (or documented exception below)
 
-| Surface | Rest (selected slot) | Hover / linked-hover | Owner |
-| --- | --- | --- | --- |
-| Media tile slot | Primary selection ring (`--selected`) | **Gold** border/wash on `.media-item__slot` | `media-item.component.scss` |
+| Surface | Tier | Rest | Hover / linked-hover | Owner |
+| --- | --- | --- | --- | --- |
+| Media tile slot (domain selection) | **Secondary** | `--interaction-selected-ink` ring on `.media-item__slot--selected` | — | `media-item.component.scss` |
+| Media tile slot (pointer / cross-surface) | **Primary** | — | **Gold** `box-shadow` + border on `.media-item__slot:hover` / `--linked-hover` | same |
 
-Cross-surface **linked-hover** from workspace grid ↔ map marker uses the same gold treatment on the tile slot.
+**Normative geometry:** Rounded slot emphasis (`border-radius: var(--radius-lg)`) MUST use **`border` / `box-shadow` only**. CSS `outline` is **forbidden** on `.media-item__slot` — outlines are rectangular and produce square halos.
+
+Cross-surface **linked-hover** from workspace grid ↔ map marker: parent grid binds `linkedHoveredMediaIds` → tile adds `.media-item__slot--linked-hover` with the same primary gold treatment as pointer hover. See [`media-marker.md`](../../ui/media-marker/media-marker.md) § linked-hover.
+
+**ItemGrid does not paint any of the above** — see [`item-grid.md`](../item-grid/item-grid.md) § Ownership Matrix.
 
 ## Boolean Input Migration Required
 
@@ -308,6 +313,7 @@ Cross-surface **linked-hover** from workspace grid ↔ map marker uses the same 
 - `MediaItemComponent` provides identity and optional aspect-ratio hint to `MediaDisplayComponent` (`mediaId`, optional `aspectRatio` pass-through).
 - `MediaItemComponent` does not wait for child download states before applying its own grid-level state changes.
 - Child media lifecycle and parent item lifecycle are parallel and independent.
+- **Workspace grid:** `workspace-selected-items-grid` passes `state` from selection service; MUST bind `linkedHoveredMediaIds()` → `class.media-item__slot--linked-hover` on each `app-media-item` when cross-surface map hover is active (see § Interaction emphasis).
 
 ### Wiring Sequence (Mermaid)
 
@@ -337,6 +343,9 @@ sequenceDiagram
 - [ ] `MediaItemComponent` exposes no boolean visual-state inputs.
 - [ ] Public input contract includes `mediaId`, `state`, and non-visual data (`item`, `mode`, `actionContextId`).
 - [ ] Selected emphasis is rendered on `.media-item__slot` only (not the square grid host).
+- [ ] **Given** `state='selected'` at rest, **when** the slot is not hovered, **then** `.media-item__slot--selected` shows **secondary** `--interaction-selected-ink` ring (not primary gold).
+- [ ] **Given** pointer over the slot, **when** hovered or focus-within, **then** gold emphasis uses `box-shadow` / `border-color` only — **no** CSS `outline` on the rounded slot.
+- [ ] **Given** parent passes `linkedHoveredMediaIds` containing this item's id, **when** the tile is not pointer-hovered, **then** the slot receives `.media-item__slot--linked-hover` with primary gold emphasis (same as hover).
 - [ ] Upload overlay z-order is above media content and below quiet actions.
 - [ ] Quiet actions reveal remains deterministic and keyboard accessible.
 - [ ] `MediaItemComponent` does not proxy or await `MediaDisplayComponent` internal states.
