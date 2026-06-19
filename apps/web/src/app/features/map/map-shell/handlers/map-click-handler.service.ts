@@ -10,8 +10,9 @@ import { MapShellState } from '../component/map-shell.state';
 import { MapShellSearchService } from '../leaflet/map-shell-search.service';
 import { MapShellInstanceService } from '../component/map-shell-instance.service';
 import { WorkspacePaneObserverAdapter } from '../../../../core/workspace-pane/workspace-pane-observer.adapter';
+import { PhotoMarkerLifecycleService } from '../markers/photo-marker-lifecycle.service';
+import { MapLocationPickService } from './map-location-pick.service';
 import type { MapLatLng, MapMouseEvent, MapPoint } from '../leaflet/map-leaflet.service';
-import type { UploadLocationMapPickRequest } from '../../../../core/workspace-pane/workspace-pane-shell-events.types';
 
 // ── Module-level constants (migrated from MapShellComponent static fields) ──
 
@@ -26,11 +27,7 @@ const CONTEXT_MENU_NATIVE_BYPASS_TTL_MS = 250;
 export interface ClickHandlerContext {
   openMapContextMenuAt(latlng: MapLatLng, clientX: number, clientY: number): void;
   openRadiusContextMenuAt(latlng: MapLatLng, clientX: number, clientY: number): void;
-  removeDraftMediaMarker(): void;
   closeWorkspacePane(): void;
-  renderOrUpdateSearchLocationMarker(latlng: [number, number]): void;
-  clearSearchPlacement(): void;
-  onCompleteLocationMapPick(pick: UploadLocationMapPickRequest, coords: { lat: number; lng: number }): void;
 }
 
 // ── Service ──────────────────────────────────────────────────────────────────
@@ -46,6 +43,8 @@ export class MapClickHandlerService {
   private readonly searchService = inject(MapShellSearchService);
   private readonly instance = inject(MapShellInstanceService);
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
+  private readonly photoMarkerLifecycleService = inject(PhotoMarkerLifecycleService);
+  private readonly mapLocationPickService = inject(MapLocationPickService);
 
   private ctx: ClickHandlerContext | null = null;
 
@@ -59,7 +58,6 @@ export class MapClickHandlerService {
     additive: boolean;
   } | null = null;
 
-  private suppressMapClickUntil = 0;
   private lastSecondaryContextClickAt: number | null = null;
   private lastSecondaryContextClickPos: { x: number; y: number } | null = null;
   private nativeContextMenuBypassUntil = 0;
@@ -113,7 +111,7 @@ export class MapClickHandlerService {
   }
 
   suppressMapClickFor(ms: number): void {
-    this.suppressMapClickUntil = Date.now() + ms;
+    this.instance.suppressMapClickUntil = Date.now() + ms;
   }
 
   clearPendingSecondaryPress(): void {
@@ -165,7 +163,7 @@ export class MapClickHandlerService {
     const isPrimaryClick = clickButton === 0;
     const allowPrimaryDeselection = this.shouldAllowPrimaryDeselection(isPrimaryClick);
 
-    if (Date.now() < this.suppressMapClickUntil && !allowPrimaryDeselection) {
+    if (Date.now() < this.instance.suppressMapClickUntil && !allowPrimaryDeselection) {
       return;
     }
 
@@ -313,7 +311,7 @@ export class MapClickHandlerService {
     }
 
     this.uploadShellUiService.closeUploadPanel();
-    this.ctx?.removeDraftMediaMarker();
+    this.photoMarkerLifecycleService.removeDraftMediaMarker();
     this.ctx?.closeWorkspacePane();
     return true;
   }
@@ -352,16 +350,16 @@ export class MapClickHandlerService {
   }
 
   private completeSearchPlacement(latlng: MapLatLng): void {
-    this.ctx?.renderOrUpdateSearchLocationMarker([latlng.lat, latlng.lng]);
+    this.searchService.renderOrUpdateLocationMarker([latlng.lat, latlng.lng], this.instance.map);
     const pendingUploadLocation = this.state.pendingUploadedLocationMapPick();
     this.state.setPendingUploadedLocationMapPick(null);
-    this.ctx?.clearSearchPlacement();
+    this.searchService.setPlacementActive(false);
 
     if (!pendingUploadLocation) {
       return;
     }
 
-    this.ctx?.onCompleteLocationMapPick(pendingUploadLocation, {
+    void this.mapLocationPickService.applyAndNavigate(pendingUploadLocation, {
       lat: latlng.lat,
       lng: latlng.lng,
     });
@@ -380,7 +378,7 @@ export class MapClickHandlerService {
 
       this.clearActiveRadiusSelection();
       this.state.closeAllContextMenus();
-      this.suppressMapClickUntil = Date.now() + RADIUS_CLICK_GUARD_MS;
+      this.instance.suppressMapClickUntil = Date.now() + RADIUS_CLICK_GUARD_MS;
       return;
     }
 

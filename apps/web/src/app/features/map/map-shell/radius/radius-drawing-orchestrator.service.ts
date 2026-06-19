@@ -18,10 +18,6 @@ import { toMarkerKey } from '../markers/marker-media-index.helpers';
 export const RADIUS_CLICK_GUARD_MS = 220;
 const RADIUS_SELECTION_MIN_METERS = 10;
 
-export interface RadiusDrawingContext {
-  suppressMapClickFor(ms: number): void;
-}
-
 @Injectable({ providedIn: 'root' })
 export class RadiusDrawingOrchestratorService {
   private readonly mapLeafletService = inject(MapLeafletService);
@@ -37,8 +33,6 @@ export class RadiusDrawingOrchestratorService {
   private readonly instance = inject(MapShellInstanceService);
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
 
-  private ctx: RadiusDrawingContext | null = null;
-
   private radiusDrawStartLatLng: MapLatLng | null = null;
   private _radiusDrawActive = false;
   private radiusDrawAdditive = false;
@@ -49,10 +43,6 @@ export class RadiusDrawingOrchestratorService {
   private radiusDrawMouseUpHandler: ((event: MapMouseEvent) => void) | null = null;
   private radiusDraftHighlightedKeys = new Set<string>();
   private readonly radiusCommittedVisuals: RadiusCommittedVisual[] = [];
-
-  bind(ctx: RadiusDrawingContext): void {
-    this.ctx = ctx;
-  }
 
   isDrawActive(): boolean {
     return this._radiusDrawActive;
@@ -85,7 +75,7 @@ export class RadiusDrawingOrchestratorService {
     this._radiusDrawActive = true;
     this.radiusDrawAdditive = additive;
     this.radiusDrawStartLatLng = startLatLng;
-    this.ctx?.suppressMapClickFor(RADIUS_CLICK_GUARD_MS);
+    this.instance.suppressMapClickUntil = Date.now() + RADIUS_CLICK_GUARD_MS;
 
     const map = this.instance.map;
     this.radiusDraftLine = this.mapLeafletService.createRadiusDraftLine(map, startLatLng);
@@ -150,7 +140,7 @@ export class RadiusDrawingOrchestratorService {
     this.addSelectionVisual(center, radiusMeters, endLatLng);
     await this.selectImages(center, radiusMeters, additive);
     this.clearDraftMarkerHighlights();
-    this.ctx?.suppressMapClickFor(RADIUS_CLICK_GUARD_MS);
+    this.instance.suppressMapClickUntil = Date.now() + RADIUS_CLICK_GUARD_MS;
   }
 
   cancelDraw(preserveDraftHighlights = false): void {

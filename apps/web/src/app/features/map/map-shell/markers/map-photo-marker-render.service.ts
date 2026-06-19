@@ -5,6 +5,7 @@ import {
   type PhotoMarkerZoomLevel,
 } from '../../../../core/map/marker-factory';
 import { PhotoMarkerIconStateService } from './photo-marker-icon-state.service';
+import { MapMarkerSelectionService } from './map-marker-selection.service';
 import type { MapDivIcon, MapMarker } from '../leaflet/map-leaflet.service';
 import { MapLeafletService } from '../leaflet/map-leaflet.service';
 import { MapShellInstanceService } from '../component/map-shell-instance.service';
@@ -22,22 +23,12 @@ export type MarkerRenderSnapshot = {
   zoomLevel: PhotoMarkerZoomLevel;
 };
 
-export interface MarkerRenderContext {
-  isSelected(markerKey: string): boolean;
-  isLinkedHovered(markerKey: string): boolean;
-}
-
 @Injectable({ providedIn: 'root' })
 export class MapPhotoMarkerRenderService {
   private readonly photoMarkerIconStateService = inject(PhotoMarkerIconStateService);
   private readonly mapLeafletService = inject(MapLeafletService);
   private readonly instance = inject(MapShellInstanceService);
-
-  private ctx: MarkerRenderContext | null = null;
-
-  bind(ctx: MarkerRenderContext): void {
-    this.ctx = ctx;
-  }
+  private readonly markerSelectionService = inject(MapMarkerSelectionService);
 
   getPhotoMarkerZoomLevel(): PhotoMarkerZoomLevel {
     const zoom = this.instance.map?.getZoom() ?? 13;
@@ -98,8 +89,8 @@ export class MapPhotoMarkerRenderService {
       direction: markerState.direction,
       corrected: markerState.corrected,
       uploading: markerState.uploading,
-      selected: this.ctx?.isSelected(markerKey) ?? false,
-      linkedHover: this.ctx?.isLinkedHovered(markerKey) ?? false,
+      selected: this.markerSelectionService.isMarkerSelected(markerKey),
+      linkedHover: this.markerSelectionService.isMarkerLinkedHovered(markerKey),
       zoomLevel: this.getPhotoMarkerZoomLevel(),
     };
   }
@@ -130,8 +121,8 @@ export class MapPhotoMarkerRenderService {
         thumbnailUrl: iconState.thumbnailUrl,
         fallbackLabel: iconState.fallbackLabel,
         bearing: iconState.direction,
-        selected: this.ctx?.isSelected(markerKey) ?? false,
-        linkedHover: this.ctx?.isLinkedHovered(markerKey) ?? false,
+        selected: this.markerSelectionService.isMarkerSelected(markerKey),
+        linkedHover: this.markerSelectionService.isMarkerLinkedHovered(markerKey),
         corrected: iconState.corrected,
         uploading: iconState.uploading,
         loading: iconState.loading,

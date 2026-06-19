@@ -554,15 +554,6 @@ export class MapShellComponent implements OnDestroy {
       isRadiusDraftHighlighted: (key) => this.radiusDrawingService.isDraftHighlighted(key),
     });
 
-    this.markerRenderService.bind({
-      isSelected: (key) => this.markerSelectionService.isMarkerSelected(key),
-      isLinkedHovered: (key) => this.markerSelectionService.isMarkerLinkedHovered(key),
-    });
-
-    this.radiusDrawingService.bind({
-      suppressMapClickFor: (ms) => this.mapClickHandlerService.suppressMapClickFor(ms),
-    });
-
     this.markerBindingService.bind({
       handlePhotoMarkerClick: (markerKey, event) => this.photoMarkerLifecycleService.handlePhotoMarkerClick(markerKey, event),
       consumeNativeContextMenuBypass: () => this.mapClickHandlerService.consumeNativeContextMenuBypass(),
@@ -596,16 +587,7 @@ export class MapShellComponent implements OnDestroy {
     this.mapClickHandlerService.bind({
       openMapContextMenuAt: (latlng, x, y) => this.mapContextMenuOpenService.openMapContextMenuAt(latlng, x, y),
       openRadiusContextMenuAt: (latlng, x, y) => this.mapContextMenuOpenService.openRadiusContextMenuAt(latlng, x, y),
-      removeDraftMediaMarker: () => this.photoMarkerLifecycleService.removeDraftMediaMarker(),
       closeWorkspacePane: () => this.workspacePaneShellHost.closeWorkspacePane(),
-      renderOrUpdateSearchLocationMarker: (latlng) => this.searchService.renderOrUpdateLocationMarker(latlng, this.map),
-      clearSearchPlacement: () => {
-        this.searchService.setPlacementActive(false);
-        this.map?.getContainer().classList.remove('map-container--placing');
-      },
-      onCompleteLocationMapPick: (pick, coords) => {
-        void this.mapLocationPickService.applyAndNavigate(pick, coords);
-      },
     });
 
     this.searchService.updateViewportBounds(this.map);

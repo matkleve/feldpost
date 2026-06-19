@@ -6,9 +6,11 @@ import type { MapInstance, MapLayerGroup } from '../leaflet/map-leaflet.service'
 @Injectable({ providedIn: 'root' })
 export class MapShellInstanceService {
   map: MapInstance | undefined;
+  mapContainerElement: HTMLDivElement | undefined;
   readonly uploadedPhotoMarkers = new Map<string, PhotoMarkerState & { lastRendered?: MarkerRenderSnapshot }>();
   photoMarkerLayer: MapLayerGroup | null = null;
   readonly markersByMediaId = new Map<string, string[]>();
   lastMapMoveAt = 0;
   lastMapIdleAt = 0;
+  suppressMapClickUntil = 0;
 }
