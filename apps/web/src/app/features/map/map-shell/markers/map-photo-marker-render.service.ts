@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, Injector, inject } from '@angular/core';
 import { fileTypeBadge } from '../../../../core/media/file-type-registry';
 import {
   buildPhotoMarkerHtml,
@@ -28,7 +28,11 @@ export class MapPhotoMarkerRenderService {
   private readonly photoMarkerIconStateService = inject(PhotoMarkerIconStateService);
   private readonly mapLeafletService = inject(MapLeafletService);
   private readonly instance = inject(MapShellInstanceService);
-  private readonly markerSelectionService = inject(MapMarkerSelectionService);
+  private readonly injector = inject(Injector);
+  private _markerSelectionService: MapMarkerSelectionService | undefined;
+  private get markerSelectionService(): MapMarkerSelectionService {
+    return (this._markerSelectionService ??= this.injector.get(MapMarkerSelectionService));
+  }
 
   getPhotoMarkerZoomLevel(): PhotoMarkerZoomLevel {
     const zoom = this.instance.map?.getZoom() ?? 13;
