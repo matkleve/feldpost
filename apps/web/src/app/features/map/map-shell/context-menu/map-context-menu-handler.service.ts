@@ -1,5 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { ToastService } from '../../../../core/toast/toast.service';
+import { PhotoMarkerLifecycleService } from '../markers/photo-marker-lifecycle.service';
+import { MapPlacementService } from '../handlers/map-placement.service';
 import { MapContextActionsService, type RemoveImagesFromProjectsResult } from './map-context-actions.service';
 import { MapProjectActionsService } from '../workspace/map-project-actions.service';
 import { MapProjectDialogService } from '../workspace/map-project-dialog.service';
@@ -25,7 +28,6 @@ import { I18nService } from '../../../../core/i18n/i18n.service';
 import { MapShellInstanceService } from '../component/map-shell-instance.service';
 import { truncateToastTechnicalDetail } from '../../../../core/toast/toast.helpers';
 import type { ToastOptions, ToastType } from '../../../../core/toast/toast.types';
-import type { UploadLocationMapPickRequest } from '../../../../core/workspace-pane/workspace-pane-shell-events.types';
 import type { MapMenuActionId, MarkerMenuActionId, RadiusMenuActionId } from '../workspace/map-workspace-actions.types';
 
 const HOUSE_PROXIMITY_ZOOM = 19;
@@ -33,14 +35,8 @@ const STREET_PROXIMITY_ZOOM = 17;
 const QUICK_RADIUS_METERS = 250;
 
 export interface ContextMenuHandlerContext {
-  showMapToast(key: string, fallback: string, type: ToastType, extra?: Omit<ToastOptions, 'title' | 'type'>): void;
-  showMapToastTitle(title: string, type: ToastType, extra?: Omit<ToastOptions, 'title' | 'type'>): void;
-  onMapMenuCloseRequested(): void;
   openDetailView(mediaId: string): void;
   onDetailAddressSearchRequestConsumed(requestId: number): void;
-  handlePhotoMarkerClick(markerKey: string): void;
-  onUploadLocationMapPickRequested(event: UploadLocationMapPickRequest): void;
-  renderOrUpdateDraftMediaMarker(latlng: [number, number]): void;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -69,11 +65,36 @@ export class MapContextMenuHandlerService {
   private readonly i18nService = inject(I18nService);
   private readonly router = inject(Router);
   private readonly instance = inject(MapShellInstanceService);
+  private readonly toastService = inject(ToastService);
+  private readonly photoMarkerLifecycleService = inject(PhotoMarkerLifecycleService);
+  private readonly mapPlacementService = inject(MapPlacementService);
 
   private ctx: ContextMenuHandlerContext | null = null;
 
   bind(ctx: ContextMenuHandlerContext): void {
     this.ctx = ctx;
+  }
+
+  private showMapToast(
+    key: string,
+    fallback: string,
+    type: ToastType,
+    extra?: Omit<ToastOptions, 'title' | 'type'>,
+  ): void {
+    this.toastService.show({ title: this.i18nService.t(key, fallback), type, dedupe: true, ...extra });
+  }
+
+  private showMapToastTitle(
+    title: string,
+    type: ToastType,
+    extra?: Omit<ToastOptions, 'title' | 'type'>,
+  ): void {
+    this.toastService.show({ title, type, dedupe: true, ...extra });
+  }
+
+  private onMapMenuCloseRequested(): void {
+    this.state.closeAllContextMenus();
+    this.instance.mapContainerElement?.focus();
   }
 
   private patchDetailMediaId(mediaId: string | null): void {
@@ -160,7 +181,7 @@ export class MapContextMenuHandlerService {
 
     const suggestion = await this.geocodingService.forward(input);
     if (!suggestion) {
-      this.ctx?.showMapToast(
+      this.showMapToast(
         'map.shell.toast.addressResolveFailed',
         'Could not resolve address.',
         'warning',
@@ -188,7 +209,7 @@ export class MapContextMenuHandlerService {
     }
 
     if (updatedCount === 0) {
-      this.ctx?.showMapToast(
+      this.showMapToast(
         'map.shell.toast.addressChangeFailed',
         'Address change failed.',
         'error',
@@ -197,7 +218,7 @@ export class MapContextMenuHandlerService {
       return;
     }
 
-    this.ctx?.showMapToastTitle(
+    this.showMapToastTitle(
       this.i18nService
         .t('map.shell.toast.addressesUpdated', '{count} media address(es) updated.')
         .replace('{count}', String(updatedCount)),
@@ -237,14 +258,14 @@ export class MapContextMenuHandlerService {
     if (!coords || !map) return;
     const center = this.mapLeafletService.createLatLng(coords.lat, coords.lng);
     await this.radiusDrawingService.startQuickRadius(center, QUICK_RADIUS_METERS);
-    this.ctx?.onMapMenuCloseRequested();
+    this.onMapMenuCloseRequested();
   }
 
   private onMapContextCreateMarkerHere(): void {
     const coords = this.state.mapContextMenuCoords();
     if (!coords) return;
     this.state.setDraftMediaMarker({ lat: coords.lat, lng: coords.lng, uploadCount: 0 });
-    this.ctx?.renderOrUpdateDraftMediaMarker([coords.lat, coords.lng]);
+    this.photoMarkerLifecycleService.renderOrUpdateDraftMediaMarker([coords.lat, coords.lng]);
     this.searchService.setPlacementActive(false);
     this.state.setPlacementActive(false);
     if (!this.state.photoPanelOpen()) {
@@ -258,7 +279,7 @@ export class MapContextMenuHandlerService {
     this.workspaceSelectionService.clearSelection();
     this.uploadShellUi.openUploadPanel();
     this.instance.map?.getContainer().classList.remove('map-container--placing');
-    this.ctx?.showMapToast(
+    this.showMapToast(
       'map.shell.toast.mediaMarkerCreated',
       'Media marker created. Start upload.',
       'success',
@@ -270,14 +291,14 @@ export class MapContextMenuHandlerService {
     const coords = this.state.mapContextMenuCoords();
     if (!coords || !this.instance.map) return;
     this.setViewWithPaneOffset(coords.lat, coords.lng, HOUSE_PROXIMITY_ZOOM);
-    this.ctx?.onMapMenuCloseRequested();
+    this.onMapMenuCloseRequested();
   }
 
   private onMapContextZoomStreetHere(): void {
     const coords = this.state.mapContextMenuCoords();
     if (!coords) return;
     this.setViewWithPaneOffset(coords.lat, coords.lng, STREET_PROXIMITY_ZOOM);
-    this.ctx?.onMapMenuCloseRequested();
+    this.onMapMenuCloseRequested();
   }
 
   private async onMapContextCopyAddress(): Promise<void> {
@@ -285,16 +306,16 @@ export class MapContextMenuHandlerService {
     if (!coords) return;
     await this.mapContextActionsService.copyAddressWithFeedback(coords.lat, coords.lng, {
       onCopied: () =>
-        this.ctx?.showMapToast('map.shell.toast.addressCopied', 'Address copied.', 'success'),
+        this.showMapToast('map.shell.toast.addressCopied', 'Address copied.', 'success'),
       onNotFound: () =>
-        this.ctx?.showMapToast(
+        this.showMapToast(
           'map.shell.toast.addressResolveFailed',
           'Could not resolve address.',
           'warning',
           { codeRef: { file: 'map-shell.component.ts', fn: 'copyAddressWithFeedback' } },
         ),
     });
-    this.ctx?.onMapMenuCloseRequested();
+    this.onMapMenuCloseRequested();
   }
 
   private async onMapContextCopyGps(): Promise<void> {
@@ -302,29 +323,29 @@ export class MapContextMenuHandlerService {
     if (!coords) return;
     await this.mapContextActionsService.copyGpsWithFeedback(coords.lat, coords.lng, {
       onCopied: () =>
-        this.ctx?.showMapToast('map.shell.toast.gpsCopied', 'GPS copied.', 'success'),
-      onFallback: (text) => this.ctx?.showMapToastTitle(text, 'info'),
+        this.showMapToast('map.shell.toast.gpsCopied', 'GPS copied.', 'success'),
+      onFallback: (text) => this.showMapToastTitle(text, 'info'),
     });
-    this.ctx?.onMapMenuCloseRequested();
+    this.onMapMenuCloseRequested();
   }
 
   private onMapContextOpenGoogleMaps(): void {
     const coords = this.state.mapContextMenuCoords();
     if (!coords) return;
     this.mapContextActionsService.openGoogleMaps(coords.lat, coords.lng);
-    this.ctx?.onMapMenuCloseRequested();
+    this.onMapMenuCloseRequested();
   }
 
   private onRadiusContextOpenSelection(): void {
     this.ensurePhotoPanelOpen();
     this.patchDetailMediaId(null);
-    this.ctx?.onMapMenuCloseRequested();
+    this.onMapMenuCloseRequested();
   }
 
   private async onRadiusContextCreateProjectFromSelection(): Promise<void> {
     const mediaIds = this.getRadiusMediaIds();
     if (mediaIds.length === 0) {
-      this.ctx?.showMapToast(
+      this.showMapToast(
         'map.shell.toast.noMediaInRadiusSelection',
         'No media available in radius selection.',
         'warning',
@@ -346,14 +367,14 @@ export class MapContextMenuHandlerService {
     });
     if (!created.ok || !created.project) {
       if (created.reason === 'organization-missing') {
-        this.ctx?.showMapToast(
+        this.showMapToast(
           'map.shell.toast.projectCreateOrganizationUnknown',
           'Could not create project (organization unknown).',
           'error',
           { codeRef: { file: 'map-shell.component.ts', fn: 'onRadiusContextCreateProject' } },
         );
       } else {
-        this.ctx?.showMapToast(
+        this.showMapToast(
           'map.shell.toast.projectCreateFailed',
           'Could not create project.',
           'error',
@@ -376,7 +397,7 @@ export class MapContextMenuHandlerService {
     const assignFailureMessage =
       this.mapProjectActionsService.getAssignmentFailureMessage(assigned);
     if (assignFailureMessage) {
-      this.ctx?.showMapToastTitle(
+      this.showMapToastTitle(
         assignFailureMessage,
         assigned.reason === 'empty' ? 'warning' : 'error',
         { codeRef: { file: 'map-shell.component.ts', fn: 'assignMediaToProject' } },
@@ -385,7 +406,7 @@ export class MapContextMenuHandlerService {
       return;
     }
 
-    this.ctx?.showMapToastTitle(
+    this.showMapToastTitle(
       this.i18nService
         .t(
           'map.shell.toast.projectCreatedAndAssigned',
@@ -401,7 +422,7 @@ export class MapContextMenuHandlerService {
   private async onRadiusContextAssignToProject(): Promise<void> {
     const mediaIds = this.getRadiusMediaIds();
     if (mediaIds.length === 0) {
-      this.ctx?.showMapToast(
+      this.showMapToast(
         'map.shell.toast.noMediaInRadiusSelection',
         'No media available in radius selection.',
         'warning',
@@ -424,7 +445,7 @@ export class MapContextMenuHandlerService {
     const assignFailureMessage =
       this.mapProjectActionsService.getAssignmentFailureMessage(assigned);
     if (!assignFailureMessage) {
-      this.ctx?.showMapToastTitle(
+      this.showMapToastTitle(
         this.mapProjectActionsService.formatProjectAssignmentSuccess(
           project.name,
           mediaIds.length,
@@ -432,7 +453,7 @@ export class MapContextMenuHandlerService {
         'success',
       );
     } else {
-      this.ctx?.showMapToastTitle(
+      this.showMapToastTitle(
         assignFailureMessage,
         assigned.reason === 'empty' ? 'warning' : 'error',
         { codeRef: { file: 'map-shell.component.ts', fn: 'assignMediaToProject' } },
@@ -444,50 +465,50 @@ export class MapContextMenuHandlerService {
   private async onRadiusContextRemoveFromProject(): Promise<void> {
     const uniqueImageIds = Array.from(new Set(this.getRadiusMediaIds()));
     if (uniqueImageIds.length === 0) {
-      this.ctx?.showMapToast(
+      this.showMapToast(
         'map.shell.toast.noMediaForProjectRemoval',
         'No media found for project removal.',
         'warning',
         { codeRef: { file: 'map-shell.component.ts', fn: 'onRadiusContextRemoveFromProjects' } },
       );
-      this.ctx?.onMapMenuCloseRequested();
+      this.onMapMenuCloseRequested();
       return;
     }
 
     const removed = await this.mapContextActionsService.removeImagesFromProjects(uniqueImageIds);
     if (!removed.ok) {
-      this.ctx?.showMapToastTitle(
+      this.showMapToastTitle(
         this.getRemoveImagesFromProjectsFailureMessage(removed),
         removed.reason === 'empty' ? 'warning' : 'error',
         { codeRef: { file: 'map-shell.component.ts', fn: 'removeImagesFromProjects' } },
       );
-      this.ctx?.onMapMenuCloseRequested();
+      this.onMapMenuCloseRequested();
       return;
     }
 
-    this.ctx?.showMapToast(
+    this.showMapToast(
       'map.shell.toast.removedFromProjects',
       'Media removed from projects.',
       'success',
     );
-    this.ctx?.onMapMenuCloseRequested();
+    this.onMapMenuCloseRequested();
   }
 
   private async onRadiusContextDeleteMedia(): Promise<void> {
     const uniqueImageIds = Array.from(new Set(this.getRadiusMediaIds()));
     if (uniqueImageIds.length === 0) {
-      this.ctx?.showMapToast(
+      this.showMapToast(
         'map.shell.toast.noMediaToDelete',
         'No media found to delete.',
         'warning',
         { codeRef: { file: 'map-shell.component.ts', fn: 'onRadiusContextDelete' } },
       );
-      this.ctx?.onMapMenuCloseRequested();
+      this.onMapMenuCloseRequested();
       return;
     }
 
     if (!this.markerContextPhotoDeleteService.confirmPhotoDeleteCount(uniqueImageIds.length)) {
-      this.ctx?.onMapMenuCloseRequested();
+      this.onMapMenuCloseRequested();
       return;
     }
 
@@ -507,7 +528,7 @@ export class MapContextMenuHandlerService {
     });
 
     if (!result.ok) {
-      this.ctx?.showMapToast(
+      this.showMapToast(
         'map.shell.toast.deleteFailed',
         'Delete failed.',
         'error',
@@ -519,50 +540,50 @@ export class MapContextMenuHandlerService {
         },
       );
     }
-    this.ctx?.onMapMenuCloseRequested();
+    this.onMapMenuCloseRequested();
   }
 
   private onMarkerContextOpenDetailsOrSelection(): void {
     const payload = this.state.markerContextMenuPayload();
     if (!payload) return;
     this.state.closeAllContextMenus();
-    this.ctx?.handlePhotoMarkerClick(payload.markerKey);
+    this.photoMarkerLifecycleService.handlePhotoMarkerClick(payload.markerKey);
   }
 
   private async onMarkerContextOpenInMedia(): Promise<void> {
     const payload = this.state.markerContextMenuPayload();
     const mediaId = payload?.mediaId;
     if (!mediaId) {
-      this.ctx?.showMapToast(
+      this.showMapToast(
         'map.shell.toast.singleMarkerOnly',
         'This action is only available for a single marker.',
         'warning',
         { codeRef: { file: 'map-shell.component.ts', fn: 'onMarkerContextMoveMarker' } },
       );
-      this.ctx?.onMapMenuCloseRequested();
+      this.onMapMenuCloseRequested();
       return;
     }
     this.workspaceSelectionService.setSingle(mediaId);
     this.ctx?.openDetailView(mediaId);
     await this.router.navigate(['/media']);
-    this.ctx?.onMapMenuCloseRequested();
+    this.onMapMenuCloseRequested();
   }
 
   private async onMarkerContextChangeLocationMap(): Promise<void> {
     const mediaIds = await this.resolveMarkerContextMediaIds();
     if (mediaIds.length === 0) {
-      this.ctx?.showMapToast(
+      this.showMapToast(
         'map.shell.toast.noMediaForLocationChange',
         'No media found for location change.',
         'warning',
         { codeRef: { file: 'map-shell.component.ts', fn: 'onRadiusContextChangeLocation' } },
       );
-      this.ctx?.onMapMenuCloseRequested();
+      this.onMapMenuCloseRequested();
       return;
     }
 
     if (mediaIds.length > 1) {
-      this.ctx?.showMapToastTitle(
+      this.showMapToastTitle(
         this.i18nService
           .t(
             'map.shell.toast.bulkLocationMovePending',
@@ -571,25 +592,25 @@ export class MapContextMenuHandlerService {
           .replace('{count}', String(mediaIds.length)),
         'info',
       );
-      this.ctx?.onMapMenuCloseRequested();
+      this.onMapMenuCloseRequested();
       return;
     }
 
     const mediaId = mediaIds[0];
-    this.ctx?.onUploadLocationMapPickRequested({ mediaId, fileName: mediaId });
-    this.ctx?.onMapMenuCloseRequested();
+    this.mapPlacementService.onUploadLocationMapPickRequested({ mediaId, fileName: mediaId });
+    this.onMapMenuCloseRequested();
   }
 
   private async onMarkerContextChangeLocationAddress(): Promise<void> {
     const mediaIds = await this.resolveMarkerContextMediaIds();
     if (mediaIds.length === 0) {
-      this.ctx?.showMapToast(
+      this.showMapToast(
         'map.shell.toast.noMediaForAddressChange',
         'No media found for address change.',
         'warning',
         { codeRef: { file: 'map-shell.component.ts', fn: 'onRadiusContextChangeAddress' } },
       );
-      this.ctx?.onMapMenuCloseRequested();
+      this.onMapMenuCloseRequested();
       return;
     }
 
@@ -600,7 +621,7 @@ export class MapContextMenuHandlerService {
       );
       this.state.setBatchAddressTargetMediaIds(mediaIds);
       this.state.setBatchAddressDialogOpen(true);
-      this.ctx?.onMapMenuCloseRequested();
+      this.onMapMenuCloseRequested();
       return;
     }
 
@@ -608,36 +629,36 @@ export class MapContextMenuHandlerService {
     this.ctx?.openDetailView(mediaId);
     const currentRequestId = this.state.detailAddressSearchRequest()?.requestId ?? 0;
     this.state.setDetailAddressSearchRequest({ mediaId, requestId: currentRequestId + 1 });
-    this.ctx?.onMapMenuCloseRequested();
+    this.onMapMenuCloseRequested();
   }
 
   private async onMarkerContextResolveLocation(): Promise<void> {
     const mediaIds = await this.resolveMarkerContextMediaIds();
     if (mediaIds.length !== 1) {
-      this.ctx?.showMapToast(
+      this.showMapToast(
         'map.shell.toast.locationResolveSingleOnly',
         'Location resolution is only available for a single item.',
         'warning',
         { codeRef: { file: 'map-shell.component.ts', fn: 'onRadiusContextResolveLocation' } },
       );
-      this.ctx?.onMapMenuCloseRequested();
+      this.onMapMenuCloseRequested();
       return;
     }
 
     const result = await this.locationResolverService.resolvePendingMediaItem(mediaIds[0]);
     if (result.status === 'resolved') {
-      this.ctx?.showMapToast(
+      this.showMapToast(
         'map.shell.toast.locationResolved',
         'Location resolved successfully.',
         'success',
       );
       await this.mapViewportCoordinatorService.queryViewportMarkers();
-      this.ctx?.onMapMenuCloseRequested();
+      this.onMapMenuCloseRequested();
       return;
     }
 
     if (result.status === 'unresolvable') {
-      this.ctx?.showMapToast(
+      this.showMapToast(
         'map.shell.toast.locationResolveTerminal',
         'Location could not be resolved (terminal).',
         'warning',
@@ -646,30 +667,30 @@ export class MapContextMenuHandlerService {
       if (result.changed) {
         await this.mapViewportCoordinatorService.queryViewportMarkers();
       }
-      this.ctx?.onMapMenuCloseRequested();
+      this.onMapMenuCloseRequested();
       return;
     }
 
-    this.ctx?.showMapToast(
+    this.showMapToast(
       'map.shell.toast.locationAlreadyResolved',
       'Location is already resolved or not retryable.',
       'info',
     );
-    this.ctx?.onMapMenuCloseRequested();
+    this.onMapMenuCloseRequested();
   }
 
   private onMarkerContextZoomHouse(): void {
     const payload = this.state.markerContextMenuPayload();
     if (!payload || !this.instance.map) return;
     this.setViewWithPaneOffset(payload.lat, payload.lng, HOUSE_PROXIMITY_ZOOM);
-    this.ctx?.onMapMenuCloseRequested();
+    this.onMapMenuCloseRequested();
   }
 
   private onMarkerContextZoomStreet(): void {
     const payload = this.state.markerContextMenuPayload();
     if (!payload || !this.instance.map) return;
     this.setViewWithPaneOffset(payload.lat, payload.lng, STREET_PROXIMITY_ZOOM);
-    this.ctx?.onMapMenuCloseRequested();
+    this.onMapMenuCloseRequested();
   }
 
   private async onMarkerContextCopyAddress(): Promise<void> {
@@ -677,16 +698,16 @@ export class MapContextMenuHandlerService {
     if (!payload) return;
     await this.mapContextActionsService.copyAddressWithFeedback(payload.lat, payload.lng, {
       onCopied: () =>
-        this.ctx?.showMapToast('map.shell.toast.addressCopied', 'Address copied.', 'success'),
+        this.showMapToast('map.shell.toast.addressCopied', 'Address copied.', 'success'),
       onNotFound: () =>
-        this.ctx?.showMapToast(
+        this.showMapToast(
           'map.shell.toast.addressResolveFailed',
           'Could not resolve address.',
           'warning',
           { codeRef: { file: 'map-shell.component.ts', fn: 'onMarkerContextCopyAddress' } },
         ),
     });
-    this.ctx?.onMapMenuCloseRequested();
+    this.onMapMenuCloseRequested();
   }
 
   private async onMarkerContextCopyGps(): Promise<void> {
@@ -694,10 +715,10 @@ export class MapContextMenuHandlerService {
     if (!payload) return;
     await this.mapContextActionsService.copyGpsWithFeedback(payload.lat, payload.lng, {
       onCopied: () =>
-        this.ctx?.showMapToast('map.shell.toast.gpsCopied', 'GPS copied.', 'success'),
-      onFallback: (text) => this.ctx?.showMapToastTitle(text, 'info'),
+        this.showMapToast('map.shell.toast.gpsCopied', 'GPS copied.', 'success'),
+      onFallback: (text) => this.showMapToastTitle(text, 'info'),
     });
-    this.ctx?.onMapMenuCloseRequested();
+    this.onMapMenuCloseRequested();
   }
 
   private onMarkerContextOpenGoogleMaps(): void {
@@ -705,7 +726,7 @@ export class MapContextMenuHandlerService {
     if (!payload || typeof window === 'undefined') return;
     const url = this.mapContextActionsService.buildGoogleMapsUrl(payload.lat, payload.lng);
     window.open(url, '_blank', 'noopener,noreferrer');
-    this.ctx?.onMapMenuCloseRequested();
+    this.onMapMenuCloseRequested();
   }
 
   private async onMarkerContextAssignToProject(): Promise<void> {
@@ -724,7 +745,7 @@ export class MapContextMenuHandlerService {
       this.instance.map?.getZoom() ?? 13,
     );
     if (mediaIds.length === 0) {
-      this.ctx?.showMapToast(
+      this.showMapToast(
         'map.shell.toast.noMediaForProjectAssignment',
         'No media found for project assignment.',
         'warning',
@@ -741,7 +762,7 @@ export class MapContextMenuHandlerService {
     const assignFailureMessage =
       this.mapProjectActionsService.getAssignmentFailureMessage(assigned);
     if (assignFailureMessage) {
-      this.ctx?.showMapToastTitle(
+      this.showMapToastTitle(
         assignFailureMessage,
         assigned.reason === 'empty' ? 'warning' : 'error',
         { codeRef: { file: 'map-shell.component.ts', fn: 'assignMediaToProject' } },
@@ -750,7 +771,7 @@ export class MapContextMenuHandlerService {
       return;
     }
 
-    this.ctx?.showMapToastTitle(
+    this.showMapToastTitle(
       this.mapProjectActionsService.formatProjectAssignmentSuccess(project.name, mediaIds.length),
       'success',
     );
@@ -768,33 +789,33 @@ export class MapContextMenuHandlerService {
     );
     const uniqueImageIds = Array.from(new Set(mediaIds));
     if (uniqueImageIds.length === 0) {
-      this.ctx?.showMapToast(
+      this.showMapToast(
         'map.shell.toast.noMediaForProjectRemoval',
         'No media found for project removal.',
         'warning',
         { codeRef: { file: 'map-shell.component.ts', fn: 'onRadiusContextRemoveFromProjects' } },
       );
-      this.ctx?.onMapMenuCloseRequested();
+      this.onMapMenuCloseRequested();
       return;
     }
 
     const removed = await this.mapContextActionsService.removeImagesFromProjects(uniqueImageIds);
     if (!removed.ok) {
-      this.ctx?.showMapToastTitle(
+      this.showMapToastTitle(
         this.getRemoveImagesFromProjectsFailureMessage(removed),
         removed.reason === 'empty' ? 'warning' : 'error',
         { codeRef: { file: 'map-shell.component.ts', fn: 'removeImagesFromProjects' } },
       );
-      this.ctx?.onMapMenuCloseRequested();
+      this.onMapMenuCloseRequested();
       return;
     }
 
-    this.ctx?.showMapToast(
+    this.showMapToast(
       'map.shell.toast.removedFromProjects',
       'Media removed from projects.',
       'success',
     );
-    this.ctx?.onMapMenuCloseRequested();
+    this.onMapMenuCloseRequested();
   }
 
   private async onMarkerContextDeletePhoto(): Promise<void> {
@@ -808,18 +829,18 @@ export class MapContextMenuHandlerService {
       );
       const uniqueImageIds = Array.from(new Set(mediaIds));
       if (uniqueImageIds.length === 0) {
-        this.ctx?.showMapToast(
+        this.showMapToast(
           'map.shell.toast.noMediaToDelete',
           'No media found to delete.',
           'warning',
           { codeRef: { file: 'map-shell.component.ts', fn: 'onMarkerContextDelete' } },
         );
-        this.ctx?.onMapMenuCloseRequested();
+        this.onMapMenuCloseRequested();
         return;
       }
 
       if (!this.markerContextPhotoDeleteService.confirmPhotoDeleteCount(uniqueImageIds.length)) {
-        this.ctx?.onMapMenuCloseRequested();
+        this.onMapMenuCloseRequested();
         return;
       }
 
@@ -839,7 +860,7 @@ export class MapContextMenuHandlerService {
       });
 
       if (!result.ok) {
-        this.ctx?.showMapToast('map.shell.toast.deleteFailed', 'Delete failed.', 'error', {
+        this.showMapToast('map.shell.toast.deleteFailed', 'Delete failed.', 'error', {
           detail: result.errorMessage
             ? truncateToastTechnicalDetail(result.errorMessage)
             : undefined,
@@ -847,7 +868,7 @@ export class MapContextMenuHandlerService {
         });
       }
 
-      this.ctx?.onMapMenuCloseRequested();
+      this.onMapMenuCloseRequested();
       return;
     }
 
@@ -881,7 +902,7 @@ export class MapContextMenuHandlerService {
     });
 
     if (!result.ok) {
-      this.ctx?.showMapToast('map.shell.toast.deleteFailed', 'Delete failed.', 'error', {
+      this.showMapToast('map.shell.toast.deleteFailed', 'Delete failed.', 'error', {
         detail: result.errorMessage
           ? truncateToastTechnicalDetail(result.errorMessage)
           : undefined,
@@ -890,13 +911,13 @@ export class MapContextMenuHandlerService {
       return;
     }
 
-    this.ctx?.onMapMenuCloseRequested();
+    this.onMapMenuCloseRequested();
   }
 
   private async promptProjectSelection(): Promise<{ id: string; name: string } | null> {
     const projects = await this.mapProjectActionsService.loadProjectOptions();
     if (!projects.ok) {
-      this.ctx?.showMapToast(
+      this.showMapToast(
         'map.shell.toast.noProjectsAvailable',
         'No projects available.',
         'warning',

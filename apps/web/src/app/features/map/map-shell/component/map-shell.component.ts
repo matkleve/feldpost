@@ -410,6 +410,7 @@ export class MapShellComponent implements OnDestroy {
     }
     this.map?.remove?.();
     this.mapShellInstance.map = undefined;
+    this.mapShellInstance.mapContainerElement = undefined;
     this.mapShellInstance.photoMarkerLayer = null;
     this.mapInitialized = false;
   }
@@ -544,6 +545,7 @@ export class MapShellComponent implements OnDestroy {
 
     this.map = this.mapLeafletService.createMap(containerRef.nativeElement);
     this.mapShellInstance.map = this.map;
+    this.mapShellInstance.mapContainerElement = containerRef.nativeElement;
 
     this.applyMapBasemapLayer();
 
@@ -565,14 +567,8 @@ export class MapShellComponent implements OnDestroy {
     });
 
     this.mapContextMenuHandlerService.bind({
-      showMapToast: (key, fallback, type, extra) => this.showMapToast(key, fallback, type, extra),
-      showMapToastTitle: (title, type, extra) => this.showMapToastTitle(title, type, extra),
-      onMapMenuCloseRequested: () => this.onMapMenuCloseRequested(),
       openDetailView: (mediaId) => this.openDetailView(mediaId),
       onDetailAddressSearchRequestConsumed: (requestId) => this.workspacePaneShellHost.onDetailAddressSearchRequestConsumed(requestId),
-      handlePhotoMarkerClick: (markerKey) => this.photoMarkerLifecycleService.handlePhotoMarkerClick(markerKey),
-      onUploadLocationMapPickRequested: (event) => this.onUploadLocationMapPickRequested(event),
-      renderOrUpdateDraftMediaMarker: (latlng) => this.photoMarkerLifecycleService.renderOrUpdateDraftMediaMarker(latlng),
     });
 
     this.photoMarkerLifecycleService.bind({
