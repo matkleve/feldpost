@@ -44,6 +44,7 @@ Map chrome, placement, and location affordances.
 - [auth-map-background](map/auth-map-background.md)
 - [gps-button](map/gps-button.md)
 - [map-context-menu](map/map-context-menu.md)
+- [map-style-switch](map/map-style-switch.md)
 - [map-zone](map/map-zone.md)
 - [placement-mode](map/placement-mode.md)
 - [radius-selection](map/radius-selection.md)

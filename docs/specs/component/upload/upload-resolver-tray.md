@@ -92,9 +92,9 @@ Choice rows follow [`state-visuals.md`](../../../design/state-visuals.md) § Int
 | Idle | `--foreground` | transparent |
 | Hover / focus (unselected) | `--brand-gold` on host; children inherit | `emphasis.hover` or matching gold wash + ink |
 | Selected (`__choice--selected`) | `--interaction-selected-ink` | selected-ink 10% mix |
-| Selected + hover | `--primary` (wins) | `emphasis.selected-hover` |
+| Selected + hover | `--brand-gold` (same as hover) | `emphasis.hover` |
 
-**Test oracle:** Selected answer is blue at rest; hovering it turns orange; unselected rows only orange on hover.
+**Test oracle:** Selected answer is blue at rest; hovering it turns **gold**; unselected rows gold on hover.
 
 ## Inputs / outputs
 

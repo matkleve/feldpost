@@ -240,6 +240,7 @@ Remount rules:
 | Selected emphasis    | `.media-item__slot`           | `app-media-item:host`  | `.media-item__open`                  | `.media-item__slot--selected` | layer/selected (2)    | Emphasis stays on media slot only                             |
 | Upload overlay       | `.media-item__upload-overlay` | `app-media-item:host`  | none (passive)                       | `.media-item__upload-overlay`  | layer/upload (3)      | Upload layer sits above media content and below quiet actions |
 | Quiet actions reveal | `.media-item__quiet-actions`  | `.media-item__slot`    | `.media-item-quiet-actions__button*` | `.media-item__quiet-actions`   | layer/actions (4)     | Reveal on slot hover/focus only                               |
+| Tile hover emphasis  | `.media-item__slot`           | `app-media-item:host`  | `.media-item__slot`                  | `.media-item__slot:hover`, `.media-item__slot--linked-hover` | layer/hover (1b)      | Gold border/wash on pointer hover — **including when `--selected`** |
 
 ### Ownership Triad Declaration
 
@@ -248,11 +249,12 @@ Remount rules:
 | Selected emphasis    | `.media-item__slot`           | `.media-item__slot--selected`        | `.media-item__slot--selected`  | yes — `box-shadow: var(--shadow-sm)`; **1px** border only (no width change)   |
 | Upload overlay       | `.media-item__upload-overlay` | `.media-item__upload-overlay`        | `.media-item__upload-overlay`  | yes                                                                            |
 | Quiet actions reveal | `.media-item__quiet-actions`  | `.media-item__slot:hover` / `--selected` | `.media-item__quiet-actions`   | exception: slot-scoped CSS only — not `:host(:hover)`.                          |
+| Tile hover emphasis  | `.media-item__slot`           | `.media-item__slot:hover` / `--linked-hover` | `.media-item__slot`            | yes — gold wash + border; applies when selected too                             |
 
 ### Stacking Context
 
 - `app-media-item:host` is the sole stacking-context owner (fixed square grid cell).
-- **Hover/focus visuals** (elevation, border tint, quiet-actions reveal) are triggered by **`.media-item__slot:hover` / `:focus-within`**, not `:host(:hover)`, so letterbox padding in the host does not activate chrome.
+- **Hover/focus visuals** (elevation, **gold hover emphasis**, border tint, quiet-actions reveal) are triggered by **`.media-item__slot:hover` / `:focus-within` / `--linked-hover`**, not `:host(:hover)`, so letterbox padding in the host does not activate chrome.
 - `MediaDisplayComponent` is rendered as base content layer.
 - Upload overlay and quiet actions are absolute overlays anchored to `.media-item__slot`.
 
@@ -264,6 +266,18 @@ Remount rules:
 | Selected emphasis | 2       | `.media-item__slot--selected` |
 | Upload overlay    | 3       | `.media-item__upload-overlay`  |
 | Quiet actions     | 4       | `.media-item__quiet-actions`   |
+
+## Interaction emphasis
+
+- Canonical: [`state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis
+- Ink: [`interaction-emphasis-ink-contract.md`](../../system/interaction-emphasis-ink-contract.md)
+- [x] This component implements the contract (or documented exception below)
+
+| Surface | Rest (selected slot) | Hover / linked-hover | Owner |
+| --- | --- | --- | --- |
+| Media tile slot | Primary selection ring (`--selected`) | **Gold** border/wash on `.media-item__slot` | `media-item.component.scss` |
+
+Cross-surface **linked-hover** from workspace grid ↔ map marker uses the same gold treatment on the tile slot.
 
 ## Boolean Input Migration Required
 

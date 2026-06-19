@@ -25,7 +25,7 @@ Left **section rail** rows and detail **TOC chips** follow [`state-visuals.md`](
 | Surface | Selected / active | Hover (non-active) | Child slots |
 | ------- | ----------------- | ------------------ | ----------- |
 | `.settings-overlay__section-item--active` | `--interaction-selected-ink` + 10% mix | — | media icon inherits selected ink |
-| `.settings-overlay__section-item--active:hover` | — | `--primary` + selected-hover wash | media + chevron inherit host |
+| `.settings-overlay__section-item--active:hover` | — | `--brand-gold` + gold wash (same as idle hover) | media + chevron inherit host |
 | `.settings-overlay__section-item` (idle) | — | `--brand-gold` + gold wash | media + chevron + label **inherit** — no child `primary` override |
 | `.settings-overlay__detail-toc-item` | — | gold quiet hover | label inherits |
 

@@ -204,12 +204,12 @@
     @include emphasis.selected-bordered(10%, 42%);
   }
 
-  // Selected rail row hover — primary wins
-  // @see docs/design/state-visuals.md § Interaction emphasis
+  // Selected rail row hover — gold (same as idle row hover).
+  // @see docs/specs/system/interaction-emphasis-ink-contract.md
   .settings-overlay__section-item--active:hover,
   .settings-overlay__section-item--active:focus-visible {
     @include emphasis.selected-hover(10%);
-    border-color: color-mix(in srgb, var(--primary) 46%, var(--border));
+    border-color: color-mix(in srgb, var(--brand-gold) 46%, var(--border));
     box-shadow: var(--settings-focus-ring);
     outline: none;
 

@@ -10,9 +10,9 @@ import { cva, type VariantProps } from 'class-variance-authority';
 const tabQuietEmphasis =
   'hover:bg-[color:color-mix(in_srgb,var(--brand-gold)_10%,transparent)] hover:text-[color:var(--brand-gold)] focus-visible:bg-[color:color-mix(in_srgb,var(--brand-gold)_10%,transparent)] focus-visible:text-[color:var(--brand-gold)]';
 
-/** Active tab + hover/focus — primary selected-hover (@see interaction-emphasis-ink-contract). */
+/** Active tab + hover/focus — gold (same as inactive hover; @see interaction-emphasis-ink-contract). */
 const tabSelectedHover =
-  'data-[state=active]:hover:bg-[color:color-mix(in_srgb,var(--primary)_10%,transparent)] data-[state=active]:hover:text-primary data-[state=active]:focus-visible:bg-[color:color-mix(in_srgb,var(--primary)_10%,transparent)] data-[state=active]:focus-visible:text-primary';
+  'data-[state=active]:hover:bg-[color:color-mix(in_srgb,var(--brand-gold)_10%,transparent)] data-[state=active]:hover:text-[color:var(--brand-gold)] data-[state=active]:focus-visible:bg-[color:color-mix(in_srgb,var(--brand-gold)_10%,transparent)] data-[state=active]:focus-visible:text-[color:var(--brand-gold)]';
 
 export type TabsListVariantProps = VariantProps<typeof tabsListVariants>;
 

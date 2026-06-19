@@ -21,13 +21,19 @@ When an interactive component spec is next edited, add **§ Interaction emphasis
 | `hlmBtn` outline/ghost | [`button-variants.ts`](../../../apps/web/src/app/shared/ui/button/button-variants.ts) | **partial** | CVA still `hover:text-primary`; align to gold + ink inherit |
 | `hlmBtn` default/destructive | same | **done** | Filled CTAs — exception (solid fill) |
 | `hlmBtn` secondary | same | **done** | No product call sites; use `outline` for quiet actions |
-| Toggle group items | [`toggle-group-variants.ts`](../../../apps/web/src/app/shared/ui/toggle-group/toggle-group-variants.ts) | **done** | on = selected ink; on+hover = primary |
-| Nav sidebar links | [`sidebar.md`](../component/workspace/sidebar.md) | **partial** | Spec updated; remove child primary overrides in SCSS |
+| Toggle group items | [`toggle-group-variants.ts`](../../../apps/web/src/app/shared/ui/toggle-group/toggle-group-variants.ts) | **done** | on+hover = gold |
+| Map style switch | [`map-style-switch.md`](../component/map/map-style-switch.md) | **done** | via toggle-group CVA |
+| Map photo markers | [`media-marker.md`](../ui/media-marker/media-marker.md) | **done** | gold hover outline |
+| Media item grid tiles | [`media-item.md`](../component/media/media-item.md) | **done** | gold slot hover |
+| Nav sidebar links | [`sidebar.md`](../component/workspace/sidebar.md) | **done** | `selected-hover` → gold via mixin |
 | Menu rows | [`_option-menu-item-states.scss`](../../../apps/web/src/styles/_option-menu-item-states.scss) | **partial** | Mixin fix in progress; verify all consumers |
-| Dropdown toolbar triggers | [`dropdown-system.md`](../component/filters/dropdown-system.md) | **partial** | Map filter frosted host locks `foreground` |
+| Dropdown toolbar triggers | [`dropdown-system.md`](../component/filters/dropdown-system.md) | **done** | `data-active` + hover = gold |
 | Map filter toolbar | [`dropdown-system.md`](../component/filters/dropdown-system.md) | **pending** | `map-filter-toolbar.component.scss` |
 | Page rail rows | [`page-rail.md`](../component/page-rail/page-rail.md) | **pending** | rail-detail-nav-item, rail-section child overrides |
-| Settings overlay rail | [`settings-overlay.md`](../ui/settings-overlay/settings-overlay.md) | **pending** | Child `primary` on gold hover host |
+| Settings overlay rail | [`settings-overlay.md`](../ui/settings-overlay/settings-overlay.md) | **done** | active row hover = gold |
+| Tabs (`hlmTabsTrigger`) | [`tabs-variants.ts`](../../../apps/web/src/app/shared/ui/tabs/tabs-variants.ts), [`ui-primitives.tab.md`](../component/ui-primitives/ui-primitives.tab.md) | **done** | active+hover = gold |
+| Upload resolver tray choices | [`upload-resolver-tray.md`](../component/upload/upload-resolver-tray.md) | **done** | via `selected-hover` mixin |
+| Quiet-row SCSS mixin | [`_interaction-emphasis-quiet-row.scss`](../../../apps/web/src/styles/_interaction-emphasis-quiet-row.scss) | **done** | `selected-hover` aliases `hover` |
 | Metadata / property pickers | media-detail picker specs | **pending** | `menu-item-hover` bg-only rows |
 | Detail row ghost actions | [`media-detail` specs](../component/workspace/) | **partial** | Removed duplicate hover on `hlmBtn`; row center tint |
 | Upload panel location row | [`upload-panel.md`](../component/upload/upload-panel.md) | **done** | `hlmBtn` ghost + geometry-only SCSS |
@@ -36,8 +42,6 @@ When an interactive component spec is next edited, add **§ Interaction emphasis
 | File-type chips | [`file-type-chips.md`](../component/media/file-type-chips.md) | **done** | **Exception** — category colors |
 | Switches | spartan switch CVA | **done** | **Exception** — on/off uses `--primary` fill |
 | Auth `btn-primary` | auth specs | **done** | `variant="default"` + layout-only `.btn-primary` |
-| Tabs (`hlmTabsTrigger`) | [`tabs-variants.ts`](../../../apps/web/src/app/shared/ui/tabs/tabs-variants.ts), [`ui-primitives.tab.md`](../component/ui-primitives/ui-primitives.tab.md) | **partial** | Spec says primary hover; align to gold or document exception |
-| Upload resolver tray choices | [`upload-resolver-tray.md`](../component/upload/upload-resolver-tray.md) | **partial** | Choice rows set child primary on gold hover |
 | Project select dialog | [`project-select-dialog.md`](../component/project-select-dialog/project-select-dialog.md) | **partial** | Verify ink inherit |
 | Upload panel file row selection | [`upload-panel.md`](../component/upload/upload-panel.md) | **done** | Embedded `--selected` |
 | Projects dropdown picker rows | media-detail-inline-section spec | **done** | `--selected` in projects picker |
@@ -46,8 +50,7 @@ When an interactive component spec is next edited, add **§ Interaction emphasis
 | Media detail inline `__option--selected` | media-detail-inline-section spec | **done** | Tag chips unchanged |
 | Search / address typeahead rows | address-search, metadata pickers | **pending** | Align to ink contract |
 | `hlmBtn` secondary call sites | [`ui-primitives.button.md`](../component/ui-primitives/ui-primitives.button.md) | **done** | Migrated to `outline` (projects retry, media-empty) |
-| Captured-date calendar day | captured-date-editor | **done** | `--selected` uses selected ink |
-| Quiet-row SCSS mixin | [`_interaction-emphasis-quiet-row.scss`](../../../apps/web/src/styles/_interaction-emphasis-quiet-row.scss) | **done** | Shared hover/selected/selected-hover |
+| Captured-date calendar day | captured-date-editor | **done** | `--selected` uses selected ink; hover via mixin |
 
 ## Grep hygiene
 
@@ -64,4 +67,5 @@ rg 'menu-trigger' apps/web/src/app --glob '*.scss' -A2 | rg 'color: var\(--foreg
 
 ## Changelog
 
-- **2026-06-17** — Ink inheritance contract; many families moved to **partial**/**pending** pending Brix alignment.
+- **2026-06-17 (c)** — Brix: `selected-hover` → gold; map style switch, markers, media tiles, toolbar triggers implemented.
+- **2026-06-17 (b)** — Contract change: selected+hover = gold.

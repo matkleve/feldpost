@@ -229,8 +229,8 @@
     @include emphasis.selected(10%);
   }
 
-  // Selected row still uses primary on hover/focus (wins over --active)
-  // @see docs/design/state-visuals.md § Interaction emphasis — use emphasis.selected-hover()
+  // Selected row hover/focus — gold invitation (same as non-active hover).
+  // @see docs/specs/system/interaction-emphasis-ink-contract.md
   &--active:hover,
   &--active:focus-visible {
     @include emphasis.selected-hover(10%);

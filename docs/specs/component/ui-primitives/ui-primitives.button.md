@@ -12,7 +12,7 @@ Token borders and fills from tweakcn semantics (`--primary`, `--border`, `--mute
 | --------- | ---- | ------------- | -------------------------------- |
 | `default` | Solid `--primary`, light foreground | Darker primary (`primary/90`) | — |
 | `destructive` | Solid destructive | Darker destructive | — |
-| `outline` | Muted text, border, background | **Gold** ink + gold wash (`emphasis.hover` semantics) | Selected ink via host state / parent |
+| `outline` | Muted text, border, background | **Gold** ink + gold wash | Selected ink at rest; **gold** on hover even when selected |
 | `ghost` | Muted text, transparent | Same as outline hover | Same as outline |
 | `secondary` | Solid `--secondary` (olive light) | Darker secondary | Rare — prefer `outline` for new work |
 | `link` | Primary text | Underline | — |

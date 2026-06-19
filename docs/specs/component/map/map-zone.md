@@ -35,7 +35,7 @@ MapZone                                    ← div, flex-1, relative, overflow-h
 ├── SearchBar                              ← absolute top-4 left-1/2, z-30
 ├── ActiveFilterChips                      ← absolute below search bar, z-20
 ├── UploadButtonZone                       ← absolute top-4 right-4, z-20
-├── BasemapSwitchButton                    ← absolute top-4 left-4, z-20, 2-state switch
+├── BasemapSwitchButton                    ← absolute top-4 left-4, z-20 — see [map-style-switch.md](./map-style-switch.md)
 ├── GPSButton                              ← absolute bottom-4 right-4, z-20
 └── [placement] PlacementBanner            ← absolute bottom-16 center, z-30
 ```
@@ -73,7 +73,7 @@ flowchart LR
 
 | File                                              | Purpose                                                      |
 | ------------------------------------------------- | ------------------------------------------------------------ |
-| `features/map/map-shell/map-shell.component.html` | Hosts `BasemapSwitchButton` in top-left map control stack    |
+| `features/map/map-shell/map-shell.component.html` | Hosts [map style switch](./map-style-switch.md) in top-left map control stack |
 | `features/map/map-shell/map-shell.component.ts`   | Holds `mapBasemap` state and calls `MapAdapter.setBaseLayer` |
 | `core/map/map-adapter.ts`                         | Defines `setBaseLayer('default' \| 'satellite')` contract    |
 | `core/map/leaflet-map.adapter.ts`                 | Maps basemap state to concrete Leaflet tile layers           |

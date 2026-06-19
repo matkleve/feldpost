@@ -126,7 +126,7 @@
   &[data-active='true']:hover,
   &[data-active='true']:focus-visible {
     @include emphasis.selected-hover(10%);
-    border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
+    border-color: color-mix(in srgb, var(--brand-gold) 42%, var(--border));
 
     .material-icons {
       color: inherit;
@@ -154,7 +154,7 @@
   &[data-active='true']:hover,
   &[data-active='true']:focus-visible {
     @include emphasis.selected-hover(10%);
-    border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
+    border-color: color-mix(in srgb, var(--brand-gold) 42%, var(--border));
 
     .material-icons {
       color: inherit;

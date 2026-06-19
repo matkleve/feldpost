@@ -119,7 +119,7 @@ app-map-shell {
   .map-photo-marker--linked-hover,
   .map-photo-marker:hover {
     .map-photo-marker__body {
-      outline: 2px solid color-mix(in srgb, var(--primary) 78%, var(--border));
+      outline: 2px solid color-mix(in srgb, var(--brand-gold) 78%, var(--border));
       outline-offset: 1px;
     }
   }
@@ -127,9 +127,9 @@ app-map-shell {
   .map-photo-marker--selected.map-photo-marker--linked-hover,
   .map-photo-marker--selected:hover {
     .map-photo-marker__body {
-      outline: 2px solid var(--primary);
+      outline: 2px solid var(--brand-gold);
       outline-offset: -1px;
-      box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 32%, transparent);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-gold) 32%, transparent);
     }
   }
 

@@ -39,7 +39,7 @@ Every nav link has these visual states. Agents must implement **all** of them �
 | Default       | transparent | `--muted-foreground` (inherit on `.nav__icon`, `.nav__label`) | idle | — |
 | Hover         | gold ~10% mix | `--brand-gold` on host; children `color: inherit` | `emphasis.hover(10%)` | Applies to non-active and active rows |
 | Active route  | selected-ink ~10% mix | `--interaction-selected-ink` on host; icon may inherit | `emphasis.selected(10%)` | `routerLinkActive` / `nav__link--active` |
-| Active + hover | primary ~10% mix | `--primary` on host; children inherit | `emphasis.selected-hover(10%)` | Primary wins over selected rest |
+| Active + hover | gold ~10% mix | `--brand-gold` on host; children inherit | `emphasis.hover(10%)` | Same gold as non-active hover |
 | Focus-visible | same as hover or selected+hover | same ink as pointer hover for that row | + `--interactive-focus-ring` | Keyboard expands rail (desktop) |
 | Disabled      | transparent | muted at reduced opacity | — | `pointer-events: none`, `aria-disabled` |
 

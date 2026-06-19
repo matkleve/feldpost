@@ -51,12 +51,12 @@
     }
   }
 
-  // Selected trigger on hover/focus — primary wins (same contract as toggle `data-[state=on]:hover`).
-  // @see docs/design/state-visuals.md § Interaction emphasis
+  // Active trigger + hover/focus — gold emphasis (same as idle hover).
+  // @see docs/specs/system/interaction-emphasis-ink-contract.md
   button.#{$block}__menu-trigger[data-active='true']:hover:not(:disabled),
   button.#{$block}__menu-trigger[data-active='true']:focus-visible:not(:disabled) {
-    @include emphasis.selected-hover(10%);
-    border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
+    @include emphasis.hover(10%);
+    border-color: color-mix(in srgb, var(--brand-gold) 42%, var(--border));
 
     [data-dd-part] {
       color: inherit;

@@ -197,6 +197,18 @@ stateDiagram-v2
 
 Viewport lifecycle, clustering, upload-driven updates, and performance rules: **[media-marker.viewport-and-clustering.supplement.md](./media-marker.viewport-and-clustering.supplement.md)**.
 
+## Interaction emphasis (marker chrome)
+
+- Canonical: [`state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis
+- Ink: [`interaction-emphasis-ink-contract.md`](../../system/interaction-emphasis-ink-contract.md)
+- [x] This component implements the contract (or documented exception below)
+
+| Surface | Rest (selected) | Hover / linked-hover | Owner |
+| --- | --- | --- | --- |
+| `.map-photo-marker__body` outline | Primary ring (`--selected` / `--primary`) | **`--brand-gold`** outline + gold wash — **including when `--selected`** | `_map-shell-leaflet-global.scss` |
+
+**Normative:** `:hover`, `:focus-within`, and `.map-photo-marker--linked-hover` MUST use gold emphasis on the body outline. Selected-at-rest keeps primary ring; pointer presence switches to gold (does not deepen primary blue).
+
 ## Settings
 
 - **Map Marker Motion**: toggles marker fade-in and centroid glide transitions during cluster reconciliation (`Off` or `Smooth`).
@@ -273,6 +285,7 @@ sequenceDiagram
 
 - [x] Click selects media and opens Workspace Pane — **`handlePhotoMarkerClick()`** calls `setSelectedMarker()` + **`photoPanelOpen.set(true)`**
 - [x] Selected markers have a clear visual state — `.map-photo-marker--selected` applies accent ring + `scale(1.05)`
+- [x] Hover / linked-hover on marker body uses **gold** outline (including when marker is selected)
 - [ ] Linked hover state exists as a secondary emphasis independent from selection (`linked-hover` class/signal)
 - [ ] Zoom spotlight is transient: one outgoing pulse only, no persistent glow when pulse completes
 - [ ] Zoom spotlight executes after render-ready (marker exists, visible, map movement settled)

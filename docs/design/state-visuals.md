@@ -57,15 +57,15 @@ Rare. Must be justified in the component spec (e.g. loading handoff). Visuals **
 
 **Rule:** Quiet interactive controls (nav links, `hlmBtn` `outline`/`ghost`, toggle items, menu rows) use this recipe unless a **dedicated element spec** documents an exception with a test oracle.
 
-**Canonical tokens:** `--brand-gold` (hover / invitation ink), `--interaction-selected-ink` (persistent selected/on; equals `--primary` in default theme), `--primary` (selected+hover ink), `--muted-foreground` (idle ink), `--menu-item-hover` (= gold 8%), `--action-hover` (= gold 12%). **Prefer the mixin/token — see Mandatory implementation contract below.**
+**Canonical tokens:** `--brand-gold` (hover / invitation ink — **including selected+hover**), `--interaction-selected-ink` (persistent selected/on at rest; equals `--primary` in default theme), `--muted-foreground` (idle ink), `--menu-item-hover` (= gold 8%), `--action-hover` (= gold 12%). **Prefer the mixin/token — see Mandatory implementation contract below.**
 
 | State | Ink | Background | Border (outline hosts) |
 | ----- | --- | ------------ | ---------------------- |
 | **Idle** | `--muted-foreground` | transparent or `--background` | `--input` / `--border` |
 | **Hover / focus-visible** | `--brand-gold` | gold ~10% mix (`emphasis.hover`) | gold ~42% + border mix (outline hosts) |
 | **Pressed (`:active`)** | `--brand-gold` | gold ~15% mix | — |
-| **Selected / on** (`routerLinkActive`, `data-state=on`, `aria-pressed`) | `--interaction-selected-ink` | selected-ink 10% mix | selected ~42% + border mix (when bordered) |
-| **Selected + hover** | `--primary` (wins) | primary 10% mix (`emphasis.selected-hover`) | same as selected+hover border |
+| **Selected / on** (`routerLinkActive`, `data-state=on`, `aria-pressed`) — **at rest** | `--interaction-selected-ink` | selected-ink 10% mix | selected ~42% + border mix (when bordered) |
+| **Selected + hover / focus-visible** | **`--brand-gold`** (same as hover) | gold ~10% mix (`emphasis.hover`) | gold ~42% + border mix |
 | **Destructive quiet row** | `--destructive` | destructive 10% mix (hover) / 15% (`:active`) | — |
 
 ### Ink inheritance (blocker)
@@ -82,7 +82,7 @@ On any quiet host using the mixins above, **icon, label, and chevron slots must 
 | Action/control hover (12%) | `var(--action-hover)` | `color-mix(in srgb, var(--primary) 12%, transparent)` |
 | Full hover treatment (bg + ink) | `@include emphasis.hover(X%)` from `_interaction-emphasis-quiet-row.scss` | raw `background:` + `color:` pair |
 | Persistent selected state | `@include emphasis.selected(X%)` | `color-mix(in srgb, var(--interaction-selected-ink) X%, transparent)` |
-| Selected row + pointer over it | `@include emphasis.selected-hover(X%)` | `color-mix(in srgb, var(--primary) X%, transparent)` on selected element |
+| Selected row + pointer over it | `@include emphasis.hover(X%)` | same as hover — gold ink + wash |
 | Selected + border indicator | `@include emphasis.selected-bordered(X%, Y%)` | `background + border-color` pair with selected-ink |
 
 **Import path** (adjust `../` levels to reach `src/styles/`):
@@ -95,7 +95,7 @@ On any quiet host using the mixins above, **icon, label, and chevron slots must 
 **Implementation owners:**
 
 - `apps/web/src/app/shared/ui/button/button-variants.ts` — `outline`, `ghost`, `destructive`
-- `apps/web/src/app/shared/ui/toggle-group/toggle-group-variants.ts` — lane items
+- `apps/web/src/app/shared/ui/toggle-group/toggle-group-variants.ts` — lane items (**hover always gold**)
 - `apps/web/src/app/shared/ui/tabs/tabs-variants.ts` — tab triggers
 - `apps/web/src/app/features/nav/nav.component.scss` — route links
 - `apps/web/src/app/features/map/map-shell/_map-shell-upload.scss` — map/media upload trigger (`.map-upload-btn`)
@@ -111,7 +111,9 @@ On any quiet host using the mixins above, **icon, label, and chevron slots must 
 - `apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/projects-dropdown.component.scss` — picker options
 - `apps/web/src/app/shared/dropdown-trigger/grouping/grouping-dropdown.component.scss` — multi-select rows
 - `apps/web/src/app/shared/workspace-pane/media-detail/media-detail-inline-section/media-detail-inline-section.component.scss` — `__option--selected`
+- `apps/web/src/styles/_map-shell-leaflet-global.scss` — photo marker hover / linked-hover outline
 - `apps/web/src/app/shared/workspace-pane/media-detail/captured-date-editor.component.scss` — calendar day `--selected`
+- `apps/web/src/app/shared/media-item/media-item.component.scss` — tile slot hover / linked-hover
 
 **Filled CTAs (exception):** `hlmBtn` `variant="default"` stays solid fill. `variant="destructive"` uses destructive quiet emphasis (light wash + destructive ink) — same recipe as the **Destructive quiet row** row above.
 
@@ -124,7 +126,7 @@ On any quiet host using the mixins above, **icon, label, and chevron slots must 
 | Map upload progress ring (`.map-upload-btn--uploading`) | Batch progress uses `--primary` on the ring/spinner only |
 | Media selection rings / tile FSM | Domain selection chrome — per media specs |
 
-**Test oracle:** Idle row is muted; hovering any enabled row tints **gold** on **host and all child slots**; current route / selected segment is cool blue at rest and **primary blue** on selected+hover (not gold split across icon vs label).
+**Test oracle:** Idle row is muted; hovering any enabled control tints **gold** on **host and all child slots** — **including when already selected**; current route / selected segment is cool blue **at rest only** (not while hovered).
 
 ---
 
@@ -136,6 +138,7 @@ On any quiet host using the mixins above, **icon, label, and chevron slots must 
 
 ## Changelog
 
+- **2026-06-17 (b)** — **Selected+hover = gold:** pointer over selected quiet controls uses `emphasis.hover`, not primary deepening.
 - **2026-06-16** — Added **Mandatory implementation contract** table: inline `color-mix` for hover/selected is now a CI-blocked pattern; all existing usages migrated to `emphasis.*` mixins or `--menu-item-hover`/`--action-hover` tokens. Guard added to `scripts/guard-interaction-emphasis.mjs` and wired into `design-system:check`.
 - **2026-06-17** — **Ink inheritance** rule + hover ink = `--brand-gold` (aligned with `_interaction-emphasis-quiet-row.scss`); cross-component scope in [`interaction-emphasis-ink-contract.md`](../specs/system/interaction-emphasis-ink-contract.md).
 - **2026-05-27** — **Interaction emphasis** contract for quiet controls (hover gold, selected `--interaction-selected-ink`).

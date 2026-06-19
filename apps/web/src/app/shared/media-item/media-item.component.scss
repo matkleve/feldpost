@@ -296,12 +296,24 @@
   border-color: var(--primary);
 }
 
-// Hover/focus-within on slot only (not empty square host padding).
-// @see docs/design/tokens.md §3.5
+// Hover/focus-within on slot only (not empty square host padding) — gold quiet emphasis.
+// @see docs/specs/component/media/media-item.md § Interaction emphasis
 .media-item__slot:hover,
 .media-item__slot:focus-within {
   box-shadow: var(--shadow-sm);
-  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+  border-color: color-mix(in srgb, var(--brand-gold) 55%, var(--border));
+  outline: 2px solid color-mix(in srgb, var(--brand-gold) 78%, transparent);
+  outline-offset: 1px;
+}
+
+.media-item__slot--selected:hover,
+.media-item__slot--selected:focus-within {
+  border-color: color-mix(in srgb, var(--brand-gold) 55%, var(--primary));
+  box-shadow:
+    var(--shadow-sm),
+    inset 0 0 0 2px color-mix(in srgb, var(--brand-gold) 70%, var(--primary)),
+    0 0 0 2px color-mix(in srgb, var(--brand-gold) 32%, transparent);
+  outline: none;
 }
 
 .media-item__open {

@@ -16,11 +16,10 @@
   color: var(--interaction-selected-ink);
 }
 
-// Selected row while hovered — primary (blue) wins over hover gold.
-// @see docs/design/state-visuals.md § Interaction emphasis
+// Pointer over any quiet row (including already-selected) — same gold invitation as plain hover.
+// @see docs/specs/system/interaction-emphasis-ink-contract.md
 @mixin selected-hover($bg-percent: 10%) {
-  background: color-mix(in srgb, var(--primary) #{$bg-percent}, transparent);
-  color: var(--primary);
+  @include hover($bg-percent);
 }
 
 // Optional bordered selected row (dialogs, rails)

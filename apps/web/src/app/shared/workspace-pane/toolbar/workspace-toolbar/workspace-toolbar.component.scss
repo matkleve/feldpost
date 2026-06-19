@@ -1,5 +1,6 @@
 @use '../../../dropdown-trigger/scss/toolbar-menu-trigger' as fp-toolbar-menu-trigger;
 @use '../../../dropdown-trigger/scss/toolbar-breakpoints' as fp-toolbar-breakpoints;
+@use '../../../../../styles/interaction-emphasis-quiet-row' as emphasis;
 
 // Flex child of .workspace-pane — owns its own padding, replaces workspace-pane-toolbar wrapper
 // @see docs/specs/ui/workspace/workspace-pane.md
@@ -61,12 +62,11 @@
   min-width: 1rem;
   padding-inline: var(--spacing-1);
   border-radius: var(--radius-full);
-  background: color-mix(in srgb, var(--interaction-selected-ink) 14%, transparent);
+  @include emphasis.selected(14%);
   font-size: var(--font-size-2xs);
   font-weight: 600;
   line-height: 1.25rem;
   text-align: center;
-  color: var(--interaction-selected-ink);
   pointer-events: none;
 }
 

@@ -69,7 +69,7 @@
 
   &--active:hover,
   &--active:focus-visible {
-    color: var(--primary);
+    color: var(--brand-gold);
     @include frosted-chrome.outline-control-selected-hover;
 
     .material-icons {

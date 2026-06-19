@@ -146,9 +146,10 @@ The filter flyout remains **inside** the shell DOM so shell **`contains()`** sti
 | State | Visual | Owner |
 | --- | --- | --- |
 | Menu row hover / focus | Gold fill + gold ink on host; icon/label `color: inherit` | [`_option-menu-item-states.scss`](../../../../apps/web/src/styles/_option-menu-item-states.scss) |
-| Active sort row | Selected-ink at rest; primary on selected+hover | `sort-dropdown.component.scss` |
-| Grouping multi-select | Selected-ink border/fill | `grouping-dropdown.component.scss` `.grouping-row--selected` |
-| Toolbar trigger hover | Gold ink on host + all `[data-dd-part]` slots | `hlmBtn` outline + feature SCSS (no `color: var(--foreground)` lock) |
+| Active sort row | Selected-ink at rest; **gold** on hover/focus (including when row is active) | `sort-dropdown.component.scss` |
+| Grouping multi-select | Selected-ink border/fill at rest; **gold** on hover when pointer present | `grouping-dropdown.component.scss` `.grouping-row--selected` |
+| Toolbar trigger idle hover | Gold ink on host + all `[data-dd-part]` slots | `hlmBtn` outline + `_toolbar-menu-trigger.scss` |
+| Toolbar trigger `data-active` + hover | **Gold** ink + wash (not primary deepening) | `_toolbar-menu-trigger.scss` |
 | Map filter triggers | Same as toolbar triggers | `map-filter-toolbar.component.scss` |
 | Filter rule row | Gold via `emphasis.hover(10%)` on `.filter-rule`; chevrons stay muted; × destructive on control hover only | `filter-dropdown.component.scss` |
 | Destructive row | Destructive token | `.option-menu-item.text-destructive` |
@@ -288,7 +289,7 @@ None - delegated to consumer feature services.
 - [x] Toolbar standard width **18rem**; filter **32rem** floor; TS clamp matches **`toolbarDropdownPositionWidthPx`**
 - [x] List rows use **`hlmMenuItem`** / `.option-menu-item` geometry from `_option-menu-list.scss`
 - [x] Sort/grouping/projects compose **`app-standard-dropdown`** + menu-panel primitives
-- [x] Sort active rows use **`interaction-selected-ink`** at rest; selected+hover uses primary on host **and** direction chip
+- [x] Sort active rows use **`interaction-selected-ink`** at rest; selected+hover uses **gold** on host **and** direction chip inherits
 - [x] Menu row hover: gold ink on icon + label (ink inheritance contract)
 - [x] Map/workspace/media toolbar triggers: hover changes ink on icon, label, and chevron together
 - [x] Filter form rules stay component-specific; footer uses menu-panel footer action
