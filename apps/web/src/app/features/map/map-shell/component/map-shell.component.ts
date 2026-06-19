@@ -87,11 +87,10 @@ import { getFirstMarkerKeyForMedia } from '../markers/marker-media-index.helpers
 import { WorkspacePaneObserverAdapter } from '../../../../core/workspace-pane/workspace-pane-observer.adapter';
 import type { SelectedItemsContextPort } from '../../../../core/workspace-pane/workspace-pane-context.port';
 import { WORKSPACE_PANE_SHELL_HOST } from '../../../../core/workspace-pane/workspace-pane-shell-host.token';
-import type { WorkspacePaneLayoutMapEffects } from '../../../../core/workspace-pane/workspace-pane-layout-map-effects.service';
-import { WorkspacePaneLayoutMapEffectsService } from '../../../../core/workspace-pane/workspace-pane-layout-map-effects.service';
 import { MapMenuViewModelService } from '../workspace/map-menu-view-model.service';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 import { MapShellInstanceService } from './map-shell-instance.service';
+import { MapWorkspacePaneEffectsService } from '../handlers/map-workspace-pane-effects.service';
 
 
 @Component({
@@ -153,12 +152,12 @@ export class MapShellComponent implements OnDestroy {
   private readonly markerStateMutationsService = inject(MarkerStateMutationsService);
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
   private readonly workspacePaneShellHost = inject(WORKSPACE_PANE_SHELL_HOST);
-  private readonly workspacePaneLayoutMapEffectsService = inject(WorkspacePaneLayoutMapEffectsService);
   readonly menuVm = inject(MapMenuViewModelService);
   readonly searchContext = inject(MapSearchContextService);
   readonly mapPlacementService = inject(MapPlacementService);
   private readonly mapSubscriptionService = inject(MapSubscriptionService);
   private readonly mapShellInstance = inject(MapShellInstanceService);
+  private readonly workspacePaneEffectsService = inject(MapWorkspacePaneEffectsService);
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
   /** Reference to the Leaflet map container div. */
@@ -194,7 +193,6 @@ export class MapShellComponent implements OnDestroy {
     startupTimer: null,
     markerBootstrapTimer: null,
   };
-  private workspacePaneMapEffectsRegistration: WorkspacePaneLayoutMapEffects | null = null;
   private readonly mapSelectedItemsContext: SelectedItemsContextPort = {
     contextKey: 'map',
     selectedMediaIds$: this.workspaceSelectionService.selectedMediaIds,
@@ -210,22 +208,7 @@ export class MapShellComponent implements OnDestroy {
 
   constructor() {
     this.workspacePaneObserver.onContextRebind(this.mapSelectedItemsContext);
-
-    this.workspacePaneMapEffectsRegistration = {
-      onZoomToLocation: (event) => this.mapViewFlyService.onZoomToLocation(event),
-      onImageUploaded: (event) => this.mapPlacementService.onImageUploaded(event),
-      enterPlacementMode: (key) => this.mapPlacementService.enterPlacementMode(key),
-      onUploadLocationPreviewRequested: (event) => this.mapPlacementService.onUploadLocationPreviewRequested(event),
-      onUploadLocationPreviewCleared: () => this.mapPlacementService.onUploadLocationPreviewCleared(),
-      onUploadLocationMapPickRequested: (event) => this.mapPlacementService.onUploadLocationMapPickRequested(event),
-      onWorkspaceItemHoverStarted: (event) => this.markerSelectionService.onWorkspaceHoverStarted(event),
-      onWorkspaceItemHoverEnded: (mediaId) => this.markerSelectionService.onWorkspaceHoverEnded(mediaId),
-      onWorkspacePaneClosing: () => this.applyWorkspacePaneClosingMapSideEffects(),
-      invalidateMapSize: () => this.map?.invalidateSize(),
-    };
-    this.workspacePaneLayoutMapEffectsService.registerMapEffects(
-      this.workspacePaneMapEffectsRegistration,
-    );
+    this.workspacePaneEffectsService.register();
 
     let mapFilterEffectReady = false;
     effect(() => {
@@ -263,12 +246,7 @@ export class MapShellComponent implements OnDestroy {
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   ngOnDestroy(): void {
-    if (this.workspacePaneMapEffectsRegistration) {
-      this.workspacePaneLayoutMapEffectsService.unregisterMapEffects(
-        this.workspacePaneMapEffectsRegistration,
-      );
-      this.workspacePaneMapEffectsRegistration = null;
-    }
+    this.workspacePaneEffectsService.unregister();
     this.cleanupGpsAndTracking();
     this.cleanupDeferredAndQueryState();
     this.detachGlobalListeners();
@@ -354,15 +332,6 @@ export class MapShellComponent implements OnDestroy {
   }
 
   // ── Workspace pane (DOM + split owned by AuthenticatedAppLayoutComponent) ─
-
-  private applyWorkspacePaneClosingMapSideEffects(): void {
-    if ((this.state.draftMediaMarker()?.uploadCount ?? 0) === 0) {
-      this.photoMarkerLifecycleService.removeDraftMediaMarker();
-    }
-    this.markerSelectionService.setSelectedMarker(null);
-    this.markerSelectionService.setSelectedMarkerKeys(new Set());
-    this.radiusDrawingService.clearSelectionVisuals();
-  }
 
   onQrInviteCommandRequested(): void {
     void this.router.navigateByUrl('/colleagues?tab=invites');
