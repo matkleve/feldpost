@@ -44,7 +44,7 @@ Shared shell width / scroll chrome: [`dropdown-system.md`](./dropdown-system.md)
 | Surface | Hover / focus | Selected | Owner |
 | --- | --- | --- | --- |
 | Filter rule row (`.filter-rule`) | Gold via `emphasis.hover(10%)` | — | `filter-dropdown.component.scss` |
-| Picker flyout option | Gold menu-row emphasis | `emphasis.selected(12%)` when `[data-selected='true']` | same |
+| Picker flyout option | Gold menu-row emphasis | `emphasis.engaged(12%)` when `[data-selected='true']` (primary tier) | same |
 | Remove (×) | Destructive on control hover only | — | `.filter-rule__remove` |
 | Picker chevron | Stays **muted** (documented exception) | — | `.filter-rule__picker-chevron` |
 
@@ -170,7 +170,7 @@ Where `FilterRule` = `{ id: string; conjunction: 'and' | 'or'; property: Propert
 - [x] Conjunction toggles between "And" / "Or" on click
 - [x] Property dropdown shows built-in + custom metadata keys
 - [x] Operator list changes based on property type
-- [x] Value input adapts: text, date picker, multi-select, number
+- [ ] Value input adapts: text, date picker, multi-select, number
 - [x] Filters apply immediately on value change
 - [x] × removes a rule (visible on hover)
 - [x] Multiple rules can be combined

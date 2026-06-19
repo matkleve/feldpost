@@ -28,7 +28,7 @@ Source of truth for standardized sizing/tokens:
 
 - Canonical: [`docs/design/state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis
 - Ink inheritance: [`interaction-emphasis-ink-contract.md`](../../system/interaction-emphasis-ink-contract.md)
-- [ ] Nav links implement contract; avatar badge uses filled-primary exception only
+- [ ] Nav links implement three-tier contract (tertiary violet at rest, gold hover); avatar badge uses filled-primary exception only
 
 ## NavLink States
 
@@ -38,7 +38,7 @@ Every nav link has these visual states. Agents must implement **all** of them �
 | ------------- | ---------- | ----------------- | -------------- | ----- |
 | Default       | transparent | `--muted-foreground` (inherit on `.nav__icon`, `.nav__label`) | idle | — |
 | Hover         | gold ~10% mix | `--brand-gold` on host; children `color: inherit` | `emphasis.hover(10%)` | Applies to non-active and active rows |
-| Active route  | selected-ink ~10% mix | `--interaction-selected-ink` on host; icon may inherit | `emphasis.selected(10%)` | `routerLinkActive` / `nav__link--active` |
+| Active route  | nav-ink ~10% mix | `--interaction-nav-ink` on host; children `color: inherit` | `emphasis.nav(10%)` | `routerLinkActive` / `nav__link--active` |
 | Active + hover | gold ~10% mix | `--brand-gold` on host; children inherit | `emphasis.hover(10%)` | Same gold as non-active hover |
 | Focus-visible | same as hover or selected+hover | same ink as pointer hover for that row | + `--interactive-focus-ring` | Keyboard expands rail (desktop) |
 | Disabled      | transparent | muted at reduced opacity | — | `pointer-events: none`, `aria-disabled` |
@@ -238,7 +238,7 @@ sequenceDiagram
 
 - [x] NavLink idle: transparent bg; icon + label muted (`--muted-foreground`)
 - [x] NavLink hover: gold wash + gold ink on **both** icon and label (no blue icon / gold text split)
-- [x] NavLink active route: selected-ink wash + selected-ink on host; icon inherits
+- [ ] NavLink active route: **tertiary** nav-ink wash + violet on host; icon inherits
 - [x] NavLink active + hover: primary wash + primary on host and children
 - [x] NavLink focus-visible: same ink as hover for that row + focus ring
 - [ ] NavLink disabled: muted, non-interactive

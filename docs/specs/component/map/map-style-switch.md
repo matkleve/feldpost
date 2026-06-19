@@ -6,7 +6,7 @@ Vertical **two-segment** basemap control in the map zone: **street map** vs **sa
 
 ## What It Looks Like
 
-Frosted pill track (top-left of map zone, `z-index: 200`). Each segment is a circular icon-only toggle (`map` / `satellite` Material icons). **On** segment uses **selected-ink** (blue) at rest; **off** segment is muted.
+Frosted pill track (top-left of map zone, `z-index: 200`). Each segment is a circular icon-only toggle (`map` / `satellite` Material icons). **On** segment uses **secondary** selected-ink (blue) at rest; **off** segment is muted. Hover → gold (primary).
 
 ## Where It Lives
 
@@ -30,7 +30,7 @@ Frosted pill track (top-left of map zone, `z-index: 200`). Each segment is a cir
 
 | Surface | Rest (on) | Rest (off) | Hover / focus-visible (any segment, including already on) | Owner |
 | --- | --- | --- | --- | --- |
-| Segment (`hlmToggleGroupItem`) | Selected-ink + selected wash | Muted ink, transparent fill | **Gold** ink + gold wash; icon `color: inherit` | `toggle-group-variants.ts` + `_map-shell-style-switch.scss` pierce |
+| Segment (`hlmToggleGroupItem`) | Secondary selected-ink + wash | Muted ink, transparent fill | **Gold** ink + gold wash; icon `color: inherit` | `toggle-group-variants.ts` + `_map-shell-style-switch.scss` pierce |
 
 **Normative:** Pointer over an **already-selected** segment MUST use the same gold hover treatment as an off segment — **not** primary blue deepening.
 
@@ -56,4 +56,4 @@ Frosted pill track (top-left of map zone, `z-index: 200`). Each segment is a cir
 - [x] Vertical frosted track, top-left placement
 - [x] Hover/focus on **on** segment shows **gold** ink (not primary deepening)
 - [x] Hover/focus on **off** segment shows **gold** ink
-- [ ] Icon inherits host ink on hover (no blue icon + gold wash split)
+- [x] Icon inherits host ink on hover (no blue icon + gold wash split)

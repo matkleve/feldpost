@@ -4,9 +4,13 @@
 
 :host {
   display: block;
-  width: auto;
+  width: 100%;
   max-width: 100%;
   min-width: 0;
+  // Container for icon-only collapse — same breakpoint contract as workspace toolbar.
+  // @see docs/specs/ui/workspace/workspace-pane.md
+  container-type: inline-size;
+  container-name: map-filter-toolbar;
 }
 
 // Floating trigger row below the search bar — left aligned with gap between buttons.
@@ -17,6 +21,7 @@
   justify-content: flex-start;
   flex-wrap: wrap;
   gap: var(--spacing-2);
+  width: 100%;
   margin: 0;
   padding: 0;
 }
@@ -24,6 +29,24 @@
 @layer components {
   @include fp-toolbar-menu-trigger.toolbar-menu-trigger-components('map-filter-toolbar');
   @include fp-toolbar-breakpoints.toolbar-menu-trigger-parts('map-filter-toolbar');
+
+  // Frosted outline-control on map overlay — rest in components layer so @layer states hover wins.
+  // @see apps/web/src/app/features/map/map-shell/scss/_map-shell-upload.scss
+  button.map-filter-toolbar__menu-trigger {
+    @include frosted-chrome.outline-control;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    color: var(--muted-foreground);
+    transition:
+      background var(--motion-duration-fast) var(--motion-ease-out),
+      border-color var(--motion-duration-fast) var(--motion-ease-out),
+      box-shadow var(--motion-duration-fast) var(--motion-ease-out),
+      color var(--motion-duration-fast) var(--motion-ease-out);
+
+    [data-dd-part] {
+      color: inherit;
+    }
+  }
 }
 
 @layer states {
@@ -31,20 +54,3 @@
 }
 
 @include fp-toolbar-breakpoints.toolbar-menu-trigger-responsive('map-filter-toolbar', map-filter-toolbar);
-
-// Frosted glass surface — map-specific chrome; beats hlmBtn outline `bg-background`.
-// @see apps/web/src/app/features/map/search-bar/search-bar.component.scss
-button.map-filter-toolbar__menu-trigger {
-  @include frosted-chrome.surface;
-  color: var(--muted-foreground);
-  border-radius: var(--radius-md);
-  transition:
-    background var(--motion-duration-fast) var(--motion-ease-out),
-    border-color var(--motion-duration-fast) var(--motion-ease-out),
-    box-shadow var(--motion-duration-fast) var(--motion-ease-out),
-    color var(--motion-duration-fast) var(--motion-ease-out);
-
-  [data-dd-part] {
-    color: inherit;
-  }
-}

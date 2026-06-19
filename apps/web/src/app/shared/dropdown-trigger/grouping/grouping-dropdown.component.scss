@@ -102,12 +102,12 @@
 // --- Selected row (multi-select via Ctrl+Click) ---
 // @see docs/design/state-visuals.md § Interaction emphasis
 .grouping-row--selected {
-  @include emphasis.selected(14%);
-  border-left: 2px solid var(--interaction-selected-ink);
+  @include emphasis.engaged(14%);
+  border-left: 2px solid var(--brand-gold);
 
   &:hover {
     @include emphasis.selected-hover(18%);
-    border-left-color: var(--primary);
+    border-left-color: var(--brand-gold);
   }
 }
 

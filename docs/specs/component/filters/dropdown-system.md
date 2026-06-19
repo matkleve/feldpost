@@ -147,7 +147,7 @@ The filter flyout remains **inside** the shell DOM so shell **`contains()`** sti
 | --- | --- | --- |
 | Menu row hover / focus | Gold fill + gold ink on host; icon/label `color: inherit` | [`_option-menu-item-states.scss`](../../../../apps/web/src/styles/_option-menu-item-states.scss) |
 | Active sort row | Selected-ink at rest; **gold** on hover/focus (including when row is active) | `sort-dropdown.component.scss` |
-| Grouping multi-select | Selected-ink border/fill at rest; **gold** on hover when pointer present | `grouping-dropdown.component.scss` `.grouping-row--selected` |
+| Grouping multi-select | **Primary** gold border/fill at rest (`emphasis.engaged`); gold on hover | `grouping-dropdown.component.scss` `.grouping-row--selected` |
 | Toolbar trigger idle hover | Gold ink on host + all `[data-dd-part]` slots | `hlmBtn` outline + `_toolbar-menu-trigger.scss` |
 | Toolbar trigger `data-active` + hover | **Gold** ink + wash (not primary deepening) | `_toolbar-menu-trigger.scss` |
 | Map filter triggers | Same as toolbar triggers | `map-filter-toolbar.component.scss` |

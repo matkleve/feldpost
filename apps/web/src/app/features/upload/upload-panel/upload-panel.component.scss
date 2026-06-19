@@ -275,12 +275,18 @@
     cursor: pointer;
     pointer-events: auto;
     outline: none;
+    border-radius: var(--radius-full);
 
     &:focus-visible {
-      outline: 2px solid var(--ring);
-      outline-offset: 2px;
-      border-radius: var(--radius-full);
+      outline: 2px solid var(--brand-gold);
+      outline-offset: 0;
     }
+  }
+
+  // Pinned-open group chip — gold engaged ring (chip keeps file-type tint inside).
+  // @see docs/specs/component/media/file-type-chips.md
+  &__file-type-group--expanded > &__file-type-chip-trigger:first-of-type {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--brand-gold) 48%, var(--border));
   }
 
   // Invisible shell — only member chips are visible (no card chrome).

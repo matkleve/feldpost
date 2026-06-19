@@ -10,25 +10,35 @@ Cross-component contract for **quiet interactive rows and triggers**: when the h
 
 This is **not** a sidebar-only rule. It applies to every surface that uses interaction emphasis mixins or `--menu-item-hover` / `hlmBtn` quiet variants.
 
-## Semantic model (normative)
+## Three-tier attention budget (normative)
 
-| Signal | Meaning | Ink | Background | Mixin |
-| ------ | ------- | --- | ---------- | ----- |
-| **Idle** | Rest, not selected | `--muted-foreground` (or `--foreground` on filled shells) | transparent / shell fill | — |
-| **Hover / focus-visible** | Transient invitation (wins over selected when pointer is present) | `--brand-gold` | gold ~10% mix | `@include emphasis.hover(X%)` |
-| **Selected / on** | Persistent choice (route, filter active, sort on) — **at rest only** | `--interaction-selected-ink` (= `--primary` in default theme) | selected-ink ~10% mix | `@include emphasis.selected(X%)` |
-| **Selected + hover / focus-visible** | Pointer over an already-selected control | **`--brand-gold`** (same as hover) | gold ~10% mix | `@include emphasis.hover(X%)` — **not** `emphasis.selected-hover()` |
-| **Destructive quiet row** | Irreversible action row | `--destructive` | destructive 10% / 15% (`:active`) | destructive branch in menu states |
+Gold is **scarce** — one primary focal signal (pointer + in-panel engaged rows). Do not use gold for resting toolbar/filter/toggle state.
 
-**Hover = warm gold — always, including when the control is already selected.** **Selected at rest = cool blue.** Pointer presence always applies the gold hover recipe; selected blue is the idle/on resting state only.
+| Tier | Meaning | Ink token | At-rest mixin | + pointer |
+| ---- | ------- | --------- | ------------- | --------- |
+| **Primary** | Acting on this row *now* | `--brand-gold` | `emphasis.engaged()` | `emphasis.hover()` |
+| **Secondary** | Context is set | `--interaction-selected-ink` | `emphasis.selected()` / `selected-bordered()` | `emphasis.hover()` |
+| **Tertiary** | Where you are in the product | `--interaction-nav-ink` | `emphasis.nav()` / `nav-bordered()` | `emphasis.hover()` |
 
-**Implementation note (Brix):** `emphasis.selected-hover()` MUST delegate to `emphasis.hover()` (or call sites MUST use `emphasis.hover()` for any `:hover` / `:focus-visible` regardless of selected state). Do not deepen selected controls to primary on hover.
+| Signal | Tier | Examples |
+| ------ | ---- | -------- |
+| Hover / focus-visible | **Primary** (always) | Any quiet row, any tier |
+| Filter picker `data-selected` | **Primary** | Flyout list while choosing |
+| Grouping multi-select row | **Primary** | `grouping-row--selected` |
+| Toolbar `data-active` | **Secondary** | Filter/sort/projects triggers |
+| Active sort row | **Secondary** | `sort-dropdown__option--active` |
+| Toggle `data-state=on` | **Secondary** | Map style switch, size control, upload lanes |
+| Nav active route | **Tertiary** | `.nav__link--active` |
+| Settings section rail | **Tertiary** | `.settings-overlay__section-item--active` |
+| Destructive quiet row | **Exception** | Destructive branch in menu states |
+
+**Pointer always wins:** `:hover` / `:focus-visible` on any tier → `emphasis.hover()` (gold). `emphasis.selected-hover()` MUST delegate to `emphasis.hover()`.
 
 List-row background-only token: `var(--menu-item-hover)` (= gold 8%). **Background-only hover without matching ink is a spec violation** unless a child spec documents an exception with a test oracle.
 
 ## Ink inheritance rule (blocker)
 
-When the **host** sets interaction emphasis (`emphasis.hover`, `emphasis.selected`, `emphasis.selected-hover`, or equivalent CVA quiet hover):
+When the **host** sets interaction emphasis (`emphasis.hover`, `emphasis.selected`, `emphasis.nav`, `emphasis.engaged`, or equivalent CVA quiet hover):
 
 1. Set **one** ink on the host (`color` on the interactive root).
 2. Child slots **must** use `color: inherit` (or no separate `color` rule).
@@ -42,27 +52,26 @@ Material Icons do not reliably inherit without an explicit inherit rule on the i
 | ------- | ------------ |
 | `background: var(--menu-item-hover)` only | Gold wash, muted ink — looks “broken” |
 | Host gold + child `color: var(--primary)` | Gold label + blue icon (reported nav/dropdown bug) |
-| `color: var(--foreground)` on `hlmBtn` host | Blocks `hover:text-*` / emphasis ink while background still changes |
+| Gold on toggle `on` at rest | Collapses attention budget — use secondary blue |
+| Blue on nav active route at rest | Use tertiary violet (`emphasis.nav`) |
+| `color: var(--foreground)` on `hlmBtn` host | Blocks emphasis ink while background still changes |
 | Per-child primary override “for emphasis” | Duplicates host ink; drifts on theme change |
 
 ## Component scope
 
-| Family | Spec | Host selector(s) | Child slots that must inherit |
-| ------ | ---- | ---------------- | ------------------------------ |
-| Main nav sidebar | [`sidebar.md`](../component/workspace/sidebar.md) | `.nav__link` | `.nav__icon`, `.nav__label` |
-| Menu / dropdown rows | [`dropdown-system.md`](../component/filters/dropdown-system.md) | `.option-menu-item` | `.option-menu-item__icon`, row label |
-| Toolbar dropdown triggers | [`dropdown-system.md`](../component/filters/dropdown-system.md), [`ui-primitives.dropdown-trigger.md`](../component/ui-primitives/ui-primitives.dropdown-trigger.md) | `button.*__menu-trigger`, `map-filter-toolbar__menu-trigger` | `[data-dd-part='icon'|'label'|'chevron']` |
-| Map filter toolbar | [`dropdown-system.md`](../component/filters/dropdown-system.md) § Toolbar triggers | `map-filter-toolbar__menu-trigger` | same `data-dd-part` slots |
-| Page rail | [`page-rail.md`](../component/page-rail/page-rail.md) | `.rail-nav-button`, `.rail-detail-nav-item`, `.rail-section__heading` | media icon, chevron, label |
-| Rail select list | [`page-rail.md`](../component/page-rail/page-rail.md) | `.rail-select-list__row-wrap` | row icon, label, badges |
-| Settings overlay rail | [`settings-overlay.md`](../ui/settings-overlay/settings-overlay.md) | `.settings-overlay__section-item` | `.settings-overlay__section-media`, chevron, label |
-| Metadata / property pickers | media-detail picker specs | `*__result-item`, combobox options | `*__result-icon`, `*__result-label` |
-| Detail rows | media-detail row specs | `.detail-row` hover center | icon, label, value |
-| Quiet buttons (`hlmBtn`) | [`ui-primitives.button.md`](../component/ui-primitives/ui-primitives.button.md) | `button[hlmBtn]` outline/ghost | `.material-icons`, projected label |
-| Map style switch segments | [`map-style-switch.md`](../component/map/map-style-switch.md) | `[hlmToggleGroupItem]` in `.map-style-switch` | `.material-icons` |
-| Map photo markers | [`media-marker.md`](../ui/media-marker/media-marker.md) | `.map-photo-marker__body` | thumbnail / cluster count (outline only) |
-| Media item grid tiles | [`media-item.md`](../component/media/media-item.md) | `.media-item__slot` | slot border / linked-hover from grid |
-| Search dropdown rows | search-bar item spec | `.search-dropdown-item` | icon, primary label (secondary meta may soften) |
+| Family | Tier (at rest) | Spec | Host selector(s) |
+| ------ | -------------- | ---- | ---------------- |
+| Main nav sidebar | Tertiary | [`sidebar.md`](../component/workspace/sidebar.md) | `.nav__link--active` |
+| Settings overlay rail | Tertiary | [`settings-overlay.md`](../ui/settings-overlay/settings-overlay.md) | `.settings-overlay__section-item--active` |
+| Menu / dropdown rows (hover) | Primary on pointer | [`dropdown-system.md`](../component/filters/dropdown-system.md) | `.option-menu-item` |
+| Filter picker flyout selected | Primary | [`filter-dropdown.md`](../component/filters/filter-dropdown.md) | `.filter-rule__picker-option[data-selected]` |
+| Sort active row | Secondary | [`dropdown-system.md`](../component/filters/dropdown-system.md) | `.sort-dropdown__option--active` |
+| Grouping multi-select | Primary | [`dropdown-system.md`](../component/filters/dropdown-system.md) | `.grouping-row--selected` |
+| Toolbar dropdown triggers `data-active` | Secondary | [`dropdown-system.md`](../component/filters/dropdown-system.md) | `button.*__menu-trigger` |
+| Map filter toolbar | Secondary | same | `map-filter-toolbar__menu-trigger` |
+| Toggle segments `on` | Secondary | [`map-style-switch.md`](../component/map/map-style-switch.md) | `[hlmToggleGroupItem]` |
+| Map photo markers (hover) | Primary | [`media-marker.md`](../ui/media-marker/media-marker.md) | `.map-photo-marker` hover outline |
+| Media item grid tiles (hover) | Primary | [`media-item.md`](../component/media/media-item.md) | `.media-item__slot:hover` |
 
 **Avatar badge** on the nav account row remains the **filled primary** exception (not quiet-row emphasis).
 
@@ -75,12 +84,14 @@ Feature SCSS must not reintroduce child `primary` overrides after host `emphasis
 ## Acceptance criteria
 
 - [ ] **Given** a quiet row at idle, **when** the user hovers or focus-visible activates it, **then** host background and **all** icon/label/chevron slots show **gold** ink (`--brand-gold`) with no slot left muted or blue.
-- [x] **Given** a **selected** quiet row or toggle segment, **when** the user hovers or focus-visible activates it, **then** host and all slots show **gold** ink with gold wash — **not** primary deepening.
+- [x] **Given** a **secondary** quiet row or toggle segment at rest, **when** the user hovers or focus-visible activates it, **then** host and all slots show **gold** ink with gold wash — **not** primary deepening.
+- [ ] **Given** main nav or settings section rail at rest with active route/section, **when** not hovered, **then** host and slots show **violet** ink (`--interaction-nav-ink`).
 - [x] **Given** a toolbar `hlmBtn` outline trigger on a frosted shell, **when** hovered, **then** icon, label, and chevron change ink together (no foreground lock on the host).
 - [x] **Given** an `hlmMenuItem` row in any dropdown (filter, sort, grouping, timespace panel actions), **when** hovered, **then** leading icon and label match host gold ink.
 - [ ] **Given** sandstone theme (`--primary` = gold), **when** hovering a non-selected row, **then** no blue/gold split appears on icon vs label.
 
 ## Changelog
 
+- **2026-06-17 (d)** — **Three-tier attention budget:** primary gold / secondary blue / tertiary violet; `emphasis.nav()`, `--interaction-nav-ink`.
 - **2026-06-17** — **Selected+hover = gold:** pointer over selected controls uses `emphasis.hover`, not primary deepening; scope adds map style switch, markers, media tiles.
 - **2026-06-17** — Initial contract: ink inheritance rule + cross-component scope (fixes spec drift that treated hover as sidebar-only primary ink).

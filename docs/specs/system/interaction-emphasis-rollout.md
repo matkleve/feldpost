@@ -25,12 +25,12 @@ When an interactive component spec is next edited, add **§ Interaction emphasis
 | Map style switch | [`map-style-switch.md`](../component/map/map-style-switch.md) | **done** | via toggle-group CVA |
 | Map photo markers | [`media-marker.md`](../ui/media-marker/media-marker.md) | **done** | gold hover outline |
 | Media item grid tiles | [`media-item.md`](../component/media/media-item.md) | **done** | gold slot hover |
-| Nav sidebar links | [`sidebar.md`](../component/workspace/sidebar.md) | **done** | `selected-hover` → gold via mixin |
+| Nav sidebar links | [`sidebar.md`](../component/workspace/sidebar.md) | **done** | tertiary `emphasis.nav()`; gold hover |
 | Menu rows | [`_option-menu-item-states.scss`](../../../apps/web/src/styles/_option-menu-item-states.scss) | **partial** | Mixin fix in progress; verify all consumers |
 | Dropdown toolbar triggers | [`dropdown-system.md`](../component/filters/dropdown-system.md) | **done** | `data-active` + hover = gold |
-| Map filter toolbar | [`dropdown-system.md`](../component/filters/dropdown-system.md) | **pending** | `map-filter-toolbar.component.scss` |
+| Map filter toolbar | [`dropdown-system.md`](../component/filters/dropdown-system.md) | **done** | `outline-control` + `toolbar-menu-trigger` states; container-query icon-only |
 | Page rail rows | [`page-rail.md`](../component/page-rail/page-rail.md) | **pending** | rail-detail-nav-item, rail-section child overrides |
-| Settings overlay rail | [`settings-overlay.md`](../ui/settings-overlay/settings-overlay.md) | **done** | active row hover = gold |
+| Settings overlay rail | [`settings-overlay.md`](../ui/settings-overlay/settings-overlay.md) | **done** | tertiary `nav-bordered`; gold hover |
 | Tabs (`hlmTabsTrigger`) | [`tabs-variants.ts`](../../../apps/web/src/app/shared/ui/tabs/tabs-variants.ts), [`ui-primitives.tab.md`](../component/ui-primitives/ui-primitives.tab.md) | **done** | active+hover = gold |
 | Upload resolver tray choices | [`upload-resolver-tray.md`](../component/upload/upload-resolver-tray.md) | **done** | via `selected-hover` mixin |
 | Quiet-row SCSS mixin | [`_interaction-emphasis-quiet-row.scss`](../../../apps/web/src/styles/_interaction-emphasis-quiet-row.scss) | **done** | `selected-hover` aliases `hover` |
@@ -46,7 +46,7 @@ When an interactive component spec is next edited, add **§ Interaction emphasis
 | Upload panel file row selection | [`upload-panel.md`](../component/upload/upload-panel.md) | **done** | Embedded `--selected` |
 | Projects dropdown picker rows | media-detail-inline-section spec | **done** | `--selected` in projects picker |
 | Grouping dropdown multi-select | [`dropdown-system.md`](../component/filters/dropdown-system.md) | **done** | `.grouping-row--selected` |
-| Filter dropdown rule rows | [`filter-dropdown.md`](../component/filters/filter-dropdown.md) | **done** | `emphasis.hover` on `.filter-rule`; chevron + × exceptions |
+| Filter dropdown rule rows | [`filter-dropdown.md`](../component/filters/filter-dropdown.md) | **done** | row hover gold; picker `data-selected` = primary `engaged` |
 | Media detail inline `__option--selected` | media-detail-inline-section spec | **done** | Tag chips unchanged |
 | Search / address typeahead rows | address-search, metadata pickers | **pending** | Align to ink contract |
 | `hlmBtn` secondary call sites | [`ui-primitives.button.md`](../component/ui-primitives/ui-primitives.button.md) | **done** | Migrated to `outline` (projects retry, media-empty) |
@@ -67,5 +67,6 @@ rg 'menu-trigger' apps/web/src/app --glob '*.scss' -A2 | rg 'color: var\(--foreg
 
 ## Changelog
 
+- **2026-06-17 (d)** — Three-tier budget: primary gold / secondary blue / tertiary violet (`--interaction-nav-ink`).
 - **2026-06-17 (c)** — Brix: `selected-hover` → gold; map style switch, markers, media tiles, toolbar triggers implemented.
 - **2026-06-17 (b)** — Contract change: selected+hover = gold.

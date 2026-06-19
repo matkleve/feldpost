@@ -223,10 +223,10 @@
     box-shadow: var(--interactive-focus-ring);
   }
 
-  // Active route — cool selection ink (global token)
-  // @see docs/design/state-visuals.md § Interaction emphasis — use emphasis.selected()
+  // Active route — tertiary nav ink (product “you are here”).
+  // @see docs/design/state-visuals.md § Interaction emphasis — Tertiary tier
   &--active {
-    @include emphasis.selected(10%);
+    @include emphasis.nav(10%);
   }
 
   // Selected row hover/focus — gold invitation (same as non-active hover).

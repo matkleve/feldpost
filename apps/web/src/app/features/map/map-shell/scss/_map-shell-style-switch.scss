@@ -44,4 +44,12 @@
   padding: 0;
   overflow: hidden;
   border-radius: calc(var(--radius-full) - var(--spacing-1));
+  box-shadow: none;
+
+  // Keyboard focus — inset gold ring; no Tailwind ring-offset halo on frosted track.
+  // @see docs/specs/component/map/map-style-switch.md
+  &:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--brand-gold) 72%, transparent);
+    outline-offset: -2px;
+  }
 }

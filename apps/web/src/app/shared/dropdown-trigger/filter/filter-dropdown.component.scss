@@ -165,7 +165,7 @@
 // @see docs/specs/component/filters/filter-dropdown.md
 // @see docs/design/state-visuals.md § Interaction emphasis
 .filter-rule__picker-option[data-selected='true'] {
-  @include emphasis.selected(12%);
+  @include emphasis.engaged(12%);
 }
 
 .filter-rule__remove {

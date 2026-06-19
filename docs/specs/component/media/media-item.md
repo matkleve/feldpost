@@ -271,7 +271,7 @@ Remount rules:
 
 - Canonical: [`state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis
 - Ink: [`interaction-emphasis-ink-contract.md`](../../system/interaction-emphasis-ink-contract.md)
-- [x] This component implements the contract (or documented exception below)
+- [ ] This component implements the contract (or documented exception below)
 
 | Surface | Rest (selected slot) | Hover / linked-hover | Owner |
 | --- | --- | --- | --- |

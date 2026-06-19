@@ -104,6 +104,7 @@
   --filetype-office: color-mix(in oklch, var(--muted-foreground) 75%, var(--foreground));
   --filetype-document: oklch(0.62 0.12 245);
   --interaction-selected-ink: var(--primary);
+  --interaction-nav-ink: var(--app-violet-accent);
   --app-violet-accent: oklch(0.72 0.14 290);
   --map-marker-user: var(--chart-1);
   --map-marker-search: var(--primary);
@@ -210,6 +211,7 @@
   // Selection ink for quiet controls (nav active, toggle on) — now equals --primary (blue).
   // @see docs/design/state-visuals.md § Interaction emphasis
   --interaction-selected-ink: var(--primary);
+  --interaction-nav-ink: var(--app-violet-accent);
   --filetype-spreadsheet: var(--success);
   --filetype-presentation: oklch(0.56 0.15 42);
   --filetype-office: color-mix(in oklch, var(--muted-foreground) 82%, var(--foreground));

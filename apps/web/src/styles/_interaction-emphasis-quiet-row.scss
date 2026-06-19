@@ -9,11 +9,25 @@
   color: var(--brand-gold);
 }
 
-// Persistent selected / active — --primary (blue) via --interaction-selected-ink.
-// @see docs/design/state-visuals.md § Interaction emphasis
+// Persistent selected / active — secondary tier (context set: sort on, filter active, toggle on).
+// @see docs/design/state-visuals.md § Interaction emphasis — Secondary tier
 @mixin selected($bg-percent: 10%) {
   background: color-mix(in srgb, var(--interaction-selected-ink) #{$bg-percent}, transparent);
   color: var(--interaction-selected-ink);
+}
+
+// Tertiary tier — product navigation (“where you are”: main nav, settings section rail).
+// @see docs/design/state-visuals.md § Interaction emphasis — Tertiary tier
+@mixin nav($bg-percent: 10%) {
+  background: color-mix(in srgb, var(--interaction-nav-ink) #{$bg-percent}, transparent);
+  color: var(--interaction-nav-ink);
+}
+
+// Primary tier — in-panel row the user is choosing right now (picker flyout, grouping multi-select).
+// Same gold recipe as hover; use only while the choice is the focal row in an open panel.
+// @see docs/design/state-visuals.md § Interaction emphasis — Primary tier
+@mixin engaged($bg-percent: 10%) {
+  @include hover($bg-percent);
 }
 
 // Pointer over any quiet row (including already-selected) — same gold invitation as plain hover.
@@ -22,9 +36,15 @@
   @include hover($bg-percent);
 }
 
-// Optional bordered selected row (dialogs, rails)
+// Optional bordered selected row (toolbar triggers, secondary tier)
 // @see docs/design/state-visuals.md § Interaction emphasis
 @mixin selected-bordered($bg-percent: 10%, $border-percent: 42%) {
   @include selected($bg-percent);
   border-color: color-mix(in srgb, var(--interaction-selected-ink) #{$border-percent}, var(--border));
+}
+
+// Optional bordered nav row (tertiary tier)
+@mixin nav-bordered($bg-percent: 10%, $border-percent: 42%) {
+  @include nav($bg-percent);
+  border-color: color-mix(in srgb, var(--interaction-nav-ink) #{$border-percent}, var(--border));
 }

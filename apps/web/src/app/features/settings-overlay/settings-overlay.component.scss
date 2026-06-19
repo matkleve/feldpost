@@ -198,10 +198,10 @@
     }
   }
 
-  // Selected section emphasis on the rail row — cool selection ink
+  // Selected section emphasis on the rail row — tertiary nav ink
   // @see docs/design/state-visuals.md § Interaction emphasis
   .settings-overlay__section-item--active {
-    @include emphasis.selected-bordered(10%, 42%);
+    @include emphasis.nav-bordered(10%, 42%);
   }
 
   // Selected rail row hover — gold (same as idle row hover).

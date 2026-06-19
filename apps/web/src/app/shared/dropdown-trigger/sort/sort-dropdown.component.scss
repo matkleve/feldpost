@@ -43,7 +43,7 @@
   justify-content: space-between;
 }
 
-// Stable state: active sort row — selected ink (not primary button fill).
+// Stable state: active sort row — secondary tier (sort context set, not primary focus).
 // @see docs/design/state-visuals.md § Interaction emphasis
 .sort-dropdown__option--active {
   @include emphasis.selected(10%);
