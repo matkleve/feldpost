@@ -45,7 +45,7 @@
 
   &--active:hover:not(:disabled) {
     @include emphasis.selected-hover(10%);
-    border-color: color-mix(in srgb, var(--primary) 46%, var(--border));
+    border-color: color-mix(in srgb, var(--brand-gold) 46%, var(--border));
 
     .rail-detail-nav-item__media,
     .rail-detail-nav-item__chevron {
@@ -60,7 +60,7 @@
   }
 
   &:not(.rail-detail-nav-item--active):focus-visible {
-    border-color: color-mix(in srgb, var(--primary) 46%, var(--border));
+    border-color: color-mix(in srgb, var(--brand-gold) 46%, var(--border));
     box-shadow: var(--interactive-focus-ring);
     outline: none;
   }

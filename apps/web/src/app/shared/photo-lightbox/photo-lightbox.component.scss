@@ -1,3 +1,5 @@
+@use '../../../styles/interaction-emphasis-quiet-row' as emphasis;
+
 :host {
   display: contents;
 }
@@ -23,14 +25,18 @@
   color: var(--media-chrome-foreground);
   cursor: pointer;
   z-index: 1;
-  transition: background 80ms ease-out;
+  transition:
+    background var(--motion-duration-fast) var(--motion-ease-out),
+    color var(--motion-duration-fast) var(--motion-ease-out);
 
   .material-icons {
     font-size: var(--font-size-xl);
   }
 
-  &:hover {
-    background: var(--media-chrome-control-bg-hover);
+  &:hover,
+  &:focus-visible {
+    @include emphasis.hover(12%);
+    outline: none;
   }
 }
 

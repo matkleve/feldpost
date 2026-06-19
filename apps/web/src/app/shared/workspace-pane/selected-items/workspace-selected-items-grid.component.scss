@@ -1,5 +1,7 @@
 // Flex child of .workspace-pane — scroll owner for selected-items tab
 // @see docs/specs/ui/workspace/workspace-pane.md
+@use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
+
 :host {
   min-height: 0;
   min-width: 0;
@@ -108,12 +110,15 @@
   font-size: var(--font-size-sm);
   cursor: pointer;
   transition:
-    background 150ms ease,
-    border-color 150ms ease;
+    background var(--motion-duration-fast) var(--motion-ease-out),
+    border-color var(--motion-duration-fast) var(--motion-ease-out),
+    color var(--motion-duration-fast) var(--motion-ease-out);
 
-  &:hover {
-    background: var(--popover);
-    border-color: var(--primary);
+  &:hover,
+  &:focus-visible {
+    @include emphasis.hover(10%);
+    border-color: color-mix(in srgb, var(--brand-gold) 42%, var(--border));
+    outline: none;
   }
 }
 

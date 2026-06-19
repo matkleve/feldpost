@@ -354,7 +354,11 @@
   }
 
   &:hover {
-    background: color-mix(in srgb, var(--primary) 22%, var(--card));
+    @include emphasis.hover(10%);
+
+    .material-icons {
+      color: inherit;
+    }
   }
 }
 

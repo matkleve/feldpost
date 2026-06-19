@@ -1,3 +1,5 @@
+@use '../../../styles/interaction-emphasis-quiet-row' as emphasis;
+
 .group-header {
   display: flex;
   align-items: center;
@@ -14,15 +16,23 @@
   top: 0;
   z-index: 1;
   border-bottom: 1px solid var(--border);
-  transition: background 150ms ease;
+  transition:
+    background var(--motion-duration-fast) var(--motion-ease-out),
+    color var(--motion-duration-fast) var(--motion-ease-out);
 
   &:hover {
-    background: var(--group-header-hover-bg, var(--card));
+    @include emphasis.hover(10%);
+
+    .group-header__chevron,
+    .group-header__count {
+      color: inherit;
+    }
   }
 
   &:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: -2px;
+    outline: none;
+    @include emphasis.hover(10%);
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--brand-gold) 40%, transparent);
   }
 }
 

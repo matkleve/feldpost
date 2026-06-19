@@ -1,5 +1,7 @@
 // Flex child of .workspace-pane — header row; :host spans full width so background fills edge-to-edge
 // @see docs/specs/ui/workspace/workspace-pane.md
+@use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
+
 :host {
   display: block;
   flex-shrink: 0;
@@ -53,8 +55,8 @@
 .pane-header__color-btn:hover,
 .pane-header__color-btn:focus-visible,
 .pane-header__color-btn[aria-expanded='true'] {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 18%, transparent);
+  border-color: color-mix(in srgb, var(--brand-gold) 55%, var(--border));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-gold) 22%, transparent);
 }
 
 .pane-header__color-swatch {
@@ -95,15 +97,21 @@
 .pane-header__title-edit {
   flex-shrink: 0;
   font-size: var(--font-size-md);
-  color: var(--primary);
+  color: var(--muted-foreground);
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--motion-duration-fast) var(--motion-ease-out);
+  transition:
+    opacity var(--motion-duration-fast) var(--motion-ease-out),
+    color var(--motion-duration-fast) var(--motion-ease-out);
 }
 
 .pane-header__title-btn:hover,
 .pane-header__title-btn:focus-visible {
-  color: var(--primary);
+  @include emphasis.hover(10%);
+
+  .pane-header__title-edit {
+    color: inherit;
+  }
 }
 
 .pane-header:has(.pane-header__color-btn) .pane-header__title-btn,
@@ -153,9 +161,9 @@
     background var(--motion-duration-fast) var(--motion-ease-out);
 
   &:focus-visible {
-    border-color: var(--primary);
-    background: color-mix(in srgb, var(--primary) 18%, var(--card));
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 20%, transparent);
+    border-color: color-mix(in srgb, var(--brand-gold) 55%, var(--border));
+    background: color-mix(in srgb, var(--brand-gold) 12%, var(--card));
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-gold) 20%, transparent);
   }
 }
 
@@ -172,10 +180,14 @@
   border-radius: var(--radius-sm);
   cursor: pointer;
   color: var(--muted-foreground);
-  transition: background var(--motion-duration-fast) var(--motion-ease-out);
+  transition:
+    background var(--motion-duration-fast) var(--motion-ease-out),
+    color var(--motion-duration-fast) var(--motion-ease-out);
 
-  &:hover {
-    background: color-mix(in srgb, var(--muted-foreground) 12%, transparent);
+  &:hover,
+  &:focus-visible {
+    @include emphasis.hover(10%);
+    outline: none;
   }
 
   .material-icons {

@@ -1,6 +1,7 @@
 // Location add/search — reuses address-search row + dropdown chrome; local rules only for collapsed/static rows.
 // @see docs/specs/ui/media-detail/media-detail-location-section.md
 // @see ../address-search/address-search.component.scss
+@use '../../../../../styles/interaction-emphasis-quiet-row' as emphasis;
 
 .media-location-add-search__collapsed {
   cursor: pointer;
@@ -74,6 +75,7 @@
 
   &:hover {
     color: var(--foreground);
+    @include emphasis.hover(10%);
   }
 }
 

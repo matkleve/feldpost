@@ -295,8 +295,8 @@
   transition: border-color 120ms ease, background-color 120ms ease;
 
   &--over {
-    border-color: var(--primary);
-    background-color: var(--menu-item-hover);
+    border-color: color-mix(in srgb, var(--brand-gold) 55%, var(--border));
+    background: color-mix(in srgb, var(--brand-gold) 10%, transparent);
   }
 }
 

@@ -271,7 +271,7 @@ Remount rules:
 
 - Canonical: [`state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis (three-tier budget)
 - Ink: [`interaction-emphasis-ink-contract.md`](../../system/interaction-emphasis-ink-contract.md)
-- [ ] This component implements the contract (or documented exception below)
+- [x] This component implements the contract (or documented exception below)
 
 | Surface | Tier | Rest | Hover / linked-hover | Owner |
 | --- | --- | --- | --- | --- |
@@ -343,9 +343,9 @@ sequenceDiagram
 - [ ] `MediaItemComponent` exposes no boolean visual-state inputs.
 - [ ] Public input contract includes `mediaId`, `state`, and non-visual data (`item`, `mode`, `actionContextId`).
 - [ ] Selected emphasis is rendered on `.media-item__slot` only (not the square grid host).
-- [ ] **Given** `state='selected'` at rest, **when** the slot is not hovered, **then** `.media-item__slot--selected` shows **secondary** `--interaction-selected-ink` ring (not primary gold).
-- [ ] **Given** pointer over the slot, **when** hovered or focus-within, **then** gold emphasis uses `box-shadow` / `border-color` only — **no** CSS `outline` on the rounded slot.
-- [ ] **Given** parent passes `linkedHoveredMediaIds` containing this item's id, **when** the tile is not pointer-hovered, **then** the slot receives `.media-item__slot--linked-hover` with primary gold emphasis (same as hover).
+- [x] **Given** `state='selected'` at rest, **when** the slot is not hovered, **then** `.media-item__slot--selected` shows **secondary** `--interaction-selected-ink` ring (not primary gold).
+- [x] **Given** pointer over the slot, **when** hovered or focus-within, **then** gold emphasis uses `box-shadow` / `border-color` only — **no** CSS `outline` on the rounded slot.
+- [x] **Given** parent passes `linkedHoveredMediaIds` containing this item's id, **when** the tile is not pointer-hovered, **then** the slot receives `.media-item__slot--linked-hover` with primary gold emphasis (same as hover).
 - [ ] Upload overlay z-order is above media content and below quiet actions.
 - [ ] Quiet actions reveal remains deterministic and keyboard accessible.
 - [ ] `MediaItemComponent` does not proxy or await `MediaDisplayComponent` internal states.
