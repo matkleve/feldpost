@@ -1,6 +1,8 @@
 // Grid: host reserves a fixed square cell; inner slot animates ratio without reflow.
 // Row: host height comes from item-grid lane.
 // @see docs/specs/component/media/media-item.md#file-type-aspect-ratio-policy
+@use '../../../styles/interaction-emphasis-quiet-row' as emphasis;
+
 :host {
   display: block;
   position: relative;
@@ -139,9 +141,16 @@
     box-shadow var(--motion-duration-fast) var(--motion-ease-out);
 }
 
-.media-item__surface--row:hover,
+.media-item__surface--row:hover {
+  @include emphasis.hover(10%);
+}
+
 :host([data-state='selected']) .media-item__surface--row {
-  background: var(--action-hover);
+  @include emphasis.selected(10%);
+}
+
+:host([data-state='selected']) .media-item__surface--row:hover {
+  @include emphasis.selected-hover(10%);
 }
 
 // Inset ring avoids border box growth when toggling selection.

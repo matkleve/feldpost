@@ -45,8 +45,8 @@
     box-shadow var(--motion-duration-fast) var(--motion-ease-out);
 
   &:hover:not(:focus-within):not(.search-bar--open) {
-    background: color-mix(in srgb, var(--primary) 8%, color-mix(in srgb, var(--card) 85%, transparent));
-    border-color: color-mix(in srgb, var(--primary) 42%, color-mix(in srgb, var(--border) 50%, transparent));
+    background: color-mix(in srgb, var(--brand-gold) 10%, color-mix(in srgb, var(--card) 85%, transparent));
+    border-color: color-mix(in srgb, var(--brand-gold) 42%, color-mix(in srgb, var(--border) 50%, transparent));
   }
 
   &:focus-within {
@@ -116,7 +116,7 @@
 
 .search-bar:hover:not(:focus-within):not(.search-bar--open) .search-bar__icon,
 .search-bar:focus-within .search-bar__icon {
-  color: var(--primary);
+  color: var(--brand-gold);
 }
 
 // Trailing clear column: inset square control with outer padding against the chrome edge.

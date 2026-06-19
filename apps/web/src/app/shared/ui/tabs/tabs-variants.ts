@@ -6,6 +6,14 @@
 
 import { cva, type VariantProps } from 'class-variance-authority';
 
+/** Inactive tab — gold invitation hover/focus (@see docs/design/state-visuals.md). */
+const tabQuietEmphasis =
+  'hover:bg-[color:color-mix(in_srgb,var(--brand-gold)_10%,transparent)] hover:text-[color:var(--brand-gold)] focus-visible:bg-[color:color-mix(in_srgb,var(--brand-gold)_10%,transparent)] focus-visible:text-[color:var(--brand-gold)]';
+
+/** Active tab + hover/focus — primary selected-hover (@see interaction-emphasis-ink-contract). */
+const tabSelectedHover =
+  'data-[state=active]:hover:bg-[color:color-mix(in_srgb,var(--primary)_10%,transparent)] data-[state=active]:hover:text-primary data-[state=active]:focus-visible:bg-[color:color-mix(in_srgb,var(--primary)_10%,transparent)] data-[state=active]:focus-visible:text-primary';
+
 export type TabsListVariantProps = VariantProps<typeof tabsListVariants>;
 
 /** Tab list chrome (muted rail or line underline row). */
@@ -31,9 +39,9 @@ export const tabsTriggerVariants = cva(
     variants: {
       variant: {
         default:
-          'rounded-sm px-3 py-1.5 text-muted-foreground hover:text-primary data-[state=active]:bg-[color-mix(in_srgb,var(--interaction-selected-ink)_10%,transparent)] data-[state=active]:text-[var(--interaction-selected-ink)] data-[state=active]:shadow-sm data-[state=active]:hover:text-primary',
+          `rounded-sm px-3 py-1.5 text-muted-foreground ${tabQuietEmphasis} data-[state=active]:bg-[color-mix(in_srgb,var(--interaction-selected-ink)_10%,transparent)] data-[state=active]:text-[var(--interaction-selected-ink)] data-[state=active]:shadow-sm ${tabSelectedHover}`,
         line:
-          'relative rounded-none border border-transparent px-4 pb-3 pt-2 text-muted-foreground hover:text-primary data-[state=active]:bg-transparent data-[state=active]:text-[var(--interaction-selected-ink)] data-[state=active]:shadow-none data-[state=active]:hover:text-primary after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-[var(--interaction-selected-ink)] after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100',
+          `relative rounded-none border border-transparent px-4 pb-3 pt-2 text-muted-foreground ${tabQuietEmphasis} data-[state=active]:bg-transparent data-[state=active]:text-[var(--interaction-selected-ink)] data-[state=active]:shadow-none ${tabSelectedHover} after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-[var(--interaction-selected-ink)] after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100`,
       },
     },
     defaultVariants: {

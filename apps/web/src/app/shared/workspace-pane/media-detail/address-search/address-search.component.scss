@@ -43,14 +43,14 @@
   transition: color 80ms ease-out;
 }
 
-// Inactive row hover — address value follows detail-row center (icon, label, value → primary).
-// @see docs/specs/ui/workspace/workspace-pane.md
+// Inactive row hover — inherit gold ink from detail-row center emphasis.
+// @see docs/specs/system/interaction-emphasis-ink-contract.md
 .address-search__row.detail-row:hover:not(.detail-row--editing) .address-search__trigger-text,
 .address-search__row.detail-row:focus-within:not(.detail-row--editing) .address-search__trigger-text {
-  color: var(--primary);
+  color: inherit;
 
   .address-search__placeholder {
-    color: var(--primary);
+    color: inherit;
   }
 }
 

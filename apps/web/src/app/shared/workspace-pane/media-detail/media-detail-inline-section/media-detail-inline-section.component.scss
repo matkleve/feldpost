@@ -213,9 +213,12 @@
       font-size: var(--font-size-md);
     }
 
-    &:hover:not(:disabled) {
-      background: var(--action-hover);
-      color: var(--menu-item-text);
+  &:hover:not(:disabled) {
+      @include emphasis.hover(10%);
+
+      .material-icons {
+        color: inherit;
+      }
     }
 
     &:disabled {

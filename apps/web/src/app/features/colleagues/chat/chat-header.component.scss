@@ -1,3 +1,5 @@
+@use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
+
 .chat-header {
   container-type: inline-size;
   container-name: chat-header;
@@ -60,8 +62,7 @@
   &:hover,
   &:focus-visible {
     outline: none;
-    background: var(--action-hover);
-    color: var(--primary);
+    @include emphasis.hover(10%);
   }
 }
 
@@ -108,16 +109,28 @@
     font-size: var(--font-size-md);
   }
 
-  &:hover,
-  &:focus-visible {
-    color: var(--primary);
-    background: var(--action-hover);
+  &:hover:not([data-active='true']),
+  &:focus-visible:not([data-active='true']) {
+    @include emphasis.hover(10%);
+
+    .material-icons {
+      color: inherit;
+    }
   }
 
   &[data-active='true'] {
-    border-color: var(--primary);
-    background: var(--action-hover);
-    color: var(--primary);
+    @include emphasis.selected(10%);
+    border-color: color-mix(in srgb, var(--interaction-selected-ink) 42%, var(--border));
+  }
+
+  &[data-active='true']:hover,
+  &[data-active='true']:focus-visible {
+    @include emphasis.selected-hover(10%);
+    border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
+
+    .material-icons {
+      color: inherit;
+    }
   }
 }
 
@@ -130,9 +143,22 @@
   }
 
   &[data-active='true'] {
-    border-color: var(--primary);
-    background: var(--action-hover);
-    color: var(--primary);
+    @include emphasis.selected(10%);
+    border-color: color-mix(in srgb, var(--interaction-selected-ink) 42%, var(--border));
+
+    .material-icons {
+      color: inherit;
+    }
+  }
+
+  &[data-active='true']:hover,
+  &[data-active='true']:focus-visible {
+    @include emphasis.selected-hover(10%);
+    border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
+
+    .material-icons {
+      color: inherit;
+    }
   }
 }
 

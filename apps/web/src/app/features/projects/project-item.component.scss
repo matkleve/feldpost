@@ -1,6 +1,8 @@
 // Grid: host reserves a fixed square cell; frame fills slot geometry.
 // Row: host height comes from item-grid lane.
 // @see docs/specs/component/project/project-item.md#visual-behavior-contract
+@use '../../../styles/interaction-emphasis-quiet-row' as emphasis;
+
 :host {
   display: block;
   position: relative;
@@ -149,9 +151,17 @@
 }
 
 .project-item__surface--row:hover,
-.project-item__surface--row:focus-within,
+.project-item__surface--row:focus-within {
+  @include emphasis.hover(10%);
+}
+
 :host([data-state='selected']) .project-item__surface--row {
-  background: var(--action-hover);
+  @include emphasis.selected(10%);
+}
+
+:host([data-state='selected']) .project-item__surface--row:hover,
+:host([data-state='selected']) .project-item__surface--row:focus-within {
+  @include emphasis.selected-hover(10%);
 }
 
 .project-item__row-chip {

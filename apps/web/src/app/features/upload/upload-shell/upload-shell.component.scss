@@ -88,12 +88,12 @@ button.map-upload-btn {
 
   &:hover,
   &:focus-visible {
-    color: var(--primary);
+    color: var(--brand-gold);
     @include frosted-chrome.outline-control-hover;
     transform: scale(1.04);
 
     .material-icons {
-      color: var(--primary);
+      color: inherit;
     }
   }
 
@@ -112,10 +112,10 @@ button.map-upload-btn {
   &--active:hover,
   &--active:focus-visible {
     color: var(--primary);
-    @include frosted-chrome.outline-control-hover;
+    @include frosted-chrome.outline-control-selected-hover;
 
     .material-icons {
-      color: var(--primary);
+      color: inherit;
     }
   }
 

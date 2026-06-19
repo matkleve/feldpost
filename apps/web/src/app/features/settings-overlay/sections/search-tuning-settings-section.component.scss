@@ -1,4 +1,5 @@
 @use '../../../../styles/range-input-accent';
+@use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
 
 // Column layout for search tuning admin form and sticky actions
 // @see docs/specs/ui/search-bar/search-tuning-settings.md
@@ -51,7 +52,7 @@
 
   &:hover,
   &:focus-visible {
-    background: color-mix(in srgb, var(--primary) 10%, transparent); // emphasis-ok: background-only hover; no token for 10% bg-only; color stays foreground
+    @include emphasis.hover(10%);
   }
 
   &:focus-visible {
