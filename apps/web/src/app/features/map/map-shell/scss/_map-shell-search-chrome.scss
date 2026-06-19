@@ -7,6 +7,9 @@
     var(--map-upload-chrome-inline, calc(5rem + var(--spacing-1)))
   );
   --search-bar-viewport-inset: var(--spacing-3);
+  // Vertical gap (search bar → triggers) matches horizontal trigger gap — inherited by map-filter-toolbar.
+  // @see docs/specs/component/map/map-filter-toolbar.md
+  --map-search-chrome-stack-gap: var(--spacing-4);
 
   position: absolute;
   top: var(--spacing-3);
@@ -17,7 +20,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--spacing-2);
+  gap: var(--map-search-chrome-stack-gap);
   box-sizing: border-box;
 
   @media (max-width: 47.9375rem) {
