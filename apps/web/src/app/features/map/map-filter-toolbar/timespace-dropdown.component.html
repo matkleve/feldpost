@@ -1,6 +1,7 @@
 <div
   #chart
   class="timespace-dropdown__chart"
+  [class.timespace-dropdown__chart--engaged]="isDragging()"
   role="slider"
   [attr.aria-label]="t('map.filter.timespace.chartAria', 'Media timeline')"
   [attr.aria-valuemin]="0"
@@ -28,7 +29,8 @@
     @if (selectionOverlay(); as overlay) {
       <div
         class="timespace-dropdown__selection"
-        [class.timespace-dropdown__selection--active]="selectionIsActive()"
+        [class.timespace-dropdown__selection--committed]="hasActiveFilter() && !isDragging()"
+        [class.timespace-dropdown__selection--engaged]="isDragging()"
         [style.--selection-left]="overlay.leftPct"
         [style.--selection-width]="overlay.widthPct"
         aria-hidden="true"

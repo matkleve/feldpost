@@ -42,7 +42,7 @@
     box-sizing: border-box;
 
     &:focus-within {
-      border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
+      border-color: color-mix(in srgb, var(--brand-gold) 42%, var(--border));
       box-shadow: var(--interactive-focus-ring);
     }
   }

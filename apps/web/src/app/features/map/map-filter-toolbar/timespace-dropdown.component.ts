@@ -140,9 +140,8 @@ export class TimespaceDropdownComponent implements OnInit {
     );
   });
 
-  readonly selectionIsActive = computed(
-    () => this.hasActiveFilter() || this.dragStartRatio() != null,
-  );
+  /** Pointer drag on histogram — primary gold emphasis for the in-progress range. */
+  readonly isDragging = computed(() => this.dragStartRatio() != null);
 
   protected barHeightPx(bin: TimespaceBin): number {
     if (bin.count <= 0) {

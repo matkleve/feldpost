@@ -49,6 +49,12 @@
     }
   }
 
+  // Histogram engaged — pointer drag in progress (primary gold track border).
+  // @see docs/specs/component/map/map-filter-toolbar.md § Timespace histogram
+  .timespace-dropdown__chart--engaged {
+    border-color: color-mix(in srgb, var(--brand-gold) 55%, var(--border));
+  }
+
   // Bar row — inset spacing-2 from chart border; bars align to bottom edge.
   // @see docs/specs/component/map/map-filter-toolbar.md
   .timespace-dropdown__bars {
@@ -98,11 +104,19 @@
     z-index: 1;
   }
 
-  // Committed / interacting selection uses primary emphasis.
-  // @see docs/specs/component/map/map-filter-toolbar.md
-  .timespace-dropdown__selection--active {
-    border-color: var(--primary);
-    background: color-mix(in srgb, var(--primary) 14%, transparent);
+  // Committed time window at rest — secondary selected ink (context set).
+  // @see docs/specs/component/map/map-filter-toolbar.md § Timespace histogram
+  .timespace-dropdown__selection--committed {
+    border-color: var(--interaction-selected-ink);
+    background: color-mix(in srgb, var(--interaction-selected-ink) 14%, transparent);
+  }
+
+  // In-progress drag / brush — primary gold (user is acting on the range now).
+  // @see docs/specs/component/map/map-filter-toolbar.md § Timespace histogram
+  .timespace-dropdown__selection--engaged {
+    border-color: color-mix(in srgb, var(--brand-gold) 78%, var(--border));
+    background: color-mix(in srgb, var(--brand-gold) 16%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--brand-gold) 28%, transparent);
   }
 
   // Footer — reset (left) and matched item count (right-bottom).

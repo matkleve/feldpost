@@ -28,6 +28,17 @@ Horizontal trigger row, left-aligned under `ss-search-bar` inside `.map-search-c
 
 **Container query:** `:host` declares `container-type: inline-size` + `container-name: map-filter-toolbar`; parent `.map-search-chrome > app-map-filter-toolbar` is `width: 100%` so icon-only collapse tracks search column width (see [`workspace-pane.md`](../../ui/workspace/workspace-pane.md) breakpoint contract).
 
+### Timespace histogram (`app-timespace-dropdown`)
+
+| Surface | Tier | At rest | Engaged (drag / focus) | Owner |
+| --- | --- | --- | --- | --- |
+| `.timespace-dropdown__selection--committed` | **Secondary** | selected-ink border + wash | — | `timespace-dropdown.component.scss` |
+| `.timespace-dropdown__selection--engaged` | **Primary** | — | gold border + wash + outer ring | same |
+| `.timespace-dropdown__chart--engaged` | **Primary** | — | gold track border during pointer drag | same |
+| `app-compact-date-field` `:focus-within` | **Primary** | neutral border | gold border + focus ring | `compact-date-field.component.scss` |
+
+**Normative:** Histogram brush uses **primary gold** only while `isDragging()`; committed range at rest uses **secondary** selected ink. Date fields use gold on `:focus-within`, not `--primary`.
+
 ## File Map
 
 | File | Purpose |
