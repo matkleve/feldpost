@@ -12,7 +12,7 @@ import { MapShellInstanceService } from '../component/map-shell-instance.service
 import { WorkspacePaneObserverAdapter } from '../../../../core/workspace-pane/workspace-pane-observer.adapter';
 import { PhotoMarkerLifecycleService } from '../markers/photo-marker-lifecycle.service';
 import { MapLocationPickService } from './map-location-pick.service';
-import type { MapLatLng, MapMouseEvent, MapPoint } from '../leaflet/map-leaflet.service';
+import type { MapLatLng, MapMouseEvent } from '../leaflet/map-leaflet.service';
 
 // ── Module-level constants (migrated from MapShellComponent static fields) ──
 
@@ -48,20 +48,10 @@ export class MapClickHandlerService {
 
   private ctx: ClickHandlerContext | null = null;
 
-  // ── State fields (migrated from MapShellComponent) ───────────────────────
-
-  private pendingSecondaryPress: {
-    startPoint: MapPoint;
-    startLatLng: MapLatLng;
-    startClientX: number;
-    startClientY: number;
-    additive: boolean;
-  } | null = null;
+  // ── State fields ──────────────────────────────────────────────────────────
 
   private lastSecondaryContextClickAt: number | null = null;
   private lastSecondaryContextClickPos: { x: number; y: number } | null = null;
-  private nativeContextMenuBypassUntil = 0;
-  private markerContextMenuSuppressUntil = 0;
 
   // ── Bound container handler (returned for addEventListener/removeEventListener) ──
 
@@ -78,8 +68,8 @@ export class MapClickHandlerService {
     }
 
     if (this.shouldAllowNativeContextMenu(event)) {
-      this.nativeContextMenuBypassUntil = Date.now() + CONTEXT_MENU_NATIVE_BYPASS_TTL_MS;
-      this.pendingSecondaryPress = null;
+      this.instance.nativeContextMenuBypassUntil = Date.now() + CONTEXT_MENU_NATIVE_BYPASS_TTL_MS;
+      this.instance.pendingSecondaryPress = null;
       this.state.closeAllContextMenus();
       return;
     }
@@ -102,20 +92,12 @@ export class MapClickHandlerService {
     return this._containerContextMenuHandler;
   }
 
-  /**
-   * Called by `markerBindingService` to suppress the next marker context menu
-   * for the given number of milliseconds.
-   */
-  suppressMarkerContextMenuFor(ms: number): void {
-    this.markerContextMenuSuppressUntil = Date.now() + ms;
-  }
-
   suppressMapClickFor(ms: number): void {
     this.instance.suppressMapClickUntil = Date.now() + ms;
   }
 
   clearPendingSecondaryPress(): void {
-    this.pendingSecondaryPress = null;
+    this.instance.pendingSecondaryPress = null;
   }
 
   clearActiveRadiusSelection(): void {
@@ -132,12 +114,12 @@ export class MapClickHandlerService {
    * Must remain PUBLIC — called by `MapMarkerBindingService`.
    */
   consumeNativeContextMenuBypass(): boolean {
-    if (Date.now() > this.nativeContextMenuBypassUntil) {
-      this.nativeContextMenuBypassUntil = 0;
+    if (Date.now() > this.instance.nativeContextMenuBypassUntil) {
+      this.instance.nativeContextMenuBypassUntil = 0;
       return false;
     }
 
-    this.nativeContextMenuBypassUntil = 0;
+    this.instance.nativeContextMenuBypassUntil = 0;
     return true;
   }
 
@@ -195,7 +177,7 @@ export class MapClickHandlerService {
       return;
     }
 
-    this.pendingSecondaryPress = {
+    this.instance.pendingSecondaryPress = {
       startPoint: map.mouseEventToContainerPoint(event.originalEvent),
       startLatLng: event.latlng,
       startClientX: event.originalEvent.clientX,
@@ -207,21 +189,21 @@ export class MapClickHandlerService {
 
   handleMapMouseMove(event: MapMouseEvent): void {
     const map = this.instance.map;
-    if (!map || !this.pendingSecondaryPress || this.radiusDrawingService.isDrawActive()) {
+    if (!map || !this.instance.pendingSecondaryPress || this.radiusDrawingService.isDrawActive()) {
       return;
     }
 
     const currentPoint = map.mouseEventToContainerPoint(event.originalEvent);
-    const dx = currentPoint.x - this.pendingSecondaryPress.startPoint.x;
-    const dy = currentPoint.y - this.pendingSecondaryPress.startPoint.y;
+    const dx = currentPoint.x - this.instance.pendingSecondaryPress.startPoint.x;
+    const dy = currentPoint.y - this.instance.pendingSecondaryPress.startPoint.y;
     const movedPx = Math.hypot(dx, dy);
 
     if (movedPx < CONTEXT_MENU_DRAG_THRESHOLD_PX) {
       return;
     }
 
-    const { startLatLng, additive } = this.pendingSecondaryPress;
-    this.pendingSecondaryPress = null;
+    const { startLatLng, additive } = this.instance.pendingSecondaryPress;
+    this.instance.pendingSecondaryPress = null;
     this.radiusDrawingService.startDraw(startLatLng, additive);
     this.radiusDrawingService.updateDraft(event.latlng);
   }
@@ -234,23 +216,23 @@ export class MapClickHandlerService {
     event.originalEvent.preventDefault();
 
     if (this.isMarkerDomTarget(event.originalEvent)) {
-      this.pendingSecondaryPress = null;
+      this.instance.pendingSecondaryPress = null;
       return;
     }
 
-    if (Date.now() <= this.markerContextMenuSuppressUntil) {
-      this.pendingSecondaryPress = null;
+    if (Date.now() <= this.instance.markerContextMenuSuppressUntil) {
+      this.instance.pendingSecondaryPress = null;
       return;
     }
 
     // Short secondary click should open the context menu. Radius drawing already
     // clears pendingSecondaryPress during mousemove once drag threshold is crossed.
-    if (!this.pendingSecondaryPress || this.radiusDrawingService.isDrawActive()) {
+    if (!this.instance.pendingSecondaryPress || this.radiusDrawingService.isDrawActive()) {
       return;
     }
 
-    const { startLatLng, startClientX, startClientY } = this.pendingSecondaryPress;
-    this.pendingSecondaryPress = null;
+    const { startLatLng, startClientX, startClientY } = this.instance.pendingSecondaryPress;
+    this.instance.pendingSecondaryPress = null;
     this.openContextMenuForShortSecondaryClick(startLatLng, startClientX, startClientY);
   }
 
@@ -260,12 +242,12 @@ export class MapClickHandlerService {
     }
 
     if (this.isMarkerDomTarget(event.originalEvent)) {
-      this.pendingSecondaryPress = null;
+      this.instance.pendingSecondaryPress = null;
       return;
     }
 
-    if (Date.now() <= this.markerContextMenuSuppressUntil) {
-      this.pendingSecondaryPress = null;
+    if (Date.now() <= this.instance.markerContextMenuSuppressUntil) {
+      this.instance.pendingSecondaryPress = null;
       return;
     }
 
@@ -274,12 +256,12 @@ export class MapClickHandlerService {
 
     // Mouse-up opens the menu for short right-click interactions. Keep this as a
     // fallback for platforms where only contextmenu is emitted.
-    if (this.radiusDrawingService.isDrawActive() || !this.pendingSecondaryPress) {
+    if (this.radiusDrawingService.isDrawActive() || !this.instance.pendingSecondaryPress) {
       return;
     }
 
-    const { startLatLng, startClientX, startClientY } = this.pendingSecondaryPress;
-    this.pendingSecondaryPress = null;
+    const { startLatLng, startClientX, startClientY } = this.instance.pendingSecondaryPress;
+    this.instance.pendingSecondaryPress = null;
     this.openContextMenuForShortSecondaryClick(startLatLng, startClientX, startClientY);
   }
 

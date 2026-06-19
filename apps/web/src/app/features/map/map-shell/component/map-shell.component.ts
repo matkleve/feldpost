@@ -503,11 +503,6 @@ export class MapShellComponent implements OnDestroy {
     this.workspacePaneShellHost.openDetailView(mediaId);
   }
 
-  private patchDetailMediaId(mediaId: string | null): void {
-    this.state.setDetailMediaId(mediaId);
-    this.workspacePaneObserver.setDetailImageId(mediaId);
-  }
-
   onZoomToLocation(event: { mediaId: string; lat: number; lng: number; zoomMode?: 'house' | 'street' }): void {
     this.mapViewFlyService.onZoomToLocation(event);
   }
@@ -558,12 +553,6 @@ export class MapShellComponent implements OnDestroy {
 
     this.markerBindingService.bind({
       handlePhotoMarkerClick: (markerKey, event) => this.photoMarkerLifecycleService.handlePhotoMarkerClick(markerKey, event),
-      consumeNativeContextMenuBypass: () => this.mapClickHandlerService.consumeNativeContextMenuBypass(),
-      clearPendingSecondaryPress: () => this.mapClickHandlerService.clearPendingSecondaryPress(),
-      openRadiusContextMenuAt: (latlng, x, y) => this.mapContextMenuOpenService.openRadiusContextMenuAt(latlng, x, y),
-      clearActiveRadiusSelection: () => this.mapClickHandlerService.clearActiveRadiusSelection(),
-      openMarkerContextMenu: (markerKey, event) => this.mapContextMenuOpenService.openMarkerContextMenu(markerKey, event),
-      suppressMarkerContextMenuFor: (ms) => this.mapClickHandlerService.suppressMarkerContextMenuFor(ms),
     });
 
     this.mapContextMenuHandlerService.bind({
@@ -572,7 +561,6 @@ export class MapShellComponent implements OnDestroy {
     });
 
     this.photoMarkerLifecycleService.bind({
-      patchDetailMediaId: (id) => this.patchDetailMediaId(id),
       openDetailView: (mediaId) => this.openDetailView(mediaId),
     });
 

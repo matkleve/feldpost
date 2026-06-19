@@ -15,6 +15,7 @@ import { MapMarkerSelectionService } from './map-marker-selection.service';
 import { MapMarkerBindingService } from './map-marker-binding.service';
 import { MapShellState } from '../component/map-shell.state';
 import { MapShellInstanceService } from '../component/map-shell-instance.service';
+import { WorkspacePaneObserverAdapter } from '../../../../core/workspace-pane/workspace-pane-observer.adapter';
 import {
   registerMarkerKeyForMedia,
   getMarkerKeysForMedia,
@@ -22,7 +23,6 @@ import {
 } from './marker-media-index.helpers';
 
 export interface PhotoMarkerLifecycleContext {
-  patchDetailMediaId(id: string | null): void;
   openDetailView(mediaId: string): void;
 }
 
@@ -36,12 +36,18 @@ export class PhotoMarkerLifecycleService {
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
   private readonly state = inject(MapShellState);
   private readonly instance = inject(MapShellInstanceService);
+  private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
 
   private ctx: PhotoMarkerLifecycleContext | null = null;
   private draftMediaMarkerLeaflet: MapMarker | null = null;
 
   bind(ctx: PhotoMarkerLifecycleContext): void {
     this.ctx = ctx;
+  }
+
+  private patchDetailMediaId(mediaId: string | null): void {
+    this.state.setDetailMediaId(mediaId);
+    this.workspacePaneObserver.setDetailImageId(mediaId);
   }
 
   // ---------------------------------------------------------------------------
@@ -264,7 +270,7 @@ export class PhotoMarkerLifecycleService {
     selectedKeys.add(markerKey);
     this.markerSelectionService.setSelectedMarkerKeys(selectedKeys);
     void this.markerBindingService.addMarkerCellsToSelection(cells, zoom);
-    this.ctx!.patchDetailMediaId(null);
+    this.patchDetailMediaId(null);
   }
 
   private handleExclusiveMarkerSelection(
@@ -283,7 +289,7 @@ export class PhotoMarkerLifecycleService {
     }
 
     void this.selectClusterImages(cells, zoom);
-    this.ctx!.patchDetailMediaId(null);
+    this.patchDetailMediaId(null);
   }
 
   private async selectClusterImages(

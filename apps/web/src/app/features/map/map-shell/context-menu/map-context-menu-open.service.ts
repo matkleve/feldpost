@@ -2,7 +2,6 @@
 import { Injectable, inject } from '@angular/core';
 import { MapContextActionsService } from './map-context-actions.service';
 import { MapShellState } from '../component/map-shell.state';
-import { MapClickHandlerService } from '../handlers/map-click-handler.service';
 import { MapShellInstanceService } from '../component/map-shell-instance.service';
 import { RADIUS_CLICK_GUARD_MS } from '../radius/radius-drawing-orchestrator.service';
 import { toMarkerKey } from '../markers/marker-media-index.helpers';
@@ -12,7 +11,6 @@ import type { MapLatLng } from '../leaflet/map-leaflet.service';
 export class MapContextMenuOpenService {
   private readonly mapContextActionsService = inject(MapContextActionsService);
   private readonly state = inject(MapShellState);
-  private readonly mapClickHandlerService = inject(MapClickHandlerService);
   private readonly instance = inject(MapShellInstanceService);
 
   openMapContextMenuAt(latlng: MapLatLng, clientX: number, clientY: number): void {
@@ -23,7 +21,7 @@ export class MapContextMenuOpenService {
     this.state.setMapContextMenuPosition(position);
     this.state.setMapContextMenuOpen(true);
     this.focusFirstOpenMapMenuItem();
-    this.mapClickHandlerService.suppressMapClickFor(RADIUS_CLICK_GUARD_MS);
+    this.instance.suppressMapClickUntil = Date.now() + RADIUS_CLICK_GUARD_MS;
   }
 
   openRadiusContextMenuAt(latlng: MapLatLng, clientX: number, clientY: number): void {
@@ -34,7 +32,7 @@ export class MapContextMenuOpenService {
     this.state.setRadiusContextMenuPosition(position);
     this.state.setRadiusContextMenuOpen(true);
     this.focusFirstOpenMapMenuItem();
-    this.mapClickHandlerService.suppressMapClickFor(RADIUS_CLICK_GUARD_MS);
+    this.instance.suppressMapClickUntil = Date.now() + RADIUS_CLICK_GUARD_MS;
   }
 
   openMarkerContextMenu(markerKey: string, sourceEvent?: MouseEvent | PointerEvent): void {
@@ -89,7 +87,7 @@ export class MapContextMenuOpenService {
 
     this.state.setMarkerContextMenuOpen(true);
     this.focusFirstOpenMapMenuItem();
-    this.mapClickHandlerService.suppressMapClickFor(RADIUS_CLICK_GUARD_MS);
+    this.instance.suppressMapClickUntil = Date.now() + RADIUS_CLICK_GUARD_MS;
   }
 
   focusFirstOpenMapMenuItem(): void {

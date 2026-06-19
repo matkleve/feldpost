@@ -8,6 +8,9 @@ import { WorkspaceSelectionService } from '../../../../core/workspace-selection/
 import { MapLeafletService } from '../leaflet/map-leaflet.service';
 import type { MapLatLng, MapMarker, MapMouseEvent } from '../leaflet/map-leaflet.service';
 import { MapShellInstanceService } from '../component/map-shell-instance.service';
+import { MapContextMenuOpenService } from '../context-menu/map-context-menu-open.service';
+import { MapShellState } from '../component/map-shell.state';
+import { WorkspacePaneObserverAdapter } from '../../../../core/workspace-pane/workspace-pane-observer.adapter';
 
 const MARKER_LONG_PRESS_MS = 500;
 const MARKER_MOVE_DURATION_MS = 320;
@@ -15,12 +18,6 @@ const MARKER_CONTEXT_MENU_SUPPRESS_MS = 320;
 
 export interface MarkerBindingContext {
   handlePhotoMarkerClick(markerKey: string, event?: MapMouseEvent): void;
-  consumeNativeContextMenuBypass(): boolean;
-  clearPendingSecondaryPress(): void;
-  openRadiusContextMenuAt(latlng: MapLatLng, clientX: number, clientY: number): void;
-  clearActiveRadiusSelection(): void;
-  openMarkerContextMenu(markerKey: string, event?: MouseEvent | PointerEvent): void;
-  suppressMarkerContextMenuFor(ms: number): void;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -33,6 +30,9 @@ export class MapMarkerBindingService {
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
   private readonly mapLeafletService = inject(MapLeafletService);
   private readonly instance = inject(MapShellInstanceService);
+  private readonly mapContextMenuOpenService = inject(MapContextMenuOpenService);
+  private readonly state = inject(MapShellState);
+  private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
 
   private ctx: MarkerBindingContext | null = null;
 
@@ -68,9 +68,9 @@ export class MapMarkerBindingService {
 
   bindMarkerContextInteraction(markerKey: string, marker: MapMarker): void {
     this.markerInteractionService.bindContextMenu(marker, {
-      shouldBypass: () => this.ctx?.consumeNativeContextMenuBypass() ?? false,
+      shouldBypass: () => this.consumeNativeContextMenuBypass(),
       onSecondaryReset: () => {
-        this.ctx?.clearPendingSecondaryPress();
+        this.instance.pendingSecondaryPress = null;
       },
       onOpen: (event: MouseEvent) => {
         this.handleMarkerSecondaryOpen(markerKey, event);
@@ -130,21 +130,37 @@ export class MapMarkerBindingService {
     this.markerMotionService.cancelMarkerMoveAnimation(marker);
   }
 
+  private consumeNativeContextMenuBypass(): boolean {
+    const bypassUntil = this.instance.nativeContextMenuBypassUntil;
+    this.instance.nativeContextMenuBypassUntil = 0;
+    return Date.now() <= bypassUntil;
+  }
+
+  private clearActiveRadiusSelection(): void {
+    this.radiusDrawingService.clearSelectionVisuals();
+    this.selectionService.setSelectedMarker(null);
+    this.selectionService.setSelectedMarkerKeys(new Set());
+    this.state.setDetailMediaId(null);
+    this.workspacePaneObserver.setDetailImageId(null);
+    this.workspaceViewService.clearActiveSelection();
+    this.workspaceSelectionService.clearSelection();
+  }
+
   private handleMarkerSecondaryOpen(markerKey: string, event: MouseEvent | PointerEvent): void {
     if (this.radiusDrawingService.hasCommittedSelection()) {
-      const state = this.instance.uploadedPhotoMarkers.get(markerKey);
-      if (state) {
-        const markerLatLng = this.mapLeafletService.createLatLng(state.lat, state.lng);
+      const markerState = this.instance.uploadedPhotoMarkers.get(markerKey);
+      if (markerState) {
+        const markerLatLng = this.mapLeafletService.createLatLng(markerState.lat, markerState.lng);
         if (this.radiusDrawingService.isInsideAnyCommittedRadius(markerLatLng)) {
-          this.ctx?.openRadiusContextMenuAt(markerLatLng, event.clientX, event.clientY);
+          this.mapContextMenuOpenService.openRadiusContextMenuAt(markerLatLng, event.clientX, event.clientY);
           return;
         }
-        this.ctx?.clearActiveRadiusSelection();
+        this.clearActiveRadiusSelection();
       }
     }
 
-    this.ctx?.suppressMarkerContextMenuFor(MARKER_CONTEXT_MENU_SUPPRESS_MS);
-    this.ctx?.openMarkerContextMenu(markerKey, event);
+    this.instance.markerContextMenuSuppressUntil = Date.now() + MARKER_CONTEXT_MENU_SUPPRESS_MS;
+    this.mapContextMenuOpenService.openMarkerContextMenu(markerKey, event);
   }
 
   private attachLongPressHandler(el: HTMLElement, markerKey: string): void {

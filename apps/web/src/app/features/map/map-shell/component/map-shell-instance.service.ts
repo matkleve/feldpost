@@ -1,7 +1,15 @@
 import { Injectable } from '@angular/core';
 import type { PhotoMarkerState } from '../markers/map-marker-reconcile.facade';
 import type { MarkerRenderSnapshot } from '../markers/map-photo-marker-render.service';
-import type { MapInstance, MapLayerGroup } from '../leaflet/map-leaflet.service';
+import type { MapInstance, MapLayerGroup, MapLatLng, MapPoint } from '../leaflet/map-leaflet.service';
+
+export type PendingSecondaryPress = {
+  startPoint: MapPoint;
+  startLatLng: MapLatLng;
+  startClientX: number;
+  startClientY: number;
+  additive: boolean;
+} | null;
 
 @Injectable({ providedIn: 'root' })
 export class MapShellInstanceService {
@@ -13,4 +21,7 @@ export class MapShellInstanceService {
   lastMapMoveAt = 0;
   lastMapIdleAt = 0;
   suppressMapClickUntil = 0;
+  nativeContextMenuBypassUntil = 0;
+  markerContextMenuSuppressUntil = 0;
+  pendingSecondaryPress: PendingSecondaryPress = null;
 }
