@@ -12,6 +12,7 @@ import { MapShellInstanceService } from '../component/map-shell-instance.service
 import { WorkspacePaneObserverAdapter } from '../../../../core/workspace-pane/workspace-pane-observer.adapter';
 import { PhotoMarkerLifecycleService } from '../markers/photo-marker-lifecycle.service';
 import { MapLocationPickService } from './map-location-pick.service';
+import { MapContextMenuOpenService } from '../context-menu/map-context-menu-open.service';
 import type { MapLatLng, MapMouseEvent } from '../leaflet/map-leaflet.service';
 
 // ── Module-level constants (migrated from MapShellComponent static fields) ──
@@ -25,8 +26,6 @@ const CONTEXT_MENU_NATIVE_BYPASS_TTL_MS = 250;
 // ── Context interface ────────────────────────────────────────────────────────
 
 export interface ClickHandlerContext {
-  openMapContextMenuAt(latlng: MapLatLng, clientX: number, clientY: number): void;
-  openRadiusContextMenuAt(latlng: MapLatLng, clientX: number, clientY: number): void;
   closeWorkspacePane(): void;
 }
 
@@ -45,6 +44,7 @@ export class MapClickHandlerService {
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
   private readonly photoMarkerLifecycleService = inject(PhotoMarkerLifecycleService);
   private readonly mapLocationPickService = inject(MapLocationPickService);
+  private readonly mapContextMenuOpenService = inject(MapContextMenuOpenService);
 
   private ctx: ClickHandlerContext | null = null;
 
@@ -354,7 +354,7 @@ export class MapClickHandlerService {
   ): void {
     if (this.radiusDrawingService.hasCommittedSelection()) {
       if (this.radiusDrawingService.isInsideAnyCommittedRadius(latlng)) {
-        this.ctx?.openRadiusContextMenuAt(latlng, clientX, clientY);
+        this.mapContextMenuOpenService.openRadiusContextMenuAt(latlng, clientX, clientY);
         return;
       }
 
@@ -364,7 +364,7 @@ export class MapClickHandlerService {
       return;
     }
 
-    this.ctx?.openMapContextMenuAt(latlng, clientX, clientY);
+    this.mapContextMenuOpenService.openMapContextMenuAt(latlng, clientX, clientY);
   }
 
   private patchDetailMediaId(mediaId: string | null): void {

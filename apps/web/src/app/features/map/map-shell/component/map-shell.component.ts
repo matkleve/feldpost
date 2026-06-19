@@ -43,8 +43,6 @@ import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-
 import { FilterService } from '../../../../core/filter/filter.service';
 import { WorkspaceSelectionService } from '../../../../core/workspace-selection/workspace-selection.service';
 import { MEDIA_PLACEHOLDER_ICON } from '../../../../core/media-download/media-download.service';
-import { ToastService } from '../../../../core/toast/toast.service';
-import type { ToastOptions, ToastType } from '../../../../core/toast/toast.types';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { SearchBarComponent } from '../../search-bar/search-bar.component';
 import { MapFilterToolbarComponent } from '../../map-filter-toolbar/map-filter-toolbar.component';
@@ -70,7 +68,6 @@ import { MapSubscriptionService } from '../handlers/map-subscription.service';
 import { PhotoMarkerLifecycleService } from '../markers/photo-marker-lifecycle.service';
 import { MapMediaDeleteSyncService } from '../markers/map-media-delete-sync.service';
 import { MarkerMotionService } from '../markers/marker-motion.service';
-import { MapPhotoMarkerRenderService } from '../markers/map-photo-marker-render.service';
 import { MapThumbnailLoaderService } from '../markers/map-thumbnail-loader.service';
 import {
   MapZoomHighlightOrchestratorService,
@@ -132,7 +129,6 @@ export class MapShellComponent implements OnDestroy {
   private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly filterService = inject(FilterService);
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
-  private readonly toastService = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly i18nService = inject(I18nService);
   private readonly router = inject(Router);
@@ -147,7 +143,6 @@ export class MapShellComponent implements OnDestroy {
   private readonly photoMarkerLifecycleService = inject(PhotoMarkerLifecycleService);
   private readonly mapMediaDeleteSyncService = inject(MapMediaDeleteSyncService);
   private readonly markerMotionService = inject(MarkerMotionService);
-  private readonly markerRenderService = inject(MapPhotoMarkerRenderService);
   private readonly thumbnailLoaderService = inject(MapThumbnailLoaderService);
   private readonly zoomHighlightOrchestrator = inject(MapZoomHighlightOrchestratorService);
   private readonly markerSelectionService = inject(MapMarkerSelectionService);
@@ -172,29 +167,6 @@ export class MapShellComponent implements OnDestroy {
   private readonly mapSubscriptionService = inject(MapSubscriptionService);
   private readonly mapShellInstance = inject(MapShellInstanceService);
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
-
-  private showMapToast(
-    key: string,
-    fallback: string,
-    type: ToastType,
-    extra?: Omit<ToastOptions, 'title' | 'type'>,
-  ): void {
-    this.toastService.show({
-      title: this.t(key, fallback),
-      type,
-      dedupe: true,
-      ...extra,
-    });
-  }
-
-  private showMapToastTitle(title: string, type: ToastType, extra?: Omit<ToastOptions, 'title' | 'type'>): void {
-    this.toastService.show({
-      title,
-      type,
-      dedupe: true,
-      ...extra,
-    });
-  }
 
   /** Reference to the Leaflet map container div. */
   private readonly mapContainerRef = viewChild<ElementRef<HTMLDivElement>>('mapContainer');
@@ -569,8 +541,6 @@ export class MapShellComponent implements OnDestroy {
     });
 
     this.mapClickHandlerService.bind({
-      openMapContextMenuAt: (latlng, x, y) => this.mapContextMenuOpenService.openMapContextMenuAt(latlng, x, y),
-      openRadiusContextMenuAt: (latlng, x, y) => this.mapContextMenuOpenService.openRadiusContextMenuAt(latlng, x, y),
       closeWorkspacePane: () => this.workspacePaneShellHost.closeWorkspacePane(),
     });
 
