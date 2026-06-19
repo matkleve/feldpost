@@ -6,12 +6,10 @@ import { MediaLocationUpdateService } from '../../../../core/media-location-upda
 import { MediaLocationsService } from '../../../../core/media-locations/media-locations.service';
 import { MediaDetailLocationSyncService } from '../../../../core/media-detail-data/media-detail-location-sync.service';
 import { buildLocationUpdateFailureToast } from '../../../../core/media-location-update/location-update-toast.util';
-import type { ImageUploadedEvent, UploadLocationMapPickRequest } from '../../../../core/workspace-pane/workspace-pane-shell-events.types';
+import { PhotoMarkerLifecycleService } from '../markers/photo-marker-lifecycle.service';
+import { MapViewportCoordinatorService } from '../markers/map-viewport-coordinator.service';
+import type { UploadLocationMapPickRequest } from '../../../../core/workspace-pane/workspace-pane-shell-events.types';
 import type { MediaLocationAddressPatch } from '../../../../core/media-location-update/media-location-update.types';
-
-export interface LocationPickContext {
-  onImageUploaded(event: ImageUploadedEvent): void;
-}
 
 @Injectable({ providedIn: 'root' })
 export class MapLocationPickService {
@@ -21,8 +19,9 @@ export class MapLocationPickService {
   private readonly toastService = inject(ToastService);
   private readonly i18nService = inject(I18nService);
   private readonly router = inject(Router);
+  private readonly photoMarkerLifecycleService = inject(PhotoMarkerLifecycleService);
+  private readonly mapViewportCoordinatorService = inject(MapViewportCoordinatorService);
 
-  private ctx: LocationPickContext | null = null;
   private locationMapPickReturnUrl: string | null = null;
   private lastLocationMapPickSync: {
     mediaId: string;
@@ -31,10 +30,6 @@ export class MapLocationPickService {
     locationRowId?: string;
     address?: MediaLocationAddressPatch;
   } | null = null;
-
-  bind(ctx: LocationPickContext): void {
-    this.ctx = ctx;
-  }
 
   setReturnUrl(url: string | null): void {
     this.locationMapPickReturnUrl = url;
@@ -137,7 +132,9 @@ export class MapLocationPickService {
       return false;
     }
 
-    this.ctx?.onImageUploaded({ id: request.mediaId, lat, lng });
+    this.photoMarkerLifecycleService.upsertUploadedPhotoMarker({ id: request.mediaId, lat, lng });
+    this.photoMarkerLifecycleService.resolveDraftMediaMarkerUpload({ id: request.mediaId, lat, lng });
+    void this.mapViewportCoordinatorService.queryViewportMarkers();
     this.lastLocationMapPickSync = {
       mediaId: request.mediaId,
       lat,

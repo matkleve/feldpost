@@ -19,7 +19,7 @@
       type="single"
       [nullable]="false"
       [value]="basemapService.mapViewMode()"
-      (valueChange)="onMapViewModeChange($event)"
+      (valueChange)="mapPlacementService.onMapViewModeChange($event)"
       aria-label="Map style"
     >
       @for (option of basemapService.mapViewOptions(); track option.id) {
@@ -43,14 +43,14 @@
   <div
     #mapContainer
     class="map-container"
-    [class.map-container--placing]="placementActive() || searchService.searchPlacementActive()"
+    [class.map-container--placing]="state.placementActive() || searchService.searchPlacementActive()"
     tabindex="-1"
     aria-label="Site map"
     aria-haspopup="menu"
     [attr.aria-expanded]="menuVm.anyContextMenuOpen()"
   ></div>
 
-  @if (mapContextMenuOpen() && mapContextMenuPosition(); as mapMenuPos) {
+  @if (state.mapContextMenuOpen() && state.mapContextMenuPosition(); as mapMenuPos) {
     <app-dropdown-shell
       class="map-context-menu"
       [top]="mapMenuPos.y"
@@ -67,8 +67,8 @@
             type="button"
             role="menuitem"
             [disabled]="action.disabled"
-            (keydown)="onMapMenuKeydown($event)"
-            (click)="onMapMenuActionSelected(action.id)"
+            (keydown)="mapContextMenuOpenService.handleMenuKeydown($event)"
+            (click)="mapContextMenuHandlerService.onMapMenuActionSelected(action.id)"
           >
             <span class="material-icons option-menu-item__icon" aria-hidden="true">{{ action.icon }}</span>
             <span class="min-w-0 flex-1 text-left">{{ action.label }}</span>
@@ -85,8 +85,8 @@
               type="button"
               role="menuitem"
               [disabled]="action.disabled"
-              (keydown)="onMapMenuKeydown($event)"
-              (click)="onMapMenuActionSelected(action.id)"
+              (keydown)="mapContextMenuOpenService.handleMenuKeydown($event)"
+              (click)="mapContextMenuHandlerService.onMapMenuActionSelected(action.id)"
             >
               <span class="material-icons option-menu-item__icon" aria-hidden="true">{{ action.icon }}</span>
               <span class="min-w-0 flex-1 text-left">{{ action.label }}</span>
@@ -97,7 +97,7 @@
     </app-dropdown-shell>
   }
 
-  @if (radiusContextMenuOpen() && radiusContextMenuPosition(); as radiusMenuPos) {
+  @if (state.radiusContextMenuOpen() && state.radiusContextMenuPosition(); as radiusMenuPos) {
     <app-dropdown-shell
       class="map-context-menu"
       [top]="radiusMenuPos.y"
@@ -116,8 +116,8 @@
             type="button"
             role="menuitem"
             [disabled]="action.disabled"
-            (keydown)="onMapMenuKeydown($event)"
-            (click)="onRadiusMenuActionSelected(action.id)"
+            (keydown)="mapContextMenuOpenService.handleMenuKeydown($event)"
+            (click)="mapContextMenuHandlerService.onRadiusMenuActionSelected(action.id)"
           >
             <span class="material-icons option-menu-item__icon" aria-hidden="true">{{ action.icon }}</span>
             <span class="min-w-0 flex-1 text-left">{{ action.label }}</span>
@@ -135,8 +135,8 @@
             type="button"
             role="menuitem"
             [disabled]="action.disabled"
-            (keydown)="onMapMenuKeydown($event)"
-            (click)="onRadiusMenuActionSelected(action.id)"
+            (keydown)="mapContextMenuOpenService.handleMenuKeydown($event)"
+            (click)="mapContextMenuHandlerService.onRadiusMenuActionSelected(action.id)"
           >
             <span class="material-icons option-menu-item__icon" aria-hidden="true">{{ action.icon }}</span>
             <span class="min-w-0 flex-1 text-left">{{ action.label }}</span>
@@ -146,8 +146,8 @@
     </app-dropdown-shell>
   }
 
-  @if (markerContextMenuOpen() && markerContextMenuPosition(); as markerMenuPos) {
-    @if (markerContextMenuPayload(); as markerMenu) {
+  @if (state.markerContextMenuOpen() && state.markerContextMenuPosition(); as markerMenuPos) {
+    @if (state.markerContextMenuPayload(); as markerMenu) {
       <app-dropdown-shell
         class="map-context-menu"
         [top]="markerMenuPos.y"
@@ -157,9 +157,9 @@
         (closeRequested)="onMapMenuCloseRequested()"
       >
         <div class="map-context-menu__header option-menu-header">
-          @if (markerContextIsMulti) {
+          @if (mapContextMenuHandlerService.markerContextIsMulti) {
             {{ markerMenu.count }} Medien ausgewaehlt
-          } @else if (markerContextIsSingle) {
+          } @else if (mapContextMenuHandlerService.markerContextIsSingle) {
             Foto Marker
           } @else {
             {{ markerMenu.count }} Fotos an dieser Stelle
@@ -174,8 +174,8 @@
               type="button"
               role="menuitem"
               [disabled]="action.disabled"
-              (keydown)="onMapMenuKeydown($event)"
-              (click)="onMarkerMenuActionSelected(action.id)"
+              (keydown)="mapContextMenuOpenService.handleMenuKeydown($event)"
+              (click)="mapContextMenuHandlerService.onMarkerMenuActionSelected(action.id)"
             >
               <span class="material-icons option-menu-item__icon" aria-hidden="true">{{ action.icon }}</span>
               <span class="min-w-0 flex-1 text-left">{{ action.label }}</span>
@@ -193,8 +193,8 @@
               type="button"
               role="menuitem"
               [disabled]="action.disabled"
-              (keydown)="onMapMenuKeydown($event)"
-              (click)="onMarkerMenuActionSelected(action.id)"
+              (keydown)="mapContextMenuOpenService.handleMenuKeydown($event)"
+              (click)="mapContextMenuHandlerService.onMarkerMenuActionSelected(action.id)"
             >
               <span class="material-icons option-menu-item__icon" aria-hidden="true">{{ action.icon }}</span>
               <span class="min-w-0 flex-1 text-left">{{ action.label }}</span>
@@ -211,8 +211,8 @@
                 type="button"
                 role="menuitem"
                 [disabled]="action.disabled"
-                (keydown)="onMapMenuKeydown($event)"
-                (click)="onMarkerMenuActionSelected(action.id)"
+                (keydown)="mapContextMenuOpenService.handleMenuKeydown($event)"
+                (click)="mapContextMenuHandlerService.onMarkerMenuActionSelected(action.id)"
               >
                 <span class="material-icons option-menu-item__icon" aria-hidden="true">{{
                   action.icon
@@ -228,10 +228,10 @@
 
   <div class="map-search-chrome">
     <ss-search-bar
-      [queryContext]="searchQueryContext()"
-      (mapCenterRequested)="onSearchMapCenterRequested($event)"
-      (clearRequested)="onSearchClearRequested()"
-      (goToLocationRequested)="goToUserPosition()"
+      [queryContext]="searchContext.searchQueryContext()"
+      (mapCenterRequested)="mapPlacementService.onSearchMapCenterRequested($event)"
+      (clearRequested)="mapPlacementService.onSearchClearRequested()"
+      (goToLocationRequested)="mapPlacementService.goToUserPosition()"
       (qrInviteCommandRequested)="onQrInviteCommandRequested()"
     />
 
@@ -262,7 +262,7 @@
     [attr.aria-pressed]="gpsService.gpsTrackingActive()"
     [class.map-gps-btn--locating]="gpsService.gpsLocating()"
     [class.map-gps-btn--active]="gpsService.gpsTrackingActive()"
-    (click)="goToUserPosition()"
+    (click)="mapPlacementService.goToUserPosition()"
   >
     @if (gpsService.gpsLocating()) {
       <span class="map-gps-btn__spinner" aria-hidden="true"></span>
@@ -274,59 +274,59 @@
   </button>
 
   <!-- Placement mode banner -->
-  @if (placementActive() || searchService.searchPlacementActive()) {
+  @if (state.placementActive() || searchService.searchPlacementActive()) {
     <div class="map-placement-banner" role="status" aria-live="assertive">
       <span class="material-icons" aria-hidden="true">pin_drop</span>
-      {{ placementBannerText() }}
+      {{ mapPlacementService.placementBannerText() }}
       <button
         hlmBtn
         variant="ghost"
         size="sm"
         class="map-placement-banner__cancel"
         type="button"
-        (click)="cancelPlacement()"
+        (click)="mapPlacementService.cancelPlacement()"
       >
         Cancel
       </button>
     </div>
   }
 
-  @if (projectSelectionDialogOpen()) {
+  @if (state.projectSelectionDialogOpen()) {
     <app-project-select-dialog
-      [title]="projectSelectionDialogTitle()"
-      [message]="projectSelectionDialogMessage()"
-      [options]="projectSelectionDialogOptions()"
-      [selectedId]="projectSelectionDialogSelectedId()"
+      [title]="state.projectSelectionDialogTitle()"
+      [message]="state.projectSelectionDialogMessage()"
+      [options]="state.projectSelectionDialogOptions()"
+      [selectedId]="state.projectSelectionDialogSelectedId()"
       confirmLabel="Auswaehlen"
       cancelLabel="Abbrechen"
-      (selectedIdChange)="onProjectSelectionDialogSelected($event)"
-      (confirmed)="onProjectSelectionDialogConfirmed($event)"
-      (cancelled)="onProjectSelectionDialogCancelled()"
+      (selectedIdChange)="mapContextMenuHandlerService.onProjectSelectionDialogSelected($event)"
+      (confirmed)="mapContextMenuHandlerService.onProjectSelectionDialogConfirmed($event)"
+      (cancelled)="mapContextMenuHandlerService.onProjectSelectionDialogCancelled()"
     />
   }
 
-  @if (projectNameDialogOpen()) {
+  @if (state.projectNameDialogOpen()) {
     <app-text-input-dialog
-      [title]="projectNameDialogTitle()"
-      [message]="projectNameDialogMessage()"
+      [title]="state.projectNameDialogTitle()"
+      [message]="state.projectNameDialogMessage()"
       placeholder="z. B. Radius Auswahl Nord"
-      [initialValue]="projectNameDialogInitialValue()"
+      [initialValue]="state.projectNameDialogInitialValue()"
       confirmLabel="Projekt erstellen"
       cancelLabel="Abbrechen"
-      (confirmed)="onProjectNameDialogConfirmed($event)"
-      (cancelled)="onProjectNameDialogCancelled()"
+      (confirmed)="mapContextMenuHandlerService.onProjectNameDialogConfirmed($event)"
+      (cancelled)="mapContextMenuHandlerService.onProjectNameDialogCancelled()"
     />
   }
 
-  @if (batchAddressDialogOpen()) {
+  @if (state.batchAddressDialogOpen()) {
     <app-text-input-dialog
-      [title]="batchAddressDialogTitle()"
-      [message]="batchAddressDialogMessage()"
+      [title]="state.batchAddressDialogTitle()"
+      [message]="state.batchAddressDialogMessage()"
       placeholder="Adresse eingeben"
       confirmLabel="Anwenden"
       cancelLabel="Abbrechen"
-      (confirmed)="onBatchAddressDialogConfirmed($event)"
-      (cancelled)="onBatchAddressDialogCancelled()"
+      (confirmed)="mapContextMenuHandlerService.onBatchAddressDialogConfirmed($event)"
+      (cancelled)="mapContextMenuHandlerService.onBatchAddressDialogCancelled()"
     />
   }
 </div>

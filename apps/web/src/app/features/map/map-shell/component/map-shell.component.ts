@@ -34,11 +34,6 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { UploadShellUiService } from '../../../upload/upload-shell/upload-shell-ui.service';
-import type {
-  ImageUploadedEvent,
-  UploadLocationMapPickRequest,
-  UploadLocationPreviewEvent,
-} from '../../../../core/workspace-pane/workspace-pane-shell-events.types';
 import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-view.service';
 import { FilterService } from '../../../../core/filter/filter.service';
 import { WorkspaceSelectionService } from '../../../../core/workspace-selection/workspace-selection.service';
@@ -47,11 +42,9 @@ import { I18nService } from '../../../../core/i18n/i18n.service';
 import { SearchBarComponent } from '../../search-bar/search-bar.component';
 import { MapFilterToolbarComponent } from '../../map-filter-toolbar/map-filter-toolbar.component';
 import { MapSearchContextService } from '../handlers/map-search-context.service';
-import type { MapMenuActionId, MarkerMenuActionId, RadiusMenuActionId } from '../workspace/map-workspace-actions.types';
-import type { ThumbnailCardHoverEvent } from '../../../../core/workspace-pane/workspace-pane-thumbnail-hover.types';
 import { ProjectSelectDialogComponent } from '../../../../shared/project-select-dialog/project-select-dialog.component';
 import { TextInputDialogComponent } from '../../../../shared/text-input-dialog/text-input-dialog.component';
-import { BrnToggleGroupImports, type ToggleValue } from '@spartan-ng/brain/toggle-group';
+import { BrnToggleGroupImports } from '@spartan-ng/brain/toggle-group';
 import { HLM_TOGGLE_GROUP_IMPORTS } from '../../../../shared/ui/toggle-group';
 import { DropdownShellComponent } from '../../../../shared/dropdown-trigger/shell/dropdown-shell.component';
 import { HlmMenuItemDirective, HlmMenuSeparatorDirective } from '../../../../shared/ui/menu';
@@ -132,10 +125,10 @@ export class MapShellComponent implements OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
   private readonly i18nService = inject(I18nService);
   private readonly router = inject(Router);
-  private readonly state = inject(MapShellState);
+  readonly state = inject(MapShellState);
   private readonly mapViewportCoordinatorService = inject(MapViewportCoordinatorService);
-  private readonly mapContextMenuHandlerService = inject(MapContextMenuHandlerService);
-  private readonly mapContextMenuOpenService = inject(MapContextMenuOpenService);
+  readonly mapContextMenuHandlerService = inject(MapContextMenuHandlerService);
+  readonly mapContextMenuOpenService = inject(MapContextMenuOpenService);
   private readonly mapClickHandlerService = inject(MapClickHandlerService);
   private readonly mapMoveEndHandlerService = inject(MapMoveEndHandlerService);
   private readonly mapViewFlyService = inject(MapViewFlyService);
@@ -163,7 +156,7 @@ export class MapShellComponent implements OnDestroy {
   private readonly workspacePaneLayoutMapEffectsService = inject(WorkspacePaneLayoutMapEffectsService);
   readonly menuVm = inject(MapMenuViewModelService);
   readonly searchContext = inject(MapSearchContextService);
-  private readonly mapPlacementService = inject(MapPlacementService);
+  readonly mapPlacementService = inject(MapPlacementService);
   private readonly mapSubscriptionService = inject(MapSubscriptionService);
   private readonly mapShellInstance = inject(MapShellInstanceService);
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
@@ -184,60 +177,7 @@ export class MapShellComponent implements OnDestroy {
    */
   protected map?: MapInstance;
 
-  // ── Upload / placement state ─────────────────────────────────────────────
-
   private readonly uploadShellUi = inject(UploadShellUiService);
-
-  /** Global upload shell (layout); map shell toggles panel for placement flows. */
-  readonly uploadPanelPinned = this.uploadShellUi.uploadPanelPinned;
-  readonly uploadPanelOpen = this.uploadShellUi.uploadPanelOpen;
-
-  /** Whether the map is in placement mode (drives the banner + cursor class). */
-  readonly placementActive = this.state.placementActive;
-
-  readonly searchQueryContext = this.searchContext.searchQueryContext;
-
-  // ── Workspace pane / photo panel state ───────────────────────────────────
-
-  /** Whether the workspace pane (photo panel) is open. */
-  readonly photoPanelOpen = this.state.photoPanelOpen;
-
-  /** Current workspace pane width in px. Uses restored user preference or design-system default. */
-  readonly workspacePaneWidth = this.state.workspacePaneWidth;
-
-  readonly selectedMarkerKey = this.state.selectedMarkerKey;
-  readonly selectedMarkerKeys = this.state.selectedMarkerKeys;
-  readonly linkedHoveredWorkspaceMediaIds = this.state.linkedHoveredWorkspaceMediaIds;
-  readonly mapContextMenuOpen = this.state.mapContextMenuOpen;
-  readonly mapContextMenuPosition = this.state.mapContextMenuPosition;
-  readonly mapContextMenuCoords = this.state.mapContextMenuCoords;
-  readonly radiusContextMenuOpen = this.state.radiusContextMenuOpen;
-  readonly radiusContextMenuPosition = this.state.radiusContextMenuPosition;
-  readonly radiusContextMenuCoords = this.state.radiusContextMenuCoords;
-  readonly markerContextMenuOpen = this.state.markerContextMenuOpen;
-  readonly markerContextMenuPosition = this.state.markerContextMenuPosition;
-  readonly markerContextMenuPayload = this.state.markerContextMenuPayload;
-  readonly draftMediaMarker = this.state.draftMediaMarker;
-  readonly projectSelectionDialogOpen = this.state.projectSelectionDialogOpen;
-  readonly projectSelectionDialogTitle = this.state.projectSelectionDialogTitle;
-  readonly projectSelectionDialogMessage = this.state.projectSelectionDialogMessage;
-  readonly projectSelectionDialogOptions = this.state.projectSelectionDialogOptions;
-  readonly projectSelectionDialogSelectedId = this.state.projectSelectionDialogSelectedId;
-  readonly projectNameDialogOpen = this.state.projectNameDialogOpen;
-  readonly projectNameDialogTitle = this.state.projectNameDialogTitle;
-  readonly projectNameDialogMessage = this.state.projectNameDialogMessage;
-  readonly projectNameDialogInitialValue = this.state.projectNameDialogInitialValue;
-  readonly batchAddressDialogOpen = this.state.batchAddressDialogOpen;
-  readonly batchAddressDialogTitle = this.state.batchAddressDialogTitle;
-  readonly batchAddressDialogMessage = this.state.batchAddressDialogMessage;
-  readonly detailAddressSearchRequest = this.state.detailAddressSearchRequest;
-
-  /**
-   * When non-null, the Image Detail View is shown inside the photo panel.
-   * Set to a DB image UUID when the user clicks a thumbnail or marker detail action.
-   * Set to null to return to the thumbnail grid.
-   */
-  readonly detailMediaId = this.state.detailMediaId;
 
   // ── Private helpers ───────────────────────────────────────────────────────
 
@@ -272,14 +212,14 @@ export class MapShellComponent implements OnDestroy {
     this.workspacePaneObserver.onContextRebind(this.mapSelectedItemsContext);
 
     this.workspacePaneMapEffectsRegistration = {
-      onZoomToLocation: (event) => this.onZoomToLocation(event),
-      onImageUploaded: (event) => this.onImageUploaded(event),
-      enterPlacementMode: (key) => this.enterPlacementMode(key),
-      onUploadLocationPreviewRequested: (event) => this.onUploadLocationPreviewRequested(event),
-      onUploadLocationPreviewCleared: () => this.onUploadLocationPreviewCleared(),
-      onUploadLocationMapPickRequested: (event) => this.onUploadLocationMapPickRequested(event),
-      onWorkspaceItemHoverStarted: (event) => this.onWorkspaceItemHoverStarted(event),
-      onWorkspaceItemHoverEnded: (mediaId) => this.onWorkspaceItemHoverEnded(mediaId),
+      onZoomToLocation: (event) => this.mapViewFlyService.onZoomToLocation(event),
+      onImageUploaded: (event) => this.mapPlacementService.onImageUploaded(event),
+      enterPlacementMode: (key) => this.mapPlacementService.enterPlacementMode(key),
+      onUploadLocationPreviewRequested: (event) => this.mapPlacementService.onUploadLocationPreviewRequested(event),
+      onUploadLocationPreviewCleared: () => this.mapPlacementService.onUploadLocationPreviewCleared(),
+      onUploadLocationMapPickRequested: (event) => this.mapPlacementService.onUploadLocationMapPickRequested(event),
+      onWorkspaceItemHoverStarted: (event) => this.markerSelectionService.onWorkspaceHoverStarted(event),
+      onWorkspaceItemHoverEnded: (mediaId) => this.markerSelectionService.onWorkspaceHoverEnded(mediaId),
       onWorkspacePaneClosing: () => this.applyWorkspacePaneClosingMapSideEffects(),
       invalidateMapSize: () => this.map?.invalidateSize(),
     };
@@ -413,44 +353,10 @@ export class MapShellComponent implements OnDestroy {
     return resolvedViewportWidth < MapShellComponent.CONTEXT_MENU_SHEET_BREAKPOINT_PX;
   }
 
-  onMapMenuKeydown(event: KeyboardEvent): void {
-    this.mapContextMenuOpenService.handleMenuKeydown(event);
-  }
-
-  async onMapMenuActionSelected(actionId: MapMenuActionId): Promise<void> {
-    return this.mapContextMenuHandlerService.onMapMenuActionSelected(actionId);
-  }
-
-  async onMapContextStartRadiusFromHere(): Promise<void> {
-    return this.mapContextMenuHandlerService.onMapContextStartRadiusFromHere();
-  }
-
-  async onRadiusMenuActionSelected(actionId: RadiusMenuActionId): Promise<void> {
-    return this.mapContextMenuHandlerService.onRadiusMenuActionSelected(actionId);
-  }
-
-  get markerContextIsSingle(): boolean { return this.mapContextMenuHandlerService.markerContextIsSingle; }
-  get markerContextIsCluster(): boolean { return this.mapContextMenuHandlerService.markerContextIsCluster; }
-  get markerContextIsMulti(): boolean { return this.mapContextMenuHandlerService.markerContextIsMulti; }
-
-  async onMarkerMenuActionSelected(actionId: MarkerMenuActionId): Promise<void> {
-    return this.mapContextMenuHandlerService.onMarkerMenuActionSelected(actionId);
-  }
-
-  onBatchAddressDialogCancelled(): void { this.mapContextMenuHandlerService.onBatchAddressDialogCancelled(); }
-
-  async onBatchAddressDialogConfirmed(addressInput: string): Promise<void> {
-    return this.mapContextMenuHandlerService.onBatchAddressDialogConfirmed(addressInput);
-  }
-
-  onDetailAddressSearchRequestConsumed(requestId: number): void {
-    this.mapContextMenuHandlerService.onDetailAddressSearchRequestConsumed(requestId);
-  }
-
   // ── Workspace pane (DOM + split owned by AuthenticatedAppLayoutComponent) ─
 
   private applyWorkspacePaneClosingMapSideEffects(): void {
-    if ((this.draftMediaMarker()?.uploadCount ?? 0) === 0) {
+    if ((this.state.draftMediaMarker()?.uploadCount ?? 0) === 0) {
       this.photoMarkerLifecycleService.removeDraftMediaMarker();
     }
     this.markerSelectionService.setSelectedMarker(null);
@@ -475,32 +381,9 @@ export class MapShellComponent implements OnDestroy {
     this.workspacePaneShellHost.openDetailView(mediaId);
   }
 
-  onZoomToLocation(event: { mediaId: string; lat: number; lng: number; zoomMode?: 'house' | 'street' }): void {
-    this.mapViewFlyService.onZoomToLocation(event);
-  }
-
-  onWorkspaceItemHoverStarted(event: ThumbnailCardHoverEvent): void {
-    this.markerSelectionService.onWorkspaceHoverStarted(event);
-  }
-
-  onWorkspaceItemHoverEnded(mediaId: string): void {
-    this.markerSelectionService.onWorkspaceHoverEnded(mediaId);
-  }
-
   // ── Upload panel ──────────────────────────────────────────────────────────
 
   toggleUploadPanel(): void { this.uploadShellUi.toggleUploadPanel(); }
-  onImageUploaded(event: ImageUploadedEvent): void { this.mapPlacementService.onImageUploaded(event); }
-  enterPlacementMode(key: string): void { this.mapPlacementService.enterPlacementMode(key); }
-  cancelPlacement(): void { this.mapPlacementService.cancelPlacement(); }
-  goToUserPosition(): void { this.mapPlacementService.goToUserPosition(); }
-  onMapViewModeChange(raw: ToggleValue<string>): void { this.mapPlacementService.onMapViewModeChange(raw); }
-  onSearchMapCenterRequested(event: { lat: number; lng: number; label: string }): void { this.mapPlacementService.onSearchMapCenterRequested(event); }
-  onSearchClearRequested(): void { this.mapPlacementService.onSearchClearRequested(); }
-  onUploadLocationPreviewRequested(event: UploadLocationPreviewEvent): void { this.mapPlacementService.onUploadLocationPreviewRequested(event); }
-  onUploadLocationPreviewCleared(): void { this.mapPlacementService.onUploadLocationPreviewCleared(); }
-  onUploadLocationMapPickRequested(event: UploadLocationMapPickRequest): void { this.mapPlacementService.onUploadLocationMapPickRequested(event); }
-  placementBannerText(): string { return this.mapPlacementService.placementBannerText(); }
 
   // ── Map init ──────────────────────────────────────────────────────────────
 
@@ -536,10 +419,6 @@ export class MapShellComponent implements OnDestroy {
       openDetailView: (mediaId) => this.openDetailView(mediaId),
     });
 
-    this.mapLocationPickService.bind({
-      onImageUploaded: (event) => this.onImageUploaded(event),
-    });
-
     this.mapClickHandlerService.bind({
       closeWorkspacePane: () => this.workspacePaneShellHost.closeWorkspacePane(),
     });
@@ -554,7 +433,7 @@ export class MapShellComponent implements OnDestroy {
 
     const pendingZoom = this.mapZoomOrchestrator.consumePending();
     if (pendingZoom) {
-      this.onZoomToLocation(pendingZoom);
+      this.mapViewFlyService.onZoomToLocation(pendingZoom);
     }
 
     // Map click handler: closes upload panel and, when active, places images
@@ -650,27 +529,7 @@ export class MapShellComponent implements OnDestroy {
 
     this.pendingLocationMapPickNav.set(null);
     this.mapLocationPickService.setReturnUrl(payload.returnUrl);
-    this.onUploadLocationMapPickRequested(payload.request);
-  }
-
-  onProjectSelectionDialogSelected(projectId: string): void {
-    this.mapContextMenuHandlerService.onProjectSelectionDialogSelected(projectId);
-  }
-
-  onProjectSelectionDialogConfirmed(projectId: string): void {
-    this.mapContextMenuHandlerService.onProjectSelectionDialogConfirmed(projectId);
-  }
-
-  onProjectSelectionDialogCancelled(): void {
-    this.mapContextMenuHandlerService.onProjectSelectionDialogCancelled();
-  }
-
-  onProjectNameDialogConfirmed(projectName: string): void {
-    this.mapContextMenuHandlerService.onProjectNameDialogConfirmed(projectName);
-  }
-
-  onProjectNameDialogCancelled(): void {
-    this.mapContextMenuHandlerService.onProjectNameDialogCancelled();
+    this.mapPlacementService.onUploadLocationMapPickRequested(payload.request);
   }
 
 }
