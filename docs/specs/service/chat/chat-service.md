@@ -44,3 +44,9 @@ Callers of `loadMessages()` receive cached state immediately (zero latency), the
 ## Security
 
 RLS enforced in Postgres via `can_access_chat_channel()` — public channels visible to org; private/DM require membership.
+
+Membership integrity (migration `20260620100000_chat_and_branding_rls_hardening.sql`):
+
+- **Self-join is gated by `can_self_join_chat_channel()`** — a user may insert their own `chat_channel_members` row only for a public channel, a channel they created, or one they already belong to. Joining a private/DM channel goes exclusively through the SECURITY DEFINER RPCs (`find_or_create_dm_channel`, `invite_chat_channel_member`). This closes the prior hole where any org member could self-insert into a private channel and read its history.
+- **Message updates** are constrained by a `WITH CHECK` that re-asserts authorship (or `chat.messages.delete_any`) and `can_access_chat_channel(channel_id)`, so a message cannot be moved into an inaccessible channel.
+- **Role changes** on `chat_channel_members` are blocked by trigger `enforce_chat_member_role_change()` unless the caller owns the channel or holds `chat.channels.manage` — a plain member cannot self-elevate to `owner`.

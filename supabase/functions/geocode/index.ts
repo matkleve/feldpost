@@ -17,6 +17,10 @@ import {
   photonGeoJsonToNominatimSearch,
   type PhotonGeoJsonResponse,
 } from "./photon-to-nominatim.ts";
+import {
+  isPhotonForwardAction,
+  isSupportedGeocodeAction,
+} from "./geocode-actions.ts";
 
 const NOMINATIM_REVERSE_URL = "https://nominatim.openstreetmap.org/reverse";
 const NOMINATIM_SEARCH_URL = "https://nominatim.openstreetmap.org/search";
@@ -85,8 +89,6 @@ type GeocodeBody = {
   city?: string;
   postcode?: string;
   countryCode?: string;
-  lat?: number;
-  lng?: number;
   lon?: number;
   zoom?: number;
 };
@@ -173,16 +175,11 @@ Deno.serve(async (req: Request) => {
 
   const { action } = body;
 
-  if (
-    action !== "reverse" &&
-    action !== "forward" &&
-    action !== "structured-search" &&
-    action !== "structured-forward"
-  ) {
+  if (!isSupportedGeocodeAction(action)) {
     return new Response(
       JSON.stringify({
         error:
-          'Invalid action. Use "reverse", "forward", "structured-search", or "structured-forward".',
+          'Invalid action. Use "reverse", "forward", "structured-search", "structured-forward", "structured-forward-bias", or "street-house-numbers".',
       }),
       {
         status: 400,
@@ -193,8 +190,7 @@ Deno.serve(async (req: Request) => {
 
   const acceptLanguage = acceptLanguageHeader(body);
   const usePhotonForward =
-    GEOCODER_FORWARD_URL.length > 0 &&
-    (action === "forward" || action === "structured-forward");
+    GEOCODER_FORWARD_URL.length > 0 && isPhotonForwardAction(action);
 
   let upstreamUrl: string;
   let upstreamKind: "nominatim" | "photon";
