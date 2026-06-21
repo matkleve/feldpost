@@ -50,3 +50,10 @@ Membership integrity (migration `20260620100000_chat_and_branding_rls_hardening.
 - **Self-join is gated by `can_self_join_chat_channel()`** — a user may insert their own `chat_channel_members` row only for a public channel, a channel they created, or one they already belong to. Joining a private/DM channel goes exclusively through the SECURITY DEFINER RPCs (`find_or_create_dm_channel`, `invite_chat_channel_member`). This closes the prior hole where any org member could self-insert into a private channel and read its history.
 - **Message updates** are constrained by a `WITH CHECK` that re-asserts authorship (or `chat.messages.delete_any`) and `can_access_chat_channel(channel_id)`, so a message cannot be moved into an inaccessible channel.
 - **Role changes** on `chat_channel_members` are blocked by trigger `enforce_chat_member_role_change()` unless the caller owns the channel or holds `chat.channels.manage` — a plain member cannot self-elevate to `owner`.
+
+Further hardening (migration `20260621090200_chat_unread_and_attachment_hardening.sql`):
+
+- **`get_chat_unread_counts`** ignores its `p_user_id` argument and always scopes to `auth.uid()`, so a caller cannot read a colleague's unread state for shared channels.
+- **chat-attachments uploads** require a non-viewer role (`not is_viewer()`), matching the `images`/`media` buckets.
+
+Performance: the chat RLS policies are InitPlan-wrapped (`(select public.user_org_id())` etc.) in `20260621090100_chat_rls_initplan_perf_wrap.sql` so the argument-free helpers evaluate once per statement rather than per row.
