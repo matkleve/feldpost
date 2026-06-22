@@ -47,9 +47,10 @@ export class MapBasemapLayerService {
       );
     }
 
-    // Street basemap follows the active theme: CARTO ships matched light/dark
-    // tilesets. Satellite imagery is theme-agnostic, so it is left untouched.
-    const variant = this.isDarkThemeActive() ? 'dark_all' : 'light_all';
+    // Street basemap follows the active theme. CARTO ships matched tilesets;
+    // sandstone (warm theme) uses the cream-toned Voyager style. Satellite
+    // imagery is theme-agnostic, so it is left untouched.
+    const variant = this.resolveStreetTilePath();
     return L.tileLayer(`https://{s}.basemaps.cartocdn.com/${variant}/{z}/{x}/{y}{r}.png`, {
       maxNativeZoom: 19,
       maxZoom: 22,
@@ -59,24 +60,30 @@ export class MapBasemapLayerService {
   }
 
   /**
-   * Resolves the effective theme the same way the rest of the app does:
-   * explicit `data-theme` wins, otherwise fall back to the OS preference.
-   * `sandstone` is a light theme.
+   * Picks the CARTO tile path for the street basemap from the effective theme,
+   * resolved the same way the rest of the app does (explicit `data-theme` wins,
+   * otherwise OS preference):
+   *   - `dark`       → `dark_all` (neutral dark)
+   *   - `sandstone`  → `rastertiles/voyager` (warm, cream-toned)
+   *   - light / else → `light_all`
    */
-  private isDarkThemeActive(): boolean {
+  private resolveStreetTilePath(): string {
     if (typeof document === 'undefined') {
-      return false;
+      return 'light_all';
     }
     const theme = document.documentElement.getAttribute('data-theme');
+    if (theme === 'sandstone') {
+      return 'rastertiles/voyager';
+    }
     if (theme === 'dark') {
-      return true;
+      return 'dark_all';
     }
-    if (theme === 'light' || theme === 'sandstone') {
-      return false;
+    if (theme === 'light') {
+      return 'light_all';
     }
-    return (
+    const prefersDark =
       typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-color-scheme: dark)').matches
-    );
+      window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return prefersDark ? 'dark_all' : 'light_all';
   }
 }
