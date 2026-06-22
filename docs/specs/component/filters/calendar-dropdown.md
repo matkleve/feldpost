@@ -10,10 +10,10 @@ Single control row: optional label, bordered shell (`2.25rem` min height — too
 
 ## Where It Lives
 
-| Call site (v1 migration) | Parent | Variant |
+| Call site | Parent | Mode / variant |
 | --- | --- | --- |
-| Timespace From/To | [`app-timespace-dropdown`](../../component/map/map-filter-toolbar.md) | `dateOnly` + org domain bounds |
-| Media Detail Captured | `app-media-detail-inline-section` | `optionalTime` — time optional, matches current `captured-date-editor` behavior (time field shown, but Done not blocked when time is empty) |
+| Timespace From/To | [`app-timespace-dropdown`](../../component/map/map-filter-toolbar.md) | `mode='range'`, `timeMode='optionalTime'` (progressive), org domain bounds |
+| Media Detail Captured | `app-media-detail-inline-section` | `mode='single'`, `optionalTime` — header time row; Done not blocked when time empty |
 | Future filters/metadata | any form row | per parent |
 
 **Selector:** `app-calendar-dropdown`
@@ -24,25 +24,28 @@ Normative API (implementation mirrors `types.ts`):
 
 | Input | Type | Default | Effect |
 | --- | --- | --- | --- |
-| `timeMode` | `'dateOnly' \| 'optionalTime' \| 'requiredTime'` | `'dateOnly'` | Panel time row visibility + save validation |
+| `mode` | `'single' \| 'range'` | `'single'` | `range`: From/To pair + one shared popover — see [`calendar-dropdown.range-mode.supplement.md`](calendar-dropdown.range-mode.supplement.md) |
+| `timeMode` | `'dateOnly' \| 'optionalTime' \| 'requiredTime'` | `'dateOnly'` | Panel time UI + Done validation; range uses progressive Add time (supplement) |
 | `minDate` | `Date \| null` | `null` | Days before min **disabled** (muted, no select) |
 | `maxDate` | `Date \| null` | `null` | Days after max **disabled** |
 | `disabledDates` | `ReadonlySet<string> \| null` | `null` | Extra ISO `YYYY-MM-DD` disables (optional v1) |
 | `nullable` | `boolean` | `true` | Clear action may emit `null` |
 | `label` / `ariaLabel` | `string` | `''` | Accessible name |
-| `value` | `CalendarDropdownValue` | `null` | See child panel contract |
+| `value` | `CalendarDropdownValue` | `null` | Single mode only |
+| `rangeValue` | `CalendarRangeValue` | `null` | Range mode only — `{ from, to }` halves |
+| `fromLabel` / `toLabel` | `string` | `''` | Range mode field labels |
 
 **Timespace bounds (normative):** parent MUST pass `minDate` = oldest media in scoped catalog (UTC day), `maxDate` = today (UTC day). Out-of-range days are disabled, not merely styled.
 
-**No range-in-one-picker in v1:** From/To remain two `app-calendar-dropdown` instances; histogram stays in `app-timespace-dropdown`.
+**Range mode (normative):** one `app-calendar-dropdown` with `mode='range'` replaces two independent instances. Both From/To fields open the same portaled panel; range pick FSM and progressive time: [`calendar-dropdown.range-mode.supplement.md`](calendar-dropdown.range-mode.supplement.md). Histogram stays in `app-timespace-dropdown`.
 
 ## Actions
 
 | # | User action | System response |
 | --- | --- | --- |
 | 1 | Focus/type in text field | Parse with `I18nService.parseDateFieldValue` / time helpers; invalid stays draft until blur or commit |
-| 2 | Click calendar icon | Toggle popover; portal to `document.body`; position via anchor placement (below/flip) |
-| 3 | Pick day in panel | Updates draft; does not close until Done (unless parent uses immediate mode — **forbidden in v1**) |
+| 2 | Click calendar icon (either field in range mode) | Toggle shared popover; anchor to opening field; portal to `document.body` |
+| 3 | Pick day in panel | Updates draft per range FSM; does not close until **Done** |
 | 4 | Edit time (when `timeMode` allows) | Local draft; `requiredTime` blocks Done until valid `HH:MM` |
 | 5 | Click **Done** or **Enter** in panel | Emit `valueChange` + close popover if valid |
 | 6 | Click **Clear** (when `nullable`) | Emit `null` date/time + close |
@@ -51,31 +54,28 @@ Normative API (implementation mirrors `types.ts`):
 
 ## Component hierarchy
 
+**Single mode** (`mode='single'`):
+
 ```
 app-calendar-dropdown
 ├── label [optional]
-├── .calendar-dropdown__control (geometry owner)
+├── .calendar-dropdown__control
 │   ├── input.calendar-dropdown__input
-│   └── button.calendar-dropdown__trigger (icon) ← anchor element
-└── app-dropdown-shell [panelClass="calendar-dropdown-panel"] (portal + placement owner)
-    └── app-calendar-picker-panel
-        ├── header (date + optional time inputs)
-        ├── month grid
-        └── actions (clear, done)
+│   └── button.calendar-dropdown__trigger ← anchor
+└── app-dropdown-shell → app-calendar-picker-panel (single pick)
 ```
 
-**Portal / placement (normative):** `CalendarDropdownComponent` must import and use `DropdownShellComponent` (`app-dropdown-shell`) for the popover. `app-dropdown-shell` already handles `portalHostToBody()`, `computeAnchorPlacementForElement` (below/flip above), outside-click close, Escape close, ResizeObserver, and `z-index: 300`. No custom portal code is needed. Pass `[panelClass]="'calendar-dropdown-panel'"` to override `overflow-hidden` from the base `hlmMenuContent` CVA:
+**Range mode** (`mode='range'`):
 
-```scss
-// dropdown-shell.component.scss — add once
-:host.calendar-dropdown-panel {
-  overflow: visible;
-}
+```
+app-calendar-dropdown
+├── .calendar-dropdown__range-row
+│   ├── .calendar-dropdown__control (From) ← anchor when opened via From
+│   └── .calendar-dropdown__control (To)   ← anchor when opened via To
+└── app-dropdown-shell (one instance) → app-calendar-picker-panel (range pick)
 ```
 
-This is the same pattern as `.toolbar-dropdown--timespace` for the timespace panel's `overflow: visible` requirement.
-
-Panel contract: [`calendar-picker-panel.md`](calendar-picker-panel.md).
+Panel contract: [`calendar-picker-panel.md`](calendar-picker-panel.md). Portal/placement: [`calendar-dropdown.range-mode.supplement.md`](calendar-dropdown.range-mode.supplement.md) § Shared popover (same rules apply to single mode).
 
 ## Data
 
@@ -98,8 +98,10 @@ flowchart LR
 | State | Owner | Notes |
 | --- | --- | --- |
 | `popoverOpen` | `CalendarDropdownComponent` | FSM: closed ↔ open |
-| `committedValue` | parent input `value` | Source of truth |
-| `draftValue` | dropdown while open | Discarded on cancel |
+| `committedValue` | parent `value` or `rangeValue` | Source of truth |
+| `draftValue` / `rangeDraft` | dropdown while open | Discarded on cancel |
+| `anchorTarget` | range open FSM | `'pick' \| 'from' \| 'to'` — see range supplement |
+| `timeExpanded` | range + optionalTime | Add time link toggles spinner row |
 
 Popover MUST NOT render inside `app-dropdown-shell` content box — use body portal (same invariant as filter picker flyout).
 
@@ -126,7 +128,7 @@ Popover MUST NOT render inside `app-dropdown-shell` content box — use body por
 | `apps/web/src/app/shared/calendar-dropdown/calendar-dropdown.component.ts` | Shell: control row, toggle open, text commit; imports `DropdownShellComponent` |
 | `apps/web/src/app/shared/calendar-dropdown/calendar-dropdown.component.html` | |
 | `apps/web/src/app/shared/calendar-dropdown/calendar-dropdown.component.scss` | Gold emphasis on `.calendar-dropdown__control` |
-| `apps/web/src/app/shared/calendar-dropdown/calendar-dropdown.types.ts` | `CalendarDropdownValue`, `TimeMode`, `CalendarDay` |
+| `apps/web/src/app/shared/calendar-dropdown/calendar-dropdown.types.ts` | `CalendarDropdownValue`, `CalendarRangeValue`, `TimeMode`, `CalendarDay` |
 | `apps/web/src/app/shared/calendar-dropdown/calendar-picker-panel.component.ts` | Panel (extract from `captured-date-editor`; uses `date-field.helpers`, not `formatEU` / `parseDateInput`) |
 | `apps/web/src/app/shared/calendar-dropdown/calendar-picker-panel.component.html` | |
 | `apps/web/src/app/shared/calendar-dropdown/calendar-picker-panel.component.scss` | |
@@ -143,12 +145,13 @@ sequenceDiagram
   participant P as CalendarPickerPanel
   participant I18n as I18nService
 
-  note over TD,CD: Timespace From/To (dateOnly)
-  U->>P: pick day
-  P->>CD: draftChange
+  note over TD,CD: Timespace range (optionalTime progressive)
+  U->>CD: open From or To
+  U->>P: pick start then end (or single-click re-anchor)
+  P->>CD: rangeDraftChange
   U->>CD: Done / Enter
   CD->>I18n: parse/format
-  CD->>TD: valueChange
+  CD->>TD: rangeChange
 
   note over MD,CD: Media Detail Captured (optionalTime)
   U->>P: pick day / set time
@@ -160,7 +163,7 @@ sequenceDiagram
 
 ## Acceptance criteria
 
-See [`calendar-dropdown.acceptance-criteria.md`](calendar-dropdown.acceptance-criteria.md).
+- [ ] See [`calendar-dropdown.acceptance-criteria.md`](calendar-dropdown.acceptance-criteria.md) (single + range + progressive time)
 
 ## Settings
 

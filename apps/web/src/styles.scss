@@ -275,6 +275,9 @@ html[data-theme="sandstone"] {
   --primary: var(--brand-gold);
   --ring: var(--brand-gold);
   --sidebar-primary: var(--brand-gold);
+  // Secondary context ink stays cool blue — must not alias sandstone --primary (gold).
+  // @see docs/design/state-visuals.md § Interaction emphasis; docs/design/tokens.md
+  --interaction-selected-ink: oklch(0.50 0.10 245);
 
   // Sandstone raw palette (consumed by interaction tokens below)
   // @see docs/design/tokens.md (sandstone theme extensions)

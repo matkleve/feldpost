@@ -28,7 +28,8 @@ This is **not** a sidebar-only rule. It applies to every surface that uses inter
 | Upload panel file row multi-select | **High attention** | Embedded `--selected` rows |
 | Toolbar `data-active` | **Secondary** | Filter/sort/projects triggers (mode on, not list pick) |
 | Active sort row | **Secondary** | `sort-dropdown__option--active` |
-| Toggle `data-state=on` | **Secondary** | Map style switch, size control, upload lanes |
+| Toggle `data-state=on` | **Secondary** | Size control, upload lanes, settings segmented controls |
+| Map style switch `data-state=on` | **Tertiary** | Basemap segment on — *where you are in the map view* ([`map-style-switch.md`](../component/map/map-style-switch.md)) |
 | Nav active route | **Tertiary** | `.nav__link--active` |
 | Settings section rail | **Tertiary** | `.settings-overlay__section-item--active` |
 | Destructive quiet row | **Exception** | Destructive branch in menu states |
@@ -53,7 +54,9 @@ Material Icons do not reliably inherit without an explicit inherit rule on the i
 | ------- | ------------ |
 | `background: var(--menu-item-hover)` only | Gold wash, muted ink — looks “broken” |
 | Host gold + child `color: var(--primary)` | Gold label + blue icon (reported nav/dropdown bug) |
-| Gold on toggle `on` or toolbar `data-active` at rest | Passive mode — use secondary blue (`--interaction-selected-ink`) |
+| Gold on map basemap segment `on` at rest | Map view placement — use tertiary violet (`emphasis.nav`) |
+| Blue on map basemap segment `on` at rest | Same — not secondary; see [`map-style-switch.md`](../component/map/map-style-switch.md) |
+| Gold on generic toggle `on` or toolbar `data-active` at rest | Passive tool context — use secondary blue (`--interaction-selected-ink`) |
 | Blue on multi-select / flyout picker row at rest | Selection is the task — use gold (`emphasis.engaged`) |
 | `--interaction-selected-ink: var(--primary)` in sandstone | Sandstone `--primary` is gold — selected ink must stay cool blue |
 | Blue on nav active route at rest | Use tertiary violet (`emphasis.nav`) |
@@ -72,7 +75,8 @@ Material Icons do not reliably inherit without an explicit inherit rule on the i
 | Grouping multi-select | High attention | [`dropdown-system.md`](../component/filters/dropdown-system.md) | `.grouping-row--selected` |
 | Toolbar dropdown triggers `data-active` | Secondary | [`dropdown-system.md`](../component/filters/dropdown-system.md) | `button.*__menu-trigger` |
 | Map filter toolbar | Secondary | same | `map-filter-toolbar__menu-trigger` |
-| Toggle segments `on` | Secondary | [`map-style-switch.md`](../component/map/map-style-switch.md) | `[hlmToggleGroupItem]` |
+| Toggle segments `on` (generic) | Secondary | settings / upload / size toggles | `[hlmToggleGroupItem]` (default CVA) |
+| Map style switch segment on | Tertiary | [`map-style-switch.md`](../component/map/map-style-switch.md) | `.map-style-switch [hlmToggleGroupItem][data-state=on]` — pierced SCSS |
 | Map photo markers (hover) | High attention | [`media-marker.md`](../ui/media-marker/media-marker.md) | `.map-photo-marker` hover outline |
 | Media item grid tiles (hover) | High attention | [`media-item.md`](../component/media/media-item.md) | `.media-item__slot:hover` |
 
@@ -92,11 +96,13 @@ Feature SCSS must not reintroduce child `primary` overrides after host `emphasis
 - [x] **Given** a toolbar `hlmBtn` outline trigger on a frosted shell, **when** hovered, **then** icon, label, and chevron change ink together (no foreground lock on the host).
 - [x] **Given** an `hlmMenuItem` row in any dropdown (filter, sort, grouping, timespace panel actions), **when** hovered, **then** leading icon and label match host gold ink.
 - [ ] **Given** a grouping or upload-panel multi-select row is selected at rest, **when** not hovered, **then** host and slots show **brand gold** (`emphasis.engaged`) — not secondary blue.
-- [ ] **Given** sandstone theme (`html[data-theme="sandstone"]`), **when** a toggle segment or toolbar trigger shows passive mode at rest (not hovered), **then** host and slots show **cool blue** (`--interaction-selected-ink`) — **not** gold.
+- [ ] **Given** map style switch with basemap segment `data-state=on` at rest, **when** not hovered, **then** host and icon show **violet** (`--interaction-nav-ink`) — not gold or blue.
+- [ ] **Given** sandstone theme (`html[data-theme="sandstone"]`), **when** a generic toggle or toolbar trigger shows passive tool context at rest (not map basemap), **then** host and slots show **cool blue** (`--interaction-selected-ink`) — **not** gold.
 - [ ] **Given** sandstone theme, **when** hovering a non-selected quiet row, **then** host and slots show **brand gold** with no blue/gold split on icon vs label.
 
 ## Changelog
 
+- **2026-06-22 (c)** — Map style switch re-tiered to **tertiary violet**; split from generic toggle secondary.
 - **2026-06-22 (b)** — **High-attention tier:** gold includes multi-select / flyout selection at rest, not only pointer. Supersedes “pointer only” (a).
 - **2026-06-22 (a)** — Sandstone `--interaction-selected-ink` decoupling; passive-mode anti-patterns.
 - **2026-06-17 (d)** — **Three-tier attention budget:** primary gold / secondary blue / tertiary violet; `emphasis.nav()`, `--interaction-nav-ink`.

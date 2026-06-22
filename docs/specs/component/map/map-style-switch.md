@@ -6,7 +6,7 @@ Vertical **two-segment** basemap control in the map zone: **street map** vs **sa
 
 ## What It Looks Like
 
-Frosted pill track (top-left of map zone, `z-index: 200`). Each segment is a circular icon-only toggle (`map` / `satellite` Material icons). **On** segment uses **secondary** context ink (cool blue) at rest — passive basemap mode, not a list-selection task. **Off** segment is muted. **Hover / focus-visible** → **brand gold** (high attention while pointer is on the segment).
+Frosted pill track (top-left of map zone, `z-index: 200`). Each segment is a circular icon-only toggle (`map` / `satellite` Material icons). **On** segment uses **tertiary** nav ink (**violet**, `--interaction-nav-ink`) at rest — *which map view you are in*, same attention tier as sidebar route and settings section rail. **Off** segment is muted. **Hover / focus-visible** → **brand gold** (high attention while pointer is on the segment).
 
 ## Where It Lives
 
@@ -30,9 +30,9 @@ Frosted pill track (top-left of map zone, `z-index: 200`). Each segment is a cir
 
 | Surface | Rest (on) | Rest (off) | Hover / focus-visible (any segment, including already on) | Owner |
 | --- | --- | --- | --- | --- |
-| Segment (`hlmToggleGroupItem`) | Secondary `--interaction-selected-ink` + wash (cool blue; all themes) | Muted ink, transparent fill | **Brand gold** ink + gold wash; icon `color: inherit` | `toggle-group-variants.ts` + `_map-shell-style-switch.scss` pierce |
+| Segment (`hlmToggleGroupItem`) | Tertiary `--interaction-nav-ink` + wash (violet; all themes) | Muted ink, transparent fill | **Brand gold** ink + gold wash; icon `color: inherit` | `_map-shell-style-switch.scss` pierce (overrides shared toggle CVA secondary) |
 
-**Normative:** Resting **on** segment is **secondary** (passive mode) — cool blue, not gold. Multi-select / attention-selection patterns do **not** apply to this control. Pointer over an **already-selected** segment uses the same gold hover as an off segment.
+**Normative:** Resting **on** segment is **tertiary** (map view placement) — **violet**, not gold or blue. Generic `toggle-group-variants.ts` `data-[state=on]` secondary blue **does not apply** to `.map-style-switch`; feature SCSS must pierce with `emphasis.nav()` or equivalent. Multi-select / attention-selection patterns do **not** apply. Pointer over an **already-selected** segment uses the same gold hover as an off segment.
 
 ## Visual Behavior Contract
 
@@ -40,7 +40,8 @@ Frosted pill track (top-left of map zone, `z-index: 200`). Each segment is a cir
 | --- | --- | --- | --- | --- | --- | --- |
 | Track shell | `[hlmToggleGroup]` in `.map-style-switch` | `.map-style-switch` | segment buttons | `.map-style-switch [hlmToggleGroup]` | 200 | Frosted column track |
 | Segment chrome | `[hlmToggleGroupItem]` | segment button | segment button | `.map-style-switch__option` | content | 2.75rem circle |
-| Hover emphasis | segment button | segment button | segment button | `:hover` / `:focus-visible` on item | states | Brand gold on on+off while hovered; resting on = cool blue only |
+| Hover emphasis | segment button | segment button | segment button | `:hover` / `:focus-visible` on item | states | Brand gold on on+off while hovered; resting on = violet only |
+| Resting on emphasis | segment button | segment button | segment button | `data-[state=on]` on item | states | Violet (`emphasis.nav`); never gold or blue at rest |
 
 ## File Map
 
@@ -48,13 +49,20 @@ Frosted pill track (top-left of map zone, `z-index: 200`). Each segment is a cir
 | ---- | ------- |
 | `features/map/map-shell/component/map-shell.component.html` | Markup (`.map-style-switch`) |
 | `features/map/map-shell/scss/_map-shell-style-switch.scss` | Position + pierced toggle geometry |
-| `shared/ui/toggle-group/toggle-group-variants.ts` | Segment hover/on CVA |
+| `shared/ui/toggle-group/toggle-group-variants.ts` | Shared segment hover/on CVA (secondary default; **overridden** in map shell pierce) |
+
+## Documented exception
+
+| Surface | Why |
+| ------- | --- |
+| Map style switch `data-state=on` | **Tertiary** — basemap choice is *where you are in the map view* (orientation), not toolbar filter context (blue) or list attention (gold). Pierced in `_map-shell-style-switch.scss`. |
 
 ## Acceptance Criteria
 
 - [x] Two segments: street + satellite icons
 - [x] Vertical frosted track, top-left placement
-- [ ] **Given** sandstone theme, **when** the active basemap segment is on at rest (passive mode, not hovered), **then** icon ink is **cool blue** — not gold.
+- [ ] **Given** any theme (light / dark / sandstone), **when** the active basemap segment is on at rest (not hovered), **then** icon ink is **violet** (`--interaction-nav-ink`) — not gold or blue.
+- [ ] **Given** sandstone theme, **when** the active segment is on at rest, **then** ink remains **violet** — must not inherit sandstone `--primary` gold via shared toggle CVA.
 - [x] Hover/focus on **on** segment shows **brand gold** ink (not blue deepening)
 - [x] Hover/focus on **off** segment shows **brand gold** ink
 - [x] Icon inherits host ink on hover (no blue icon + gold wash split)

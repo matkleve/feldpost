@@ -22,7 +22,7 @@ When an interactive component spec is next edited, add **§ Interaction emphasis
 | `hlmBtn` default/destructive | same | **done** | Filled CTAs — exception (solid fill) |
 | `hlmBtn` secondary | same | **done** | No product call sites; use `outline` for quiet actions |
 | Toggle group items | [`toggle-group-variants.ts`](../../../apps/web/src/app/shared/ui/toggle-group/toggle-group-variants.ts) | **partial** | CVA correct; sandstone `--interaction-selected-ink` token fix pending |
-| Map style switch | [`map-style-switch.md`](../component/map/map-style-switch.md) | **partial** | via toggle-group CVA; sandstone resting-on must be blue not gold |
+| Map style switch | [`map-style-switch.md`](../component/map/map-style-switch.md) | **partial** | Resting on must be **violet** (`emphasis.nav` pierce); overrides toggle CVA |
 | Map photo markers | [`media-marker.md`](../ui/media-marker/media-marker.md) | **done** | gold hover outline |
 | Media item grid tiles | [`media-item.md`](../component/media/media-item.md) | **done** | gold slot hover |
 | Nav sidebar links | [`sidebar.md`](../component/workspace/sidebar.md) | **done** | tertiary `emphasis.nav()`; gold hover |
@@ -47,8 +47,8 @@ When an interactive component spec is next edited, add **§ Interaction emphasis
 | Projects dropdown picker rows | media-detail-inline-section spec | **done** | `--selected` in projects picker |
 | Grouping dropdown multi-select | [`dropdown-system.md`](../component/filters/dropdown-system.md) | **done** | `.grouping-row--selected` |
 | Filter dropdown rule rows | [`filter-dropdown.md`](../component/filters/filter-dropdown.md) | **done** | row hover gold; picker `data-selected` = primary `engaged` |
-| Timespace histogram + date fields | [`map-filter-toolbar.md`](../component/map/map-filter-toolbar.md) | **partial** | drag gold pending Brix; migrate to `calendar-dropdown` |
-| Calendar dropdown | [`calendar-dropdown.md`](../component/filters/calendar-dropdown.md) | **done** | replaces compact-date-field + inline captured-date-editor |
+| Timespace histogram + date fields | [`map-filter-toolbar.md`](../component/map/map-filter-toolbar.md) | **partial** | drag gold pending Brix; migrate to `calendar-dropdown` **range mode** |
+| Calendar dropdown | [`calendar-dropdown.md`](../component/filters/calendar-dropdown.md) | **partial** | single mode done; **range mode** spec added — Brix |
 | Media detail inline `__option--selected` | media-detail-inline-section spec | **done** | Tag chips unchanged |
 | Search / address typeahead rows | address-search, metadata pickers | **pending** | Align to ink contract |
 | `hlmBtn` secondary call sites | [`ui-primitives.button.md`](../component/ui-primitives/ui-primitives.button.md) | **done** | Migrated to `outline` (projects retry, media-empty) |
@@ -69,8 +69,8 @@ rg 'menu-trigger' apps/web/src/app --glob '*.scss' -A2 | rg 'color: var\(--foreg
 
 ## Changelog
 
-- **2026-06-22 (b)** — High-attention tier: gold = pointer + multi-select/flyout selection; map style switch remains secondary (passive mode).
-- **2026-06-22 (a)** — Sandstone token decoupling pending.
+- **2026-06-22 (c)** — Map style switch → tertiary violet (Brix: pierce `_map-shell-style-switch.scss`).
+- **2026-06-22 (b)** — High-attention tier:
 - **2026-06-17 (d)** — Three-tier budget: primary gold / secondary blue / tertiary violet (`--interaction-nav-ink`).
 - **2026-06-17 (c)** — Brix: `selected-hover` → gold; map style switch, markers, media tiles, toolbar triggers implemented.
 - **2026-06-17 (b)** — Contract change: selected+hover = gold.

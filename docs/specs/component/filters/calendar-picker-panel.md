@@ -2,7 +2,13 @@
 
 ## What It Is
 
-Popover **content** for [`calendar-dropdown.md`](calendar-dropdown.md): month grid, optional time row, Clear/Done. No trigger, no portal — parent `app-calendar-dropdown` owns anchor and open state.
+Popover **content** for [`calendar-dropdown.md`](calendar-dropdown.md): month grid, optional time (single header row or range progressive row), Clear/Done. No trigger, no portal — parent `app-calendar-dropdown` owns anchor and open state.
+
+**Range grid:** [`calendar-picker-panel.range-grid.supplement.md`](calendar-picker-panel.range-grid.supplement.md).
+
+## Where It Lives
+
+Rendered inside `app-calendar-dropdown` via `app-dropdown-shell` portal — never standalone.
 
 ## What It Looks Like
 
@@ -26,15 +32,19 @@ app-calendar-picker-panel
 
 | Input | Type | Notes |
 | --- | --- | --- |
+| `pickMode` | `'single' \| 'range'` | `'single'` | Enables range day classes + click semantics |
+| `anchorTarget` | `'pick' \| 'from' \| 'to'` | `'pick'` | Range only — from parent open FSM |
 | `timeMode` | `TimeMode` | from parent |
 | `minDate` / `maxDate` | `Date \| null` | disables out-of-range days |
 | `disabledDates` | `ReadonlySet<string> \| null` | optional |
 | `nullable` | `boolean` | shows Clear |
-| `draft` | `CalendarDropdownValue` | two-way via outputs |
+| `draft` | `CalendarDropdownValue` | single mode two-way |
+| `rangeDraft` | `CalendarRangeValue` | range mode two-way |
 
 | Output | Payload |
 | --- | --- |
-| `draftChange` | updated draft |
+| `draftChange` | updated single draft |
+| `rangeDraftChange` | updated range draft |
 | `done` | user committed from panel |
 | `clear` | user cleared |
 | `cancel` | Escape from panel focus trap |
@@ -43,7 +53,7 @@ app-calendar-picker-panel
 
 | # | User action | System response |
 | --- | --- | --- |
-| 1 | Click enabled day | Set `draft.date` (ISO UTC) |
+| 1 | Click enabled day | Single: set `draft.date`. Range: per `anchorTarget` / two-click FSM (supplement) |
 | 2 | Prev/next month | Change view month; selection unchanged |
 | 3 | **Today** shortcut | Select today if within bounds |
 | 4 | Type date/time in header | Parse locally; invalid blocks Done when required |
@@ -68,7 +78,8 @@ app-calendar-picker-panel
 | `day` | `number` | 1–31 |
 | `isCurrentMonth` | `boolean` | |
 | `isToday` | `boolean` | |
-| `isSelected` | `boolean` | |
+| `isSelected` | `boolean` | Single mode: selected day. Range: true on start or end |
+| `isRangeStart` / `isRangeEnd` / `isInRange` | `boolean` | Range mode only — see range grid supplement |
 | `isDisabled` | `boolean` | `true` when `date < minDate \|\| date > maxDate \|\| disabledDates.has(date)` |
 
 Disabled days render with reduced opacity and `pointer-events: none`.

@@ -35,9 +35,9 @@ Horizontal trigger row, left-aligned under `ss-search-bar` inside `.map-search-c
 | `.timespace-dropdown__selection--committed` | **Secondary** | selected-ink border + wash | — | `timespace-dropdown.component.scss` |
 | `.timespace-dropdown__selection--engaged` | **Primary** | — | gold border + wash + outer ring | same |
 | `.timespace-dropdown__chart--engaged` | **Primary** | — | gold track border during pointer drag | same |
-| `app-compact-date-field` `:focus-within` | **Primary** | neutral border | gold border + focus ring | `calendar-dropdown.component.scss` (replaces `compact-date-field`) |
+| `app-calendar-dropdown` `:focus-within` | **Primary** | neutral border | gold border + focus ring | `calendar-dropdown.component.scss` |
 
-**Normative:** Histogram brush uses **primary gold** only while `isDragging()`; committed range at rest uses **secondary** selected ink. Date fields use `app-calendar-dropdown` ([`calendar-dropdown.md`](../filters/calendar-dropdown.md)) — gold on `:focus-within`, body-portaled panel (no clip).
+**Normative:** Histogram brush uses **primary gold** only while `isDragging()`; committed range at rest uses **secondary** selected ink. Date range uses **one** `app-calendar-dropdown` `mode='range'` ([`calendar-dropdown.md`](../filters/calendar-dropdown.md) + [range supplement](../filters/calendar-dropdown.range-mode.supplement.md)) — gold on `:focus-within` per active field, body-portaled panel (no clip).
 
 ## File Map
 

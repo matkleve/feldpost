@@ -1,5 +1,7 @@
 // Map style switch (street/photo) — top-left of map zone
-// @see docs/migration/phase-8-global-scss-elimination.md (map-shell partial split)
+// @see docs/specs/component/map/map-style-switch.md
+
+@use '../../../../../styles/interaction-emphasis-quiet-row' as emphasis;
 
 .map-style-switch {
   position: absolute;
@@ -51,5 +53,27 @@
   &:focus-visible {
     outline: 2px solid color-mix(in srgb, var(--brand-gold) 72%, transparent);
     outline-offset: -2px;
+  }
+}
+
+@layer states {
+  // Resting on = tertiary violet (map view placement); overrides shared toggle CVA secondary/gold.
+  // @see docs/specs/component/map/map-style-switch.md § Interaction emphasis
+  :host .map-style-switch .map-style-switch__option[data-state='on'] {
+    @include emphasis.nav(10%);
+    box-shadow: none;
+
+    .material-icons {
+      color: inherit;
+    }
+
+    &:hover,
+    &:focus-visible {
+      @include emphasis.selected-hover(10%);
+
+      .material-icons {
+        color: inherit;
+      }
+    }
   }
 }

@@ -65,11 +65,11 @@ Gold means **this needs attention** — not merely “something is selected.”
 
 | Use gold (`emphasis.hover` / `emphasis.engaged`) | Use secondary blue (`emphasis.selected`) | Use tertiary violet (`emphasis.nav`) |
 | ------------------------------------------------ | ---------------------------------------- | ------------------------------------ |
-| `:hover`, `:focus-visible`, `:active` on any quiet control | Toggle `data-state=on` (mode, not a list choice) | Nav active route |
+| `:hover`, `:focus-visible`, `:active` on any quiet control | Toggle `data-state=on` (toolbar lanes, upload size — not map basemap) | Nav active route |
 | Filter picker row `data-selected` while choosing | Toolbar trigger `data-active` (filter/sort applied) | Settings section rail active |
-| Grouping / upload-panel **multi-select** row selected | Active sort row (preset, not flyout pick) | — |
+| Grouping / upload-panel **multi-select** row selected | Active sort row (preset, not flyout pick) | **Map style switch** segment on at rest |
 | In-panel engaged row in an **open** flyout | Calendar day selected (date context) | — |
-| Linked-hover (grid ↔ map cross-surface) | Map style switch segment on at rest | — |
+| Linked-hover (grid ↔ map cross-surface) | — | — |
 | Single or **multiple** list rows where selection is the current task | — | — |
 
 **Sandstone theme:** `--primary` may be gold for filled CTAs; `--interaction-selected-ink` **must** remain cool blue in `html[data-theme="sandstone"]`. Accidentally aliasing secondary ink to sandstone `--primary` makes passive context (toggle on) look like high-attention gold — **spec violation** (see [`tokens.md`](tokens.md) § Interaction emphasis).
@@ -80,7 +80,7 @@ Gold means **this needs attention** — not merely “something is selected.”
 | ---- | ------- | --- | ----- | -------- |
 | **High attention** | Pointer focus **or** selection that needs user focus now | `--brand-gold` | `emphasis.hover()`, `emphasis.engaged()` | Row hover; filter picker `data-selected`; grouping multi-select; upload-panel multi-select; linked-hover |
 | **Secondary** | Context is set, not the focal task | `--interaction-selected-ink` | `emphasis.selected()`, `emphasis.selected-bordered()` | Toolbar `data-active`, active sort row, toggle `data-state=on`, calendar selected day |
-| **Tertiary** | Where you are in the product | `--interaction-nav-ink` | `emphasis.nav()`, `emphasis.nav-bordered()` | Main nav active route, settings overlay section rail |
+| **Tertiary** | Where you are in the product or map view | `--interaction-nav-ink` | `emphasis.nav()`, `emphasis.nav-bordered()` | Main nav active route, settings overlay section rail, **map style switch on** |
 
 **Pointer always wins:** any tier + `:hover` / `:focus-visible` → **brand gold** (`emphasis.hover()`). Never deepen secondary/tertiary to stronger blue/violet on hover.
 
@@ -129,6 +129,7 @@ On any quiet host using the mixins above, **icon, label, and chevron slots must 
 - `apps/web/src/app/features/nav/nav.component.scss` — route links
 - `apps/web/src/app/features/map/map-shell/_map-shell-upload.scss` — map/media upload trigger (`.map-upload-btn`)
 - `apps/web/src/styles/_option-menu-item-states.scss` — menu rows (`emphasis.hover` + child `color: inherit`)
+- `apps/web/src/app/features/map/map-shell/scss/_map-shell-style-switch.scss` — map basemap switch (tertiary violet pierce over toggle CVA)
 - `apps/web/src/app/features/map/map-filter-toolbar/map-filter-toolbar.component.scss` — frosted map filter triggers
 - `apps/web/src/app/shared/rail-detail-nav-item/rail-detail-nav-item.component.scss` — page-rail detail rows
 - `apps/web/src/app/shared/rail-section/rail-section.component.scss` — collapsible rail headers
@@ -155,7 +156,7 @@ On any quiet host using the mixins above, **icon, label, and chevron slots must 
 | Map upload progress ring (`.map-upload-btn--uploading`) | Batch progress uses `--primary` on the ring/spinner only |
 | Media selection rings / tile FSM | Domain selection chrome — per media specs |
 
-**Test oracle:** Idle row is muted. **High attention** (hover, multi-select row selected, flyout picker `data-selected`, linked-hover) → **brand gold** on host + all child slots. **Secondary** at rest (sort preset on, filter toolbar active, toggle on) → cool blue — **including sandstone**. **Tertiary** at rest (nav route, settings section) → royal violet. Pointer over any tier → gold. **Reject:** gold on passive mode indicators (toggle on, toolbar `data-active`) at rest; blue on multi-select rows that are the current task.
+**Test oracle:** Idle row is muted. **High attention** (hover, multi-select row selected, flyout picker `data-selected`, linked-hover) → **brand gold** on host + all child slots. **Secondary** at rest (sort preset on, filter toolbar active, non-map toggles on) → cool blue. **Tertiary** at rest (nav route, settings section, **map basemap segment on**) → royal violet. Pointer over any tier → gold. **Reject:** gold on resting map basemap segment; blue on map basemap segment on at rest.
 
 ---
 
@@ -167,6 +168,7 @@ On any quiet host using the mixins above, **icon, label, and chevron slots must 
 
 ## Changelog
 
+- **2026-06-22 (c)** — **Map style switch** re-tiered to **tertiary violet** (map view placement); generic toggles remain secondary blue.
 - **2026-06-22 (b)** — **High-attention tier:** gold = pointer focus **and** selection that needs attention (multi-select, flyout pick, linked-hover); not passive mode context. Supersedes narrow “pointer only” wording from (a).
 - **2026-06-22 (a)** — Brand gold scope blocker; sandstone `--interaction-selected-ink` decoupling. Tokens table in [`tokens.md`](tokens.md).
 - **2026-06-17 (c)** — **Three-tier attention budget:** primary gold (hover + in-panel engaged rows), secondary blue (context set), tertiary violet (product nav). Tokens `--interaction-nav-ink`, mixins `emphasis.nav()` / `nav-bordered()`.
