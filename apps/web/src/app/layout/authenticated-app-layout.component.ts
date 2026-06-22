@@ -13,11 +13,12 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router, RouterOutlet } from '@angular/router';
 import { filter, map, startWith } from 'rxjs/operators';
 import { MapShellComponent } from '../features/map/map-shell/component/map-shell.component';
 import {
   resolveAuthenticatedActiveShell,
+  resolveMapShellDisplayed,
   type AuthenticatedActiveShell,
 } from './authenticated-shell-active.helpers';
 import { ShareLinkRestoreService } from '../core/share-set/share-link-restore.service';
@@ -98,7 +99,13 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
   );
 
   readonly activeShell = computed(() => resolveAuthenticatedActiveShell(this.currentUrl()));
-  readonly mapShellVisible = computed(() => this.activeShell() === 'map');
+
+  /** In-flight navigation target; set on NavigationStart, cleared on end/cancel/error. */
+  private readonly navigationTargetShell = signal<AuthenticatedActiveShell | null>(null);
+
+  readonly mapShellVisible = computed(() =>
+    resolveMapShellDisplayed(this.activeShell(), this.navigationTargetShell()),
+  );
 
   private previousActiveShell: AuthenticatedActiveShell | null = null;
 
@@ -148,6 +155,21 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
       }
 
       this.previousActiveShell = shell;
+    });
+
+    this.router.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
+      if (event instanceof NavigationStart) {
+        this.navigationTargetShell.set(resolveAuthenticatedActiveShell(event.url));
+        return;
+      }
+
+      if (
+        event instanceof NavigationEnd ||
+        event instanceof NavigationCancel ||
+        event instanceof NavigationError
+      ) {
+        this.navigationTargetShell.set(null);
+      }
     });
 
     effect(() => {

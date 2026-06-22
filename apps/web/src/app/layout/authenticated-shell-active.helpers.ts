@@ -31,3 +31,18 @@ export function resolveAuthenticatedActiveShell(url: string): AuthenticatedActiv
 
   return 'map';
 }
+
+/**
+ * Whether the layout map host should paint and receive pointer events.
+ * During an in-flight navigation, the destination shell wins so map chrome hides
+ * on NavigationStart (not only after lazy route chunks finish loading).
+ */
+export function resolveMapShellDisplayed(
+  activeShell: AuthenticatedActiveShell,
+  navigationTargetShell: AuthenticatedActiveShell | null,
+): boolean {
+  if (navigationTargetShell !== null) {
+    return navigationTargetShell === 'map';
+  }
+  return activeShell === 'map';
+}
