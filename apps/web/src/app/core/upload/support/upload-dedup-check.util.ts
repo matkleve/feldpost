@@ -28,9 +28,6 @@ export async function runUploadDedupCheck(
 ): Promise<UploadDedupCheckOutcome> {
   const mediaType = deps.uploadService.resolveMediaType(job.file);
   if (!isContentHashDedupEligible(mediaType) || job.forceDuplicateUpload) {
-    if (job.forceDuplicateUpload) {
-      deps.jobState.updateJob(jobId, { forceDuplicateUpload: false });
-    }
     return 'ineligible';
   }
 
