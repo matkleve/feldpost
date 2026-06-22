@@ -39,7 +39,7 @@ These are fully defined. Use them as the template when fixing the others.
 
 | # | Component | Visual-ownership problem | Severity |
 |---|---|---|---|
-| 1 | `shared/media/universal-media.component.scss` | **Visual owner leaks to consumers.** Border/ring/background/radius of `.universal-media__slot` are exposed as `--universal-media-slot-*` custom props that every consumer (upload-panel, media-item) overrides — so no single element actually owns the surface's appearance. Overlay layers (`__badge` z2, `__upload-overlay` z1) have **no documented z-index map**. `loading` / `error` are color-only overrides on a shared `.universal-media__layer` with no enforced state exclusivity. No spec / no contract. **Highest impact — it's a shared primitive, so the ambiguity propagates everywhere it's embedded.** | Blocker |
+| 1 | `shared/media/universal-media.component.scss` ⚠️ **DEPRECATED — do not invest** | Its visual owner *is* poorly defined (surface border/ring/bg/radius exposed as `--universal-media-slot-*` props that consumers override; `__badge`/`__upload-overlay` z-order undocumented; `loading`/`error` are color-only with no enforced exclusivity). **But this component is officially on the retire path** — `item-grid.migration-acceptance-and-gates.md` lists it as a "reference source during migration, then archived after replacement." Its only live consumer is `upload-panel-item`; the modern replacement is `media-display`. **Fix = retire it (migrate upload-panel-item's thumbnail to `media-display`, then archive), not document its ownership.** | Retire |
 | 2 | `features/upload/upload-shell/upload-shell.component.scss` | 5× `position: relative` + 4× `z-index`, **no contract reference** → multiple candidate stacking-context owners, implicit layer order. | Blocker |
 | 3 | `features/upload/upload-panel/upload-panel.component.scss` | 3× `position: relative` + 5× `z-index`, no consolidated layer map. | High |
 | 4 | `features/upload/upload-panel/upload-panel-item.component.scss` | 8× `z-index` (highest in repo). Selected/hover visual owner *is* consolidated (`emphasis` mixins on `.upload-panel__file-main` — good), but the overlay/hit-target/thumbnail/menu z-order has **no single layer map comment**; reads as ad-hoc. | High |
@@ -81,14 +81,13 @@ Lower visual complexity than Tier 1, but the owner is still implicit.
 
 ## Recommended order of work
 
-1. **`universal-media`** — define a Visual Behavior Contract: declare the slot as sole
-   visual owner of surface (border/radius/bg), document the badge/upload-overlay z-index
-   map, and make loading/error/empty mutually exclusive. This is a shared primitive, so it
-   pays off everywhere.
+1. **Retire `universal-media`** — do *not* write a contract for it. Migrate
+   `upload-panel-item`'s thumbnail to `media-display`, then archive `universal-media`
+   (it's already migration-marked for removal). This removes a poorly-defined surface
+   instead of documenting it.
 2. **Upload family** (`upload-shell`, `upload-panel`, `upload-panel-item`) — write one
-   z-index layer map and name the single stacking-context owner per component.
+   z-index layer map and name the single stacking-context owner per component. (Do this
+   after, or together with, step 1 since they share the upload surface.)
 3. **Auth / colleagues / organization** feature surfaces — backfill ownership matrices in
    their specs, then add `@see` links in SCSS.
 4. **Tier 2 quick wins** — add `@see` links binding existing specs to SCSS.
-</content>
-</invoke>
