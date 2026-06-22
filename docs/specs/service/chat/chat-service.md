@@ -56,4 +56,6 @@ Further hardening (migration `20260621090200_chat_unread_and_attachment_hardenin
 - **`get_chat_unread_counts`** ignores its `p_user_id` argument and always scopes to `auth.uid()`, so a caller cannot read a colleague's unread state for shared channels.
 - **chat-attachments uploads** require a non-viewer role (`not is_viewer()`), matching the `images`/`media` buckets.
 
+Attachment storage (migration `20260622080000_chat_attachments_private_bucket.sql`): the `chat-attachments` bucket is **private**. Uploads persist the storage path in `chat_attachments.storage_path` (not a public URL); `ChatMessagesAdapter` mints short-lived signed URLs at read time (`createSignedUrls`, 1h TTL) into `attachment.fileUrl`. The storage SELECT policy is scoped to the caller's org folder (`foldername[1] = user_org_id`), so a signed URL cannot be minted for another org's object. Realtime message events do not carry attachment joins, so attachments render after the next channel load. Legacy rows keep `file_url` as a non-authoritative fallback.
+
 Performance: the chat RLS policies are InitPlan-wrapped (`(select public.user_org_id())` etc.) in `20260621090100_chat_rls_initplan_perf_wrap.sql` so the argument-free helpers evaluate once per statement rather than per row.

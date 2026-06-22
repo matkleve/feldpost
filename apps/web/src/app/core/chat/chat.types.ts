@@ -32,6 +32,9 @@ export interface ChatMessageAttachment {
   id: string;
   messageId: string;
   mediaItemId: string | null;
+  /** Storage object path in the private `chat-attachments` bucket. */
+  storagePath: string | null;
+  /** Short-lived signed URL resolved at read time from `storagePath`; null until signed. */
   fileUrl: string | null;
   fileName: string | null;
   fileType: string | null;
