@@ -183,38 +183,69 @@ machine's invariants are written down and tested."**
 
 ---
 
-## 5. Autonomy — the "80% without asking" policy
+## 5. Conventions & autonomy — "don't make me re-specify the obvious"
 
-The goal is that "create a messaging service" runs ~80% autonomously. The way to
-get there safely (per the AI-autonomy-levels literature) is **not** "ask less" —
-it's **"specify more, then let the agent run inside the spec's boundaries."** A
-well-specified, well-tested module is exactly where an agent can be let loose;
-ambiguity is where it must stop. Tie autonomy to the change-class:
+The real ask is not a percentage. It's: **for a page concept that's been built a
+million times, nobody should have to tell the agent where the search box or the
+input field goes.** Standard archetypes carry standard layouts; the agent brings
+them. You specify the *delta*, not the universe.
 
-| Decide autonomously (just do it, ~the 80%) | Must ask first (the ~20%) |
+### Convention default (specify-the-delta) — the primary rule
+
+- **Recognize the archetype.** List page, detail page, search, settings, CRUD
+  form, auth screen, master-detail, wizard — each has a conventional layout and a
+  conventional set of states (loading / empty / error / populated).
+- **Inherit conventions automatically**, from two sources, in this order:
+  1. **This project's existing equivalent** — the nearest page/component and the
+     `docs/specs/component/registry.md` entry. Match it (placement, tokens,
+     shared primitives, interaction emphasis) so the app stays coherent.
+  2. **Standard UX convention** for that archetype where the project has no
+     precedent (e.g. search top of list, primary action top-right, destructive
+     actions guarded, pagination at the foot of long lists).
+- **The spec names the archetype and records only deviations.** "Standard list
+  page" + "search filters the current project, not the org" is a complete
+  contract. It does **not** need to enumerate where the search field sits — that
+  is inherited. This keeps *spec-is-contract* intact: the contract is
+  "archetype + deltas," not silence, and not a pixel inventory.
+- **Surface, don't ask.** The agent states the conventions it applied in one line
+  ("standard list page: search top, new-item top-right, empty-state CTA") so the
+  choices are visible — but it does **not** ask permission for each. You correct
+  the few that are wrong; you don't dictate the many that are obvious.
+
+This is the counterweight to `implement-from-spec`'s "don't add anything the spec
+doesn't mention": that rule prevents *invented behavior*; this one permits
+*inherited convention*. Convention for a named archetype is not invention — it's
+the baseline the archetype already implies. (Genuinely novel UI, new product
+behavior, or anything Sensitive-class still gets specified explicitly.)
+
+### When the agent still must stop and ask
+
+Conventions cover layout and standard states. They do **not** cover product
+decisions. Stop and ask (or emit `⚠ SPEC GAP:`) for:
+
+| Inherited from convention — just do it | Must ask / specify explicitly |
 | --- | --- |
-| Anything fully determined by the spec, glossary, tokens, or an existing pattern | A **new data shape / table / RLS** decision, or anything Sensitive-class |
-| Reusing a registered shared component or adapter | Adding a **new component** when a registry entry might cover it (reuse vs build) |
-| File layout following service-module symmetry | **Merging or splitting** existing components/services (structural change) |
-| Naming from the glossary; standard signals/computed wiring | A genuine **product-behavior ambiguity** the spec doesn't resolve |
-| Writing the tests the acceptance criteria imply | A **security/data-protection** trade-off (DSGVO, org scoping) |
-| Trivial/Standard-class work end-to-end | Anything that would **change a published contract** other code depends on |
+| Archetype layout: field/search/action placement, standard loading/empty/error states | **What the data means** — which records, which scope (`organization_id`), which filters |
+| Reusing a registered shared component, adapter, design token | A **new data shape / table / RLS**, or anything Sensitive-class |
+| Naming from the glossary; standard signals/`computed` wiring | Adding a **new component** when a registry variant might cover it (reuse vs build) |
+| Matching an existing equivalent page in the app | **Merging/splitting** components or services (structural — its own task) |
+| Writing the tests the acceptance criteria imply | A genuine **product-behavior** choice or **security/DSGVO** trade-off the spec doesn't resolve |
 
 Operating rules:
 
-- **Front-load the questions, then go.** For a big ask, the agent interviews the
-  user *once* (batched questions) to reach DoR, writes the spec, then executes
-  the rest without re-confirming each step. Don't drip-feed questions mid-build.
-- **Boundaries, not babysitting.** Inside the spec + acceptance tests, proceed.
-  At a spec gap, stop and emit `⚠ SPEC GAP:` (already in the spec format) rather
-  than guessing.
-- **Evidence replaces approval.** Instead of asking "is this right?", show the
-  passing check. Verification is what makes high autonomy safe.
-- **Two corrections ⇒ reset.** If the user corrects the same thing twice, the
-  context is polluted — re-read the baseline and re-prompt, don't keep patching.
+- **Front-load questions once.** For a big ask, interview *once* (batched) to
+  reach Definition of Ready, then execute without re-confirming each step. Don't
+  drip-feed questions — and don't ask about anything convention already answers.
+- **Boundaries, not babysitting.** Inside the spec + acceptance tests + inherited
+  conventions, proceed. At a real product gap, stop — don't guess.
+- **Evidence replaces approval.** Instead of "is this right?", show the passing
+  check and the conventions applied.
+- **Two corrections ⇒ reset.** If the user corrects the same thing twice, re-read
+  the baseline and re-prompt rather than patching on a polluted context.
 
-This is how you get 80% hands-off *without* the agent confidently shipping the
-wrong thing: the autonomy lives inside a spec tight enough to be checked.
+The result is what you actually wanted: say "build a standard settings page for
+X," and the agent lays it out the conventional way on the first try, asking only
+about the handful of things that are specific to *your* product.
 
 ---
 
@@ -248,11 +279,13 @@ scope, testable criteria) → **Specify** (behavior, not implementation; a
 state-coherence contract when multiple panes share a selection) → **Plan** (reuse
 decided, files mapped, one runnable check named) → **Tasks** (thin vertical
 slices) → **Implement** → **Verify** (evidence, fresh-context review) → **Done**
-(universal checklist, no leftovers). Agents run ~80% of it autonomously *because*
-the spec is tight enough to check, and stop only at the ~20% that the spec can't
-resolve — new data shapes, structural component changes, security trade-offs.
-The messaging bug disappears when "all panes derive from one selection signal" is
-a written, tested contract instead of an unstated assumption.
+(universal checklist, no leftovers). For standard archetypes the agent **inherits
+conventions** (where the search/input/actions go) from the project's existing
+pages and standard UX — you specify only the *delta* that's specific to your
+product. It runs hands-off *because* the spec is tight enough to check, and stops
+only for genuine product/data/security decisions the spec can't resolve. The
+messaging bug disappears when "all panes derive from one selection signal" is a
+written, tested contract instead of an unstated assumption.
 
 ---
 

@@ -27,6 +27,12 @@ loop cannot ship.
    reach Ready, then run autonomously. Do not drip-feed questions per step.
 6. **Stay in scope.** No new component without a registry check; no merging or
    splitting components/services as a side effect — that is its own task.
+7. **Inherit conventions; specify the delta.** For standard archetypes (list,
+   detail, search, settings, CRUD form, auth, wizard) do NOT ask where the
+   search box / input / primary action goes. Apply the project's nearest existing
+   equivalent + the registry + standard UX convention. The user specifies only
+   what deviates. State the conventions you applied in one line; do not ask
+   permission for each. This is not "inventing" — it is the archetype's baseline.
 
 ## Procedure
 
@@ -38,8 +44,10 @@ loop cannot ship.
     money, stateful UI, the upload pipeline, anything `organization_id`-scoped.
 
 ### Stage 1 — Shape (Definition of Ready) — BLOCKING
-Interview the user **once** (use `AskUserQuestion`, batch the questions) until all
-of these hold. If any cannot be answered, stop with `⚠ SPEC GAP: …`.
+First identify the **archetype** and inherit its conventions (rule 7) — do not
+ask about anything convention already answers. Then interview the user **once**
+(use `AskUserQuestion`, batch the questions) only on what's left, until all of
+these hold. If any cannot be answered, stop with `⚠ SPEC GAP: …`.
 - [ ] User value stated; scope boundary explicit (what's in AND what's out).
 - [ ] Change-class declared.
 - [ ] Acceptance criteria drafted and **testable** (behavior, not implementation).
