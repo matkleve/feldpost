@@ -1035,7 +1035,7 @@ export class MediaDetailViewComponent implements OnDestroy {
       return;
     }
 
-    await this.persistAddressFieldMeta(field, { source: 'user', verified: false });
+    await this.fieldsHelper.persistAddressFieldMeta(field, { source: 'user', verified: false });
 
     const fieldLabel = this.t(label.key, label.fallback);
     this.showUndoToast(
@@ -1046,7 +1046,7 @@ export class MediaDetailViewComponent implements OnDestroy {
           return;
         }
         if (previousMeta) {
-          await this.persistAddressFieldMeta(field, previousMeta);
+          await this.fieldsHelper.persistAddressFieldMeta(field, previousMeta);
         }
       },
     );
