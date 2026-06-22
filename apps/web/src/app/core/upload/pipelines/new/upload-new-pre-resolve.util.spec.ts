@@ -308,4 +308,71 @@ describe('runPreUploadLocationResolve — text before EXIF', () => {
       expect.objectContaining({ jobId: job.id, existingMediaId: 'existing-media-id' }),
     );
   });
+
+  it('keeps duplicate bypass active across both pre-resolve dedup passes', async () => {
+    let job = createJob({
+      groupingKey: undefined,
+      titleAddress: undefined,
+      titleAddressSource: undefined,
+      coords: { lat: 48.2, lng: 16.37 },
+      forceDuplicateUpload: true,
+    });
+
+    const { runPreUploadLocationResolve } = await import('./upload-new-pre-resolve.util');
+    const deps = {
+      jobState: {
+        findJob: vi.fn(() => job),
+        updateJob: vi.fn((_id: string, patch: Partial<typeof job>) => {
+          job = { ...job, ...patch };
+        }),
+        setPhase: vi.fn((_id: string, phase: typeof job.phase) => {
+          job = { ...job, phase };
+        }),
+      },
+      queue: { markDone: vi.fn() },
+      uploadService: {
+        resolveMediaType: vi.fn().mockReturnValue('photo'),
+        isPhotoFile: vi.fn().mockReturnValue(true),
+      },
+      filenameParser: { extractAddress: vi.fn().mockReturnValue(undefined) },
+      locationConfig: {
+        getConfig: vi.fn().mockReturnValue({
+          titleConfidenceThreshold: 0.8,
+          filenameAlwaysOverridesFolder: true,
+        }),
+      },
+      locationResolution: {},
+      addressOrchestrator: {},
+    };
+    const ctx = {
+      emitBatchProgress: vi.fn(),
+      drainQueue: vi.fn(),
+      emitMissingData: vi.fn(),
+      failJob: vi.fn(),
+      emitUploadSkipped: vi.fn(),
+      emitImageUploaded: vi.fn(),
+      emitImageReplaced: vi.fn(),
+      emitImageAttached: vi.fn(),
+      emitLocationConflict: vi.fn(),
+      getAbortSignal: vi.fn(),
+      checkDedupHash: vi.fn().mockResolvedValue({
+        mediaItemId: 'existing-media-id',
+        registeredByUserId: 'user-1',
+      }),
+      getCurrentUserId: vi.fn().mockReturnValue('user-1'),
+      emitDuplicateDetected: vi.fn(),
+    };
+
+    const outcome = await runPreUploadLocationResolve(
+      deps as never,
+      job.id,
+      job.parsedExif ?? {},
+      ctx as never,
+    );
+
+    expect(outcome).toBe('continue');
+    expect(ctx.checkDedupHash).not.toHaveBeenCalled();
+    expect(job.phase).toBe('extracting_title');
+    expect(ctx.emitUploadSkipped).not.toHaveBeenCalled();
+  });
 });
