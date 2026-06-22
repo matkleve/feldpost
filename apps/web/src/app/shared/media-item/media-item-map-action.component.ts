@@ -103,11 +103,6 @@ export class MediaItemMapActionComponent {
     });
   });
 
-  readonly panelMinWidth = computed(() => {
-    const width = this.triggerRef()?.nativeElement.getBoundingClientRect().width ?? 0;
-    return Math.max(200, Math.round(width));
-  });
-
   t(key: string, fallback: string): string {
     const value = this.i18nService.t(key, fallback);
     return typeof value === 'string' && value.trim().length > 0 ? value : fallback;

@@ -15,23 +15,22 @@
   [attr.aria-label]="selectLabel()"
   (click)="onSelectClick($event)"
 >
-  <!-- Stable states: interactive-selected | interactive-selected-map-disabled render selected checkmark. -->
-  <!-- @see docs/specs/component/media/media-item-quiet-actions.md#state-machine -->
   @if (selected()) {
-    <!-- Shows check glyph when item is currently selected. -->
-    <!-- @see docs/specs/component/media/media-item.md#actions--interactions -->
     <span class="material-icons media-item-quiet-actions__icon" aria-hidden="true">check</span>
+  } @else {
+    <span class="material-icons media-item-quiet-actions__icon" aria-hidden="true">radio_button_unchecked</span>
   }
 </button>
 
-<!-- Map zoom: single location flies to map; multiple opens StandardDropdown picker. -->
+<!-- Map zoom: only rendered when a zoomable location exists. -->
 <!-- @see docs/specs/component/media/media-item-quiet-actions.md#state-machine -->
-<app-media-item-map-action
-  [mediaItemId]="mediaItemId()"
-  [legacyLatitude]="legacyLatitude()"
-  [legacyLongitude]="legacyLongitude()"
-  [legacyAddressLabel]="legacyAddressLabel()"
-  [mapLabel]="mapLabel()"
-  [disabled]="mapActionDisabled()"
-  (mapZoomRequested)="mapZoomRequested.emit($event)"
-/>
+@if (!mapActionDisabled()) {
+  <app-media-item-map-action
+    [mediaItemId]="mediaItemId()"
+    [legacyLatitude]="legacyLatitude()"
+    [legacyLongitude]="legacyLongitude()"
+    [legacyAddressLabel]="legacyAddressLabel()"
+    [mapLabel]="mapLabel()"
+    (mapZoomRequested)="mapZoomRequested.emit($event)"
+  />
+}
