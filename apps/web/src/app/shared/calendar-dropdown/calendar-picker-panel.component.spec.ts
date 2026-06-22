@@ -83,19 +83,23 @@ describe('CalendarPickerPanelComponent', () => {
     expect(fixture.componentInstance.viewMonth()).toBe(4);
   });
 
-  it('re-syncs visible month only when draft date changes', () => {
+  it('does not snap view month when selecting another day in the visible month', () => {
     fixture.componentRef.setInput('draft', { date: '2026-06-03', time: null });
     fixture.detectChanges();
     fixture.componentInstance.nextMonth();
     fixture.detectChanges();
     expect(fixture.componentInstance.viewMonth()).toBe(6);
 
-    fixture.componentRef.setInput('draft', { date: '2026-06-03', time: null });
-    fixture.detectChanges();
-    expect(fixture.componentInstance.viewMonth()).toBe(6);
+    const target = fixture.componentInstance.calendarDays().find((day) => day.date === '2026-07-20');
+    expect(target).toBeDefined();
 
-    fixture.componentRef.setInput('draft', { date: '2026-08-15', time: null });
-    fixture.detectChanges();
-    expect(fixture.componentInstance.viewMonth()).toBe(7);
+    let emittedDate = '';
+    fixture.componentInstance.draftChange.subscribe((value) => {
+      emittedDate = value?.date ?? '';
+    });
+    fixture.componentInstance.selectDay(target!);
+
+    expect(emittedDate).toBe('2026-07-20');
+    expect(fixture.componentInstance.viewMonth()).toBe(6);
   });
 });
