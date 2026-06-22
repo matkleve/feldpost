@@ -149,7 +149,6 @@ interface AddressFieldSaveEvent {
 import type {
   AddressFieldKind,
   AddressFieldMeta,
-  AddressFieldVerification,
 } from '../../../core/address-field-suggest/address-field-suggest.types';
 import type { ReconciliationOffer } from '../../../core/address-reconciliation/address-reconciliation.types';
 import {
@@ -993,31 +992,11 @@ export class MediaDetailViewComponent implements OnDestroy {
       ? { source: 'geocoder' as const, verified: true }
       : { source: 'user' as const, verified: false };
 
-    await this.persistAddressFieldMeta(field, newFieldMeta);
+    await this.fieldsHelper.persistAddressFieldMeta(field, newFieldMeta);
 
     if (event.value.trim()) {
       void this.resolveGpsFromAddressFields();
     }
-  }
-
-  private async persistAddressFieldMeta(
-    field: AddressFieldKind,
-    verification: AddressFieldVerification,
-  ): Promise<void> {
-    const mediaItem = this.media();
-    if (!mediaItem) {
-      return;
-    }
-
-    const updatedMeta = { ...(mediaItem.address_field_meta ?? {}), [field]: verification };
-    await this.supabaseService.client
-      .from('media_items')
-      .update({ address_field_meta: updatedMeta })
-      .or(`id.eq.${mediaItem.id},source_image_id.eq.${mediaItem.id}`);
-
-    this.media.update((current) =>
-      current ? { ...current, address_field_meta: updatedMeta } : current,
-    );
   }
 
   private static readonly ADDRESS_FIELD_LABEL_KEYS: Record<
@@ -1056,7 +1035,7 @@ export class MediaDetailViewComponent implements OnDestroy {
       return;
     }
 
-    await this.persistAddressFieldMeta(field, { source: 'user', verified: false });
+    await this.fieldsHelper.persistAddressFieldMeta(field, { source: 'user', verified: false });
 
     const fieldLabel = this.t(label.key, label.fallback);
     this.showUndoToast(
@@ -1067,7 +1046,7 @@ export class MediaDetailViewComponent implements OnDestroy {
           return;
         }
         if (previousMeta) {
-          await this.persistAddressFieldMeta(field, previousMeta);
+          await this.fieldsHelper.persistAddressFieldMeta(field, previousMeta);
         }
       },
     );

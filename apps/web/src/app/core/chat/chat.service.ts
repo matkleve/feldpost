@@ -143,7 +143,7 @@ export class ChatService {
       const upload = await this.messagesAdapter.uploadChatFile(orgId, userId, input.attachmentFile);
       if (upload.path) {
         await this.messagesAdapter.attachFile(message.id, {
-          fileUrl: upload.path,
+          storagePath: upload.path,
           fileName: input.attachmentFile.name,
           fileType: input.attachmentFile.type,
         });

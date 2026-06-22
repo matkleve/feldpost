@@ -30,6 +30,8 @@ Desktop: `app-page-grid` with left rail ~16–22rem. Section rail mirrors [setti
 | 6 | Requests export | Insert job + `process_org_export_job` RPC | export section |
 | 7 | Downloads export | Browser blob from `payload` jsonb | export list |
 
+Export `payload` jsonb contains: `organization`, `projects`, `members` (id, full name, suspended/removed timestamps), and `mediaItems` (full `media_items` rows minus `storage_path`/`thumbnail_path`). Storage object bytes are not part of the JSON export. Gated by the `org.export` permission in `process_org_export_job` (migration `20260620100300_org_export_payload_completeness.sql`).
+
 ## Component Hierarchy
 
 ```text

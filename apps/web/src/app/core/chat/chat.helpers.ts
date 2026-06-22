@@ -52,6 +52,9 @@ export function toMessage(row: Record<string, unknown>): ChatMessage {
       id: a['id'] as string,
       messageId: a['message_id'] as string,
       mediaItemId: (a['media_item_id'] as string | null) ?? null,
+      storagePath: (a['storage_path'] as string | null) ?? null,
+      // Signed at read time from storagePath (private bucket). Legacy rows may
+      // still carry a stored file_url; keep it as a fallback.
       fileUrl: (a['file_url'] as string | null) ?? null,
       fileName: (a['file_name'] as string | null) ?? null,
       fileType: (a['file_type'] as string | null) ?? null,

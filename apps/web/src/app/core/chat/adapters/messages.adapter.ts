@@ -4,7 +4,11 @@ import { toMessage } from '../chat.helpers';
 import type { ChatMessage, SendMessageInput } from '../chat.types';
 
 const MESSAGE_SELECT =
-  '*, profiles(full_name), chat_reactions(emoji, user_id), chat_attachments(id, message_id, media_item_id, file_url, file_name, file_type), chat_message_links(id, message_id, entity_type, entity_id, entity_label)';
+  '*, profiles(full_name), chat_reactions(emoji, user_id), chat_attachments(id, message_id, media_item_id, storage_path, file_url, file_name, file_type), chat_message_links(id, message_id, entity_type, entity_id, entity_label)';
+
+const ATTACHMENTS_BUCKET = 'chat-attachments';
+// Signed-URL lifetime for rendering private attachments. Re-signed on each load.
+const SIGNED_URL_TTL_SECONDS = 60 * 60;
 
 @Injectable({ providedIn: 'root' })
 export class ChatMessagesAdapter {
@@ -25,6 +29,7 @@ export class ChatMessagesAdapter {
     }
 
     const messages = await this.attachThreadCounts(data ?? []);
+    await this.signAttachmentUrls(messages);
     return { data: messages, error: null };
   }
 
@@ -40,7 +45,9 @@ export class ChatMessagesAdapter {
       return { data: [], error: new Error(error.message) };
     }
 
-    return { data: (data ?? []).map((row) => toMessage(row)), error: null };
+    const messages = (data ?? []).map((row) => toMessage(row));
+    await this.signAttachmentUrls(messages);
+    return { data: messages, error: null };
   }
 
   async sendMessage(
@@ -96,7 +103,9 @@ export class ChatMessagesAdapter {
       return { data: [], error: new Error(error.message) };
     }
 
-    return { data: (data ?? []).map((row) => toMessage(row)), error: null };
+    const messages = (data ?? []).map((row) => toMessage(row));
+    await this.signAttachmentUrls(messages);
+    return { data: messages, error: null };
   }
 
   async addReaction(messageId: string, userId: string, emoji: string): Promise<{ error: Error | null }> {
@@ -122,11 +131,11 @@ export class ChatMessagesAdapter {
 
   async attachFile(
     messageId: string,
-    file: { fileUrl: string; fileName: string; fileType: string; mediaItemId?: string | null },
+    file: { storagePath: string; fileName: string; fileType: string; mediaItemId?: string | null },
   ): Promise<{ error: Error | null }> {
     const { error } = await this.supabase.client.from('chat_attachments').insert({
       message_id: messageId,
-      file_url: file.fileUrl,
+      storage_path: file.storagePath,
       file_name: file.fileName,
       file_type: file.fileType,
       media_item_id: file.mediaItemId ?? null,
@@ -167,8 +176,49 @@ export class ChatMessagesAdapter {
       return { path: null, error: new Error(error.message) };
     }
 
-    const { data } = this.supabase.client.storage.from('chat-attachments').getPublicUrl(path);
-    return { path: data.publicUrl, error: null };
+    // Bucket is private; persist the storage path and sign on read.
+    return { path, error: null };
+  }
+
+  /**
+   * Resolves short-lived signed URLs for every attachment carrying a
+   * `storagePath` (private `chat-attachments` bucket), mutating each attachment's
+   * `fileUrl` in place. Legacy rows without a storagePath keep their stored
+   * `fileUrl`. Batched via `createSignedUrls`; failures leave `fileUrl` as-is.
+   */
+  private async signAttachmentUrls(messages: ChatMessage[]): Promise<void> {
+    const paths = [
+      ...new Set(
+        messages
+          .flatMap((message) => message.attachments ?? [])
+          .map((attachment) => attachment.storagePath)
+          .filter((path): path is string => !!path),
+      ),
+    ];
+
+    if (paths.length === 0) {
+      return;
+    }
+
+    const { data } = await this.supabase.client.storage
+      .from(ATTACHMENTS_BUCKET)
+      .createSignedUrls(paths, SIGNED_URL_TTL_SECONDS);
+
+    const signedByPath = new Map<string, string>();
+    for (const entry of data ?? []) {
+      if (entry.error || !entry.path || !entry.signedUrl) {
+        continue;
+      }
+      signedByPath.set(entry.path, entry.signedUrl);
+    }
+
+    for (const message of messages) {
+      for (const attachment of message.attachments ?? []) {
+        if (attachment.storagePath) {
+          attachment.fileUrl = signedByPath.get(attachment.storagePath) ?? attachment.fileUrl;
+        }
+      }
+    }
   }
 
   private async attachThreadCounts(rows: Record<string, unknown>[]): Promise<ChatMessage[]> {

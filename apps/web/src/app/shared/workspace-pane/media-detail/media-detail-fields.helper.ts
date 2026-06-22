@@ -2,6 +2,7 @@ import type { WritableSignal } from '@angular/core';
 import type {
   AddressFieldKind,
   AddressFieldMeta,
+  AddressFieldVerification,
 } from '../../../core/address-field-suggest/address-field-suggest.types';
 import type { ForwardGeocodeResult } from '../../../core/geocoding/geocoding.service';
 import type { MediaLocationUpdateService } from '../../../core/media-location-update/media-location-update.service';
@@ -356,6 +357,26 @@ export class MediaDetailFieldsHelper {
     }
 
     this.deps.signals.saving.set(false);
+  }
+
+  /** Writes verification meta for a single address field (user edit or geocoder confirm). */
+  async persistAddressFieldMeta(
+    field: AddressFieldKind,
+    verification: AddressFieldVerification,
+  ): Promise<void> {
+    const img = this.deps.signals.media();
+    if (!img) return;
+
+    const addressFieldMeta = { ...(img.address_field_meta ?? {}), [field]: verification };
+
+    this.deps.signals.media.update((prev) =>
+      prev ? { ...prev, address_field_meta: addressFieldMeta } : prev,
+    );
+
+    await this.deps.services.supabase.client
+      .from('media_items')
+      .update({ address_field_meta: addressFieldMeta })
+      .or(`id.eq.${img.id},source_image_id.eq.${img.id}`);
   }
 
   /** Writes geocoder verification meta after resolve_media_location already saved address + coords. */
