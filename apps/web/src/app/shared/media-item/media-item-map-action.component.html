@@ -2,13 +2,15 @@
   #mapTriggerRef
   type="button"
   class="media-item-map-action__trigger"
+  [class.is-loading]="loading()"
   hlmBtn
   variant="outline"
   size="icon-sm"
-  [disabled]="disabled() || loading()"
+  [disabled]="disabled()"
   [attr.aria-label]="mapLabel()"
   [attr.aria-expanded]="open()"
-  [attr.aria-haspopup]="open() ? 'listbox' : null"
+  aria-haspopup="listbox"
+  [attr.aria-busy]="loading() || null"
   (click)="onMapClick($event)"
 >
   @if (loading()) {
@@ -24,7 +26,7 @@
     panelClass="option-menu-surface media-item-map-action__panel"
     placement="end"
     [anchor]="triggerEl()"
-    [minWidth]="panelMinWidth()"
+    [minWidth]="200"
     (closeRequested)="close()"
   >
     @if (showSearch()) {

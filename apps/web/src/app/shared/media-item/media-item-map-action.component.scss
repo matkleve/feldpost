@@ -38,6 +38,14 @@
     visibility var(--motion-duration-fast) var(--motion-ease-out);
 }
 
+// Selected tile with a zoomable location keeps the map button permanently visible.
+// The equivalent rule in media-item.component.scss cannot pierce Angular's emulated encapsulation.
+:host-context(.media-item__slot--selected.media-item__slot--map-enabled) .media-item-map-action__trigger {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
 .media-item-map-action__trigger:focus-visible {
   opacity: 1;
   visibility: visible;
@@ -50,6 +58,12 @@
 button.media-item-map-action__trigger {
   @include frosted-chrome.outline-control;
   box-shadow: var(--shadow-md);
+  border-radius: var(--radius-full);
+
+  &.is-loading {
+    pointer-events: none;
+    cursor: default;
+  }
 
   &:hover:not(:disabled),
   &:focus-visible:not(:disabled) {
