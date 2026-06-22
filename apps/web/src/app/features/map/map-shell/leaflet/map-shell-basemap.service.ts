@@ -1,9 +1,10 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
 import type { ToggleValue } from '@spartan-ng/brain/toggle-group';
 import type { ToggleGroupOption } from '../../../../shared/ui/toggle-group/toggle-group-option.types';
 import { toggleSingleStringValue } from '../../../../shared/ui/toggle-group/toggle-group-option.helpers';
 import { MapBasemapPreference, MapPreferencesService } from './map-preferences.service';
 import { MapBasemapLayerService } from './map-basemap-layer.service';
+import { MapShellInstanceService } from '../component/map-shell-instance.service';
 import type { MapInstance, MapTileLayer } from './map-leaflet.service';
 
 export type MapViewMode = 'street' | 'photo';
@@ -14,8 +15,14 @@ const BASEMAP_STORAGE_KEY = 'sitesnap.settings.map.basemap';
 export class MapShellBasemapService {
   private readonly mapPreferencesService = inject(MapPreferencesService);
   private readonly mapBasemapLayerService = inject(MapBasemapLayerService);
+  private readonly instance = inject(MapShellInstanceService);
+  private readonly destroyRef = inject(DestroyRef);
 
   private activeBaseTileLayer: MapTileLayer | null = null;
+
+  constructor() {
+    this.watchThemeChanges();
+  }
 
   private readonly _mapBasemap = signal<MapBasemapPreference>(
     this.mapPreferencesService.readBasemapPreference(BASEMAP_STORAGE_KEY),
@@ -62,5 +69,38 @@ export class MapShellBasemapService {
     if (mode === 'street' || mode === 'photo') {
       this.setViewMode(mode, map);
     }
+  }
+
+  /**
+   * Re-applies the street basemap when the app theme changes so the tiles
+   * track light/dark. Satellite is theme-agnostic, so it is skipped to avoid a
+   * needless tile reload. Watches both the explicit `data-theme` attribute and
+   * the OS preference (used when theme is `system`).
+   */
+  private watchThemeChanges(): void {
+    if (typeof document === 'undefined' || typeof window === 'undefined') {
+      return;
+    }
+
+    const reapplyIfStreet = (): void => {
+      if (this._mapBasemap() !== 'default') {
+        return;
+      }
+      this.applyToMap(this.instance.map);
+    };
+
+    const observer = new MutationObserver(reapplyIfStreet);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
+
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    media.addEventListener('change', reapplyIfStreet);
+
+    this.destroyRef.onDestroy(() => {
+      observer.disconnect();
+      media.removeEventListener('change', reapplyIfStreet);
+    });
   }
 }
