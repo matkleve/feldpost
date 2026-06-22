@@ -37,4 +37,6 @@
 
 .standard-dropdown__search-icon-btn {
   flex-shrink: 0;
+  // Ink idle/hover owned by hlmBtn variant="ghost" — geometry only here.
+  // @see docs/specs/component/ui-primitives/menu-panel-search-row.md § Interaction emphasis
 }

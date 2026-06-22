@@ -54,7 +54,7 @@ app-calendar-picker-panel
 | # | User action | System response |
 | --- | --- | --- |
 | 1 | Click enabled day | Single: set `draft.date`. Range: per `anchorTarget` / two-click FSM (supplement) |
-| 2 | Prev/next month | Change view month; selection unchanged |
+| 2 | Prev/next month | Change view month; **does not** change draft selection; user may browse freely in both directions after picking a date |
 | 3 | **Today** shortcut | Select today if within bounds |
 | 4 | Type date/time in header | Parse locally; invalid blocks Done when required |
 | 5 | **Done** / Enter | `done` emit (parent validates + closes) |
@@ -64,8 +64,8 @@ app-calendar-picker-panel
 ## Interaction emphasis
 
 - Canonical: [`state-visuals.md`](../../../design/state-visuals.md) § three-tier budget
-- Day cell selected at rest: **secondary** `--interaction-selected-ink`
-- Day cell hover / focus: **primary** gold (`emphasis.hover()`)
+- Day cell selected at rest: **secondary** `--interaction-selected-ink` on a **rounded square** (`border-radius: var(--radius-sm)` — not `var(--radius-full)` / circle)
+- Day cell hover / focus: **primary** gold (`emphasis.hover()` / `emphasis.selected-hover()`) — same square geometry
 - Today ring (unselected): `--border` + subtle tint — not primary fill
 
 ## CalendarDay interface
@@ -88,7 +88,8 @@ Disabled days render with reduced opacity and `pointer-events: none`.
 
 | State | Type | Controls |
 | --- | --- | --- |
-| `viewYear` / `viewMonth` | `number` | visible grid month |
+| `viewYear` / `viewMonth` | `number` | visible grid month — independent of draft after initial sync |
+| `viewSyncedToDate` | ISO string | internal guard — sync view to draft date only when this value changes |
 | `selectedDate` | ISO string | draft date half |
 | `timeInput` | string | draft time half |
 
@@ -111,3 +112,5 @@ Extracted from legacy `captured-date-editor.component.*` — behavior preserved,
 - [x] `dateOnly` hides time input and ignores time on emit
 - [x] Selected + hover emphasis match three-tier table above
 - [x] Keyboard: Enter → Done, Escape → cancel
+- [ ] Day cells use rounded squares (`--radius-sm`), not circles (`--radius-full`)
+- [ ] Prev/next month works in both directions while a date remains selected in draft

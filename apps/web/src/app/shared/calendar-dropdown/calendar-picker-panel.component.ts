@@ -42,6 +42,9 @@ export class CalendarPickerPanelComponent {
   readonly viewYear = signal(new Date().getFullYear());
   readonly viewMonth = signal(new Date().getMonth());
 
+  /** Last draft ISO date we synced the visible month to — prevents nav snap-back. */
+  private viewSyncedToDate = '';
+
   readonly weekdays = computed(() => [
     this.t('workspace.capturedDate.weekday.mon', 'Mo'),
     this.t('workspace.capturedDate.weekday.tue', 'Tu'),
@@ -91,11 +94,10 @@ export class CalendarPickerPanelComponent {
       if (date) {
         const parsed = parseIsoDateValue(date);
         this.dateInput.set(parsed ? this.i18nService.formatDateFieldValue(parsed) : '');
-        const parts = date.split('-');
-        this.viewYear.set(parseInt(parts[0], 10));
-        this.viewMonth.set(parseInt(parts[1], 10) - 1);
+        this.syncVisibleMonthToDate(date);
       } else {
         this.dateInput.set('');
+        this.viewSyncedToDate = '';
       }
 
       this.timeInput.set(draft?.time ?? '');
@@ -115,9 +117,7 @@ export class CalendarPickerPanelComponent {
     });
 
     if (!day.isCurrentMonth) {
-      const parts = day.date.split('-');
-      this.viewYear.set(parseInt(parts[0], 10));
-      this.viewMonth.set(parseInt(parts[1], 10) - 1);
+      this.syncVisibleMonthToDate(day.date);
     }
   }
 
@@ -147,9 +147,7 @@ export class CalendarPickerPanelComponent {
 
     const parsed = parseIsoDateValue(iso);
     this.dateInput.set(parsed ? this.i18nService.formatDateFieldValue(parsed) : '');
-    const parts = iso.split('-');
-    this.viewYear.set(parseInt(parts[0], 10));
-    this.viewMonth.set(parseInt(parts[1], 10) - 1);
+    this.syncVisibleMonthToDate(iso);
     this.emitDraft({
       date: iso,
       time: this.timeMode() === 'dateOnly' ? null : (this.draft()?.time ?? null),
@@ -161,9 +159,7 @@ export class CalendarPickerPanelComponent {
     if (parsed) {
       const iso = toIsoDateValue(parsed);
       this.dateInput.set(this.i18nService.formatDateFieldValue(parsed));
-      const parts = iso.split('-');
-      this.viewYear.set(parseInt(parts[0], 10));
-      this.viewMonth.set(parseInt(parts[1], 10) - 1);
+      this.syncVisibleMonthToDate(iso);
       this.emitDraft({
         date: iso,
         time: this.timeMode() === 'dateOnly' ? null : (this.draft()?.time ?? null),
@@ -243,5 +239,17 @@ export class CalendarPickerPanelComponent {
       return;
     }
     this.draftChange.emit(next);
+  }
+
+  /** Jump the grid month only when the committed draft date changes — not on prev/next nav. */
+  private syncVisibleMonthToDate(isoDate: string): void {
+    if (!isoDate || isoDate === this.viewSyncedToDate) {
+      return;
+    }
+
+    this.viewSyncedToDate = isoDate;
+    const parts = isoDate.split('-');
+    this.viewYear.set(parseInt(parts[0], 10));
+    this.viewMonth.set(parseInt(parts[1], 10) - 1);
   }
 }

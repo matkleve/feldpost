@@ -142,14 +142,12 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
-    aspect-ratio: 1;
-    max-width: 1.75rem;
-    max-height: 1.75rem;
+    width: 1.625rem;
+    height: 1.625rem;
     margin: 0 auto;
     font-size: var(--font-size-2xs);
     color: var(--foreground);
-    background: none;
+    background: transparent;
     border: none;
     border-radius: var(--radius-sm);
     cursor: pointer;
@@ -160,6 +158,7 @@
 
     &:hover:not(&--disabled):not(&--selected) {
       @include emphasis.hover(10%);
+      border-radius: var(--radius-sm);
     }
 
     &--other-month {
@@ -167,18 +166,19 @@
     }
 
     &--today:not(&--selected) {
+      border-radius: var(--radius-sm);
       box-shadow: inset 0 0 0 1.5px var(--border);
     }
 
     &--selected {
-      background: var(--primary);
-      color: var(--primary-foreground);
+      border-radius: var(--radius-sm);
+      @include emphasis.selected(12%);
       font-weight: var(--font-weight-semibold);
     }
 
     &--selected:hover:not(&--disabled) {
-      background: color-mix(in srgb, var(--primary) 88%, black);
-      color: var(--primary-foreground);
+      border-radius: var(--radius-sm);
+      @include emphasis.selected-hover(12%);
     }
 
     &--disabled {

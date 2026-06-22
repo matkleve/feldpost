@@ -64,4 +64,38 @@ describe('CalendarPickerPanelComponent', () => {
     component.onDateKeydown(new KeyboardEvent('keydown', { key: 'Escape' }));
     expect(cancelled).toBe(true);
   });
+
+  it('keeps navigated month after selecting a date', () => {
+    fixture.componentRef.setInput('draft', { date: '2026-06-03', time: null });
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.viewMonth()).toBe(5);
+
+    fixture.componentInstance.nextMonth();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.viewMonth()).toBe(6);
+
+    fixture.componentInstance.prevMonth();
+    fixture.componentInstance.prevMonth();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.viewMonth()).toBe(4);
+  });
+
+  it('re-syncs visible month only when draft date changes', () => {
+    fixture.componentRef.setInput('draft', { date: '2026-06-03', time: null });
+    fixture.detectChanges();
+    fixture.componentInstance.nextMonth();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.viewMonth()).toBe(6);
+
+    fixture.componentRef.setInput('draft', { date: '2026-06-03', time: null });
+    fixture.detectChanges();
+    expect(fixture.componentInstance.viewMonth()).toBe(6);
+
+    fixture.componentRef.setInput('draft', { date: '2026-08-15', time: null });
+    fixture.detectChanges();
+    expect(fixture.componentInstance.viewMonth()).toBe(7);
+  });
 });

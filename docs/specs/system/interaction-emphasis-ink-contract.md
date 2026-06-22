@@ -61,6 +61,7 @@ Material Icons do not reliably inherit without an explicit inherit rule on the i
 | `--interaction-selected-ink: var(--primary)` in sandstone | Sandstone `--primary` is gold — selected ink must stay cool blue |
 | Blue on nav active route at rest | Use tertiary violet (`emphasis.nav`) |
 | `color: var(--foreground)` on `hlmBtn` host | Blocks emphasis ink while background still changes |
+| `color: var(--muted-foreground)` or `text-muted-foreground` on `hlmBtn` ghost host | Blocks gold hover ink while gold wash still applies (search-bar clear bug) |
 | Per-child primary override “for emphasis” | Duplicates host ink; drifts on theme change |
 
 ## Component scope
@@ -79,12 +80,16 @@ Material Icons do not reliably inherit without an explicit inherit rule on the i
 | Map style switch segment on | Tertiary | [`map-style-switch.md`](../component/map/map-style-switch.md) | `.map-style-switch [hlmToggleGroupItem][data-state=on]` — pierced SCSS |
 | Map photo markers (hover) | High attention | [`media-marker.md`](../ui/media-marker/media-marker.md) | `.map-photo-marker` hover outline |
 | Media item grid tiles (hover) | High attention | [`media-item.md`](../component/media/media-item.md) | `.media-item__slot:hover` |
+| Map search bar clear `×` | High attention on pointer | [`search-bar.md`](../ui/search-bar/search-bar.md) | `button.search-bar__clear` (`hlmBtn` ghost) |
+| Dropdown search row clear `×` | High attention on pointer | [`menu-panel-search-row.md`](../component/ui-primitives/menu-panel-search-row.md) | `.standard-dropdown__search-icon-btn` (`hlmBtn` ghost) |
 
 **Avatar badge** on the nav account row remains the **filled primary** exception (not quiet-row emphasis).
 
 ## Implementation owners
 
 Global: `_interaction-emphasis-quiet-row.scss`, `_option-menu-item-states.scss`, `button-variants.ts`, `_toolbar-menu-trigger.scss`.
+
+Feature: `search-bar.component.scss` (clear geometry + linked bar-hover ink), `menu-panel-search-row.component` (clear geometry only).
 
 Feature SCSS must not reintroduce child `primary` overrides after host `emphasis.hover`. See parent [`state-visuals.md`](../../design/state-visuals.md) implementation-owner list.
 
@@ -102,6 +107,7 @@ Feature SCSS must not reintroduce child `primary` overrides after host `emphasis
 
 ## Changelog
 
+- **2026-06-22 (d)** — Map search bar + dropdown search clear: ghost ink ownership; anti-pattern for muted `color:` on `hlmBtn` ghost host.
 - **2026-06-22 (c)** — Map style switch re-tiered to **tertiary violet**; split from generic toggle secondary.
 - **2026-06-22 (b)** — **High-attention tier:** gold includes multi-select / flyout selection at rest, not only pointer. Supersedes “pointer only” (a).
 - **2026-06-22 (a)** — Sandstone `--interaction-selected-ink` decoupling; passive-mode anti-patterns.

@@ -50,6 +50,8 @@ When an interactive component spec is next edited, add **§ Interaction emphasis
 | Timespace histogram + date fields | [`map-filter-toolbar.md`](../component/map/map-filter-toolbar.md) | **partial** | drag gold pending Brix; migrate to `calendar-dropdown` **range mode** |
 | Calendar dropdown | [`calendar-dropdown.md`](../component/filters/calendar-dropdown.md) | **partial** | single mode done; **range mode** spec added — Brix |
 | Media detail inline `__option--selected` | media-detail-inline-section spec | **done** | Tag chips unchanged |
+| Map search bar clear `×` | [`search-bar.md`](../ui/search-bar/search-bar.md) | **done** | `hlmBtn` ghost; geometry-only SCSS; linked bar-hover ink |
+| Dropdown search row clear `×` | [`menu-panel-search-row.md`](../component/ui-primitives/menu-panel-search-row.md) | **done** | `hlmBtn` ghost; no `text-muted-foreground` on host |
 | Search / address typeahead rows | address-search, metadata pickers | **pending** | Align to ink contract |
 | `hlmBtn` secondary call sites | [`ui-primitives.button.md`](../component/ui-primitives/ui-primitives.button.md) | **done** | Migrated to `outline` (projects retry, media-empty) |
 | Captured-date calendar day | captured-date-editor | **done** | `--selected` uses selected ink; hover via mixin |

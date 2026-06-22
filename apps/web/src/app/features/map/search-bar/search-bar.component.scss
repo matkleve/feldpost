@@ -115,7 +115,9 @@
 }
 
 .search-bar:hover:not(:focus-within):not(.search-bar--open) .search-bar__icon,
-.search-bar:focus-within .search-bar__icon {
+.search-bar:focus-within .search-bar__icon,
+.search-bar:hover:not(:focus-within):not(.search-bar--open) .search-bar__clear,
+.search-bar:focus-within .search-bar__clear {
   color: var(--brand-gold);
 }
 
@@ -131,10 +133,12 @@
   padding-inline-end: var(--spacing-1);
 }
 
+// Clear control geometry only — idle/hover ink owned by hlmBtn variant="ghost".
+// @see docs/design/state-visuals.md § Interaction emphasis
+// @see docs/specs/ui/search-bar/search-bar.md § Interaction emphasis
 .search-bar__clear {
   inline-size: calc(var(--search-bar-row-height) - (2 * var(--spacing-1)));
   block-size: calc(var(--search-bar-row-height) - (2 * var(--spacing-1)));
-  color: var(--muted-foreground);
 
   .material-icons {
     font-size: var(--font-size-lg);

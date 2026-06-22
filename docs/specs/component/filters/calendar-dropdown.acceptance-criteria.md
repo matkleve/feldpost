@@ -41,7 +41,8 @@ Parent: [`calendar-dropdown.md`](calendar-dropdown.md)
 ## Interaction emphasis
 
 - [x] Control shell + icon trigger: gold hover/focus per ink contract
-- [x] Panel days: per [`calendar-picker-panel.md`](calendar-picker-panel.md)
+- [ ] Day cells: rounded square geometry (`--radius-sm`); hover + selected use emphasis mixins (not circles)
+- [ ] After picking a date, prev/next month navigates freely without snapping back to the selected date's month
 
 ## Range mode
 

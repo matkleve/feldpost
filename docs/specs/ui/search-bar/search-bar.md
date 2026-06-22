@@ -17,7 +17,20 @@ This parent spec defines the implementation contract for the search surface UI a
 
 ## What It Looks Like
 
-Floating search surface pinned top-center over the map. Use the shared `.ui-container` panel geometry with the same corner radius, panel padding, and panel gap as the Sidebar, subtle shadow, and warm `--color-bg-surface` background. The structure is: panel container ? compact search row ? results panel revealed inside the same surface. Do not morph the container into a pill in any state. The leading search icon and trailing clear button both sit inside helper wrappers that absorb the extra search-row height while preserving the shared fixed square media-slot rhythm. Results sections use headers, dividers, and clickable rows built from the shared `.ui-item` row pattern. Warm, calm styling: `--color-bg-surface` background, `--color-clay` accents for matched text.
+Floating search surface pinned top-center over the map. Frosted chrome (`frosted-chrome.surface`) with the same corner radius, panel padding, and panel gap as the Sidebar, subtle shadow, and warm `var(--card)` tint. The structure is: panel container → compact search row → results panel revealed inside the same surface. Do not morph the container into a pill in any state. The leading search icon and trailing clear button both sit inside helper wrappers that absorb the extra search-row height while preserving the shared fixed square media-slot rhythm. Results sections use headers, dividers, and clickable rows built from the shared `.ui-item` row pattern. Matched query text uses warm accent treatment per dropdown item spec — not filled primary CTA styling.
+
+## Interaction emphasis
+
+- Canonical: [`docs/design/state-visuals.md`](../../design/state-visuals.md) § Interaction emphasis; ink inheritance: [`interaction-emphasis-ink-contract.md`](../system/interaction-emphasis-ink-contract.md)
+- [x] This component implements the contract (or documented exception below)
+
+| Control | Variant / host | Idle ink | Pointer / chrome hover | Implementation |
+| ------- | -------------- | -------- | ---------------------- | -------------- |
+| Leading search icon | non-interactive slot | `--muted-foreground` | `--brand-gold` when bar hovered or `:focus-within` | `search-bar.component.scss` `.search-bar__icon` |
+| Trailing `×` clear | `hlmBtn` `variant="ghost"` `size="icon"` | `--muted-foreground` (CVA) | `--brand-gold` + gold wash on button hover; linked gold when bar hovered or `:focus-within` | `button-variants.ts` + geometry-only `.search-bar__clear` SCSS |
+| Dropdown result rows | menu row pattern | muted | gold on row hover | `search-dropdown-item.component.scss` |
+
+**Blocker:** Component SCSS must not set `color:` on `.search-bar__clear` — that overrides `hlmBtn` ghost hover ink (gold wash + muted icon anti-pattern).
 
 ## Where It Lives
 
@@ -270,6 +283,7 @@ sequenceDiagram
 - [x] `×` while typing clears query text and closes the dropdown without requiring a prior commit
 - [x] `×` after commit clears query, committed state, and Search Location Marker
 - [x] `×` clear button uses square control geometry aligned to shared control/media sizing tokens
+- [x] `×` clear button uses `hlmBtn` `variant="ghost"`; idle ink is muted; pointer hover and bar `:focus-within` show brand gold on host and icon (no component `color:` lock on the host)
 - [x] Empty state shows "No address found" with guidance to try a different address or search term
 - [x] Pasting coordinates or Google Maps URL auto-detects and centers map
 
