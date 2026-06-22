@@ -1,3 +1,5 @@
+@use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
+
 :host {
   display: contents;
 }
@@ -26,10 +28,17 @@
   color: var(--foreground);
   border-radius: var(--radius-md);
   cursor: pointer;
+  transition:
+    background 80ms ease-out,
+    color 80ms ease-out,
+    border-color 80ms ease-out;
 
-  &:hover:not(:disabled) {
-    border-color: var(--primary);
-    background: var(--popover);
+  // Pointer always wins → primary gold (quiet outline host). Solid primary CTA
+  // opts out below. @see docs/design/state-visuals.md § Interaction emphasis
+  &:hover:not(:disabled):not(.workspace-action__btn--primary),
+  &:focus-visible:not(.workspace-action__btn--primary) {
+    @include emphasis.hover(10%);
+    border-color: color-mix(in srgb, var(--brand-gold) 42%, var(--border));
   }
 
   &:disabled {
@@ -42,6 +51,11 @@
   background: var(--primary);
   color: var(--foreground);
   border-color: var(--primary);
+
+  // Solid CTA is not a quiet control — keep its fill, lift slightly on hover.
+  &:hover:not(:disabled) {
+    filter: brightness(1.06);
+  }
 }
 
 .workspace-action__dialog-backdrop {

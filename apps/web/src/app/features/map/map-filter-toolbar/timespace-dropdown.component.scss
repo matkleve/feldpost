@@ -108,7 +108,7 @@
   // @see docs/specs/component/map/map-filter-toolbar.md § Timespace histogram
   .timespace-dropdown__selection--committed {
     border-color: var(--interaction-selected-ink);
-    background: color-mix(in srgb, var(--interaction-selected-ink) 14%, transparent);
+    @include emphasis.selected(14%);
   }
 
   // In-progress drag / brush — primary gold (user is acting on the range now).
