@@ -24,6 +24,9 @@ Takes all remaining horizontal space after Sidebar (`flex: 1`). The Leaflet map 
 | 5   | Taps Basemap Switch Button       | Switches tile layer from default map to satellite photo | `MapAdapter.setBaseLayer('satellite')` |
 | 6   | Taps Basemap Switch Button again | Switches tile layer back to default map                 | `MapAdapter.setBaseLayer('default')`   |
 | 7   | Reloads the page                 | Restores last selected basemap from local persistence   | `mapBasemap` restored on shell init    |
+| 8   | Switches app theme (light/dark/system) | Street basemap swaps CARTO `light_all` ↔ `dark_all` tiles live; satellite is theme-agnostic and unchanged | `MapShellBasemapService` re-applies on `data-theme` / `prefers-color-scheme` change |
+
+> **Theme-following street basemap:** the default (street) basemap tracks the active theme — CARTO `dark_all` when the effective theme is dark, `light_all` otherwise (`sandstone` counts as light). `MapShellBasemapService` watches `<html data-theme>` (MutationObserver) and the OS `prefers-color-scheme` media query, re-applying only the street layer so satellite imagery never reloads needlessly.
 
 ## Component Hierarchy
 
