@@ -48,18 +48,26 @@ Use this file for concrete values; use `token-layers.md` for layering and overri
 
 ## Frosted chrome (map / floating shells)
 
-Canonical **frosted floating chrome** (nav sidebar panel, map style switch, search bar, upload preview chips, settings overlay shell fill) is defined once in **`apps/web/src/styles/_frosted-chrome.scss`**:
+**Single token, single opacity:** every element floating over the map uses **`var(--chrome-surface)`** as its background base — defined in `styles.scss` as `color-mix(in srgb, var(--card) 55%, transparent)` for all themes. To change the opacity of all floating chrome at once, change `--chrome-surface` in `styles.scss`.
 
-| Mixin | Use |
-| --- | --- |
-| `frosted-chrome.fill` | `var(--card)` at **85%** + `backdrop-filter: blur(16px) saturate(1.2)` |
-| `frosted-chrome.surface` | `fill` + border `color-mix(var(--border) 50%)` + `var(--shadow-md)` |
-| `frosted-chrome.outline-control` | Semi-transparent fill + lighter blur for **`hlmBtn` `variant="outline"`** on frosted shells (upload intake rows, map upload FAB) |
-| `frosted-chrome.outline-control-hover` | Primary-tinted hover/focus wash while keeping blur |
+Canonical **frosted floating chrome** is defined once in **`apps/web/src/styles/_frosted-chrome.scss`**:
+
+| Mixin | Background base | Blur | Use |
+| --- | --- | --- | --- |
+| `frosted-chrome.panel` | `var(--chrome-surface)` | 16px | Floating panels: nav sidebar, search bar, dropdowns, upload tray |
+| `frosted-chrome.floating-panel-shell` | `var(--chrome-surface)` | 16px | Same as `panel` + tighter border + padding |
+| `frosted-chrome.outline-control` | `var(--chrome-surface)` | 12px | Map overlay icon buttons at rest: GPS, upload, filter triggers |
+| `frosted-chrome.outline-control-hover` | `var(--chrome-surface)` + gold tint | 12px | Same buttons on hover/focus |
+| `frosted-chrome.outline-control-selected` | `var(--chrome-surface)` + selected-ink tint | 12px | Same buttons in persistent active/on state |
+| `frosted-chrome.outline-control-selected-hover` | same as hover | 12px | Active button on hover/focus |
+| `frosted-chrome.fill` | `var(--card)` at 85% | 16px | **Non-map** contexts only |
+| `frosted-chrome.surface` | `fill` (85%) + border + shadow | 16px | **Non-map** contexts only |
 
 Component SCSS must `@use '../../../styles/frosted-chrome'` (adjust depth) and `@include` — do not duplicate `%` / blur literals on map-overlay surfaces.
 
 **Outline on frosted chrome:** Global `hlmBtn` outline uses opaque `bg-background` on solid surfaces. On map/upload frosted panels only, override with `outline-control` mixins — do **not** apply app-wide to every outline button.
+
+**No exceptions:** every element floating over the map uses 55%. If a new element seems to need a different value, bring it up as a design decision — do not invent a one-off inline override.
 
 ## 3.1 Color Tokens
 

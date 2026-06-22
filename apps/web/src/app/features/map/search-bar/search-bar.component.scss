@@ -36,7 +36,7 @@
   min-height: var(--search-bar-chrome-size);
   width: 100%;
   border-radius: var(--radius-md);
-  @include frosted-chrome.surface;
+  @include frosted-chrome.panel;
   overflow: hidden;
   contain: layout;
   transition:
@@ -45,7 +45,7 @@
     box-shadow var(--motion-duration-fast) var(--motion-ease-out);
 
   &:hover:not(:focus-within):not(.search-bar--open) {
-    background: color-mix(in srgb, var(--brand-gold) 10%, color-mix(in srgb, var(--card) 85%, transparent));
+    background: color-mix(in srgb, var(--brand-gold) 10%, var(--chrome-surface));
     border-color: color-mix(in srgb, var(--brand-gold) 42%, color-mix(in srgb, var(--border) 50%, transparent));
   }
 

@@ -52,6 +52,18 @@
 @layer states {
   @include fp-toolbar-menu-trigger.toolbar-menu-trigger-states('map-filter-toolbar');
 
+  // Active resting state: frosted outline-control-selected overrides the transparent emphasis.selected-bordered
+  // from the shared toolbar-menu-trigger mixin, which has no frosted context.
+  // @see apps/web/src/styles/_frosted-chrome.scss § outline-control-selected
+  button.map-filter-toolbar__menu-trigger[data-active='true'] {
+    color: var(--interaction-selected-ink);
+    @include frosted-chrome.outline-control-selected;
+
+    [data-dd-part] {
+      color: inherit;
+    }
+  }
+
   // Frosted triggers must keep card tint + blur on hover — generic emphasis.hover is transparent-only.
   // @see docs/design/tokens.md § Frosted chrome
   // @see apps/web/src/app/features/map/map-shell/scss/_map-shell-upload.scss

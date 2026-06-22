@@ -111,7 +111,7 @@
     border-radius: var(--container-radius-panel);
     overflow: hidden;
 
-    @include frosted-chrome.surface;
+    @include frosted-chrome.panel;
   }
 
   @media (max-width: 767px) {

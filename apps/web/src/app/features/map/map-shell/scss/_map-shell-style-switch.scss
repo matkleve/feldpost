@@ -1,6 +1,7 @@
 // Map style switch (street/photo) — top-left of map zone
 // @see docs/specs/component/map/map-style-switch.md
 
+@use '../../../../../styles/frosted-chrome';
 @use '../../../../../styles/interaction-emphasis-quiet-row' as emphasis;
 
 .map-style-switch {
@@ -17,8 +18,7 @@
   }
 }
 
-// Track shell only — lighter than default frosted (85% card); segments keep shared toggle on/hover.
-// Lighter = higher `--card` opacity in the mix (same tokens as sidebar/settings, no new global name).
+// Track shell — 55% card, matches all other map-floating chrome.
 // @see docs/design/tokens.md § Frosted chrome
 :host .map-style-switch [hlmToggleGroup] {
   flex-direction: column;
@@ -28,11 +28,7 @@
   gap: var(--spacing-1);
   border-radius: var(--radius-full);
   padding: var(--spacing-1);
-  border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
-  box-shadow: var(--shadow-md);
-  backdrop-filter: blur(16px) saturate(1.2);
-  -webkit-backdrop-filter: blur(16px) saturate(1.2);
-  background: color-mix(in srgb, var(--card) 94%, transparent);
+  @include frosted-chrome.panel;
 }
 
 // Each segment is a full circle; gap separates them inside the frosted track.

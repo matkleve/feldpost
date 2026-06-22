@@ -25,10 +25,10 @@
   justify-content: center;
   box-shadow: var(--shadow-md);
   transition:
-    background 120ms ease-out,
-    border-color 120ms ease-out,
-    color 120ms ease-out,
-    transform 120ms ease-out;
+    background var(--motion-duration-standard) var(--motion-ease-out),
+    border-color var(--motion-duration-standard) var(--motion-ease-out),
+    color var(--motion-duration-standard) var(--motion-ease-out),
+    transform var(--motion-duration-standard) var(--motion-ease-out);
 
   .material-icons {
     font-size: var(--font-size-xl);
@@ -57,10 +57,7 @@
 
   &--active {
     color: var(--interaction-selected-ink);
-    background: color-mix(in srgb, var(--interaction-selected-ink) 12%, color-mix(in srgb, var(--card) 55%, transparent));
-    border-color: color-mix(in srgb, var(--interaction-selected-ink) 42%, var(--border));
-    backdrop-filter: blur(12px) saturate(1.15);
-    -webkit-backdrop-filter: blur(12px) saturate(1.15);
+    @include frosted-chrome.outline-control-selected;
 
     .material-icons {
       color: var(--interaction-selected-ink);
