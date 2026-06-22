@@ -55,19 +55,34 @@ Rare. Must be justified in the component spec (e.g. loading handoff). Visuals **
 
 ## Interaction emphasis (hover / selected)
 
-**Rule:** Quiet interactive controls use a **three-tier attention budget** unless a **dedicated element spec** documents an exception with a test oracle. **Gold is scarce** — reserve it for pointer focus and in-panel row choices.
+**Rule:** Quiet interactive controls use a **three-tier attention budget** unless a **dedicated element spec** documents an exception with a test oracle. **`--brand-gold` is the high-attention tier** — pointer focus **and** any row/item **selected because it needs user attention now** (multi-select, in-panel choice, linked-hover). **Not** for passive “mode is on” context (toggle segment, toolbar `data-active`, sort preset).
 
-**Canonical tokens:** `--brand-gold` (primary tier), `--interaction-selected-ink` (secondary; equals `--primary` in default theme), `--interaction-nav-ink` (tertiary; royal violet via `--app-violet-accent`), `--muted-foreground` (idle ink), `--menu-item-hover` (= gold 8%), `--action-hover` (= gold 12%). **Prefer the mixin/token — see Mandatory implementation contract below.**
+**Canonical tokens:** `--brand-gold` (high-attention tier), `--interaction-selected-ink` (secondary; cool blue — **not** `var(--primary)` when sandstone sets primary to gold), `--interaction-nav-ink` (tertiary; royal violet via `--app-violet-accent`), `--muted-foreground` (idle ink), `--menu-item-hover` (= gold 8%), `--action-hover` (= gold 12%). **Prefer the mixin/token — see Mandatory implementation contract below.**
+
+### Brand gold scope (blocker)
+
+Gold means **this needs attention** — not merely “something is selected.”
+
+| Use gold (`emphasis.hover` / `emphasis.engaged`) | Use secondary blue (`emphasis.selected`) | Use tertiary violet (`emphasis.nav`) |
+| ------------------------------------------------ | ---------------------------------------- | ------------------------------------ |
+| `:hover`, `:focus-visible`, `:active` on any quiet control | Toggle `data-state=on` (mode, not a list choice) | Nav active route |
+| Filter picker row `data-selected` while choosing | Toolbar trigger `data-active` (filter/sort applied) | Settings section rail active |
+| Grouping / upload-panel **multi-select** row selected | Active sort row (preset, not flyout pick) | — |
+| In-panel engaged row in an **open** flyout | Calendar day selected (date context) | — |
+| Linked-hover (grid ↔ map cross-surface) | Map style switch segment on at rest | — |
+| Single or **multiple** list rows where selection is the current task | — | — |
+
+**Sandstone theme:** `--primary` may be gold for filled CTAs; `--interaction-selected-ink` **must** remain cool blue in `html[data-theme="sandstone"]`. Accidentally aliasing secondary ink to sandstone `--primary` makes passive context (toggle on) look like high-attention gold — **spec violation** (see [`tokens.md`](tokens.md) § Interaction emphasis).
 
 ### Attention tiers (normative)
 
 | Tier | Meaning | Ink | Mixin | Examples |
 | ---- | ------- | --- | ----- | -------- |
-| **Primary** | Transient or in-panel focus — what the user is acting on *now* | `--brand-gold` | `emphasis.hover()`, `emphasis.engaged()` | Row hover; filter picker `data-selected`; grouping multi-select rows; linked-hover |
-| **Secondary** | Context is set, not the main event | `--interaction-selected-ink` | `emphasis.selected()`, `emphasis.selected-bordered()` | Toolbar `data-active`, active sort row, toggle `data-state=on`, calendar selected day |
+| **High attention** | Pointer focus **or** selection that needs user focus now | `--brand-gold` | `emphasis.hover()`, `emphasis.engaged()` | Row hover; filter picker `data-selected`; grouping multi-select; upload-panel multi-select; linked-hover |
+| **Secondary** | Context is set, not the focal task | `--interaction-selected-ink` | `emphasis.selected()`, `emphasis.selected-bordered()` | Toolbar `data-active`, active sort row, toggle `data-state=on`, calendar selected day |
 | **Tertiary** | Where you are in the product | `--interaction-nav-ink` | `emphasis.nav()`, `emphasis.nav-bordered()` | Main nav active route, settings overlay section rail |
 
-**Pointer always wins:** any tier + `:hover` / `:focus-visible` → **primary gold** (`emphasis.hover()`). Never deepen secondary/tertiary to stronger blue/violet on hover.
+**Pointer always wins:** any tier + `:hover` / `:focus-visible` → **brand gold** (`emphasis.hover()`). Never deepen secondary/tertiary to stronger blue/violet on hover.
 
 | State | Ink | Background | Border (outline hosts) |
 | ----- | --- | ------------ | ---------------------- |
@@ -76,7 +91,7 @@ Rare. Must be justified in the component spec (e.g. loading handoff). Visuals **
 | **Pressed (`:active`)** | `--brand-gold` | gold ~15% mix | — |
 | **Secondary at rest** | `--interaction-selected-ink` | selected-ink ~10% mix | selected ~42% + border mix (when bordered) |
 | **Tertiary at rest** | `--interaction-nav-ink` | nav-ink ~10% mix | nav ~42% + border mix (when bordered) |
-| **Primary engaged row** (in open panel) | `--brand-gold` | gold ~10% mix | — |
+| **Engaged / attention-selected row** (open panel or multi-select task) | `--brand-gold` | gold ~10% mix | — |
 | **Destructive quiet row** | `--destructive` | destructive 10% mix (hover) / 15% (`:active`) | — |
 
 ### Ink inheritance (blocker)
@@ -94,7 +109,7 @@ On any quiet host using the mixins above, **icon, label, and chevron slots must 
 | Full hover treatment (bg + ink) | `@include emphasis.hover(X%)` from `_interaction-emphasis-quiet-row.scss` | raw `background:` + `color:` pair |
 | Persistent selected state (secondary) | `@include emphasis.selected(X%)` | `color-mix(in srgb, var(--interaction-selected-ink) X%, transparent)` |
 | Product nav at rest (tertiary) | `@include emphasis.nav(X%)` | `color-mix(in srgb, var(--interaction-nav-ink) X%, transparent)` |
-| In-panel engaged row (primary) | `@include emphasis.engaged(X%)` | same as hover |
+| In-panel / attention-selected row | `@include emphasis.engaged(X%)` | same as hover |
 | Selected row + pointer over it | `@include emphasis.hover(X%)` | same as hover — gold ink + wash |
 | Selected + border indicator (secondary) | `@include emphasis.selected-bordered(X%, Y%)` | `background + border-color` pair with selected-ink |
 | Nav + border indicator (tertiary) | `@include emphasis.nav-bordered(X%, Y%)` | `background + border-color` pair with nav-ink |
@@ -140,7 +155,7 @@ On any quiet host using the mixins above, **icon, label, and chevron slots must 
 | Map upload progress ring (`.map-upload-btn--uploading`) | Batch progress uses `--primary` on the ring/spinner only |
 | Media selection rings / tile FSM | Domain selection chrome — per media specs |
 
-**Test oracle:** Idle row is muted; **hover** on any enabled control → **gold** on host + all child slots. **Secondary** at rest (sort on, filter active, toggle on) → cool blue. **Tertiary** at rest (nav route, settings section) → royal violet. **Primary engaged** rows in open panels → gold at rest. Pointer over any tier → gold.
+**Test oracle:** Idle row is muted. **High attention** (hover, multi-select row selected, flyout picker `data-selected`, linked-hover) → **brand gold** on host + all child slots. **Secondary** at rest (sort preset on, filter toolbar active, toggle on) → cool blue — **including sandstone**. **Tertiary** at rest (nav route, settings section) → royal violet. Pointer over any tier → gold. **Reject:** gold on passive mode indicators (toggle on, toolbar `data-active`) at rest; blue on multi-select rows that are the current task.
 
 ---
 
@@ -152,6 +167,8 @@ On any quiet host using the mixins above, **icon, label, and chevron slots must 
 
 ## Changelog
 
+- **2026-06-22 (b)** — **High-attention tier:** gold = pointer focus **and** selection that needs attention (multi-select, flyout pick, linked-hover); not passive mode context. Supersedes narrow “pointer only” wording from (a).
+- **2026-06-22 (a)** — Brand gold scope blocker; sandstone `--interaction-selected-ink` decoupling. Tokens table in [`tokens.md`](tokens.md).
 - **2026-06-17 (c)** — **Three-tier attention budget:** primary gold (hover + in-panel engaged rows), secondary blue (context set), tertiary violet (product nav). Tokens `--interaction-nav-ink`, mixins `emphasis.nav()` / `nav-bordered()`.
 - **2026-06-16** — Added **Mandatory implementation contract** table: inline `color-mix` for hover/selected is now a CI-blocked pattern; all existing usages migrated to `emphasis.*` mixins or `--menu-item-hover`/`--action-hover` tokens. Guard added to `scripts/guard-interaction-emphasis.mjs` and wired into `design-system:check`.
 - **2026-06-17** — **Ink inheritance** rule + hover ink = `--brand-gold` (aligned with `_interaction-emphasis-quiet-row.scss`); cross-component scope in [`interaction-emphasis-ink-contract.md`](../specs/system/interaction-emphasis-ink-contract.md).

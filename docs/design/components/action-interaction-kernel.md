@@ -103,10 +103,10 @@ Avoid accent for:
 ## Button Policy
 
 - **Commit CTAs:** `hlmBtn` `variant="default"` — filled `--primary`; `variant="destructive"` — destructive quiet wash + `--destructive` ink (not solid fill).
-- **Quiet actions:** `outline` and `ghost` — idle `--muted-foreground`; hover/focus `--primary` + 10% primary wash; selected/on `--interaction-selected-ink` + 10% wash; selected+hover primary wins (see state-visuals).
+- **Quiet actions:** `outline` and `ghost` — idle `--muted-foreground`; hover/focus **`--brand-gold`** + gold wash (`emphasis.hover`); passive context/on `--interaction-selected-ink` + 10% wash; attention-selected rows `emphasis.engaged()`; selected+hover **brand gold** wins (see state-visuals).
 - **Link-style:** `variant="link"` — primary text + underline on hover.
 - **Legacy filled secondary:** `variant="secondary"` — rare; prefer `outline` for new work.
-- Toolbar triggers may keep geometry/padding exceptions; colors follow interaction emphasis when open (selected ink) and on hover (primary).
+- Toolbar triggers may keep geometry/padding exceptions; colors follow interaction emphasis when open (selected ink) and on hover (**brand gold**).
 - Danger actions: semantic destructive styling, never ambiguous.
 - Icon + label on `hlmBtn`: horizontal padding locks to spacing-2 (`ps-2` / `pe-2`) on both edges for every size and `iconPlacement` (`start` / `end`); set `iconPlacement` for composition semantics; `size="icon"` stays square (`w-10 h-10`).
 

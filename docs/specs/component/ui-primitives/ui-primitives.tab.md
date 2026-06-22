@@ -39,12 +39,12 @@ Tab state is managed by `BrnTabs`; active trigger receives `data-state="active"`
 | Behavior | Geometry Owner | State Owner | Visual Owner | Same element? |
 | -------- | -------------- | ----------- | ------------ | ------------- |
 | Active tab | `button[brnTabsTrigger]` | `data-[state=active]` (BrnTabs) | selected-ink text/underline (`line`) or selected-ink fill mix (`default`) | ✅ |
-| Tab hover | `button[brnTabsTrigger]` | `:hover` | `hover:text-primary` | ✅ |
+| Tab hover | `button[brnTabsTrigger]` | `:hover` | `emphasis.hover` / `--brand-gold` | ✅ |
 | Focus ring | `button[brnTabsTrigger]` | `:focus-visible` | `focus-visible:ring-ring` | ✅ |
 
 ## Acceptance Criteria
 
-- [ ] Tab list renders with `bg-muted` rail (`default`) or line underline (`line`); active trigger uses `--interaction-selected-ink`; hover uses `--primary`.
+- [ ] Tab list renders with `bg-muted` rail (`default`) or line underline (`line`); active trigger uses `--interaction-selected-ink`; hover uses **`--brand-gold`**.
 - [ ] `app-group-tab-bar` stays the composition owner for workspace tabs.
 - [ ] `BrnTabs` manages active state; no boolean `@Input()` for visual state.
 - [ ] Focus ring visible on all three themes (light / dark / sandstone).

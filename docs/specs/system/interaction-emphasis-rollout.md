@@ -2,7 +2,7 @@
 
 **Canonical contract:** [`docs/design/state-visuals.md`](../../design/state-visuals.md) § Interaction emphasis  
 **Ink inheritance:** [`interaction-emphasis-ink-contract.md`](./interaction-emphasis-ink-contract.md)  
-**Token:** `--interaction-selected-ink` in [`apps/web/src/styles.scss`](../../../apps/web/src/styles.scss)
+**Token:** `--interaction-selected-ink` and `--brand-gold` in [`apps/web/src/styles.scss`](../../../apps/web/src/styles.scss) — see [`tokens.md`](../../design/tokens.md) § Interaction emphasis (sandstone decoupling).
 
 When an interactive component spec is next edited, add **§ Interaction emphasis** (see [`element-spec-format.md`](../../agent-workflows/element-spec-format.md)) and either implement the contract or document an exception. Remove the pending note from this table when done.
 
@@ -21,8 +21,8 @@ When an interactive component spec is next edited, add **§ Interaction emphasis
 | `hlmBtn` outline/ghost | [`button-variants.ts`](../../../apps/web/src/app/shared/ui/button/button-variants.ts) | **partial** | CVA still `hover:text-primary`; align to gold + ink inherit |
 | `hlmBtn` default/destructive | same | **done** | Filled CTAs — exception (solid fill) |
 | `hlmBtn` secondary | same | **done** | No product call sites; use `outline` for quiet actions |
-| Toggle group items | [`toggle-group-variants.ts`](../../../apps/web/src/app/shared/ui/toggle-group/toggle-group-variants.ts) | **done** | on+hover = gold |
-| Map style switch | [`map-style-switch.md`](../component/map/map-style-switch.md) | **done** | via toggle-group CVA |
+| Toggle group items | [`toggle-group-variants.ts`](../../../apps/web/src/app/shared/ui/toggle-group/toggle-group-variants.ts) | **partial** | CVA correct; sandstone `--interaction-selected-ink` token fix pending |
+| Map style switch | [`map-style-switch.md`](../component/map/map-style-switch.md) | **partial** | via toggle-group CVA; sandstone resting-on must be blue not gold |
 | Map photo markers | [`media-marker.md`](../ui/media-marker/media-marker.md) | **done** | gold hover outline |
 | Media item grid tiles | [`media-item.md`](../component/media/media-item.md) | **done** | gold slot hover |
 | Nav sidebar links | [`sidebar.md`](../component/workspace/sidebar.md) | **done** | tertiary `emphasis.nav()`; gold hover |
@@ -69,6 +69,8 @@ rg 'menu-trigger' apps/web/src/app --glob '*.scss' -A2 | rg 'color: var\(--foreg
 
 ## Changelog
 
+- **2026-06-22 (b)** — High-attention tier: gold = pointer + multi-select/flyout selection; map style switch remains secondary (passive mode).
+- **2026-06-22 (a)** — Sandstone token decoupling pending.
 - **2026-06-17 (d)** — Three-tier budget: primary gold / secondary blue / tertiary violet (`--interaction-nav-ink`).
 - **2026-06-17 (c)** — Brix: `selected-hover` → gold; map style switch, markers, media tiles, toolbar triggers implemented.
 - **2026-06-17 (b)** — Contract change: selected+hover = gold.

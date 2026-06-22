@@ -51,6 +51,29 @@
 
 @layer states {
   @include fp-toolbar-menu-trigger.toolbar-menu-trigger-states('map-filter-toolbar');
+
+  // Frosted triggers must keep card tint + blur on hover — generic emphasis.hover is transparent-only.
+  // @see docs/design/tokens.md § Frosted chrome
+  // @see apps/web/src/app/features/map/map-shell/scss/_map-shell-upload.scss
+  button.map-filter-toolbar__menu-trigger:not([data-active='true']):hover:not(:disabled),
+  button.map-filter-toolbar__menu-trigger:not([data-active='true']):focus-visible:not(:disabled) {
+    color: var(--brand-gold);
+    @include frosted-chrome.outline-control-hover;
+
+    [data-dd-part] {
+      color: inherit;
+    }
+  }
+
+  button.map-filter-toolbar__menu-trigger[data-active='true']:hover:not(:disabled),
+  button.map-filter-toolbar__menu-trigger[data-active='true']:focus-visible:not(:disabled) {
+    color: var(--brand-gold);
+    @include frosted-chrome.outline-control-selected-hover;
+
+    [data-dd-part] {
+      color: inherit;
+    }
+  }
 }
 
 @include fp-toolbar-breakpoints.toolbar-menu-trigger-responsive(

@@ -87,14 +87,17 @@ Design tokens are CSS custom properties. All components use tokens — never raw
 
 #### Interaction emphasis (product semantic — `styles.scss` `:root`)
 
+**Normative split:** `--brand-gold` is **high-attention ink** on quiet controls — pointer focus **and** resting rows/items where selection is the focal task (multi-select, flyout pick, linked-hover). **Not** passive mode context (toggle on, toolbar `data-active`). See [`state-visuals.md`](state-visuals.md) § Interaction emphasis.
+
 | Token | Value | Use |
 | ----- | ----- | --- |
-| `--primary` | `oklch(0.50 0.10 245)` light / `oklch(0.62 0.12 245)` dark | **Interactive blue** — hover fills, CTA buttons, selected/active states. Sandstone theme overrides back to gold via `--brand-gold`. |
-| `--brand-gold` | `oklch(0.748 0.128 84.6)` light / `oklch(0.796 0.134 80)` dark | Feldpost brand gold `#c9a84c` — preserved for sandstone primary, chart-2, org branding reference. |
-| `--interaction-selected-ink` | `var(--primary)` | Persistent **selected/on** ink for quiet controls (nav active route, toggle `data-state=on`). Now equals primary (blue). |
-| Hover / attention ink | `var(--primary)` | Quiet control hover/focus; see `docs/design/state-visuals.md` § Interaction emphasis |
+| `--primary` | `oklch(0.50 0.10 245)` light / `oklch(0.62 0.12 245)` dark | **Filled CTA fill** and solid primary surfaces. Sandstone overrides to `var(--brand-gold)` for warm-theme CTAs — **does not** retarget high-attention rows or secondary context ink. |
+| `--brand-gold` | `oklch(0.748 0.128 84.6)` light / `oklch(0.796 0.134 80)` dark | Feldpost brand gold — **high-attention** quiet ink (`emphasis.hover`, `emphasis.engaged`), chart-2, org branding, sandstone `--primary` fill. **Not** passive toggle/toolbar/sort-on ink. |
+| `--interaction-selected-ink` | Cool interactive blue (light `oklch(0.50 0.10 245)` / dark `oklch(0.62 0.12 245)`) | **Secondary** passive context — toggle `data-state=on`, toolbar `data-active`, active sort row. **Must stay blue in all themes** including sandstone (decoupled from `--primary`). |
+| `--interaction-nav-ink` | `var(--app-violet-accent)` | **Tertiary** resting ink — nav active route, settings section rail. |
+| High-attention ink (quiet) | `var(--brand-gold)` | Hover, focus-visible, multi-select / flyout selection, linked-hover; see `docs/design/state-visuals.md` § Interaction emphasis |
 
-Emitted on light `:root` and in `@mixin tweakcn-dark-semantic-palette`. Sandstone overrides `--primary` back to `var(--brand-gold)` for warm-theme consistency.
+Emitted on light `:root` and in `@mixin tweakcn-dark-semantic-palette`. Sandstone may set `--primary: var(--brand-gold)` for filled CTAs but **must** keep `--interaction-selected-ink` on the cool blue values above so passive mode context never masquerades as high-attention gold.
 
 #### Reference palette — primary (gold-amber, seed `#c9a84c` @ stop 70)
 

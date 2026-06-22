@@ -12,20 +12,21 @@ This is **not** a sidebar-only rule. It applies to every surface that uses inter
 
 ## Three-tier attention budget (normative)
 
-Gold is **scarce** — one primary focal signal (pointer + in-panel engaged rows). Do not use gold for resting toolbar/filter/toggle state.
+**`--brand-gold` is the high-attention tier** — pointer focus **and** resting selection when the item **needs user attention** (multi-select rows, flyout picker choice, in-panel engaged row, linked-hover). Gold is **scarce**: reserve it for focal tasks, not passive “mode is on” chrome (toggle on, toolbar `data-active`, sort preset → secondary blue; nav → tertiary violet).
 
 | Tier | Meaning | Ink token | At-rest mixin | + pointer |
 | ---- | ------- | --------- | ------------- | --------- |
-| **Primary** | Acting on this row *now* | `--brand-gold` | `emphasis.engaged()` | `emphasis.hover()` |
-| **Secondary** | Context is set | `--interaction-selected-ink` | `emphasis.selected()` / `selected-bordered()` | `emphasis.hover()` |
+| **High attention** | Pointer focus or selection that is the current task | `--brand-gold` | `emphasis.engaged()` | `emphasis.hover()` |
+| **Secondary** | Context is set, not focal | `--interaction-selected-ink` | `emphasis.selected()` / `selected-bordered()` | `emphasis.hover()` |
 | **Tertiary** | Where you are in the product | `--interaction-nav-ink` | `emphasis.nav()` / `nav-bordered()` | `emphasis.hover()` |
 
 | Signal | Tier | Examples |
 | ------ | ---- | -------- |
-| Hover / focus-visible | **Primary** (always) | Any quiet row, any tier |
-| Filter picker `data-selected` | **Primary** | Flyout list while choosing |
-| Grouping multi-select row | **Primary** | `grouping-row--selected` |
-| Toolbar `data-active` | **Secondary** | Filter/sort/projects triggers |
+| Hover / focus-visible | **High attention** (always) | Any quiet row, any tier — ink = `--brand-gold` |
+| Filter picker `data-selected` | **High attention** | Flyout list while choosing |
+| Grouping multi-select row | **High attention** | `grouping-row--selected` |
+| Upload panel file row multi-select | **High attention** | Embedded `--selected` rows |
+| Toolbar `data-active` | **Secondary** | Filter/sort/projects triggers (mode on, not list pick) |
 | Active sort row | **Secondary** | `sort-dropdown__option--active` |
 | Toggle `data-state=on` | **Secondary** | Map style switch, size control, upload lanes |
 | Nav active route | **Tertiary** | `.nav__link--active` |
@@ -52,7 +53,9 @@ Material Icons do not reliably inherit without an explicit inherit rule on the i
 | ------- | ------------ |
 | `background: var(--menu-item-hover)` only | Gold wash, muted ink — looks “broken” |
 | Host gold + child `color: var(--primary)` | Gold label + blue icon (reported nav/dropdown bug) |
-| Gold on toggle `on` at rest | Collapses attention budget — use secondary blue |
+| Gold on toggle `on` or toolbar `data-active` at rest | Passive mode — use secondary blue (`--interaction-selected-ink`) |
+| Blue on multi-select / flyout picker row at rest | Selection is the task — use gold (`emphasis.engaged`) |
+| `--interaction-selected-ink: var(--primary)` in sandstone | Sandstone `--primary` is gold — selected ink must stay cool blue |
 | Blue on nav active route at rest | Use tertiary violet (`emphasis.nav`) |
 | `color: var(--foreground)` on `hlmBtn` host | Blocks emphasis ink while background still changes |
 | Per-child primary override “for emphasis” | Duplicates host ink; drifts on theme change |
@@ -63,15 +66,15 @@ Material Icons do not reliably inherit without an explicit inherit rule on the i
 | ------ | -------------- | ---- | ---------------- |
 | Main nav sidebar | Tertiary | [`sidebar.md`](../component/workspace/sidebar.md) | `.nav__link--active` |
 | Settings overlay rail | Tertiary | [`settings-overlay.md`](../ui/settings-overlay/settings-overlay.md) | `.settings-overlay__section-item--active` |
-| Menu / dropdown rows (hover) | Primary on pointer | [`dropdown-system.md`](../component/filters/dropdown-system.md) | `.option-menu-item` |
-| Filter picker flyout selected | Primary | [`filter-dropdown.md`](../component/filters/filter-dropdown.md) | `.filter-rule__picker-option[data-selected]` |
+| Menu / dropdown rows (hover) | High attention on pointer | [`dropdown-system.md`](../component/filters/dropdown-system.md) | `.option-menu-item` |
+| Filter picker flyout selected | High attention | [`filter-dropdown.md`](../component/filters/filter-dropdown.md) | `.filter-rule__picker-option[data-selected]` |
 | Sort active row | Secondary | [`dropdown-system.md`](../component/filters/dropdown-system.md) | `.sort-dropdown__option--active` |
-| Grouping multi-select | Primary | [`dropdown-system.md`](../component/filters/dropdown-system.md) | `.grouping-row--selected` |
+| Grouping multi-select | High attention | [`dropdown-system.md`](../component/filters/dropdown-system.md) | `.grouping-row--selected` |
 | Toolbar dropdown triggers `data-active` | Secondary | [`dropdown-system.md`](../component/filters/dropdown-system.md) | `button.*__menu-trigger` |
 | Map filter toolbar | Secondary | same | `map-filter-toolbar__menu-trigger` |
 | Toggle segments `on` | Secondary | [`map-style-switch.md`](../component/map/map-style-switch.md) | `[hlmToggleGroupItem]` |
-| Map photo markers (hover) | Primary | [`media-marker.md`](../ui/media-marker/media-marker.md) | `.map-photo-marker` hover outline |
-| Media item grid tiles (hover) | Primary | [`media-item.md`](../component/media/media-item.md) | `.media-item__slot:hover` |
+| Map photo markers (hover) | High attention | [`media-marker.md`](../ui/media-marker/media-marker.md) | `.map-photo-marker` hover outline |
+| Media item grid tiles (hover) | High attention | [`media-item.md`](../component/media/media-item.md) | `.media-item__slot:hover` |
 
 **Avatar badge** on the nav account row remains the **filled primary** exception (not quiet-row emphasis).
 
@@ -88,10 +91,14 @@ Feature SCSS must not reintroduce child `primary` overrides after host `emphasis
 - [x] **Given** main nav or settings section rail at rest with active route/section, **when** not hovered, **then** host and slots show **violet** ink (`--interaction-nav-ink`).
 - [x] **Given** a toolbar `hlmBtn` outline trigger on a frosted shell, **when** hovered, **then** icon, label, and chevron change ink together (no foreground lock on the host).
 - [x] **Given** an `hlmMenuItem` row in any dropdown (filter, sort, grouping, timespace panel actions), **when** hovered, **then** leading icon and label match host gold ink.
-- [ ] **Given** sandstone theme (`--primary` = gold), **when** hovering a non-selected row, **then** no blue/gold split appears on icon vs label.
+- [ ] **Given** a grouping or upload-panel multi-select row is selected at rest, **when** not hovered, **then** host and slots show **brand gold** (`emphasis.engaged`) — not secondary blue.
+- [ ] **Given** sandstone theme (`html[data-theme="sandstone"]`), **when** a toggle segment or toolbar trigger shows passive mode at rest (not hovered), **then** host and slots show **cool blue** (`--interaction-selected-ink`) — **not** gold.
+- [ ] **Given** sandstone theme, **when** hovering a non-selected quiet row, **then** host and slots show **brand gold** with no blue/gold split on icon vs label.
 
 ## Changelog
 
+- **2026-06-22 (b)** — **High-attention tier:** gold includes multi-select / flyout selection at rest, not only pointer. Supersedes “pointer only” (a).
+- **2026-06-22 (a)** — Sandstone `--interaction-selected-ink` decoupling; passive-mode anti-patterns.
 - **2026-06-17 (d)** — **Three-tier attention budget:** primary gold / secondary blue / tertiary violet; `emphasis.nav()`, `--interaction-nav-ink`.
 - **2026-06-17** — **Selected+hover = gold:** pointer over selected controls uses `emphasis.hover`, not primary deepening; scope adds map style switch, markers, media tiles.
 - **2026-06-17** — Initial contract: ink inheritance rule + cross-component scope (fixes spec drift that treated hover as sidebar-only primary ink).

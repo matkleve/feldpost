@@ -30,7 +30,7 @@ Authoritative governance source: docs/specs/GOVERNANCE-MATRIX.md.
 ## Cross-cutting UI contracts
 
 - **Product colors:** Specs describe **token names** (`var(--primary)`, tonal **stop** numbers, Figma roles)—not hex literals. Canonical values: [`docs/design/tokens.md`](../design/tokens.md) and `apps/web/src/styles.scss`. Architecture and service specs do not define palette.
-- **Interaction emphasis** (hover primary, selected cool ink): [`docs/design/state-visuals.md`](../design/state-visuals.md) § Interaction emphasis — rollout tracker [`docs/specs/system/interaction-emphasis-rollout.md`](system/interaction-emphasis-rollout.md)
+- **Interaction emphasis** (high-attention **brand gold**, passive context cool blue, nav violet): [`docs/design/state-visuals.md`](../design/state-visuals.md) § Interaction emphasis — rollout tracker [`docs/specs/system/interaction-emphasis-rollout.md`](system/interaction-emphasis-rollout.md)
 
 ## Governance Artifacts
 
