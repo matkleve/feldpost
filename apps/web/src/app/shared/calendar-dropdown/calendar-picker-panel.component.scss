@@ -1,7 +1,6 @@
 @use '../../../styles/interaction-emphasis-quiet-row' as emphasis;
 
 // Popover content for app-calendar-dropdown — month nav, day grid, footer actions.
-// Header inputs removed: outer app-calendar-dropdown shell owns text entry.
 // @see docs/specs/component/filters/calendar-picker-panel.md
 :host {
   display: block;
@@ -20,7 +19,7 @@
   flex-direction: column;
   gap: var(--spacing-1);
 
-  // Month nav: label + Today + prev/next chevrons.
+  // Month nav: label + Today shortcut + prev/next chevrons.
   // Ink/hover owned by hlmBtn variant="ghost".
   // @see docs/design/state-visuals.md § Interaction emphasis
   &__month-nav {
@@ -36,8 +35,7 @@
     flex: 1 1 auto;
   }
 
-  // Today button: compact text; only horizontal geometry overrides here.
-  // hlmBtn size="sm" supplies height + ink transitions.
+  // Today shortcut — geometry-only override on hlmBtn size="sm".
   &__now-btn {
     font-size: var(--font-size-2xs);
     padding-inline: var(--spacing-1);
@@ -47,7 +45,7 @@
   &__grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: var(--spacing-1);
+    gap: 2px;
     text-align: center;
   }
 
@@ -60,20 +58,30 @@
     letter-spacing: 0.02em;
   }
 
-  // Day cell: square grid button.
-  // hlmBtn variant="ghost" supplies idle ink + gold hover; geometry overrides here.
+  // Day cell: custom <button> — not hlmBtn (grid control, not standard action).
+  // Interaction emphasis: muted at rest; gold on hover; secondary ink when selected.
   // @see docs/specs/component/filters/calendar-picker-panel.md § Interaction emphasis
   &__day {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.625rem;
-    height: 1.625rem;
+    width: 1.75rem;
+    height: 1.75rem;
     margin: 0 auto;
     font-size: var(--font-size-2xs);
-    // Reset hlmBtn rounded-md to radius-sm for the day grid.
+    font-family: inherit;
+    color: var(--foreground);
+    background: transparent;
+    border: none;
     border-radius: var(--radius-sm);
-    padding: 0;
+    cursor: pointer;
+    transition:
+      background var(--motion-duration-fast) var(--motion-ease-out),
+      color var(--motion-duration-fast) var(--motion-ease-out);
+
+    &:hover:not(&--disabled):not(&--selected) {
+      @include emphasis.hover(10%);
+    }
 
     &--other-month {
       color: color-mix(in srgb, var(--muted-foreground) 52%, transparent);
@@ -84,8 +92,8 @@
       box-shadow: inset 0 0 0 1.5px var(--border);
     }
 
-    // Selected: secondary ink at rest (cool blue / interaction-selected-ink).
-    // @see docs/design/state-visuals.md § Interaction emphasis
+    // Selected day (single mode) or range endpoint — secondary ink.
+    // @see docs/design/state-visuals.md § Interaction emphasis (secondary tier)
     &--selected {
       @include emphasis.selected(12%);
       font-weight: var(--font-weight-semibold);
@@ -95,6 +103,31 @@
     // @see docs/specs/system/interaction-emphasis-ink-contract.md
     &--selected:hover:not(&--disabled) {
       @include emphasis.selected-hover(12%);
+    }
+
+    // In-range days (strictly between start and end): subtle secondary wash.
+    // Text stays foreground; hover → gold (handled by :hover rule above since !--selected).
+    // @see docs/specs/component/filters/calendar-picker-panel.range-grid.supplement.md
+    &--in-range:not(&--selected) {
+      @include emphasis.selected(6%);
+      color: var(--foreground);
+      border-radius: var(--radius-sm);
+    }
+
+    &--in-range:not(&--selected):hover:not(&--disabled) {
+      @include emphasis.hover(10%);
+    }
+
+    // Hover-preview wash — brand gold at 8% between anchor and hovered date.
+    // Shows potential range BEFORE the second click commits it.
+    // @see docs/specs/component/filters/calendar-dropdown.range-mode.supplement.md
+    &--preview-in-range:not(&--selected):not(&--in-range) {
+      background: color-mix(in srgb, var(--brand-gold) 8%, transparent);
+      color: var(--foreground);
+    }
+
+    &--preview-in-range:not(&--selected):not(&--in-range):hover:not(&--disabled) {
+      @include emphasis.hover(10%);
     }
 
     &--disabled {
@@ -112,9 +145,8 @@
     border-top: 1px solid var(--menu-border-subtle);
   }
 
-  // Clear button: destructive hover on top of hlmBtn ghost base.
-  // Geometry owned by hlmBtn size="sm"; only color override here.
-  // @see docs/design/state-visuals.md § Interaction emphasis — Destructive quiet row
+  // Clear: destructive-on-hover override on top of hlmBtn ghost.
+  // @see docs/design/state-visuals.md § Destructive quiet row
   &__clear-btn {
     color: var(--muted-foreground);
 
@@ -125,8 +157,8 @@
     }
   }
 
-  // Done button: geometry-only; hlmBtn variant="default" supplies fill/hover.
+  // Done: geometry only — hlmBtn variant="default" primary fill is the correct CTA treatment.
   &__done-btn {
-    // No overrides needed — variant="default" primary fill is the correct CTA treatment.
+    // No color overrides needed.
   }
 }

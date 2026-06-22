@@ -38,6 +38,44 @@ export function todayIsoUtc(): string {
   );
 }
 
+/** Shared month grid generator — returns raw cell data for a 6×7 grid. */
+function generateMonthGrid(
+  year: number,
+  month: number,
+): Array<{ dateStr: string; day: number; isCurrentMonth: boolean }> {
+  const firstDay = new Date(year, month, 1);
+  let startDow = firstDay.getDay() - 1;
+  if (startDow < 0) startDow = 6;
+
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const daysInPrevMonth = new Date(year, month, 0).getDate();
+  const cells: Array<{ dateStr: string; day: number; isCurrentMonth: boolean }> = [];
+
+  for (let i = startDow - 1; i >= 0; i--) {
+    const d = daysInPrevMonth - i;
+    const prevMonth = month === 0 ? 11 : month - 1;
+    const prevYear = month === 0 ? year - 1 : year;
+    const dateStr = `${prevYear}-${String(prevMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    cells.push({ dateStr, day: d, isCurrentMonth: false });
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    cells.push({ dateStr, day: d, isCurrentMonth: true });
+  }
+
+  const remaining = 42 - cells.length;
+  for (let d = 1; d <= remaining; d++) {
+    const nextMonth = month === 11 ? 0 : month + 1;
+    const nextYear = month === 11 ? year + 1 : year;
+    const dateStr = `${nextYear}-${String(nextMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    cells.push({ dateStr, day: d, isCurrentMonth: false });
+  }
+
+  return cells;
+}
+
+/** Single-mode calendar grid. Range fields default to false. */
 export function buildCalendarDays(
   year: number,
   month: number,
@@ -47,57 +85,72 @@ export function buildCalendarDays(
   disabledDates: ReadonlySet<string> | null,
 ): CalendarDay[] {
   const today = todayIsoUtc();
-
-  const firstDay = new Date(year, month, 1);
-  let startDow = firstDay.getDay() - 1;
-  if (startDow < 0) {
-    startDow = 6;
-  }
-
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const daysInPrevMonth = new Date(year, month, 0).getDate();
-  const days: CalendarDay[] = [];
-
-  for (let i = startDow - 1; i >= 0; i--) {
-    const d = daysInPrevMonth - i;
-    const prevMonth = month === 0 ? 11 : month - 1;
-    const prevYear = month === 0 ? year - 1 : year;
-    const dateStr = `${prevYear}-${String(prevMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    days.push(makeDay(dateStr, d, false, today, selected, minDate, maxDate, disabledDates));
-  }
-
-  for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    days.push(makeDay(dateStr, d, true, today, selected, minDate, maxDate, disabledDates));
-  }
-
-  const remaining = 42 - days.length;
-  for (let d = 1; d <= remaining; d++) {
-    const nextMonth = month === 11 ? 0 : month + 1;
-    const nextYear = month === 11 ? year + 1 : year;
-    const dateStr = `${nextYear}-${String(nextMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    days.push(makeDay(dateStr, d, false, today, selected, minDate, maxDate, disabledDates));
-  }
-
-  return days;
-}
-
-function makeDay(
-  dateStr: string,
-  day: number,
-  isCurrentMonth: boolean,
-  today: string,
-  selected: string,
-  minDate: Date | null,
-  maxDate: Date | null,
-  disabledDates: ReadonlySet<string> | null,
-): CalendarDay {
-  return {
+  return generateMonthGrid(year, month).map(({ dateStr, day, isCurrentMonth }) => ({
     date: dateStr,
     day,
     isCurrentMonth,
     isToday: dateStr === today,
     isSelected: dateStr === selected,
     isDisabled: isCalendarDayDisabled(dateStr, minDate, maxDate, disabledDates),
-  };
+    isRangeStart: false,
+    isRangeEnd: false,
+    isInRange: false,
+    isPreviewInRange: false,
+  }));
+}
+
+/**
+ * Range-mode calendar grid.
+ *
+ * @param fromDate  - committed/draft range start ISO date (or '')
+ * @param toDate    - committed/draft range end ISO date (or '')
+ * @param previewAnchor - the fixed anchor date for hover preview (opposite bound)
+ * @param hoveredDate   - the date the user is currently hovering over
+ */
+export function buildRangeCalendarDays(
+  year: number,
+  month: number,
+  fromDate: string,
+  toDate: string,
+  previewAnchor: string,
+  hoveredDate: string,
+  minDate: Date | null,
+  maxDate: Date | null,
+  disabledDates: ReadonlySet<string> | null,
+): CalendarDay[] {
+  const today = todayIsoUtc();
+
+  // Compute preview bounds (between anchor and hovered date).
+  let previewMin = '';
+  let previewMax = '';
+  if (previewAnchor && hoveredDate && previewAnchor !== hoveredDate) {
+    previewMin = previewAnchor < hoveredDate ? previewAnchor : hoveredDate;
+    previewMax = previewAnchor < hoveredDate ? hoveredDate : previewAnchor;
+  }
+
+  return generateMonthGrid(year, month).map(({ dateStr, day, isCurrentMonth }) => {
+    const isRangeStart = !!fromDate && dateStr === fromDate;
+    const isRangeEnd = !!toDate && dateStr === toDate;
+    const isInRange =
+      !!fromDate && !!toDate && dateStr > fromDate && dateStr < toDate;
+    const isPreviewInRange =
+      !!previewMin &&
+      dateStr > previewMin &&
+      dateStr < previewMax &&
+      !isRangeStart &&
+      !isRangeEnd;
+
+    return {
+      date: dateStr,
+      day,
+      isCurrentMonth,
+      isToday: dateStr === today,
+      isSelected: isRangeStart || isRangeEnd,
+      isDisabled: isCalendarDayDisabled(dateStr, minDate, maxDate, disabledDates),
+      isRangeStart,
+      isRangeEnd,
+      isInRange,
+      isPreviewInRange,
+    };
+  });
 }

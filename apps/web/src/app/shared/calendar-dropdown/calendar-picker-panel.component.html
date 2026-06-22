@@ -39,17 +39,21 @@
     }
     @for (day of calendarDays(); track day.date) {
       <button
-        hlmBtn
-        variant="ghost"
         type="button"
-        class="calendar-picker-panel__day"
+        class="calendar-picker-panel__day focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-primary focus-visible:outline-offset-1"
         [class.calendar-picker-panel__day--other-month]="!day.isCurrentMonth"
         [class.calendar-picker-panel__day--today]="day.isToday"
         [class.calendar-picker-panel__day--selected]="day.isSelected"
+        [class.calendar-picker-panel__day--range-start]="day.isRangeStart"
+        [class.calendar-picker-panel__day--range-end]="day.isRangeEnd"
+        [class.calendar-picker-panel__day--in-range]="day.isInRange"
+        [class.calendar-picker-panel__day--preview-in-range]="day.isPreviewInRange"
         [class.calendar-picker-panel__day--disabled]="day.isDisabled"
         [disabled]="day.isDisabled"
         [attr.aria-label]="day.date"
         [attr.aria-current]="day.isToday ? 'date' : null"
+        (mouseenter)="onDayMouseEnter(day)"
+        (mouseleave)="onDayMouseLeave()"
         (click)="selectDay(day)"
       >
         {{ day.day }}

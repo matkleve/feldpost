@@ -65,6 +65,20 @@
     }
   }
 
+  // Range mode: two control fields side by side.
+  // @see docs/specs/component/filters/calendar-dropdown.range-mode.supplement.md
+  .calendar-dropdown--range {
+    display: flex;
+    flex-direction: row;
+    gap: var(--spacing-2);
+    width: 100%;
+  }
+
+  .calendar-dropdown__range-field {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
   .calendar-dropdown__trigger {
     display: inline-flex;
     flex-shrink: 0;

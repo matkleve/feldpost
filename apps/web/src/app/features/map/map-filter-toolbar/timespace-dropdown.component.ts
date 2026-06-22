@@ -23,7 +23,7 @@ import {
 } from '../../../core/workspace-view/timespace.helpers';
 import { toIsoDateValue, parseIsoDateValue } from '../../../core/i18n/date-field.helpers';
 import { CalendarDropdownComponent } from '../../../shared/calendar-dropdown/calendar-dropdown.component';
-import type { CalendarDropdownValue } from '../../../shared/calendar-dropdown/calendar-dropdown.types';
+import type { CalendarRangeValue } from '../../../shared/calendar-dropdown/calendar-dropdown.types';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 
 @Component({
@@ -96,20 +96,13 @@ export class TimespaceDropdownComponent implements OnInit {
     return new Date(hist.domainEndMs);
   });
 
-  readonly fromDropdownValue = computed((): CalendarDropdownValue | null => {
-    const from = this.effectiveRange()?.from;
-    if (!from) {
-      return null;
-    }
-    return { date: toIsoDateValue(from), time: null };
-  });
-
-  readonly toDropdownValue = computed((): CalendarDropdownValue | null => {
-    const to = this.effectiveRange()?.to;
-    if (!to) {
-      return null;
-    }
-    return { date: toIsoDateValue(to), time: null };
+  readonly rangeDropdownValue = computed((): CalendarRangeValue | null => {
+    const range = this.effectiveRange();
+    if (!range?.from && !range?.to) return null;
+    return {
+      from: range?.from ? { date: toIsoDateValue(range.from), time: null } : null,
+      to: range?.to ? { date: toIsoDateValue(range.to), time: null } : null,
+    };
   });
 
   readonly matchedItemCount = computed(() => {
@@ -147,16 +140,10 @@ export class TimespaceDropdownComponent implements OnInit {
     return this.viewService.timeRange();
   });
 
-  onFromDateChange(value: CalendarDropdownValue | null): void {
-    const from = value?.date ? parseIsoDateValue(value.date) : null;
-    const current = this.viewService.timeRange();
-    this.commitRange({ from, to: current?.to ?? null });
-  }
-
-  onToDateChange(value: CalendarDropdownValue | null): void {
-    const to = value?.date ? parseIsoDateValue(value.date) : null;
-    const current = this.viewService.timeRange();
-    this.commitRange({ from: current?.from ?? null, to });
+  onRangeChange(value: CalendarRangeValue | null): void {
+    const from = value?.from?.date ? parseIsoDateValue(value.from.date) : null;
+    const to = value?.to?.date ? parseIsoDateValue(value.to.date) : null;
+    this.commitRange({ from, to });
   }
 
   onReset(): void {
