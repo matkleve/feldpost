@@ -125,7 +125,7 @@
   &__grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 1px;
+    gap: var(--spacing-1);
     text-align: center;
   }
 
@@ -142,21 +142,23 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.625rem;
-    height: 1.625rem;
+    width: 100%;
+    aspect-ratio: 1;
+    max-width: 1.75rem;
+    max-height: 1.75rem;
     margin: 0 auto;
     font-size: var(--font-size-2xs);
     color: var(--foreground);
     background: none;
     border: none;
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-sm);
     cursor: pointer;
     font-family: inherit;
     transition:
       background var(--motion-duration-fast) var(--motion-ease-out),
       color var(--motion-duration-fast) var(--motion-ease-out);
 
-    &:hover:not(&--selected):not(&--disabled) {
+    &:hover:not(&--disabled):not(&--selected) {
       @include emphasis.hover(10%);
     }
 
@@ -169,12 +171,14 @@
     }
 
     &--selected {
-      @include emphasis.selected(12%);
+      background: var(--primary);
+      color: var(--primary-foreground);
       font-weight: var(--font-weight-semibold);
     }
 
     &--selected:hover:not(&--disabled) {
-      @include emphasis.hover(12%);
+      background: color-mix(in srgb, var(--primary) 88%, black);
+      color: var(--primary-foreground);
     }
 
     &--disabled {
