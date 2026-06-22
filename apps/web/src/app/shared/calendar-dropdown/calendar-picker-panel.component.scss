@@ -1,6 +1,7 @@
 @use '../../../styles/interaction-emphasis-quiet-row' as emphasis;
 
-// Popover content for app-calendar-dropdown — month grid + optional time row.
+// Popover content for app-calendar-dropdown — month nav, day grid, footer actions.
+// Header inputs removed: outer app-calendar-dropdown shell owns text entry.
 // @see docs/specs/component/filters/calendar-picker-panel.md
 :host {
   display: block;
@@ -19,50 +20,9 @@
   flex-direction: column;
   gap: var(--spacing-1);
 
-  &__header {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-1);
-    padding-bottom: var(--spacing-1);
-    border-bottom: 1px solid var(--menu-border-subtle);
-  }
-
-  &__header--date-only {
-    .calendar-picker-panel__date-input {
-      flex: 1 1 100%;
-    }
-  }
-
-  &__date-input,
-  &__time-input {
-    flex: 1 1 50%;
-    min-width: 0;
-    font-size: var(--font-size-xs);
-    color: var(--foreground);
-    background: var(--card);
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius-sm);
-    padding: 0.1875rem var(--spacing-2);
-    font-family: inherit;
-    outline: none;
-    transition:
-      border-color var(--motion-duration-fast) var(--motion-ease-out),
-      box-shadow var(--motion-duration-fast) var(--motion-ease-out);
-
-    &::placeholder {
-      color: var(--text-disabled);
-    }
-
-    &:focus {
-      border-color: color-mix(in srgb, var(--brand-gold) 42%, var(--border));
-      box-shadow: var(--interactive-focus-ring);
-    }
-  }
-
-  &__time-input {
-    text-align: left;
-  }
-
+  // Month nav: label + Today + prev/next chevrons.
+  // Ink/hover owned by hlmBtn variant="ghost".
+  // @see docs/design/state-visuals.md § Interaction emphasis
   &__month-nav {
     display: flex;
     align-items: center;
@@ -76,50 +36,12 @@
     flex: 1 1 auto;
   }
 
+  // Today button: compact text; only horizontal geometry overrides here.
+  // hlmBtn size="sm" supplies height + ink transitions.
   &__now-btn {
     font-size: var(--font-size-2xs);
-    color: var(--muted-foreground);
-    background: none;
-    border: none;
-    padding: 0.125rem var(--spacing-1);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    font-family: inherit;
-    transition:
-      color var(--motion-duration-fast) var(--motion-ease-out),
-      background var(--motion-duration-fast) var(--motion-ease-out);
-
-    &:hover {
-      @include emphasis.hover(10%);
-    }
-  }
-
-  &__nav-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.25rem;
-    height: 1.25rem;
-    border: none;
-    border-radius: var(--radius-sm);
-    background: none;
-    color: var(--muted-foreground);
-    cursor: pointer;
-    transition:
-      color var(--motion-duration-fast) var(--motion-ease-out),
-      background var(--motion-duration-fast) var(--motion-ease-out);
-
-    .material-icons {
-      font-size: var(--font-size-md);
-    }
-
-    &:hover {
-      @include emphasis.hover(10%);
-
-      .material-icons {
-        color: inherit;
-      }
-    }
+    padding-inline: var(--spacing-1);
+    height: 1.5rem;
   }
 
   &__grid {
@@ -138,6 +60,9 @@
     letter-spacing: 0.02em;
   }
 
+  // Day cell: square grid button.
+  // hlmBtn variant="ghost" supplies idle ink + gold hover; geometry overrides here.
+  // @see docs/specs/component/filters/calendar-picker-panel.md § Interaction emphasis
   &__day {
     display: inline-flex;
     align-items: center;
@@ -146,38 +71,29 @@
     height: 1.625rem;
     margin: 0 auto;
     font-size: var(--font-size-2xs);
-    color: var(--foreground);
-    background: transparent;
-    border: none;
+    // Reset hlmBtn rounded-md to radius-sm for the day grid.
     border-radius: var(--radius-sm);
-    cursor: pointer;
-    font-family: inherit;
-    transition:
-      background var(--motion-duration-fast) var(--motion-ease-out),
-      color var(--motion-duration-fast) var(--motion-ease-out);
-
-    &:hover:not(&--disabled):not(&--selected) {
-      @include emphasis.hover(10%);
-      border-radius: var(--radius-sm);
-    }
+    padding: 0;
 
     &--other-month {
       color: color-mix(in srgb, var(--muted-foreground) 52%, transparent);
     }
 
+    // Today ring (unselected): subtle border, no fill.
     &--today:not(&--selected) {
-      border-radius: var(--radius-sm);
       box-shadow: inset 0 0 0 1.5px var(--border);
     }
 
+    // Selected: secondary ink at rest (cool blue / interaction-selected-ink).
+    // @see docs/design/state-visuals.md § Interaction emphasis
     &--selected {
-      border-radius: var(--radius-sm);
       @include emphasis.selected(12%);
       font-weight: var(--font-weight-semibold);
     }
 
+    // Selected + hover: pointer always wins → gold.
+    // @see docs/specs/system/interaction-emphasis-ink-contract.md
     &--selected:hover:not(&--disabled) {
-      border-radius: var(--radius-sm);
       @include emphasis.selected-hover(12%);
     }
 
@@ -196,42 +112,21 @@
     border-top: 1px solid var(--menu-border-subtle);
   }
 
-  &__clear-btn,
-  &__done-btn {
-    font-size: var(--font-size-2xs);
-    font-family: inherit;
-    background: none;
-    border: none;
-    border-radius: var(--radius-sm);
-    padding: var(--spacing-1) var(--spacing-2);
-    cursor: pointer;
-    transition:
-      color var(--motion-duration-fast) var(--motion-ease-out),
-      background var(--motion-duration-fast) var(--motion-ease-out);
-  }
-
+  // Clear button: destructive hover on top of hlmBtn ghost base.
+  // Geometry owned by hlmBtn size="sm"; only color override here.
+  // @see docs/design/state-visuals.md § Interaction emphasis — Destructive quiet row
   &__clear-btn {
     color: var(--muted-foreground);
 
-    &:hover {
+    &:hover:not(:disabled),
+    &:focus-visible:not(:disabled) {
       color: var(--destructive);
       background: color-mix(in srgb, var(--destructive) 8%, transparent);
     }
   }
 
+  // Done button: geometry-only; hlmBtn variant="default" supplies fill/hover.
   &__done-btn {
-    color: var(--success-foreground);
-    font-weight: var(--font-weight-medium);
-    background: var(--success);
-    border-radius: var(--radius-sm);
-
-    &:hover:not(:disabled) {
-      background: color-mix(in srgb, var(--success) 88%, black);
-    }
-
-    &:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-    }
+    // No overrides needed — variant="default" primary fill is the correct CTA treatment.
   }
 }

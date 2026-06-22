@@ -7,17 +7,15 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { parseIsoDateValue, toIsoDateValue } from '../../core/i18n/date-field.helpers';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { parseTimeInput } from '../ui-primitives/parse-time-input';
-import { HLM_INPUT_IMPORTS } from '../ui/input';
+import { HLM_BUTTON_IMPORTS } from '../ui/button';
 import { buildCalendarDays, isCalendarDayDisabled, todayIsoUtc } from './calendar-picker.helpers';
 import type { CalendarDay, CalendarDropdownValue, TimeMode } from './calendar-dropdown.types';
 
 @Component({
   selector: 'app-calendar-picker-panel',
   standalone: true,
-  imports: [...HLM_INPUT_IMPORTS],
+  imports: [...HLM_BUTTON_IMPORTS],
   templateUrl: './calendar-picker-panel.component.html',
   styleUrl: './calendar-picker-panel.component.scss',
 })
@@ -37,8 +35,6 @@ export class CalendarPickerPanelComponent {
   readonly clear = output<void>();
   readonly cancel = output<void>();
 
-  readonly dateInput = signal('');
-  readonly timeInput = signal('');
   readonly viewYear = signal(new Date().getFullYear());
   readonly viewMonth = signal(new Date().getMonth());
 
@@ -73,34 +69,23 @@ export class CalendarPickerPanelComponent {
     ),
   );
 
-  readonly showTime = computed(() => this.timeMode() !== 'dateOnly');
-
   readonly canDone = computed(() => {
     const draft = this.draft();
     if (!draft?.date) {
       return this.nullable();
     }
-    if (this.timeMode() === 'requiredTime') {
-      return parseTimeInput(this.timeInput()) !== '';
-    }
     return true;
   });
 
   constructor() {
+    // Sync the visible month when the committed draft date changes.
     effect(() => {
-      const draft = this.draft();
-      const date = draft?.date ?? '';
-
+      const date = this.draft()?.date ?? '';
       if (date) {
-        const parsed = parseIsoDateValue(date);
-        this.dateInput.set(parsed ? this.i18nService.formatDateFieldValue(parsed) : '');
         this.syncVisibleMonthToDate(date);
       } else {
-        this.dateInput.set('');
         this.viewSyncedToDate = '';
       }
-
-      this.timeInput.set(draft?.time ?? '');
     });
   }
 
@@ -108,9 +93,6 @@ export class CalendarPickerPanelComponent {
     if (day.isDisabled) {
       return;
     }
-
-    const parsed = parseIsoDateValue(day.date);
-    this.dateInput.set(parsed ? this.i18nService.formatDateFieldValue(parsed) : '');
     this.emitDraft({
       date: day.date,
       time: this.timeMode() === 'dateOnly' ? null : (this.draft()?.time ?? null),
@@ -144,9 +126,6 @@ export class CalendarPickerPanelComponent {
     if (isCalendarDayDisabled(iso, this.minDate(), this.maxDate(), this.disabledDates())) {
       return;
     }
-
-    const parsed = parseIsoDateValue(iso);
-    this.dateInput.set(parsed ? this.i18nService.formatDateFieldValue(parsed) : '');
     this.syncVisibleMonthToDate(iso);
     this.emitDraft({
       date: iso,
@@ -154,77 +133,9 @@ export class CalendarPickerPanelComponent {
     });
   }
 
-  onDateBlur(): void {
-    const parsed = this.i18nService.parseDateFieldValue(this.dateInput());
-    if (parsed) {
-      const iso = toIsoDateValue(parsed);
-      this.dateInput.set(this.i18nService.formatDateFieldValue(parsed));
-      this.syncVisibleMonthToDate(iso);
-      this.emitDraft({
-        date: iso,
-        time: this.timeMode() === 'dateOnly' ? null : (this.draft()?.time ?? null),
-      });
-      return;
-    }
-
-    const current = this.draft()?.date ?? '';
-    this.dateInput.set(
-      current ? this.i18nService.formatDateFieldValue(parseIsoDateValue(current)) : '',
-    );
-  }
-
-  onDateKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Escape') {
-      event.stopPropagation();
-      this.cancel.emit();
-      return;
-    }
-    if (event.key === 'Enter') {
-      this.onDateBlur();
-      if (this.canDone()) {
-        this.done.emit();
-      }
-    }
-  }
-
-  onTimeInput(value: string): void {
-    this.timeInput.set(value);
-    this.emitDraft({
-      date: this.draft()?.date ?? null,
-      time: value || null,
-    });
-  }
-
-  onTimeBlur(): void {
-    const parsed = parseTimeInput(this.timeInput());
-    this.timeInput.set(parsed);
-    this.emitDraft({
-      date: this.draft()?.date ?? null,
-      time: parsed || null,
-    });
-  }
-
-  onTimeKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Escape') {
-      event.stopPropagation();
-      this.cancel.emit();
-      return;
-    }
-    if (event.key === 'Enter') {
-      this.onTimeBlur();
-      if (this.canDone()) {
-        this.done.emit();
-      }
-    }
-  }
-
   onDoneClick(): void {
     if (!this.canDone()) {
       return;
-    }
-    this.onDateBlur();
-    if (this.showTime()) {
-      this.onTimeBlur();
     }
     this.done.emit();
   }

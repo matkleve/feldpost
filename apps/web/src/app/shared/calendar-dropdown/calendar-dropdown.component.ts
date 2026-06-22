@@ -69,6 +69,13 @@ export class CalendarDropdownComponent {
     this.valueChange.emit({ date, time });
   }
 
+  openIfClosed(): void {
+    if (!this.popoverOpen()) {
+      this.draft.set(this.cloneValue(this.value()));
+      this.popoverOpen.set(true);
+    }
+  }
+
   togglePopover(event: MouseEvent): void {
     event.preventDefault();
     event.stopPropagation();

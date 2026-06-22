@@ -15,6 +15,7 @@
       [attr.placeholder]="placeholder()"
       [attr.aria-label]="ariaLabel() || label()"
       [value]="shellDisplayText()"
+      (focus)="openIfClosed()"
       (change)="onShellTextCommit($event)"
       (keydown.enter)="onShellTextCommit($event)"
     />
