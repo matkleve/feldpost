@@ -101,12 +101,13 @@ Feature SCSS must not reintroduce child `primary` overrides after host `emphasis
 - [x] **Given** a toolbar `hlmBtn` outline trigger on a frosted shell, **when** hovered, **then** icon, label, and chevron change ink together (no foreground lock on the host).
 - [x] **Given** an `hlmMenuItem` row in any dropdown (filter, sort, grouping, timespace panel actions), **when** hovered, **then** leading icon and label match host gold ink.
 - [ ] **Given** a grouping or upload-panel multi-select row is selected at rest, **when** not hovered, **then** host and slots show **brand gold** (`emphasis.engaged`) — not secondary blue.
-- [ ] **Given** map style switch with basemap segment `data-state=on` at rest, **when** not hovered, **then** host and icon show **violet** (`--interaction-nav-ink`) — not gold or blue.
+- [x] **Given** map style switch at rest, **when** a basemap mode is active, **then** the **active dot** shows violet (`--interaction-nav-ink`) — button body stays muted; not gold or blue on the full control.
 - [ ] **Given** sandstone theme (`html[data-theme="sandstone"]`), **when** a generic toggle or toolbar trigger shows passive tool context at rest (not map basemap), **then** host and slots show **cool blue** (`--interaction-selected-ink`) — **not** gold.
 - [ ] **Given** sandstone theme, **when** hovering a non-selected quiet row, **then** host and slots show **brand gold** with no blue/gold split on icon vs label.
 
 ## Changelog
 
+- **2026-06-23** — Map style switch AC aligned with dot-only tertiary ink ([`map-style-switch.md`](../component/map/map-style-switch.md)); superseded host-fill criterion.
 - **2026-06-22 (d)** — Map search bar + dropdown search clear: ghost ink ownership; anti-pattern for muted `color:` on `hlmBtn` ghost host.
 - **2026-06-22 (c)** — Map style switch re-tiered to **tertiary violet**; split from generic toggle secondary.
 - **2026-06-22 (b)** — **High-attention tier:** gold includes multi-select / flyout selection at rest, not only pointer. Supersedes “pointer only” (a).

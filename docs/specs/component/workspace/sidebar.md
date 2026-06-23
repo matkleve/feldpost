@@ -111,7 +111,7 @@ flowchart LR
 ## Wiring
 
 - `AuthenticatedAppLayoutComponent` hosts `app-nav`; layout spacer mirrors `--feldpost-sidebar-width`
-- Collapse toggle MUST NOT change panel padding or row grid — supplement
+- Collapse toggle MUST NOT change panel `padding-inline` — collapsed row gap/label width change per supplement
 - Map shell registers `invalidateMapSize` via `WorkspacePaneLayoutMapEffectsService`
 
 ## Acceptance Criteria

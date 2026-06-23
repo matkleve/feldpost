@@ -214,7 +214,7 @@
 
 - **File**: `apps/web/src/app/shared/time-field-control/time-field-control.component.ts`
 - **Purpose**: `HH:MM` input + scroll-wheel picker for split calendar range rows.
-- **Spec**: [`docs/specs/component/filters/time-field-control.md`](filters/time-field-control.md)
+- **Spec**: [`time-field-control.md`](filters/time-field-control.md) · AC: [`time-field-control.acceptance-criteria.md`](filters/time-field-control.acceptance-criteria.md)
 - **Variant axes**: `value`, `disabled`, `ariaLabel`
 - **Composed of**: `app-dropdown-shell` (portal)
 - **Used in**: `app-calendar-dropdown` (`layout='split'`, `timeMode≠'dateOnly'`)

@@ -88,13 +88,14 @@ sequenceDiagram
   N->>N: sidebarCollapsed.toggle + localStorage
   N->>D: --feldpost-sidebar-width
   N->>M: invalidateMapSize (debounced)
-  Note over N: Labels opacity/visibility only; grid unchanged
+  Note over N: Width + label clip + collapsed gap/label column only
 ```
 
 ## Acceptance Criteria (collapse & geometry)
 
 - [x] Panel `padding-inline` identical in collapsed and expanded desktop states
 - [x] Row shell (grid, media width, row padding) unchanged across toggle
+- [x] Collapsed: column-gap `0`, label column `0fr`, nav link min-height `32px`
 - [x] Labels hidden via opacity/visibility; remain mounted
 - [x] Collapse control persists across reload
 - [x] Map `invalidateSize` runs on toggle, not on component init

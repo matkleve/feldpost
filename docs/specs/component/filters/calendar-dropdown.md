@@ -93,7 +93,7 @@ Popover MUST NOT render inside `app-dropdown-shell` content box — use body por
 
 ## File map
 
-Shell + panel + time field under `apps/web/src/app/shared/calendar-dropdown/` and `time-field-control/` — see child specs for full file lists.
+Shell + panel + time field under `apps/web/src/app/shared/calendar-dropdown/` and `time-field-control/` — see child specs ([`time-field-control.md`](time-field-control.md) + [AC](time-field-control.acceptance-criteria.md)) for picker contract.
 
 ## Wiring
 

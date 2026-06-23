@@ -78,6 +78,10 @@ Parent: [`calendar-dropdown.md`](calendar-dropdown.md)
 - [x] Empty time → whole UTC day boundary on emit; set time → exact instant
 - [x] Filter `matchesTimeRange` uses committed `Date.getTime()` boundaries
 
+- [x] Time picker shell uses `option-menu-surface` (frosted panel when overlapping map)
+- [x] Wheel columns have no visible scrollbars; mouse wheel adjusts hour/minute by pointer X
+- [x] Wheel row tap and scroll work when picker is portaled over map tiles
+
 ## Deferred (not in scope)
 
 - [ ] Panel-internal progressive time row (Add time link below grid) — timespace uses shell [`time-field-control.md`](time-field-control.md) instead

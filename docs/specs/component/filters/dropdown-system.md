@@ -127,6 +127,8 @@ The filter flyout remains **inside** the shell DOM so shell **`contains()`** sti
 | Toolbar filter | `.toolbar-dropdown--filter` **32rem** min, **40rem** max | Filter panel |
 | Media-detail projects | `.media-detail-projects-panel` max **20rem** | `media-detail-inline-section` |
 | Arbitrary px floor | `[minWidth]` on `app-dropdown-shell` | Address search, comboboxes, context menu (**176**), location row (**220**), map shells, upload row menu |
+| Calendar picker | `:host.calendar-dropdown-panel` overflow visible | `app-calendar-dropdown` |
+| Time field wheel | `:host.time-field-panel` + `option-menu-surface`, content-sized | `app-time-field-control` |
 | Content-sized | No `toolbar-dropdown` class; `option-menu-surface` only | Metadata picker, add-metadata suggestions |
 
 ### Padding ownership (normative)
