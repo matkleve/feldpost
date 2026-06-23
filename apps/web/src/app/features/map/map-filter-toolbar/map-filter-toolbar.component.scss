@@ -19,7 +19,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: var(--map-search-chrome-stack-gap, var(--spacing-4));
   width: 100%;
   margin: 0;

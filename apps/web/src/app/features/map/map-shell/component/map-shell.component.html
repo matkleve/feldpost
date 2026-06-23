@@ -20,9 +20,21 @@
       [title]="basemapService.mapViewMode() === 'street' ? 'Satellite view' : 'Street view'"
       (click)="toggleBasemap()"
     >
-      <span class="material-icons" aria-hidden="true">{{
-        basemapService.mapViewMode() === 'street' ? 'satellite_alt' : 'map'
-      }}</span>
+      <span class="map-style-switch__media" aria-hidden="true">
+        <span class="material-icons map-style-switch__icon">{{
+          basemapService.mapViewMode() === 'street' ? 'satellite_alt' : 'map'
+        }}</span>
+        <span class="map-style-switch__dots">
+          <span
+            class="map-style-switch__dot"
+            [class.map-style-switch__dot--active]="basemapService.mapViewMode() === 'street'"
+          ></span>
+          <span
+            class="map-style-switch__dot"
+            [class.map-style-switch__dot--active]="basemapService.mapViewMode() === 'photo'"
+          ></span>
+        </span>
+      </span>
     </button>
   </div>
 

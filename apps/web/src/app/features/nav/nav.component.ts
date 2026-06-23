@@ -6,6 +6,7 @@ import { AuthService } from '../../core/auth/auth.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { ThemeService } from '../../core/theme/theme.service';
 import { SettingsPaneService } from '../../core/settings-pane/settings-pane.service';
+import { WorkspacePaneLayoutMapEffectsService } from '../../core/workspace-pane/workspace-pane-layout-map-effects.service';
 import {
   buildSettingsUrl,
   parseSettingsUrl,
@@ -22,6 +23,7 @@ export interface NavItem {
 }
 
 const COLLAPSED_STORAGE_KEY = 'feldpost.ui.sidebarCollapsed';
+const SIDEBAR_WIDTH_TRANSITION_MS = 200;
 
 @Component({
   selector: 'app-nav',
@@ -38,6 +40,7 @@ export class NavComponent {
   private readonly authService = inject(AuthService);
   private readonly i18nService = inject(I18nService);
   private readonly settingsPaneService = inject(SettingsPaneService);
+  private readonly mapLayoutEffects = inject(WorkspacePaneLayoutMapEffectsService);
   readonly themeService = inject(ThemeService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
@@ -59,13 +62,29 @@ export class NavComponent {
   );
 
   private readonly _sidebarWidthEffect = effect(() => {
+    const collapsed = this.sidebarCollapsed();
     if (typeof document !== 'undefined') {
       document.documentElement.style.setProperty(
         '--feldpost-sidebar-width',
-        this.sidebarCollapsed() ? '3rem' : '15rem',
+        collapsed ? '3rem' : '15rem',
       );
     }
+    this.invalidateMapAfterSidebarLayoutChange();
   });
+
+  private invalidateMapAfterSidebarLayoutChange(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const invalidate = (): void => {
+      this.mapLayoutEffects.getMapEffects()?.invalidateMapSize();
+    };
+
+    invalidate();
+    window.setTimeout(invalidate, 0);
+    window.setTimeout(invalidate, SIDEBAR_WIDTH_TRANSITION_MS);
+  }
 
   toggleCollapse(): void {
     const next = !this.sidebarCollapsed();

@@ -21,6 +21,22 @@
   --sidebar-row-height: calc(var(--spacing-6) + var(--spacing-1));
   --sidebar-media-size: var(--spacing-6);
   --sidebar-icon-size: 1.25rem;
+  // Row orchestration — expanded defaults; collapsed overrides on :host.nav--collapsed below.
+  --nav-row-display: grid;
+  --nav-row-grid-columns: var(--sidebar-media-size) minmax(0, 1fr);
+  --nav-row-justify: start;
+  --nav-row-align: center;
+  --nav-row-width: 100%;
+  --nav-row-margin-inline: 0;
+  --nav-row-padding-inline: var(--sidebar-row-padding-inline);
+  --nav-row-column-gap: var(--sidebar-row-gap);
+  --nav-label-display: flex;
+  --nav-panel-padding-inline: var(--spacing-2);
+  --nav-header-justify: space-between;
+  --nav-header-padding-inline: var(--spacing-2);
+  --nav-collapse-margin-inline-start: auto;
+  --nav-collapse-margin-inline-end: 0;
+  --nav-collapse-width: var(--sidebar-media-size);
 
   position: fixed;
   z-index: 201;
@@ -55,52 +71,6 @@
   }
 }
 
-// ── Collapsed state (desktop only) ───────────────────────────────────────────
-
-:host.nav--collapsed {
-  @media (min-width: 768px) {
-    width: var(--sidebar-width-collapsed);
-  }
-
-  .sidebar {
-    @media (min-width: 768px) {
-      width: var(--sidebar-width-collapsed);
-    }
-  }
-
-  .nav__header-title,
-  .nav__logo-mark,
-  .nav__label {
-    @media (min-width: 768px) {
-      display: none;
-    }
-  }
-
-  .nav__collapse-btn {
-    @media (min-width: 768px) {
-      margin-inline-start: 0;
-    }
-  }
-
-  // Reduce panel padding so icons have breathing room without clipping
-  .sidebar__panel {
-    @media (min-width: 768px) {
-      padding-inline: var(--spacing-1);
-    }
-  }
-
-  // Center icons in the full collapsed width; no grid needed
-  .nav__link,
-  .nav__utility-btn {
-    @media (min-width: 768px) {
-      display: flex;
-      justify-content: center;
-      padding-inline: 0;
-    }
-  }
-
-}
-
 // ── Panel ─────────────────────────────────────────────────────────────────────
 
 .sidebar__panel {
@@ -114,7 +84,7 @@
     width: 100%;
     min-height: 0;
     padding-block: var(--spacing-3);
-    padding-inline: var(--spacing-2);
+    padding-inline: var(--nav-panel-padding-inline);
     border-radius: 0;
     border-right: 1px solid var(--border);
     overflow: hidden;
@@ -138,9 +108,9 @@
   @media (min-width: 768px) {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: var(--nav-header-justify);
     padding-block: var(--spacing-1);
-    padding-inline: var(--spacing-2);
+    padding-inline: var(--nav-header-padding-inline);
     margin-bottom: var(--spacing-3);
     min-height: var(--sidebar-row-height);
     flex-shrink: 0;
@@ -178,10 +148,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: var(--sidebar-media-size);
+    width: var(--nav-collapse-width);
     min-height: var(--sidebar-row-height);
     flex-shrink: 0;
-    margin-inline-start: auto;
+    margin-inline-start: var(--nav-collapse-margin-inline-start);
+    margin-inline-end: var(--nav-collapse-margin-inline-end);
     border: none;
     background: transparent;
     border-radius: var(--container-radius-control);
@@ -263,13 +234,16 @@
 // ── Nav link ──────────────────────────────────────────────────────────────────
 
 .nav__link {
-  display: grid;
-  grid-template-columns: var(--sidebar-media-size) minmax(0, 1fr);
-  align-items: center;
-  column-gap: var(--sidebar-row-gap);
+  display: var(--nav-row-display);
+  grid-template-columns: var(--nav-row-grid-columns);
+  justify-content: var(--nav-row-justify);
+  align-items: var(--nav-row-align);
+  column-gap: var(--nav-row-column-gap);
   min-height: var(--sidebar-row-height);
   padding-block: var(--sidebar-row-padding-block);
-  padding-inline: var(--sidebar-row-padding-inline);
+  padding-inline: var(--nav-row-padding-inline);
+  width: var(--nav-row-width);
+  margin-inline: var(--nav-row-margin-inline);
   border-radius: var(--container-radius-control);
   text-decoration: none;
   color: var(--muted-foreground);
@@ -281,7 +255,6 @@
     color 80ms ease-out;
 
   @media (min-width: 768px) {
-    width: 100%;
     overflow: hidden;
   }
 
@@ -344,7 +317,7 @@
 }
 
 .nav__label {
-  display: flex;
+  display: var(--nav-label-display);
   flex-direction: column;
   flex: 1 1 auto;
   min-width: 0;
@@ -375,20 +348,22 @@
 }
 
 .nav__utility-btn {
-  display: grid;
-  grid-template-columns: var(--sidebar-media-size) minmax(0, 1fr);
-  align-items: center;
-  column-gap: var(--sidebar-row-gap);
+  display: var(--nav-row-display);
+  grid-template-columns: var(--nav-row-grid-columns);
+  justify-content: var(--nav-row-justify);
+  align-items: var(--nav-row-align);
+  column-gap: var(--nav-row-column-gap);
   min-height: var(--sidebar-row-height);
   padding-block: var(--sidebar-row-padding-block);
-  padding-inline: var(--sidebar-row-padding-inline);
+  padding-inline: var(--nav-row-padding-inline);
+  width: var(--nav-row-width);
+  margin-inline: var(--nav-row-margin-inline);
   border: none;
   border-radius: var(--container-radius-control);
   background: transparent;
   color: var(--muted-foreground);
   text-align: left;
   cursor: pointer;
-  width: 100%;
   overflow: hidden;
   white-space: nowrap;
   transition:
@@ -460,7 +435,6 @@
 .nav__account-link {
   border: 0;
   background: transparent;
-  width: 100%;
   text-align: left;
   color: var(--foreground);
 }
@@ -513,4 +487,40 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+// ── Collapsed orchestration (desktop) — must follow row definitions ───────────
+// @see docs/specs/component/workspace/sidebar.md § Desktop NavRow contract
+
+:host.nav--collapsed {
+  @media (min-width: 768px) {
+    width: var(--sidebar-width-collapsed);
+  }
+
+  .sidebar {
+    @media (min-width: 768px) {
+      width: var(--sidebar-width-collapsed);
+      --nav-row-display: flex;
+      --nav-row-grid-columns: unset;
+      --nav-row-justify: center;
+      --nav-row-width: var(--sidebar-row-height);
+      --nav-row-margin-inline: auto;
+      --nav-row-padding-inline: 0;
+      --nav-row-column-gap: 0;
+      --nav-label-display: none;
+      --nav-panel-padding-inline: var(--spacing-1);
+      --nav-header-justify: center;
+      --nav-header-padding-inline: 0;
+      --nav-collapse-margin-inline-start: auto;
+      --nav-collapse-margin-inline-end: auto;
+      --nav-collapse-width: var(--sidebar-row-height);
+    }
+  }
+
+  .nav__header-title,
+  .nav__logo-mark {
+    @media (min-width: 768px) {
+      display: none;
+    }
+  }
 }

@@ -6,8 +6,9 @@
 // Icon-only menu triggers when toolbar is narrower than four labeled triggers + view toggle.
 $toolbar-menu-compact-max: 42.5rem;
 
-// Map filter row: three triggers under search chrome (max ~36rem) — collapse only when labels cannot fit.
-$map-filter-toolbar-compact-max: 22rem;
+// Map filter row: three triggers under search chrome — collapse before labels would wrap.
+// Proportional to workspace four-trigger budget: 42.5rem × 3/4 = 31.875rem.
+$map-filter-toolbar-compact-max: 31.875rem;
 
 // Single cycle button replaces full card-variant toggle group.
 $toolbar-view-toggle-compact-max: 23.75rem;

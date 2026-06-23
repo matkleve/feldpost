@@ -32,6 +32,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
   box-shadow: var(--shadow-md);
   transition:
     background var(--motion-duration-standard) var(--motion-ease-out),
@@ -39,21 +40,12 @@
     color var(--motion-duration-standard) var(--motion-ease-out),
     transform var(--motion-duration-standard) var(--motion-ease-out);
 
-  .material-icons {
-    font-size: var(--font-size-xl);
-    color: inherit;
-  }
-
   &:hover,
   &:focus-visible {
     color: var(--brand-gold);
     @include frosted-chrome.outline-control-hover;
     transform: scale(1.04);
     outline: none;
-
-    .material-icons {
-      color: inherit;
-    }
   }
 
   &:focus-visible {
@@ -64,5 +56,42 @@
     width: var(--touch-target-mobile);
     height: var(--touch-target-mobile);
   }
+}
+
+// Icon + basemap indicator dots stacked inside the circular hit target
+// @see docs/specs/component/map/map-style-switch.md
+.map-style-switch__media {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.18rem;
+}
+
+.map-style-switch__icon {
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-solid);
+  color: inherit;
+}
+
+.map-style-switch__dots {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  width: 100%;
+}
+
+.map-style-switch__dot {
+  width: 0.25rem;
+  height: 0.25rem;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--muted-foreground) 35%, transparent);
+  transition: background var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+.map-style-switch__dot--active {
+  background: var(--interaction-nav-ink);
 }
 

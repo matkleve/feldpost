@@ -32,21 +32,19 @@ describe('MapShellComponent – structure, upload panel & placement', () => {
     expect(bar).not.toBeNull();
   });
 
-  it('renders the top-left map style switch with two options', () => {
+  it('renders the map style switch with basemap indicator dots', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
 
     const switchRoot = (fixture.nativeElement as HTMLElement).querySelector('.map-style-switch');
-    const options = (fixture.nativeElement as HTMLElement).querySelectorAll(
-      '.map-style-switch__option',
-    );
+    const button = switchRoot?.querySelector('.map-style-switch__btn');
+    const dots = switchRoot?.querySelectorAll('.map-style-switch__dot');
+    const icon = switchRoot?.querySelector('.map-style-switch__icon');
+
     expect(switchRoot).not.toBeNull();
-    expect(options).toHaveLength(2);
-    const icons = (fixture.nativeElement as HTMLElement).querySelectorAll(
-      '.map-style-switch .material-icons',
-    );
-    expect(icons[0]?.textContent?.trim()).toBe('map');
-    expect(icons[1]?.textContent?.trim()).toBe('satellite_alt');
+    expect(button).not.toBeNull();
+    expect(dots?.length).toBe(2);
+    expect(icon?.textContent?.trim()).toBe('satellite_alt');
   });
 
   it('renders the map container element', () => {
