@@ -22,12 +22,12 @@
     min-width: 0;
   }
 
-  // Histogram track — fixed height so bar px heights resolve.
+  // Histogram track — compact height; bar px heights use chartTrackHeightPx in TS.
   // @see docs/specs/component/map/map-filter-toolbar.md
   .timespace-dropdown__chart {
     position: relative;
     width: 100%;
-    height: 3.25rem;
+    height: 2.5rem;
     border-radius: var(--radius-sm);
     border: 1px solid var(--border);
     background: color-mix(in srgb, var(--card) 72%, transparent);
@@ -37,7 +37,7 @@
     box-sizing: border-box;
     overflow: hidden;
     --timespace-selection-inset: var(--spacing-1);
-    --timespace-bars-inset: var(--spacing-2);
+    --timespace-bars-inset: var(--spacing-1);
 
     &:focus-visible {
       outline: none;

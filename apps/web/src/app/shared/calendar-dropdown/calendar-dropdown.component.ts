@@ -11,6 +11,7 @@ import {
 import { parseIsoDateValue, toIsoDateValue } from '../../core/i18n/date-field.helpers';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { DropdownShellComponent } from '../dropdown-trigger/shell/dropdown-shell.component';
+import { HLM_BUTTON_IMPORTS } from '../ui/button';
 import { CalendarPickerPanelComponent } from './calendar-picker-panel.component';
 import { normalizeRangeValue } from './calendar-picker.helpers';
 import type {
@@ -23,7 +24,7 @@ import type {
 @Component({
   selector: 'app-calendar-dropdown',
   standalone: true,
-  imports: [DropdownShellComponent, CalendarPickerPanelComponent],
+  imports: [DropdownShellComponent, CalendarPickerPanelComponent, ...HLM_BUTTON_IMPORTS],
   templateUrl: './calendar-dropdown.component.html',
   styleUrl: './calendar-dropdown.component.scss',
 })
@@ -33,8 +34,8 @@ export class CalendarDropdownComponent {
 
   // ── Mode ─────────────────────────────────────────────────────────────────
   readonly mode = input<'single' | 'range'>('single');
-  /** `toolbar` = leading calendar icon + full-width range row (timespace). */
-  readonly layout = input<'default' | 'toolbar'>('default');
+  /** `toolbar` = per-field icon; `split` = input-only fields + center range-pick icon (timespace). */
+  readonly layout = input<'default' | 'toolbar' | 'split'>('default');
 
   // ── Single mode API ───────────────────────────────────────────────────────
   readonly label = input('');
@@ -68,13 +69,18 @@ export class CalendarDropdownComponent {
   private readonly controlRef = viewChild<ElementRef<HTMLElement>>('control');
   private readonly fromControlRef = viewChild<ElementRef<HTMLElement>>('fromControl');
   private readonly toControlRef = viewChild<ElementRef<HTMLElement>>('toControl');
+  private readonly pickControlRef = viewChild<ElementRef<HTMLElement>>('pickControl');
 
   readonly anchorEl = computed(() => {
     if (this.mode() === 'range') {
       const anchor = this.anchorTarget();
-      return anchor === 'to'
-        ? (this.toControlRef()?.nativeElement ?? null)
-        : (this.fromControlRef()?.nativeElement ?? null);
+      if (anchor === 'pick') {
+        return this.pickControlRef()?.nativeElement ?? null;
+      }
+      if (anchor === 'to') {
+        return this.toControlRef()?.nativeElement ?? null;
+      }
+      return this.fromControlRef()?.nativeElement ?? null;
     }
     return this.controlRef()?.nativeElement ?? null;
   });
@@ -113,6 +119,7 @@ export class CalendarDropdownComponent {
     const target = this.anchorTarget();
     const from = range?.from?.date ?? '';
     const to = range?.to?.date ?? '';
+    if (target === 'pick') return from || to;
     if (target === 'to') return to || from;
     if (target === 'from') return from || to;
     return from || to;
@@ -191,6 +198,30 @@ export class CalendarDropdownComponent {
     this.anchorTarget.set(field);
     this.rangeDraft.set(this.cloneRangeValue(this.rangeValue()));
     this.popoverOpen.set(true);
+  }
+
+  /** Split layout: center icon opens two-click range pick in the panel. */
+  toggleRangePickPopover(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (this.popoverOpen()) {
+      if (this.anchorTarget() !== 'pick') {
+        this.anchorTarget.set('pick');
+        return;
+      }
+      this.closePopover(false);
+      return;
+    }
+
+    this.anchorTarget.set('pick');
+    this.rangeDraft.set(this.cloneRangeValue(this.rangeValue()));
+    this.popoverOpen.set(true);
+  }
+
+  /** Split layout: focus highlights one field for typing; does not open the panel. */
+  onRangeFieldFocus(field: 'from' | 'to'): void {
+    this.anchorTarget.set(field);
   }
 
   onRangeDraftChange(next: CalendarRangeValue | null): void {

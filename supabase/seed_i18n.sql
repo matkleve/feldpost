@@ -14170,6 +14170,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shared.dateField.openCalendarRange', 'Select date range', 'en', 'apps/web/src/app/shared/calendar-dropdown/calendar-dropdown.component.html split range pick button aria')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Select date range', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shared.dateField.openCalendarRange'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zeitraum wählen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shared.dateField.openCalendarRange'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Seleziona intervallo date', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shared.dateField.openCalendarRange'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'map.filter.timespace.from', 'From', 'en', 'apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html date input label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

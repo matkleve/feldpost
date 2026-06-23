@@ -51,7 +51,7 @@ export class TimespaceDropdownComponent implements OnInit {
   readonly dateInputLocale = this.i18nService.locale;
 
   /** Pixel height of the histogram bar track — bars use explicit px, not % height. */
-  protected readonly chartTrackHeightPx = 40;
+  protected readonly chartTrackHeightPx = 28;
 
   private readonly chartRef = viewChild<ElementRef<HTMLElement>>('chart');
 

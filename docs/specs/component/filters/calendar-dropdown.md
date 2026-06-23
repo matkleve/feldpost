@@ -12,7 +12,7 @@ Single control row: optional label, bordered shell (`2.25rem` min height — too
 
 | Call site | Parent | Mode / variant |
 | --- | --- | --- |
-| Timespace From/To | [`app-timespace-dropdown`](../../component/map/map-filter-toolbar.md) | `mode='range'`, `timeMode='dateOnly'`, org domain bounds |
+| Timespace From/To | [`app-timespace-dropdown`](../../component/map/map-filter-toolbar.md) | `mode='range'`, `layout='split'`, `timeMode='dateOnly'`, org domain bounds |
 | Media Detail Captured | `app-media-detail-inline-section` | `mode='single'`, `optionalTime` — header time row; Done not blocked when time empty |
 | Future filters/metadata | any form row | per parent |
 

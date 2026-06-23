@@ -71,6 +71,24 @@ export function applyRangeAnchorDayClick(
   return { from, to };
 }
 
+/**
+ * Two-click range pick — first click sets start, second sets end; third restarts.
+ * @see docs/specs/component/filters/calendar-dropdown.range-mode.supplement.md § Split layout
+ */
+export function applyRangePickDayClick(
+  currentFrom: string | null,
+  currentTo: string | null,
+  clickedIso: string,
+): { from: string | null; to: string | null } {
+  if (!currentFrom || (currentFrom && currentTo)) {
+    return { from: clickedIso, to: null };
+  }
+  if (currentFrom > clickedIso) {
+    return { from: clickedIso, to: currentFrom };
+  }
+  return { from: currentFrom, to: clickedIso };
+}
+
 /** Ensure range endpoints are ordered — earlier date is always `from`. */
 export function normalizeRangeValue<T extends { date: string | null; time: string | null }>(
   value: { from: T | null; to: T | null } | null,

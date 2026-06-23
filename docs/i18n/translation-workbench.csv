@@ -456,6 +456,7 @@ map.filter.button.timespace,Timespace,apps/web/src/app/features/map/map-filter-t
 map.filter.timespace.aria,Time range,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html attr:aria-label,Time range,Zeitraum,Intervallo temporale
 map.filter.timespace.datePlaceholder,—,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.ts empty date display,—,—,—
 shared.dateField.openCalendar,Open calendar,apps/web/src/app/shared/ui/compact-date-field/compact-date-field.component.html calendar button aria,Open calendar,Kalender öffnen,Apri calendario
+shared.dateField.openCalendarRange,Select date range,apps/web/src/app/shared/calendar-dropdown/calendar-dropdown.component.html split range pick button aria,Select date range,Zeitraum wählen,Seleziona intervallo date
 map.filter.timespace.from,From,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html date input label,From,Von,Da
 map.filter.timespace.to,To,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html date input label,To,Bis,A
 map.filter.timespace.chartAria,Media timeline,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html chart aria,Media timeline,Medien-Zeitachse,Cronologia media

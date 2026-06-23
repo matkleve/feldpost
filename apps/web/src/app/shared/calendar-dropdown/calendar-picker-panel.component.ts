@@ -12,6 +12,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { HLM_BUTTON_IMPORTS } from '../ui/button';
 import {
   applyRangeAnchorDayClick,
+  applyRangePickDayClick,
   buildCalendarDays,
   buildRangeCalendarDays,
   isCalendarDayDisabled,
@@ -99,6 +100,13 @@ export class CalendarPickerPanelComponent implements OnInit {
     const anchor = this.anchorTarget();
     const range = this.rangeDraft();
     if (anchor === 'from') return range?.to?.date ?? '';
+    if (anchor === 'to') return range?.from?.date ?? '';
+    if (anchor === 'pick') {
+      const from = range?.from?.date ?? '';
+      const to = range?.to?.date ?? '';
+      if (from && !to) return from;
+      return '';
+    }
     return range?.from?.date ?? '';
   });
 
@@ -248,12 +256,19 @@ export class CalendarPickerPanelComponent implements OnInit {
   private selectDayRange(day: CalendarDay): void {
     const anchor = this.anchorTarget();
     const current = this.rangeDraft();
-    const next = applyRangeAnchorDayClick(
-      anchor,
-      current?.from?.date ?? null,
-      current?.to?.date ?? null,
-      day.date,
-    );
+    const next =
+      anchor === 'pick'
+        ? applyRangePickDayClick(
+            current?.from?.date ?? null,
+            current?.to?.date ?? null,
+            day.date,
+          )
+        : applyRangeAnchorDayClick(
+            anchor,
+            current?.from?.date ?? null,
+            current?.to?.date ?? null,
+            day.date,
+          );
 
     const newDraft: CalendarRangeValue = {
       from: next.from ? { date: next.from, time: current?.from?.time ?? null } : null,
@@ -293,6 +308,7 @@ export class CalendarPickerPanelComponent implements OnInit {
   ): string {
     const from = range?.from?.date ?? '';
     const to = range?.to?.date ?? '';
+    if (anchor === 'pick') return from || to;
     return anchor === 'to' ? to || from : from || to;
   }
 

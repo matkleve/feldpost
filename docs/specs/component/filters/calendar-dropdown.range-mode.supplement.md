@@ -8,9 +8,24 @@ Parent: [`calendar-dropdown.md`](calendar-dropdown.md) · Panel: [`calendar-pick
 
 ## What It Looks Like
 
-Horizontal **From** and **To** rows — bordered shell (`2.25rem` min height), locale date text input, leading `calendar_today` icon in toolbar layout (timespace). **Calendar icon** opens the frosted panel anchored to that field; **typing in the text field does not** open the panel. Inside the panel: dual consecutive month grids, in-range wash, secondary start/end ink, gold hover preview. Footer: **Clear** + **Done** (commit requires both bounds unless Clear).
+Horizontal **From** and **To** fields. **`layout='split'`** (timespace): input-only From/To with one center `calendar_today` button — inputs focus one field for typing; center icon opens two-click range pick (`anchorTarget='pick'`). **`layout='toolbar'`**: leading icon per field. Inside the panel: dual consecutive month grids, in-range wash, secondary start/end ink, gold hover preview. Footer: **Clear** + **Done** (commit requires both bounds unless Clear).
 
-## Field-anchored selection (normative)
+## Split layout (timespace, normative)
+
+```
+From label          (gap)          To label
+[ input only ]   [ calendar ]   [ input only ]
+```
+
+| User action | `anchorTarget` | Panel day-click behavior |
+| --- | --- | --- |
+| Focus From input | `from` | No panel; typing commits that half when popover closed |
+| Focus To input | `to` | No panel; typing commits that half when popover closed |
+| Click center calendar icon | `pick` | 1st click → `from`; 2nd click → `to`; 3rd click restarts range |
+
+Popover anchors to the center button when `anchorTarget='pick'`.
+
+## Field-anchored selection (toolbar / default layout)
 
 Follows Airbnb / Google Flights / `react-dates` **focused-input** model — not blind two-click `pick` when From/To fields exist.
 
@@ -33,7 +48,7 @@ Follows Airbnb / Google Flights / `react-dates` **focused-input** model — not 
 | Input | Type | Default | Effect |
 | --- | --- | --- | --- |
 | `mode` | `'single' \| 'range'` | `'single'` | `range` renders From/To pair + shared popover |
-| `layout` | `'default' \| 'toolbar'` | `'default'` | `toolbar` = leading icon + full-width row (timespace) |
+| `layout` | `'default' \| 'toolbar' \| 'split'` | `'default'` | `toolbar` = per-field icon; `split` = input-only fields + center range-pick icon (timespace) |
 | `rangeValue` | `CalendarRangeValue \| null` | `null` | Committed `{ from, to }` halves |
 | `fromLabel` / `toLabel` | `string` | `''` | Visible labels |
 | `minDate` / `maxDate` | `Date \| null` | `null` | Disables out-of-domain days |
@@ -50,8 +65,9 @@ Follows Airbnb / Google Flights / `react-dates` **focused-input** model — not 
 | State | Meaning | Entered by |
 | --- | --- | --- |
 | `closed` | Popover hidden | default, Done, Clear, Escape, outside click |
-| `open-anchor-from` | Next day click replaces **from** | Open / re-anchor via **From** calendar icon |
-| `open-anchor-to` | Next day click replaces **to** | Open / re-anchor via **To** calendar icon |
+| `open-anchor-from` | Next day click replaces **from** | Open via **From** calendar icon (toolbar layout) |
+| `open-anchor-to` | Next day click replaces **to** | Open via **To** calendar icon (toolbar layout) |
+| `open-anchor-pick` | Two-click range in panel | Open via **center** calendar icon (`layout='split'`) |
 
 ### Transitions (normative)
 

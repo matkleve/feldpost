@@ -58,6 +58,13 @@ Parent: [`calendar-dropdown.md`](calendar-dropdown.md)
 - [x] `rangeChange` emits `{ from, to }` with ISO dates
 - [x] Histogram selection overlay stays in sync with committed range (drag + calendar paths)
 
+## Split layout (timespace)
+
+- [x] `layout='split'`: From/To are input-only; one center calendar button opens range pick
+- [x] Input focus sets `anchorTarget` to that field; does not open popover
+- [x] Center icon sets `anchorTarget='pick'`; first panel click → from, second → to, third restarts
+- [x] Timespace uses `layout='split'`
+
 ## Progressive time (timespace) — deferred, not built
 
 Timespace uses `timeMode='dateOnly'`. Progressive time (Add time link, HH:MM spinners) is explicitly deferred. To implement, reverse this decision in `calendar-dropdown.md` § Where It Lives and build the panel rows described below.

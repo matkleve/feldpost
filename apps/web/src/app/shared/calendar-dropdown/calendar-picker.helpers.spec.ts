@@ -1,5 +1,6 @@
 import {
   applyRangeAnchorDayClick,
+  applyRangePickDayClick,
   buildCalendarDays,
   buildRangeCalendarDays,
   isCalendarDayDisabled,
@@ -89,6 +90,25 @@ describe('calendar-picker.helpers', () => {
     expect(applyRangeAnchorDayClick('to', '2026-05-28', '2026-05-01', '2026-05-15')).toEqual({
       from: '2026-05-15',
       to: '2026-05-28',
+    });
+  });
+
+  it('applyRangePickDayClick uses two-click range then restarts', () => {
+    expect(applyRangePickDayClick(null, null, '2026-05-10')).toEqual({
+      from: '2026-05-10',
+      to: null,
+    });
+    expect(applyRangePickDayClick('2026-05-10', null, '2026-05-28')).toEqual({
+      from: '2026-05-10',
+      to: '2026-05-28',
+    });
+    expect(applyRangePickDayClick('2026-05-10', '2026-05-28', '2026-05-15')).toEqual({
+      from: '2026-05-15',
+      to: null,
+    });
+    expect(applyRangePickDayClick('2026-05-28', '2026-05-10', '2026-05-15')).toEqual({
+      from: '2026-05-15',
+      to: null,
     });
   });
 });

@@ -32,6 +32,71 @@
     </div>
   </label>
 } @else {
+  @if (layout() === 'split') {
+    <div class="calendar-dropdown--range calendar-dropdown--split">
+      @if (fromLabel()) {
+        <span class="calendar-dropdown__label">{{ fromLabel() }}</span>
+      } @else {
+        <span class="calendar-dropdown__label" aria-hidden="true"></span>
+      }
+      <span class="calendar-dropdown__split-gap" aria-hidden="true"></span>
+      @if (toLabel()) {
+        <span class="calendar-dropdown__label">{{ toLabel() }}</span>
+      } @else {
+        <span class="calendar-dropdown__label" aria-hidden="true"></span>
+      }
+      <div
+        #fromControl
+        class="calendar-dropdown__control"
+        [attr.lang]="i18nService.locale()"
+      >
+        <input
+          class="calendar-dropdown__input"
+          type="text"
+          inputmode="numeric"
+          autocomplete="off"
+          [attr.placeholder]="placeholder()"
+          [attr.aria-label]="fromLabel()"
+          [value]="fromShellText()"
+          (focus)="onRangeFieldFocus('from')"
+          (change)="onFromShellTextCommit($event)"
+          (keydown.enter)="onFromShellTextCommit($event)"
+        />
+      </div>
+      <button
+        #pickControl
+        type="button"
+        hlmBtn
+        variant="outline"
+        size="icon-sm"
+        class="calendar-dropdown__range-pick"
+        [class.calendar-dropdown__range-pick--open]="popoverOpen() && anchorTarget() === 'pick'"
+        [attr.aria-label]="t('shared.dateField.openCalendarRange', 'Select date range')"
+        [attr.aria-expanded]="popoverOpen() && anchorTarget() === 'pick'"
+        (click)="toggleRangePickPopover($event)"
+      >
+        <span class="material-icons" aria-hidden="true">calendar_today</span>
+      </button>
+      <div
+        #toControl
+        class="calendar-dropdown__control"
+        [attr.lang]="i18nService.locale()"
+      >
+        <input
+          class="calendar-dropdown__input"
+          type="text"
+          inputmode="numeric"
+          autocomplete="off"
+          [attr.placeholder]="placeholder()"
+          [attr.aria-label]="toLabel()"
+          [value]="toShellText()"
+          (focus)="onRangeFieldFocus('to')"
+          (change)="onToShellTextCommit($event)"
+          (keydown.enter)="onToShellTextCommit($event)"
+        />
+      </div>
+    </div>
+  } @else {
   <div class="calendar-dropdown--range" [class.calendar-dropdown--toolbar]="layout() === 'toolbar'">
     <label class="calendar-dropdown calendar-dropdown__range-field">
       @if (fromLabel()) {
@@ -98,6 +163,7 @@
       </div>
     </label>
   </div>
+  }
 }
 
 @if (popoverOpen()) {

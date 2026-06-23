@@ -100,6 +100,51 @@
     }
   }
 
+  // Timespace split: From | pick icon | To — labels row + controls row.
+  // @see docs/specs/component/filters/calendar-dropdown.range-mode.supplement.md § Split layout
+  .calendar-dropdown--split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    column-gap: var(--spacing-2);
+    row-gap: var(--spacing-1);
+    width: 100%;
+    min-width: 0;
+    align-items: center;
+  }
+
+  .calendar-dropdown__split-gap {
+    min-width: 2.25rem;
+  }
+
+  // Center range-pick control — two-click range in panel; inputs stay typing-only.
+  .calendar-dropdown__range-pick {
+    align-self: end;
+    flex-shrink: 0;
+    color: var(--muted-foreground);
+
+    .material-icons {
+      font-size: var(--font-size-sm);
+    }
+
+    &:hover:not(:disabled),
+    &:focus-visible:not(:disabled) {
+      color: var(--primary);
+    }
+  }
+
+  .calendar-dropdown__range-pick--open {
+    color: var(--interaction-selected-ink);
+    @include emphasis.selected-bordered(10%, 24%);
+  }
+
+  .calendar-dropdown__range-pick--open:hover:not(:disabled),
+  .calendar-dropdown__range-pick--open:focus-visible:not(:disabled) {
+    color: var(--brand-gold);
+    @include emphasis.hover(10%);
+    border-color: color-mix(in srgb, var(--brand-gold) 42%, var(--border));
+  }
+
   // Calendar icon affordance — no own hover bg or focus ring; the parent __control owns both.
   // color: inherit lets the control's hover gold propagate to the icon without a second wash.
   .calendar-dropdown__trigger {
