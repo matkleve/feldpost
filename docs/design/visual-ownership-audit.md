@@ -69,13 +69,41 @@ Lower visual complexity than Tier 1, but the owner is still implicit.
 
 ---
 
-## Tier 3 — Coverage gap (documentation, not code)
+## Tier 3 — Coverage gap (measured at the SCSS level)
 
-- **~58 of 146 components** reference the ownership triad / Visual Owner in their spec.
-  The remaining ~88 have **no ownership matrix at all** in `docs/specs`.
-- The undocumented concentration is in **feature surfaces**: `upload/*`, `colleagues/*`,
-  `organization/sections/*`, `auth/*`. Shared primitives are mostly covered; feature
-  pages are where visual ownership drifts.
+> "Documented" here = the component SCSS links an ownership contract/spec
+> (`@see …`, `#visual-behavior-contract`, `#ownership-matrix`, `docs/specs`).
+
+| Metric | Count |
+|---|---|
+| Component SCSS files (excl. `archive/`) | **131** |
+| Link an ownership contract/spec | **99** |
+| **Undocumented (no link)** | **32** |
+| └ of those, actually carry visual state | **11** |
+| └ pure layout/spacing (ownership is moot) | **21** |
+
+The real problem set is **11 components**, not the whole undocumented tail. The other 21
+undocumented files are pure flexbox/grid spacing — no rings, shadows, overlays, or states —
+so visual ownership does not meaningfully apply to them.
+
+### The 11 undocumented components that carry visual state
+
+| Component | What's unowned | Effort |
+|---|---|---|
+| `shared/media/universal-media` | Leaky surface props (`--universal-media-slot-*`) + undocumented overlay/badge z-order. **Retire-marked** (see Tier 1). | Retire, don't document |
+| `features/colleagues/invites/invite-editor-panel` | Theme-conditional QR-frame visuals split across `:host-context` selectors. | Real |
+| `features/colleagues/invites/colleagues-invite-referrals-panel` | Ad-hoc state visuals, no contract. | Real |
+| `features/colleagues/chat/chat-area` | Ad-hoc state visuals on a large feature surface. | Real |
+| `features/auth/auth-map-layer` | map(z0)/overlay(z1) layering, no layer map. | Real |
+| `features/map/gps-button` | Magic `z-index:200` + shadow, no contract. | Small (token the z-index) |
+| `features/organization/sections/branding/...` | State-class geometry mixing (width/height inside state selectors). | Small |
+| `features/organization/sections/roles/...` | State-class geometry mixing. | Small |
+| `shared/ui-primitives/group-header` | Gold inset focus ring + `z-index:1`; spec **already exists** — just needs the `@see` link. | Trivial (`@see` link) |
+| `shared/quick-info-chips` | Spec **already exists** — needs the `@see` link. | Trivial (`@see` link) |
+| `shared/workspace-pane/shell/drag-divider` | Structurally fine (single `:host` owner); only missing the `@see` link. | Trivial (`@see` link) |
+
+Concentration is in **feature surfaces** (`colleagues/*`, `auth/*`, `organization/*`); shared
+primitives are mostly covered, and the three trivial ones already have specs to link.
 
 ---
 
