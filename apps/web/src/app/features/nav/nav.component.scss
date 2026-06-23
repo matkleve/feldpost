@@ -15,12 +15,12 @@
 .sidebar {
   --sidebar-width-expanded: 15rem;
   --sidebar-width-collapsed: 3rem;
-  // Panel padding owns horizontal inset; row shell stays 32px media in 3rem collapsed rail.
+  // Panel padding-inline (spacing-2) = row padding-block — equal inset on all sides of icon column.
   --sidebar-row-padding-inline: 0;
-  --sidebar-row-padding-block: 0;
+  --sidebar-row-padding-block: var(--spacing-2);
   --sidebar-row-gap: var(--spacing-3);
-  --sidebar-row-height: calc(var(--spacing-6) + var(--spacing-1));
   --sidebar-media-size: var(--spacing-6);
+  --sidebar-row-height: calc(var(--sidebar-media-size) + 2 * var(--spacing-2));
   --sidebar-icon-size: 1.25rem;
 
   position: fixed;
