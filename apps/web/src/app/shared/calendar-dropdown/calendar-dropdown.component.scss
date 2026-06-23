@@ -150,26 +150,12 @@
     width: 100%;
   }
 
-  // Center range-pick control — 2.25rem matches date/time shells (hlmBtn icon-sm was 2rem).
+  // Center range-pick control — `hlmBtn outline icon-sm`; open-state emphasis only (no custom geometry).
+  // @see docs/specs/component/filters/calendar-dropdown.range-mode.supplement.md § Split layout
   .calendar-dropdown__range-pick {
-    display: inline-flex;
+    align-self: end;
     flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    margin: 0;
-    padding: 0;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    background: var(--background);
     color: var(--muted-foreground);
-    cursor: pointer;
-    box-sizing: border-box;
-    transition:
-      background var(--motion-duration-fast) var(--motion-ease-out),
-      border-color var(--motion-duration-fast) var(--motion-ease-out),
-      color var(--motion-duration-fast) var(--motion-ease-out);
 
     .material-icons {
       font-size: var(--font-size-sm);
@@ -178,9 +164,6 @@
     &:hover:not(:disabled),
     &:focus-visible:not(:disabled) {
       color: var(--primary);
-      @include emphasis.hover(8%);
-      border-color: color-mix(in srgb, var(--brand-gold) 42%, var(--border));
-      box-shadow: var(--interactive-focus-ring);
     }
   }
 

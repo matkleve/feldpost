@@ -14,6 +14,25 @@ Horizontal trigger row, left-aligned under `ss-search-bar` inside `.map-search-c
 - **Component:** `apps/web/src/app/features/map/map-filter-toolbar/`
 - **Dropdown panels:** `app-filter-dropdown`, `app-projects-dropdown`, `app-timespace-dropdown` via `app-toolbar-dropdown-stack`
 
+## Actions
+
+| # | User action | System response |
+| --- | --- | --- |
+| 1 | Click trigger | Toggle matching dropdown panel via `app-toolbar-dropdown-stack` |
+| 2 | Click outside / Escape | Close active panel |
+| 3 | Apply filter / project / timespace | Parent sets `data-active='true'` on matching trigger |
+
+## Component hierarchy
+
+```
+app-map-filter-toolbar
+├── .map-filter-toolbar (3 × button.map-filter-toolbar__menu-trigger)
+└── app-toolbar-dropdown-stack
+    ├── app-filter-dropdown
+    ├── app-projects-dropdown
+    └── app-timespace-dropdown
+```
+
 ## Interaction emphasis
 
 - Canonical: [`state-visuals.md`](../../../design/state-visuals.md) § three-tier budget
@@ -37,14 +56,16 @@ Horizontal trigger row, left-aligned under `ss-search-bar` inside `.map-search-c
 | `.timespace-dropdown__chart--engaged` | **Primary** | — | gold track border during pointer drag | same |
 | `app-calendar-dropdown` `:focus-within` | **Primary** | neutral border | gold border + focus ring | `calendar-dropdown.component.scss` |
 
-**Normative:** Histogram brush uses **primary gold** only while `isDragging()`; committed range at rest uses **secondary** selected ink. Date range uses **one** `app-calendar-dropdown` `mode='range'` `timeMode='dateOnly'` ([`calendar-dropdown.md`](../filters/calendar-dropdown.md) + [range supplement](../filters/calendar-dropdown.range-mode.supplement.md)) — gold on `:focus-within` per active field, body-portaled panel (no clip). No range summary text line between fields and chart (removed). Reset button: `hlmBtn variant="ghost" size="sm"` with `restart_alt` icon + translated "Reset" label.
+**Normative:** Histogram brush uses **primary gold** only while `isDragging()`; committed range at rest uses **secondary** selected ink. Date range uses **one** `app-calendar-dropdown` `mode='range'` `layout='split'` `timeMode='optionalTime'` ([`calendar-dropdown.md`](../filters/calendar-dropdown.md) + [range supplement](../filters/calendar-dropdown.range-mode.supplement.md)) — row: From date + From time + center range icon + To date + To time; all shells `2.25rem`. Gold on `:focus-within` per active field; body-portaled panel (no clip). No range summary text line between fields and chart. Reset button: `hlmBtn variant="ghost" size="sm"` with `restart_alt` icon + translated "Reset" label.
+
+**Map filter triggers (normative):** plain `<button class="map-filter-toolbar__menu-trigger">` with frosted `outline-control` — **not** `hlmBtn outline` (avoids hover stack conflict with map chrome).
 
 ## File Map
 
 | File | Purpose |
 | ---- | ------- |
 | `map-filter-toolbar.component.ts` | Trigger row + dropdown stack wiring |
-| `map-filter-toolbar.component.html` | Three `hlmBtn` outline triggers |
+| `map-filter-toolbar.component.html` | Three plain frosted trigger buttons |
 | `map-filter-toolbar.component.scss` | Frosted shells + shared toolbar trigger mixins |
 | `map-shell/scss/_map-shell-search-chrome.scss` | Column width + toolbar host sizing |
 

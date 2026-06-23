@@ -33,7 +33,8 @@ app-calendar-picker-panel
 | Input | Type | Notes |
 | --- | --- | --- |
 | `pickMode` | `'single' \| 'range'` | `'single'` | Enables range day classes + click semantics |
-| `anchorTarget` | `'from' \| 'to'` | `'from'` | Range only — active field anchor from parent FSM |
+| `anchorTarget` | `'from' \| 'to' \| 'pick'` | `'from'` | Range only — active field or pick FSM from parent |
+| `viewAnchorDate` | `string` | `''` | Stable month anchor at popover open |
 | `timeMode` | `TimeMode` | from parent |
 | `minDate` / `maxDate` | `Date \| null` | disables out-of-range days |
 | `disabledDates` | `ReadonlySet<string> \| null` | optional |

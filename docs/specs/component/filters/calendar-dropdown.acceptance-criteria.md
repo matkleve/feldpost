@@ -16,9 +16,9 @@ Parent: [`calendar-dropdown.md`](calendar-dropdown.md)
 
 ## Variants
 
-- [x] `timeMode='dateOnly'`: no time row; emit date only
-- [x] `timeMode='optionalTime'`: time row shown; empty time allowed on Done
-- [x] `timeMode='requiredTime'`: Done disabled until valid `HH:MM`
+- [x] `timeMode='dateOnly'`: no time fields in split layout; emit date only
+- [x] `timeMode='optionalTime'`: `app-time-field-control` beside each date in split layout; empty time allowed
+- [x] `timeMode='requiredTime'`: Done disabled until valid `HH:MM` (single mode panel)
 
 ## Constraints
 
@@ -28,9 +28,10 @@ Parent: [`calendar-dropdown.md`](calendar-dropdown.md)
 
 ## Commit model
 
-- [x] Done button commits draft → `valueChange`
+- [x] Done button commits draft → `valueChange` / `rangeChange` (pick anchor)
 - [x] Enter in panel commits when valid (same as Done)
-- [x] Escape / outside click reverts draft; no `valueChange`
+- [x] Escape / outside click reverts draft; no emit
+- [x] Split field anchor: single day click → auto-commit + close
 
 ## Migration
 
@@ -44,32 +45,39 @@ Parent: [`calendar-dropdown.md`](calendar-dropdown.md)
 - [x] Control shell focus: gold border + `--interactive-focus-ring` on `.calendar-dropdown__control:focus-within`; no own ring on trigger or input
 - [x] Day cells: rounded square geometry (`--radius-sm`); hover + selected use emphasis mixins (not circles)
 - [x] After picking a date, prev/next month navigates freely without snapping back to the selected date's month
+- [x] Clicking a day in the **right** dual-month grid does **not** jump months when that date is already visible
 
 ## Range mode
 
 - [x] Timespace: one `app-calendar-dropdown` `mode='range'` with From/To labels — not two separate instances
-- [x] Calendar icon on From/To opens the **same** portaled panel (text focus does **not** open panel)
-- [x] **Field-anchored:** open via From → each day click replaces start only (empty or existing range)
+- [x] **Toolbar layout:** calendar icon on From/To opens the same portaled panel
+- [x] **Field-anchored:** open via From → each day click replaces start only
 - [x] **Field-anchored:** open via To → each day click replaces end only
 - [x] Wrong first date: second click via From anchor replaces start — does **not** force end
 - [x] Popover open: other field calendar icon re-anchors without closing
 - [x] Order normalization: if from > to after edit, draft swaps before display
-- [x] **Done** commits when both bounds set; shell typing commits immediately when popover closed
-- [x] `rangeChange` emits `{ from, to }` with ISO dates
+- [x] **Done** commits when both bounds set (pick anchor); shell typing commits immediately when popover closed
+- [x] `rangeChange` emits `{ from, to }` with ISO dates + optional `HH:MM` time
 - [x] Histogram selection overlay stays in sync with committed range (drag + calendar paths)
 
 ## Split layout (timespace)
 
-- [x] `layout='split'`: From/To are input-only; one center calendar button opens range pick
-- [x] Input focus sets `anchorTarget` to that field; does not open popover
-- [x] Center icon sets `anchorTarget='pick'`; first panel click → from, second → to, third restarts
-- [x] Timespace uses `layout='split'`
+- [x] `layout='split'`: From/To date inputs + optional time fields; center calendar button for **range pick only**
+- [x] Date input focus **opens** portaled panel with single-endpoint anchor (`from` / `to`)
+- [x] Date day click under field anchor auto-commits — **not** two-click range
+- [x] Center icon sets `anchorTarget='pick'`; first panel click → from, second → to, third restarts; **Done** required
+- [x] Center pick uses `hlmBtn variant="outline" size="icon-sm"` — no custom button geometry in SCSS
+- [x] Timespace uses `layout='split'` + `timeMode='optionalTime'`
 
-## Progressive time (timespace) — deferred, not built
+## Time fields (timespace split)
 
-Timespace uses `timeMode='dateOnly'`. Progressive time (Add time link, HH:MM spinners) is explicitly deferred. To implement, reverse this decision in `calendar-dropdown.md` § Where It Lives and build the panel rows described below.
+- [x] Timespace passes `timeMode='optionalTime'`
+- [x] From + To `app-time-field-control` in shell row (not panel spinners)
+- [x] Time typing uses `parseTimeInput`; wheel picker with hour `0–23` + minute `0–59`
+- [x] Empty time → whole UTC day boundary on emit; set time → exact instant
+- [x] Filter `matchesTimeRange` uses committed `Date.getTime()` boundaries
 
-- [ ] *(deferred)* Timespace passes `timeMode='optionalTime'`
-- [ ] *(deferred)* Add time link hidden until start date exists in draft
-- [ ] *(deferred)* Expanded: From + To HH:MM spinners below grid (not header); empty time allowed on Done
-- [ ] *(deferred)* Collapsed: emit date-only range on Done
+## Deferred (not in scope)
+
+- [ ] Panel-internal progressive time row (Add time link below grid) — timespace uses shell [`time-field-control.md`](time-field-control.md) instead
+- [ ] Locale switch without reload (UC-11)

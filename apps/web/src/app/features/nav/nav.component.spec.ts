@@ -21,6 +21,7 @@ import { provideRouter, Router } from '@angular/router';
 import { signal } from '@angular/core';
 import { NavComponent } from './nav.component';
 import { AuthService } from '../../core/auth/auth.service';
+import { WorkspacePaneLayoutMapEffectsService } from '../../core/workspace-pane/workspace-pane-layout-map-effects.service';
 
 function collectCssRules(): CSSStyleRule[] {
   const rules: CSSStyleRule[] = [];
@@ -368,5 +369,40 @@ describe('NavComponent', () => {
     expect(rowTransition).not.toContain('min-height');
     expect(labelTransition).not.toContain('transform');
     expect(labelTransition).not.toContain('max-width');
+  });
+
+  it('invalidates map size when sidebar collapse toggles, not on init', async () => {
+    const invalidateMapSize = vi.fn();
+
+    await TestBed.configureTestingModule({
+      imports: [NavComponent],
+      providers: [
+        provideRouter([{ path: '', component: NavComponent }]),
+        {
+          provide: AuthService,
+          useValue: {
+            user: signal(createMockUser('user@example.com')),
+            session: signal(null),
+            loading: signal(false),
+            initialize: vi.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: WorkspacePaneLayoutMapEffectsService,
+          useValue: {
+            getMapEffects: () => ({ invalidateMapSize }),
+          },
+        },
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(NavComponent);
+    fixture.detectChanges();
+
+    expect(invalidateMapSize).not.toHaveBeenCalled();
+
+    fixture.componentInstance.toggleCollapse();
+
+    expect(invalidateMapSize).toHaveBeenCalled();
   });
 });

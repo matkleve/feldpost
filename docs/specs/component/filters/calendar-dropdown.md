@@ -12,7 +12,7 @@ Single control row: optional label, bordered shell (`2.25rem` min height — too
 
 | Call site | Parent | Mode / variant |
 | --- | --- | --- |
-| Timespace From/To | [`app-timespace-dropdown`](../../component/map/map-filter-toolbar.md) | `mode='range'`, `layout='split'`, `timeMode='dateOnly'`, org domain bounds |
+| Timespace From/To | [`app-timespace-dropdown`](../../component/map/map-filter-toolbar.md) | `mode='range'`, `layout='split'`, `timeMode='optionalTime'`, org domain bounds |
 | Media Detail Captured | `app-media-detail-inline-section` | `mode='single'`, `optionalTime` — header time row; Done not blocked when time empty |
 | Future filters/metadata | any form row | per parent |
 
@@ -25,7 +25,8 @@ Normative API (implementation mirrors `types.ts`):
 | Input | Type | Default | Effect |
 | --- | --- | --- | --- |
 | `mode` | `'single' \| 'range'` | `'single'` | `range`: From/To pair + one shared popover — see [`calendar-dropdown.range-mode.supplement.md`](calendar-dropdown.range-mode.supplement.md) |
-| `timeMode` | `'dateOnly' \| 'optionalTime' \| 'requiredTime'` | `'dateOnly'` | Panel time UI + Done validation; range uses progressive Add time (supplement) |
+| `layout` | `'default' \| 'toolbar' \| 'split'` | `'default'` | `split` = timespace row (date + time + center range icon); `toolbar` = per-field calendar icon |
+| `timeMode` | `'dateOnly' \| 'optionalTime' \| 'requiredTime'` | `'dateOnly'` | `optionalTime` in split layout shows [`time-field-control`](time-field-control.md) beside each date |
 | `minDate` | `Date \| null` | `null` | Days before min **disabled** (muted, no select) |
 | `maxDate` | `Date \| null` | `null` | Days after max **disabled** |
 | `disabledDates` | `ReadonlySet<string> \| null` | `null` | Extra ISO `YYYY-MM-DD` disables (optional v1) |
@@ -43,39 +44,20 @@ Normative API (implementation mirrors `types.ts`):
 
 | # | User action | System response |
 | --- | --- | --- |
-| 1 | Focus/type in text field | Parse with `I18nService.parseDateFieldValue` / time helpers; invalid stays draft until blur or commit |
-| 2 | Click calendar icon (either field in range mode) | Toggle shared popover; anchor to opening field; portal to `document.body` |
-| 3 | Pick day in panel | Updates draft per range FSM; does not close until **Done** |
-| 4 | Edit time (when `timeMode` allows) | Local draft; `requiredTime` blocks Done until valid `HH:MM` |
-| 5 | Click **Done** or **Enter** in panel | Emit `valueChange` + close popover if valid |
-| 6 | Click **Clear** (when `nullable`) | Emit `null` date/time + close |
-| 7 | **Escape** | Close without emit (revert draft to last committed `value`) |
-| 8 | Outside click | Same as Escape (cancel draft) |
+| 1 | Focus/type in date field (single or range split) | Parse with `I18nService.parseDateFieldValue`; range split: focus **opens** portaled panel anchored to that field (single-endpoint pick) |
+| 2 | Focus/type in time field (`optionalTime` split) | `app-time-field-control` — type or scroll picker; commits immediately when popover closed |
+| 3 | Click center calendar icon (`layout='split'`) | Toggle shared popover with `anchorTarget='pick'` — two-click **range** pick; **Done** required |
+| 4 | Click calendar icon per field (`layout='toolbar'`) | Toggle shared popover; anchor to opening field |
+| 5 | Pick day in panel | Split + field anchor: replace one endpoint only → **auto-commit** + close. Split + `pick`: two-click range FSM; **Done** when both set |
+| 6 | Click **Done** or **Enter** in panel | Emit `valueChange` / `rangeChange` + close when valid |
+| 7 | Click **Clear** (when `nullable`) | Emit `null` + close |
+| 8 | **Escape** / outside click | Close without emit (revert draft) |
 
 ## Component hierarchy
 
-**Single mode** (`mode='single'`):
+**Single mode:** label → `.calendar-dropdown__control` (input + trigger) → portaled `app-calendar-picker-panel`.
 
-```
-app-calendar-dropdown
-├── label [optional]
-├── .calendar-dropdown__control
-│   ├── input.calendar-dropdown__input
-│   └── button.calendar-dropdown__trigger ← anchor
-└── app-dropdown-shell → app-calendar-picker-panel (single pick)
-```
-
-**Range mode** (`mode='range'`):
-
-```
-app-calendar-dropdown
-├── .calendar-dropdown__range-row
-│   ├── .calendar-dropdown__control (From) ← anchor when opened via From
-│   └── .calendar-dropdown__control (To)   ← anchor when opened via To
-└── app-dropdown-shell (one instance) → app-calendar-picker-panel (range pick)
-```
-
-Panel contract: [`calendar-picker-panel.md`](calendar-picker-panel.md). Portal/placement: [`calendar-dropdown.range-mode.supplement.md`](calendar-dropdown.range-mode.supplement.md) § Shared popover (same rules apply to single mode).
+**Range mode:** split / toolbar trees — [`calendar-dropdown.range-mode.supplement.md`](calendar-dropdown.range-mode.supplement.md) § Split layout. Panel: [`calendar-picker-panel.md`](calendar-picker-panel.md).
 
 ## Data
 
@@ -100,68 +82,22 @@ flowchart LR
 | `popoverOpen` | `CalendarDropdownComponent` | FSM: closed ↔ open |
 | `committedValue` | parent `value` or `rangeValue` | Source of truth |
 | `draftValue` / `rangeDraft` | dropdown while open | Discarded on cancel |
-| `anchorTarget` | range open FSM | `'from' \| 'to'` — field that opened popover; see range supplement |
+| `anchorTarget` | range open FSM | `'from' \| 'to' \| 'pick'` — field anchor, or center range pick (split only) |
+| `viewAnchorAtOpen` | dropdown while open | ISO date for initial visible month; MUST NOT follow live draft (prevents dual-grid jump) |
 
 Popover MUST NOT render inside `app-dropdown-shell` content box — use body portal (same invariant as filter picker flyout).
 
 ## Interaction emphasis
 
-**Ownership contract (normative):** `.calendar-dropdown__control` is the sole owner of hover and focus state for the composite field. `.calendar-dropdown__trigger` carries **no own hover background and no own focus ring** — it inherits `color` from the control so the icon turns gold when the control is hovered or focused, without producing a second wash or a second ring. `.calendar-dropdown__input` suppresses its native outline (`outline: none`); the control's `:focus-within` ring covers keyboard focus.
-
-| Surface | Tier | Hover | Focus | Owner |
-| --- | --- | --- | --- | --- |
-| `.calendar-dropdown__control` | **Primary** | gold wash + border | gold border + `--interactive-focus-ring` | `calendar-dropdown.component.scss` `:hover` / `:focus-within` |
-| `.calendar-dropdown__trigger` | — | inherits `color` from control | — (control `:focus-within` covers it) | no own rule |
-| `.calendar-dropdown__input` | — | transparent | `outline: none` — control ring covers it | no own rule |
-| Panel days | per [`calendar-picker-panel.md`](calendar-picker-panel.md) | | | |
-
-## Migration (one cutover)
-
-| Legacy | Replacement |
-| --- | --- |
-| `app-compact-date-field` | `app-calendar-dropdown` |
-| Inline `app-captured-date-editor` in media detail | `app-calendar-dropdown` (`timeMode` per field) |
-| [`captured-date-editor.md`](captured-date-editor.md) | Superseded by panel spec; remove after migration |
+`.calendar-dropdown__control` owns hover/focus; trigger inherits `color` only — see [`interaction-emphasis-ink-contract.md`](../../system/interaction-emphasis-ink-contract.md) and range supplement Visual Behavior table.
 
 ## File map
 
-| File | Purpose |
-| --- | --- |
-| `apps/web/src/app/shared/calendar-dropdown/calendar-dropdown.component.ts` | Shell: control row, toggle open, text commit; imports `DropdownShellComponent` |
-| `apps/web/src/app/shared/calendar-dropdown/calendar-dropdown.component.html` | |
-| `apps/web/src/app/shared/calendar-dropdown/calendar-dropdown.component.scss` | Gold emphasis on `.calendar-dropdown__control` |
-| `apps/web/src/app/shared/calendar-dropdown/calendar-dropdown.types.ts` | `CalendarDropdownValue`, `CalendarRangeValue`, `TimeMode`, `CalendarDay` |
-| `apps/web/src/app/shared/calendar-dropdown/calendar-picker-panel.component.ts` | Panel (extract from `captured-date-editor`; uses `date-field.helpers`, not `formatEU` / `parseDateInput`) |
-| `apps/web/src/app/shared/calendar-dropdown/calendar-picker-panel.component.html` | |
-| `apps/web/src/app/shared/calendar-dropdown/calendar-picker-panel.component.scss` | |
-| `apps/web/src/app/shared/dropdown-trigger/shell/dropdown-shell.component.scss` | Add `:host.calendar-dropdown-panel { overflow: visible; }` |
+Shell + panel + time field under `apps/web/src/app/shared/calendar-dropdown/` and `time-field-control/` — see child specs for full file lists.
 
 ## Wiring
 
-```mermaid
-sequenceDiagram
-  participant U as User
-  participant TD as TimespaceDropdown
-  participant MD as MediaDetailInlineSection
-  participant CD as CalendarDropdown
-  participant P as CalendarPickerPanel
-  participant I18n as I18nService
-
-  note over TD,CD: Timespace range (dateOnly)
-  U->>CD: open From or To
-  U->>P: pick start then end (or single-click re-anchor)
-  P->>CD: rangeDraftChange
-  U->>CD: Done / Enter
-  CD->>I18n: parse/format
-  CD->>TD: rangeChange
-
-  note over MD,CD: Media Detail Captured (optionalTime)
-  U->>P: pick day / set time
-  P->>CD: draftChange
-  U->>CD: Done
-  CD->>I18n: parse/format
-  CD->>MD: valueChange → capturedAtSaved
-```
+Timespace split + media detail single flows — [`calendar-dropdown.range-mode.supplement.md`](calendar-dropdown.range-mode.supplement.md) § Wiring.
 
 ## Acceptance criteria
 

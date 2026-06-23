@@ -23,8 +23,9 @@ Extends `CalendarDay` in `calendar-dropdown.types.ts`:
 | --- | --- |
 | `'from'` | Replace **start** only; normalize order if end exists |
 | `'to'` | Replace **end** only; normalize order if start exists |
+| `'pick'` | Two-click range: 1st → start, 2nd → end, 3rd restarts |
 
-**No `pick` anchor** when parent exposes From/To fields (timespace). Normalize order: if `from > to`, swap date halves.
+Normalize order: if `from > to`, swap date halves.
 
 ### Hover preview (range)
 
@@ -32,8 +33,19 @@ Extends `CalendarDay` in `calendar-dropdown.types.ts`:
 | --- | --- |
 | `'from'` | `draft.to` if set |
 | `'to'` | `draft.from` if set |
+| `'pick'` | First bound when only start set; else none |
 
 Preview wash only between fixed anchor and hovered date when both exist and differ.
+
+### Dual-month view stability
+
+| Rule | Behavior |
+| --- | --- |
+| `viewAnchorDate` input | Stable ISO date from parent at popover open — not live draft |
+| Day click | MUST NOT re-sync visible month when clicked date is in left **or** right grid |
+| `prevMonth` / `nextMonth` | User navigation; clears sync lock so browsing is free |
+
+Helper: `isDateVisibleInDualMonthView(iso, viewYear, viewMonth)`.
 
 ### Interaction emphasis (range)
 
@@ -46,31 +58,19 @@ Preview wash only between fixed anchor and hovered date when both exist and diff
 
 Canonical: [`state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis.
 
-## Progressive time row
+## Time in range mode
 
-Replaces always-visible header time input in **range + optionalTime** context:
+**Timespace (`layout='split'`):** time inputs live in parent shell via [`time-field-control.md`](time-field-control.md) — **not** in this panel.
 
-```
-app-calendar-picker-panel
-├── [single mode header: date + optional time inputs — unchanged]
-├── month nav + grid
-├── .calendar-picker-panel__add-time [range + optionalTime only]
-├── .calendar-picker-panel__time-spinners [expanded only]
-│   ├── from HH:MM
-│   └── to HH:MM
-└── actions (clear, done)
-```
-
-**Single mode:** header time row unchanged (`showTime()` from `timeMode`).
-
-**Range mode + `optionalTime`:** header time inputs hidden; spinners live below grid per parent supplement.
+**Deferred:** panel-internal Add-time row + spinners below grid (see old progressive-time sketch). Do not implement for timespace unless product reverses shell-time decision.
 
 ## Panel inputs (range)
 
 | Input | Type | Notes |
 | --- | --- | --- |
 | `pickMode` | `'single' \| 'range'` | from parent `mode` |
-| `anchorTarget` | `'from' \| 'to'` | which field opened / re-anchored popover |
+| `anchorTarget` | `'from' \| 'to' \| 'pick'` | active field / pick FSM |
+| `viewAnchorDate` | `string` | ISO date for initial month sync |
 | `rangeDraft` | `CalendarRangeValue \| null` | two-way via `rangeDraftChange` |
 
 | Output | Payload |
@@ -80,9 +80,10 @@ app-calendar-picker-panel
 ## Acceptance criteria
 
 - [x] Range mode: in-range days render wash between start and end
-- [x] `anchorTarget='from'`: each calendar click replaces start (even when range was empty)
+- [x] `anchorTarget='from'`: each calendar click replaces start
 - [x] `anchorTarget='to'`: each calendar click replaces end
-- [x] Wrong start: re-open From → second click replaces start, does not set end
-- [x] Popover open + other field icon → re-anchor without close
-- [ ] `optionalTime` + range: Add time link after start exists; spinners below grid
-- [ ] Done disabled until both `from.date` and `to.date` set (unless nullable clear path)
+- [x] `anchorTarget='pick'`: two-click range semantics
+- [x] Right-grid day click does not jump visible months when date already visible
+- [x] Popover open + other field icon → re-anchor without close (toolbar layout)
+- [x] Done disabled until both `from.date` and `to.date` set for pick anchor (unless nullable clear)
+- [x] Timespace time: shell `app-time-field-control` — panel spinners **not** built

@@ -59,6 +59,10 @@ src/app/
 - No overlay/state implementation is allowed without explicit selector-level ownership mapping.
 - Full contract: `.cursor/rules/visual-behavior.mdc`.
 
+## Component styling gate (hard)
+
+Do **not** change existing component visual styling — SCSS/Tailwind on shared or feature components, `hlmBtn` variant/size, custom `width`/`height` overrides, token swaps, or replacing design-system primitives with bespoke CSS — unless the user explicitly approved that visual change in the **current** task. Behavior and wiring fixes without visual diff are fine. If a spec mandates a visual change the user has not confirmed, emit `⚠ SPEC GAP` and ask before editing styles. Policy: [`../../.github/agents/README.md`](../../.github/agents/README.md) § Component styling gate.
+
 ## Stable State Comments (Required)
 
 - For every stateful component, `*.component.ts`, `*.component.html`, and `*.component.scss` must include explicit English `Stable state:` comment blocks.

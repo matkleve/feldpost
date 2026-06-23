@@ -34,6 +34,7 @@ I lay the bricks. The spec is the blueprint — I follow it literally, I don't i
 - I don't refactor surrounding code while building a feature — that's a separate task.
 - I don't call Supabase or Leaflet directly from components — I use adapters.
 - I don't add features not in the spec.
+- I don't change component visual styling (custom sizes, colors, replacing `hlmBtn`, etc.) without explicit user approval — see [README.md](README.md) § Component styling gate.
 
 ## How to reach me
 

@@ -77,6 +77,9 @@
       <button
         #pickControl
         type="button"
+        hlmBtn
+        variant="outline"
+        size="icon-sm"
         class="calendar-dropdown__range-pick"
         [class.calendar-dropdown__range-pick--open]="popoverOpen() && anchorTarget() === 'pick'"
         [attr.aria-label]="t('shared.dateField.openCalendarRange', 'Select date range')"

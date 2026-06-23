@@ -203,6 +203,8 @@ Agents should ask **enough questions that requirements are clear** before multi-
 
 **Before coding:** restate the invariant in your own words and confirm; list open ambiguities and ask about each that is not locked in spec/plan; then list files you will touch, what you will not touch, and how you will verify.
 
+**Component styling gate (hard):** Do not change existing component visual styling (SCSS/Tailwind geometry, colors, borders, sizes, `hlmBtn` variant/size swaps, or replacing design-system primitives with custom CSS) unless the user explicitly approved that visual change in the **current** task. Behavior-only fixes are fine; visual diffs require ask-first. See [`.github/agents/README.md`](.github/agents/README.md) § Component styling gate.
+
 **When the user corrects you:** treat it as an invariant update — fix minimal code, sync spec/plan if applicable, add a short note to `docs/ai-diary/YYYY-MM-DD.md` if the mistake is likely to recur.
 
 **🔴 Live verification (product owner):** When agents change route cache, media preview FSM, signing, or tile aspect caches, you must run the browser checks in [`docs/agent-workflows/agent-communication.md`](docs/agent-workflows/agent-communication.md) § **LIVE VERIFICATION** — especially **second visit to `/media`**. `ng build` alone does not prove revisit UX. Agents must call this out explicitly; if they do not, ask for the LIVE CHECK block.

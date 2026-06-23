@@ -61,6 +61,8 @@ export class NavComponent {
       : false,
   );
 
+  private sidebarLayoutSyncInitialized = false;
+
   private readonly _sidebarWidthEffect = effect(() => {
     const collapsed = this.sidebarCollapsed();
     if (typeof document !== 'undefined') {
@@ -69,6 +71,12 @@ export class NavComponent {
         collapsed ? '3rem' : '15rem',
       );
     }
+
+    if (!this.sidebarLayoutSyncInitialized) {
+      this.sidebarLayoutSyncInitialized = true;
+      return;
+    }
+
     this.invalidateMapAfterSidebarLayoutChange();
   });
 

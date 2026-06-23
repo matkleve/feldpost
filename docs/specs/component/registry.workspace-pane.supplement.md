@@ -200,13 +200,25 @@
 
 ### `<app-calendar-dropdown>` — Calendar Dropdown
 
-- **File**: `apps/web/src/app/shared/calendar-dropdown/calendar-dropdown.component.ts` *(planned)*
+- **File**: `apps/web/src/app/shared/calendar-dropdown/calendar-dropdown.component.ts`
 - **Purpose**: Locale-aware date/time field + body-portaled calendar popover; shared across Timespace and Media Detail.
 - **Spec**: [`docs/specs/component/filters/calendar-dropdown.md`](filters/calendar-dropdown.md)
-- **Variant axes**: `timeMode` (`dateOnly` \| `optionalTime` \| `requiredTime`), `minDate`, `maxDate`, `nullable`
-- **Composed of**: `app-calendar-picker-panel` (portal)
-- **Used in**: `app-timespace-dropdown`, `app-media-detail-inline-section` *(after migration)*
-- **Gaps**: not implemented — replaces `app-compact-date-field`, `app-captured-date-editor`
+- **Variant axes**: `mode` (`single` \| `range`), `layout` (`default` \| `toolbar` \| `split`), `timeMode` (`dateOnly` \| `optionalTime` \| `requiredTime`), `minDate`, `maxDate`, `nullable`
+- **Composed of**: `app-calendar-picker-panel` (portal), `app-time-field-control` (split + optionalTime)
+- **Used in**: `app-timespace-dropdown`, `app-media-detail-inline-section`
+- **Gaps**: none for v1 timespace split layout
+
+---
+
+### `<app-time-field-control>` — Time Field Control
+
+- **File**: `apps/web/src/app/shared/time-field-control/time-field-control.component.ts`
+- **Purpose**: `HH:MM` input + scroll-wheel picker for split calendar range rows.
+- **Spec**: [`docs/specs/component/filters/time-field-control.md`](filters/time-field-control.md)
+- **Variant axes**: `value`, `disabled`, `ariaLabel`
+- **Composed of**: `app-dropdown-shell` (portal)
+- **Used in**: `app-calendar-dropdown` (`layout='split'`, `timeMode≠'dateOnly'`)
+- **Gaps**: none
 
 ---
 

@@ -12,6 +12,7 @@ import { parseIsoDateValue, toIsoDateValue } from '../../core/i18n/date-field.he
 import { I18nService } from '../../core/i18n/i18n.service';
 import { DropdownShellComponent } from '../dropdown-trigger/shell/dropdown-shell.component';
 import { TimeFieldControlComponent } from '../time-field-control/time-field-control.component';
+import { HLM_BUTTON_IMPORTS } from '../ui/button';
 import { CalendarPickerPanelComponent } from './calendar-picker-panel.component';
 import { normalizeRangeValue, resolveRangeViewAnchorDate } from './calendar-picker.helpers';
 import type {
@@ -24,7 +25,7 @@ import type {
 @Component({
   selector: 'app-calendar-dropdown',
   standalone: true,
-  imports: [DropdownShellComponent, CalendarPickerPanelComponent, TimeFieldControlComponent],
+  imports: [DropdownShellComponent, CalendarPickerPanelComponent, TimeFieldControlComponent, ...HLM_BUTTON_IMPORTS],
   templateUrl: './calendar-dropdown.component.html',
   styleUrl: './calendar-dropdown.component.scss',
 })
