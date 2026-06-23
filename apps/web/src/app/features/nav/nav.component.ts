@@ -17,7 +17,7 @@
  *  - routerLinkActive uses exact matching for '/' to avoid it always being active.
  */
 
-import { Component, HostListener, computed, inject } from '@angular/core';
+import { Component, HostListener, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter, map, startWith } from 'rxjs/operators';
@@ -67,15 +67,29 @@ export class NavComponent {
 
   private readonly activeShell = computed(() => resolveAuthenticatedActiveShell(this.currentUrl()));
 
-  /** Nav items in display order. Items with disabled: true are visually greyed
-   *  out and non-interactive — reserved for future features. */
-  readonly navItems = computed<NavItem[]>(() => [
-    { icon: 'map', label: this.t('nav.item.map', 'Map'), route: '/' },
-    { icon: 'perm_media', label: this.t('nav.item.media', 'Media'), route: '/media' },
-    { icon: 'folder', label: this.t('nav.item.projects', 'Projects'), route: '/projects' },
-    { icon: 'groups', label: this.t('nav.item.colleagues', 'Colleagues'), route: '/colleagues' },
-    { icon: 'business', label: this.t('nav.item.organization', 'Organization'), route: '/organization' },
-  ]);
+  readonly navExpanded = signal(true);
+  readonly searchQuery = signal('');
+
+  onSearchInput(event: Event): void {
+    this.searchQuery.set((event.target as HTMLInputElement).value);
+  }
+
+  toggleNav(): void {
+    this.navExpanded.update(v => !v);
+  }
+
+  /** Nav items in display order, filtered by searchQuery when active. */
+  readonly navItems = computed<NavItem[]>(() => {
+    const all: NavItem[] = [
+      { icon: 'map', label: this.t('nav.item.map', 'Map'), route: '/' },
+      { icon: 'perm_media', label: this.t('nav.item.media', 'Media'), route: '/media' },
+      { icon: 'folder', label: this.t('nav.item.projects', 'Projects'), route: '/projects' },
+      { icon: 'groups', label: this.t('nav.item.colleagues', 'Colleagues'), route: '/colleagues' },
+      { icon: 'business', label: this.t('nav.item.organization', 'Organization'), route: '/organization' },
+    ];
+    const q = this.searchQuery().toLowerCase().trim();
+    return q ? all.filter(item => item.label.toLowerCase().includes(q)) : all;
+  });
 
   /** Map shell uses `/`, `/map`, and `/map/settings/...` — not only `/`. */
   isNavItemActive(item: NavItem): boolean {
