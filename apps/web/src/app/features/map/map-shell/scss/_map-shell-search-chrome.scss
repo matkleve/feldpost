@@ -13,10 +13,9 @@
 
   position: absolute;
   top: var(--spacing-3);
-  left: 50%;
+  left: var(--spacing-3);
   z-index: 200;
-  width: min(36rem, calc(100% - (2 * var(--search-bar-safe-inline))));
-  transform: translateX(-50%);
+  width: min(36rem, calc(100% - var(--spacing-3) - var(--search-bar-safe-inline)));
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -24,7 +23,7 @@
   box-sizing: border-box;
 
   @media (max-width: 47.9375rem) {
-    width: calc(100% - (2 * var(--search-bar-safe-inline)));
+    width: calc(100% - var(--spacing-3) - var(--search-bar-safe-inline));
   }
 
   // Search bar fills the chrome column width; filter row stays left-aligned beneath it.

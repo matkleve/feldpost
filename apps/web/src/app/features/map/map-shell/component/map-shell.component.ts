@@ -169,6 +169,10 @@ export class MapShellComponent implements OnDestroy {
     this.mapContainerRef()?.nativeElement?.focus();
   }
 
+  toggleBasemap(): void {
+    this.basemapService.toggle(this.mapShellInstance.map);
+  }
+
   mapMenuPanelClass(viewportWidth?: number): string {
     return this.isContextMenuSheetViewport(viewportWidth)
       ? 'map-context-menu option-menu-surface map-context-menu--sheet'

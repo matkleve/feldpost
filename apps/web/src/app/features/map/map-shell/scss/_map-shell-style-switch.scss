@@ -1,75 +1,68 @@
-// Map style switch (street/photo) — top-left of map zone
+// Map style switch (street/photo) — single toggle button, bottom-right, above GPS.
 // @see docs/specs/component/map/map-style-switch.md
 
 @use '../../../../../styles/frosted-chrome';
 @use '../../../../../styles/interaction-emphasis-quiet-row' as emphasis;
 
 .map-style-switch {
+  --touch-target-base: 2.75rem;
+  --touch-target-mobile: 3rem;
+
   position: absolute;
-  top: var(--spacing-3);
-  left: var(--spacing-3);
+  bottom: calc(var(--spacing-5) + 2.75rem + var(--spacing-2));
+  right: var(--spacing-4);
   z-index: 200;
   display: inline-flex;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
 
   @media (max-width: 47.9375rem) {
-    top: calc(var(--spacing-3) + var(--spacing-2));
-    left: var(--spacing-3);
+    bottom: calc(var(--spacing-5) + 3rem + var(--spacing-2));
   }
 }
 
-// Track shell — 55% card, matches all other map-floating chrome.
-// @see docs/design/tokens.md § Frosted chrome
-:host .map-style-switch [hlmToggleGroup] {
-  flex-direction: column;
-  align-items: stretch;
-  height: auto;
-  min-height: 0;
-  gap: var(--spacing-1);
+:host button.map-style-switch__btn {
+  width: var(--touch-target-base);
+  height: var(--touch-target-base);
+  border: 1px solid var(--border);
   border-radius: var(--radius-full);
-  padding: var(--spacing-1);
-  @include frosted-chrome.panel;
-}
-
-// Each segment is a full circle; gap separates them inside the frosted track.
-// @see docs/migration/phase-10-manual-matrix.md (map style switch pierce)
-:host .map-style-switch [hlmToggleGroupItem] {
+  @include frosted-chrome.outline-control;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  width: 2.75rem;
-  min-width: 2.75rem;
-  min-height: 2.75rem;
-  height: 2.75rem;
-  padding: 0;
-  overflow: hidden;
-  border-radius: calc(var(--radius-full) - var(--spacing-1));
-  box-shadow: none;
+  box-shadow: var(--shadow-md);
+  transition:
+    background var(--motion-duration-standard) var(--motion-ease-out),
+    border-color var(--motion-duration-standard) var(--motion-ease-out),
+    color var(--motion-duration-standard) var(--motion-ease-out),
+    transform var(--motion-duration-standard) var(--motion-ease-out);
 
-  // Keyboard focus — inset gold ring; no Tailwind ring-offset halo on frosted track.
-  // @see docs/specs/component/map/map-style-switch.md
-  &:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--brand-gold) 72%, transparent);
-    outline-offset: -2px;
+  .material-icons {
+    font-size: var(--font-size-xl);
+    color: inherit;
   }
-}
 
-@layer states {
-  // Resting on = tertiary violet (map view placement); overrides shared toggle CVA secondary/gold.
-  // @see docs/specs/component/map/map-style-switch.md § Interaction emphasis
-  :host .map-style-switch .map-style-switch__option[data-state='on'] {
-    @include emphasis.nav(10%);
-    box-shadow: none;
+  &:hover,
+  &:focus-visible {
+    color: var(--brand-gold);
+    @include frosted-chrome.outline-control-hover;
+    transform: scale(1.04);
+    outline: none;
 
     .material-icons {
       color: inherit;
     }
+  }
 
-    &:hover,
-    &:focus-visible {
-      @include emphasis.selected-hover(10%);
+  &:focus-visible {
+    box-shadow: var(--interactive-focus-ring);
+  }
 
-      .material-icons {
-        color: inherit;
-      }
-    }
+  @media (max-width: 47.9375rem) {
+    width: var(--touch-target-mobile);
+    height: var(--touch-target-mobile);
   }
 }
+
