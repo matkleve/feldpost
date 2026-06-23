@@ -21,8 +21,8 @@ Takes all remaining horizontal space after Sidebar (`flex: 1`). The Leaflet map 
 | 2   | Clicks map (placement mode)      | Places marker at click coordinates                      | `placementActive` → new marker         |
 | 3   | Right-click + drag (desktop)     | Starts radius selection                                 | Radius Selection Circle appears        |
 | 4   | Long-press + drag (mobile)       | Starts radius selection                                 | Radius Selection Circle appears        |
-| 5   | Taps Basemap Switch Button       | Switches tile layer from default map to satellite photo | `MapAdapter.setBaseLayer('satellite')` |
-| 6   | Taps Basemap Switch Button again | Switches tile layer back to default map                 | `MapAdapter.setBaseLayer('default')`   |
+| 5   | Taps Basemap Switch Button       | Switches tile layer (street ↔ satellite); icon + dots update | `MapShellBasemapService.toggle` |
+| 6   | Taps Basemap Switch Button again | Switches back | same |
 | 7   | Reloads the page                 | Restores last selected basemap from local persistence   | `mapBasemap` restored on shell init    |
 | 8   | Switches app theme (light/dark/sandstone/system) | Street basemap swaps CARTO tiles live to match the theme; satellite is theme-agnostic and unchanged | `MapShellBasemapService` re-applies on `data-theme` / `prefers-color-scheme` change |
 
@@ -38,7 +38,7 @@ MapZone                                    ← div, flex-1, relative, overflow-h
 ├── SearchBar                              ← absolute top-4 left-1/2, z-30
 ├── ActiveFilterChips                      ← absolute below search bar, z-20
 ├── UploadButtonZone                       ← absolute top-4 right-4, z-20
-├── BasemapSwitchButton                    ← absolute top-4 left-4, z-20 — see [map-style-switch.md](./map-style-switch.md)
+├── BasemapSwitchButton                    ← bottom-right above GPS, z-200 — see [map-style-switch.md](./map-style-switch.md)
 ├── GPSButton                              ← absolute bottom-4 right-4, z-20
 └── [placement] PlacementBanner            ← absolute bottom-16 center, z-30
 ```
@@ -76,7 +76,7 @@ flowchart LR
 
 | File                                              | Purpose                                                      |
 | ------------------------------------------------- | ------------------------------------------------------------ |
-| `features/map/map-shell/map-shell.component.html` | Hosts [map style switch](./map-style-switch.md) in top-left map control stack |
+| `features/map/map-shell/map-shell.component.html` | Hosts [map style switch](./map-style-switch.md) (bottom-right stack) |
 | `features/map/map-shell/map-shell.component.ts`   | Holds `mapBasemap` state and calls `MapAdapter.setBaseLayer` |
 | `core/map/map-adapter.ts`                         | Defines `setBaseLayer('default' \| 'satellite')` contract    |
 | `core/map/leaflet-map.adapter.ts`                 | Maps basemap state to concrete Leaflet tile layers           |

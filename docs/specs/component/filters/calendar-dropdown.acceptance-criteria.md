@@ -31,7 +31,8 @@ Parent: [`calendar-dropdown.md`](calendar-dropdown.md)
 - [x] Done button commits draft → `valueChange` / `rangeChange` (pick anchor)
 - [x] Enter in panel commits when valid (same as Done)
 - [x] Escape / outside click reverts draft; no emit
-- [x] Split field anchor: single day click → auto-commit + close
+- [x] Split field anchor: single-endpoint day clicks update draft; panel stays open until dismiss (outside / Escape)
+- [x] Split field anchor: dismiss commits the active endpoint; pick anchor still uses **Done**
 
 ## Migration
 

@@ -45,7 +45,7 @@ Bordered shell matching date control geometry (`2.25rem` height, `--radius-sm`).
 app-time-field-control
 ├── .time-field__control
 │   └── input.time-field__input
-└── app-dropdown-shell → .time-field__picker (hour wheel | minute wheel)
+└── app-dropdown-shell (`option-menu-surface time-field-panel`) → .time-field__picker (hour wheel | minute wheel)
 ```
 
 ## Visual Behavior Contract

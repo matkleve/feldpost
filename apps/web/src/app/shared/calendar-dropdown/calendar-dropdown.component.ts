@@ -151,7 +151,7 @@ export class CalendarDropdownComponent {
   }
 
   onPopoverCloseRequested(): void {
-    this.closePopover(false);
+    this.dismissRangePopover();
   }
 
   onDraftChange(next: CalendarDropdownValue | null): void {
@@ -194,7 +194,7 @@ export class CalendarDropdownComponent {
         this.reanchorRangeField(field);
         return;
       }
-      this.closePopover(false);
+      this.dismissRangePopover();
       return;
     }
 
@@ -231,19 +231,6 @@ export class CalendarDropdownComponent {
 
   onRangeDraftChange(next: CalendarRangeValue | null): void {
     this.rangeDraft.set(next);
-
-    if (this.layout() !== 'split' || this.anchorTarget() === 'pick') {
-      return;
-    }
-
-    const draft = normalizeRangeValue(next);
-    const anchor = this.anchorTarget();
-    const hasEndpoint =
-      anchor === 'from' ? !!draft?.from?.date : anchor === 'to' ? !!draft?.to?.date : false;
-    if (!hasEndpoint) return;
-
-    this.rangeChange.emit(draft);
-    this.closePopover(true);
   }
 
   onRangePanelDone(): void {
@@ -281,6 +268,31 @@ export class CalendarDropdownComponent {
     this.draft.set(null);
     this.rangeDraft.set(null);
     this.viewAnchorAtOpen.set('');
+  }
+
+  /** Split field anchor: commit draft when the portaled panel dismisses (not on each day click). */
+  private dismissRangePopover(): void {
+    if (this.mode() === 'range') {
+      this.commitSplitFieldAnchorDraft();
+    }
+    this.closePopover(false);
+  }
+
+  private commitSplitFieldAnchorDraft(): void {
+    if (this.layout() !== 'split' || !this.popoverOpen()) {
+      return;
+    }
+    const anchor = this.anchorTarget();
+    if (anchor !== 'from' && anchor !== 'to') {
+      return;
+    }
+    const draft = normalizeRangeValue(this.rangeDraft());
+    const hasEndpoint =
+      anchor === 'from' ? !!draft?.from?.date : anchor === 'to' ? !!draft?.to?.date : false;
+    if (!hasEndpoint) {
+      return;
+    }
+    this.rangeChange.emit(draft);
   }
 
   private openRangeFieldPopover(field: 'from' | 'to'): void {

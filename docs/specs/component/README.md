@@ -98,7 +98,7 @@ Workspace chrome adjacent to the map/workspace split.
 - [active-selection-view](workspace/active-selection-view.md)
 - [drag-divider](workspace/drag-divider.md)
 - [group-tab-bar](workspace/group-tab-bar.md)
-- [sidebar](workspace/sidebar.md)
+- [sidebar](workspace/sidebar.md) (+ [collapse supplement](workspace/sidebar.collapse.supplement.md), [acceptance criteria](workspace/sidebar.acceptance-criteria.md))
 
 ## account/
 
@@ -126,6 +126,7 @@ Workspace chrome adjacent to the map/workspace split.
 - [badges and chips](ui-primitives/ui-primitives.badges-and-chips.md) (inventory: pill vs toolbar control vs filter operator; canonical chip height)
 - [card grid](ui-primitives/ui-primitives.card-grid.md)
 - [card variant switch](ui-primitives/ui-primitives.card-variant-switch.md)
+- [cycle indicator dots](ui-primitives/cycle-indicator-dots.md)
 - [group header](ui-primitives/ui-primitives.group-header.md)
 - [panel trigger](ui-primitives/panel-trigger.md) (`app-panel-trigger` — compact toolbar trigger; Figma node `164:2177`)
 - [popover](ui-primitives/popover.md) (`app-popover` — chrome-only floating surface shell; `@no-figma`)

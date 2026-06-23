@@ -21,8 +21,8 @@ From label (date+time)     (gap)     To label (date+time)
 
 | User action | `anchorTarget` | Panel day-click behavior | Commit |
 | --- | --- | --- | --- |
-| Focus / click From **date** input | `from` | Replace **from.date** only (single endpoint) | **Auto-commit** + close on day click |
-| Focus / click To **date** input | `to` | Replace **to.date** only | **Auto-commit** + close on day click |
+| Focus / click From **date** input | `from` | Replace **from.date** only (single endpoint) | **On dismiss** (outside / Escape) |
+| Focus / click To **date** input | `to` | Replace **to.date** only | **On dismiss** |
 | Edit From/To **time** (`app-time-field-control`) | — | No calendar panel | Immediate `rangeChange` when shell closed |
 | Click **center** calendar icon | `pick` | 1st click → `from`; 2nd → `to`; 3rd restarts | **Done** (or Clear) — two-click **range** only here |
 
@@ -100,8 +100,9 @@ When the panel shows two consecutive months, clicking a day in the **right** gri
 | `closed` | Center icon (split) | `open-anchor-pick` | Draft = clone committed |
 | `closed` | From icon (toolbar) | `open-anchor-from` | Draft = clone committed |
 | `closed` | To icon (toolbar) | `open-anchor-to` | Draft = clone committed |
-| `open-anchor-from` | enabled day click (split) | `closed` | Replace `from`; `rangeChange` emit |
-| `open-anchor-to` | enabled day click (split) | `closed` | Replace `to`; `rangeChange` emit |
+| `open-anchor-from` | enabled day click (split) | `open-anchor-from` | Replace `from` in draft; panel stays open |
+| `open-anchor-to` | enabled day click (split) | `open-anchor-to` | Replace `to` in draft; panel stays open |
+| `open-anchor-from/to` | dismiss (outside / Escape) (split) | `closed` | `rangeChange` emit if endpoint set |
 | `open-anchor-from/to` | enabled day click (toolbar) | `open-anchor-*` | Replace half; stay open until Done |
 | `open-anchor-pick` | 1st / 2nd day click | `open-anchor-pick` | Two-click range draft |
 | `open-anchor-pick` | **Done** (both bounds) | `closed` | `rangeChange` emit |

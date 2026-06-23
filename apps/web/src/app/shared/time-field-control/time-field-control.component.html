@@ -22,43 +22,39 @@
 
 @if (popoverOpen()) {
   <app-dropdown-shell
-    panelClass="time-field-panel"
+    panelClass="option-menu-surface time-field-panel"
     placement="end"
     [anchor]="anchorEl()"
     (closeRequested)="onPopoverCloseRequested()"
   >
-    <div class="time-field__picker" role="group" [attr.aria-label]="ariaLabel()">
-      <div
-        #hourWheel
-        class="time-field__wheel"
-        tabindex="-1"
-        (wheel)="onHourWheel($event)"
-      >
+    <div
+      #picker
+      class="time-field__picker"
+      role="group"
+      [attr.aria-label]="ariaLabel()"
+      (pointerdown)="$event.stopPropagation()"
+    >
+      <div #hourWheel class="time-field__wheel" tabindex="-1">
         @for (hour of hours; track hour) {
           <button
             type="button"
             class="time-field__wheel-item"
             [class.time-field__wheel-item--selected]="hour === selectedHour()"
             [attr.data-wheel-value]="hour"
-            (click)="selectHour(hour)"
+            (pointerdown)="onWheelItemActivate($event, 'hour', hour)"
           >
             {{ hour | number: '2.0-0' }}
           </button>
         }
       </div>
-      <div
-        #minuteWheel
-        class="time-field__wheel"
-        tabindex="-1"
-        (wheel)="onMinuteWheel($event)"
-      >
+      <div #minuteWheel class="time-field__wheel" tabindex="-1">
         @for (minute of minutes; track minute) {
           <button
             type="button"
             class="time-field__wheel-item"
             [class.time-field__wheel-item--selected]="minute === selectedMinute()"
             [attr.data-wheel-value]="minute"
-            (click)="selectMinute(minute)"
+            (pointerdown)="onWheelItemActivate($event, 'minute', minute)"
           >
             {{ minute | number: '2.0-0' }}
           </button>

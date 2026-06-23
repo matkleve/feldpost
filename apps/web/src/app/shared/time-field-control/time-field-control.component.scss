@@ -51,21 +51,27 @@
     }
   }
 
-  // Hour + minute scroll columns inside portaled panel.
+  // Hour + minute columns — shell chrome from `.option-menu-surface` on dropdown host.
+  // @see docs/specs/component/filters/dropdown-system.md
   .time-field__picker {
     display: flex;
-    gap: var(--spacing-1);
-    padding: var(--spacing-1);
+    gap: var(--spacing-2);
     min-width: 6.5rem;
+    touch-action: none;
   }
 
   .time-field__wheel {
     flex: 1 1 0;
     min-width: 0;
     max-height: 7.5rem;
-    overflow-y: auto;
+    overflow-y: scroll;
     scroll-behavior: smooth;
-    scrollbar-width: thin;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   .time-field__wheel-item {

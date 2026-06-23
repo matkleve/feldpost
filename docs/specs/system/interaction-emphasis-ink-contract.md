@@ -29,7 +29,7 @@ This is **not** a sidebar-only rule. It applies to every surface that uses inter
 | Toolbar `data-active` | **Secondary** | Filter/sort/projects triggers (mode on, not list pick) |
 | Active sort row | **Secondary** | `sort-dropdown__option--active` |
 | Toggle `data-state=on` | **Secondary** | Size control, upload lanes, settings segmented controls |
-| Map style switch `data-state=on` | **Tertiary** | Basemap segment on — *where you are in the map view* ([`map-style-switch.md`](../component/map/map-style-switch.md)) |
+| Map style switch `data-state=on` | **Tertiary** | Basemap active dot — [`map-style-switch.md`](../component/map/map-style-switch.md) |
 | Nav active route | **Tertiary** | `.nav__link--active` |
 | Settings section rail | **Tertiary** | `.settings-overlay__section-item--active` |
 | Destructive quiet row | **Exception** | Destructive branch in menu states |
@@ -77,7 +77,7 @@ Material Icons do not reliably inherit without an explicit inherit rule on the i
 | Toolbar dropdown triggers `data-active` | Secondary | [`dropdown-system.md`](../component/filters/dropdown-system.md) | `button.*__menu-trigger` |
 | Map filter toolbar | Secondary | same | `map-filter-toolbar__menu-trigger` |
 | Toggle segments `on` (generic) | Secondary | settings / upload / size toggles | `[hlmToggleGroupItem]` (default CVA) |
-| Map style switch segment on | Tertiary | [`map-style-switch.md`](../component/map/map-style-switch.md) | `.map-style-switch [hlmToggleGroupItem][data-state=on]` — pierced SCSS |
+| Map style switch (cycle button) | **Tertiary** (active dot) | [`map-style-switch.md`](../component/map/map-style-switch.md) | `.map-style-switch__dot--active` |
 | Map photo markers (hover) | High attention | [`media-marker.md`](../ui/media-marker/media-marker.md) | `.map-photo-marker` hover outline |
 | Media item grid tiles (hover) | High attention | [`media-item.md`](../component/media/media-item.md) | `.media-item__slot:hover` |
 | Map search bar clear `×` | High attention on pointer | [`search-bar.md`](../ui/search-bar/search-bar.md) | `button.search-bar__clear` (`hlmBtn` ghost) |

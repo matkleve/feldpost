@@ -1,11 +1,15 @@
 import {
   Component,
+  DestroyRef,
   ElementRef,
+  afterNextRender,
   computed,
+  effect,
   inject,
   input,
   output,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
@@ -25,6 +29,7 @@ const MINUTES = Array.from({ length: 60 }, (_, index) => index);
 })
 export class TimeFieldControlComponent {
   protected readonly i18nService = inject(I18nService);
+  private readonly destroyRef = inject(DestroyRef);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   readonly value = input<string | null>(null);
@@ -38,8 +43,26 @@ export class TimeFieldControlComponent {
   readonly minutes = MINUTES;
 
   private readonly controlRef = viewChild<ElementRef<HTMLElement>>('control');
+  private readonly pickerRef = viewChild<ElementRef<HTMLElement>>('picker');
   private readonly hourWheelRef = viewChild<ElementRef<HTMLElement>>('hourWheel');
   private readonly minuteWheelRef = viewChild<ElementRef<HTMLElement>>('minuteWheel');
+
+  private wheelUnbind: (() => void) | null = null;
+
+  constructor() {
+    effect(() => {
+      const open = this.popoverOpen();
+      untracked(() => {
+        if (!open) {
+          this.unbindPickerWheelListener();
+          return;
+        }
+        afterNextRender(() => this.bindPickerWheelListener());
+      });
+    });
+
+    this.destroyRef.onDestroy(() => this.unbindPickerWheelListener());
+  }
 
   readonly shellText = computed(() => this.value() ?? '');
 
@@ -91,18 +114,56 @@ export class TimeFieldControlComponent {
     this.emitTime(this.selectedHour(), minute);
   }
 
-  onHourWheel(event: WheelEvent): void {
+  onWheelItemActivate(event: PointerEvent, kind: 'hour' | 'minute', value: number): void {
     event.preventDefault();
-    const next = this.wrapHour(this.selectedHour() + (event.deltaY > 0 ? 1 : -1));
-    this.emitTime(next, this.selectedMinute());
-    this.scrollWheelToValue(this.hourWheelRef(), next);
+    event.stopPropagation();
+    if (kind === 'hour') {
+      this.selectHour(value);
+      return;
+    }
+    this.selectMinute(value);
   }
 
-  onMinuteWheel(event: WheelEvent): void {
+  private onPickerWheel(event: WheelEvent): void {
     event.preventDefault();
-    const next = this.wrapMinute(this.selectedMinute() + (event.deltaY > 0 ? 1 : -1));
+    event.stopPropagation();
+
+    const picker = this.pickerRef()?.nativeElement;
+    if (!picker) {
+      return;
+    }
+
+    const midX = picker.getBoundingClientRect().left + picker.clientWidth / 2;
+    const delta = event.deltaY > 0 ? 1 : -1;
+
+    if (event.clientX < midX) {
+      const next = this.wrapHour(this.selectedHour() + delta);
+      this.emitTime(next, this.selectedMinute());
+      this.scrollWheelToValue(this.hourWheelRef(), next);
+      return;
+    }
+
+    const next = this.wrapMinute(this.selectedMinute() + delta);
     this.emitTime(this.selectedHour(), next);
     this.scrollWheelToValue(this.minuteWheelRef(), next);
+  }
+
+  private bindPickerWheelListener(): void {
+    this.unbindPickerWheelListener();
+
+    const picker = this.pickerRef()?.nativeElement;
+    if (!picker) {
+      return;
+    }
+
+    const handler = (event: WheelEvent) => this.onPickerWheel(event);
+    picker.addEventListener('wheel', handler, { passive: false });
+    this.wheelUnbind = () => picker.removeEventListener('wheel', handler);
+  }
+
+  private unbindPickerWheelListener(): void {
+    this.wheelUnbind?.();
+    this.wheelUnbind = null;
   }
 
   private emitTime(hour: number, minute: number): void {

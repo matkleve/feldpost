@@ -22,7 +22,7 @@ When an interactive component spec is next edited, add **§ Interaction emphasis
 | `hlmBtn` default/destructive | same | **done** | Filled CTAs — exception (solid fill) |
 | `hlmBtn` secondary | same | **done** | No product call sites; use `outline` for quiet actions |
 | Toggle group items | [`toggle-group-variants.ts`](../../../apps/web/src/app/shared/ui/toggle-group/toggle-group-variants.ts) | **partial** | CVA correct; sandstone `--interaction-selected-ink` token fix pending |
-| Map style switch | [`map-style-switch.md`](../component/map/map-style-switch.md) | **partial** | Resting on must be **violet** (`emphasis.nav` pierce); overrides toggle CVA |
+| Map style switch | [`map-style-switch.md`](../component/map/map-style-switch.md) | **done** | Cycle button; active basemap on violet dot |
 | Map photo markers | [`media-marker.md`](../ui/media-marker/media-marker.md) | **done** | gold hover outline |
 | Media item grid tiles | [`media-item.md`](../component/media/media-item.md) | **done** | gold slot hover |
 | Nav sidebar links | [`sidebar.md`](../component/workspace/sidebar.md) | **done** | tertiary `emphasis.nav()`; gold hover |

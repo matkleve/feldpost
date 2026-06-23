@@ -66,6 +66,12 @@
     overflow: visible;
   }
 
+  // Time wheel picker — same overflow contract as calendar panel.
+  // @see docs/specs/component/filters/time-field-control.md
+  :host.time-field-panel {
+    overflow: visible;
+  }
+
   // Media-detail project picker: content-sized panel (no 18rem×1.6 empty tail).
   // Standalone rule — does NOT require toolbar-dropdown because the media-detail shell uses anchor
   // positioning, not the toolbar width floor. Max-width caps at 20rem per spec table.

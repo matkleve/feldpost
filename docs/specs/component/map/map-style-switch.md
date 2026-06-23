@@ -2,67 +2,90 @@
 
 ## What It Is
 
-Vertical **two-segment** basemap control in the map zone: **street map** vs **satellite photo**. Implemented as `[hlmPillToggle]` + `[hlmToggleGroup]` / `[hlmToggleGroupItem]` in `MapShellComponent` (not a standalone Angular component file).
+Single **cycle/toggle** basemap control in the map zone: switches between **street map** and **satellite photo**. Implemented inline in `MapShellComponent` (not a standalone component). Shows a stacked icon + **cycle indicator dots** ([`cycle-indicator-dots.md`](../ui-primitives/cycle-indicator-dots.md)).
 
 ## What It Looks Like
 
-Frosted pill track (top-left of map zone, `z-index: 200`). Each segment is a circular icon-only toggle (`map` / `satellite` Material icons). **On** segment uses **tertiary** nav ink (**violet**, `--interaction-nav-ink`) at rest — *which map view you are in*, same attention tier as sidebar route and settings section rail. **Off** segment is muted. **Hover / focus-visible** → **brand gold** (high attention while pointer is on the segment).
+- **Position:** bottom-right of map zone, above GPS button (`z-index: 200`)
+- **Shape:** circular frosted outline button `2.75rem` (desktop) / `3rem` (mobile)
+- **Icon:** shows the **target** mode (`satellite_alt` when on street, `map` when on photo) at `var(--font-size-lg)`
+- **Dots:** two dots under icon — left = street, right = photo; active dot uses `var(--interaction-nav-ink)`
+- **Rest:** muted icon + frosted `outline-control` chrome
+- **Hover / focus-visible:** brand gold ink + gold frosted wash (`outline-control-hover`)
 
 ## Where It Lives
 
 - **Parent:** [`map-zone.md`](./map-zone.md) → `MapShellComponent` template
 - **SCSS:** `apps/web/src/app/features/map/map-shell/scss/_map-shell-style-switch.scss`
-- **CVA base:** `apps/web/src/app/shared/ui/toggle-group/toggle-group-variants.ts`
+- **State:** `MapShellBasemapService.mapViewMode()` (`street` | `photo`)
 
 ## Actions
 
 | # | User action | System response |
 | - | ----------- | ---------------- |
-| 1 | Tap inactive segment | Basemap switches; segment becomes `data-state=on` |
-| 2 | Hover / focus-visible any segment | **Brand gold** ink + gold wash on that segment only while focused (see Interaction emphasis) |
-| 3 | Reload page | Last basemap restored from persistence (see `map-zone.md`) |
+| 1 | Tap button | Basemap toggles; icon and active dot update |
+| 2 | Hover / focus-visible | Brand gold emphasis on button |
+| 3 | Reload page | Last basemap restored from persistence ([`map-zone.md`](./map-zone.md)) |
 
 ## Interaction emphasis
 
-- Canonical: [`state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis
-- Ink: [`interaction-emphasis-ink-contract.md`](../../system/interaction-emphasis-ink-contract.md)
-- [x] This component implements the contract (or documented exception below)
+| Surface | Rest | Hover / focus-visible |
+| --- | --- | --- |
+| Button | Muted ink; active mode shown on **dots** (violet), not full button fill | Brand gold ink + gold wash; icon inherits |
 
-| Surface | Rest (on) | Rest (off) | Hover / focus-visible (any segment, including already on) | Owner |
-| --- | --- | --- | --- | --- |
-| Segment (`hlmToggleGroupItem`) | Tertiary `--interaction-nav-ink` + wash (violet; all themes) | Muted ink, transparent fill | **Brand gold** ink + gold wash; icon `color: inherit` | `_map-shell-style-switch.scss` pierce (overrides shared toggle CVA secondary) |
+Active basemap is **tertiary** placement (violet dot) — same attention tier as sidebar route ink. The button body does not use `emphasis.nav()` fill at rest; only the active dot carries nav ink.
 
-**Normative:** Resting **on** segment is **tertiary** (map view placement) — **violet**, not gold or blue. Generic `toggle-group-variants.ts` `data-[state=on]` secondary blue **does not apply** to `.map-style-switch`; feature SCSS must pierce with `emphasis.nav()` or equivalent. Multi-select / attention-selection patterns do **not** apply. Pointer over an **already-selected** segment uses the same gold hover as an off segment.
+## Component Hierarchy
+
+```text
+.map-style-switch
+└── button.map-style-switch__btn
+    └── .map-style-switch__media
+        ├── .map-style-switch__icon (Material icon)
+        └── .map-style-switch__dots
+            ├── .map-style-switch__dot (street)
+            └── .map-style-switch__dot (photo)
+```
 
 ## Visual Behavior Contract
 
 | Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer | Test Oracle |
 | --- | --- | --- | --- | --- | --- | --- |
-| Track shell | `[hlmToggleGroup]` in `.map-style-switch` | `.map-style-switch` | segment buttons | `.map-style-switch [hlmToggleGroup]` | 200 | Frosted column track |
-| Segment chrome | `[hlmToggleGroupItem]` | segment button | segment button | `.map-style-switch__option` | content | 2.75rem circle |
-| Hover emphasis | segment button | segment button | segment button | `:hover` / `:focus-visible` on item | states | Brand gold on on+off while hovered; resting on = violet only |
-| Resting on emphasis | segment button | segment button | segment button | `data-[state=on]` on item | states | Violet (`emphasis.nav`); never gold or blue at rest |
+| Control shell | `.map-style-switch` | `.map-style-switch` | `.map-style-switch__btn` | `.map-style-switch` | 200 | Fixed above GPS offset |
+| Circular button | `.map-style-switch__btn` | button | button | `:host button.map-style-switch__btn` | content | 2.75rem circle |
+| Icon + dots stack | `.map-style-switch__media` | button | button | `__media`, `__icon`, `__dots` | content | Fits inside circle |
+| Hover emphasis | button | button | button | `:hover`, `:focus-visible` | states | Gold ink + frosted hover |
 
 ## File Map
 
 | File | Purpose |
 | ---- | ------- |
-| `features/map/map-shell/component/map-shell.component.html` | Markup (`.map-style-switch`) |
-| `features/map/map-shell/scss/_map-shell-style-switch.scss` | Position + pierced toggle geometry |
-| `shared/ui/toggle-group/toggle-group-variants.ts` | Shared segment hover/on CVA (secondary default; **overridden** in map shell pierce) |
+| `features/map/map-shell/component/map-shell.component.html` | `.map-style-switch` markup |
+| `features/map/map-shell/scss/_map-shell-style-switch.scss` | Geometry + frosted chrome |
+| `features/map/map-shell/leaflet/map-shell-basemap.service.ts` | Basemap state + persistence |
 
-## Documented exception
+## Wiring
 
-| Surface | Why |
-| ------- | --- |
-| Map style switch `data-state=on` | **Tertiary** — basemap choice is *where you are in the map view* (orientation), not toolbar filter context (blue) or list attention (gold). Pierced in `_map-shell-style-switch.scss`. |
+```mermaid
+sequenceDiagram
+  participant U as User
+  participant MS as MapShellComponent
+  participant BS as MapShellBasemapService
+  participant MA as MapAdapter
+
+  U->>MS: Click map-style-switch
+  MS->>BS: toggle(map)
+  BS->>MA: apply basemap layer
+  BS-->>MS: mapViewMode updated
+  Note over MS: Icon + dots re-render
+```
 
 ## Acceptance Criteria
 
-- [x] Two segments: street + satellite icons
-- [x] Vertical frosted track, top-left placement
-- [ ] **Given** any theme (light / dark / sandstone), **when** the active basemap segment is on at rest (not hovered), **then** icon ink is **violet** (`--interaction-nav-ink`) — not gold or blue.
-- [ ] **Given** sandstone theme, **when** the active segment is on at rest, **then** ink remains **violet** — must not inherit sandstone `--primary` gold via shared toggle CVA.
-- [x] Hover/focus on **on** segment shows **brand gold** ink (not blue deepening)
-- [x] Hover/focus on **off** segment shows **brand gold** ink
-- [x] Icon inherits host ink on hover (no blue icon + gold wash split)
+- [x] Single circular toggle (not a two-segment pill track)
+- [x] Bottom-right placement above GPS
+- [x] Two indicator dots (street / photo) with exactly one active
+- [x] Icon shows target mode; smaller than pre-dots size to fit stack
+- [x] Hover/focus: brand gold on button
+- [x] **Given** any theme, **when** street mode active at rest, **then** left dot is violet (`--interaction-nav-ink`)
+- [x] **Given** sandstone theme, **when** photo mode active, **then** active dot remains violet — not sandstone gold primary

@@ -69,7 +69,7 @@
     width: 100%;
     min-height: 0;
     padding-block: var(--spacing-3);
-    padding-inline: var(--spacing-2);
+    padding-inline: var(--spacing-1);
     border-radius: 0;
     border-right: 1px solid var(--border);
     overflow: hidden;
@@ -511,11 +511,28 @@
     }
   }
 
+  .nav__link,
+  .nav__utility-btn {
+    @media (min-width: 768px) {
+      // Label column stays mounted but takes 0 width; gap must be 0 or 32px media clips.
+      grid-template-columns: var(--sidebar-media-size) 0fr;
+      column-gap: 0;
+    }
+  }
+
+  .nav__link {
+    @media (min-width: 768px) {
+      min-height: var(--sidebar-media-size);
+    }
+  }
+
   .nav__label {
     @media (min-width: 768px) {
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
+      overflow: hidden;
+      min-width: 0;
     }
   }
 }
