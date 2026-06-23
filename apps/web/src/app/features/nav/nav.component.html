@@ -1,7 +1,3 @@
-<!--
-  NavComponent — LeftSidebar: full-height sidebar (desktop) /
-  fixed bottom tab bar (mobile < 768 px).
--->
 <nav
   class="sidebar"
   [class.sidebar--settings-open]="settingsOverlayOpen()"
@@ -12,71 +8,89 @@
     <!-- Header -->
     <div class="nav__header">
       <span class="nav__header-title text-sm font-semibold">Feldpost</span>
+      <button
+        type="button"
+        class="nav__collapse-btn"
+        (click)="toggleCollapse()"
+        [title]="sidebarCollapsed() ? t('nav.expand', 'Expand sidebar') : t('nav.collapse', 'Collapse sidebar')"
+        [attr.aria-label]="sidebarCollapsed() ? t('nav.expand', 'Expand sidebar') : t('nav.collapse', 'Collapse sidebar')"
+      >
+        <span class="material-icons">{{ sidebarCollapsed() ? 'chevron_right' : 'chevron_left' }}</span>
+      </button>
     </div>
 
-    <!-- Search -->
-    <div class="nav__search">
-      <span class="nav__search-icon material-icons" aria-hidden="true">search</span>
-      <input
-        class="nav__search-input text-sm"
-        type="search"
-        [placeholder]="t('nav.search.placeholder', 'Suchen …')"
-        [value]="searchQuery()"
-        (input)="onSearchInput($event)"
-        [attr.aria-label]="t('nav.search.aria', 'Navigation durchsuchen')"
-      />
-    </div>
-
-    <!-- Expandable navigation section -->
-    <button
-      type="button"
-      class="nav__section-toggle"
-      [attr.aria-expanded]="navExpanded()"
-      (click)="toggleNav()"
-    >
-      <span class="nav__section-label text-xs">{{ t('nav.section.navigation', 'Navigation') }}</span>
-      <span class="nav__section-chevron material-icons" [class.nav__section-chevron--open]="navExpanded()" aria-hidden="true">expand_more</span>
-    </button>
-
-    @if (navExpanded()) {
-      <ul class="nav__list" role="list">
-        @for (item of navItems(); track item.route) {
-          <li class="sidebar__item">
-            @if (item.disabled) {
-              <span
-                class="nav__link nav__link--disabled"
-                role="link"
-                aria-disabled="true"
-                tabindex="-1"
-                [title]="t('nav.disabled.titlePrefix', 'Coming soon: ') + item.label"
-                [attr.aria-describedby]="'nav-disabled-tip'"
-              >
-                <span class="nav__media" aria-hidden="true">
-                  <span class="nav__icon material-icons">{{ item.icon }}</span>
-                </span>
-                <span class="nav__label text-sm">{{ item.label }}</span>
+    <!-- Nav items — flat list, no accordion -->
+    <ul class="nav__list" role="list">
+      @for (item of navItems(); track item.route) {
+        <li class="sidebar__item">
+          @if (item.disabled) {
+            <span
+              class="nav__link nav__link--disabled"
+              role="link"
+              aria-disabled="true"
+              tabindex="-1"
+              [title]="t('nav.disabled.titlePrefix', 'Coming soon: ') + item.label"
+              [attr.aria-describedby]="'nav-disabled-tip'"
+            >
+              <span class="nav__media" aria-hidden="true">
+                <span class="nav__icon material-icons">{{ item.icon }}</span>
               </span>
-            } @else {
-              <a
-                class="nav__link"
-                [routerLink]="item.route"
-                [class.nav__link--active]="isNavItemActive(item)"
-                [attr.aria-current]="isNavItemActive(item) ? 'page' : null"
-                [title]="item.label"
-              >
-                <span class="nav__media" aria-hidden="true">
-                  <span class="nav__icon material-icons">{{ item.icon }}</span>
-                </span>
-                <span class="nav__label text-sm">{{ item.label }}</span>
-              </a>
-            }
-          </li>
-        }
-      </ul>
-    }
+              <span class="nav__label text-sm">{{ item.label }}</span>
+            </span>
+          } @else {
+            <a
+              class="nav__link"
+              [routerLink]="item.route"
+              [class.nav__link--active]="isNavItemActive(item)"
+              [attr.aria-current]="isNavItemActive(item) ? 'page' : null"
+              [title]="item.label"
+            >
+              <span class="nav__media" aria-hidden="true">
+                <span class="nav__icon material-icons">{{ item.icon }}</span>
+              </span>
+              <span class="nav__label text-sm">{{ item.label }}</span>
+            </a>
+          }
+        </li>
+      }
+    </ul>
 
-    <div class="sidebar__item sidebar__item--spacer" aria-hidden="true"></div>
+    <div class="sidebar__spacer" aria-hidden="true"></div>
 
+    <!-- Utility row: theme + map style -->
+    <div class="nav__utility-row">
+      <button
+        type="button"
+        class="nav__utility-btn"
+        (click)="toggleTheme()"
+        [title]="themeService.isDark() ? t('nav.theme.light', 'Switch to light mode') : t('nav.theme.dark', 'Switch to dark mode')"
+        [attr.aria-label]="themeService.isDark() ? t('nav.theme.light', 'Switch to light mode') : t('nav.theme.dark', 'Switch to dark mode')"
+      >
+        <span class="material-icons nav__utility-icon" aria-hidden="true">{{
+          themeService.isDark() ? 'light_mode' : 'dark_mode'
+        }}</span>
+        <span class="nav__label nav__utility-label text-sm">{{
+          themeService.isDark() ? t('nav.theme.light', 'Light') : t('nav.theme.dark', 'Dark')
+        }}</span>
+      </button>
+
+      <button
+        type="button"
+        class="nav__utility-btn"
+        (click)="toggleBasemap()"
+        [title]="basemapService.mapViewMode() === 'street' ? t('nav.map.satellite', 'Satellite view') : t('nav.map.street', 'Street view')"
+        [attr.aria-label]="basemapService.mapViewMode() === 'street' ? t('nav.map.satellite', 'Satellite view') : t('nav.map.street', 'Street view')"
+      >
+        <span class="material-icons nav__utility-icon" aria-hidden="true">{{
+          basemapService.mapViewMode() === 'street' ? 'satellite_alt' : 'map'
+        }}</span>
+        <span class="nav__label nav__utility-label text-sm">{{
+          basemapService.mapViewMode() === 'street' ? t('nav.map.satellite', 'Satellite') : t('nav.map.street', 'Street')
+        }}</span>
+      </button>
+    </div>
+
+    <!-- Account / Settings -->
     <div class="sidebar__item sidebar__item--account">
       <button
         type="button"

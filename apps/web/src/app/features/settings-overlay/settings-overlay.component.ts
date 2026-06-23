@@ -15,6 +15,7 @@ import {
 } from '@angular/core';
 import type { LanguageCode } from '../../core/i18n/translation-catalog';
 import { I18nService } from '../../core/i18n/i18n.service';
+import { ThemeService, type ThemeMode } from '../../core/theme/theme.service';
 import { Router } from '@angular/router';
 import type { SettingsPaneSectionId } from '../../core/settings-pane/settings-pane.service';
 import { SettingsPaneService } from '../../core/settings-pane/settings-pane.service';
@@ -58,7 +59,7 @@ import {
   buildMarkerMotionOptions,
 } from './settings-options.const';
 
-type ThemeMode = 'light' | 'dark' | 'system' | 'sandstone';
+// ThemeMode re-exported from ThemeService
 
 type DensityMode = 'compact' | 'comfortable';
 
@@ -120,6 +121,7 @@ export class SettingsOverlayComponent {
   private readonly i18nService = inject(I18nService);
   private readonly router = inject(Router);
   private readonly settingsPaneService = inject(SettingsPaneService);
+  private readonly themeService = inject(ThemeService);
   private readonly orgSearchTuning = inject(OrgSearchTuningService);
   private readonly hostRef = inject(ElementRef<HTMLElement>);
   private readonly injector = inject(Injector);
@@ -195,6 +197,9 @@ export class SettingsOverlayComponent {
     effect(() => {
       if (this.open()) {
         void this.orgSearchTuning.bootstrapFromSession();
+        // Sync theme from ThemeService in case it was changed via the sidebar toggle.
+        const currentMode = this.themeService.mode();
+        this.settingsModel.update(m => ({ ...m, themeMode: currentMode }));
       }
     });
 
@@ -205,9 +210,7 @@ export class SettingsOverlayComponent {
       }
     });
 
-    effect(() => {
-      this.applyThemeMode(this.settingsModel().themeMode);
-    });
+    // Theme is applied via ThemeService.set() called from setThemeMode().
 
     effect(() => {
       const subsectionRequest = this.settingsPaneService.subsectionRequest();
@@ -328,12 +331,7 @@ export class SettingsOverlayComponent {
 
   setThemeMode(themeMode: ThemeMode): void {
     this.settingsModel.update((model) => ({ ...model, themeMode }));
-
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    window.localStorage.setItem(THEME_MODE_STORAGE_KEY, themeMode);
+    this.themeService.set(themeMode);
   }
 
   setDensity(density: DensityMode): void {
@@ -420,20 +418,6 @@ export class SettingsOverlayComponent {
     }
 
     return 'system';
-  }
-
-  private applyThemeMode(themeMode: ThemeMode): void {
-    if (typeof document === 'undefined') {
-      return;
-    }
-
-    const root = document.documentElement;
-    if (themeMode === 'system') {
-      root.removeAttribute('data-theme');
-      return;
-    }
-
-    root.setAttribute('data-theme', themeMode);
   }
 
   /**
