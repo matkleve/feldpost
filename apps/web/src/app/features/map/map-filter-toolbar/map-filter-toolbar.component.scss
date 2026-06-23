@@ -26,14 +26,19 @@
   padding: 0;
 }
 
+// Frosted chrome outside @layer — unlayered rules beat Tailwind's unlayered/utility-layer bg-background
+// applied by hlmBtn. All other outline-control users (GPS, upload shell) are already unlayered.
+// @see docs/design/tokens.md § Frosted chrome
+button.map-filter-toolbar__menu-trigger {
+  @include frosted-chrome.outline-control;
+}
+
 @layer components {
   @include fp-toolbar-menu-trigger.toolbar-menu-trigger-components('map-filter-toolbar');
   @include fp-toolbar-breakpoints.toolbar-menu-trigger-parts('map-filter-toolbar');
 
-  // Frosted outline-control on map overlay — rest in components layer so @layer states hover wins.
-  // @see apps/web/src/app/features/map/map-shell/scss/_map-shell-upload.scss
   button.map-filter-toolbar__menu-trigger {
-    @include frosted-chrome.outline-control;
+    // background/backdrop-filter owned by unlayered block above — must beat hlmBtn bg-background.
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
     color: var(--muted-foreground);

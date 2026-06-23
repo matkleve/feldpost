@@ -46,7 +46,7 @@
   --card-foreground: oklch(0.8109 0 0);
   --popover: var(--background);
   --popover-foreground: oklch(0.8109 0 0);
-  --chrome-surface: color-mix(in srgb, var(--card) 55%, transparent);
+  --chrome-surface: color-mix(in srgb, var(--card) 85%, transparent);
   --primary: oklch(0.62 0.12 245);
   --primary-foreground: oklch(1.0000 0 0);
   --brand-gold: oklch(0.796 0.134 80);
@@ -148,7 +148,7 @@
   --card-foreground: oklch(0.2101 0.0318 264.6645);
   --popover: oklch(1.0000 0 0);
   --popover-foreground: oklch(0.2101 0.0318 264.6645);
-  --chrome-surface: color-mix(in srgb, var(--card) 55%, transparent);
+  --chrome-surface: color-mix(in srgb, var(--card) 85%, transparent);
   --primary: oklch(0.50 0.10 245);
   --primary-foreground: oklch(1.0000 0 0);
   --brand-gold: oklch(0.748 0.128 84.6);
@@ -267,7 +267,7 @@ html[data-theme="sandstone"] {
   --background: oklch(0.9800 0.0080 75.0000);
   --card: oklch(0.9700 0.0090 72.0000);
   --popover: oklch(0.9800 0.0080 75.0000);
-  --chrome-surface: color-mix(in srgb, var(--card) 55%, transparent);
+  --chrome-surface: color-mix(in srgb, var(--card) 85%, transparent);
   --border: oklch(0.8900 0.0150 70.0000);
   --input: oklch(0.8900 0.0150 70.0000);
   --muted: oklch(0.9500 0.0100 70.0000);
