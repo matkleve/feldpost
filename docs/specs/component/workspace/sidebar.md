@@ -42,11 +42,11 @@ Tokens: [`docs/design/tokens.md`](../../../design/tokens.md), [`docs/design/layo
 | --- | --- |
 | Collapsed / expanded width | `3rem` / `15rem` |
 | Panel `padding-inline` | `var(--spacing-2)` (8px) — **constant** |
-| Row `padding-block` | `var(--spacing-2)` (8px) — **constant** |
 | Row `padding-inline` | `0` — **constant** |
 | Row `column-gap` | `var(--spacing-3)` (12px) — **constant** |
 | Media column | `var(--spacing-6)` (32px) — **constant** |
-| Row min-height | `calc(var(--spacing-6) + 2 × var(--spacing-2))` = 48px — **constant** |
+| Icon / logo mark | `var(--spacing-4)` (16px) — centered in media (`spacing-2` inset) |
+| Row min-height | `var(--spacing-6)` (32px) = collapsed content width — **constant** |
 | Width transition | `180ms ease-out` |
 
 Full tables + mobile bar: [`sidebar.collapse.supplement.md`](sidebar.collapse.supplement.md).

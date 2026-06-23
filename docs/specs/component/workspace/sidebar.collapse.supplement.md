@@ -29,15 +29,16 @@ NavRow (expanded AND collapsed — same CSS)
 └── LabelColumn   ← minmax(0, 1fr) — clipped by sidebar overflow:hidden when collapsed
 ```
 
+Row height equals collapsed content width: `3rem` rail − `2 × spacing-2` panel padding = `spacing-6` (32px). Icons and logo use `spacing-4` (16px), centered in the media column (`spacing-2` inset on each side).
+
 | Property | Expanded | Collapsed | Changes on toggle? |
 | --- | --- | --- | --- |
 | Panel `padding-inline` | `var(--spacing-2)` (8px) | same | **No** |
 | Row `padding-inline` | `0` | same | **No** |
-| Row `padding-block` | `var(--spacing-2)` (8px) | same | **No** |
-| Row `display` | `grid` | same | **No** |
 | Row `column-gap` | `var(--spacing-3)` (12px) | same | **No** |
-| Row `min-height` | `48px` (32 + 2×8) | same | **No** |
-| Media column width | 32px | same | **No** |
+| Row `min-height` | `32px` (`spacing-6`) | same | **No** |
+| Media column width | 32px (`spacing-6`) | same | **No** |
+| Icon / logo size | 16px (`spacing-4`) | same | **No** |
 | Label visibility | opacity `1` | opacity `0`, `visibility: hidden` | **Yes** |
 | Sidebar width | `15rem` | `3rem` | **Yes** |
 
