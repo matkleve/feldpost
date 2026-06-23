@@ -48,6 +48,29 @@ export function shiftCalendarMonth(
   return { year: date.getFullYear(), month: date.getMonth() };
 }
 
+/**
+ * Field-anchored day click — replaces the active bound only; normalizes order when both exist.
+ * @see docs/specs/component/filters/calendar-dropdown.range-mode.supplement.md
+ */
+export function applyRangeAnchorDayClick(
+  anchor: 'from' | 'to',
+  currentFrom: string | null,
+  currentTo: string | null,
+  clickedIso: string,
+): { from: string | null; to: string | null } {
+  let from = currentFrom;
+  let to = currentTo;
+  if (anchor === 'from') {
+    from = clickedIso;
+  } else {
+    to = clickedIso;
+  }
+  if (from && to && from > to) {
+    return { from: to, to: from };
+  }
+  return { from, to };
+}
+
 /** Ensure range endpoints are ordered — earlier date is always `from`. */
 export function normalizeRangeValue<T extends { date: string | null; time: string | null }>(
   value: { from: T | null; to: T | null } | null,

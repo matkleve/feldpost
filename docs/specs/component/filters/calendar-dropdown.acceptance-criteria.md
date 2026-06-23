@@ -46,13 +46,16 @@ Parent: [`calendar-dropdown.md`](calendar-dropdown.md)
 
 ## Range mode
 
-- [ ] Timespace: one `app-calendar-dropdown` `mode='range'` with From/To labels — not two separate instances
-- [ ] Clicking either From or To field opens the **same** portaled panel
-- [ ] Empty range: first day click anchors start; second sets end with in-range highlight; **Done** commits (popover stays open until Done)
-- [ ] Existing range: open via From → next click replaces start; open via To → next click replaces end
-- [ ] Order normalization: if from > to after pick, draft swaps before display
-- [ ] `rangeChange` emits `{ from, to }` with ISO dates; times null unless Add time expanded
-- [ ] Histogram selection overlay stays in sync with committed range (drag + calendar paths)
+- [x] Timespace: one `app-calendar-dropdown` `mode='range'` with From/To labels — not two separate instances
+- [x] Calendar icon on From/To opens the **same** portaled panel (text focus does **not** open panel)
+- [x] **Field-anchored:** open via From → each day click replaces start only (empty or existing range)
+- [x] **Field-anchored:** open via To → each day click replaces end only
+- [x] Wrong first date: second click via From anchor replaces start — does **not** force end
+- [x] Popover open: other field calendar icon re-anchors without closing
+- [x] Order normalization: if from > to after edit, draft swaps before display
+- [x] **Done** commits when both bounds set; shell typing commits immediately when popover closed
+- [x] `rangeChange` emits `{ from, to }` with ISO dates
+- [x] Histogram selection overlay stays in sync with committed range (drag + calendar paths)
 
 ## Progressive time (timespace)
 

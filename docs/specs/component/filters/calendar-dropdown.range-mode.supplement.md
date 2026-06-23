@@ -8,24 +8,34 @@ Parent: [`calendar-dropdown.md`](calendar-dropdown.md) · Panel: [`calendar-pick
 
 ## What It Looks Like
 
-Horizontal **From** and **To** rows — same bordered shell as single mode (`2.25rem` min height, locale date text input, trailing `calendar_today` icon each). Either field or either icon opens the **same** frosted panel anchored to the field that opened it. Inside the panel: month grid with **in-range wash** between start and end; start/end days use **secondary** selected ink; hover on enabled days uses **primary** gold. Below the grid (not in the header): optional **Add time** link; when expanded, compact **HH:MM** spinners for From and To inline. Footer keeps **Clear** and **Done** (normative — user commits with Done even after the second day click completes the draft range).
+Horizontal **From** and **To** rows — bordered shell (`2.25rem` min height), locale date text input, leading `calendar_today` icon in toolbar layout (timespace). **Calendar icon** opens the frosted panel anchored to that field; **typing in the text field does not** open the panel. Inside the panel: dual consecutive month grids, in-range wash, secondary start/end ink, gold hover preview. Footer: **Clear** + **Done** (commit requires both bounds unless Clear).
 
-## Why one popover
+## Field-anchored selection (normative)
 
-| Two independent dropdowns | Single shared popover |
-| --- | --- |
-| Two interactions for one range | One conceptual control |
-| No cross-picker range highlight | Continuous in-range fill on one grid |
-| Unfamiliar for date ranges | Matches flight/hotel booking mental model |
+Follows Airbnb / Google Flights / `react-dates` **focused-input** model — not blind two-click `pick` when From/To fields exist.
+
+| User opens via | `anchorTarget` | Each enabled day click |
+| --- | --- | --- |
+| **From** icon | `from` | Replace **draft.from** only |
+| **To** icon | `to` | Replace **draft.to** only |
+
+**Corollaries:**
+
+- Wrong first date: open **From** again → next click replaces start (never forces end on second click).
+- Complete range in draft: open **To** → click replaces end; open **From** → click replaces start (keep opposite bound; normalize order if `from > to`).
+- Fresh range: **Clear** in panel, or timespace footer reset icon.
+- Popover already open: clicking the **other** field's calendar icon **re-anchors** (does not close).
+
+**Removed:** `open-pick` / two-click-in-one-popover when range empty. Timespace always has From/To fields — use field anchors + **Done**.
 
 ## API (range mode)
 
 | Input | Type | Default | Effect |
 | --- | --- | --- | --- |
 | `mode` | `'single' \| 'range'` | `'single'` | `range` renders From/To pair + shared popover |
+| `layout` | `'default' \| 'toolbar'` | `'default'` | `toolbar` = leading icon + full-width row (timespace) |
 | `rangeValue` | `CalendarRangeValue \| null` | `null` | Committed `{ from, to }` halves |
-| `fromLabel` / `toLabel` | `string` | `''` | Visible labels (timespace: localized From/To) |
-| `timeMode` | `TimeMode` | `'dateOnly'` | Timespace: **`optionalTime`** with progressive disclosure |
+| `fromLabel` / `toLabel` | `string` | `''` | Visible labels |
 | `minDate` / `maxDate` | `Date \| null` | `null` | Disables out-of-domain days |
 | `nullable` | `boolean` | `true` | Clear emits null range |
 
@@ -33,88 +43,69 @@ Horizontal **From** and **To** rows — same bordered shell as single mode (`2.2
 | --- | --- |
 | `rangeChange` | `CalendarRangeValue \| null` |
 
-```typescript
-/** Range wire value — each half matches single-mode CalendarDropdownValue. */
-interface CalendarRangeValue {
-  from: CalendarDropdownValue | null;
-  to: CalendarDropdownValue | null;
-}
-```
-
-**Invariant:** `mode='single'` MUST use `value` / `valueChange`. `mode='range'` MUST use `rangeValue` / `rangeChange`. Mixing APIs on one instance is forbidden.
+**Invariant:** `mode='single'` MUST use `value` / `valueChange`. `mode='range'` MUST use `rangeValue` / `rangeChange`.
 
 ## Range pick FSM
 
 | State | Meaning | Entered by |
 | --- | --- | --- |
 | `closed` | Popover hidden | default, Done, Clear, Escape, outside click |
-| `open-pick` | Two-click flow; no anchor role | Open when range empty or after Clear |
-| `open-anchor-from` | Next day click replaces **from** | User focused/opened via **From** field or icon |
-| `open-anchor-to` | Next day click replaces **to** | User focused/opened via **To** field or icon |
+| `open-anchor-from` | Next day click replaces **from** | Open / re-anchor via **From** calendar icon |
+| `open-anchor-to` | Next day click replaces **to** | Open / re-anchor via **To** calendar icon |
 
 ### Transitions (normative)
 
 | From | Event | To | Draft effect |
 | --- | --- | --- | --- |
-| `closed` | Open via From (range exists) | `open-anchor-from` | Draft = committed range |
-| `closed` | Open via To (range exists) | `open-anchor-to` | Draft = committed range |
-| `closed` | Open via either (no range) | `open-pick` | Draft empty |
-| `open-pick` | 1st enabled day click | `open-pick` | Set draft.from; highlight start |
-| `open-pick` | 2nd enabled day click | `open-pick` | Set draft.to; normalize order (swap if from > to); in-range fill |
-| `open-anchor-from` | enabled day click | `open-anchor-from` | Replace draft.from; normalize order |
-| `open-anchor-to` | enabled day click | `open-anchor-to` | Replace draft.to; normalize order |
-| `open-*` | **Done** (valid draft) | `closed` | `rangeChange` emit |
+| `closed` | Open via From icon | `open-anchor-from` | Draft = clone committed range |
+| `closed` | Open via To icon | `open-anchor-to` | Draft = clone committed range |
+| `open-anchor-from` | enabled day click | `open-anchor-from` | Replace `draft.from`; normalize order if end exists |
+| `open-anchor-to` | enabled day click | `open-anchor-to` | Replace `draft.to`; normalize order if start exists |
+| `open-anchor-*` | other field icon (popover open) | `open-anchor-{other}` | Re-anchor; draft unchanged |
+| `open-anchor-*` | same field icon (popover open) | `closed` | Revert draft; no emit |
+| `open-*` | **Done** (both bounds) | `closed` | `rangeChange` emit |
 | `open-*` | **Clear** | `closed` | `rangeChange(null)` |
 | `open-*` | Escape / outside | `closed` | Revert draft; no emit |
 
-**Done gate:** Enabled when `draft.from` and `draft.to` are both set (or `nullable` and user clears). If optional time is expanded, empty time halves are allowed on Done (same as single `optionalTime`).
+**Done gate:** Enabled when `draft.from` and `draft.to` are both set.
 
-**Keyboard:** Typing in From/To fields parses locale date and updates the corresponding draft half on blur; does not close popover. **Enter** in an open panel commits when Done would be enabled (same as single mode).
+**Shell typing:** Popover **closed** → parse + `rangeChange` immediately (timespace inline edit). Popover **open** → update `rangeDraft` half only; set `anchorTarget` to typed field; no close.
 
-## Progressive optional time (timespace)
+**Keyboard:** Enter in panel commits when Done enabled.
 
-| Step | UI |
-| --- | --- |
-| Popover opens, no start date | Grid only; no time controls |
-| Start anchored (two-click step 1 or existing range) | **Add time** text link below grid |
-| User clicks **Add time** | Inline From HH:MM + To HH:MM spinners below grid (not in header) |
-| User collapses / Clear | Hide spinners; reset time draft halves |
+## Shared popover
 
-Timespace parent MUST pass `timeMode='optionalTime'`. Default collapsed — construction searches remain day-granular unless the user opts in.
-
-## Shared popover (single + range)
-
-`CalendarDropdownComponent` MUST use `DropdownShellComponent` (`app-dropdown-shell`) — `portalHostToBody()`, flip placement, outside-click/Escape close, `z-index: 300`. Pass `[panelClass]="'calendar-dropdown-panel'"` (`overflow: visible` on host — same as `.toolbar-dropdown--timespace`).
+`DropdownShellComponent` — body portal, `z-index: 300`, `[panelClass]="'calendar-dropdown-panel'"`.
 
 ## Visual Behavior Contract
 
-| Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer | Test Oracle |
+| Behavior | Geometry Owner | Stacking Owner | Hit-Area Owner | Selector(s) | Layer | Test Oracle |
 | --- | --- | --- | --- | --- | --- | --- |
-| From/To field row | `.calendar-dropdown__control` | `app-calendar-dropdown` `:host` | same control | `.calendar-dropdown__input`, `.calendar-dropdown__trigger` | content 0 | Both fields `2.25rem`; gold `:focus-within` on active field |
-| Shared popover | `app-dropdown-shell` | shell host | panel interior | `.calendar-dropdown-panel` | dropdown 300 | Portal to body; not clipped in timespace toolbar |
-| Range start/end day | day button | `.calendar-picker-panel__grid` | day button | `.calendar-picker-panel__day--range-start`, `--range-end` | content 0 | Secondary selected ink at rest |
-| In-range days | day button | grid | day button | `.calendar-picker-panel__day--in-range` | content 0 | Subtle selected wash; not full gold fill |
-| Pending second click | day button | grid | day button | start cell `--range-start` only | content 0 | Start highlighted; no in-range until end set |
-| Add time link | footer-adjacent row | panel root | link button | `.calendar-picker-panel__add-time` | content 0 | Hidden until start exists |
-| Time spinners | spinner row | panel root | inputs | `.calendar-picker-panel__time-spinners` | content 0 | Below grid; hidden until expanded |
+| From/To field row | `.calendar-dropdown__control` | `app-calendar-dropdown` `:host` | control | `.calendar-dropdown__input`, `.calendar-dropdown__trigger` | 0 | Full width in timespace toolbar |
+| Shared popover | `app-dropdown-shell` | shell host | panel | `.calendar-dropdown-panel` | 300 | Body portal |
+| Range start/end | day button | grid | day button | `--range-start`, `--range-end` | 0 | Secondary ink |
+| In-range wash | day button | grid | day button | `--in-range` | 0 | Muted secondary |
+| Hover preview | day button | grid | day button | `--preview-in-range` | 0 | Gold 8% between fixed anchor + hover |
 
 ## Wiring (timespace)
 
 ```mermaid
 sequenceDiagram
   participant U as User
-  participant TS as TimespaceDropdown
   participant CR as CalendarDropdown range
   participant P as CalendarPickerPanel
-  participant WV as WorkspaceViewService
+  participant TS as TimespaceDropdown
 
-  U->>CR: click From field
-  CR->>P: open-anchor-from
-  U->>P: pick day
-  P->>CR: draft.from updated
+  U->>CR: From calendar icon
+  CR->>P: anchor-from
+  U->>P: click day (wrong)
+  U->>P: click another day
+  Note over P: replaces from only
+  U->>CR: To calendar icon
+  CR->>P: anchor-to
+  U->>P: click end day
   U->>CR: Done
   CR->>TS: rangeChange
-  TS->>WV: setTimeRange
 ```
 
 ## Acceptance criteria

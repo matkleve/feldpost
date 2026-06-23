@@ -100,7 +100,7 @@ flowchart LR
 | `popoverOpen` | `CalendarDropdownComponent` | FSM: closed ↔ open |
 | `committedValue` | parent `value` or `rangeValue` | Source of truth |
 | `draftValue` / `rangeDraft` | dropdown while open | Discarded on cancel |
-| `anchorTarget` | range open FSM | `'pick' \| 'from' \| 'to'` — see range supplement |
+| `anchorTarget` | range open FSM | `'from' \| 'to'` — field that opened popover; see range supplement |
 | `timeExpanded` | range + optionalTime | Add time link toggles spinner row |
 
 Popover MUST NOT render inside `app-dropdown-shell` content box — use body portal (same invariant as filter picker flyout).

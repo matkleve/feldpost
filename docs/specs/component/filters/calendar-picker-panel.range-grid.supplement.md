@@ -21,11 +21,19 @@ Extends `CalendarDay` in `calendar-dropdown.types.ts`:
 
 | `anchorTarget` | Click enabled day |
 | --- | --- |
-| `'pick'` (two-click) | 1st: set start only; 2nd: set end + normalize order |
-| `'from'` | Replace start; normalize order if end exists |
-| `'to'` | Replace end; normalize order if start exists |
+| `'from'` | Replace **start** only; normalize order if end exists |
+| `'to'` | Replace **end** only; normalize order if start exists |
 
-Normalize order: if `from > to`, swap date halves (timespace parent already swaps on commit — panel MUST emit ordered draft).
+**No `pick` anchor** when parent exposes From/To fields (timespace). Normalize order: if `from > to`, swap date halves.
+
+### Hover preview (range)
+
+| `anchorTarget` | Fixed preview anchor (opposite bound) |
+| --- | --- |
+| `'from'` | `draft.to` if set |
+| `'to'` | `draft.from` if set |
+
+Preview wash only between fixed anchor and hovered date when both exist and differ.
 
 ### Interaction emphasis (range)
 
@@ -62,7 +70,7 @@ app-calendar-picker-panel
 | Input | Type | Notes |
 | --- | --- | --- |
 | `pickMode` | `'single' \| 'range'` | from parent `mode` |
-| `anchorTarget` | `'pick' \| 'from' \| 'to'` | which field opened popover |
+| `anchorTarget` | `'from' \| 'to'` | which field opened / re-anchored popover |
 | `rangeDraft` | `CalendarRangeValue \| null` | two-way via `rangeDraftChange` |
 
 | Output | Payload |
@@ -71,8 +79,10 @@ app-calendar-picker-panel
 
 ## Acceptance criteria
 
-- [ ] Range mode: in-range days render wash between start and end
-- [ ] Two-click flow: first click only highlights start; second completes range in draft
-- [ ] `anchorTarget='from'|'to'`: single click replaces that bound
+- [x] Range mode: in-range days render wash between start and end
+- [x] `anchorTarget='from'`: each calendar click replaces start (even when range was empty)
+- [x] `anchorTarget='to'`: each calendar click replaces end
+- [x] Wrong start: re-open From → second click replaces start, does not set end
+- [x] Popover open + other field icon → re-anchor without close
 - [ ] `optionalTime` + range: Add time link after start exists; spinners below grid
 - [ ] Done disabled until both `from.date` and `to.date` set (unless nullable clear path)

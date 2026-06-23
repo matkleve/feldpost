@@ -1,4 +1,5 @@
 import {
+  applyRangeAnchorDayClick,
   buildCalendarDays,
   buildRangeCalendarDays,
   isCalendarDayDisabled,
@@ -63,5 +64,31 @@ describe('calendar-picker.helpers', () => {
     });
     expect(normalized?.from?.date).toBe('2026-04-09');
     expect(normalized?.to?.date).toBe('2026-05-22');
+  });
+
+  it('applyRangeAnchorDayClick replaces from only on anchor-from', () => {
+    expect(applyRangeAnchorDayClick('from', null, null, '2026-05-10')).toEqual({
+      from: '2026-05-10',
+      to: null,
+    });
+    expect(applyRangeAnchorDayClick('from', '2026-05-01', null, '2026-05-20')).toEqual({
+      from: '2026-05-20',
+      to: null,
+    });
+    expect(applyRangeAnchorDayClick('from', '2026-05-01', '2026-05-28', '2026-05-20')).toEqual({
+      from: '2026-05-20',
+      to: '2026-05-28',
+    });
+  });
+
+  it('applyRangeAnchorDayClick replaces to only on anchor-to', () => {
+    expect(applyRangeAnchorDayClick('to', '2026-05-01', null, '2026-05-28')).toEqual({
+      from: '2026-05-01',
+      to: '2026-05-28',
+    });
+    expect(applyRangeAnchorDayClick('to', '2026-05-28', '2026-05-01', '2026-05-15')).toEqual({
+      from: '2026-05-15',
+      to: '2026-05-28',
+    });
   });
 });

@@ -11,6 +11,7 @@ import {
 import { I18nService } from '../../core/i18n/i18n.service';
 import { HLM_BUTTON_IMPORTS } from '../ui/button';
 import {
+  applyRangeAnchorDayClick,
   buildCalendarDays,
   buildRangeCalendarDays,
   isCalendarDayDisabled,
@@ -38,7 +39,7 @@ export class CalendarPickerPanelComponent implements OnInit {
 
   // ── Shared inputs ────────────────────────────────────────────────────────
   readonly pickMode = input<'single' | 'range'>('single');
-  readonly anchorTarget = input<RangeAnchorTarget>('pick');
+  readonly anchorTarget = input<RangeAnchorTarget>('from');
   readonly timeMode = input<TimeMode>('dateOnly');
   readonly minDate = input<Date | null>(null);
   readonly maxDate = input<Date | null>(null);
@@ -93,17 +94,11 @@ export class CalendarPickerPanelComponent implements OnInit {
 
   readonly selectedDate = computed(() => this.draft()?.date ?? '');
 
-  /**
-   * Fixed anchor date for hover-preview: the bound that is NOT being replaced.
-   * - anchor-from: user replacing "from" → opposite anchor is "to"
-   * - anchor-to:   user replacing "to"   → opposite anchor is "from"
-   * - pick:        first click fixed "from"; second click will set "to"
-   */
+  /** Opposite bound for hover-preview wash while replacing the active field anchor. */
   private readonly previewAnchorDate = computed(() => {
     const anchor = this.anchorTarget();
     const range = this.rangeDraft();
     if (anchor === 'from') return range?.to?.date ?? '';
-    if (anchor === 'to') return range?.from?.date ?? '';
     return range?.from?.date ?? '';
   });
 
@@ -253,31 +248,16 @@ export class CalendarPickerPanelComponent implements OnInit {
   private selectDayRange(day: CalendarDay): void {
     const anchor = this.anchorTarget();
     const current = this.rangeDraft();
-    let from = current?.from?.date ?? null;
-    let to = current?.to?.date ?? null;
-
-    if (anchor === 'from') {
-      from = day.date;
-    } else if (anchor === 'to') {
-      to = day.date;
-    } else if (!from) {
-      from = day.date;
-      to = null;
-    } else if (!to) {
-      to = day.date;
-    } else {
-      // Third+ click in pick mode restarts: new start, pending end.
-      from = day.date;
-      to = null;
-    }
-
-    if (from && to && from > to) {
-      [from, to] = [to, from];
-    }
+    const next = applyRangeAnchorDayClick(
+      anchor,
+      current?.from?.date ?? null,
+      current?.to?.date ?? null,
+      day.date,
+    );
 
     const newDraft: CalendarRangeValue = {
-      from: from ? { date: from, time: current?.from?.time ?? null } : null,
-      to: to ? { date: to, time: current?.to?.time ?? null } : null,
+      from: next.from ? { date: next.from, time: current?.from?.time ?? null } : null,
+      to: next.to ? { date: next.to, time: current?.to?.time ?? null } : null,
     };
     this.rangeDraftChange.emit(newDraft);
 
@@ -313,9 +293,7 @@ export class CalendarPickerPanelComponent implements OnInit {
   ): string {
     const from = range?.from?.date ?? '';
     const to = range?.to?.date ?? '';
-    if (anchor === 'to') return to || from;
-    if (anchor === 'from') return from || to;
-    return from || to;
+    return anchor === 'to' ? to || from : from || to;
   }
 
   private formatMonthLabel(year: number, month: number): string {

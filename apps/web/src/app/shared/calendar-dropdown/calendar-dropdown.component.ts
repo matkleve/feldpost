@@ -62,7 +62,7 @@ export class CalendarDropdownComponent {
 
   // ── Range mode draft + FSM ────────────────────────────────────────────────
   readonly rangeDraft = signal<CalendarRangeValue | null>(null);
-  readonly anchorTarget = signal<RangeAnchorTarget>('pick');
+  readonly anchorTarget = signal<RangeAnchorTarget>('from');
 
   // ── Anchor elements ───────────────────────────────────────────────────────
   private readonly controlRef = viewChild<ElementRef<HTMLElement>>('control');
@@ -180,11 +180,15 @@ export class CalendarDropdownComponent {
     event.stopPropagation();
 
     if (this.popoverOpen()) {
+      if (this.anchorTarget() !== field) {
+        this.anchorTarget.set(field);
+        return;
+      }
       this.closePopover(false);
       return;
     }
 
-    this.anchorTarget.set(this.resolveRangeAnchor(field));
+    this.anchorTarget.set(field);
     this.rangeDraft.set(this.cloneRangeValue(this.rangeValue()));
     this.popoverOpen.set(true);
   }
@@ -219,13 +223,6 @@ export class CalendarDropdownComponent {
     this.popoverOpen.set(false);
     this.draft.set(null);
     this.rangeDraft.set(null);
-  }
-
-  private resolveRangeAnchor(field: 'from' | 'to'): RangeAnchorTarget {
-    const rv = this.rangeValue();
-    // No range yet → two-click 'pick' flow
-    if (!rv?.from?.date && !rv?.to?.date) return 'pick';
-    return field;
   }
 
   private cloneValue(value: CalendarDropdownValue | null): CalendarDropdownValue | null {

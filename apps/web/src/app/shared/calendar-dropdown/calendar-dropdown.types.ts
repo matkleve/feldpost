@@ -16,7 +16,7 @@ export interface CalendarRangeValue {
 }
 
 /** Range popover open FSM — which field anchored the open. */
-export type RangeAnchorTarget = 'pick' | 'from' | 'to';
+export type RangeAnchorTarget = 'from' | 'to';
 
 export interface CalendarDay {
   date: string;
