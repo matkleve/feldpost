@@ -69,6 +69,7 @@
   }
 
   .nav__header-title,
+  .nav__logo-mark,
   .nav__label {
     @media (min-width: 768px) {
       display: none;
@@ -128,9 +129,25 @@
   }
 }
 
+.nav__logo-mark {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+.nav__logo-bg {
+  fill: var(--primary);
+}
+
+.nav__logo-fg {
+  fill: var(--primary-foreground);
+}
+
 .nav__header-title {
+  font-family: var(--font-serif), ui-serif, Georgia, serif;
+  font-size: var(--font-size-md);
   color: var(--foreground);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
