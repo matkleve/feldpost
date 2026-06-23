@@ -81,6 +81,30 @@
       margin-inline-start: 0;
     }
   }
+
+  // Remove panel padding so the full 3rem width is available for centered icons
+  .sidebar__panel {
+    @media (min-width: 768px) {
+      padding-inline: 0;
+    }
+  }
+
+  // Center icons in the full collapsed width; no grid needed
+  .nav__link,
+  .nav__utility-btn {
+    @media (min-width: 768px) {
+      display: flex;
+      justify-content: center;
+      padding-inline: 0;
+    }
+  }
+
+  // Theme dots hidden in collapsed state
+  .nav__theme-dots {
+    @media (min-width: 768px) {
+      display: none;
+    }
+  }
 }
 
 // ── Panel ─────────────────────────────────────────────────────────────────────
