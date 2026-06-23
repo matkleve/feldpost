@@ -15,7 +15,7 @@
         [title]="sidebarCollapsed() ? t('nav.expand', 'Expand sidebar') : t('nav.collapse', 'Collapse sidebar')"
         [attr.aria-label]="sidebarCollapsed() ? t('nav.expand', 'Expand sidebar') : t('nav.collapse', 'Collapse sidebar')"
       >
-        <span class="material-icons">{{ sidebarCollapsed() ? 'chevron_right' : 'chevron_left' }}</span>
+        <span class="material-icons">view_sidebar</span>
       </button>
     </div>
 
@@ -57,37 +57,23 @@
 
     <div class="sidebar__spacer" aria-hidden="true"></div>
 
-    <!-- Utility row: theme + map style -->
+    <!-- Utility row: theme cycle -->
     <div class="nav__utility-row">
       <button
         type="button"
         class="nav__utility-btn"
         (click)="toggleTheme()"
-        [title]="themeService.isDark() ? t('nav.theme.light', 'Switch to light mode') : t('nav.theme.dark', 'Switch to dark mode')"
-        [attr.aria-label]="themeService.isDark() ? t('nav.theme.light', 'Switch to light mode') : t('nav.theme.dark', 'Switch to dark mode')"
+        [title]="themeLabel()"
+        [attr.aria-label]="themeLabel()"
       >
-        <span class="material-icons nav__utility-icon" aria-hidden="true">{{
-          themeService.isDark() ? 'light_mode' : 'dark_mode'
-        }}</span>
-        <span class="nav__label nav__utility-label text-sm">{{
-          themeService.isDark() ? t('nav.theme.light', 'Light') : t('nav.theme.dark', 'Dark')
-        }}</span>
+        <span class="material-icons nav__utility-icon" aria-hidden="true">{{ themeIcon() }}</span>
+        <span class="nav__label nav__utility-label text-sm">{{ themeLabel() }}</span>
       </button>
-
-      <button
-        type="button"
-        class="nav__utility-btn"
-        (click)="toggleBasemap()"
-        [title]="basemapService.mapViewMode() === 'street' ? t('nav.map.satellite', 'Satellite view') : t('nav.map.street', 'Street view')"
-        [attr.aria-label]="basemapService.mapViewMode() === 'street' ? t('nav.map.satellite', 'Satellite view') : t('nav.map.street', 'Street view')"
-      >
-        <span class="material-icons nav__utility-icon" aria-hidden="true">{{
-          basemapService.mapViewMode() === 'street' ? 'satellite_alt' : 'map'
-        }}</span>
-        <span class="nav__label nav__utility-label text-sm">{{
-          basemapService.mapViewMode() === 'street' ? t('nav.map.satellite', 'Satellite') : t('nav.map.street', 'Street')
-        }}</span>
-      </button>
+      <div class="nav__theme-dots" aria-hidden="true">
+        <span class="nav__theme-dot" [class.nav__theme-dot--active]="themeService.mode() === 'light'"></span>
+        <span class="nav__theme-dot" [class.nav__theme-dot--active]="themeService.mode() === 'dark'"></span>
+        <span class="nav__theme-dot" [class.nav__theme-dot--active]="themeService.mode() === 'sandstone'"></span>
+      </div>
     </div>
 
     <!-- Account / Settings -->

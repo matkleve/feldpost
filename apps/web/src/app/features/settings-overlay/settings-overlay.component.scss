@@ -36,9 +36,9 @@
   .settings-overlay {
     position: fixed;
     top: 50%;
-    // Fixed pane offset: spacing + collapsed nav rail (0.25rem * 12 matches app-nav --sidebar-width-collapsed; siblings — no --shell-* bridge)
-    // @see docs/design/shell-layout-tokens.md; docs/specs/ui/settings-overlay/settings-overlay.md
-    left: calc(var(--spacing-3) + (0.25rem * 12) + var(--spacing-3));
+    // Sidebar-relative offset: tracks sidebar width set on :root by NavComponent effect (collapsed: 3rem, expanded: 15rem).
+    left: calc(var(--feldpost-sidebar-width, 15rem) + var(--spacing-3));
+    transition: left 180ms ease-out;
     transform: translateY(-50%);
     z-index: 500;
     display: flex;

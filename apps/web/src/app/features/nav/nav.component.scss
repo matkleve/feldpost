@@ -388,6 +388,34 @@
   flex: 1 1 auto;
 }
 
+// ── Theme indicator dots ──────────────────────────────────────────────────────
+
+.nav__theme-dots {
+  display: none;
+
+  @media (min-width: 768px) {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-1);
+    padding-block: var(--spacing-1);
+    padding-inline: var(--sidebar-row-padding-inline);
+  }
+}
+
+.nav__theme-dot {
+  width: 0.3rem;
+  height: 0.3rem;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--muted-foreground) 35%, transparent);
+  transition: background 120ms ease-out;
+}
+
+.nav__theme-dot--active {
+  background: var(--primary);
+}
+
 // ── Account ───────────────────────────────────────────────────────────────────
 
 .nav__account-link {

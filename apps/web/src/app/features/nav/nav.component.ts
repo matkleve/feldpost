@@ -1,4 +1,4 @@
-import { Component, HostListener, HostBinding, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter, map, startWith } from 'rxjs/operators';
@@ -13,8 +13,6 @@ import {
   stripSettingsSuffix,
 } from '../../core/settings-pane/settings-url.helpers';
 import { resolveAuthenticatedActiveShell } from '../../layout/authenticated-shell-active.helpers';
-import { MapShellBasemapService } from '../map/map-shell/leaflet/map-shell-basemap.service';
-import { MapShellInstanceService } from '../map/map-shell/component/map-shell-instance.service';
 
 export interface NavItem {
   icon: string;
@@ -41,8 +39,6 @@ export class NavComponent {
   private readonly i18nService = inject(I18nService);
   private readonly settingsPaneService = inject(SettingsPaneService);
   readonly themeService = inject(ThemeService);
-  readonly basemapService = inject(MapShellBasemapService);
-  private readonly mapShellInstance = inject(MapShellInstanceService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
   private readonly currentUrl = toSignal(
@@ -62,6 +58,15 @@ export class NavComponent {
       : false,
   );
 
+  private readonly _sidebarWidthEffect = effect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.style.setProperty(
+        '--feldpost-sidebar-width',
+        this.sidebarCollapsed() ? '3rem' : '15rem',
+      );
+    }
+  });
+
   toggleCollapse(): void {
     const next = !this.sidebarCollapsed();
     this.sidebarCollapsed.set(next);
@@ -71,12 +76,22 @@ export class NavComponent {
   }
 
   toggleTheme(): void {
-    this.themeService.toggle();
+    this.themeService.cycle();
   }
 
-  toggleBasemap(): void {
-    this.basemapService.toggle(this.mapShellInstance.map);
-  }
+  readonly themeIcon = computed(() => {
+    const mode = this.themeService.mode();
+    if (mode === 'dark') return 'dark_mode';
+    if (mode === 'sandstone') return 'palette';
+    return 'light_mode';
+  });
+
+  readonly themeLabel = computed(() => {
+    const mode = this.themeService.mode();
+    if (mode === 'dark') return this.t('nav.theme.dark', 'Dark');
+    if (mode === 'sandstone') return this.t('nav.theme.sandstone', 'Sandstone');
+    return this.t('nav.theme.light', 'Light');
+  });
 
   readonly navItems = computed<NavItem[]>(() => [
     { icon: 'map', label: this.t('nav.item.map', 'Map'), route: '/' },

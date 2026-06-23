@@ -26,6 +26,13 @@ export class ThemeService {
     this.set(this.isDark() ? 'light' : 'dark');
   }
 
+  cycle(): void {
+    const order: ThemeMode[] = ['light', 'dark', 'sandstone'];
+    const current = this._mode();
+    const idx = order.indexOf(current);
+    this.set(order[(idx >= 0 ? idx + 1 : 0) % order.length]);
+  }
+
   set(mode: ThemeMode): void {
     this._mode.set(mode);
     if (typeof window !== 'undefined') {
