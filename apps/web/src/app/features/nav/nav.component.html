@@ -72,14 +72,16 @@
         [title]="themeLabel()"
         [attr.aria-label]="themeLabel()"
       >
-        <span class="material-icons nav__utility-icon" aria-hidden="true">{{ themeIcon() }}</span>
+        <span class="nav__utility-media">
+          <span class="material-icons nav__utility-icon" aria-hidden="true">{{ themeIcon() }}</span>
+          <span class="nav__theme-dots" aria-hidden="true">
+            <span class="nav__theme-dot" [class.nav__theme-dot--active]="themeService.mode() === 'light'"></span>
+            <span class="nav__theme-dot" [class.nav__theme-dot--active]="themeService.mode() === 'dark'"></span>
+            <span class="nav__theme-dot" [class.nav__theme-dot--active]="themeService.mode() === 'sandstone'"></span>
+          </span>
+        </span>
         <span class="nav__label nav__utility-label text-sm">{{ themeLabel() }}</span>
       </button>
-      <div class="nav__theme-dots" aria-hidden="true">
-        <span class="nav__theme-dot" [class.nav__theme-dot--active]="themeService.mode() === 'light'"></span>
-        <span class="nav__theme-dot" [class.nav__theme-dot--active]="themeService.mode() === 'dark'"></span>
-        <span class="nav__theme-dot" [class.nav__theme-dot--active]="themeService.mode() === 'sandstone'"></span>
-      </div>
     </div>
 
     <!-- Account / Settings -->
