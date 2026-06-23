@@ -12,31 +12,18 @@
 
 <!-- Map zone — fills remaining space -->
 <div class="map-zone">
-  <div class="map-style-switch" hlmPillToggle size="md">
-    <div
-      hlmToggleGroup
-      brnToggleGroup
-      type="single"
-      [nullable]="false"
-      [value]="basemapService.mapViewMode()"
-      (valueChange)="mapPlacementService.onMapViewModeChange($event)"
-      aria-label="Map style"
+  <div class="map-style-switch">
+    <button
+      type="button"
+      class="map-style-switch__btn"
+      [attr.aria-label]="basemapService.mapViewMode() === 'street' ? 'Switch to satellite view' : 'Switch to street view'"
+      [title]="basemapService.mapViewMode() === 'street' ? 'Satellite view' : 'Street view'"
+      (click)="toggleBasemap()"
     >
-      @for (option of basemapService.mapViewOptions(); track option.id) {
-        <button
-          hlmToggleGroupItem
-          size="icon"
-          class="map-style-switch__option shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-          type="button"
-          brnToggleGroupItem
-          [value]="option.id"
-          [attr.aria-label]="option.ariaLabel || option.label"
-          [attr.title]="option.title || option.label"
-        >
-          <span class="material-icons" aria-hidden="true">{{ option.icon }}</span>
-        </button>
-      }
-    </div>
+      <span class="material-icons" aria-hidden="true">{{
+        basemapService.mapViewMode() === 'street' ? 'satellite_alt' : 'map'
+      }}</span>
+    </button>
   </div>
 
   <!-- Leaflet target -->
