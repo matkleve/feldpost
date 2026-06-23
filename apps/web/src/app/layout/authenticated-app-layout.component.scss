@@ -1,13 +1,22 @@
 // Hosts authenticated route outlet + workspace pane split (canonical layout owner).
 // @see docs/specs/ui/workspace/workspace-pane.md § Layout host
 
-// app-nav::host is display:block so it claims a flex slot even though its .sidebar is position:fixed.
-// Collapse the slot to zero; the visual nav renders fixed and needs no layout space here.
+// app-nav::host is display:block so it claims a flex slot.
+// On desktop the fixed sidebar occupies the left edge; a matching spacer here pushes main content right.
+// On mobile the sidebar is a fixed bottom bar, so no space is claimed.
 app-nav {
   flex: none;
-  width: 0;
-  height: 0;
   overflow: visible;
+
+  @media (min-width: 768px) {
+    width: 15rem;
+    height: 100%;
+  }
+
+  @media (max-width: 767px) {
+    width: 0;
+    height: 0;
+  }
 }
 
 // Flex row split owner: main content vs workspace pane. Fixed app-nav sits outside flow.

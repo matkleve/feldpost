@@ -26,18 +26,9 @@
   pointer-events: none;
 }
 
-// Settings open + rail hover: expanded width overlaps the overlay — lift above modal plane (500).
-// @see docs/specs/ui/settings-overlay/settings-overlay.md
-@media (min-width: 768px) {
-  :host:has(.sidebar.sidebar--settings-open:hover) {
-    z-index: 501;
-  }
-}
-
 // ── LeftSidebar — trigger zone ───────────────────────────────────────────────
 
 .sidebar {
-  --sidebar-width-collapsed: calc(0.25rem * 12);
   --sidebar-width-expanded: 15rem;
   --sidebar-row-padding-inline: var(--spacing-1);
   --sidebar-row-padding-block: var(--spacing-1);
@@ -50,31 +41,14 @@
   pointer-events: auto;
 
   @media (min-width: 768px) {
-    top: 50%;
-    left: var(--spacing-3);
-    transform: translateY(-50%);
-    width: var(--sidebar-width-collapsed);
-    min-width: var(--sidebar-width-collapsed);
-    max-width: var(--sidebar-width-collapsed);
-    height: auto; // fit content
-    max-height: 80vh;
-    overflow: visible;
-    border-radius: var(--container-radius-panel);
+    top: 0;
+    left: 0;
+    width: var(--sidebar-width-expanded);
+    height: 100vh;
+    overflow: hidden;
+    border-radius: 0;
     display: flex;
     align-items: stretch;
-    transition: width 180ms ease-out;
-
-    &:hover {
-      width: var(--sidebar-width-expanded);
-      min-width: var(--sidebar-width-expanded);
-      max-width: var(--sidebar-width-expanded);
-
-      .nav__label {
-        opacity: 1;
-        visibility: visible;
-        transition-delay: 0s;
-      }
-    }
   }
 
   @media (max-width: 767px) {
@@ -106,9 +80,10 @@
     height: 100%;
     width: 100%;
     min-height: 0;
-    padding-block: var(--spacing-1);
-    padding-inline: var(--spacing-1);
-    border-radius: var(--container-radius-panel);
+    padding-block: var(--spacing-3);
+    padding-inline: var(--spacing-2);
+    border-radius: 0;
+    border-right: 1px solid var(--border);
     overflow: hidden;
 
     @include frosted-chrome.panel;
@@ -276,13 +251,8 @@
   letter-spacing: 0.01em;
   line-height: var(--line-height-solid);
   color: inherit;
-  opacity: 0;
-  visibility: hidden;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition:
-    opacity 120ms ease-out,
-    visibility 0s linear 120ms;
 
   @media (max-width: 767px) {
     display: none; // icons only on mobile bottom bar
