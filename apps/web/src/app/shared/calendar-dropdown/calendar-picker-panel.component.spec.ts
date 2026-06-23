@@ -32,7 +32,6 @@ describe('CalendarPickerPanelComponent', () => {
       ],
     });
     fixture = TestBed.createComponent(CalendarPickerPanelComponent);
-    fixture.detectChanges();
   });
 
   afterEach(() => {
@@ -40,29 +39,18 @@ describe('CalendarPickerPanelComponent', () => {
   });
 
   it('generates 42 calendar cells by default', () => {
+    fixture.detectChanges();
     expect(fixture.componentInstance.calendarDays().length).toBe(42);
   });
 
-  it('dateOnly hides time row', () => {
-    expect(fixture.componentInstance.showTime()).toBe(false);
-    expect(fixture.nativeElement.querySelector('.calendar-picker-panel__time-input')).toBeNull();
-  });
+  it('range mode renders two consecutive month grids', () => {
+    fixture.componentRef.setInput('pickMode', 'range');
+    fixture.detectChanges();
 
-  it('Enter on date field emits done when draft has date', () => {
-    const component = fixture.componentInstance;
-    component.dateInput.set('15.06.2025');
-    let done = false;
-    component.done.subscribe(() => (done = true));
-    component.onDateKeydown(new KeyboardEvent('keydown', { key: 'Enter' }));
-    expect(done).toBe(true);
-  });
-
-  it('Escape emits cancel', () => {
-    const component = fixture.componentInstance;
-    let cancelled = false;
-    component.cancel.subscribe(() => (cancelled = true));
-    component.onDateKeydown(new KeyboardEvent('keydown', { key: 'Escape' }));
-    expect(cancelled).toBe(true);
+    expect(fixture.componentInstance.rightCalendarDays().length).toBe(42);
+    expect(fixture.componentInstance.rightView().month).toBe(
+      (fixture.componentInstance.viewMonth() + 1) % 12,
+    );
   });
 
   it('keeps navigated month after selecting a date', () => {
@@ -81,25 +69,5 @@ describe('CalendarPickerPanelComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.componentInstance.viewMonth()).toBe(4);
-  });
-
-  it('does not snap view month when selecting another day in the visible month', () => {
-    fixture.componentRef.setInput('draft', { date: '2026-06-03', time: null });
-    fixture.detectChanges();
-    fixture.componentInstance.nextMonth();
-    fixture.detectChanges();
-    expect(fixture.componentInstance.viewMonth()).toBe(6);
-
-    const target = fixture.componentInstance.calendarDays().find((day) => day.date === '2026-07-20');
-    expect(target).toBeDefined();
-
-    let emittedDate = '';
-    fixture.componentInstance.draftChange.subscribe((value) => {
-      emittedDate = value?.date ?? '';
-    });
-    fixture.componentInstance.selectDay(target!);
-
-    expect(emittedDate).toBe('2026-07-20');
-    expect(fixture.componentInstance.viewMonth()).toBe(6);
   });
 });

@@ -48,12 +48,13 @@
     min-height: 0;
   }
 
-  // Timespace: horizontal histogram strip — wider than standard menus.
+  // Timespace: compact histogram strip — narrower than filter, dates fill panel width.
   // @see docs/specs/component/map/map-filter-toolbar.md
   :host.toolbar-dropdown.toolbar-dropdown--timespace {
-    width: max-content;
-    max-width: min(36rem, calc(100vw - 2rem));
-    min-width: min(28rem, calc(100vw - 2rem));
+    box-sizing: border-box;
+    width: min(22rem, calc(100vw - 2rem));
+    max-width: min(22rem, calc(100vw - 2rem));
+    min-width: min(22rem, calc(100vw - 2rem));
     min-height: 0;
     max-height: none;
     overflow: visible;

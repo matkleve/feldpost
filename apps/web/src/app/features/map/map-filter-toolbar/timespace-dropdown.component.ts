@@ -105,6 +105,16 @@ export class TimespaceDropdownComponent implements OnInit {
     };
   });
 
+  readonly rangeSummaryLabel = computed(() => {
+    const range = this.effectiveRange();
+    if (!isTimeRangeActive(range) || !range?.from || !range?.to) {
+      return '';
+    }
+    const from = this.formatSummaryDate(range.from);
+    const to = this.formatSummaryDate(range.to);
+    return `${from} – ${to}`;
+  });
+
   readonly matchedItemCount = computed(() => {
     const entries = this.scopedEntries();
     const range = this.effectiveRange();
@@ -242,5 +252,14 @@ export class TimespaceDropdownComponent implements OnInit {
       return;
     }
     this.viewService.setTimeRange(range);
+  }
+
+  private formatSummaryDate(date: Date): string {
+    return new Intl.DateTimeFormat(this.i18nService.locale(), {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(date);
   }
 }

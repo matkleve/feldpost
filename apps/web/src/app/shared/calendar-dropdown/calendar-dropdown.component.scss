@@ -65,18 +65,39 @@
     }
   }
 
-  // Range mode: two control fields side by side.
+  // Range mode: two control fields side by side, full panel width.
   // @see docs/specs/component/filters/calendar-dropdown.range-mode.supplement.md
   .calendar-dropdown--range {
-    display: flex;
-    flex-direction: row;
-    gap: var(--spacing-2);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--spacing-1);
     width: 100%;
+    min-width: 0;
+  }
+
+  .calendar-dropdown--toolbar {
+    gap: var(--spacing-1);
   }
 
   .calendar-dropdown__range-field {
-    flex: 1 1 0;
     min-width: 0;
+    width: 100%;
+  }
+
+  // Timespace toolbar: calendar icon leads, input fills remaining width.
+  .calendar-dropdown__control--icon-leading {
+    gap: var(--spacing-1);
+    padding-inline: var(--spacing-1) var(--spacing-2);
+
+    .calendar-dropdown__trigger {
+      flex-shrink: 0;
+    }
+
+    .calendar-dropdown__input {
+      flex: 1 1 auto;
+      min-width: 0;
+      width: 100%;
+    }
   }
 
   .calendar-dropdown__trigger {

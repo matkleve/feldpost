@@ -38,6 +38,16 @@ export function todayIsoUtc(): string {
   );
 }
 
+/** Calendar month index 0–11 with year rollover. */
+export function shiftCalendarMonth(
+  year: number,
+  month: number,
+  delta: number,
+): { year: number; month: number } {
+  const date = new Date(year, month + delta, 1);
+  return { year: date.getFullYear(), month: date.getMonth() };
+}
+
 /** Shared month grid generator — returns raw cell data for a 6×7 grid. */
 function generateMonthGrid(
   year: number,

@@ -1,65 +1,142 @@
-<div class="calendar-picker-panel">
-  <div class="calendar-picker-panel__month-nav">
-    <span class="calendar-picker-panel__month-label">{{ monthLabel() }}</span>
-    <button
-      hlmBtn
-      variant="ghost"
-      size="sm"
-      type="button"
-      class="calendar-picker-panel__now-btn"
-      (click)="setToday()"
-    >
-      {{ t('workspace.capturedDate.action.today', 'Today') }}
-    </button>
-    <button
-      hlmBtn
-      variant="ghost"
-      size="icon-xs"
-      type="button"
-      [attr.aria-label]="t('workspace.capturedDate.aria.previousMonth', 'Previous month')"
-      (click)="prevMonth()"
-    >
-      <span class="material-icons" aria-hidden="true">chevron_left</span>
-    </button>
-    <button
-      hlmBtn
-      variant="ghost"
-      size="icon-xs"
-      type="button"
-      [attr.aria-label]="t('workspace.capturedDate.aria.nextMonth', 'Next month')"
-      (click)="nextMonth()"
-    >
-      <span class="material-icons" aria-hidden="true">chevron_right</span>
-    </button>
-  </div>
-
-  <div class="calendar-picker-panel__grid">
-    @for (day of weekdays(); track day) {
-      <span class="calendar-picker-panel__weekday">{{ day }}</span>
-    }
-    @for (day of calendarDays(); track day.date) {
+<div
+  class="calendar-picker-panel"
+  [class.calendar-picker-panel--range]="pickMode() === 'range'"
+>
+  @if (pickMode() === 'range') {
+    <div class="calendar-picker-panel__range-nav">
       <button
+        hlmBtn
+        variant="ghost"
+        size="icon-xs"
         type="button"
-        class="calendar-picker-panel__day focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-primary focus-visible:outline-offset-1"
-        [class.calendar-picker-panel__day--other-month]="!day.isCurrentMonth"
-        [class.calendar-picker-panel__day--today]="day.isToday"
-        [class.calendar-picker-panel__day--selected]="day.isSelected"
-        [class.calendar-picker-panel__day--range-start]="day.isRangeStart"
-        [class.calendar-picker-panel__day--range-end]="day.isRangeEnd"
-        [class.calendar-picker-panel__day--in-range]="day.isInRange"
-        [class.calendar-picker-panel__day--preview-in-range]="day.isPreviewInRange"
-        [class.calendar-picker-panel__day--disabled]="day.isDisabled"
-        [disabled]="day.isDisabled"
-        [attr.aria-label]="day.date"
-        [attr.aria-current]="day.isToday ? 'date' : null"
-        (mouseenter)="onDayMouseEnter(day)"
-        (mouseleave)="onDayMouseLeave()"
-        (click)="selectDay(day)"
+        [attr.aria-label]="t('workspace.capturedDate.aria.previousMonth', 'Previous month')"
+        (click)="prevMonth()"
       >
-        {{ day.day }}
+        <span class="material-icons" aria-hidden="true">chevron_left</span>
       </button>
-    }
-  </div>
+      <div class="calendar-picker-panel__range-months" aria-hidden="true">
+        <span class="calendar-picker-panel__month-label">{{ monthLabel() }}</span>
+        <span class="calendar-picker-panel__month-label">{{ rightMonthLabel() }}</span>
+      </div>
+      <button
+        hlmBtn
+        variant="ghost"
+        size="icon-xs"
+        type="button"
+        [attr.aria-label]="t('workspace.capturedDate.aria.nextMonth', 'Next month')"
+        (click)="nextMonth()"
+      >
+        <span class="material-icons" aria-hidden="true">chevron_right</span>
+      </button>
+    </div>
+
+    <div class="calendar-picker-panel__dual-grids">
+      @for (grid of [calendarDays(), rightCalendarDays()]; track $index) {
+        <div class="calendar-picker-panel__grid">
+          @for (day of weekdays(); track day) {
+            <span class="calendar-picker-panel__weekday">{{ day }}</span>
+          }
+          @for (day of grid; track day.date) {
+            <button
+              type="button"
+              class="calendar-picker-panel__day focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-primary focus-visible:outline-offset-1"
+              [class.calendar-picker-panel__day--other-month]="!day.isCurrentMonth"
+              [class.calendar-picker-panel__day--today]="day.isToday"
+              [class.calendar-picker-panel__day--selected]="day.isSelected"
+              [class.calendar-picker-panel__day--range-start]="day.isRangeStart"
+              [class.calendar-picker-panel__day--range-end]="day.isRangeEnd"
+              [class.calendar-picker-panel__day--in-range]="day.isInRange"
+              [class.calendar-picker-panel__day--preview-in-range]="day.isPreviewInRange"
+              [class.calendar-picker-panel__day--disabled]="day.isDisabled"
+              [disabled]="day.isDisabled"
+              [attr.aria-label]="day.date"
+              [attr.aria-current]="day.isToday ? 'date' : null"
+              (mouseenter)="onDayMouseEnter(day)"
+              (mouseleave)="onDayMouseLeave()"
+              (click)="selectDay(day)"
+            >
+              {{ day.day }}
+            </button>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="calendar-picker-panel__range-shortcuts">
+      <button
+        hlmBtn
+        variant="ghost"
+        size="sm"
+        type="button"
+        class="calendar-picker-panel__now-btn"
+        (click)="setToday()"
+      >
+        {{ t('workspace.capturedDate.action.today', 'Today') }}
+      </button>
+    </div>
+  } @else {
+    <div class="calendar-picker-panel__month-nav">
+      <span class="calendar-picker-panel__month-label">{{ monthLabel() }}</span>
+      <button
+        hlmBtn
+        variant="ghost"
+        size="sm"
+        type="button"
+        class="calendar-picker-panel__now-btn"
+        (click)="setToday()"
+      >
+        {{ t('workspace.capturedDate.action.today', 'Today') }}
+      </button>
+      <button
+        hlmBtn
+        variant="ghost"
+        size="icon-xs"
+        type="button"
+        [attr.aria-label]="t('workspace.capturedDate.aria.previousMonth', 'Previous month')"
+        (click)="prevMonth()"
+      >
+        <span class="material-icons" aria-hidden="true">chevron_left</span>
+      </button>
+      <button
+        hlmBtn
+        variant="ghost"
+        size="icon-xs"
+        type="button"
+        [attr.aria-label]="t('workspace.capturedDate.aria.nextMonth', 'Next month')"
+        (click)="nextMonth()"
+      >
+        <span class="material-icons" aria-hidden="true">chevron_right</span>
+      </button>
+    </div>
+
+    <div class="calendar-picker-panel__grid">
+      @for (day of weekdays(); track day) {
+        <span class="calendar-picker-panel__weekday">{{ day }}</span>
+      }
+      @for (day of calendarDays(); track day.date) {
+        <button
+          type="button"
+          class="calendar-picker-panel__day focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-primary focus-visible:outline-offset-1"
+          [class.calendar-picker-panel__day--other-month]="!day.isCurrentMonth"
+          [class.calendar-picker-panel__day--today]="day.isToday"
+          [class.calendar-picker-panel__day--selected]="day.isSelected"
+          [class.calendar-picker-panel__day--range-start]="day.isRangeStart"
+          [class.calendar-picker-panel__day--range-end]="day.isRangeEnd"
+          [class.calendar-picker-panel__day--in-range]="day.isInRange"
+          [class.calendar-picker-panel__day--preview-in-range]="day.isPreviewInRange"
+          [class.calendar-picker-panel__day--disabled]="day.isDisabled"
+          [disabled]="day.isDisabled"
+          [attr.aria-label]="day.date"
+          [attr.aria-current]="day.isToday ? 'date' : null"
+          (mouseenter)="onDayMouseEnter(day)"
+          (mouseleave)="onDayMouseLeave()"
+          (click)="selectDay(day)"
+        >
+          {{ day.day }}
+        </button>
+      }
+    </div>
+  }
 
   <div class="calendar-picker-panel__actions">
     @if (nullable()) {

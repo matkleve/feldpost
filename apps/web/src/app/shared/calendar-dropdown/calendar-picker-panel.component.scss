@@ -19,8 +19,13 @@
   flex-direction: column;
   gap: var(--spacing-1);
 
-  // Month nav: label + Today shortcut + prev/next chevrons.
-  // Ink/hover owned by hlmBtn variant="ghost".
+  // Range mode: two consecutive months side by side.
+  // @see docs/specs/component/filters/calendar-dropdown.range-mode.supplement.md
+  &--range {
+    width: min(34rem, calc(100vw - var(--spacing-4)));
+  }
+
+  // Single-month nav: label + Today shortcut + prev/next chevrons.
   // @see docs/design/state-visuals.md § Interaction emphasis
   &__month-nav {
     display: flex;
@@ -28,11 +33,40 @@
     gap: var(--spacing-1);
   }
 
+  // Range nav: chevrons flank dual month titles.
+  &__range-nav {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--spacing-1);
+  }
+
+  &__range-months {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--spacing-2);
+    min-width: 0;
+  }
+
+  &__dual-grids {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--spacing-2);
+    min-width: 0;
+  }
+
+  &__range-shortcuts {
+    display: flex;
+    justify-content: center;
+  }
+
   &__month-label {
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-semibold);
     color: var(--foreground);
     flex: 1 1 auto;
+    text-align: center;
+    min-width: 0;
   }
 
   // Today shortcut — geometry-only override on hlmBtn size="sm".
@@ -40,6 +74,12 @@
     font-size: var(--font-size-2xs);
     padding-inline: var(--spacing-1);
     height: 1.5rem;
+    color: var(--muted-foreground);
+
+    &:hover:not(:disabled),
+    &:focus-visible:not(:disabled) {
+      color: var(--primary);
+    }
   }
 
   &__grid {
@@ -47,6 +87,7 @@
     grid-template-columns: repeat(7, 1fr);
     gap: 2px;
     text-align: center;
+    min-width: 0;
   }
 
   &__weekday {
@@ -59,7 +100,6 @@
   }
 
   // Day cell: custom <button> — not hlmBtn (grid control, not standard action).
-  // Interaction emphasis: muted at rest; gold on hover; secondary ink when selected.
   // @see docs/specs/component/filters/calendar-picker-panel.md § Interaction emphasis
   &__day {
     display: inline-flex;
@@ -77,7 +117,8 @@
     cursor: pointer;
     transition:
       background var(--motion-duration-fast) var(--motion-ease-out),
-      color var(--motion-duration-fast) var(--motion-ease-out);
+      color var(--motion-duration-fast) var(--motion-ease-out),
+      box-shadow var(--motion-duration-fast) var(--motion-ease-out);
 
     &:hover:not(&--disabled):not(&--selected) {
       @include emphasis.hover(10%);
@@ -87,27 +128,23 @@
       color: color-mix(in srgb, var(--muted-foreground) 52%, transparent);
     }
 
-    // Today ring (unselected): subtle border, no fill.
+    // Today ring (unselected): dashed muted ring — distinct from selected fill.
     &--today:not(&--selected) {
-      box-shadow: inset 0 0 0 1.5px var(--border);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--muted-foreground) 55%, transparent);
+      font-weight: var(--font-weight-medium);
     }
 
-    // Selected day (single mode) or range endpoint — secondary ink.
-    // @see docs/design/state-visuals.md § Interaction emphasis (secondary tier)
+    // Selected day (single mode) or range endpoint — secondary ink fill.
     &--selected {
       @include emphasis.selected(12%);
       font-weight: var(--font-weight-semibold);
+      box-shadow: inset 0 0 0 1.5px var(--interaction-selected-ink);
     }
 
-    // Selected + hover: pointer always wins → gold.
-    // @see docs/specs/system/interaction-emphasis-ink-contract.md
     &--selected:hover:not(&--disabled) {
       @include emphasis.selected-hover(12%);
     }
 
-    // In-range days (strictly between start and end): subtle secondary wash.
-    // Text stays foreground; hover → gold (handled by :hover rule above since !--selected).
-    // @see docs/specs/component/filters/calendar-picker-panel.range-grid.supplement.md
     &--in-range:not(&--selected) {
       @include emphasis.selected(6%);
       color: var(--foreground);
@@ -118,9 +155,6 @@
       @include emphasis.hover(10%);
     }
 
-    // Hover-preview wash — brand gold at 8% between anchor and hovered date.
-    // Shows potential range BEFORE the second click commits it.
-    // @see docs/specs/component/filters/calendar-dropdown.range-mode.supplement.md
     &--preview-in-range:not(&--selected):not(&--in-range) {
       background: color-mix(in srgb, var(--brand-gold) 8%, transparent);
       color: var(--foreground);
@@ -145,8 +179,11 @@
     border-top: 1px solid var(--menu-border-subtle);
   }
 
-  // Clear: destructive-on-hover override on top of hlmBtn ghost.
-  // @see docs/design/state-visuals.md § Destructive quiet row
+  &--range &__actions {
+    justify-content: center;
+    gap: var(--spacing-2);
+  }
+
   &__clear-btn {
     color: var(--muted-foreground);
 
@@ -155,10 +192,5 @@
       color: var(--destructive);
       background: color-mix(in srgb, var(--destructive) 8%, transparent);
     }
-  }
-
-  // Done: geometry only — hlmBtn variant="default" primary fill is the correct CTA treatment.
-  &__done-btn {
-    // No color overrides needed.
   }
 }

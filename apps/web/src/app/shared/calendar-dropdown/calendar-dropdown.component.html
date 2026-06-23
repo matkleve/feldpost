@@ -32,7 +32,7 @@
     </div>
   </label>
 } @else {
-  <div class="calendar-dropdown--range">
+  <div class="calendar-dropdown--range" [class.calendar-dropdown--toolbar]="layout() === 'toolbar'">
     <label class="calendar-dropdown calendar-dropdown__range-field">
       @if (fromLabel()) {
         <span class="calendar-dropdown__label">{{ fromLabel() }}</span>
@@ -40,8 +40,18 @@
       <div
         #fromControl
         class="calendar-dropdown__control"
+        [class.calendar-dropdown__control--icon-leading]="layout() === 'toolbar'"
         [attr.lang]="i18nService.locale()"
       >
+        <button
+          type="button"
+          class="calendar-dropdown__trigger"
+          [attr.aria-label]="t('shared.dateField.openCalendar', 'Open calendar')"
+          [attr.aria-expanded]="popoverOpen()"
+          (click)="toggleRangePopover($event, 'from')"
+        >
+          <span class="material-icons" aria-hidden="true">calendar_today</span>
+        </button>
         <input
           class="calendar-dropdown__input"
           type="text"
@@ -54,15 +64,6 @@
           (change)="onFromShellTextCommit($event)"
           (keydown.enter)="onFromShellTextCommit($event)"
         />
-        <button
-          type="button"
-          class="calendar-dropdown__trigger"
-          [attr.aria-label]="t('shared.dateField.openCalendar', 'Open calendar')"
-          [attr.aria-expanded]="popoverOpen()"
-          (click)="toggleRangePopover($event, 'from')"
-        >
-          <span class="material-icons" aria-hidden="true">calendar_today</span>
-        </button>
       </div>
     </label>
     <label class="calendar-dropdown calendar-dropdown__range-field">
@@ -72,8 +73,18 @@
       <div
         #toControl
         class="calendar-dropdown__control"
+        [class.calendar-dropdown__control--icon-leading]="layout() === 'toolbar'"
         [attr.lang]="i18nService.locale()"
       >
+        <button
+          type="button"
+          class="calendar-dropdown__trigger"
+          [attr.aria-label]="t('shared.dateField.openCalendar', 'Open calendar')"
+          [attr.aria-expanded]="popoverOpen()"
+          (click)="toggleRangePopover($event, 'to')"
+        >
+          <span class="material-icons" aria-hidden="true">calendar_today</span>
+        </button>
         <input
           class="calendar-dropdown__input"
           type="text"
@@ -86,15 +97,6 @@
           (change)="onToShellTextCommit($event)"
           (keydown.enter)="onToShellTextCommit($event)"
         />
-        <button
-          type="button"
-          class="calendar-dropdown__trigger"
-          [attr.aria-label]="t('shared.dateField.openCalendar', 'Open calendar')"
-          [attr.aria-expanded]="popoverOpen()"
-          (click)="toggleRangePopover($event, 'to')"
-        >
-          <span class="material-icons" aria-hidden="true">calendar_today</span>
-        </button>
       </div>
     </label>
   </div>
@@ -124,6 +126,7 @@
       <app-calendar-picker-panel
         pickMode="range"
         [anchorTarget]="anchorTarget()"
+        [viewAnchorDate]="panelViewAnchorDate()"
         [minDate]="minDate()"
         [maxDate]="maxDate()"
         [disabledDates]="disabledDates()"

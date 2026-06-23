@@ -4,6 +4,7 @@ import {
   effect,
   inject,
   input,
+  OnInit,
   output,
   signal,
 } from '@angular/core';
@@ -13,6 +14,7 @@ import {
   buildCalendarDays,
   buildRangeCalendarDays,
   isCalendarDayDisabled,
+  shiftCalendarMonth,
   todayIsoUtc,
 } from './calendar-picker.helpers';
 import type {
@@ -30,7 +32,7 @@ import type {
   templateUrl: './calendar-picker-panel.component.html',
   styleUrl: './calendar-picker-panel.component.scss',
 })
-export class CalendarPickerPanelComponent {
+export class CalendarPickerPanelComponent implements OnInit {
   protected readonly i18nService = inject(I18nService);
   readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
 
@@ -50,6 +52,8 @@ export class CalendarPickerPanelComponent {
   // ── Range mode ────────────────────────────────────────────────────────────
   readonly rangeDraft = input<CalendarRangeValue | null>(null);
   readonly rangeDraftChange = output<CalendarRangeValue | null>();
+  /** ISO date the visible month should track on open / anchor change. */
+  readonly viewAnchorDate = input('');
 
   // ── Shared outputs ────────────────────────────────────────────────────────
   readonly done = output<void>();
@@ -57,12 +61,13 @@ export class CalendarPickerPanelComponent {
   readonly cancel = output<void>();
 
   // ── View state ────────────────────────────────────────────────────────────
+  /** Left month in range dual-grid; sole month in single mode. */
   readonly viewYear = signal(new Date().getFullYear());
   readonly viewMonth = signal(new Date().getMonth());
   /** Currently hovered enabled day — drives hover-preview range wash. */
   readonly hoveredDate = signal('');
 
-  /** Last draft ISO date we synced the visible month to — prevents nav snap-back. */
+  /** Last focus ISO we synced the visible month to — prevents nav snap-back. */
   private viewSyncedToDate = '';
 
   readonly weekdays = computed(() => [
@@ -75,12 +80,15 @@ export class CalendarPickerPanelComponent {
     this.t('workspace.capturedDate.weekday.sun', 'Su'),
   ]);
 
-  readonly monthLabel = computed(() => {
-    const date = new Date(this.viewYear(), this.viewMonth(), 1);
-    return date.toLocaleDateString(this.i18nService.locale(), {
-      month: 'short',
-      year: 'numeric',
-    });
+  readonly rightView = computed(() =>
+    shiftCalendarMonth(this.viewYear(), this.viewMonth(), 1),
+  );
+
+  readonly monthLabel = computed(() => this.formatMonthLabel(this.viewYear(), this.viewMonth()));
+
+  readonly rightMonthLabel = computed(() => {
+    const right = this.rightView();
+    return this.formatMonthLabel(right.year, right.month);
   });
 
   readonly selectedDate = computed(() => this.draft()?.date ?? '');
@@ -96,24 +104,29 @@ export class CalendarPickerPanelComponent {
     const range = this.rangeDraft();
     if (anchor === 'from') return range?.to?.date ?? '';
     if (anchor === 'to') return range?.from?.date ?? '';
-    // 'pick': anchor to already-set "from" (first of two clicks)
     return range?.from?.date ?? '';
   });
 
+  private readonly rangeFromDate = computed(() => this.rangeDraft()?.from?.date ?? '');
+  private readonly rangeToDate = computed(() => this.rangeDraft()?.to?.date ?? '');
+
+  private buildRangeDays(year: number, month: number): CalendarDay[] {
+    return buildRangeCalendarDays(
+      year,
+      month,
+      this.rangeFromDate(),
+      this.rangeToDate(),
+      this.previewAnchorDate(),
+      this.hoveredDate(),
+      this.minDate(),
+      this.maxDate(),
+      this.disabledDates(),
+    );
+  }
+
   readonly calendarDays = computed((): CalendarDay[] => {
     if (this.pickMode() === 'range') {
-      const range = this.rangeDraft();
-      return buildRangeCalendarDays(
-        this.viewYear(),
-        this.viewMonth(),
-        range?.from?.date ?? '',
-        range?.to?.date ?? '',
-        this.previewAnchorDate(),
-        this.hoveredDate(),
-        this.minDate(),
-        this.maxDate(),
-        this.disabledDates(),
-      );
+      return this.buildRangeDays(this.viewYear(), this.viewMonth());
     }
     return buildCalendarDays(
       this.viewYear(),
@@ -123,6 +136,11 @@ export class CalendarPickerPanelComponent {
       this.maxDate(),
       this.disabledDates(),
     );
+  });
+
+  readonly rightCalendarDays = computed((): CalendarDay[] => {
+    const right = this.rightView();
+    return this.buildRangeDays(right.year, right.month);
   });
 
   readonly canDone = computed(() => {
@@ -136,18 +154,23 @@ export class CalendarPickerPanelComponent {
   });
 
   constructor() {
-    // Sync visible month when the committed draft date changes (prevents nav snap-back).
     effect(() => {
-      if (this.pickMode() === 'range') {
-        const from = this.rangeDraft()?.from?.date ?? '';
-        if (from) this.syncVisibleMonthToDate(from);
-        else this.viewSyncedToDate = '';
-      } else {
-        const date = this.draft()?.date ?? '';
-        if (date) this.syncVisibleMonthToDate(date);
-        else this.viewSyncedToDate = '';
+      const anchorDate = this.viewAnchorDate();
+      if (anchorDate) {
+        this.syncVisibleMonthToDate(anchorDate);
+        return;
       }
+      this.syncViewToFocus();
     });
+  }
+
+  ngOnInit(): void {
+    const anchorDate = this.viewAnchorDate();
+    if (anchorDate) {
+      this.syncVisibleMonthToDate(anchorDate);
+      return;
+    }
+    this.syncViewToFocus();
   }
 
   // ── Day interaction ───────────────────────────────────────────────────────
@@ -177,21 +200,17 @@ export class CalendarPickerPanelComponent {
   // ── Navigation ────────────────────────────────────────────────────────────
 
   prevMonth(): void {
-    if (this.viewMonth() === 0) {
-      this.viewYear.update((y) => y - 1);
-      this.viewMonth.set(11);
-    } else {
-      this.viewMonth.update((m) => m - 1);
-    }
+    const shifted = shiftCalendarMonth(this.viewYear(), this.viewMonth(), -1);
+    this.viewYear.set(shifted.year);
+    this.viewMonth.set(shifted.month);
+    this.viewSyncedToDate = '';
   }
 
   nextMonth(): void {
-    if (this.viewMonth() === 11) {
-      this.viewYear.update((y) => y + 1);
-      this.viewMonth.set(0);
-    } else {
-      this.viewMonth.update((m) => m + 1);
-    }
+    const shifted = shiftCalendarMonth(this.viewYear(), this.viewMonth(), 1);
+    this.viewYear.set(shifted.year);
+    this.viewMonth.set(shifted.month);
+    this.viewSyncedToDate = '';
   }
 
   setToday(): void {
@@ -201,7 +220,18 @@ export class CalendarPickerPanelComponent {
     }
     this.syncVisibleMonthToDate(iso);
     if (this.pickMode() === 'range') {
-      this.selectDayRange({ date: iso, day: 0, isCurrentMonth: true, isToday: true, isSelected: false, isDisabled: false, isRangeStart: false, isRangeEnd: false, isInRange: false, isPreviewInRange: false });
+      this.selectDayRange({
+        date: iso,
+        day: 0,
+        isCurrentMonth: true,
+        isToday: true,
+        isSelected: false,
+        isDisabled: false,
+        isRangeStart: false,
+        isRangeEnd: false,
+        isInRange: false,
+        isPreviewInRange: false,
+      });
       return;
     }
     this.emitDraft({ date: iso, time: null });
@@ -230,17 +260,17 @@ export class CalendarPickerPanelComponent {
       from = day.date;
     } else if (anchor === 'to') {
       to = day.date;
+    } else if (!from) {
+      from = day.date;
+      to = null;
+    } else if (!to) {
+      to = day.date;
     } else {
-      // Two-click 'pick' flow: first click = from, second click = to
-      if (!from) {
-        from = day.date;
-        to = null;
-      } else {
-        to = day.date;
-      }
+      // Third+ click in pick mode restarts: new start, pending end.
+      from = day.date;
+      to = null;
     }
 
-    // Normalize order: earlier date is always "from"
     if (from && to && from > to) {
       [from, to] = [to, from];
     }
@@ -254,11 +284,49 @@ export class CalendarPickerPanelComponent {
     if (!day.isCurrentMonth) this.syncVisibleMonthToDate(day.date);
   }
 
+  private syncViewToFocus(): void {
+    if (this.pickMode() === 'range') {
+      const focus = this.resolveFocusDate(this.anchorTarget(), this.rangeDraft());
+      if (focus) {
+        this.syncVisibleMonthToDate(focus);
+      } else {
+        this.viewSyncedToDate = '';
+      }
+      return;
+    }
+
+    const date = this.draft()?.date ?? '';
+    if (date) {
+      this.syncVisibleMonthToDate(date);
+    } else {
+      this.viewSyncedToDate = '';
+    }
+  }
+
   private emitDraft(next: CalendarDropdownValue | null): void {
     this.draftChange.emit(next);
   }
 
-  /** Jump the grid month only when the committed draft date changes — not on prev/next nav. */
+  private resolveFocusDate(
+    anchor: RangeAnchorTarget,
+    range: CalendarRangeValue | null,
+  ): string {
+    const from = range?.from?.date ?? '';
+    const to = range?.to?.date ?? '';
+    if (anchor === 'to') return to || from;
+    if (anchor === 'from') return from || to;
+    return from || to;
+  }
+
+  private formatMonthLabel(year: number, month: number): string {
+    const date = new Date(year, month, 1);
+    return date.toLocaleDateString(this.i18nService.locale(), {
+      month: 'short',
+      year: 'numeric',
+    });
+  }
+
+  /** Jump the left grid month when the focused draft date changes — not on prev/next nav. */
   private syncVisibleMonthToDate(isoDate: string): void {
     if (!isoDate || isoDate === this.viewSyncedToDate) return;
     this.viewSyncedToDate = isoDate;

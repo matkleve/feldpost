@@ -32,6 +32,8 @@ export class CalendarDropdownComponent {
 
   // ── Mode ─────────────────────────────────────────────────────────────────
   readonly mode = input<'single' | 'range'>('single');
+  /** `toolbar` = leading calendar icon + full-width range row (timespace). */
+  readonly layout = input<'default' | 'toolbar'>('default');
 
   // ── Single mode API ───────────────────────────────────────────────────────
   readonly label = input('');
@@ -85,20 +87,35 @@ export class CalendarDropdownComponent {
   });
 
   readonly fromShellText = computed(() => {
-    const d = this.rangeValue()?.from?.date;
+    const source = this.popoverOpen() ? this.rangeDraft() : this.rangeValue();
+    const d = source?.from?.date;
     if (!d) return '';
     const parsed = parseIsoDateValue(d);
     return parsed ? this.i18nService.formatDateFieldValue(parsed) : '';
   });
 
   readonly toShellText = computed(() => {
-    const d = this.rangeValue()?.to?.date;
+    const source = this.popoverOpen() ? this.rangeDraft() : this.rangeValue();
+    const d = source?.to?.date;
     if (!d) return '';
     const parsed = parseIsoDateValue(d);
     return parsed ? this.i18nService.formatDateFieldValue(parsed) : '';
   });
 
   readonly placeholder = computed(() => this.i18nService.dateFieldPlaceholder());
+
+  readonly panelViewAnchorDate = computed(() => {
+    if (this.mode() !== 'range') {
+      return this.draft()?.date ?? '';
+    }
+    const range = this.rangeDraft() ?? this.rangeValue();
+    const target = this.anchorTarget();
+    const from = range?.from?.date ?? '';
+    const to = range?.to?.date ?? '';
+    if (target === 'to') return to || from;
+    if (target === 'from') return from || to;
+    return from || to;
+  });
 
   // ── Single mode actions ───────────────────────────────────────────────────
 

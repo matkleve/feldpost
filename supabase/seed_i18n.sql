@@ -14387,6 +14387,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.filter.timespace.reset', 'Reset', 'en', 'apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html summary reset link')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Reset', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.reset'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zurücksetzen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.reset'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Reimposta', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.reset'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'map.filter.timespace.count.single', '1 item', 'en', 'apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html footer item count singular')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

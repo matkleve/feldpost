@@ -11,10 +11,10 @@ export const TOOLBAR_MENU_PANEL_MIN_PX = 288;
 export const TOOLBAR_MENU_FILTER_PANEL_MIN_PX = 512;
 /** Filter panel viewport cap — keep in sync with `:host.toolbar-dropdown.toolbar-dropdown--filter` (**40rem === 640px** at 16px root). */
 export const TOOLBAR_MENU_FILTER_PANEL_MAX_PX = 640;
-/** Timespace panel floor — keep in sync with `:host.toolbar-dropdown.toolbar-dropdown--timespace` (**28rem === 448px** at 16px root). */
-export const TOOLBAR_MENU_TIMESPACE_PANEL_MIN_PX = 448;
-/** Timespace panel viewport cap — keep in sync with `:host.toolbar-dropdown.toolbar-dropdown--timespace` (**36rem === 576px** at 16px root). */
-export const TOOLBAR_MENU_TIMESPACE_PANEL_MAX_PX = 576;
+/** Timespace panel floor — keep in sync with `:host.toolbar-dropdown.toolbar-dropdown--timespace` (**22rem === 352px** at 16px root). */
+export const TOOLBAR_MENU_TIMESPACE_PANEL_MIN_PX = 352;
+/** Timespace panel viewport cap — keep in sync with `:host.toolbar-dropdown.toolbar-dropdown--timespace` (**26rem === 416px** at 16px root). */
+export const TOOLBAR_MENU_TIMESPACE_PANEL_MAX_PX = 416;
 
 /** Viewport clamp width for toolbar shell positioning (sort, grouping, projects, and non-filter panels). */
 export const TOOLBAR_MENU_SHELL_MIN_PX = TOOLBAR_MENU_PANEL_MIN_PX;
