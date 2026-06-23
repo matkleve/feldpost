@@ -16,6 +16,7 @@
       <circle cx="24" cy="17" r="1.35" fill="black"/>
     </mask>
   </defs>
+  <rect x="0" y="0" width="24" height="24" rx="2.5" fill="white"/>
   <rect x="0" y="0" width="24" height="24" rx="2.5" fill="#c9a84c" mask="url(#fp-stamp-mask)"/>
   <rect x="4" y="4" width="16" height="16" rx="1.5" fill="#F7EDD0"/>
   <text
