@@ -7,10 +7,12 @@
 
     <!-- Header -->
     <div class="nav__header">
-      <span class="nav__media" aria-hidden="true">
-        <img class="nav__logo-mark" src="/assets/logo.svg" width="16" height="16" aria-hidden="true" alt="" />
-      </span>
-      <span class="nav__header-title font-semibold">Feldpost</span>
+      <div class="nav__link nav__header-row">
+        <span class="nav__media" aria-hidden="true">
+          <img class="nav__logo-mark" src="/assets/logo.svg" width="16" height="16" aria-hidden="true" alt="" />
+        </span>
+        <span class="nav__header-title font-semibold">Feldpost</span>
+      </div>
       <button
         type="button"
         class="nav__collapse-btn"
@@ -18,7 +20,9 @@
         [title]="sidebarCollapsed() ? t('nav.expand', 'Expand sidebar') : t('nav.collapse', 'Collapse sidebar')"
         [attr.aria-label]="sidebarCollapsed() ? t('nav.expand', 'Expand sidebar') : t('nav.collapse', 'Collapse sidebar')"
       >
-        <span class="material-icons">view_sidebar</span>
+        <span class="nav__media" aria-hidden="true">
+          <span class="material-icons nav__icon">view_sidebar</span>
+        </span>
       </button>
     </div>
 
