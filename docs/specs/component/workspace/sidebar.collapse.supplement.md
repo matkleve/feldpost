@@ -31,26 +31,25 @@ NavRow
 
 | Property | Expanded | Collapsed | Changes on toggle? |
 | --- | --- | --- | --- |
-| Panel `padding-inline` | `var(--spacing-1)` (4px) | same | **No** |
+| Panel `padding-inline` | `var(--spacing-2)` (8px) | same | **No** |
 | Row `padding-inline` | `0` | same | **No** |
 | Row `display` | `grid` | same | **No** |
 | Row `column-gap` | `var(--spacing-3)` | `0` | **Yes** |
+| Row `min-height` | row height token (`36px`) | same | **No** |
 | Media column width | 32px | same | **No** |
 | Label column width | `minmax(0, 1fr)` | `0fr` (mounted, clipped) | **Yes** |
-| Nav link `min-height` | row height token | `32px` (square hit target) | **Yes** |
 | Label visibility | opacity `1` | opacity `0`, `visibility: hidden` | **Yes** |
 | Sidebar width | `15rem` | `3rem` | **Yes** |
 
-Horizontal inset for icons = panel padding only (**4px** from rail edge). Row padding MUST NOT add a second inset. When collapsed, row `column-gap` MUST be **0** — a non-zero gap plus the 32px media column overflows a narrow rail and clips the avatar circle.
+Horizontal inset for icons = panel padding only (**8px** from rail edge). When collapsed, row `column-gap` MUST be **0** — otherwise `32px media + 12px gap` overflows the `3rem` rail.
 
 ### Collapsed rail math
 
 ```text
 3rem rail (48px)
-├── padding-inline spacing-1 × 2  → 8px
-└── content (40px)
-    └── NavRow grid: [ 32px media | 0fr label ], gap 0  → 32×32px square hit target
-        └── 4px slack on trailing edge inside content box
+├── padding-inline spacing-2 × 2  → 16px
+└── content (32px) = media column width exactly
+    └── NavRow grid: [ 32px media | 0fr label ], gap 0
 ```
 
 Icons stay in the **leading column**; they are not re-centered with flex/`margin: auto` on collapse.
@@ -95,7 +94,7 @@ sequenceDiagram
 
 - [x] Panel `padding-inline` identical in collapsed and expanded desktop states
 - [x] Row shell (grid, media width, row padding) unchanged across toggle
-- [x] Collapsed: column-gap `0`, label column `0fr`, nav link min-height `32px`
+- [x] Collapsed: column-gap `0`, label column `0fr` — row min-height unchanged
 - [x] Labels hidden via opacity/visibility; remain mounted
 - [x] Collapse control persists across reload
 - [x] Map `invalidateSize` runs on toggle, not on component init

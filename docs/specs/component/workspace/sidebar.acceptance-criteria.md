@@ -22,14 +22,12 @@ Parent: [`sidebar.md`](sidebar.md) · Geometry: [`sidebar.collapse.supplement.md
 
 ## Spacing & collapse invariants
 
-- [x] Panel `padding-inline` is `var(--spacing-1)` in both collapsed and expanded desktop states
-- [x] Row grid + media width + row `padding-inline` unchanged across toggle
+- [x] Panel `padding-inline` is `var(--spacing-2)` in both collapsed and expanded desktop states
+- [x] Row grid, media width, row `padding-inline`, and row `min-height` unchanged across toggle
 - [x] Collapsed: row `column-gap` is `0`; label column is `0fr` (mounted, hidden)
-- [x] Collapsed: nav link hit target is **32×32px** square (no tall rectangle hover shape)
-- [x] Collapsed: avatar circle not clipped (no overflow from label column + gap)
 - [x] Labels hidden via opacity/visibility when collapsed; icons do not shift sideways
 - [x] Expanded rows reveal labels without icon column jump
-- [x] Sidebar width + collapsed row gap/label width + label opacity animate on collapse
+- [x] Only sidebar width, collapsed gap/label column, and label opacity animate on collapse
 - [ ] Mobile: `h-14` bar + safe-area padding per layout spec
 
 ## Collapse & persistence

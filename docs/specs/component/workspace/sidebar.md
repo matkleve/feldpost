@@ -8,7 +8,7 @@ Detail: [`sidebar.collapse.supplement.md`](sidebar.collapse.supplement.md) (NavR
 
 ## What It Looks Like
 
-**Desktop (≥ 768px):** Expanded = `15rem`; collapsed = `3rem`. Panel uses frosted chrome with **`padding-inline: var(--spacing-1)` in both widths**. Nav rows use a fixed **32px leading media column**; labels clip via opacity when collapsed — icons do **not** re-center or shift horizontally. Collapsed rows use **0 column-gap** and a **32×32px** square hit target. Header: logo | title | collapse control (see supplement).
+**Desktop (≥ 768px):** Expanded = `15rem`; collapsed = `3rem`. Panel uses frosted chrome with **`padding-inline: var(--spacing-2)` in both widths**. Nav rows use a fixed **32px leading media column**; labels clip via opacity when collapsed — icons do **not** re-center. Collapsed rows zero out **column-gap** only (label column `0fr`). Header: logo | title | collapse control (see supplement).
 
 **Mobile (< 768px):** Bottom bar `3.5rem` tall, icons only. Account row hidden (settings via other surfaces).
 
@@ -41,7 +41,7 @@ Tokens: [`docs/design/tokens.md`](../../../design/tokens.md), [`docs/design/layo
 | Property | Value |
 | --- | --- |
 | Collapsed / expanded width | `3rem` / `15rem` |
-| Panel `padding-inline` | `var(--spacing-1)` — **constant** |
+| Panel `padding-inline` | `var(--spacing-2)` — **constant** |
 | Row `padding-inline` | `0` |
 | Media column | `var(--spacing-6)` (32px) |
 | Row min-height | `calc(var(--spacing-6) + var(--spacing-1))` |
