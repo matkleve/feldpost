@@ -112,5 +112,5 @@ Extracted from legacy `captured-date-editor.component.*` — behavior preserved,
 - [x] `dateOnly` hides time input and ignores time on emit
 - [x] Selected + hover emphasis match three-tier table above
 - [x] Keyboard: Enter → Done, Escape → cancel
-- [ ] Day cells use rounded squares (`--radius-sm`), not circles (`--radius-full`)
-- [ ] Prev/next month works in both directions while a date remains selected in draft
+- [x] Day cells use rounded squares (`--radius-sm`), not circles (`--radius-full`)
+- [x] Prev/next month works in both directions while a date remains selected in draft

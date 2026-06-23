@@ -100,6 +100,8 @@
     }
   }
 
+  // Calendar icon affordance — no own hover bg or focus ring; the parent __control owns both.
+  // color: inherit lets the control's hover gold propagate to the icon without a second wash.
   .calendar-dropdown__trigger {
     display: inline-flex;
     flex-shrink: 0;
@@ -110,22 +112,12 @@
     margin: 0;
     padding: 0;
     border: 0;
-    border-radius: var(--radius-sm);
     background: transparent;
-    color: var(--muted-foreground);
+    color: inherit;
     cursor: pointer;
 
     .material-icons {
       font-size: var(--font-size-sm);
-    }
-
-    &:hover {
-      @include emphasis.hover(10%);
-    }
-
-    &:focus-visible {
-      outline: none;
-      box-shadow: var(--interactive-focus-ring);
     }
   }
 }
