@@ -94,9 +94,8 @@
   align-items: center;
   gap: var(--spacing-2);
   padding: var(--spacing-2) var(--spacing-4);
-  background: var(--popover);
+  @include frosted-chrome.panel;
   border-radius: var(--radius-full);
-  box-shadow: var(--shadow-md);
   color: var(--foreground);
   font-size: var(--font-size-md);
   white-space: nowrap;
