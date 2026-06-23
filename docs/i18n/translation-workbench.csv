@@ -463,7 +463,7 @@ map.filter.timespace.empty,No media in this organization yet.,apps/web/src/app/f
 map.filter.timespace.loadError,Could not load timeline.,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html error state,Could not load timeline.,Zeitachse konnte nicht geladen werden.,Impossibile caricare la cronologia.
 map.filter.timespace.loading,Loading timeline…,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html loading state,Loading timeline…,Zeitachse wird geladen…,Caricamento cronologia…
 map.filter.timespace.reset.aria,Reset time range,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html reset button aria,Reset time range,Zeitraum zurücksetzen,Reimposta intervallo temporale
-map.filter.timespace.reset,Reset,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html summary reset link,Reset,Zurücksetzen,Reimposta
+map.filter.timespace.reset,Reset,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html reset button label,Reset,Zurücksetzen,Reimposta
 map.filter.timespace.count.single,1 item,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html footer item count singular,1 item,1 Element,1 elemento
 map.filter.timespace.count.multi,{count} items,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html footer item count plural,{count} items,{count} Elemente,{count} elementi
 map.searchBar.placeholder.example.denishgasse,"Denisgasse 46, Vienna",apps/web/src/app/features/map/search-bar/search-bar.component.ts placeholder-example,"Denisgasse 46, Vienna","Denisgasse 46, Wien","Denisgasse 46, Vienna"

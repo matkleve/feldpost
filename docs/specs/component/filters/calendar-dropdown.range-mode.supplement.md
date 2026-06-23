@@ -81,7 +81,7 @@ Follows Airbnb / Google Flights / `react-dates` **focused-input** model — not 
 
 | Behavior | Geometry Owner | Stacking Owner | Hit-Area Owner | Selector(s) | Layer | Test Oracle |
 | --- | --- | --- | --- | --- | --- | --- |
-| From/To field row | `.calendar-dropdown__control` | `app-calendar-dropdown` `:host` | control | `.calendar-dropdown__input`, `.calendar-dropdown__trigger` | 0 | Full width in timespace toolbar |
+| From/To field row | `.calendar-dropdown__control` | `app-calendar-dropdown` `:host` | control | `.calendar-dropdown__input`, `.calendar-dropdown__trigger` | 0 | Full width in timespace toolbar — hover/focus owned by `__control`; `__trigger` inherits `color` only |
 | Shared popover | `app-dropdown-shell` | shell host | panel | `.calendar-dropdown-panel` | 300 | Body portal |
 | Range start/end | day button | grid | day button | `--range-start`, `--range-end` | 0 | Secondary ink |
 | In-range wash | day button | grid | day button | `--in-range` | 0 | Muted secondary |

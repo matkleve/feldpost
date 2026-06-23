@@ -12,7 +12,7 @@ Single control row: optional label, bordered shell (`2.25rem` min height — too
 
 | Call site | Parent | Mode / variant |
 | --- | --- | --- |
-| Timespace From/To | [`app-timespace-dropdown`](../../component/map/map-filter-toolbar.md) | `mode='range'`, `timeMode='optionalTime'` (progressive), org domain bounds |
+| Timespace From/To | [`app-timespace-dropdown`](../../component/map/map-filter-toolbar.md) | `mode='range'`, `timeMode='dateOnly'`, org domain bounds |
 | Media Detail Captured | `app-media-detail-inline-section` | `mode='single'`, `optionalTime` — header time row; Done not blocked when time empty |
 | Future filters/metadata | any form row | per parent |
 
@@ -101,17 +101,19 @@ flowchart LR
 | `committedValue` | parent `value` or `rangeValue` | Source of truth |
 | `draftValue` / `rangeDraft` | dropdown while open | Discarded on cancel |
 | `anchorTarget` | range open FSM | `'from' \| 'to'` — field that opened popover; see range supplement |
-| `timeExpanded` | range + optionalTime | Add time link toggles spinner row |
 
 Popover MUST NOT render inside `app-dropdown-shell` content box — use body portal (same invariant as filter picker flyout).
 
 ## Interaction emphasis
 
-| Surface | Tier | Hover / focus | Owner |
-| --- | --- | --- | --- |
-| `.calendar-dropdown__control` | **Primary** | gold border + wash | `calendar-dropdown.component.scss` |
-| `.calendar-dropdown__trigger` | **Primary** | gold (inherit shell) | same |
-| Panel days | per [`calendar-picker-panel.md`](calendar-picker-panel.md) | | |
+**Ownership contract (normative):** `.calendar-dropdown__control` is the sole owner of hover and focus state for the composite field. `.calendar-dropdown__trigger` carries **no own hover background and no own focus ring** — it inherits `color` from the control so the icon turns gold when the control is hovered or focused, without producing a second wash or a second ring. `.calendar-dropdown__input` suppresses its native outline (`outline: none`); the control's `:focus-within` ring covers keyboard focus.
+
+| Surface | Tier | Hover | Focus | Owner |
+| --- | --- | --- | --- | --- |
+| `.calendar-dropdown__control` | **Primary** | gold wash + border | gold border + `--interactive-focus-ring` | `calendar-dropdown.component.scss` `:hover` / `:focus-within` |
+| `.calendar-dropdown__trigger` | — | inherits `color` from control | — (control `:focus-within` covers it) | no own rule |
+| `.calendar-dropdown__input` | — | transparent | `outline: none` — control ring covers it | no own rule |
+| Panel days | per [`calendar-picker-panel.md`](calendar-picker-panel.md) | | | |
 
 ## Migration (one cutover)
 
@@ -145,7 +147,7 @@ sequenceDiagram
   participant P as CalendarPickerPanel
   participant I18n as I18nService
 
-  note over TD,CD: Timespace range (optionalTime progressive)
+  note over TD,CD: Timespace range (dateOnly)
   U->>CD: open From or To
   U->>P: pick start then end (or single-click re-anchor)
   P->>CD: rangeDraftChange

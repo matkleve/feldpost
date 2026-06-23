@@ -40,7 +40,8 @@ Parent: [`calendar-dropdown.md`](calendar-dropdown.md)
 
 ## Interaction emphasis
 
-- [x] Control shell + icon trigger: gold hover/focus per ink contract
+- [x] Control shell hover: gold wash + border on `.calendar-dropdown__control`; icon inherits `color` — no second wash on trigger
+- [x] Control shell focus: gold border + `--interactive-focus-ring` on `.calendar-dropdown__control:focus-within`; no own ring on trigger or input
 - [x] Day cells: rounded square geometry (`--radius-sm`); hover + selected use emphasis mixins (not circles)
 - [x] After picking a date, prev/next month navigates freely without snapping back to the selected date's month
 
@@ -57,9 +58,11 @@ Parent: [`calendar-dropdown.md`](calendar-dropdown.md)
 - [x] `rangeChange` emits `{ from, to }` with ISO dates
 - [x] Histogram selection overlay stays in sync with committed range (drag + calendar paths)
 
-## Progressive time (timespace)
+## Progressive time (timespace) — deferred, not built
 
-- [ ] Timespace passes `timeMode='optionalTime'`
-- [ ] Add time link hidden until start date exists in draft
-- [ ] Expanded: From + To HH:MM spinners below grid (not header); empty time allowed on Done
-- [ ] Collapsed: emit date-only range on Done
+Timespace uses `timeMode='dateOnly'`. Progressive time (Add time link, HH:MM spinners) is explicitly deferred. To implement, reverse this decision in `calendar-dropdown.md` § Where It Lives and build the panel rows described below.
+
+- [ ] *(deferred)* Timespace passes `timeMode='optionalTime'`
+- [ ] *(deferred)* Add time link hidden until start date exists in draft
+- [ ] *(deferred)* Expanded: From + To HH:MM spinners below grid (not header); empty time allowed on Done
+- [ ] *(deferred)* Collapsed: emit date-only range on Done

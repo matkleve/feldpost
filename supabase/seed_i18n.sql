@@ -14387,7 +14387,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'map.filter.timespace.reset', 'Reset', 'en', 'apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html summary reset link')
+values (null, 'map.filter.timespace.reset', 'Reset', 'en', 'apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html reset button label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
