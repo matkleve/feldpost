@@ -16,9 +16,9 @@
   --sidebar-width-expanded: 15rem;
   --sidebar-width-collapsed: 3rem;
   --sidebar-row-padding-inline: var(--spacing-1);
-  --sidebar-row-padding-block: var(--spacing-1);
+  --sidebar-row-padding-block: 0;
   --sidebar-row-gap: var(--spacing-3);
-  --sidebar-row-height: calc(var(--spacing-6) + (var(--spacing-1) * 2));
+  --sidebar-row-height: calc(var(--spacing-6) + var(--spacing-1));
   --sidebar-media-size: var(--spacing-6);
   --sidebar-icon-size: 1.25rem;
 
@@ -82,10 +82,10 @@
     }
   }
 
-  // Remove panel padding so the full 3rem width is available for centered icons
+  // Reduce panel padding so icons have breathing room without clipping
   .sidebar__panel {
     @media (min-width: 768px) {
-      padding-inline: 0;
+      padding-inline: var(--spacing-1);
     }
   }
 
@@ -178,8 +178,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 1.75rem;
-    height: 1.75rem;
+    width: var(--sidebar-media-size);
+    min-height: var(--sidebar-row-height);
     flex-shrink: 0;
     margin-inline-start: auto;
     border: none;
@@ -407,12 +407,12 @@
 }
 
 .nav__utility-media {
-  display: inline-flex;
+  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.2rem;
-  inline-size: var(--sidebar-media-size);
+  gap: 0.18rem;
+  width: var(--sidebar-media-size);
   flex-shrink: 0;
 }
 
@@ -421,6 +421,11 @@
   line-height: var(--line-height-solid);
   text-align: center;
   color: inherit;
+  width: var(--sidebar-icon-size);
+  height: var(--sidebar-icon-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .nav__utility-label {
@@ -435,6 +440,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.2rem;
+  width: 100%;
 }
 
 .nav__theme-dot {
