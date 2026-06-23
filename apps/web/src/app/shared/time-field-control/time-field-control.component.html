@@ -1,0 +1,69 @@
+<div
+  #control
+  class="time-field__control"
+  [attr.lang]="i18nService.locale()"
+>
+  <input
+    class="time-field__input"
+    type="text"
+    inputmode="numeric"
+    autocomplete="off"
+    [disabled]="disabled()"
+    [attr.placeholder]="t('workspace.capturedDate.placeholder.time', 'HH:MM')"
+    [attr.aria-label]="ariaLabel() || t('workspace.capturedDate.aria.editTime', 'Edit time')"
+    [attr.aria-expanded]="popoverOpen()"
+    [value]="shellText()"
+    (focus)="onFocus()"
+    (input)="onInput($event)"
+    (change)="onCommit($event)"
+    (keydown.enter)="onCommit($event)"
+  />
+</div>
+
+@if (popoverOpen()) {
+  <app-dropdown-shell
+    panelClass="time-field-panel"
+    placement="end"
+    [anchor]="anchorEl()"
+    (closeRequested)="onPopoverCloseRequested()"
+  >
+    <div class="time-field__picker" role="group" [attr.aria-label]="ariaLabel()">
+      <div
+        #hourWheel
+        class="time-field__wheel"
+        tabindex="-1"
+        (wheel)="onHourWheel($event)"
+      >
+        @for (hour of hours; track hour) {
+          <button
+            type="button"
+            class="time-field__wheel-item"
+            [class.time-field__wheel-item--selected]="hour === selectedHour()"
+            [attr.data-wheel-value]="hour"
+            (click)="selectHour(hour)"
+          >
+            {{ hour | number: '2.0-0' }}
+          </button>
+        }
+      </div>
+      <div
+        #minuteWheel
+        class="time-field__wheel"
+        tabindex="-1"
+        (wheel)="onMinuteWheel($event)"
+      >
+        @for (minute of minutes; track minute) {
+          <button
+            type="button"
+            class="time-field__wheel-item"
+            [class.time-field__wheel-item--selected]="minute === selectedMinute()"
+            [attr.data-wheel-value]="minute"
+            (click)="selectMinute(minute)"
+          >
+            {{ minute | number: '2.0-0' }}
+          </button>
+        }
+      </div>
+    </div>
+  </app-dropdown-shell>
+}

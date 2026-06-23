@@ -100,7 +100,7 @@
     }
   }
 
-  // Timespace split: From | pick icon | To — labels row + controls row.
+  // Timespace split: From date | From time | pick | To date | To time.
   // @see docs/specs/component/filters/calendar-dropdown.range-mode.supplement.md § Split layout
   .calendar-dropdown--split {
     display: grid;
@@ -113,15 +113,63 @@
     align-items: center;
   }
 
+  .calendar-dropdown--split-with-time {
+    grid-template-columns: minmax(0, 1fr) 3.75rem auto minmax(0, 1fr) 3.75rem;
+  }
+
+  .calendar-dropdown__label--from {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .calendar-dropdown--split-with-time .calendar-dropdown__label--from {
+    grid-column: 1 / 3;
+  }
+
   .calendar-dropdown__split-gap {
+    grid-column: 2;
+    grid-row: 1;
     min-width: 2.25rem;
   }
 
-  // Center range-pick control — two-click range in panel; inputs stay typing-only.
+  .calendar-dropdown--split-with-time .calendar-dropdown__split-gap {
+    grid-column: 3;
+  }
+
+  .calendar-dropdown__label--to {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .calendar-dropdown--split-with-time .calendar-dropdown__label--to {
+    grid-column: 4 / 6;
+  }
+
+  .calendar-dropdown__time-field {
+    min-width: 0;
+    width: 100%;
+  }
+
+  // Center range-pick control — 2.25rem matches date/time shells (hlmBtn icon-sm was 2rem).
   .calendar-dropdown__range-pick {
-    align-self: end;
+    display: inline-flex;
     flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--background);
     color: var(--muted-foreground);
+    cursor: pointer;
+    box-sizing: border-box;
+    transition:
+      background var(--motion-duration-fast) var(--motion-ease-out),
+      border-color var(--motion-duration-fast) var(--motion-ease-out),
+      color var(--motion-duration-fast) var(--motion-ease-out);
 
     .material-icons {
       font-size: var(--font-size-sm);
@@ -130,6 +178,9 @@
     &:hover:not(:disabled),
     &:focus-visible:not(:disabled) {
       color: var(--primary);
+      @include emphasis.hover(8%);
+      border-color: color-mix(in srgb, var(--brand-gold) 42%, var(--border));
+      box-shadow: var(--interactive-focus-ring);
     }
   }
 

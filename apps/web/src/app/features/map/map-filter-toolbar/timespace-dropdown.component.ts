@@ -14,10 +14,12 @@ import {
   buildTimespaceHistogram,
   clickBandRange,
   dragRange,
+  endOfUtcDay,
   isTimeRangeActive,
   matchesTimeRange,
   ratioFromClientXInInsetBox,
   selectionOverlayPercents,
+  startOfUtcDay,
   type TimeRange,
   type TimespaceBin,
 } from '../../../core/workspace-view/timespace.helpers';
@@ -100,8 +102,12 @@ export class TimespaceDropdownComponent implements OnInit {
     const range = this.effectiveRange();
     if (!range?.from && !range?.to) return null;
     return {
-      from: range?.from ? { date: toIsoDateValue(range.from), time: null } : null,
-      to: range?.to ? { date: toIsoDateValue(range.to), time: null } : null,
+      from: range.from
+        ? { date: toIsoDateValue(range.from), time: this.extractTimeForHalf(range.from, 'from') }
+        : null,
+      to: range.to
+        ? { date: toIsoDateValue(range.to), time: this.extractTimeForHalf(range.to, 'to') }
+        : null,
     };
   });
 
@@ -141,8 +147,8 @@ export class TimespaceDropdownComponent implements OnInit {
   });
 
   onRangeChange(value: CalendarRangeValue | null): void {
-    const from = value?.from?.date ? parseIsoDateValue(value.from.date) : null;
-    const to = value?.to?.date ? parseIsoDateValue(value.to.date) : null;
+    const from = this.calendarHalfToDate(value?.from ?? null, 'from');
+    const to = this.calendarHalfToDate(value?.to ?? null, 'to');
     this.commitRange({ from, to });
   }
 
@@ -244,4 +250,29 @@ export class TimespaceDropdownComponent implements OnInit {
     this.viewService.setTimeRange(range);
   }
 
+  private calendarHalfToDate(
+    half: { date: string | null; time: string | null } | null,
+    bound: 'from' | 'to',
+  ): Date | null {
+    if (!half?.date) return null;
+    const base = parseIsoDateValue(half.date);
+    if (!base) return null;
+    if (!half.time) {
+      return bound === 'from'
+        ? new Date(startOfUtcDay(base.getTime()))
+        : new Date(endOfUtcDay(base.getTime()));
+    }
+    const [hours, minutes] = half.time.split(':').map((part) => parseInt(part, 10));
+    return new Date(
+      Date.UTC(base.getUTCFullYear(), base.getUTCMonth(), base.getUTCDate(), hours, minutes, 0, 0),
+    );
+  }
+
+  private extractTimeForHalf(date: Date, bound: 'from' | 'to'): string | null {
+    const hours = date.getUTCHours();
+    const minutes = date.getUTCMinutes();
+    if (bound === 'from' && hours === 0 && minutes === 0) return null;
+    if (bound === 'to' && hours === 23 && minutes === 59) return null;
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+  }
 }

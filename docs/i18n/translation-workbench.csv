@@ -458,7 +458,9 @@ map.filter.timespace.datePlaceholder,—,apps/web/src/app/features/map/map-filte
 shared.dateField.openCalendar,Open calendar,apps/web/src/app/shared/ui/compact-date-field/compact-date-field.component.html calendar button aria,Open calendar,Kalender öffnen,Apri calendario
 shared.dateField.openCalendarRange,Select date range,apps/web/src/app/shared/calendar-dropdown/calendar-dropdown.component.html split range pick button aria,Select date range,Zeitraum wählen,Seleziona intervallo date
 map.filter.timespace.from,From,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html date input label,From,Von,Da
+map.filter.timespace.fromTime,From time,apps/web/src/app/shared/calendar-dropdown/calendar-dropdown.component.html from time aria,From time,Von Uhrzeit,Ora inizio
 map.filter.timespace.to,To,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html date input label,To,Bis,A
+map.filter.timespace.toTime,To time,apps/web/src/app/shared/calendar-dropdown/calendar-dropdown.component.html to time aria,To time,Bis Uhrzeit,Ora fine
 map.filter.timespace.chartAria,Media timeline,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html chart aria,Media timeline,Medien-Zeitachse,Cronologia media
 map.filter.timespace.empty,No media in this organization yet.,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html empty state,No media in this organization yet.,Noch keine Medien in dieser Organisation.,Nessun media in questa organizzazione.
 map.filter.timespace.loadError,Could not load timeline.,apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html error state,Could not load timeline.,Zeitachse konnte nicht geladen werden.,Impossibile caricare la cronologia.

@@ -1,0 +1,97 @@
+@use '../../../styles/interaction-emphasis-quiet-row' as emphasis;
+
+@layer components {
+  :host {
+    display: block;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  // Time shell — same 2.25rem height as calendar date controls.
+  // @see docs/specs/component/filters/calendar-dropdown.md
+  .time-field__control {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+    height: 2.25rem;
+    padding-inline: var(--spacing-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--background);
+    box-sizing: border-box;
+
+    &:hover {
+      @include emphasis.hover(8%);
+    }
+
+    &:focus-within {
+      border-color: color-mix(in srgb, var(--brand-gold) 42%, var(--border));
+      box-shadow: var(--interactive-focus-ring);
+    }
+  }
+
+  .time-field__input {
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-tight);
+    color: var(--foreground);
+    text-align: center;
+    outline: none;
+
+    &::placeholder {
+      color: var(--muted-foreground);
+    }
+  }
+
+  // Hour + minute scroll columns inside portaled panel.
+  .time-field__picker {
+    display: flex;
+    gap: var(--spacing-1);
+    padding: var(--spacing-1);
+    min-width: 6.5rem;
+  }
+
+  .time-field__wheel {
+    flex: 1 1 0;
+    min-width: 0;
+    max-height: 7.5rem;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+  }
+
+  .time-field__wheel-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 1.75rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-tight);
+    color: var(--muted-foreground);
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      @include emphasis.hover(8%);
+      color: var(--foreground);
+    }
+  }
+
+  .time-field__wheel-item--selected {
+    color: var(--interaction-selected-ink);
+    @include emphasis.selected-bordered(10%, 24%);
+  }
+}

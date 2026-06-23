@@ -6,9 +6,6 @@
   @for (btn of buttons(); track btn.id) {
     <button
       type="button"
-      hlmBtn
-      variant="outline"
-      size="sm"
       class="map-filter-toolbar__menu-trigger"
       [class.map-filter-toolbar__menu-trigger--open]="activeDropdown() === btn.id"
       [attr.data-active]="btn.active() ? 'true' : null"

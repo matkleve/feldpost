@@ -357,9 +357,9 @@ describe('NavComponent', () => {
     const labelTransition = labelRule?.style.getPropertyValue('transition') ?? '';
 
     expect(rowRule?.style.getPropertyValue('grid-template-columns')).toContain(
-      'var(--nav-row-grid-columns)',
+      'var(--sidebar-media-size)',
     );
-    expect(rowRule?.style.getPropertyValue('column-gap')).toBe('var(--nav-row-column-gap)');
+    expect(rowRule?.style.getPropertyValue('column-gap')).toBe('var(--sidebar-row-gap)');
     expect(mediaRule?.style.getPropertyValue('inline-size')).toBe('var(--sidebar-media-size)');
     expect(mediaRule?.style.getPropertyValue('min-inline-size')).toBe('var(--sidebar-media-size)');
     expect(rowTransition).not.toContain('padding');

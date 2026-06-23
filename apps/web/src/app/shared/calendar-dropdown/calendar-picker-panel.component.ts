@@ -16,6 +16,7 @@ import {
   buildCalendarDays,
   buildRangeCalendarDays,
   isCalendarDayDisabled,
+  isDateVisibleInDualMonthView,
   shiftCalendarMonth,
   todayIsoUtc,
 } from './calendar-picker.helpers';
@@ -160,7 +161,11 @@ export class CalendarPickerPanelComponent implements OnInit {
     effect(() => {
       const anchorDate = this.viewAnchorDate();
       if (anchorDate) {
-        this.syncVisibleMonthToDate(anchorDate);
+        if (
+          !isDateVisibleInDualMonthView(anchorDate, this.viewYear(), this.viewMonth())
+        ) {
+          this.syncVisibleMonthToDate(anchorDate);
+        }
         return;
       }
       this.syncViewToFocus();
@@ -275,8 +280,6 @@ export class CalendarPickerPanelComponent implements OnInit {
       to: next.to ? { date: next.to, time: current?.to?.time ?? null } : null,
     };
     this.rangeDraftChange.emit(newDraft);
-
-    if (!day.isCurrentMonth) this.syncVisibleMonthToDate(day.date);
   }
 
   private syncViewToFocus(): void {

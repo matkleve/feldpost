@@ -14232,6 +14232,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.filter.timespace.fromTime', 'From time', 'en', 'apps/web/src/app/shared/calendar-dropdown/calendar-dropdown.component.html from time aria')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'From time', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.fromTime'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Von Uhrzeit', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.fromTime'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ora inizio', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.fromTime'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'map.filter.timespace.to', 'To', 'en', 'apps/web/src/app/features/map/map-filter-toolbar/timespace-dropdown.component.html date input label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -14258,6 +14289,37 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'A', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'map.filter.timespace.to'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'map.filter.timespace.toTime', 'To time', 'en', 'apps/web/src/app/shared/calendar-dropdown/calendar-dropdown.component.html to time aria')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'To time', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.toTime'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Bis Uhrzeit', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.toTime'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ora fine', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'map.filter.timespace.toTime'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

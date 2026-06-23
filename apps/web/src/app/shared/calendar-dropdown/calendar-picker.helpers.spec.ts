@@ -4,6 +4,7 @@ import {
   buildCalendarDays,
   buildRangeCalendarDays,
   isCalendarDayDisabled,
+  isDateVisibleInDualMonthView,
   normalizeRangeValue,
   shiftCalendarMonth,
 } from './calendar-picker.helpers';
@@ -30,6 +31,12 @@ describe('calendar-picker.helpers', () => {
     const inside = days.find((d) => d.date === '2026-03-10');
     expect(before?.isDisabled).toBe(true);
     expect(inside?.isDisabled).toBe(false);
+  });
+
+  it('isDateVisibleInDualMonthView covers left and right months', () => {
+    expect(isDateVisibleInDualMonthView('2026-04-17', 2026, 3)).toBe(true);
+    expect(isDateVisibleInDualMonthView('2026-05-03', 2026, 3)).toBe(true);
+    expect(isDateVisibleInDualMonthView('2026-06-01', 2026, 3)).toBe(false);
   });
 
   it('shiftCalendarMonth rolls year at boundaries', () => {

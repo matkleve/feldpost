@@ -26,11 +26,20 @@
   padding: 0;
 }
 
-// Frosted chrome outside @layer — unlayered rules beat Tailwind's unlayered/utility-layer bg-background
-// applied by hlmBtn. All other outline-control users (GPS, upload shell) are already unlayered.
+// Frosted map trigger — plain button + outline-control (no hlmBtn; avoids triple hover stack).
 // @see docs/design/tokens.md § Frosted chrome
 button.map-filter-toolbar__menu-trigger {
   @include frosted-chrome.outline-control;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.25rem;
+  padding-block: 0;
+  border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+  cursor: pointer;
 }
 
 @layer components {
@@ -55,14 +64,26 @@ button.map-filter-toolbar__menu-trigger {
 }
 
 @layer states {
-  @include fp-toolbar-menu-trigger.toolbar-menu-trigger-states('map-filter-toolbar');
+  // Chevron only — frosted hover/active rules below; no shared toolbar-menu-trigger-states mixin
+  // (that mixin applies transparent emphasis.hover and fights outline-control on map chrome).
+  .map-filter-toolbar__menu-trigger--open [data-dd-part='chevron'] {
+    transform: rotate(180deg);
+  }
 
-  // Active resting state: frosted outline-control-selected overrides the transparent emphasis.selected-bordered
-  // from the shared toolbar-menu-trigger mixin, which has no frosted context.
-  // @see apps/web/src/styles/_frosted-chrome.scss § outline-control-selected
+  // Active resting state: frosted outline-control-selected.
   button.map-filter-toolbar__menu-trigger[data-active='true'] {
     color: var(--interaction-selected-ink);
     @include frosted-chrome.outline-control-selected;
+
+    [data-dd-part] {
+      color: inherit;
+    }
+  }
+
+  // Open panel (no filter active yet) — same gold hover chrome as idle hover.
+  button.map-filter-toolbar__menu-trigger--open:not([data-active='true']):not(:disabled) {
+    color: var(--brand-gold);
+    @include frosted-chrome.outline-control-hover;
 
     [data-dd-part] {
       color: inherit;

@@ -6,7 +6,6 @@ import { ProjectsDropdownComponent } from '../../../shared/workspace-pane/toolba
 import { FilterService } from '../../../core/filter/filter.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
-import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 import { TimespaceDropdownComponent } from './timespace-dropdown.component';
 
 export type MapFilterDropdown = 'filter' | 'projects' | 'timespace' | null;
@@ -20,7 +19,6 @@ export type MapFilterDropdown = 'filter' | 'projects' | 'timespace' | null;
     FilterDropdownComponent,
     ProjectsDropdownComponent,
     TimespaceDropdownComponent,
-    ...HLM_BUTTON_IMPORTS,
   ],
 })
 export class MapFilterToolbarComponent implements OnInit {

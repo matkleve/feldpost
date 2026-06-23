@@ -48,6 +48,32 @@ export function shiftCalendarMonth(
   return { year: date.getFullYear(), month: date.getMonth() };
 }
 
+/** True when `isoDate` falls in the left or right month of a dual-month range grid. */
+export function isDateVisibleInDualMonthView(
+  isoDate: string,
+  viewYear: number,
+  viewMonth: number,
+): boolean {
+  if (!isoDate) return false;
+  const parts = isoDate.split('-');
+  const year = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1;
+  if (year === viewYear && month === viewMonth) return true;
+  const right = shiftCalendarMonth(viewYear, viewMonth, 1);
+  return year === right.year && month === right.month;
+}
+
+/** ISO date the visible month should track when a range anchor opens. */
+export function resolveRangeViewAnchorDate(
+  anchor: 'from' | 'to' | 'pick',
+  range: { from?: { date: string | null } | null; to?: { date: string | null } | null } | null,
+): string {
+  const from = range?.from?.date ?? '';
+  const to = range?.to?.date ?? '';
+  if (anchor === 'pick') return from || to;
+  return anchor === 'to' ? to || from : from || to;
+}
+
 /**
  * Field-anchored day click — replaces the active bound only; normalizes order when both exist.
  * @see docs/specs/component/filters/calendar-dropdown.range-mode.supplement.md

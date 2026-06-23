@@ -11,9 +11,9 @@ import {
 import { parseIsoDateValue, toIsoDateValue } from '../../core/i18n/date-field.helpers';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { DropdownShellComponent } from '../dropdown-trigger/shell/dropdown-shell.component';
-import { HLM_BUTTON_IMPORTS } from '../ui/button';
+import { TimeFieldControlComponent } from '../time-field-control/time-field-control.component';
 import { CalendarPickerPanelComponent } from './calendar-picker-panel.component';
-import { normalizeRangeValue } from './calendar-picker.helpers';
+import { normalizeRangeValue, resolveRangeViewAnchorDate } from './calendar-picker.helpers';
 import type {
   CalendarDropdownValue,
   CalendarRangeValue,
@@ -24,7 +24,7 @@ import type {
 @Component({
   selector: 'app-calendar-dropdown',
   standalone: true,
-  imports: [DropdownShellComponent, CalendarPickerPanelComponent, ...HLM_BUTTON_IMPORTS],
+  imports: [DropdownShellComponent, CalendarPickerPanelComponent, TimeFieldControlComponent],
   templateUrl: './calendar-dropdown.component.html',
   styleUrl: './calendar-dropdown.component.scss',
 })
@@ -64,6 +64,10 @@ export class CalendarDropdownComponent {
   // ── Range mode draft + FSM ────────────────────────────────────────────────
   readonly rangeDraft = signal<CalendarRangeValue | null>(null);
   readonly anchorTarget = signal<RangeAnchorTarget>('from');
+  /** Stable month anchor when popover opens — does not follow live draft (prevents grid jump). */
+  readonly viewAnchorAtOpen = signal('');
+
+  readonly showTimeFields = computed(() => this.timeMode() !== 'dateOnly');
 
   // ── Anchor elements ───────────────────────────────────────────────────────
   private readonly controlRef = viewChild<ElementRef<HTMLElement>>('control');
@@ -109,21 +113,19 @@ export class CalendarDropdownComponent {
     return parsed ? this.i18nService.formatDateFieldValue(parsed) : '';
   });
 
+  readonly fromTimeValue = computed(() => {
+    const source = this.popoverOpen() ? this.rangeDraft() : this.rangeValue();
+    return source?.from?.time ?? null;
+  });
+
+  readonly toTimeValue = computed(() => {
+    const source = this.popoverOpen() ? this.rangeDraft() : this.rangeValue();
+    return source?.to?.time ?? null;
+  });
+
   readonly placeholder = computed(() => this.i18nService.dateFieldPlaceholder());
 
-  readonly panelViewAnchorDate = computed(() => {
-    if (this.mode() !== 'range') {
-      return this.draft()?.date ?? '';
-    }
-    const range = this.rangeDraft() ?? this.rangeValue();
-    const target = this.anchorTarget();
-    const from = range?.from?.date ?? '';
-    const to = range?.to?.date ?? '';
-    if (target === 'pick') return from || to;
-    if (target === 'to') return to || from;
-    if (target === 'from') return from || to;
-    return from || to;
-  });
+  readonly panelViewAnchorDate = computed(() => this.viewAnchorAtOpen());
 
   // ── Single mode actions ───────────────────────────────────────────────────
 
@@ -188,16 +190,14 @@ export class CalendarDropdownComponent {
 
     if (this.popoverOpen()) {
       if (this.anchorTarget() !== field) {
-        this.anchorTarget.set(field);
+        this.reanchorRangeField(field);
         return;
       }
       this.closePopover(false);
       return;
     }
 
-    this.anchorTarget.set(field);
-    this.rangeDraft.set(this.cloneRangeValue(this.rangeValue()));
-    this.popoverOpen.set(true);
+    this.openRangeFieldPopover(field);
   }
 
   /** Split layout: center icon opens two-click range pick in the panel. */
@@ -207,25 +207,42 @@ export class CalendarDropdownComponent {
 
     if (this.popoverOpen()) {
       if (this.anchorTarget() !== 'pick') {
-        this.anchorTarget.set('pick');
+        this.openRangePickPopover();
         return;
       }
       this.closePopover(false);
       return;
     }
 
-    this.anchorTarget.set('pick');
-    this.rangeDraft.set(this.cloneRangeValue(this.rangeValue()));
-    this.popoverOpen.set(true);
+    this.openRangePickPopover();
   }
 
-  /** Split layout: focus highlights one field for typing; does not open the panel. */
+  /** Split layout: focus opens single-endpoint calendar for that field. */
   onRangeFieldFocus(field: 'from' | 'to'): void {
-    this.anchorTarget.set(field);
+    if (this.popoverOpen()) {
+      if (this.anchorTarget() !== field) {
+        this.reanchorRangeField(field);
+      }
+      return;
+    }
+    this.openRangeFieldPopover(field);
   }
 
   onRangeDraftChange(next: CalendarRangeValue | null): void {
     this.rangeDraft.set(next);
+
+    if (this.layout() !== 'split' || this.anchorTarget() === 'pick') {
+      return;
+    }
+
+    const draft = normalizeRangeValue(next);
+    const anchor = this.anchorTarget();
+    const hasEndpoint =
+      anchor === 'from' ? !!draft?.from?.date : anchor === 'to' ? !!draft?.to?.date : false;
+    if (!hasEndpoint) return;
+
+    this.rangeChange.emit(draft);
+    this.closePopover(true);
   }
 
   onRangePanelDone(): void {
@@ -248,12 +265,43 @@ export class CalendarDropdownComponent {
     this.applyRangeShellHalf('to', (event.target as HTMLInputElement).value);
   }
 
+  onFromTimeChange(time: string | null): void {
+    this.applyRangeTimeHalf('from', time);
+  }
+
+  onToTimeChange(time: string | null): void {
+    this.applyRangeTimeHalf('to', time);
+  }
+
   // ── Private ───────────────────────────────────────────────────────────────
 
   private closePopover(_committed: boolean): void {
     this.popoverOpen.set(false);
     this.draft.set(null);
     this.rangeDraft.set(null);
+    this.viewAnchorAtOpen.set('');
+  }
+
+  private openRangeFieldPopover(field: 'from' | 'to'): void {
+    const range = this.rangeValue();
+    this.anchorTarget.set(field);
+    this.viewAnchorAtOpen.set(resolveRangeViewAnchorDate(field, range));
+    this.rangeDraft.set(this.cloneRangeValue(range));
+    this.popoverOpen.set(true);
+  }
+
+  private openRangePickPopover(): void {
+    const range = this.rangeValue();
+    this.anchorTarget.set('pick');
+    this.viewAnchorAtOpen.set(resolveRangeViewAnchorDate('pick', range));
+    this.rangeDraft.set(this.cloneRangeValue(range));
+    this.popoverOpen.set(true);
+  }
+
+  private reanchorRangeField(field: 'from' | 'to'): void {
+    const range = this.rangeDraft() ?? this.rangeValue();
+    this.anchorTarget.set(field);
+    this.viewAnchorAtOpen.set(resolveRangeViewAnchorDate(field, range));
   }
 
   private cloneValue(value: CalendarDropdownValue | null): CalendarDropdownValue | null {
@@ -309,6 +357,34 @@ export class CalendarDropdownComponent {
       this.rangeChange.emit(null);
       return;
     }
+    this.rangeChange.emit(normalized);
+  }
+
+  private applyRangeTimeHalf(field: 'from' | 'to', time: string | null): void {
+    const base = this.popoverOpen()
+      ? (this.rangeDraft() ?? this.cloneRangeValue(this.rangeValue()))
+      : this.cloneRangeValue(this.rangeValue());
+
+    const normalized = normalizeRangeValue({
+      from:
+        field === 'from'
+          ? { date: base?.from?.date ?? null, time }
+          : base?.from
+            ? { date: base.from.date, time: base.from.time }
+            : null,
+      to:
+        field === 'to'
+          ? { date: base?.to?.date ?? null, time }
+          : base?.to
+            ? { date: base.to.date, time: base.to.time }
+            : null,
+    });
+
+    if (this.popoverOpen()) {
+      this.rangeDraft.set(normalized);
+      return;
+    }
+
     this.rangeChange.emit(normalized);
   }
 }

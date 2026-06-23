@@ -33,17 +33,20 @@
   </label>
 } @else {
   @if (layout() === 'split') {
-    <div class="calendar-dropdown--range calendar-dropdown--split">
+    <div
+      class="calendar-dropdown--range calendar-dropdown--split"
+      [class.calendar-dropdown--split-with-time]="showTimeFields()"
+    >
       @if (fromLabel()) {
-        <span class="calendar-dropdown__label">{{ fromLabel() }}</span>
+        <span class="calendar-dropdown__label calendar-dropdown__label--from">{{ fromLabel() }}</span>
       } @else {
-        <span class="calendar-dropdown__label" aria-hidden="true"></span>
+        <span class="calendar-dropdown__label calendar-dropdown__label--from" aria-hidden="true"></span>
       }
       <span class="calendar-dropdown__split-gap" aria-hidden="true"></span>
       @if (toLabel()) {
-        <span class="calendar-dropdown__label">{{ toLabel() }}</span>
+        <span class="calendar-dropdown__label calendar-dropdown__label--to">{{ toLabel() }}</span>
       } @else {
-        <span class="calendar-dropdown__label" aria-hidden="true"></span>
+        <span class="calendar-dropdown__label calendar-dropdown__label--to" aria-hidden="true"></span>
       }
       <div
         #fromControl
@@ -63,12 +66,17 @@
           (keydown.enter)="onFromShellTextCommit($event)"
         />
       </div>
+      @if (showTimeFields()) {
+        <app-time-field-control
+          class="calendar-dropdown__time-field"
+          [value]="fromTimeValue()"
+          [ariaLabel]="t('map.filter.timespace.fromTime', 'From time')"
+          (valueChange)="onFromTimeChange($event)"
+        />
+      }
       <button
         #pickControl
         type="button"
-        hlmBtn
-        variant="outline"
-        size="icon-sm"
         class="calendar-dropdown__range-pick"
         [class.calendar-dropdown__range-pick--open]="popoverOpen() && anchorTarget() === 'pick'"
         [attr.aria-label]="t('shared.dateField.openCalendarRange', 'Select date range')"
@@ -95,6 +103,14 @@
           (keydown.enter)="onToShellTextCommit($event)"
         />
       </div>
+      @if (showTimeFields()) {
+        <app-time-field-control
+          class="calendar-dropdown__time-field"
+          [value]="toTimeValue()"
+          [ariaLabel]="t('map.filter.timespace.toTime', 'To time')"
+          (valueChange)="onToTimeChange($event)"
+        />
+      }
     </div>
   } @else {
   <div class="calendar-dropdown--range" [class.calendar-dropdown--toolbar]="layout() === 'toolbar'">

@@ -47,10 +47,10 @@ export function matchesTimeRange(
   }
 
   const ts = effectiveMediaTimestampMs(image);
-  if (range.from && ts < startOfUtcDay(range.from.getTime())) {
+  if (range.from && ts < range.from.getTime()) {
     return false;
   }
-  if (range.to && ts > endOfUtcDay(range.to.getTime())) {
+  if (range.to && ts > range.to.getTime()) {
     return false;
   }
   return true;
