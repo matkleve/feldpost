@@ -19,40 +19,41 @@ Desktop width is **pinned** by an explicit collapse control — **not** hover-to
 
 **Deferred (not shipped):** hover/focus-within auto-expand in Actions #1–2 / #7–8 of legacy sidebar drafts. Do not reintroduce without a spec amendment.
 
-## NavRow contract (no sideways jump)
+## NavRow contract (nothing changes on collapse)
 
-Every desktop row keeps the **same grid shell** in both widths:
+Row CSS is **identical** in both states. The sidebar's `overflow: hidden` clips the label column naturally when the rail narrows.
 
 ```text
-NavRow
+NavRow (expanded AND collapsed — same CSS)
 ├── MediaColumn   ← var(--sidebar-media-size) = var(--spacing-6) = 32px
-└── LabelColumn   ← minmax(0, 1fr); clipped when collapsed
+└── LabelColumn   ← minmax(0, 1fr) — clipped by sidebar overflow:hidden when collapsed
 ```
 
 | Property | Expanded | Collapsed | Changes on toggle? |
 | --- | --- | --- | --- |
 | Panel `padding-inline` | `var(--spacing-2)` (8px) | same | **No** |
 | Row `padding-inline` | `0` | same | **No** |
+| Row `padding-block` | `var(--spacing-2)` (8px) | same | **No** |
 | Row `display` | `grid` | same | **No** |
-| Row `column-gap` | `var(--spacing-3)` | `0` | **Yes** |
-| Row `min-height` | row height token (`36px`) | same | **No** |
+| Row `column-gap` | `var(--spacing-3)` (12px) | same | **No** |
+| Row `min-height` | `48px` (32 + 2×8) | same | **No** |
 | Media column width | 32px | same | **No** |
-| Label column width | `minmax(0, 1fr)` | `0fr` (mounted, clipped) | **Yes** |
 | Label visibility | opacity `1` | opacity `0`, `visibility: hidden` | **Yes** |
 | Sidebar width | `15rem` | `3rem` | **Yes** |
 
-Horizontal inset for icons = panel padding only (**8px** from rail edge). When collapsed, row `column-gap` MUST be **0** — otherwise `32px media + 12px gap` overflows the `3rem` rail.
+### How clipping works
 
-### Collapsed rail math
+`overflow: hidden` is set on `.sidebar`. When the rail narrows to `3rem` (48px):
 
 ```text
 3rem rail (48px)
-├── padding-inline spacing-2 × 2  → 16px
-└── content (32px) = media column width exactly
-    └── NavRow grid: [ 32px media | 0fr label ], gap 0
+├── panel padding-inline: 8px + 8px  → 16px
+└── content box: 32px
+    ├── grid col 1 (media): 32px  → fills content exactly
+    └── grid gap (12px) + col 2 (label): overflow → clipped by sidebar
 ```
 
-Icons stay in the **leading column**; they are not re-centered with flex/`margin: auto` on collapse.
+Icons stay in the **leading column** at a fixed X position. No CSS changes on the row.
 
 ## Header row
 
@@ -87,15 +88,15 @@ sequenceDiagram
   N->>N: sidebarCollapsed.toggle + localStorage
   N->>D: --feldpost-sidebar-width
   N->>M: invalidateMapSize (debounced)
-  Note over N: Width + label clip + collapsed gap/label column only
+  Note over N: Width narrows; overflow:hidden clips labels; row CSS unchanged
 ```
 
 ## Acceptance Criteria (collapse & geometry)
 
 - [x] Panel `padding-inline` identical in collapsed and expanded desktop states
-- [x] Row shell (grid, media width, row padding) unchanged across toggle
-- [x] Collapsed: column-gap `0`, label column `0fr` — row min-height unchanged
-- [x] Labels hidden via opacity/visibility; remain mounted
+- [x] Row CSS (grid, column-gap, padding, min-height) unchanged across toggle
+- [x] Sidebar `overflow: hidden` clips label column — no row CSS changes needed
+- [x] Labels fade via opacity/visibility; layout handled by clipping
 - [x] Collapse control persists across reload
 - [x] Map `invalidateSize` runs on toggle, not on component init
 - [ ] Hover-to-expand desktop rail (deferred — not implemented)

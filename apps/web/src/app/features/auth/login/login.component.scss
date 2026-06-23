@@ -1,5 +1,12 @@
 @use '../auth.styles';
 
+// Feldpost stamp logo centered above the sign-in heading
+// @see docs/specs/component/workspace/sidebar.md
+.auth-card__logo {
+  display: block;
+  margin: 0 auto var(--spacing-4);
+}
+
 // Establishes stacking context so the toggle button can be positioned absolutely
 // @see login.component.html#password-field-wrapper
 .password-field-wrapper {

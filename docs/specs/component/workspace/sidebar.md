@@ -8,7 +8,7 @@ Detail: [`sidebar.collapse.supplement.md`](sidebar.collapse.supplement.md) (NavR
 
 ## What It Looks Like
 
-**Desktop (≥ 768px):** Expanded = `15rem`; collapsed = `3rem`. Panel uses frosted chrome with **`padding-inline: var(--spacing-2)` in both widths**. Nav rows use a fixed **32px leading media column**; labels clip via opacity when collapsed — icons do **not** re-center. Collapsed rows zero out **column-gap** only (label column `0fr`). Header: logo | title | collapse control (see supplement).
+**Desktop (≥ 768px):** Expanded = `15rem`; collapsed = `3rem`. Panel uses frosted chrome; row CSS is **identical in both states** — sidebar `overflow: hidden` clips the label column automatically. Icons stay at a fixed X position. Header: logo | title | collapse control (see supplement).
 
 **Mobile (< 768px):** Bottom bar `3.5rem` tall, icons only. Account row hidden (settings via other surfaces).
 
@@ -41,11 +41,12 @@ Tokens: [`docs/design/tokens.md`](../../../design/tokens.md), [`docs/design/layo
 | Property | Value |
 | --- | --- |
 | Collapsed / expanded width | `3rem` / `15rem` |
-| Panel `padding-inline` | `var(--spacing-2)` — **constant** |
-| Row `padding-inline` | `0` |
-| Media column | `var(--spacing-6)` (32px) |
-| Row min-height | `calc(var(--spacing-6) + var(--spacing-1))` |
-| Icon-to-label gap | `var(--spacing-3)` |
+| Panel `padding-inline` | `var(--spacing-2)` (8px) — **constant** |
+| Row `padding-block` | `var(--spacing-2)` (8px) — **constant** |
+| Row `padding-inline` | `0` — **constant** |
+| Row `column-gap` | `var(--spacing-3)` (12px) — **constant** |
+| Media column | `var(--spacing-6)` (32px) — **constant** |
+| Row min-height | `calc(var(--spacing-6) + 2 × var(--spacing-2))` = 48px — **constant** |
 | Width transition | `180ms ease-out` |
 
 Full tables + mobile bar: [`sidebar.collapse.supplement.md`](sidebar.collapse.supplement.md).

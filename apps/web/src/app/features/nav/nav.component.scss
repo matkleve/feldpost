@@ -15,8 +15,7 @@
 .sidebar {
   --sidebar-width-expanded: 15rem;
   --sidebar-width-collapsed: 3rem;
-  // Panel padding-inline (spacing-2) = row padding-block — equal inset on all sides of icon column.
-  --sidebar-row-padding-inline: 0;
+  // Row padding-block = panel padding-inline (spacing-2): uniform inset on all sides of icon column.
   --sidebar-row-padding-block: var(--spacing-2);
   --sidebar-row-gap: var(--spacing-3);
   --sidebar-media-size: var(--spacing-6);
@@ -33,10 +32,9 @@
     width: var(--sidebar-width-expanded);
     height: 100vh;
     overflow: hidden;
-    border-radius: 0;
     display: flex;
     align-items: stretch;
-    transition: width 180ms ease-out;
+    transition: width var(--motion-duration-entrance) var(--motion-ease-out);
   }
 
   @media (max-width: 767px) {
@@ -44,7 +42,6 @@
     left: 0;
     right: 0;
     top: auto;
-    transform: none;
     width: 100%;
     height: 3.5rem;
     display: flex;
@@ -110,13 +107,6 @@
   flex-shrink: 0;
 }
 
-.nav__logo-bg {
-  fill: var(--primary);
-}
-
-.nav__logo-fg {
-  fill: var(--primary-foreground);
-}
 
 .nav__header-title {
   grid-column: 2;
@@ -147,17 +137,17 @@
     color: var(--muted-foreground);
     cursor: pointer;
     transition:
-      background 80ms ease-out,
-      color 80ms ease-out;
+      background var(--motion-duration-fast) var(--motion-ease-out),
+      color var(--motion-duration-fast) var(--motion-ease-out);
 
     .material-icons {
       font-size: 1.1rem;
       line-height: var(--line-height-solid);
     }
 
-    &:hover {
-      background: color-mix(in srgb, var(--muted-foreground) 10%, transparent);
-      color: var(--foreground);
+    &:hover,
+    &:focus-visible {
+      @include emphasis.hover(10%);
     }
 
     &:focus-visible {
@@ -228,7 +218,7 @@
   column-gap: var(--sidebar-row-gap);
   min-height: var(--sidebar-row-height);
   padding-block: var(--sidebar-row-padding-block);
-  padding-inline: var(--sidebar-row-padding-inline);
+  padding-inline: 0;
   width: 100%;
   border-radius: var(--container-radius-control);
   text-decoration: none;
@@ -237,8 +227,8 @@
   cursor: pointer;
   margin: 0;
   transition:
-    background 80ms ease-out,
-    color 80ms ease-out;
+    background var(--motion-duration-fast) var(--motion-ease-out),
+    color var(--motion-duration-fast) var(--motion-ease-out);
 
   @media (min-width: 768px) {
     overflow: hidden;
@@ -345,7 +335,7 @@
   column-gap: var(--sidebar-row-gap);
   min-height: var(--sidebar-row-height);
   padding-block: var(--sidebar-row-padding-block);
-  padding-inline: var(--sidebar-row-padding-inline);
+  padding-inline: 0;
   width: 100%;
   border: none;
   border-radius: var(--container-radius-control);
@@ -356,8 +346,8 @@
   overflow: hidden;
   white-space: nowrap;
   transition:
-    background 80ms ease-out,
-    color 80ms ease-out;
+    background var(--motion-duration-fast) var(--motion-ease-out),
+    color var(--motion-duration-fast) var(--motion-ease-out);
 
   &:hover,
   &:focus-visible {
@@ -412,7 +402,7 @@
   height: 0.25rem;
   border-radius: var(--radius-full);
   background: color-mix(in srgb, var(--muted-foreground) 35%, transparent);
-  transition: background 120ms ease-out;
+  transition: background var(--motion-duration-fast) var(--motion-ease-out);
 }
 
 .nav__theme-dot--active {
@@ -439,8 +429,8 @@
   background: var(--primary);
   color: var(--primary-foreground);
   transition:
-    background 80ms ease-out,
-    transform 80ms ease-out;
+    background var(--motion-duration-fast) var(--motion-ease-out),
+    transform var(--motion-duration-fast) var(--motion-ease-out);
   user-select: none;
 
   .nav__account-link:hover & {
@@ -478,8 +468,10 @@
   border: 0;
 }
 
-// ── Collapsed (desktop) — width + label clip only; row shell unchanged ────────
-// @see docs/specs/component/workspace/sidebar.md § Desktop NavRow contract
+// ── Collapsed (desktop) ───────────────────────────────────────────────────────
+// Sidebar width narrows; overflow:hidden on .sidebar clips labels automatically.
+// Row grid (columns, gap, padding, height) is IDENTICAL in both states.
+// @see docs/specs/component/workspace/sidebar.collapse.supplement.md
 
 :host.nav--collapsed {
   @media (min-width: 768px) {
@@ -492,6 +484,7 @@
     }
   }
 
+  // Header: collapse to single icon column; title + logo hidden.
   .nav__header {
     @media (min-width: 768px) {
       grid-template-columns: var(--sidebar-media-size);
@@ -511,22 +504,12 @@
     }
   }
 
-  .nav__link,
-  .nav__utility-btn {
-    @media (min-width: 768px) {
-      // Label column stays mounted but takes 0 width; gap must be 0 on 3rem rail.
-      grid-template-columns: var(--sidebar-media-size) 0fr;
-      column-gap: 0;
-    }
-  }
-
+  // Labels fade out; overflow:hidden on .sidebar clips their layout space.
   .nav__label {
     @media (min-width: 768px) {
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
-      overflow: hidden;
-      min-width: 0;
     }
   }
 }
