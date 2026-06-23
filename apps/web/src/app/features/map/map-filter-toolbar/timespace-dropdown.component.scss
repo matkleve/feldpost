@@ -21,19 +21,11 @@
     min-width: 0;
   }
 
-  // Committed range summary + text reset — reference layout below date fields.
+  // Committed range summary below date fields (reset stays in footer).
   // @see docs/specs/component/map/map-filter-toolbar.md
   .timespace-dropdown__summary {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--spacing-2);
+    margin: 0;
     width: 100%;
-    min-width: 0;
-  }
-
-  .timespace-dropdown__summary-label {
-    flex: 1 1 auto;
     min-width: 0;
     font-size: var(--font-size-2xs);
     line-height: var(--line-height-tight);
@@ -41,21 +33,6 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-
-  // Text reset — destructive on hover; replaces footer icon reset.
-  .timespace-dropdown__reset-link {
-    flex: 0 0 auto;
-    font-size: var(--font-size-2xs);
-    height: auto;
-    padding-inline: var(--spacing-1);
-    color: var(--muted-foreground);
-
-    &:hover:not(:disabled),
-    &:focus-visible:not(:disabled) {
-      color: var(--destructive);
-      background: color-mix(in srgb, var(--destructive) 8%, transparent);
-    }
   }
 
   // Histogram track — fixed height so bar px heights resolve.
@@ -152,10 +129,37 @@
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--brand-gold) 28%, transparent);
   }
 
-  // Footer — matched item count below histogram.
+  // Footer — reset (left) and matched item count (right-bottom).
   // @see docs/specs/component/map/map-filter-toolbar.md
+  .timespace-dropdown__footer {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--spacing-1);
+    width: 100%;
+    min-width: 0;
+  }
+
+  .timespace-dropdown__footer-start {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+
+  .timespace-dropdown__reset {
+    color: var(--muted-foreground);
+  }
+
+  .timespace-dropdown__reset-icon {
+    font-size: var(--font-size-lg);
+    line-height: 1;
+    transition: transform var(--motion-duration-fast) var(--motion-ease-out);
+  }
+
   .timespace-dropdown__count {
-    align-self: flex-end;
+    margin-left: auto;
+    flex: 0 0 auto;
     font-size: var(--font-size-2xs);
     line-height: 1;
     color: var(--muted-foreground);

@@ -60,7 +60,6 @@
           [attr.placeholder]="placeholder()"
           [attr.aria-label]="fromLabel()"
           [value]="fromShellText()"
-          (focus)="openRangeIfClosed('from')"
           (change)="onFromShellTextCommit($event)"
           (keydown.enter)="onFromShellTextCommit($event)"
         />
@@ -93,7 +92,6 @@
           [attr.placeholder]="placeholder()"
           [attr.aria-label]="toLabel()"
           [value]="toShellText()"
-          (focus)="openRangeIfClosed('to')"
           (change)="onToShellTextCommit($event)"
           (keydown.enter)="onToShellTextCommit($event)"
         />

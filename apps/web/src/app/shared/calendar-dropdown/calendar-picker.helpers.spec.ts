@@ -2,6 +2,7 @@ import {
   buildCalendarDays,
   buildRangeCalendarDays,
   isCalendarDayDisabled,
+  normalizeRangeValue,
   shiftCalendarMonth,
 } from './calendar-picker.helpers';
 
@@ -53,5 +54,14 @@ describe('calendar-picker.helpers', () => {
     expect(start?.isRangeEnd).toBe(false);
     expect(preview?.isPreviewInRange).toBe(true);
     expect(mayDays.some((d) => d.isRangeEnd)).toBe(false);
+  });
+
+  it('normalizeRangeValue swaps unordered endpoints', () => {
+    const normalized = normalizeRangeValue({
+      from: { date: '2026-05-22', time: null },
+      to: { date: '2026-04-09', time: null },
+    });
+    expect(normalized?.from?.date).toBe('2026-04-09');
+    expect(normalized?.to?.date).toBe('2026-05-22');
   });
 });

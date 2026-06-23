@@ -12,6 +12,7 @@ import { parseIsoDateValue, toIsoDateValue } from '../../core/i18n/date-field.he
 import { I18nService } from '../../core/i18n/i18n.service';
 import { DropdownShellComponent } from '../dropdown-trigger/shell/dropdown-shell.component';
 import { CalendarPickerPanelComponent } from './calendar-picker-panel.component';
+import { normalizeRangeValue } from './calendar-picker.helpers';
 import type {
   CalendarDropdownValue,
   CalendarRangeValue,
@@ -174,13 +175,6 @@ export class CalendarDropdownComponent {
 
   // ── Range mode actions ────────────────────────────────────────────────────
 
-  openRangeIfClosed(field: 'from' | 'to'): void {
-    if (this.popoverOpen()) return;
-    this.anchorTarget.set(this.resolveRangeAnchor(field));
-    this.rangeDraft.set(this.cloneRangeValue(this.rangeValue()));
-    this.popoverOpen.set(true);
-  }
-
   toggleRangePopover(event: MouseEvent, field: 'from' | 'to'): void {
     event.preventDefault();
     event.stopPropagation();
@@ -200,7 +194,8 @@ export class CalendarDropdownComponent {
   }
 
   onRangePanelDone(): void {
-    const draft = this.rangeDraft();
+    const draft = normalizeRangeValue(this.rangeDraft());
+    if (!draft?.from?.date || !draft?.to?.date) return;
     this.rangeChange.emit(draft);
     this.closePopover(true);
   }
@@ -211,19 +206,11 @@ export class CalendarDropdownComponent {
   }
 
   onFromShellTextCommit(event: Event): void {
-    const raw = (event.target as HTMLInputElement).value;
-    const parsed = this.i18nService.parseDateFieldValue(raw);
-    const date = parsed ? toIsoDateValue(parsed) : null;
-    const current = this.rangeValue();
-    this.rangeChange.emit({ from: date ? { date, time: null } : null, to: current?.to ?? null });
+    this.applyRangeShellHalf('from', (event.target as HTMLInputElement).value);
   }
 
   onToShellTextCommit(event: Event): void {
-    const raw = (event.target as HTMLInputElement).value;
-    const parsed = this.i18nService.parseDateFieldValue(raw);
-    const date = parsed ? toIsoDateValue(parsed) : null;
-    const current = this.rangeValue();
-    this.rangeChange.emit({ from: current?.from ?? null, to: date ? { date, time: null } : null });
+    this.applyRangeShellHalf('to', (event.target as HTMLInputElement).value);
   }
 
   // ── Private ───────────────────────────────────────────────────────────────
@@ -263,5 +250,37 @@ export class CalendarDropdownComponent {
   private isDraftValid(draft: CalendarDropdownValue | null): boolean {
     if (!draft?.date) return this.nullable();
     return true;
+  }
+
+  /**
+   * Shell typing: popover open → draft half only (spec: blur does not close).
+   * Popover closed → commit immediately to parent (timespace inline edit).
+   */
+  private applyRangeShellHalf(field: 'from' | 'to', raw: string): void {
+    const parsed = this.i18nService.parseDateFieldValue(raw);
+    const date = parsed ? toIsoDateValue(parsed) : null;
+    const base = this.popoverOpen()
+      ? (this.rangeDraft() ?? this.cloneRangeValue(this.rangeValue()))
+      : this.cloneRangeValue(this.rangeValue());
+
+    let fromIso = field === 'from' ? date : (base?.from?.date ?? null);
+    let toIso = field === 'to' ? date : (base?.to?.date ?? null);
+
+    const normalized = normalizeRangeValue({
+      from: fromIso ? { date: fromIso, time: base?.from?.time ?? null } : null,
+      to: toIso ? { date: toIso, time: base?.to?.time ?? null } : null,
+    });
+
+    if (this.popoverOpen()) {
+      this.anchorTarget.set(field);
+      this.rangeDraft.set(normalized);
+      return;
+    }
+
+    if (!normalized?.from?.date && !normalized?.to?.date) {
+      this.rangeChange.emit(null);
+      return;
+    }
+    this.rangeChange.emit(normalized);
   }
 }

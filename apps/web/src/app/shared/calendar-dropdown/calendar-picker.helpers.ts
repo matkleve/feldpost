@@ -48,6 +48,19 @@ export function shiftCalendarMonth(
   return { year: date.getFullYear(), month: date.getMonth() };
 }
 
+/** Ensure range endpoints are ordered — earlier date is always `from`. */
+export function normalizeRangeValue<T extends { date: string | null; time: string | null }>(
+  value: { from: T | null; to: T | null } | null,
+): { from: T | null; to: T | null } | null {
+  if (!value) return null;
+  const from = value.from?.date ?? null;
+  const to = value.to?.date ?? null;
+  if (from && to && from > to) {
+    return { from: value.to, to: value.from };
+  }
+  return value;
+}
+
 /** Shared month grid generator — returns raw cell data for a 6×7 grid. */
 function generateMonthGrid(
   year: number,

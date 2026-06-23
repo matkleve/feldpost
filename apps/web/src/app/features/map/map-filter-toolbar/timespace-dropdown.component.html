@@ -13,19 +13,7 @@
 </div>
 
 @if (hasActiveFilter() && rangeSummaryLabel()) {
-  <div class="timespace-dropdown__summary">
-    <span class="timespace-dropdown__summary-label">{{ rangeSummaryLabel() }}</span>
-    <button
-      hlmBtn
-      variant="ghost"
-      size="sm"
-      type="button"
-      class="timespace-dropdown__reset-link"
-      (click)="onReset()"
-    >
-      {{ t('map.filter.timespace.reset', 'Reset') }}
-    </button>
-  </div>
+  <p class="timespace-dropdown__summary">{{ rangeSummaryLabel() }}</p>
 }
 
 <div
@@ -77,6 +65,29 @@
   }
 </div>
 
-@if (histogram()) {
-  <span class="timespace-dropdown__count" aria-live="polite">{{ itemCountLabel() }}</span>
-}
+<div class="timespace-dropdown__footer">
+  <div class="timespace-dropdown__footer-start">
+    @if (hasActiveFilter()) {
+      <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        class="timespace-dropdown__reset"
+        type="button"
+        data-fp-timespace-reset="true"
+        (click)="onReset()"
+        [attr.aria-label]="t('map.filter.timespace.reset.aria', 'Reset time range')"
+      >
+        <span
+          class="timespace-dropdown__reset-icon material-icons"
+          data-fp-timespace-reset-icon="true"
+          aria-hidden="true"
+          >restart_alt</span
+        >
+      </button>
+    }
+  </div>
+  @if (histogram()) {
+    <span class="timespace-dropdown__count" aria-live="polite">{{ itemCountLabel() }}</span>
+  }
+</div>
