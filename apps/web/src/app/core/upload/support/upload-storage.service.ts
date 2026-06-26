@@ -20,6 +20,7 @@ import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../../auth/auth.service';
 import { SupabaseService } from '../../supabase/supabase.service';
 import { WideEventService } from '../../wide-event/wide-event.service';
+import { buildMediaStoragePath, uploadToMediaBucket } from './upload-storage-write.util';
 
 @Injectable({ providedIn: 'root' })
 export class UploadStorageService {
@@ -54,16 +55,16 @@ export class UploadStorageService {
         return null;
       }
 
-      const uuid = crypto.randomUUID();
-      const ext = (file.name.split('.').pop() ?? 'jpg').toLowerCase();
-      const storagePath = `${orgId}/${user.id}/${uuid}.${ext}`;
+      const storagePath = buildMediaStoragePath(orgId, user.id, file.name);
       ev.set({ storagePath, bytesWritten: file.size });
 
-      const { error } = await this.supabase.client.storage.from('media').upload(storagePath, file, {
-        contentType: file.type,
-        upsert: false,
-        ...(abortSignal ? ({ signal: abortSignal } as Record<string, unknown>) : {}),
-      });
+      const { error } = await uploadToMediaBucket(
+        this.supabase.client,
+        storagePath,
+        file,
+        file.type,
+        abortSignal,
+      );
 
       if (error) {
         ev.end('error', {

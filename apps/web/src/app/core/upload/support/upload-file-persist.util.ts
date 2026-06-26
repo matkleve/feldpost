@@ -8,6 +8,7 @@ import type { User } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { GeocodingService } from '../../geocoding/geocoding.service';
 import { resolveUploadAddress } from '../address-resolution/upload-address-resolve.util';
+import { buildMediaStoragePath, uploadToMediaBucket } from './upload-storage-write.util';
 import {
   describeUploadPersistError,
   mapUploadStorageError,
@@ -71,9 +72,7 @@ export async function persistUploadFile(
     return { error: new Error('Profile not found.') };
   }
 
-  const uuid = crypto.randomUUID();
-  const ext = (input.file.name.split('.').pop() ?? 'jpg').toLowerCase();
-  const storagePath = `${orgId}/${user.id}/${uuid}.${ext}`;
+  const storagePath = buildMediaStoragePath(orgId, user.id, input.file.name);
 
   if (input.abortSignal?.aborted) {
     return { error: 'Upload cancelled by user.' };
@@ -111,14 +110,13 @@ async function uploadFileToStorage(
   deps: UploadFilePersistDeps,
   abortSignal?: AbortSignal,
 ): Promise<UploadResult | { error: null }> {
-  const contentType = deps.resolveMimeType(file);
-  const { error: storageError } = await deps.supabaseClient.storage
-    .from('media')
-    .upload(storagePath, file, {
-      contentType,
-      upsert: false,
-      ...(abortSignal ? ({ signal: abortSignal } as Record<string, unknown>) : {}),
-    });
+  const { error: storageError } = await uploadToMediaBucket(
+    deps.supabaseClient,
+    storagePath,
+    file,
+    deps.resolveMimeType(file),
+    abortSignal,
+  );
 
   if (storageError) {
     return { error: mapUploadStorageError(storageError) };
