@@ -9,7 +9,9 @@ import unusedImports from 'eslint-plugin-unused-imports';
 const { getTemplateParserServices } = angularEslintUtils;
 
 const maintainabilityGuidance = {
-  'max-lines': ['warn', { max: 200, skipBlankLines: true, skipComments: true }],
+  // 300 code lines (blanks/comments excluded) matches the common industry band
+  // (Airbnb default) and avoids forcing cohesive files into mechanical splits.
+  'max-lines': ['warn', { max: 300, skipBlankLines: true, skipComments: true }],
   'max-lines-per-function': ['warn', { max: 60 }],
   complexity: ['warn', 15],
 };
@@ -193,8 +195,8 @@ export default tseslint.config(
       'unused-imports': unusedImports,
     },
     rules: {
-      // Specs can be longer — each scenario adds lines
-      'max-lines': ['warn', { max: 200, skipBlankLines: true, skipComments: true }],
+      // Specs can be longer - each scenario adds lines
+      'max-lines': ['warn', { max: 300, skipBlankLines: true, skipComments: true }],
       'max-lines-per-function': ['warn', { max: 60 }],
       // No magic numbers rule in specs — test values are explicit by nature
       'no-magic-numbers': 'off',
@@ -205,13 +207,14 @@ export default tseslint.config(
     },
   },
 
-  // ── Upload core services — enforce split-friendly file size ───────────────
-  // Counts code lines only (blank lines and comments excluded).
-  // @see docs/agent-workflows/upload-core-services-split-prompt.md
+  // ── Upload core services — hard ceiling against god-files ─────────────────
+  // Counts code lines only (blank lines and comments excluded). The ceiling is
+  // a backstop for genuinely oversized services, not a split trigger; routine
+  // guidance comes from the global 300-line warning above.
   {
     files: ['src/app/core/upload/**/*.service.ts'],
     rules: {
-      'max-lines': ['error', { max: 300, skipBlankLines: true, skipComments: true }],
+      'max-lines': ['error', { max: 400, skipBlankLines: true, skipComments: true }],
       'max-lines-per-function': ['error', { max: 80, skipBlankLines: true, skipComments: true }],
     },
   },
