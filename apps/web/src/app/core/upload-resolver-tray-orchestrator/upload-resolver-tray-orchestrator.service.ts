@@ -32,7 +32,6 @@ export class UploadResolverTrayOrchestratorService {
   private readonly _collectingBundle = signal<PresentationBundle | null>(null);
   private readonly _presentingBundle = signal<PresentationBundle | null>(null);
   private readonly _pendingBundles = signal<PresentationBundle[]>([]);
-  private readonly _flushedBundles = signal<PresentationBundle[]>([]);
 
   private readonly _resolvedItemIds = signal<Set<string>>(new Set());
   private readonly _skippedItemIds = signal<Set<string>>(new Set());
@@ -102,13 +101,6 @@ export class UploadResolverTrayOrchestratorService {
       allTerminal: bundleAllTerminal(bundle.items, resolved, skipped),
     };
   });
-
-  readonly hasQueuedBundles = computed(
-    () =>
-      this._pendingBundles().length > 0 ||
-      this._collectingBundle() !== null ||
-      this._inbox().length > 0,
-  );
 
   /** More presentation bundles or collecting window after current bundle. */
   readonly hasPresentationBacklog = computed(
@@ -319,7 +311,6 @@ export class UploadResolverTrayOrchestratorService {
     this._collectingBundle.set(null);
     this._presentingBundle.set(null);
     this._pendingBundles.set([]);
-    this._flushedBundles.set([]);
     this._resolvedItemIds.set(new Set());
     this._skippedItemIds.set(new Set());
     this._activeItemIndex.set(0);
@@ -501,7 +492,6 @@ export class UploadResolverTrayOrchestratorService {
   }
 
   private flushPresentingBundle(bundle: PresentationBundle): void {
-    const resolved = this._resolvedItemIds();
     const skipped = this._skippedItemIds();
     const answers = this._itemAnswers();
     const results: TrayItemResolvedEvent[] = bundle.items.map((item) => ({
@@ -514,8 +504,6 @@ export class UploadResolverTrayOrchestratorService {
       item,
     }));
 
-    const flushed: PresentationBundle = { ...bundle, status: 'flushed' };
-    this._flushedBundles.update((prev) => [...prev, flushed]);
     this._presentingBundle.set(null);
     this._bundleCompleted$.next({
       batchId: bundle.batchId,
