@@ -13,7 +13,7 @@ function createJob(overrides: Partial<UploadJob> = {}): UploadJob {
     file: new File(['x'], 'camera_001.jpg', { type: 'image/jpeg' }),
     phase: 'extracting_title',
     progress: 0,
-    statusLabel: 'Checking filename…',
+    statusLabel: 'Checking filename...',
     submittedAt: new Date('2026-04-01T10:00:00.000Z'),
     mode: 'new',
     ...overrides,

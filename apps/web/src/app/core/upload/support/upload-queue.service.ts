@@ -1,5 +1,5 @@
 /**
- * UploadQueueService — FIFO concurrency control for uploads.
+ * UploadQueueService -- FIFO concurrency control for uploads.
  *
  * Manages the concurrency cap (max 3 parallel) and tracks which
  * jobs are currently running through the pipeline.

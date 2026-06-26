@@ -33,7 +33,7 @@ export function formatSourceConflictDistance(meters: number): string {
   return km >= 10 ? `${Math.round(km)} km` : `${km.toFixed(1)} km`;
 }
 
-/** Raw EXIF GPS from parse — never use job.coords for assist/conflict before placement decision. */
+/** Raw EXIF GPS from parse -- never use job.coords for assist/conflict before placement decision. */
 export function getExifMetadataCoords(job: UploadJob): ExifCoords | undefined {
   return job.parsedExif?.coords;
 }
@@ -57,7 +57,7 @@ export function shouldHoldForSourceConflict(
 ): boolean {
   const distanceM = Math.round(haversineMeters(textCoords, exifCoords));
   const hold = distanceM > config.sourceAgreementRadiusMeters;
-  uploadTraceDecision('source-agree', hold ? 'hold — text vs EXIF beyond agree radius' : 'agree — within radius', {
+  uploadTraceDecision('source-agree', hold ? 'hold -- text vs EXIF beyond agree radius' : 'agree -- within radius', {
     distanceM,
     sourceAgreementRadiusMeters: config.sourceAgreementRadiusMeters,
     textCoords,
@@ -95,7 +95,7 @@ export function buildChosenPlacementPatch(
   };
 }
 
-/** After forward geocode — stores text coords only; does not set job.coords. */
+/** After forward geocode -- stores text coords only; does not set job.coords. */
 export function buildGeocodeCandidatePatch(
   candidate: UploadAddressCandidate,
   folderDisplayPath: string,
@@ -132,7 +132,7 @@ export function buildSourceConflictQueryKey(groupingKey: string): string {
 
 /**
  * Source-conflict tray applies only when folder text geocode and EXIF metadata both exist on the job.
- * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md § Phase 3
+ * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md # Phase 3
  */
 export function isJobEligibleForSourceConflictGroup(job: UploadJob): boolean {
   return job.titleAddressCoords != null && getExifMetadataCoords(job) != null;
@@ -155,8 +155,8 @@ export function collectSourceConflictJobIds(
 }
 
 /**
- * Leaf folder segment for tray copy (e.g. `Thaliastraße 14`), not camera filename tokens.
- * @see docs/specs/component/upload/upload-resolver-tray.question-copy.md — Folder path vs folder address
+ * Leaf folder segment for tray copy (e.g. `Thaliastrasse 14`), not camera filename tokens.
+ * @see docs/specs/component/upload/upload-resolver-tray.question-copy.md -- Folder path vs folder address
  */
 export function labelFromFolderDisplayPath(folderDisplayPath?: string): string | null {
   if (!folderDisplayPath?.trim()) {
@@ -181,8 +181,8 @@ function houseNumberLooksLikeCameraToken(houseNumber: string | null | undefined)
 }
 
 /**
- * Option 1 label for source-conflict tray — folder path wins over SO when filename merged `IMG` noise.
- * @see docs/specs/component/upload/upload-resolver-tray.question-copy.md — Folder path vs folder address
+ * Option 1 label for source-conflict tray -- folder path wins over SO when filename merged `IMG` noise.
+ * @see docs/specs/component/upload/upload-resolver-tray.question-copy.md -- Folder path vs folder address
  */
 export function resolveFolderSourceOptionLabel(input: {
   job: UploadJob;
@@ -214,7 +214,7 @@ export function resolveFolderSourceOptionLabel(input: {
 
 /**
  * Outcome of applying one source-conflict candidate to a single job.
- * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md § Phase 3 — source-conflict resolution record
+ * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md # Phase 3 -- source-conflict resolution record
  */
 export type SourceConflictApplyResult =
   | {
@@ -226,8 +226,8 @@ export type SourceConflictApplyResult =
 
 /**
  * Single writer for source-text | source-exif | source-both | source-none on one job.
- * @param candidate — group candidate for text pin fallback when titleAddressCoords missing
- * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md § Phase 3 — source-conflict resolution record
+ * @param candidate -- group candidate for text pin fallback when titleAddressCoords missing
+ * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md # Phase 3 -- source-conflict resolution record
  */
 export function applySourceConflictChoiceToJob(
   job: UploadJob,
@@ -319,7 +319,7 @@ export function buildSourceConflictCandidates(input: {
       id: SOURCE_CONFLICT_NONE_CANDIDATE_ID,
       addressLabel: '',
       displayName: '',
-      // Placeholder coords — tray must not preview (no placement for "set later").
+      // Placeholder coords -- tray must not preview (no placement for "set later").
       lat: 0,
       lng: 0,
     },
@@ -347,13 +347,13 @@ export function resolvePlacementAfterTextGeocode(
   });
 
   if (!textCoords) {
-    uploadTraceDecision('placement', 'missing_data — no titleAddressCoords after geocode');
+    uploadTraceDecision('placement', 'missing_data -- no titleAddressCoords after geocode');
     uploadTraceExit('placement', 'resolvePlacementAfterTextGeocode', 'missing_data');
     return { kind: 'missing_data' };
   }
 
   if (!exifCoords) {
-    uploadTraceDecision('placement', 'placed — text coords only, no EXIF metadata');
+    uploadTraceDecision('placement', 'placed -- text coords only, no EXIF metadata');
     uploadTraceExit('placement', 'resolvePlacementAfterTextGeocode', 'placed');
     return { kind: 'placed' };
   }
@@ -363,7 +363,7 @@ export function resolvePlacementAfterTextGeocode(
     return { kind: 'placed' };
   }
 
-  uploadTraceDecision('placement', 'held_source_conflict — opening source tray');
+  uploadTraceDecision('placement', 'held_source_conflict -- opening source tray');
   uploadTraceExit('placement', 'resolvePlacementAfterTextGeocode', 'held_source_conflict');
   return { kind: 'held_source_conflict' };
 }
@@ -373,7 +373,7 @@ export function resolvePlacementWithoutText(
 ): 'exif' | 'missing_data' {
   const exif = getExifMetadataCoords(job);
   const outcome = exif ? 'exif' : 'missing_data';
-  uploadTraceDecision('placement', `resolvePlacementWithoutText → ${outcome}`, {
+  uploadTraceDecision('placement', `resolvePlacementWithoutText -> ${outcome}`, {
     jobId: job.id,
     fileName: job.file.name,
     exifCoords: exif,

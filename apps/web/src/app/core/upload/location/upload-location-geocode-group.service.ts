@@ -1,6 +1,6 @@
 /**
  * Group-level Photon geocode (branches A/B/C) with in-flight dedupe.
- * @see docs/specs/service/media-upload-service/address-resolution-model.md § Step 5
+ * @see docs/specs/service/media-upload-service/address-resolution-model.md # Step 5
  */
 
 import { Injectable, inject } from '@angular/core';
@@ -64,7 +64,7 @@ export class UploadLocationGeocodeGroupService {
 
   /**
    * Geocode a group via Branch A (street+city), B (project centroid bias), or C (street only).
-   * @see docs/specs/service/media-upload-service/address-resolution-model.md § Step 5 (Photon + branches A/B/C)
+   * @see docs/specs/service/media-upload-service/address-resolution-model.md # Step 5 (Photon + branches A/B/C)
    */
   private async runGeocodeForGroup(
     batchId: string,
@@ -112,8 +112,8 @@ export class UploadLocationGeocodeGroupService {
   ): UploadGroupResolutionState {
     const partial: UploadGroupResolutionState = { ...group, status: 'partial' };
     this.orchestrator.patchGroupState(batchId, partial);
-    uploadTraceDecision('geocode', 'partial — missing street or country', { street, countryCode });
-    uploadAddressDebug('geocode', 'skipped — missing street or country', {
+    uploadTraceDecision('geocode', 'partial -- missing street or country', { street, countryCode });
+    uploadAddressDebug('geocode', 'skipped -- missing street or country', {
       street,
       countryCode,
       searchObject: summarizeSearchObject(group.searchObject),
@@ -205,7 +205,7 @@ export class UploadLocationGeocodeGroupService {
       outcome.kind === 'auto' &&
       shouldForceBranchCCityTray(group, outcome, exifCoords, config.sourceAgreementRadiusMeters)
     ) {
-      uploadTraceDecision('geocode', 'branch_c CITY-01 — EXIF far from auto, force city_step', {
+      uploadTraceDecision('geocode', 'branch_c CITY-01 -- EXIF far from auto, force city_step', {
         distanceM: exifCoords
           ? Math.round(
               haversineMeters(exifCoords, {
@@ -259,7 +259,7 @@ export class UploadLocationGeocodeGroupService {
   ): UploadGroupResolutionState {
     const so = group.searchObject;
     if (group.geocodeBranch === 'branch_c' && !so.houseNumber?.trim()) {
-      uploadTraceDecision('geocode', 'needsTray 1b — branch_c auto hit but no houseNumber on SO', {
+      uploadTraceDecision('geocode', 'needsTray 1b -- branch_c auto hit but no houseNumber on SO', {
         street: so.street,
         autoCity: autoCandidate.city,
         autoLabel: autoCandidate.addressLabel,
@@ -276,7 +276,7 @@ export class UploadLocationGeocodeGroupService {
       uploadTraceExit('geocode', 'runGeocodeForGroup', 'needsTray/1b');
       return needsHouse;
     }
-    uploadTraceDecision('geocode', 'resolved — auto candidate', {
+    uploadTraceDecision('geocode', 'resolved -- auto candidate', {
       candidateId: autoCandidate.id,
       addressLabel: autoCandidate.addressLabel,
     });

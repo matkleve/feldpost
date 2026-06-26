@@ -27,15 +27,15 @@ export class UploadPreResolveWaveService {
   }
 
   /**
-   * Early scanIdle — first disambiguation may present before the pre-resolve wave ends.
-   * @see docs/specs/service/media-upload-service/upload-resolver-tray-orchestrator.md § Early vs final notifyScanIdle
+   * Early scanIdle -- first disambiguation may present before the pre-resolve wave ends.
+   * @see docs/specs/service/media-upload-service/upload-resolver-tray-orchestrator.md # Early vs final notifyScanIdle
    */
   notifyFirstTrayReady(batchId: string, detail?: Record<string, unknown>): void {
     if (!USE_TRAY_ORCHESTRATOR || this.earlyTrayPresented.has(batchId)) {
       return;
     }
     this.earlyTrayPresented.add(batchId);
-    uploadTraceDecision('wave', 'early tray — first disambiguation registered', {
+    uploadTraceDecision('wave', 'early tray -- first disambiguation registered', {
       batchId,
       ...detail,
     });
@@ -44,7 +44,7 @@ export class UploadPreResolveWaveService {
 
   /**
    * Final scanIdle when the pre-resolve wave counter reaches zero (idempotent if early scanIdle already ran).
-   * @see docs/specs/service/media-upload-service/upload-resolver-tray-orchestrator.md § Early vs final notifyScanIdle
+   * @see docs/specs/service/media-upload-service/upload-resolver-tray-orchestrator.md # Early vs final notifyScanIdle
    */
   completeJob(batchId: string): void {
     const pending = this.pendingByBatch.get(batchId);
@@ -54,12 +54,12 @@ export class UploadPreResolveWaveService {
     const next = pending - 1;
     if (next <= 0) {
       this.pendingByBatch.delete(batchId);
-      uploadTraceDecision('wave', 'scanIdle — pre-resolve wave complete', {
+      uploadTraceDecision('wave', 'scanIdle -- pre-resolve wave complete', {
         batchId,
         skippedFinalScanIdle: this.earlyTrayPresented.has(batchId),
       });
-      // Early tray already closed the collecting window — avoid presenting the same bundle twice.
-      // @see docs/specs/service/media-upload-service/upload-resolver-tray-orchestrator.md § Early vs final notifyScanIdle
+      // Early tray already closed the collecting window -- avoid presenting the same bundle twice.
+      // @see docs/specs/service/media-upload-service/upload-resolver-tray-orchestrator.md # Early vs final notifyScanIdle
       if (USE_TRAY_ORCHESTRATOR && !this.earlyTrayPresented.has(batchId)) {
         this.trayOrchestrator.notifyScanIdle(batchId);
       }

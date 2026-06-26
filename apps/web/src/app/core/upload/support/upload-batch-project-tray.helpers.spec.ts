@@ -50,7 +50,7 @@ describe('detectProjectAddressTrayScenario', () => {
   it('Scenario B when jobs have grouping/title address', () => {
     expect(
       detectProjectAddressTrayScenario(
-        [job({ id: 'j1', projectId: 'p1', groupingKey: 'k', titleAddress: 'Thaliastraße 4' })],
+        [job({ id: 'j1', projectId: 'p1', groupingKey: 'k', titleAddress: 'Thaliastrasse 4' })],
         [loc],
       ),
     ).toBe('b');

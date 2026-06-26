@@ -82,7 +82,7 @@ export class UploadLocationResolutionService {
 
   /**
    * Whether the user already answered source-conflict for this folder grouping.
-   * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md § Phase 3
+   * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md # Phase 3
    */
   isSourceConflictResolved(batchId: string, groupingKey: string | undefined | null): boolean {
     return this.sourceConflict.isSourceConflictResolved(batchId, groupingKey);
@@ -97,7 +97,7 @@ export class UploadLocationResolutionService {
   }
 
   /**
-   * @deprecated Removed — project location is bias-only (Branch B), not an address fallback.
+   * @deprecated Removed -- project location is bias-only (Branch B), not an address fallback.
    * @see docs/specs/service/media-upload-service/address-resolution-model.md
    */
   async registerBatchProjectTrayIfNeeded(batchId: string): Promise<void> {

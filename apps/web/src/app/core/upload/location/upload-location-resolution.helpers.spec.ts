@@ -104,12 +104,12 @@ describe('upload-location-resolution.helpers', () => {
   });
 
   it('evaluateLocalResolution Branch A with street + city', () => {
-    expect(evaluateLocalResolution(so({ street: 'Thaliastraße', city: 'Wien' }))).toBe('branch_a');
+    expect(evaluateLocalResolution(so({ street: 'Thaliastrasse', city: 'Wien' }))).toBe('branch_a');
   });
 
   it('evaluateLocalResolution Branch B with project centroid', () => {
     expect(
-      evaluateLocalResolution(so({ street: 'Thaliastraße', houseNumber: '4' }), {
+      evaluateLocalResolution(so({ street: 'Thaliastrasse', houseNumber: '4' }), {
         lat: 48.2,
         lng: 16.3,
       }),
@@ -117,7 +117,7 @@ describe('upload-location-resolution.helpers', () => {
   });
 
   it('evaluateLocalResolution Branch C without centroid', () => {
-    expect(evaluateLocalResolution(so({ street: 'Thaliastraße' }))).toBe('branch_c');
+    expect(evaluateLocalResolution(so({ street: 'Thaliastrasse' }))).toBe('branch_c');
   });
 
   it('shouldSplitGroupByPhotonUnitCoords when units on SO and hits far apart', () => {

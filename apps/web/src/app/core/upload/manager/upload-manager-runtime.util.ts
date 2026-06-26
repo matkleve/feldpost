@@ -1,5 +1,5 @@
 /**
- * createUploadManagerPipelineContext() — Factory for PipelineContext object.
+ * createUploadManagerPipelineContext() -- Factory for PipelineContext object.
  * Bundles global state (failJob, emit events, abort signals, dedup check, queue drain)
  * into single context passed to all pipeline stages.
  */

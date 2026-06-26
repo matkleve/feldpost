@@ -83,7 +83,7 @@ export class UploadAddressResolutionOrchestrator {
     uploadTraceEnter('orchestrator', 'classifyBatch', { batchId });
     const jobs = this.jobState.jobs().filter((j) => j.batchId === batchId);
     if (!jobs.length) {
-      uploadTraceDecision('orchestrator', 'classifyBatch — no jobs in batch');
+      uploadTraceDecision('orchestrator', 'classifyBatch -- no jobs in batch');
       uploadTraceExit('orchestrator', 'classifyBatch', 'empty');
       return;
     }
@@ -191,7 +191,7 @@ export class UploadAddressResolutionOrchestrator {
       }
 
       if (isSearchObjectMeaningless(so)) {
-        uploadAddressDebug('orchestrator', 'skip meaningless SO — no real address signal', {
+        uploadAddressDebug('orchestrator', 'skip meaningless SO -- no real address signal', {
           jobId: job.id,
           fileName: job.file.name,
           street: so.street,
@@ -240,7 +240,7 @@ export class UploadAddressResolutionOrchestrator {
         adminLevelConflicts: accum.adminLevelConflicts,
       };
       cache.set(adminConflictQueryKey, adminState);
-      uploadTraceDecision('orchestrator', 'needsAdminLevelResolution — admin field conflict', {
+      uploadTraceDecision('orchestrator', 'needsAdminLevelResolution -- admin field conflict', {
         adminConflictQueryKey,
         jobIds: accum.jobIds,
       });
@@ -258,7 +258,7 @@ export class UploadAddressResolutionOrchestrator {
         layerConflictQueryKey,
       };
       cache.set(layerConflictQueryKey, layerState);
-      uploadTraceDecision('orchestrator', 'needsLayerResolution — package conflict before geocode', {
+      uploadTraceDecision('orchestrator', 'needsLayerResolution -- package conflict before geocode', {
         layerConflictQueryKey,
         jobIds: accum.jobIds,
       });
@@ -285,7 +285,7 @@ export class UploadAddressResolutionOrchestrator {
       });
 
       if (local === 'postcode_blocked' || local === 'incomplete') {
-        uploadTraceDecision('orchestrator', `group partial — local gate ${local}`, {
+        uploadTraceDecision('orchestrator', `group partial -- local gate ${local}`, {
           groupingKey,
           jobIds,
         });
@@ -299,12 +299,12 @@ export class UploadAddressResolutionOrchestrator {
           geocodeBranch: undefined,
         };
         cache.set(groupingKey, partialState);
-        uploadAddressDebug('orchestrator', 'group → partial (local gate)', summarizeGroupState(partialState));
+        uploadAddressDebug('orchestrator', 'group -> partial (local gate)', summarizeGroupState(partialState));
         continue;
       }
 
       if (local === 'branch_c') {
-        uploadTraceDecision('orchestrator', 'group needsGeocode — branch_c (street only, no locality)', {
+        uploadTraceDecision('orchestrator', 'group needsGeocode -- branch_c (street only, no locality)', {
           groupingKey,
           street: so.street,
           jobIds,
@@ -322,12 +322,12 @@ export class UploadAddressResolutionOrchestrator {
           geocodeBranch: 'branch_c',
         };
         cache.set(groupingKey, branchCState);
-        uploadAddressDebug('orchestrator', 'group → needsGeocode (branch C)', summarizeGroupState(branchCState));
+        uploadAddressDebug('orchestrator', 'group -> needsGeocode (branch C)', summarizeGroupState(branchCState));
         continue;
       }
 
       if (local === 'metadata_only') {
-        uploadTraceDecision('orchestrator', 'group partial — metadata_only', { groupingKey, jobIds });
+        uploadTraceDecision('orchestrator', 'group partial -- metadata_only', { groupingKey, jobIds });
         const metaState: UploadGroupResolutionState = {
           status: 'partial',
           groupingKey,
@@ -343,7 +343,7 @@ export class UploadAddressResolutionOrchestrator {
 
       const row = await this.lookup.findBySearchObject(so);
       if (row) {
-        uploadTraceDecision('orchestrator', 'group resolved — DB location hit', {
+        uploadTraceDecision('orchestrator', 'group resolved -- DB location hit', {
           groupingKey,
           locationId: row['id'],
           geocodeBranch: local,
@@ -359,7 +359,7 @@ export class UploadAddressResolutionOrchestrator {
           candidate: locationRowToCandidate(row),
         };
         cache.set(groupingKey, resolvedState);
-        uploadAddressDebug('orchestrator', 'group → resolved (db)', summarizeGroupState(resolvedState));
+        uploadAddressDebug('orchestrator', 'group -> resolved (db)', summarizeGroupState(resolvedState));
         continue;
       }
 
@@ -374,12 +374,12 @@ export class UploadAddressResolutionOrchestrator {
         projectCentroid: local === 'branch_b' ? (projectCentroid ?? undefined) : undefined,
       };
       cache.set(groupingKey, needsGeocodeState);
-      uploadTraceDecision('orchestrator', 'group needsGeocode — no DB row', {
+      uploadTraceDecision('orchestrator', 'group needsGeocode -- no DB row', {
         groupingKey,
         geocodeBranch: needsGeocodeState.geocodeBranch,
         jobIds,
       });
-      uploadAddressDebug('orchestrator', 'group → needsGeocode', summarizeGroupState(needsGeocodeState));
+      uploadAddressDebug('orchestrator', 'group -> needsGeocode', summarizeGroupState(needsGeocodeState));
     }
 
     this.batchCaches.set(batchId, cache);

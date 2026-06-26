@@ -1,17 +1,17 @@
 /**
- * drainUploadManagerQueue() — Pull queued jobs and start pipeline for available slots.
+ * drainUploadManagerQueue() -- Pull queued jobs and start pipeline for available slots.
  *
- * Logic (Spec: upload-manager-pipeline.md § Queue Draining):
+ * Logic (Spec: upload-manager-pipeline.md # Queue Draining):
  *  1. Snapshot current jobs
  *  2. Count available slots (MAX_CONCURRENT=3)
  *  3. If slots avail: select N queued jobs via selectQueuedJobsForStart()
- *  4. For each job: ensureAbortController → markRunning → runPipeline()
+ *  4. For each job: ensureAbortController -> markRunning -> runPipeline()
  *  5. Exit if no slots (queue waits for running jobs to complete)
  *
  * Called by:
  *  - submitUploadManagerFiles() / submitUploadManagerFolder() (initial queue kick)
  *  - retryUploadManagerJob() (after retry)
- *  - Job completion (markDone → notifies queue there's now space)
+ *  - Job completion (markDone -> notifies queue there's now space)
  *
  * Logging: Debug console output for diagnostics (job phases, selected queue items)
  */

@@ -1,5 +1,5 @@
 /**
- * handleUploadPipelineError() — Catch-all error handler for pipeline exceptions.
+ * handleUploadPipelineError() -- Catch-all error handler for pipeline exceptions.
  * Checks if job was cancelled; if not, fails job with error message + emits batchProgress + drains queue.
  */
 

@@ -153,7 +153,7 @@ export class UploadManagerPipelineHostService {
         this.jobState.updateJob(jobId, {
           phase: 'error',
           statusLabel: 'Cancelled',
-          error: 'Upload cancelled — user signed out.',
+          error: 'Upload cancelled -- user signed out.',
           failedAt,
         });
       },

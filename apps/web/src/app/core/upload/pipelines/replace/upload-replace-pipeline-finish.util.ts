@@ -1,7 +1,7 @@
 /**
- * Replace pipeline: uploading → replacing_record → complete.
+ * Replace pipeline: uploading -> replacing_record -> complete.
  * @see upload-replace-pipeline.service.ts
- * @see docs/specs/service/media-upload-service/upload-manager-pipeline.md § Replace Upload Pipeline
+ * @see docs/specs/service/media-upload-service/upload-manager-pipeline.md # Replace Upload Pipeline
  */
 
 import {
@@ -16,7 +16,7 @@ import type {
 } from './upload-replace-pipeline-run.util';
 
 /**
- * uploading → replacing_record → complete.
+ * uploading -> replacing_record -> complete.
  * @see upload-replace-pipeline.service.ts run (second half)
  */
 export async function finishReplacePipelineJob(

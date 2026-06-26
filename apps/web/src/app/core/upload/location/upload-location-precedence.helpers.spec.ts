@@ -66,7 +66,7 @@ describe('upload-location-precedence.helpers', () => {
     const exif = { lat: 48.23, lng: 16.39 };
     const candidates = buildSourceConflictCandidates({
       folderAddress: 'Wolzeile, Vienna',
-      photoAddress: 'Mariahilfer Straße, Vienna',
+      photoAddress: 'Mariahilfer Strasse, Vienna',
       textCoords: text,
       exifCoords: exif,
     });
@@ -93,7 +93,7 @@ describe('upload-location-precedence.helpers', () => {
 
   /** @see docs/specs/component/upload/upload-resolver-tray.question-copy.md */
   it('labelFromFolderDisplayPath uses leaf folder segment for tray copy', () => {
-    expect(labelFromFolderDisplayPath('Projects/Bau/Thaliastraße 14')).toBe('Thaliastraße 14');
+    expect(labelFromFolderDisplayPath('Projects/Bau/Thaliastrasse 14')).toBe('Thaliastrasse 14');
   });
 
   it('collectSourceConflictJobIds only includes jobs with folder pin and EXIF metadata', () => {
@@ -143,12 +143,12 @@ describe('upload-location-precedence.helpers', () => {
   it('resolveFolderSourceOptionLabel prefers folder path over SO with IMG house number', () => {
     const label = resolveFolderSourceOptionLabel({
       job: job({
-        titleAddress: 'Thaliastraße',
-        folderDisplayPath: 'Thaliastraße 14',
+        titleAddress: 'Thaliastrasse',
+        folderDisplayPath: 'Thaliastrasse 14',
       }),
       groupState: {
         searchObject: {
-          street: 'Thaliastraße',
+          street: 'Thaliastrasse',
           houseNumber: 'IMG 14',
           city: 'Wien',
           postcode: null,
@@ -157,7 +157,7 @@ describe('upload-location-precedence.helpers', () => {
           municipality: null,
           staircase: null,
           door: null,
-          relativePath: 'Thaliastraße 14',
+          relativePath: 'Thaliastrasse 14',
           fileName: 'photo.jpg',
           sources: [],
           deviations: [],
@@ -165,7 +165,7 @@ describe('upload-location-precedence.helpers', () => {
         },
       } as never,
     });
-    expect(label).toBe('Thaliastraße 14');
+    expect(label).toBe('Thaliastrasse 14');
     expect(label).not.toMatch(/\bIMG\b/i);
   });
 });

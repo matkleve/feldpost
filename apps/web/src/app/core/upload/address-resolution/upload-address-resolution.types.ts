@@ -99,7 +99,7 @@ export interface UploadGroupResolutionState {
   candidate?: UploadAddressCandidate;
   candidates?: UploadAddressCandidate[];
   discriminatingField?: UploadDiscriminatingField;
-  /** Raw layer packages for audit — @see upload-search-object.layer-map.md */
+  /** Raw layer packages for audit -- @see upload-search-object.layer-map.md */
   addressLayers?: AddressLayerEntry[];
   /** Tray merge key for layer_package groups. */
   layerConflictQueryKey?: string;
@@ -109,6 +109,6 @@ export interface UploadGroupResolutionState {
   /** Set when this group was created by integrateResolvedAdminGroups.
    * Used to trigger a containment_check tray instead of silent partial on Photon 0-hit. */
   resolvedFromAdminConflict?: boolean;
-  /** Photon 0-hit after admin resolution — open validation tray instead of silent partial. */
+  /** Photon 0-hit after admin resolution -- open validation tray instead of silent partial. */
   containmentCheck?: boolean;
 }

@@ -43,7 +43,7 @@ export function isUploadProcessTraceEnabled(): boolean {
   return isUploadAddressDebugEnabled();
 }
 
-/** `→ functionName` with optional context values. */
+/** `-> functionName` with optional context values. */
 export function uploadTraceEnter(
   scope: string,
   fn: string,
@@ -52,7 +52,7 @@ export function uploadTraceEnter(
   if (!isUploadProcessTraceEnabled()) {
     return;
   }
-  const label = `[upload-process:${scope}] → ${fn}`;
+  const label = `[upload-process:${scope}] -> ${fn}`;
   if (detail && Object.keys(detail).length > 0) {
     console.info(label, detail);
   } else {
@@ -60,7 +60,7 @@ export function uploadTraceEnter(
   }
 }
 
-/** `decision: … because …` with structured fields. */
+/** `decision: ... because ...` with structured fields. */
 export function uploadTraceDecision(
   scope: string,
   because: string,
@@ -77,7 +77,7 @@ export function uploadTraceDecision(
   }
 }
 
-/** `← functionName` with optional result summary. */
+/** `<- functionName` with optional result summary. */
 export function uploadTraceExit(
   scope: string,
   fn: string,
@@ -87,8 +87,8 @@ export function uploadTraceExit(
   if (!isUploadProcessTraceEnabled()) {
     return;
   }
-  const suffix = result ? ` → ${result}` : '';
-  const label = `[upload-process:${scope}] ← ${fn}${suffix}`;
+  const suffix = result ? ` -> ${result}` : '';
+  const label = `[upload-process:${scope}] <- ${fn}${suffix}`;
   if (detail && Object.keys(detail).length > 0) {
     console.info(label, detail);
   } else {
@@ -112,7 +112,7 @@ export function uploadAddressDebug(
   }
 }
 
-/** High-signal placement decision line (phases P0–P6 per location-routing supplement). */
+/** High-signal placement decision line (phases P0-P6 per location-routing supplement). */
 export function uploadPlacementLog(
   phase: string,
   jobId: string,
@@ -124,7 +124,7 @@ export function uploadPlacementLog(
     return;
   }
   const shortId = jobId.length > 8 ? jobId.slice(0, 8) : jobId;
-  console.info(`[upload-placement] ${phase} ${shortId} ${fileName} — ${message}`, {
+  console.info(`[upload-placement] ${phase} ${shortId} ${fileName} -- ${message}`, {
     ...(detail ?? {}),
   });
 }

@@ -1,8 +1,8 @@
 /**
- * UploadAttachPipelineService ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â handles the 'attach' upload pipeline.
+ * UploadAttachPipelineService -- handles the 'attach' upload pipeline.
  *
- * Pipeline phases (Spec: upload-manager-pipeline.md Ãƒâ€šÃ‚Â§ Attach Upload Pipeline):
- * validating ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ converting_format ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ hashing ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ dedup_check ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ uploading ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ saving_record ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ enrichment ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ complete
+ * Pipeline phases (Spec: upload-manager-pipeline.md # Attach Upload Pipeline):
+ * validating -> converting_format -> hashing -> dedup_check -> uploading -> saving_record -> enrichment -> complete
  *
  * Purpose: Add a new photo to an existing photoless image row after conflict resolution.
  * Triggered by: conflict resolution response = 'use_existing' (user chooses to attach to found row)
@@ -136,7 +136,7 @@ export class UploadAttachPipelineService {
     this.jobState.setPhase(jobId, 'validating');
     const validation = this.uploadService.validateFile(job.file);
     if (!validation.valid) {
-      console.error('[attach-pipeline] ÃƒÂ¢Ã…â€œÃ¢â‚¬â€ validation failed:', validation.error);
+      console.error('[attach-pipeline] x validation failed:', validation.error);
       ctx.failJob(jobId, 'validating', validation.error!);
       return null;
     }
@@ -216,7 +216,7 @@ export class UploadAttachPipelineService {
 
     const storagePath = await this.storage.upload(file, abortSignal);
     if (!storagePath) {
-      console.error('[attach-pipeline] ÃƒÂ¢Ã…â€œÃ¢â‚¬â€ storage upload returned null');
+      console.error('[attach-pipeline] x storage upload returned null');
       ctx.failJob(jobId, 'uploading', 'Storage upload failed.');
       return null;
     }

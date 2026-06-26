@@ -87,7 +87,7 @@ export function formatUploadFailureMessage(rawError: string | null | undefined):
   if (/unsupported type|maximum allowed|25\s*mb/i.test(normalized)) {
     return {
       title: 'Upload failed',
-      summary: message.length > 120 ? `${message.slice(0, 117)}…` : message,
+      summary: message.length > 120 ? `${message.slice(0, 117)}...` : message,
       technicalDetail: message.length > 120 ? truncateToastTechnicalDetail(message) : undefined,
     };
   }
@@ -109,7 +109,7 @@ export function formatUploadFailureMessage(rawError: string | null | undefined):
     };
   }
 
-  const shortSummary = message.length > 120 ? `${message.slice(0, 117)}…` : message;
+  const shortSummary = message.length > 120 ? `${message.slice(0, 117)}...` : message;
 
   if (described.hint) {
     return {

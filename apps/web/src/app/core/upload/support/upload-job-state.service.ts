@@ -1,11 +1,11 @@
 /**
- * UploadJobStateService — job CRUD, phase transitions, and event emission.
+ * UploadJobStateService -- job CRUD, phase transitions, and event emission.
  *
  * Owns the jobs signal and provides atomic operations for job state management.
  * Emits domain events when jobs change phase, fail, skip, or complete.
  *
  * Ground rules (Spec: upload-manager-pipeline.md):
- * - Phase transitions: queued → validating → parsing_exif → ... → complete|error|missing_data|skipped
+ * - Phase transitions: queued -> validating -> parsing_exif -> ... -> complete|error|missing_data|skipped
  * - TERMINAL_PHASES: complete, error, missing_data, skipped (job leaves queue)
  * - ACTIVE_PHASES: All phases with ongoing work (shown in 'uploading' lane)
  * - Event emission: jobPhaseChanged$, uploadFailed$, uploadSkipped$ for subscribers
@@ -58,37 +58,37 @@ function phaseLabel(phase: UploadPhase): string {
     case 'queued':
       return 'Queued';
     case 'validating':
-      return 'Validating…';
+      return 'Validating...';
     case 'parsing_exif':
-      return 'Reading EXIF…';
+      return 'Reading EXIF...';
     case 'converting_format':
-      return 'Converting format…';
+      return 'Converting format...';
     case 'hashing':
-      return 'Computing hash…';
+      return 'Computing hash...';
     case 'dedup_check':
-      return 'Checking duplicates…';
+      return 'Checking duplicates...';
     case 'skipped':
       return 'Already uploaded';
     case 'extracting_title':
-      return 'Checking filename…';
+      return 'Checking filename...';
     case 'resolving_location':
-      return 'Resolving location…';
+      return 'Resolving location...';
     case 'awaiting_disambiguation':
       return 'Choose address';
     case 'conflict_check':
-      return 'Checking conflicts…';
+      return 'Checking conflicts...';
     case 'awaiting_conflict_resolution':
-      return 'Waiting for decision…';
+      return 'Waiting for decision...';
     case 'uploading':
-      return 'Uploading…';
+      return 'Uploading...';
     case 'saving_record':
-      return 'Saving…';
+      return 'Saving...';
     case 'replacing_record':
-      return 'Updating record…';
+      return 'Updating record...';
     case 'resolving_address':
-      return 'Resolving address…';
+      return 'Resolving address...';
     case 'resolving_coordinates':
-      return 'Resolving location…';
+      return 'Resolving location...';
     case 'missing_data':
       return 'Choose location';
     case 'complete':
@@ -116,7 +116,7 @@ export class UploadJobStateService {
     () => this._jobs().filter((j) => ACTIVE_PHASES.has(j.phase)).length,
   );
 
-  // ── Events ─────────────────────────────────────────────────────────────────
+  // -- Events ------------------------
 
   private readonly _jobPhaseChanged$ = new Subject<JobPhaseChangedEvent>();
   private readonly _uploadFailed$ = new Subject<UploadFailedEvent>();
@@ -125,7 +125,7 @@ export class UploadJobStateService {
     this._jobPhaseChanged$.asObservable();
   readonly uploadFailed$: Observable<UploadFailedEvent> = this._uploadFailed$.asObservable();
 
-  // ── Mutations ──────────────────────────────────────────────────────────────
+  // -- Mutations ------------------------
 
   addJobs(jobs: UploadJob[]): void {
     this._jobs.update((prev) => [...prev, ...jobs]);

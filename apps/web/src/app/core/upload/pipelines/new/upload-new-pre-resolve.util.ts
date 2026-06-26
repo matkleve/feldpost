@@ -61,7 +61,7 @@ export function mergeTitleCandidateOnJob(
   const inheritedTitleAddress = job.titleAddress?.trim();
   const parsedConfidenceScore = parsed ? (parsed.confidence === 'high' ? 1 : 0.5) : 0;
 
-  // Search Object intake already set titleAddress + groupingKey — do not replace with IMG_* parse.
+  // Search Object intake already set titleAddress + groupingKey -- do not replace with IMG_* parse.
   if (job.groupingKey && inheritedTitleAddress) {
     const groupState = deps.addressOrchestrator?.getGroupState(job.batchId, job.groupingKey);
     const soLabel =
@@ -72,7 +72,7 @@ export function mergeTitleCandidateOnJob(
       groupState &&
       isExifAuthoritativeOverWeakFilenameStreet(groupState, (id) => deps.jobState.findJob(id))
     ) {
-      uploadTraceDecision('pre-resolve', 'mergeTitle — keep SO title, low confidence (weak filename + EXIF)', {
+      uploadTraceDecision('pre-resolve', 'mergeTitle -- keep SO title, low confidence (weak filename + EXIF)', {
         jobId,
         titleAddress: soLabel,
         groupingKey: job.groupingKey,
@@ -80,7 +80,7 @@ export function mergeTitleCandidateOnJob(
       deps.jobState.updateJob(jobId, { titleAddress: soLabel, titleAddressSource: 'folder' });
       return { titleAddress: soLabel, highConfidence: false };
     }
-    uploadTraceDecision('pre-resolve', 'mergeTitle — SO intake title, high confidence', {
+    uploadTraceDecision('pre-resolve', 'mergeTitle -- SO intake title, high confidence', {
       jobId,
       titleAddress: soLabel,
       groupingKey: job.groupingKey,
@@ -127,7 +127,7 @@ export function mergeTitleCandidateOnJob(
   const candidateMeetsThreshold = mergedCandidate.score >= config.titleConfidenceThreshold;
 
   // Low-confidence file parse: store as addressNotes instead of routing title address.
-  // @see upload-manager-pipeline.md § Filename Address Confidence Contract
+  // @see upload-manager-pipeline.md # Filename Address Confidence Contract
   if (!candidateMeetsThreshold && mergedCandidate.source === 'file') {
     const existing = deps.jobState.findJob(jobId)?.addressNotes ?? [];
     deps.jobState.updateJob(jobId, {
@@ -147,7 +147,7 @@ export function mergeTitleCandidateOnJob(
   };
 }
 
-/** Step 3: org dedup before geocode — same-user skip or colleague issue. */
+/** Step 3: org dedup before geocode -- same-user skip or colleague issue. */
 async function finishPreResolveDedup(
   deps: PreResolveDeps,
   jobId: string,
@@ -181,7 +181,7 @@ function applyExifOnlyPlacement(
 }
 
 /**
- * Phase 3–4 after orchestrator or legacy geocode: placement, source tray, EXIF-only, or Branch A.
+ * Phase 3-4 after orchestrator or legacy geocode: placement, source tray, EXIF-only, or Branch A.
  * @returns held when job stops in tray or Issues
  */
 async function completePlacementAfterLocationResolve(
@@ -200,7 +200,7 @@ async function completePlacementAfterLocationResolve(
   });
 
   if (current.coords) {
-    uploadPlacementLog('P6', jobId, current.file.name, 'skip — placement already set', {
+    uploadPlacementLog('P6', jobId, current.file.name, 'skip -- placement already set', {
       locationSourceUsed: current.locationSourceUsed,
       coords: current.coords,
     });
@@ -215,14 +215,14 @@ async function completePlacementAfterLocationResolve(
   }
 
   if (current.titleAddressCoords) {
-    uploadPlacementLog('P3', jobId, current.file.name, 'text coords ready — source agreement', {
+    uploadPlacementLog('P3', jobId, current.file.name, 'text coords ready -- source agreement', {
       titleAddressCoords: current.titleAddressCoords,
       exifMetadata: getExifMetadataCoords(current),
     });
     const held = deps.locationResolution.finalizePlacementForJob(jobId);
     const afterFinalize = deps.jobState.findJob(jobId);
     if (afterFinalize) {
-      uploadPlacementLog('P4', jobId, current.file.name, held ? 'held — source tray' : 'text placement applied', {
+      uploadPlacementLog('P4', jobId, current.file.name, held ? 'held -- source tray' : 'text placement applied', {
         ...summarizeJobPlacement(afterFinalize),
       });
     }
@@ -276,7 +276,7 @@ async function completePlacementAfterLocationResolve(
     return null;
   }
 
-  uploadPlacementLog('A', jobId, current.file.name, 'Branch A — no text coords, no EXIF', {
+  uploadPlacementLog('A', jobId, current.file.name, 'Branch A -- no text coords, no EXIF', {
     ...summarizeJobPlacement(current),
   });
   routeJobToMissingData(deps, jobId, current, ctx);
@@ -318,7 +318,7 @@ async function runPreUploadLocationResolveInner(
     groupingKey: job.groupingKey,
   });
   if (!isAutoLocationEnabled(job)) {
-    uploadTraceDecision('pipeline', 'location optional — skip resolution');
+    uploadTraceDecision('pipeline', 'location optional -- skip resolution');
     uploadTraceExit('pipeline', 'runPreUploadLocationResolve', 'not_required');
     deps.jobState.updateJob(jobId, { resolutionStatus: 'not_required' });
     return finishPreResolveDedup(deps, jobId, parsedExif, ctx);
@@ -328,20 +328,20 @@ async function runPreUploadLocationResolveInner(
 
   const { highConfidence } = mergeTitleCandidateOnJob(deps, jobId, job);
   const jobAfterMerge = deps.jobState.findJob(jobId)!;
-  uploadTraceDecision('pipeline', `title merge done — highConfidence=${highConfidence}`, {
+  uploadTraceDecision('pipeline', `title merge done -- highConfidence=${highConfidence}`, {
     titleAddress: jobAfterMerge.titleAddress,
     groupingKey: jobAfterMerge.groupingKey,
   });
 
   const dedupGate = await finishPreResolveDedup(deps, jobId, parsedExif, ctx);
   if (dedupGate === 'dedup_skip') {
-    uploadTraceDecision('pipeline', 'duplicate content detected — dedup gate');
+    uploadTraceDecision('pipeline', 'duplicate content detected -- dedup gate');
     uploadTraceExit('pipeline', 'runPreUploadLocationResolve', 'dedup_skip');
     return 'dedup_skip';
   }
 
   if (highConfidence && jobAfterMerge.groupingKey) {
-    uploadTraceDecision('pipeline', 'path — orchestrator pre-resolve (groupingKey)');
+    uploadTraceDecision('pipeline', 'path -- orchestrator pre-resolve (groupingKey)');
     const orchestrated = await deps.locationResolution.applyPreResolveFromOrchestrator(jobId);
     if (orchestrated === 'held') {
       uploadTraceExit('pipeline', 'runPreUploadLocationResolve', 'held (orchestrator)');
@@ -365,7 +365,7 @@ async function runPreUploadLocationResolveInner(
   }
 
   if (highConfidence) {
-    uploadTraceDecision('pipeline', 'path — high confidence without groupingKey');
+    uploadTraceDecision('pipeline', 'path -- high confidence without groupingKey');
     const placementHeld = await completePlacementAfterLocationResolve(
       deps,
       jobId,
@@ -378,7 +378,7 @@ async function runPreUploadLocationResolveInner(
     return finishPreResolveDedup(deps, jobId, parsedExif, ctx);
   }
 
-  uploadTraceDecision('pipeline', 'path — low confidence, complete placement');
+  uploadTraceDecision('pipeline', 'path -- low confidence, complete placement');
   const current = deps.jobState.findJob(jobId)!;
   const placementHeld = await completePlacementAfterLocationResolve(deps, jobId, current, ctx);
   if (placementHeld) {

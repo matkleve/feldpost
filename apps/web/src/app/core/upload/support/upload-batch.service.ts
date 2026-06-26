@@ -1,11 +1,11 @@
 /**
- * UploadBatchService — aggregate progress tracking for upload batches.
+ * UploadBatchService -- aggregate progress tracking for upload batches.
  *
  * Owns batch state (signals), computes progress from job states,
  * and emits batch-level events (progress, complete).
  *
- * Ground rules (Spec: upload-manager-pipeline.md § Batch Lifecycle):
- * - Batch status flow: scanning → uploading → complete|cancelled
+ * Ground rules (Spec: upload-manager-pipeline.md # Batch Lifecycle):
+ * - Batch status flow: scanning -> uploading -> complete|cancelled
  * - Progress computation: (completedFiles + skippedFiles) / totalFiles * 100
  * - Active batch: The batch currently being processed (excluding completed/cancelled)
  * - Batch completion: All jobs transitioned to terminal phase + finishedAt timestamp set
@@ -16,7 +16,7 @@
  *  - updateBatch(batchId, patch): Merge partial state (progress, status, timestamps)
  *  - computeProgress(batchId): (completed + skipped) / total * 100
  *  - markBatchComplete(batchId): Set status=complete, emit batchComplete$
- *  - activeBatch: Signal<UploadBatch | null> — current batch or null if none
+ *  - activeBatch: Signal<UploadBatch | null> -- current batch or null if none
  */
 
 import { Injectable, computed, inject, signal } from '@angular/core';
@@ -65,7 +65,7 @@ export class UploadBatchService {
     () => this._batches().find((b) => b.status !== 'complete' && b.status !== 'cancelled') ?? null,
   );
 
-  // ── Events ─────────────────────────────────────────────────────────────────
+  // -- Events ------------------------
 
   private readonly _batchProgress$ = new Subject<BatchProgressEvent>();
   private readonly _batchComplete$ = new Subject<BatchCompleteEvent>();
@@ -73,7 +73,7 @@ export class UploadBatchService {
   readonly batchProgress$: Observable<BatchProgressEvent> = this._batchProgress$.asObservable();
   readonly batchComplete$: Observable<BatchCompleteEvent> = this._batchComplete$.asObservable();
 
-  // ── Mutations ──────────────────────────────────────────────────────────────
+  // -- Mutations ------------------------
 
   addBatch(batch: UploadBatch): void {
     this._batches.update((prev) => [...prev, batch]);
@@ -87,7 +87,7 @@ export class UploadBatchService {
     return this._batches().find((b) => b.id === batchId);
   }
 
-  // ── Progress computation ───────────────────────────────────────────────────
+  // -- Progress computation ------------------------
 
   /** Recompute and emit batch progress based on current job states. */
   emitBatchProgress(batchId: string, jobs: ReadonlyArray<UploadJob>): void {
@@ -128,7 +128,7 @@ export class UploadBatchService {
 
   /**
    * Clears orchestrator scanIdle for a terminal batch.
-   * @see docs/specs/service/media-upload-service/upload-resolver-tray-orchestrator.md § Early vs final notifyScanIdle
+   * @see docs/specs/service/media-upload-service/upload-resolver-tray-orchestrator.md # Early vs final notifyScanIdle
    */
   releaseTrayOrchestratorForBatch(batchId: string): void {
     this.trayOrchestrator.clearScanIdle(batchId);
@@ -163,7 +163,7 @@ export class UploadBatchService {
     });
 
     // Release scanIdle so the next batch does not inherit stale orchestrator idle state.
-    // @see docs/specs/service/media-upload-service/upload-resolver-tray-orchestrator.md § Early vs final notifyScanIdle
+    // @see docs/specs/service/media-upload-service/upload-resolver-tray-orchestrator.md # Early vs final notifyScanIdle
     this.releaseTrayOrchestratorForBatch(batchId);
 
     this._batchComplete$.next({

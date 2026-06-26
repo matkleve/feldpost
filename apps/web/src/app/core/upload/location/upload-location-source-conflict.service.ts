@@ -1,6 +1,6 @@
 /**
  * Source-conflict tray: resolution record, registration, apply choice to jobs.
- * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md § Phase 3
+ * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md # Phase 3
  */
 
 import { Injectable, Injector, inject } from '@angular/core';
@@ -39,7 +39,7 @@ export class UploadLocationSourceConflictService {
 
   /**
    * Stored tray choice per `queryKey` (`source|{groupingKey}`) for late-job replay.
-   * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md § Phase 3 — source-conflict resolution record
+   * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md # Phase 3 -- source-conflict resolution record
    */
   private readonly resolvedSourceChoices = new Map<string, Map<string, string>>();
 
@@ -154,7 +154,7 @@ export class UploadLocationSourceConflictService {
     const queryKey = buildSourceConflictQueryKey(groupingKey);
 
     if (this.isSourceConflictResolved(job.batchId, groupingKey)) {
-      uploadTrayGate('registerSourceConflict skipped — queryKey already resolved', {
+      uploadTrayGate('registerSourceConflict skipped -- queryKey already resolved', {
         batchId: job.batchId,
         queryKey,
         groupingKey,

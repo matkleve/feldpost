@@ -36,7 +36,7 @@ function buildJob(overrides: Partial<UploadJob> = {}): UploadJob {
   };
 }
 
-describe('UploadAddressResolutionOrchestrator — admin level conflicts', () => {
+describe('UploadAddressResolutionOrchestrator -- admin level conflicts', () => {
   let orchestrator: UploadAddressResolutionOrchestrator;
   let jobState: UploadJobStateService;
 
@@ -242,7 +242,7 @@ describe('UploadAddressResolutionOrchestrator — admin level conflicts', () => 
       buildJob({
         id: 'job-regular',
         batchId: 'batch-plz',
-        relativePath: 'AT/Wien/1090/Hauptstraße/photo.jpg',
+        relativePath: 'AT/Wien/1090/Hauptstrasse/photo.jpg',
         file: new File([], 'photo.jpg'),
       }),
     ]);

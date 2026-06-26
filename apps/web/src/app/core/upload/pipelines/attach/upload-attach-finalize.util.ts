@@ -70,6 +70,6 @@ export function finalizeAttachCompletion(args: FinalizeAttachCompletionArgs): vo
   emitImageAttached(attachedEvent);
 
   emitBatchProgress(finalJob.batchId);
-  log('[attach-pipeline] ▶ DONE');
+  log('[attach-pipeline] > DONE');
   drainQueue();
 }

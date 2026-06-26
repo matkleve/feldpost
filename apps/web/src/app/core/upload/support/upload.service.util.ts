@@ -10,7 +10,7 @@ import type { ExifCoords, FileValidation, ParsedExif } from '../upload.types';
 
 export function resolveUploadMimeType(file: File): string {
   const rawType = file.type?.trim() ?? '';
-  // Browsers often label camera files application/octet-stream — sniff by extension.
+  // Browsers often label camera files application/octet-stream -- sniff by extension.
   if (rawType && rawType !== 'application/octet-stream') {
     return rawType;
   }
@@ -122,7 +122,7 @@ export async function parseUploadExif(file: File): Promise<ParsedExif> {
   }
 }
 
-/** Thrown when heic2any cannot produce JPEG bytes — upload must not proceed with raw HEIC. */
+/** Thrown when heic2any cannot produce JPEG bytes -- upload must not proceed with raw HEIC. */
 export const HEIC_CONVERSION_FAILED = 'HEIC_CONVERSION_FAILED';
 
 export function isHeicUploadFile(file: File): boolean {

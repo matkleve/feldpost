@@ -98,11 +98,11 @@ describe('mergeTitleCandidateOnJob', () => {
   });
 });
 
-describe('runPreUploadLocationResolve — text before EXIF', () => {
+describe('runPreUploadLocationResolve -- text before EXIF', () => {
   it('geocodes folder text before EXIF-only when titleAddressCoords are missing', async () => {
     const exifCoords = { lat: 48.21, lng: 16.37 };
     let job = createJob({
-      titleAddress: 'Thaliastraße, Wien',
+      titleAddress: 'Thaliastrasse, Wien',
       titleAddressSource: 'folder',
       parsedExif: { coords: exifCoords },
       groupingKey: undefined,

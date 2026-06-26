@@ -37,7 +37,7 @@ export interface UploadFilePersistInput {
   projectId?: string;
   abortSignal?: AbortSignal;
   relativePath?: string;
-  /** Low-confidence filename/folder address fragments. @see upload-manager-pipeline.md § Action 11c */
+  /** Low-confidence filename/folder address fragments. @see upload-manager-pipeline.md # Action 11c */
   addressNotes?: string[];
   options?: { pendingPartialLocation?: boolean };
 }

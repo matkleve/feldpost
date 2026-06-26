@@ -80,7 +80,7 @@ export class UploadLocationTrayFlowService {
   }
 
   /**
-   * @deprecated Removed — project location is bias-only (Branch B), not an address fallback.
+   * @deprecated Removed -- project location is bias-only (Branch B), not an address fallback.
    * @see docs/specs/service/media-upload-service/address-resolution-model.md
    */
   async registerBatchProjectTrayIfNeeded(_batchId: string): Promise<void> {
@@ -89,7 +89,7 @@ export class UploadLocationTrayFlowService {
   }
 
   /**
-   * Register layer_package trays after classifyBatch — before Photon.
+   * Register layer_package trays after classifyBatch -- before Photon.
    * @see docs/specs/service/media-upload-service/upload-search-object.layer-map.md#tray-registration
    */
   registerLayerPackageGroupsAfterClassify(batchId: string): void {
@@ -251,7 +251,7 @@ export class UploadLocationTrayFlowService {
     await this.confirmTrayCity(groupId, group.confirmedCity);
   }
 
-  /** Step 1A: user confirmed city → unlock 1B and load house numbers. */
+  /** Step 1A: user confirmed city -> unlock 1B and load house numbers. */
   async confirmTrayCity(groupId: string, city: string): Promise<void> {
     const group = this.disambiguationStore.groups().find((g) => g.id === groupId);
     if (!group) {

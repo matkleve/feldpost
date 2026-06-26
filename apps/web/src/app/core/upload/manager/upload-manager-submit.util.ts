@@ -208,7 +208,7 @@ async function resolveUploadProjectIdFromFolderName(
   folderName: string,
   deps: UploadManagerSubmitDeps,
 ): Promise<string | undefined> {
-  // ── Parse "Project: [projectname]" token from folder name ──────────────────
+  // -- Parse "Project: [projectname]" token from folder name ------------------------
   // Pattern: case-insensitive match for "project : [name]" at start of folder name.
   // Spec (upload-manager-pipeline.md, Action 2a): Extract project context from
   // folder naming convention and auto-assign/auto-create project.

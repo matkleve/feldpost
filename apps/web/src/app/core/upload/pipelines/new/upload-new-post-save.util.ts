@@ -25,7 +25,7 @@ type FinalizeNewUploadPhaseArgs = {
   mismatchToleranceMeters: number;
   /**
    * Fire-and-forget DB update when a location mismatch is confirmed.
-   * @see upload-manager-pipeline.location-routing.supplement.md § Mismatch audit
+   * @see upload-manager-pipeline.location-routing.supplement.md # Mismatch audit
    */
   persistMismatch?: (mediaId: string, distanceMeters: number) => Promise<void>;
   setLocalUrl: (mediaId: string, localUrl: string) => void;
@@ -235,7 +235,7 @@ async function auditTitleExifMismatch(args: {
       toleranceMeters: mismatchToleranceMeters,
     });
     // Persist to DB so detail view can surface the mismatch after navigation.
-    // @see upload-manager-pipeline.location-routing.supplement.md § Mismatch audit
+    // @see upload-manager-pipeline.location-routing.supplement.md # Mismatch audit
     if (persistMismatch && updatedJob.mediaId) {
       void persistMismatch(updatedJob.mediaId, roundedDistance);
     }

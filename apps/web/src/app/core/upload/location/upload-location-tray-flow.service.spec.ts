@@ -42,12 +42,12 @@ function buildJob(overrides: Partial<UploadJob> = {}): UploadJob {
     statusLabel: 'Choose address',
     submittedAt: new Date(),
     mode: 'new',
-    relativePath: 'AT/Wien/Graz/Hauptstraße 5/photo.jpg',
+    relativePath: 'AT/Wien/Graz/Hauptstrasse 5/photo.jpg',
     ...overrides,
   };
 }
 
-describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
+describe('UploadLocationTrayFlowService -- admin_level_conflict', () => {
   let trayFlow: UploadLocationTrayFlowService;
   let orchestrator: UploadAddressResolutionOrchestrator;
   let jobState: UploadJobStateService;
@@ -185,7 +185,7 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
   it('applyAdminLevelConflictChoice accepts manual city entry on Wien/Innsbruck street path', async () => {
     jobState.addJobs([
       buildJob({
-        relativePath: 'AT/Wien/Innsbruck/Hauptstraße 5/photo.jpg',
+        relativePath: 'AT/Wien/Innsbruck/Hauptstrasse 5/photo.jpg',
       }),
     ]);
     await orchestrator.classifyBatch('batch-tray');
@@ -229,7 +229,7 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
     jobState.addJobs([
       buildJob({
         id: 'job-cascade',
-        relativePath: 'AT/Wien/Innsbruck/Graz/Hauptstraße 5/photo.jpg',
+        relativePath: 'AT/Wien/Innsbruck/Graz/Hauptstrasse 5/photo.jpg',
       }),
     ]);
     await orchestrator.classifyBatch('batch-tray');
@@ -286,7 +286,7 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
         state: 'Wien',
         postcode: '1200',
         city: 'Wien',
-        street: 'Hauptstraße',
+        street: 'Hauptstrasse',
         houseNumber: null,
         staircase: null,
         door: null,
@@ -296,15 +296,15 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
         postcodeCandidates: [],
         uncertainFields: [],
         groupingKey: 'at|wien|1200|wien|hauptstrasse|',
-        relativePath: 'AT/Wien/1200/Hauptstraße',
+        relativePath: 'AT/Wien/1200/Hauptstrasse',
         fileName: 'photo.jpg',
       },
-      folderDisplayPath: 'AT/Wien/1200/Hauptstraße',
-      titleAddressLabel: 'Hauptstraße, Wien',
+      folderDisplayPath: 'AT/Wien/1200/Hauptstrasse',
+      titleAddressLabel: 'Hauptstrasse, Wien',
       containmentCheck: true,
       trayStep: '3',
       candidates: [
-        { id: 'keep-address', addressLabel: 'Keep: Hauptstraße, Wien', lat: 0, lng: 0 },
+        { id: 'keep-address', addressLabel: 'Keep: Hauptstrasse, Wien', lat: 0, lng: 0 },
         { id: 'enter-different', addressLabel: 'Enter a different address', lat: 0, lng: 0 },
       ],
     };
@@ -328,11 +328,11 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
     const group = disambiguationStore.createGroup({
       batchId: 'batch-tray',
       queryKey: 'containment|at|wien|1200|wien|hauptstrasse|',
-      folderDisplayPath: 'AT/Wien/1200/Hauptstraße',
-      titleAddress: 'Hauptstraße, Wien',
+      folderDisplayPath: 'AT/Wien/1200/Hauptstrasse',
+      titleAddress: 'Hauptstrasse, Wien',
       jobIds: ['job-cc'],
       candidates: [
-        { id: 'keep-address', addressLabel: 'Keep: Hauptstraße, Wien', lat: 0, lng: 0 },
+        { id: 'keep-address', addressLabel: 'Keep: Hauptstrasse, Wien', lat: 0, lng: 0 },
         { id: 'enter-different', addressLabel: 'Enter a different address', lat: 0, lng: 0 },
       ],
       disambiguationKind: 'containment_check',
@@ -352,8 +352,8 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
     const group = disambiguationStore.createGroup({
       batchId: 'batch-tray',
       queryKey: 'containment|key',
-      folderDisplayPath: 'AT/Wien/Hauptstraße',
-      titleAddress: 'Hauptstraße, Wien',
+      folderDisplayPath: 'AT/Wien/Hauptstrasse',
+      titleAddress: 'Hauptstrasse, Wien',
       jobIds: ['job-defer'],
       candidates: [
         { id: 'keep-address', addressLabel: 'Keep', lat: 0, lng: 0 },

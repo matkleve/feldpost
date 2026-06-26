@@ -1,19 +1,19 @@
 /**
- * UploadStorageService — Supabase Storage upload helper.
+ * UploadStorageService -- Supabase Storage upload helper.
  *
  * Used by replace/attach pipelines that handle DB insert separately
  * from the storage upload step.
  *
- * Ground rules (Spec: upload-manager.md § Storage):
- *  - Upload to Supabase Storage bucket with path "/images/{date}/{uuid}.{ext}"
+ * Ground rules (Spec: upload-manager.md # Storage):
+ *  - Upload to the "media" Supabase Storage bucket with path "{orgId}/{userId}/{uuid}.{ext}"
  *  - Return storage_path (used later in DB record insert)
  *  - Support AbortSignal for cancellation
  *  - RLS: Respects org bucket ACL + user role permissions
  *  - Error handling: Retry with exponential backoff; fail fast after max retries
  *
  * Public API:
- *  - upload(file, abortSignal?): Promise<string | null> → storage_path
- *  - delete(storagePath): Promise<boolean> → cleanup success
+ *  - upload(file, abortSignal?): Promise<string | null> -> storage_path
+ *  - delete(storagePath): Promise<boolean> -> cleanup success
  */
 
 import { Injectable, inject } from '@angular/core';

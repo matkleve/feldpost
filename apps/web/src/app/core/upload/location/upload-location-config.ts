@@ -1,6 +1,6 @@
 export interface UploadLocationConfig {
   /**
-   * Meters: folder/file text geocode vs EXIF metadata — auto-agree or `source` tray.
+   * Meters: folder/file text geocode vs EXIF metadata -- auto-agree or `source` tray.
    * Not the org km cap (`contextDistanceMaxMeters` in Search Tuning).
    * @see docs/specs/service/search/search-tuning.distance-radii-contract.md
    */
@@ -13,7 +13,7 @@ export interface UploadLocationConfig {
   mismatchToleranceMeters: number;
   /**
    * Meters: among multiple geocode hits, prefer candidate within this distance of EXIF;
-   * Step 7 pin nudge. Not the org km “internet results” realism cap.
+   * Step 7 pin nudge. Not the org km "internet results" realism cap.
    * @see docs/specs/service/search/search-tuning.distance-radii-contract.md
    */
   exifAssistRadiusMeters: number;

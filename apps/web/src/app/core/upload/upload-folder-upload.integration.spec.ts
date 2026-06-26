@@ -1,7 +1,7 @@
 /**
- * Folder upload integration test — exercises the full pipeline for a batch of
- * photos: Search Object (SO) creation → dedup (content-hash) → DB lookup
- * (findBySearchObject) → tray / disambiguation registration.
+ * Folder upload integration test -- exercises the full pipeline for a batch of
+ * photos: Search Object (SO) creation -> dedup (content-hash) -> DB lookup
+ * (findBySearchObject) -> tray / disambiguation registration.
  *
  * Uses the REAL AT geo data (assets/geo/*.json) so SO branch classification
  * (branch_a / branch_c / packageConflict) reflects production behavior.
@@ -28,7 +28,7 @@ import { UploadLocationTrayFlowService } from './location/upload-location-tray-f
 import type { ScannedFileEntry } from '../folder-scan/folder-scan.service';
 import { signal } from '@angular/core';
 
-// ── Real AT geo data ─────────────────────────────────────────────────────
+// -- Real AT geo data ------------------------
 
 const ASSETS_DIR = path.join(__dirname, '../../../assets/geo');
 
@@ -45,7 +45,7 @@ function loadRealGeo(): { states: BundeslandRecord[]; municipalities: GemeindeRe
   return { states, municipalities, postcodeMap };
 }
 
-// ── Fakes ─────────────────────────────────────────────────────────────────
+// -- Fakes ------------------------
 
 function buildFakeUploadService() {
   return {
@@ -53,7 +53,7 @@ function buildFakeUploadService() {
     resolveMediaType: vi.fn().mockReturnValue('photo'),
     isPhotoFile: vi.fn().mockReturnValue(true),
     validateFile: vi.fn().mockReturnValue({ valid: true }),
-    // No EXIF GPS — avoids text/EXIF source-conflict trays in these scenarios.
+    // No EXIF GPS -- avoids text/EXIF source-conflict trays in these scenarios.
     parseExif: vi.fn().mockResolvedValue({}),
     isHeic: vi.fn().mockReturnValue(false),
     convertToJpeg: vi.fn().mockImplementation(async (file: File) => file),
@@ -138,7 +138,7 @@ function makeFile(name: string, content: Uint8Array = new Uint8Array(512)): File
   return new File([content], name, { type: 'image/jpeg' });
 }
 
-// ── Setup ─────────────────────────────────────────────────────────────────
+// -- Setup ------------------------
 
 async function setup(rpcHandlers: Record<string, RpcHandler> = {}) {
   const fakeUpload = buildFakeUploadService();
@@ -181,25 +181,25 @@ async function setup(rpcHandlers: Record<string, RpcHandler> = {}) {
   };
 }
 
-// ── Tests ─────────────────────────────────────────────────────────────────
+// -- Tests ------------------------
 
-describe('UploadManagerService — folder upload integration (SO → dedup → DB lookup → tray)', () => {
-  it('(a) multiple photos, same address, single Photon hit → auto-resolve & upload all', async () => {
+describe('UploadManagerService -- folder upload integration (SO -> dedup -> DB lookup -> tray)', () => {
+  it('(a) multiple photos, same address, single Photon hit -> auto-resolve & upload all', async () => {
     const { service, fakeGeocoding } = await setup();
 
     fakeGeocoding.searchStructuredForward.mockResolvedValue([
       {
         lat: 47.0707,
         lng: 15.4395,
-        displayName: 'Annenstraße 10, Graz, Österreich',
-        name: 'Annenstraße 10',
+        displayName: 'Annenstrasse 10, Graz, Oesterreich',
+        name: 'Annenstrasse 10',
         importance: 0.97,
         address: {
-          road: 'Annenstraße',
+          road: 'Annenstrasse',
           house_number: '10',
           postcode: '8020',
           city: 'Graz',
-          country: 'Österreich',
+          country: 'Oesterreich',
           country_code: 'at',
         },
       },
@@ -211,28 +211,28 @@ describe('UploadManagerService — folder upload integration (SO → dedup → D
     const entries: ScannedFileEntry[] = [
       {
         file: makeFile('IMG_1.jpg'),
-        relativePath: 'AT/Graz/Annenstraße 10/IMG_1.jpg',
-        directorySegments: ['AT', 'Graz', 'Annenstraße 10'],
+        relativePath: 'AT/Graz/Annenstrasse 10/IMG_1.jpg',
+        directorySegments: ['AT', 'Graz', 'Annenstrasse 10'],
       },
       {
         file: makeFile('IMG_2.jpg'),
-        relativePath: 'AT/Graz/Annenstraße 10/IMG_2.jpg',
-        directorySegments: ['AT', 'Graz', 'Annenstraße 10'],
+        relativePath: 'AT/Graz/Annenstrasse 10/IMG_2.jpg',
+        directorySegments: ['AT', 'Graz', 'Annenstrasse 10'],
       },
       {
         file: makeFile('IMG_3.jpg'),
-        relativePath: 'AT/Graz/Annenstraße 10/IMG_3.jpg',
-        directorySegments: ['AT', 'Graz', 'Annenstraße 10'],
+        relativePath: 'AT/Graz/Annenstrasse 10/IMG_3.jpg',
+        directorySegments: ['AT', 'Graz', 'Annenstrasse 10'],
       },
     ];
 
-    await service.submitWebkitFolder(entries, 'Annenstraße 10');
+    await service.submitWebkitFolder(entries, 'Annenstrasse 10');
 
     await vi.waitFor(() => {
       expect(events.length).toBe(3);
     });
 
-    // Single group → geocode runs once for all three jobs.
+    // Single group -> geocode runs once for all three jobs.
     expect(fakeGeocoding.searchStructuredForward).toHaveBeenCalledTimes(1);
 
     const jobs = service.jobs();
@@ -240,7 +240,7 @@ describe('UploadManagerService — folder upload integration (SO → dedup → D
     expect(jobs.every((j) => !!j.coords)).toBe(true);
   });
 
-  it('(b) duplicate file content (locationRequirementMode: optional) → dedup skip', async () => {
+  it('(b) duplicate file content (locationRequirementMode: optional) -> dedup skip', async () => {
     let dedupCalls = 0;
     const { service } = await setup({
       check_dedup_hashes: () => {
@@ -288,37 +288,37 @@ describe('UploadManagerService — folder upload integration (SO → dedup → D
     });
   });
 
-  it('(c) ambiguous Photon hits for street-only address → city_step disambiguation tray (1a)', async () => {
+  it('(c) ambiguous Photon hits for street-only address -> city_step disambiguation tray (1a)', async () => {
     const { service, fakeGeocoding, locationResolution } = await setup();
 
     fakeGeocoding.searchStructuredForward.mockResolvedValue([
       {
         lat: 48.3059,
         lng: 14.2862,
-        displayName: 'Hauptstraße 5, Linz, Österreich',
-        name: 'Hauptstraße 5',
+        displayName: 'Hauptstrasse 5, Linz, Oesterreich',
+        name: 'Hauptstrasse 5',
         importance: 0.75,
         address: {
-          road: 'Hauptstraße',
+          road: 'Hauptstrasse',
           house_number: '5',
           postcode: '4020',
           city: 'Linz',
-          country: 'Österreich',
+          country: 'Oesterreich',
           country_code: 'at',
         },
       },
       {
         lat: 47.7981,
         lng: 13.0457,
-        displayName: 'Hauptstraße 5, Salzburg, Österreich',
-        name: 'Hauptstraße 5',
+        displayName: 'Hauptstrasse 5, Salzburg, Oesterreich',
+        name: 'Hauptstrasse 5',
         importance: 0.7,
         address: {
-          road: 'Hauptstraße',
+          road: 'Hauptstrasse',
           house_number: '5',
           postcode: '5020',
           city: 'Salzburg',
-          country: 'Österreich',
+          country: 'Oesterreich',
           country_code: 'at',
         },
       },
@@ -327,12 +327,12 @@ describe('UploadManagerService — folder upload integration (SO → dedup → D
     const entries: ScannedFileEntry[] = [
       {
         file: makeFile('IMG_1.jpg'),
-        relativePath: 'Hauptstraße 5/IMG_1.jpg',
-        directorySegments: ['Hauptstraße 5'],
+        relativePath: 'Hauptstrasse 5/IMG_1.jpg',
+        directorySegments: ['Hauptstrasse 5'],
       },
     ];
 
-    await service.submitWebkitFolder(entries, 'Hauptstraße 5');
+    await service.submitWebkitFolder(entries, 'Hauptstrasse 5');
 
     await vi.waitFor(() => {
       const groups = locationResolution
@@ -348,7 +348,7 @@ describe('UploadManagerService — folder upload integration (SO → dedup → D
     expect(group.candidates.length).toBe(2);
   });
 
-  it('(d1) admin level conflict (Wien/Innsbruck) → admin_level_conflict tray before geocode', async () => {
+  it('(d1) admin level conflict (Wien/Innsbruck) -> admin_level_conflict tray before geocode', async () => {
     const { service, fakeGeocoding, locationResolution } = await setup();
 
     const entries: ScannedFileEntry[] = [
@@ -392,15 +392,15 @@ describe('UploadManagerService — folder upload integration (SO → dedup → D
       {
         lat: 47.2692,
         lng: 11.4041,
-        displayName: 'Hauptstraße 5, Wien, Österreich',
-        name: 'Hauptstraße 5',
+        displayName: 'Hauptstrasse 5, Wien, Oesterreich',
+        name: 'Hauptstrasse 5',
         importance: 0.9,
         address: {
-          road: 'Hauptstraße',
+          road: 'Hauptstrasse',
           house_number: '5',
           postcode: '1010',
           city: 'Wien',
-          country: 'Österreich',
+          country: 'Oesterreich',
           country_code: 'at',
         },
       },
@@ -409,12 +409,12 @@ describe('UploadManagerService — folder upload integration (SO → dedup → D
     const entries: ScannedFileEntry[] = [
       {
         file: makeFile('photo.jpg'),
-        relativePath: 'AT/Wien/Innsbruck/Hauptstraße 5/photo.jpg',
-        directorySegments: ['AT', 'Wien', 'Innsbruck', 'Hauptstraße 5'],
+        relativePath: 'AT/Wien/Innsbruck/Hauptstrasse 5/photo.jpg',
+        directorySegments: ['AT', 'Wien', 'Innsbruck', 'Hauptstrasse 5'],
       },
     ];
 
-    await service.submitWebkitFolder(entries, 'Hauptstraße 5');
+    await service.submitWebkitFolder(entries, 'Hauptstrasse 5');
 
     await vi.waitFor(() => {
       const groups = locationResolution
@@ -500,7 +500,7 @@ describe('UploadManagerService — folder upload integration (SO → dedup → D
     expect(groups.every((g) => g.candidates.length >= 2)).toBe(true);
   });
 
-  it('(d) folder/filename layer-package conflict → layer_package tray before geocode', async () => {
+  it('(d) folder/filename layer-package conflict -> layer_package tray before geocode', async () => {
     const { service, fakeGeocoding, locationResolution } = await setup();
 
     const entries: ScannedFileEntry[] = [
@@ -533,7 +533,7 @@ describe('UploadManagerService — folder upload integration (SO → dedup → D
     expect(labels.some((l) => l.includes('Schmiedgasse'))).toBe(true);
   });
 
-  it('(e) DB-pre-resolved address → no Photon call, job completes from DB hit', async () => {
+  it('(e) DB-pre-resolved address -> no Photon call, job completes from DB hit', async () => {
     const { service, fakeGeocoding } = await setup({
       get_location_by_address_components: () => ({
         data: {

@@ -28,7 +28,7 @@ export function patchAmbiguousGeocodeOutcome(
     candidates,
     config.unitGeocodeSplitMinMeters,
   );
-  uploadTraceDecision('geocode', 'ambiguous — register tray', {
+  uploadTraceDecision('geocode', 'ambiguous -- register tray', {
     trayStep: group.geocodeBranch === 'branch_c' ? '1a' : '3',
     candidateCount: candidates.length,
     unitPhotonSplit: unitSplit,
@@ -51,7 +51,7 @@ export function patchFallbackTrayGeocodeOutcome(
   batchId: string,
   group: UploadGroupResolutionState,
 ): UploadGroupResolutionState {
-  uploadTraceDecision('geocode', 'needsTray 1a — geocode failed, branch b/c fallback', {
+  uploadTraceDecision('geocode', 'needsTray 1a -- geocode failed, branch b/c fallback', {
     geocodeBranch: group.geocodeBranch,
   });
   const fallbackTray: UploadGroupResolutionState = {
@@ -71,7 +71,7 @@ export function patchPartialClassifyFailedGeocode(
   batchId: string,
   group: UploadGroupResolutionState,
 ): UploadGroupResolutionState {
-  uploadTraceDecision('geocode', 'partial — classify failed, not branch b/c');
+  uploadTraceDecision('geocode', 'partial -- classify failed, not branch b/c');
   const partial: UploadGroupResolutionState = { ...group, status: 'partial' };
   orchestrator.patchGroupState(batchId, partial);
   uploadTraceExit('geocode', 'runGeocodeForGroup', 'partial');
@@ -85,7 +85,7 @@ export function patchContainmentCheckOutcome(
 ): UploadGroupResolutionState {
   const street = group.searchObject.street?.trim() ?? '';
   const city = group.searchObject.city?.trim() ?? '';
-  uploadTraceDecision('geocode', 'containment_check — Branch A 0-hit after admin resolution', {
+  uploadTraceDecision('geocode', 'containment_check -- Branch A 0-hit after admin resolution', {
     street,
     city,
   });

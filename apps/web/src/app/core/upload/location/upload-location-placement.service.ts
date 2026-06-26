@@ -1,5 +1,5 @@
 /**
- * Job placement after geocode: title-address resolve, Phase 3–4 coords, weak Branch C EXIF.
+ * Job placement after geocode: title-address resolve, Phase 3-4 coords, weak Branch C EXIF.
  * @see docs/specs/service/media-upload-service/upload-location-resolution.md
  */
 
@@ -82,7 +82,7 @@ export class UploadLocationPlacementService {
     }
 
     if (!job.titleAddress?.trim()) {
-      uploadTraceDecision('ulr', 'continue — empty titleAddress');
+      uploadTraceDecision('ulr', 'continue -- empty titleAddress');
       uploadTraceExit('ulr', 'resolveJobTitleAddress', 'continue');
       return 'continue';
     }
@@ -151,7 +151,7 @@ export class UploadLocationPlacementService {
   }
 
   /**
-   * Phase 3–4: set job.coords after text geocode + optional source tray.
+   * Phase 3-4: set job.coords after text geocode + optional source tray.
    * @returns true when job is held for disambiguation
    */
   finalizePlacementForJob(jobId: string): boolean {
@@ -172,7 +172,7 @@ export class UploadLocationPlacementService {
           ? Math.round(haversineMeters(job.titleAddressCoords, exifCoords))
           : undefined;
       const outcome = resolvePlacementAfterTextGeocode(job, config);
-      uploadPlacementLog('P3', jobId, job.file.name, `source agreement → ${outcome.kind}`, {
+      uploadPlacementLog('P3', jobId, job.file.name, `source agreement -> ${outcome.kind}`, {
         distanceM,
         agreeRadiusM: config.sourceAgreementRadiusMeters,
         textCoords: job.titleAddressCoords,
@@ -180,7 +180,7 @@ export class UploadLocationPlacementService {
       });
       if (outcome.kind === 'held_source_conflict') {
         const groupingKey = job.groupingKey;
-        uploadTrayGate('held for source conflict tray — EXIF far from text geocode pin', {
+        uploadTrayGate('held for source conflict tray -- EXIF far from text geocode pin', {
           jobId,
           groupingKey,
           distanceM,
@@ -237,8 +237,8 @@ export class UploadLocationPlacementService {
   }
 
   /**
-   * Branch C from filename-only street (e.g. IMG_1121 → "IMG") must not open city tray when EXIF exists.
-   * @see upload-manager-pipeline.location-routing.supplement.md — EXIF before weak text
+   * Branch C from filename-only street (e.g. IMG_1121 -> "IMG") must not open city tray when EXIF exists.
+   * @see upload-manager-pipeline.location-routing.supplement.md -- EXIF before weak text
    */
   tryApplyExifPlacementForWeakBranchC(groupState: UploadGroupResolutionState): boolean {
     if (

@@ -54,7 +54,7 @@ export async function verifyStoragePathWrite(args: VerifyStoragePathWriteArgs): 
   });
   if (storagePath && storagePath !== expectedStoragePath) {
     logError(
-      '[attach-pipeline] ✗ WRITE DID NOT PERSIST — RLS likely blocked the update. Expected:',
+      '[attach-pipeline] x WRITE DID NOT PERSIST -- RLS likely blocked the update. Expected:',
       expectedStoragePath,
       'Got:',
       storagePath,

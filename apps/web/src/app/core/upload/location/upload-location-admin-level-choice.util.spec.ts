@@ -95,12 +95,12 @@ describe('upload-location-admin-level-choice.util', () => {
   it('round-trips candidate ids with encoded special characters', () => {
     const entry = {
       level: 1,
-      value: 'St. Pölten',
+      value: 'St. Poelten',
       source: 'folder' as const,
       field: 'city' as const,
     };
     const parsed = parseAdminLevelCandidateId(adminLevelCandidateId(entry));
-    expect(parsed).toEqual({ field: 'city', value: 'St. Pölten' });
+    expect(parsed).toEqual({ field: 'city', value: 'St. Poelten' });
   });
 
   it('replaces prior level-map entries for the resolved field', () => {
@@ -145,7 +145,7 @@ describe('upload-location-admin-level-choice.util', () => {
       postcodeMap: { '6020': ['Innsbruck'] },
     };
     const so = buildSearchObjectFromRelativePath(
-      'AT/Wien/Innsbruck/Hauptstraße 5/photo.jpg',
+      'AT/Wien/Innsbruck/Hauptstrasse 5/photo.jpg',
       'photo.jpg',
       geo,
     );

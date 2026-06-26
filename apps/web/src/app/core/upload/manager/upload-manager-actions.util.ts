@@ -1,5 +1,5 @@
 /**
- * UploadManagerActionFunctions — Public action implementations:
+ * UploadManagerActionFunctions -- Public action implementations:
  * retryUploadManagerJob, cancelUploadManagerJob, dismissUploadManagerJob,
  * placeUploadManagerJob, assignUploadManagerJobToProject, resolveUploadManagerConflict,
  * attachUploadManagerFile, replaceUploadManagerFile, forceUploadManagerDuplicateUpload,

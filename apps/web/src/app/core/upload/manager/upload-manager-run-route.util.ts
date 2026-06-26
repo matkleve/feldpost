@@ -1,5 +1,5 @@
 /**
- * runUploadPipelineByMode() — Route job to correct pipeline by mode.
+ * runUploadPipelineByMode() -- Route job to correct pipeline by mode.
  * Delegates to UploadNewPipelineService, UploadReplacePipelineService, or UploadAttachPipelineService
  * based on job.mode. Entry point for pipeline execution.
  */
@@ -24,13 +24,13 @@ export async function runUploadPipelineByMode(
   );
 
   if (job.mode === 'replace') {
-    console.log('[upload-manager] → replacePipeline.run()');
+    console.log('[upload-manager] -> replacePipeline.run()');
     await deps.runReplace(job.id);
   } else if (job.mode === 'attach') {
-    console.log('[upload-manager] → attachPipeline.run()');
+    console.log('[upload-manager] -> attachPipeline.run()');
     await deps.runAttach(job.id);
   } else {
-    console.log('[upload-manager] → newPipeline.run()');
+    console.log('[upload-manager] -> newPipeline.run()');
     await deps.runNew(job.id);
   }
 }

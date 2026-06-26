@@ -26,7 +26,7 @@ type ApplyDedupMatchArgs = {
   ctx: Pick<PipelineContext, 'emitUploadSkipped' | 'emitBatchProgress' | 'drainQueue' | 'emitDuplicateDetected'>;
 };
 
-/** Same-user → silent skip; colleague → duplicate issue + modal event. */
+/** Same-user -> silent skip; colleague -> duplicate issue + modal event. */
 export function applyDedupMatch(args: ApplyDedupMatchArgs): 'skipped' | 'issue' {
   const { jobId, job, contentHash, match, currentUserId, deps, ctx } = args;
 

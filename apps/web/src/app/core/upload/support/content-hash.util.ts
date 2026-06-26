@@ -5,7 +5,7 @@
  * - `photo_v1`: file head + size + EXIF GPS/date/direction
  * - `binary_v1`: file head + size only (documents, video, byte-static files)
  *
- * Uses the Web Crypto API — no external dependencies.
+ * Uses the Web Crypto API -- no external dependencies.
  *
  * @see docs/specs/service/media-upload-service/upload-manager-pipeline.dedup-scope.supplement.md
  */
@@ -77,7 +77,7 @@ function concatBuffers(parts: Uint8Array[]): Uint8Array {
  * - GPS coords, capture date, direction (EXIF metadata)
  *
  * Two genuinely different photos will almost certainly produce different hashes.
- * Uses the Web Crypto API (crypto.subtle.digest) — no dependencies.
+ * Uses the Web Crypto API (crypto.subtle.digest) -- no dependencies.
  */
 async function digestSha256Hex(parts: Uint8Array[]): Promise<string> {
   const combined = concatBuffers(parts);
@@ -87,7 +87,7 @@ async function digestSha256Hex(parts: Uint8Array[]): Promise<string> {
     .join('');
 }
 
-/** Photo fingerprint — head + size + EXIF metadata when present. */
+/** Photo fingerprint -- head + size + EXIF metadata when present. */
 export async function computeContentHash(input: ContentHashInput): Promise<string> {
   const encoder = new TextEncoder();
   return digestSha256Hex([
@@ -99,7 +99,7 @@ export async function computeContentHash(input: ContentHashInput): Promise<strin
   ]);
 }
 
-/** Byte-static fingerprint — head + size only. */
+/** Byte-static fingerprint -- head + size only. */
 export async function computeBinaryContentHash(input: {
   fileHeadBytes: ArrayBuffer;
   fileSize: number;

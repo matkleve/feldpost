@@ -44,7 +44,7 @@ export class UploadLocationPreResolveOrchestratorService {
     uploadTraceEnter('ulr', 'applyPreResolveFromOrchestrator', { jobId });
     const job = this.jobState.findJob(jobId);
     if (!job?.groupingKey) {
-      uploadTraceDecision('ulr', 'continue — job has no groupingKey', { jobId });
+      uploadTraceDecision('ulr', 'continue -- job has no groupingKey', { jobId });
       uploadTraceExit('ulr', 'applyPreResolveFromOrchestrator', 'continue');
       return 'continue';
     }
@@ -56,7 +56,7 @@ export class UploadLocationPreResolveOrchestratorService {
         batchId: job.batchId,
         groupingKey: job.groupingKey,
       });
-      uploadTraceDecision('ulr', 'continue — no orchestrator cache', {
+      uploadTraceDecision('ulr', 'continue -- no orchestrator cache', {
         batchId: job.batchId,
         groupingKey: job.groupingKey,
       });
@@ -92,7 +92,7 @@ export class UploadLocationPreResolveOrchestratorService {
     batchId: string,
     groupState: UploadGroupResolutionState,
   ): 'held' {
-    uploadTraceDecision('ulr', 'held — admin_level_conflict tray before geocode', {
+    uploadTraceDecision('ulr', 'held -- admin_level_conflict tray before geocode', {
       adminConflictQueryKey: groupState.adminConflictQueryKey,
     });
     this.trayFlow.registerAdminLevelConflictGroup(batchId, groupState);
@@ -104,7 +104,7 @@ export class UploadLocationPreResolveOrchestratorService {
     batchId: string,
     groupState: UploadGroupResolutionState,
   ): 'held' {
-    uploadTraceDecision('ulr', 'held — layer_package tray before geocode', {
+    uploadTraceDecision('ulr', 'held -- layer_package tray before geocode', {
       layerConflictQueryKey: groupState.layerConflictQueryKey,
     });
     this.trayFlow.registerLayerPackageGroup(batchId, groupState);
@@ -128,7 +128,7 @@ export class UploadLocationPreResolveOrchestratorService {
     if (groupState.status === 'ambiguous' && groupState.candidates?.length) {
       return this.handleAmbiguousPreResolve(job, groupState);
     }
-    uploadTraceDecision('ulr', 'partial — fallback markGroupPartial', summarizeGroupState(groupState));
+    uploadTraceDecision('ulr', 'partial -- fallback markGroupPartial', summarizeGroupState(groupState));
     this.markGroupPartial(groupState);
     uploadTraceExit('ulr', 'applyPreResolveFromOrchestrator', 'partial');
     return 'partial';
@@ -143,14 +143,14 @@ export class UploadLocationPreResolveOrchestratorService {
       return 'continue';
     }
     if (groupState.containmentCheck) {
-      uploadTraceDecision('ulr', 'held — register containment_check tray', {
+      uploadTraceDecision('ulr', 'held -- register containment_check tray', {
         groupingKey: groupState.groupingKey,
       });
       this.trayFlow.registerContainmentCheckGroup(batchId, groupState);
       uploadTraceExit('ulr', 'applyPreResolveFromOrchestrator', 'held (containment_check)');
       return 'held';
     }
-    uploadTraceDecision('ulr', 'held — register tray step', {
+    uploadTraceDecision('ulr', 'held -- register tray step', {
       trayStep: groupState.trayStep,
       geocodeBranch: groupState.geocodeBranch,
     });
@@ -162,7 +162,7 @@ export class UploadLocationPreResolveOrchestratorService {
   private handleResolvedPreResolve(
     groupState: UploadGroupResolutionState,
   ): 'continue' | 'held' {
-    uploadTraceDecision('ulr', 'resolved — apply candidate to jobs', {
+    uploadTraceDecision('ulr', 'resolved -- apply candidate to jobs', {
       candidateId: groupState.candidate!.id,
       addressLabel: groupState.candidate!.addressLabel,
     });
@@ -183,7 +183,7 @@ export class UploadLocationPreResolveOrchestratorService {
   }
 
   private handlePartialPreResolve(groupState: UploadGroupResolutionState): 'partial' {
-    uploadTraceDecision('ulr', 'partial — markGroupPartial', { groupingKey: groupState.groupingKey });
+    uploadTraceDecision('ulr', 'partial -- markGroupPartial', { groupingKey: groupState.groupingKey });
     this.markGroupPartial(groupState);
     uploadTraceExit('ulr', 'applyPreResolveFromOrchestrator', 'partial');
     return 'partial';
@@ -194,7 +194,7 @@ export class UploadLocationPreResolveOrchestratorService {
     groupState: UploadGroupResolutionState,
   ): 'held' {
     if (groupState.geocodeBranch === 'branch_c') {
-      uploadTraceDecision('ulr', 'held — branch_c ambiguous → city_step tray 1a', {
+      uploadTraceDecision('ulr', 'held -- branch_c ambiguous -> city_step tray 1a', {
         candidateCount: groupState.candidates!.length,
         discriminatingField: groupState.discriminatingField,
       });
@@ -218,7 +218,7 @@ export class UploadLocationPreResolveOrchestratorService {
       uploadTraceExit('ulr', 'applyPreResolveFromOrchestrator', 'held');
       return 'held';
     }
-    uploadTraceDecision('ulr', 'held — ambiguous geocode tray step 3', {
+    uploadTraceDecision('ulr', 'held -- ambiguous geocode tray step 3', {
       candidateCount: groupState.candidates!.length,
     });
     this.resolution().registerDisambiguationGroup({

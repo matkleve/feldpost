@@ -1,8 +1,8 @@
 /**
- * UploadReplacePipelineService — handles the 'replace' upload pipeline.
+ * UploadReplacePipelineService -- handles the 'replace' upload pipeline.
  *
- * Pipeline phases (Spec: upload-manager-pipeline.md § Replace Upload Pipeline):
- * validating → converting_format → hashing → dedup_check → uploading → replacing_record → complete
+ * Pipeline phases (Spec: upload-manager-pipeline.md # Replace Upload Pipeline):
+ * validating -> converting_format -> hashing -> dedup_check -> uploading -> replacing_record -> complete
  *
  * Purpose: Swap the file on an existing image row, update EXIF metadata, preserve location/project.
  * Triggered by: resolveUploadManagerConflict(jobId, 'use_existing')

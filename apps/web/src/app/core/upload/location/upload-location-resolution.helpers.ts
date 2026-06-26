@@ -142,14 +142,14 @@ export function isExifAuthoritativeOverWeakFilenameStreet(
     jobIds: groupState.jobIds,
   });
   if (groupState.geocodeBranch !== 'branch_c' || groupState.trayStep !== '1a') {
-    uploadTraceDecision('weak-exif', 'skip EXIF override — need branch_c and trayStep 1a', {
+    uploadTraceDecision('weak-exif', 'skip EXIF override -- need branch_c and trayStep 1a', {
       geocodeBranch: groupState.geocodeBranch,
       trayStep: groupState.trayStep,
     });
     return false;
   }
   if (!so.street?.trim() || searchObjectHasLocality(so)) {
-    uploadTraceDecision('weak-exif', 'skip — no street or SO already has locality', {
+    uploadTraceDecision('weak-exif', 'skip -- no street or SO already has locality', {
       street: so.street,
       city: so.city,
       postcode: so.postcode,
@@ -157,7 +157,7 @@ export function isExifAuthoritativeOverWeakFilenameStreet(
     return false;
   }
   if (groupState.folderDisplayPath?.trim()) {
-    uploadTraceDecision('weak-exif', 'skip — folder path present', {
+    uploadTraceDecision('weak-exif', 'skip -- folder path present', {
       folderDisplayPath: groupState.folderDisplayPath,
     });
     return false;
@@ -171,7 +171,7 @@ export function isExifAuthoritativeOverWeakFilenameStreet(
         entry.field === 'postcode'),
   );
   if (hasFolderAddressSource) {
-    uploadTraceDecision('weak-exif', 'skip — folder contributed address fields', {
+    uploadTraceDecision('weak-exif', 'skip -- folder contributed address fields', {
       sources: so.sources.map((s) => `${s.source}:${s.field}`),
     });
     return false;
@@ -183,7 +183,7 @@ export function isExifAuthoritativeOverWeakFilenameStreet(
     streetSources.length > 0 &&
     !streetSources.every((entry) => entry.source === 'filename')
   ) {
-    uploadTraceDecision('weak-exif', 'skip — street not filename-only', {
+    uploadTraceDecision('weak-exif', 'skip -- street not filename-only', {
       streetSources: streetSources.map((s) => `${s.source}:${s.field}=${s.value}`),
     });
     return false;
@@ -193,12 +193,12 @@ export function isExifAuthoritativeOverWeakFilenameStreet(
     return !!job && !!getExifMetadataCoords(job);
   });
   if (allHaveExif) {
-    uploadTraceDecision('weak-exif', 'EXIF wins — weak filename street, all jobs have EXIF', {
+    uploadTraceDecision('weak-exif', 'EXIF wins -- weak filename street, all jobs have EXIF', {
       street: so.street,
       jobIds: groupState.jobIds,
     });
   } else {
-    uploadTraceDecision('weak-exif', 'skip — not every job has EXIF metadata', {
+    uploadTraceDecision('weak-exif', 'skip -- not every job has EXIF metadata', {
       jobIds: groupState.jobIds,
     });
   }
@@ -207,7 +207,7 @@ export function isExifAuthoritativeOverWeakFilenameStreet(
 
 /**
  * Classify SO completeness into a local resolution gate (branch_a/b/c, incomplete, postcode_blocked, metadata_only).
- * @see docs/specs/service/media-upload-service/upload-search-object.md § Completeness gates (Branch A/B/C)
+ * @see docs/specs/service/media-upload-service/upload-search-object.md # Completeness gates (Branch A/B/C)
  */
 export function evaluateLocalResolution(
   so: UploadSearchObject,
@@ -223,7 +223,7 @@ export function evaluateLocalResolution(
     hasProjectCentroid: !!projectCentroid,
   });
   if (so.postcodeCandidates.length > 1 && !so.city) {
-    uploadTraceDecision('local-gate', 'postcode_blocked — multiple postcode candidates, no city', {
+    uploadTraceDecision('local-gate', 'postcode_blocked -- multiple postcode candidates, no city', {
       postcodeCandidates: so.postcodeCandidates,
       city: so.city,
     });
@@ -232,7 +232,7 @@ export function evaluateLocalResolution(
   }
   const branch = classifySearchObjectCompleteness(so, projectCentroid);
   if (branch === 'incomplete') {
-    uploadTraceDecision('local-gate', 'incomplete — SO missing required tiers for any branch', {
+    uploadTraceDecision('local-gate', 'incomplete -- SO missing required tiers for any branch', {
       street: so.street,
       city: so.city,
       houseNumber: so.houseNumber,
@@ -253,7 +253,7 @@ export function evaluateLocalResolution(
 }
 
 /**
- * Optional locality hint from folder path only (OD-5 — no default city append).
+ * Optional locality hint from folder path only (OD-5 -- no default city append).
  */
 export function deriveLocalityHint(relativePath: string | undefined): string | undefined {
   const folder = deriveFolderDisplayPath(relativePath);
@@ -389,7 +389,7 @@ function pickExifAssistCandidate(
 }
 
 /**
- * Drop Photon hits farther than org contextDistanceMaxMeters from anchor (EXIF → project centroid).
+ * Drop Photon hits farther than org contextDistanceMaxMeters from anchor (EXIF -> project centroid).
  * @see docs/specs/service/search/search-tuning.distance-radii-contract.md
  */
 export function filterGeocodeHitsByContextDistance(
@@ -440,7 +440,7 @@ export function shouldSplitGroupByPhotonUnitCoords(
 }
 
 /**
- * Branch C auto-assign blocked — force city_step when EXIF disagrees with Photon auto city.
+ * Branch C auto-assign blocked -- force city_step when EXIF disagrees with Photon auto city.
  * @see docs/specs/service/media-upload-service/upload-address-resolution.branch-c-city-tray.md#city-01
  */
 export function shouldForceBranchCCityTray(
@@ -467,7 +467,7 @@ export function shouldForceBranchCCityTray(
  * Distance rules (do not conflate):
  * - `config.exifAssistRadiusMeters` (m): pick which candidate matches EXIF when several exist.
  * - Org `resolver.contextDistanceMaxMeters` (km in UI, m in DB): drop hits unrealistically far from
- *   job search anchor before classify — same as Search Tuning “Max distance for internet results”.
+ *   job search anchor before classify -- same as Search Tuning "Max distance for internet results".
  *   **Wire-up:** filter hits using merged org config + anchor before this function runs.
  * @see docs/specs/service/search/search-tuning.distance-radii-contract.md
  */
@@ -483,7 +483,7 @@ export function classifySearchHits(
     minMeaningfulScore: config.minMeaningfulScore,
   });
   if (!hits.length) {
-    uploadTraceDecision('classify-hits', 'failed — zero geocoder hits');
+    uploadTraceDecision('classify-hits', 'failed -- zero geocoder hits');
     uploadTraceExit('classify-hits', 'classifySearchHits', 'failed');
     return { kind: 'failed' };
   }
@@ -496,7 +496,7 @@ export function classifySearchHits(
       config.exifAssistRadiusMeters,
     );
     if (assisted) {
-      uploadTraceDecision('classify-hits', 'auto — EXIF within exifAssistRadiusMeters', {
+      uploadTraceDecision('classify-hits', 'auto -- EXIF within exifAssistRadiusMeters', {
         candidateId: assisted.id,
         addressLabel: assisted.addressLabel,
         radiusM: config.exifAssistRadiusMeters,
@@ -516,7 +516,7 @@ export function classifySearchHits(
   const topScore = top.score ?? 0;
 
   if (topScore < config.minMeaningfulScore) {
-    uploadTraceDecision('classify-hits', 'failed — top score below minMeaningfulScore', {
+    uploadTraceDecision('classify-hits', 'failed -- top score below minMeaningfulScore', {
       topScore,
       minMeaningfulScore: config.minMeaningfulScore,
       topLabel: top.addressLabel,
@@ -526,7 +526,7 @@ export function classifySearchHits(
   }
 
   if (topScore >= config.disambiguationAutoAssignThreshold) {
-    uploadTraceDecision('classify-hits', 'auto — top score >= disambiguationAutoAssignThreshold', {
+    uploadTraceDecision('classify-hits', 'auto -- top score >= disambiguationAutoAssignThreshold', {
       topScore,
       threshold: config.disambiguationAutoAssignThreshold,
       topLabel: top.addressLabel,
@@ -541,7 +541,7 @@ export function classifySearchHits(
       topScore - (second.score ?? 0) >= config.minTopGap &&
       topScore >= config.disambiguationReviewLowerBound)
   ) {
-    uploadTraceDecision('classify-hits', 'auto — single hit or clear top gap', {
+    uploadTraceDecision('classify-hits', 'auto -- single hit or clear top gap', {
       hitCount: sorted.length,
       topScore,
       secondScore: second?.score,
@@ -553,7 +553,7 @@ export function classifySearchHits(
   }
 
   if (sorted.length > 1 && topScore >= config.disambiguationReviewLowerBound) {
-    uploadTraceDecision('classify-hits', 'ambiguous — multiple hits above review lower bound', {
+    uploadTraceDecision('classify-hits', 'ambiguous -- multiple hits above review lower bound', {
       hitCount: sorted.length,
       topScore,
       reviewLowerBound: config.disambiguationReviewLowerBound,
@@ -562,7 +562,7 @@ export function classifySearchHits(
     return { kind: 'ambiguous', candidates: sorted };
   }
 
-  uploadTraceDecision('classify-hits', 'auto — fallback to top candidate', {
+  uploadTraceDecision('classify-hits', 'auto -- fallback to top candidate', {
     topScore,
     topLabel: top.addressLabel,
   });

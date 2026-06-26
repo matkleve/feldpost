@@ -1,13 +1,13 @@
 /**
- * Tray Continue gate — jobs must finish Phase 0 before the user can confirm an answer.
- * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md § Tray Continue gate
+ * Tray Continue gate -- jobs must finish Phase 0 before the user can confirm an answer.
+ * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md # Tray Continue gate
  */
 
 import type { UploadJob } from '../upload-manager.types';
 
 /**
  * One job is ready when it awaits tray input and HEIC was converted to JPEG on the job file.
- * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md § Tray Continue gate
+ * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md # Tray Continue gate
  */
 export function isJobReadyForTrayResolution(
   job: UploadJob,

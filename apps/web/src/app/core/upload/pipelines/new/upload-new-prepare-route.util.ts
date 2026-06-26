@@ -38,7 +38,7 @@ function applyConvertedFileToJob(
   deps.jobState.updateJob(jobId, { file: convertedFile, thumbnailUrl: newThumbnailUrl });
 }
 
-/** Singleflight HEIC→JPEG for one job (prepare may have started this in background). */
+/** Singleflight HEIC->JPEG for one job (prepare may have started this in background). */
 function ensureHeicConversionScheduled(
   deps: Pick<NewPrepareRouteDeps, 'jobState' | 'uploadService'>,
   jobId: string,
@@ -133,23 +133,23 @@ export async function prepareNewJobForUpload(
 }
 
 /**
- * routePreparedNewJob() ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Route a job through conflict check ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ upload phase or ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ issues lane.
+ * routePreparedNewJob() -- Route a job through conflict check -> upload phase or -> issues lane.
  *
  * Ground rules:
- *  - If job has coordinates: run conflict check ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ upload phase
- *  - If no coordinates + high-confidence address: run conflict check ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ upload phase
+ *  - If job has coordinates: run conflict check -> upload phase
+ *  - If no coordinates + high-confidence address: run conflict check -> upload phase
  *  - If no coordinates + low/no confidence:
  *    - For photos: set phase=missing_data, issueKind=missing_gps
  *    - For documents: set phase=missing_data, issueKind=document_unresolved
  *    - Mark job done (dequeue); emit MissingDataEvent
  *
  * Spec compliance (upload-manager-pipeline.md):
- *  ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ Document routing: issueKind=document_unresolved when no address
- *  ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ Confidence gating: Only high-confidence addresses proceed to upload
- *  ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ Conflict check: Run after address resolution
+ *  - Document routing: issueKind=document_unresolved when no address
+ *  - Confidence gating: Only high-confidence addresses proceed to upload
+ *  - Conflict check: Run after address resolution
  */
 /**
- * Phase 6 — placement decided in pre-resolve; upload bytes only when job.coords is set.
+ * Phase 6 -- placement decided in pre-resolve; upload bytes only when job.coords is set.
  * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md
  */
 export async function routePreparedNewJob(
@@ -187,7 +187,7 @@ export async function routePreparedNewJob(
   routeJobToMissingData(deps, jobId, routedJob, ctx);
 }
 
-/** Branch A — no text coords and no EXIF metadata after geocode failure. */
+/** Branch A -- no text coords and no EXIF metadata after geocode failure. */
 export function routeJobToMissingData(
   deps: Pick<NewPrepareRouteDeps, 'jobState' | 'queue' | 'uploadService'>,
   jobId: string,
@@ -216,9 +216,9 @@ export function routeJobToMissingData(
 }
 
 /**
- * Phase 0 — EXIF parse and HEIC conversion run in parallel (both work on the original file).
+ * Phase 0 -- EXIF parse and HEIC conversion run in parallel (both work on the original file).
  * Upload gate (Phase B) waits for conversion; geocode starts as soon as EXIF + SO are ready.
- * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md § Phase 0 prepareExif
+ * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md # Phase 0 prepareExif
  */
 async function prepareExifAndFile(
   deps: NewPrepareRouteDeps,
@@ -228,7 +228,7 @@ async function prepareExifAndFile(
 ): Promise<{ job: UploadJob; parsedExif: ParsedExif } | null> {
   const isHeic = deps.uploadService.isHeic(job.file);
 
-  // Fire both immediately — EXIF parse and HEIC→JPEG conversion are independent of each other.
+  // Fire both immediately -- EXIF parse and HEIC->JPEG conversion are independent of each other.
   deps.jobState.setPhase(jobId, 'parsing_exif');
   const exifPromise: Promise<ParsedExif> = job.parsedExif
     ? Promise.resolve(job.parsedExif)
@@ -281,7 +281,7 @@ async function prepareExifAndFile(
 
 /**
  * Hash + dedup check after placement; shows modal or marks skip.
- * @see docs/specs/service/media-upload-service/upload-manager-pipeline.md § Actions 7–9
+ * @see docs/specs/service/media-upload-service/upload-manager-pipeline.md # Actions 7-9
  */
 export async function hashAndCheckDedupForNewJob(
   deps: Pick<NewPrepareRouteDeps, 'jobState' | 'queue' | 'uploadService'>,
@@ -294,7 +294,7 @@ export async function hashAndCheckDedupForNewJob(
   return outcome === 'skipped' || outcome === 'issue';
 }
 
-/** Panel "No auto location" — only explicit optional disables GPS/filename routing. */
+/** Panel "No auto location" -- only explicit optional disables GPS/filename routing. */
 function isAutoLocationEnabled(job: UploadJob): boolean {
   return job.locationRequirementMode !== 'optional';
 }

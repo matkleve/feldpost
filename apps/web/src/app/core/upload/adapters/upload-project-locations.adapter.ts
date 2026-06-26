@@ -49,7 +49,7 @@ export class UploadProjectLocationsAdapter {
     }));
   }
 
-  /** Lowest sort_order row with valid coords — Branch B bias. */
+  /** Lowest sort_order row with valid coords -- Branch B bias. */
   pickCentroid(rows: readonly ProjectLocationRow[]): UploadProjectCentroid | null {
     const sorted = [...rows].sort((a, b) => a.sortOrder - b.sortOrder);
     for (const row of sorted) {

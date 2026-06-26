@@ -1,7 +1,7 @@
 /**
  * Replace pipeline phase runners (mechanical extract from UploadReplacePipelineService.run).
  * @see upload-replace-pipeline.service.ts
- * @see docs/specs/service/media-upload-service/upload-manager-pipeline.md § Replace Upload Pipeline
+ * @see docs/specs/service/media-upload-service/upload-manager-pipeline.md # Replace Upload Pipeline
  */
 
 import type { User } from '@supabase/supabase-js';
@@ -34,7 +34,7 @@ export type ReplacePipelinePrepared = {
 };
 
 /**
- * validating → parsing_exif → converting_format → hashing → dedup_check.
+ * validating -> parsing_exif -> converting_format -> hashing -> dedup_check.
  * @see upload-replace-pipeline.service.ts run (first half)
  */
 export async function prepareReplacePipelineJob(

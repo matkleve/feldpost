@@ -64,13 +64,13 @@ describe('UploadEnrichmentService', () => {
         .mockResolvedValueOnce({
           lat: 48.1372,
           lng: 16.3738,
-          addressLabel: 'Mariahilferstraße 56, Wien',
+          addressLabel: 'Mariahilferstrasse 56, Wien',
           city: 'Wien',
           district: null,
-          street: 'Mariahilferstraße',
+          street: 'Mariahilferstrasse',
           streetNumber: '56',
           zip: null,
-          country: 'Österreich',
+          country: 'Oesterreich',
         }),
     };
 
@@ -90,12 +90,12 @@ describe('UploadEnrichmentService', () => {
     });
 
     const service = TestBed.inject(UploadEnrichmentService);
-    const result = await service.enrichWithForwardGeocode('media-anchor', 'Mariahilferstraße 56');
+    const result = await service.enrichWithForwardGeocode('media-anchor', 'Mariahilferstrasse 56');
 
-    expect(geocodingMock.forward).toHaveBeenNthCalledWith(1, 'Mariahilferstraße 56');
+    expect(geocodingMock.forward).toHaveBeenNthCalledWith(1, 'Mariahilferstrasse 56');
     expect(geocodingMock.forward).toHaveBeenNthCalledWith(
       2,
-      'Mariahilferstraße 56, Wien, Österreich',
+      'Mariahilferstrasse 56, Wien, Oesterreich',
     );
     expect(result?.coords).toEqual({ lat: 48.1372, lng: 16.3738 });
   });
