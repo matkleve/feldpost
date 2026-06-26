@@ -102,10 +102,10 @@ function buildFakeAuth(userId: string | null = 'user-uuid') {
 
 function buildFakeGeocoding(
   result: object | null = {
-    addressLabel: 'Burgstrasse 7, 8001 Zuerich, Switzerland',
-    city: 'Zuerich',
+    addressLabel: 'Burgstraße 7, 8001 Zürich, Switzerland',
+    city: 'Zürich',
     district: 'Altstadt',
-    street: 'Burgstrasse 7',
+    street: 'Burgstraße 7',
     country: 'Switzerland',
   },
 ) {
@@ -629,10 +629,10 @@ describe('UploadService', () => {
         p_media_item_id: 'img-uuid',
         p_latitude: 47.3769,
         p_longitude: 8.5417,
-        p_address_label: 'Burgstrasse 7, 8001 Zuerich, Switzerland',
-        p_city: 'Zuerich',
+        p_address_label: 'Burgstraße 7, 8001 Zürich, Switzerland',
+        p_city: 'Zürich',
         p_district: 'Altstadt',
-        p_street: 'Burgstrasse 7',
+        p_street: 'Burgstraße 7',
         p_country: 'Switzerland',
       });
     });

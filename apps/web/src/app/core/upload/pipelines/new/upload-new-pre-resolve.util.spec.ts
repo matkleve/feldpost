@@ -102,7 +102,7 @@ describe('runPreUploadLocationResolve -- text before EXIF', () => {
   it('geocodes folder text before EXIF-only when titleAddressCoords are missing', async () => {
     const exifCoords = { lat: 48.21, lng: 16.37 };
     let job = createJob({
-      titleAddress: 'Thaliastrasse, Wien',
+      titleAddress: 'Thaliastraße, Wien',
       titleAddressSource: 'folder',
       parsedExif: { coords: exifCoords },
       groupingKey: undefined,

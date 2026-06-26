@@ -242,7 +242,7 @@ describe('UploadAddressResolutionOrchestrator -- admin level conflicts', () => {
       buildJob({
         id: 'job-regular',
         batchId: 'batch-plz',
-        relativePath: 'AT/Wien/1090/Hauptstrasse/photo.jpg',
+        relativePath: 'AT/Wien/1090/Hauptstraße/photo.jpg',
         file: new File([], 'photo.jpg'),
       }),
     ]);

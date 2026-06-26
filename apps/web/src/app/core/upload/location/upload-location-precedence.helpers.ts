@@ -155,7 +155,7 @@ export function collectSourceConflictJobIds(
 }
 
 /**
- * Leaf folder segment for tray copy (e.g. `Thaliastrasse 14`), not camera filename tokens.
+ * Leaf folder segment for tray copy (e.g. `Thaliastraße 14`), not camera filename tokens.
  * @see docs/specs/component/upload/upload-resolver-tray.question-copy.md -- Folder path vs folder address
  */
 export function labelFromFolderDisplayPath(folderDisplayPath?: string): string | null {

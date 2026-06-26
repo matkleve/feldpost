@@ -68,6 +68,7 @@ function buildFakeAuthService() {
     user: userSignal.asReadonly(),
     session: signal(null).asReadonly(),
     loading: signal(false).asReadonly(),
+    organizationId: vi.fn().mockResolvedValue('org-1'),
     _userSignal: userSignal,
   };
 }
@@ -231,15 +232,15 @@ describe('UploadManagerService', () => {
         {
           lat: 48.2,
           lng: 16.37,
-          displayName: 'Burgstrasse 7, Wien, Oesterreich',
-          name: 'Burgstrasse 7',
+          displayName: 'Burgstraße 7, Wien, Österreich',
+          name: 'Burgstraße 7',
           importance: 0.97,
           address: {
-            road: 'Burgstrasse',
+            road: 'Burgstraße',
             house_number: '7',
             postcode: '1010',
             city: 'Wien',
-            country: 'Oesterreich',
+            country: 'Österreich',
             country_code: 'at',
           },
         },
@@ -249,7 +250,7 @@ describe('UploadManagerService', () => {
       service.imageUploaded$.subscribe((e) => events.push(e));
 
       // Filename with street address
-      service.submit([makeFile('Burgstrasse_7_facade.jpg')]);
+      service.submit([makeFile('Burgstraße_7_facade.jpg')]);
 
       await vi.waitFor(() => {
         expect(events.length).toBe(1);
@@ -527,21 +528,21 @@ describe('UploadManagerService', () => {
         {
           lat: 48.2,
           lng: 16.37,
-          displayName: 'Hauptstrasse 12, Wien, Oesterreich',
-          name: 'Hauptstrasse 12',
+          displayName: 'Hauptstraße 12, Wien, Österreich',
+          name: 'Hauptstraße 12',
           importance: 0.97,
           address: {
-            road: 'Hauptstrasse',
+            road: 'Hauptstraße',
             house_number: '12',
             postcode: '1010',
             city: 'Wien',
-            country: 'Oesterreich',
+            country: 'Österreich',
             country_code: 'at',
           },
         },
       ]);
 
-      service.submit([makeFile('Hauptstrasse_12_front.jpg')]);
+      service.submit([makeFile('Hauptstraße_12_front.jpg')]);
 
       await vi.waitFor(() => {
         expect(events.length).toBe(1);
@@ -549,7 +550,7 @@ describe('UploadManagerService', () => {
 
       expect(fakeGeocoding.searchStructuredForward).toHaveBeenCalled();
       const job = service.jobs().find((j) => j.id === events[0]);
-      expect(job?.titleAddress).toContain('Hauptstrasse');
+      expect(job?.titleAddress).toContain('Hauptstraße');
     });
 
     it('rejects camera-generated filenames', async () => {

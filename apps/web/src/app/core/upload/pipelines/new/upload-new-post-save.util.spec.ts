@@ -25,7 +25,7 @@ describe('finalizeNewUploadPhase', () => {
       .mockResolvedValue({ coords: { lat: 48.1372, lng: 11.5756 } });
     const geocodeTitleAddress = vi.fn().mockResolvedValue({ lat: 48.1372, lng: 11.5756 });
     let job = createJob({
-      titleAddress: 'Mariahilferstrasse 56',
+      titleAddress: 'Mariahilferstraße 56',
       locationSourceUsed: 'folder',
       parsedExif: { coords: { lat: 48.2082, lng: 16.3738 } },
       coords: undefined,
@@ -43,7 +43,7 @@ describe('finalizeNewUploadPhase', () => {
       },
     );
 
-    expect(enrichWithForwardGeocode).toHaveBeenCalledWith('media-1', 'Mariahilferstrasse 56');
+    expect(enrichWithForwardGeocode).toHaveBeenCalledWith('media-1', 'Mariahilferstraße 56');
     expect(geocodeTitleAddress).toHaveBeenCalled();
     expect(phases[0]).toBe('resolving_coordinates');
     expect(job.locationMismatchMeters).toBeGreaterThan(15);

@@ -13,7 +13,7 @@ describe('patchContainmentCheckOutcome', () => {
         state: 'Wien',
         postcode: '1200',
         city: 'Wien',
-        street: 'Hauptstrasse',
+        street: 'Hauptstraße',
         houseNumber: null,
         staircase: null,
         door: null,
@@ -23,11 +23,11 @@ describe('patchContainmentCheckOutcome', () => {
         postcodeCandidates: [],
         uncertainFields: [],
         groupingKey: 'at|wien|1200|wien|hauptstrasse|',
-        relativePath: 'AT/Wien/1200/Hauptstrasse',
+        relativePath: 'AT/Wien/1200/Hauptstraße',
         fileName: 'photo.jpg',
       },
-      folderDisplayPath: 'AT/Wien/1200/Hauptstrasse',
-      titleAddressLabel: 'Hauptstrasse, Wien',
+      folderDisplayPath: 'AT/Wien/1200/Hauptstraße',
+      titleAddressLabel: 'Hauptstraße, Wien',
       geocodeBranch: 'branch_a',
       resolvedFromAdminConflict: true,
       ...overrides,
@@ -90,14 +90,14 @@ describe('patchContainmentCheckOutcome', () => {
     const group = makeGroup({
       searchObject: {
         ...makeGroup().searchObject,
-        street: 'Hauptstrasse',
+        street: 'Hauptstraße',
         city: null,
       },
     });
 
     const result = patchContainmentCheckOutcome(orchestrator as never, 'b', group);
 
-    expect(result.candidates?.[0]?.addressLabel).toBe('Keep: Hauptstrasse,');
+    expect(result.candidates?.[0]?.addressLabel).toBe('Keep: Hauptstraße,');
     expect(result.trayStep).toBe('3');
   });
 

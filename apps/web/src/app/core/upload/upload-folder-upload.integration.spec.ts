@@ -192,15 +192,15 @@ describe('UploadManagerService -- folder upload integration (SO -> dedup -> DB l
       {
         lat: 47.0707,
         lng: 15.4395,
-        displayName: 'Annenstrasse 10, Graz, Oesterreich',
-        name: 'Annenstrasse 10',
+        displayName: 'Annenstraße 10, Graz, Österreich',
+        name: 'Annenstraße 10',
         importance: 0.97,
         address: {
-          road: 'Annenstrasse',
+          road: 'Annenstraße',
           house_number: '10',
           postcode: '8020',
           city: 'Graz',
-          country: 'Oesterreich',
+          country: 'Österreich',
           country_code: 'at',
         },
       },
@@ -212,22 +212,22 @@ describe('UploadManagerService -- folder upload integration (SO -> dedup -> DB l
     const entries: ScannedFileEntry[] = [
       {
         file: makeFile('IMG_1.jpg'),
-        relativePath: 'AT/Graz/Annenstrasse 10/IMG_1.jpg',
-        directorySegments: ['AT', 'Graz', 'Annenstrasse 10'],
+        relativePath: 'AT/Graz/Annenstraße 10/IMG_1.jpg',
+        directorySegments: ['AT', 'Graz', 'Annenstraße 10'],
       },
       {
         file: makeFile('IMG_2.jpg'),
-        relativePath: 'AT/Graz/Annenstrasse 10/IMG_2.jpg',
-        directorySegments: ['AT', 'Graz', 'Annenstrasse 10'],
+        relativePath: 'AT/Graz/Annenstraße 10/IMG_2.jpg',
+        directorySegments: ['AT', 'Graz', 'Annenstraße 10'],
       },
       {
         file: makeFile('IMG_3.jpg'),
-        relativePath: 'AT/Graz/Annenstrasse 10/IMG_3.jpg',
-        directorySegments: ['AT', 'Graz', 'Annenstrasse 10'],
+        relativePath: 'AT/Graz/Annenstraße 10/IMG_3.jpg',
+        directorySegments: ['AT', 'Graz', 'Annenstraße 10'],
       },
     ];
 
-    await service.submitWebkitFolder(entries, 'Annenstrasse 10');
+    await service.submitWebkitFolder(entries, 'Annenstraße 10');
 
     await vi.waitFor(() => {
       expect(events.length).toBe(3);
@@ -296,30 +296,30 @@ describe('UploadManagerService -- folder upload integration (SO -> dedup -> DB l
       {
         lat: 48.3059,
         lng: 14.2862,
-        displayName: 'Hauptstrasse 5, Linz, Oesterreich',
-        name: 'Hauptstrasse 5',
+        displayName: 'Hauptstraße 5, Linz, Österreich',
+        name: 'Hauptstraße 5',
         importance: 0.75,
         address: {
-          road: 'Hauptstrasse',
+          road: 'Hauptstraße',
           house_number: '5',
           postcode: '4020',
           city: 'Linz',
-          country: 'Oesterreich',
+          country: 'Österreich',
           country_code: 'at',
         },
       },
       {
         lat: 47.7981,
         lng: 13.0457,
-        displayName: 'Hauptstrasse 5, Salzburg, Oesterreich',
-        name: 'Hauptstrasse 5',
+        displayName: 'Hauptstraße 5, Salzburg, Österreich',
+        name: 'Hauptstraße 5',
         importance: 0.7,
         address: {
-          road: 'Hauptstrasse',
+          road: 'Hauptstraße',
           house_number: '5',
           postcode: '5020',
           city: 'Salzburg',
-          country: 'Oesterreich',
+          country: 'Österreich',
           country_code: 'at',
         },
       },
@@ -328,12 +328,12 @@ describe('UploadManagerService -- folder upload integration (SO -> dedup -> DB l
     const entries: ScannedFileEntry[] = [
       {
         file: makeFile('IMG_1.jpg'),
-        relativePath: 'Hauptstrasse 5/IMG_1.jpg',
-        directorySegments: ['Hauptstrasse 5'],
+        relativePath: 'Hauptstraße 5/IMG_1.jpg',
+        directorySegments: ['Hauptstraße 5'],
       },
     ];
 
-    await service.submitWebkitFolder(entries, 'Hauptstrasse 5');
+    await service.submitWebkitFolder(entries, 'Hauptstraße 5');
 
     await vi.waitFor(() => {
       const groups = locationResolution
@@ -393,15 +393,15 @@ describe('UploadManagerService -- folder upload integration (SO -> dedup -> DB l
       {
         lat: 47.2692,
         lng: 11.4041,
-        displayName: 'Hauptstrasse 5, Wien, Oesterreich',
-        name: 'Hauptstrasse 5',
+        displayName: 'Hauptstraße 5, Wien, Österreich',
+        name: 'Hauptstraße 5',
         importance: 0.9,
         address: {
-          road: 'Hauptstrasse',
+          road: 'Hauptstraße',
           house_number: '5',
           postcode: '1010',
           city: 'Wien',
-          country: 'Oesterreich',
+          country: 'Österreich',
           country_code: 'at',
         },
       },
@@ -410,12 +410,12 @@ describe('UploadManagerService -- folder upload integration (SO -> dedup -> DB l
     const entries: ScannedFileEntry[] = [
       {
         file: makeFile('photo.jpg'),
-        relativePath: 'AT/Wien/Innsbruck/Hauptstrasse 5/photo.jpg',
-        directorySegments: ['AT', 'Wien', 'Innsbruck', 'Hauptstrasse 5'],
+        relativePath: 'AT/Wien/Innsbruck/Hauptstraße 5/photo.jpg',
+        directorySegments: ['AT', 'Wien', 'Innsbruck', 'Hauptstraße 5'],
       },
     ];
 
-    await service.submitWebkitFolder(entries, 'Hauptstrasse 5');
+    await service.submitWebkitFolder(entries, 'Hauptstraße 5');
 
     await vi.waitFor(() => {
       const groups = locationResolution

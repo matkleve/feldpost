@@ -31,8 +31,8 @@ function buildJob(overrides: Partial<UploadJob> = {}): UploadJob {
     submittedAt: new Date(),
     mode: 'new',
     groupingKey: 'gk-thaliastrasse',
-    folderDisplayPath: 'Thaliastrasse 14',
-    titleAddress: 'Thaliastrasse 14',
+    folderDisplayPath: 'Thaliastraße 14',
+    titleAddress: 'Thaliastraße 14',
     titleAddressCoords: { lat: 48.198, lng: 16.335 },
     parsedExif: { coords: { lat: 48.21, lng: 16.37 } },
     disambiguationGroupId: 'group-pending',
@@ -62,7 +62,7 @@ describe('UploadLocationResolutionService -- source conflict', () => {
             reverse: vi.fn().mockImplementation(async (lat: number, lng: number) => {
               reverseCalls += 1;
               if (lat === 48.198) {
-                return { addressLabel: 'Thaliastrasse 65, Wien' };
+                return { addressLabel: 'Thaliastraße 65, Wien' };
               }
               return { addressLabel: 'Antonsplatz, Wien' };
             }),
@@ -147,11 +147,11 @@ describe('UploadLocationResolutionService -- source conflict', () => {
     service.registerDisambiguationGroup({
       batchId: 'batch-1',
       queryKey: buildSourceConflictQueryKey('gk-thaliastrasse'),
-      folderDisplayPath: 'Thaliastrasse 14',
-      titleAddress: 'Thaliastrasse 14',
+      folderDisplayPath: 'Thaliastraße 14',
+      titleAddress: 'Thaliastraße 14',
       jobIds: [onTray.id],
       candidates: buildSourceConflictCandidates({
-        folderAddress: 'Thaliastrasse 14, Wien',
+        folderAddress: 'Thaliastraße 14, Wien',
         photoAddress: 'Antonsplatz, Wien',
         textCoords: text,
         exifCoords: exif,
@@ -183,14 +183,14 @@ describe('UploadLocationResolutionService -- source conflict', () => {
     service.registerDisambiguationGroup({
       batchId: 'batch-1',
       queryKey: buildSourceConflictQueryKey('gk-thaliastrasse'),
-      folderDisplayPath: 'Thaliastrasse 14',
-      titleAddress: 'Thaliastrasse 14',
+      folderDisplayPath: 'Thaliastraße 14',
+      titleAddress: 'Thaliastraße 14',
       jobIds: [job.id],
       candidates: [
         {
           id: SOURCE_CONFLICT_TEXT_CANDIDATE_ID,
-          addressLabel: 'Thaliastrasse 65, Wien',
-          displayName: 'Thaliastrasse 65, Wien',
+          addressLabel: 'Thaliastraße 65, Wien',
+          displayName: 'Thaliastraße 65, Wien',
           lat: text.lat,
           lng: text.lng,
         },
@@ -225,11 +225,11 @@ describe('UploadLocationResolutionService -- source conflict', () => {
     service.registerDisambiguationGroup({
       batchId: 'batch-1',
       queryKey,
-      folderDisplayPath: 'Thaliastrasse 14',
-      titleAddress: 'Thaliastrasse 14',
+      folderDisplayPath: 'Thaliastraße 14',
+      titleAddress: 'Thaliastraße 14',
       jobIds: [job.id],
       candidates: buildSourceConflictCandidates({
-        folderAddress: 'Thaliastrasse 65, Wien',
+        folderAddress: 'Thaliastraße 65, Wien',
         photoAddress: 'Antonsplatz, Wien',
         textCoords: text,
         exifCoords: exif,
@@ -264,11 +264,11 @@ describe('UploadLocationResolutionService -- source conflict', () => {
     service.registerDisambiguationGroup({
       batchId: 'batch-1',
       queryKey,
-      folderDisplayPath: 'Thaliastrasse 14',
-      titleAddress: 'Thaliastrasse 14',
+      folderDisplayPath: 'Thaliastraße 14',
+      titleAddress: 'Thaliastraße 14',
       jobIds: [jobFirst.id],
       candidates: buildSourceConflictCandidates({
-        folderAddress: 'Thaliastrasse 14, Wien',
+        folderAddress: 'Thaliastraße 14, Wien',
         photoAddress: 'Antonsplatz, Wien',
         textCoords: text,
         exifCoords: exif,
@@ -306,11 +306,11 @@ describe('UploadLocationResolutionService -- source conflict', () => {
     service.registerDisambiguationGroup({
       batchId: 'batch-1',
       queryKey,
-      folderDisplayPath: 'Thaliastrasse 14',
-      titleAddress: 'Thaliastrasse 14',
+      folderDisplayPath: 'Thaliastraße 14',
+      titleAddress: 'Thaliastraße 14',
       jobIds: [jobFirst.id],
       candidates: buildSourceConflictCandidates({
-        folderAddress: 'Thaliastrasse 14, Wien',
+        folderAddress: 'Thaliastraße 14, Wien',
         photoAddress: 'Antonsplatz, Wien',
         textCoords: text,
         exifCoords: exif,
@@ -346,11 +346,11 @@ describe('UploadLocationResolutionService -- source conflict', () => {
     service.registerDisambiguationGroup({
       batchId: 'batch-1',
       queryKey,
-      folderDisplayPath: 'Thaliastrasse 14',
-      titleAddress: 'Thaliastrasse 14',
+      folderDisplayPath: 'Thaliastraße 14',
+      titleAddress: 'Thaliastraße 14',
       jobIds: [jobFirst.id],
       candidates: buildSourceConflictCandidates({
-        folderAddress: 'Thaliastrasse 14, Wien',
+        folderAddress: 'Thaliastraße 14, Wien',
         photoAddress: 'Antonsplatz, Wien',
         textCoords: text,
         exifCoords: exif,
