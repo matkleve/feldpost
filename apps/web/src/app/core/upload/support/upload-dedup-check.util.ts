@@ -81,9 +81,25 @@ function skipIntraBatchDuplicate(
   jobId: string,
   job: UploadJob,
   ownerJobId: string,
-  ctx: Pick<PipelineContext, 'emitUploadSkipped' | 'emitBatchProgress' | 'drainQueue'>,
+  ctx: Pick<
+    PipelineContext,
+    'emitUploadSkipped' | 'emitBatchProgress' | 'drainQueue' | 'mergeDuplicateAddress'
+  >,
 ): 'skipped' {
   const owner = deps.jobState.findJob(ownerJobId);
+
+  // Same file under a different folder address: attach this address to the
+  // owner media (one media, multiple addresses). Same address -> nothing to add.
+  const dupAddress = job.titleAddress?.trim();
+  if (
+    dupAddress &&
+    job.groupingKey &&
+    owner?.groupingKey &&
+    job.groupingKey !== owner.groupingKey
+  ) {
+    ctx.mergeDuplicateAddress(ownerJobId, dupAddress);
+  }
+
   deps.jobState.setPhase(jobId, 'skipped');
   deps.jobState.updateJob(jobId, { existingMediaId: owner?.mediaId });
   deps.queue.markDone(jobId);

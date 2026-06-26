@@ -24,6 +24,7 @@ export interface UploadManagerPipelineContextDeps {
   getAbortSignal: (jobId: string) => AbortSignal | undefined;
   checkDedupHash: (hash: string) => Promise<DedupHashMatch | null>;
   claimBatchHash: (batchId: string, hash: string, jobId: string) => string | null;
+  mergeDuplicateAddress: (ownerJobId: string, addressLabel: string) => void;
   getCurrentUserId: () => string | undefined;
   emitUploadSkipped: (event: UploadSkippedEvent) => void;
   emitDuplicateDetected: (event: DuplicateDetectedEvent) => void;
@@ -44,6 +45,8 @@ export function createUploadManagerPipelineContext(
     getAbortSignal: (jobId) => deps.getAbortSignal(jobId),
     checkDedupHash: (hash) => deps.checkDedupHash(hash),
     claimBatchHash: (batchId, hash, jobId) => deps.claimBatchHash(batchId, hash, jobId),
+    mergeDuplicateAddress: (ownerJobId, addressLabel) =>
+      deps.mergeDuplicateAddress(ownerJobId, addressLabel),
     getCurrentUserId: () => deps.getCurrentUserId(),
     emitUploadSkipped: (event) => deps.emitUploadSkipped(event),
     emitDuplicateDetected: (event) => deps.emitDuplicateDetected(event),

@@ -26,6 +26,7 @@ import { AuthService } from '../auth/auth.service';
 import { FilenameParserService } from '../filename-parser/filename-parser.service';
 import { FolderScanService } from '../folder-scan/folder-scan.service';
 import { MediaPreviewService } from '../media-preview/media-preview.service';
+import { MediaLocationsService } from '../media-locations/media-locations.service';
 import { ProjectsService } from '../projects/projects.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { UploadAttachPipelineService } from './pipelines/attach/upload-attach-pipeline.service';
@@ -136,6 +137,7 @@ export class UploadManagerService {
   private readonly folderScan = inject(FolderScanService);
   private readonly filenameParser = inject(FilenameParserService);
   private readonly mediaPreview = inject(MediaPreviewService);
+  private readonly mediaLocations = inject(MediaLocationsService);
   private readonly projects = inject(ProjectsService);
   private readonly locationConfig = inject(UploadLocationConfigService);
   private readonly locationResolution = inject(UploadLocationResolutionService);
@@ -221,6 +223,13 @@ export class UploadManagerService {
    */
   private readonly batchDedupClaims = new Map<string, string>();
 
+  /**
+   * Address labels to attach to an owner job's media once it persists, keyed
+   * by owner jobId. A byte-identical duplicate under a different folder records
+   * its address here so the one media ends up with both addresses.
+   */
+  private readonly pendingAddressMerges = new Map<string, string[]>();
+
   // -- Pipeline context ------------------------
 
   /** Shared context passed to pipeline services for manager-owned operations. */
@@ -232,6 +241,7 @@ export class UploadManagerService {
     getAbortSignal: (jobId) => this.pipelineHost.getAbortSignal(jobId),
     checkDedupHash: (hash) => this.checkDedupHash(hash),
     claimBatchHash: (batchId, hash, jobId) => this.claimBatchHash(batchId, hash, jobId),
+    mergeDuplicateAddress: (ownerJobId, label) => this.mergeDuplicateAddress(ownerJobId, label),
     getCurrentUserId: () => this.auth.user()?.id,
     emitUploadSkipped: (event) => this._uploadSkipped$.next(event),
     emitDuplicateDetected: (event) => this._duplicateDetected$.next(event),
@@ -272,6 +282,11 @@ export class UploadManagerService {
 
     // Release a batch's intra-batch hash claims once it finishes.
     this.batchComplete$.subscribe((event) => this.clearBatchDedup(event.batchId));
+
+    // Attach a duplicate's deferred address once its owner media persists.
+    this._imageUploaded$.subscribe((event) =>
+      this.flushPendingAddressMerges(event.jobId, event.mediaId),
+    );
   }
 
   // -- Public API ------------------------
@@ -484,6 +499,39 @@ export class UploadManagerService {
       if (key.startsWith(prefix)) {
         this.batchDedupClaims.delete(key);
       }
+    }
+  }
+
+  /**
+   * Record the duplicate's address for the owner media. Attaches immediately if
+   * the owner already persisted, otherwise defers until its `imageUploaded`.
+   */
+  private mergeDuplicateAddress(ownerJobId: string, addressLabel: string): void {
+    const label = addressLabel.trim();
+    if (!label) {
+      return;
+    }
+    const ownerMediaId = this.jobState.findJob(ownerJobId)?.mediaId;
+    if (ownerMediaId) {
+      void this.mediaLocations.addFromFreeText(ownerMediaId, label);
+      return;
+    }
+    const pending = this.pendingAddressMerges.get(ownerJobId) ?? [];
+    if (!pending.includes(label)) {
+      pending.push(label);
+    }
+    this.pendingAddressMerges.set(ownerJobId, pending);
+  }
+
+  /** Attach any deferred duplicate addresses once the owner media exists. */
+  private flushPendingAddressMerges(ownerJobId: string, mediaId: string): void {
+    const labels = this.pendingAddressMerges.get(ownerJobId);
+    if (!labels?.length) {
+      return;
+    }
+    this.pendingAddressMerges.delete(ownerJobId);
+    for (const label of labels) {
+      void this.mediaLocations.addFromFreeText(mediaId, label);
     }
   }
 }

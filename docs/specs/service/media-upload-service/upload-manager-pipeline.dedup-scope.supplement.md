@@ -84,6 +84,23 @@ progress never regresses to `dedup_check` after placement.
 Intra-batch skips are visible (`uploadSkipped`); `existingMediaId` MAY be
 undefined until the owning sibling finishes uploading.
 
+### One media, multiple addresses
+
+A file is identified by its **content** (`content_hash`), not its folder. The
+same bytes under two different address folders therefore dedup to **one media
+item**, but the address is **not** discarded — the duplicate's folder address is
+attached as an **additional location** on the owning media (`addFromFreeText` →
+`resolve_media_location`), so the one media carries **both** addresses.
+
+| Duplicate vs owner | Action |
+| --- | --- |
+| Same address (same `groupingKey`) | Pure skip — nothing to add |
+| Different address (different `groupingKey`) | Skip the bytes; attach the duplicate's address as an extra location (deferred until the owner media persists) |
+
+This is distinct from SearchObject (`groupingKey`) dedup, which collapses
+*resolution work* (one address geocoded/resolved once, shared across files at
+that address) — not media.
+
 ## Concurrency contract (cross-client race)
 
 When two clients write identical bytes for the same org simultaneously, neither
@@ -102,5 +119,6 @@ This replaces the legacy best-effort **second** client dedup check.
 - [x] Cross-user org match surfaces `duplicate_file` issue + modal
 - [x] `photo_v1` + `binary_v1` cover photo, document, and video
 - [x] Intra-batch (same-selection) duplicates skipped deterministically before storage write, single early gate
+- [x] Same file under a different address attaches that address to the one media (one media, multiple addresses); same address = pure skip
 - [ ] Hash registration uses `ON CONFLICT DO NOTHING`; losing client reconciles the orphan (cross-client concurrency)
 - [ ] `use_existing` links project context when batch has project filter (parent AC — verify end-to-end)

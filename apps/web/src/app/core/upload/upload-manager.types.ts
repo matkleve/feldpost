@@ -397,6 +397,13 @@ export interface PipelineContext {
    * call) — replaces the racy second server dedup check for double folder picks.
    */
   claimBatchHash(batchId: string, contentHash: string, jobId: string): string | null;
+  /**
+   * A byte-identical duplicate carries a *different* address than the media it
+   * dedups into (same file under two folders). Attach the duplicate's address
+   * as an extra location on the owning media — one media, multiple addresses.
+   * Deferred internally until the owning job has a persisted mediaId.
+   */
+  mergeDuplicateAddress(ownerJobId: string, addressLabel: string): void;
   getCurrentUserId(): string | undefined;
   emitUploadSkipped(event: UploadSkippedEvent): void;
   emitDuplicateDetected(event: DuplicateDetectedEvent): void;
