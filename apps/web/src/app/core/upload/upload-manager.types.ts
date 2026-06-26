@@ -259,7 +259,12 @@ export interface UploadSkippedEvent {
   batchId: string;
   fileName: string;
   contentHash: string;
-  existingMediaId: string;
+  /**
+   * The canonical media row this file duplicates. Present for org/server
+   * matches; may be undefined for an intra-batch duplicate whose owning
+   * sibling has not finished uploading yet.
+   */
+  existingMediaId?: string;
 }
 
 export interface DuplicateDetectedEvent {
@@ -385,6 +390,13 @@ export interface PipelineContext {
   drainQueue(): void;
   getAbortSignal(jobId: string): AbortSignal | undefined;
   checkDedupHash(contentHash: string): Promise<DedupHashMatch | null>;
+  /**
+   * Claim a content hash for a job within its batch. Returns the jobId that
+   * already owns the hash in this batch (an intra-batch duplicate), or null
+   * when this job is the first/owner. Deterministic and synchronous (no server
+   * call) — replaces the racy second server dedup check for double folder picks.
+   */
+  claimBatchHash(batchId: string, contentHash: string, jobId: string): string | null;
   getCurrentUserId(): string | undefined;
   emitUploadSkipped(event: UploadSkippedEvent): void;
   emitDuplicateDetected(event: DuplicateDetectedEvent): void;

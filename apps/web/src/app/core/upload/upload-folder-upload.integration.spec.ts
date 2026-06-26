@@ -211,17 +211,19 @@ describe('UploadManagerService -- folder upload integration (SO -> dedup -> DB l
 
     const entries: ScannedFileEntry[] = [
       {
-        file: makeFile('IMG_1.jpg'),
+        // Distinct bytes per photo: real photos differ, so intra-batch dedup
+        // must not collapse three different files at the same address.
+        file: makeFile('IMG_1.jpg', new Uint8Array(512).fill(1)),
         relativePath: 'AT/Graz/Annenstraße 10/IMG_1.jpg',
         directorySegments: ['AT', 'Graz', 'Annenstraße 10'],
       },
       {
-        file: makeFile('IMG_2.jpg'),
+        file: makeFile('IMG_2.jpg', new Uint8Array(512).fill(2)),
         relativePath: 'AT/Graz/Annenstraße 10/IMG_2.jpg',
         directorySegments: ['AT', 'Graz', 'Annenstraße 10'],
       },
       {
-        file: makeFile('IMG_3.jpg'),
+        file: makeFile('IMG_3.jpg', new Uint8Array(512).fill(3)),
         relativePath: 'AT/Graz/Annenstraße 10/IMG_3.jpg',
         directorySegments: ['AT', 'Graz', 'Annenstraße 10'],
       },
@@ -277,16 +279,19 @@ describe('UploadManagerService -- folder upload integration (SO -> dedup -> DB l
 
     await service.submitWebkitFolder(entries, 'Duplikate', { locationRequirementMode: 'optional' });
 
+    // Intra-batch dedup is deterministic: exactly one of the two byte-identical
+    // files is skipped, the other uploads. (existingMediaId may be undefined
+    // because the owning sibling can still be uploading when the dup is skipped.)
     await vi.waitFor(() => {
       expect(skipped.length).toBe(1);
     });
 
-    expect(skipped[0].existingMediaId).toBe('img-123');
-
-    // The non-duplicate job continues through the normal upload path.
     await vi.waitFor(() => {
       expect(uploaded.length).toBe(1);
     });
+
+    // The skipped and uploaded jobs are the two distinct files.
+    expect(skipped[0].jobId).not.toBe(uploaded[0].jobId);
   });
 
   it('(c) ambiguous Photon hits for street-only address -> city_step disambiguation tray (1a)', async () => {

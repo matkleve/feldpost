@@ -361,7 +361,7 @@ async function runPreUploadLocationResolveInner(
       return placementHeld;
     }
     uploadTraceExit('pipeline', 'runPreUploadLocationResolve', 'continue');
-    return finishPreResolveDedup(deps, jobId, parsedExif, ctx);
+    return 'continue';
   }
 
   if (highConfidence) {
@@ -375,7 +375,7 @@ async function runPreUploadLocationResolveInner(
     if (placementHeld) {
       return placementHeld;
     }
-    return finishPreResolveDedup(deps, jobId, parsedExif, ctx);
+    return 'continue';
   }
 
   uploadTraceDecision('pipeline', 'path -- low confidence, complete placement');
@@ -386,5 +386,5 @@ async function runPreUploadLocationResolveInner(
     return placementHeld;
   }
   uploadTraceExit('pipeline', 'runPreUploadLocationResolve', 'continue');
-  return finishPreResolveDedup(deps, jobId, parsedExif, ctx);
+  return 'continue';
 }

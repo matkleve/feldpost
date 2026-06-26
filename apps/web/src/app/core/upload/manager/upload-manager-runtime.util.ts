@@ -23,6 +23,7 @@ export interface UploadManagerPipelineContextDeps {
   drainQueue: () => void;
   getAbortSignal: (jobId: string) => AbortSignal | undefined;
   checkDedupHash: (hash: string) => Promise<DedupHashMatch | null>;
+  claimBatchHash: (batchId: string, hash: string, jobId: string) => string | null;
   getCurrentUserId: () => string | undefined;
   emitUploadSkipped: (event: UploadSkippedEvent) => void;
   emitDuplicateDetected: (event: DuplicateDetectedEvent) => void;
@@ -42,6 +43,7 @@ export function createUploadManagerPipelineContext(
     drainQueue: () => deps.drainQueue(),
     getAbortSignal: (jobId) => deps.getAbortSignal(jobId),
     checkDedupHash: (hash) => deps.checkDedupHash(hash),
+    claimBatchHash: (batchId, hash, jobId) => deps.claimBatchHash(batchId, hash, jobId),
     getCurrentUserId: () => deps.getCurrentUserId(),
     emitUploadSkipped: (event) => deps.emitUploadSkipped(event),
     emitDuplicateDetected: (event) => deps.emitDuplicateDetected(event),

@@ -212,6 +212,15 @@ export class UploadManagerService {
   readonly imageReplaced$: Observable<ImageReplacedEvent> = this._imageReplaced$.asObservable();
   readonly imageAttached$: Observable<ImageAttachedEvent> = this._imageAttached$.asObservable();
 
+  // -- Intra-batch dedup registry ------------------------
+
+  /**
+   * Per-batch content-hash ownership: `${batchId} ${hash}` -> first jobId.
+   * Lets a later job in the same batch detect a byte-identical sibling
+   * deterministically (double folder pick) without a second server round-trip.
+   */
+  private readonly batchDedupClaims = new Map<string, string>();
+
   // -- Pipeline context ------------------------
 
   /** Shared context passed to pipeline services for manager-owned operations. */
@@ -222,6 +231,7 @@ export class UploadManagerService {
     drainQueue: () => this.pipelineHost.drainQueue(this.pipelineCtx),
     getAbortSignal: (jobId) => this.pipelineHost.getAbortSignal(jobId),
     checkDedupHash: (hash) => this.checkDedupHash(hash),
+    claimBatchHash: (batchId, hash, jobId) => this.claimBatchHash(batchId, hash, jobId),
     getCurrentUserId: () => this.auth.user()?.id,
     emitUploadSkipped: (event) => this._uploadSkipped$.next(event),
     emitDuplicateDetected: (event) => this._duplicateDetected$.next(event),
@@ -259,6 +269,9 @@ export class UploadManagerService {
       },
       beforeUnloadHandler: this.beforeUnloadHandler,
     });
+
+    // Release a batch's intra-batch hash claims once it finishes.
+    this.batchComplete$.subscribe((event) => this.clearBatchDedup(event.batchId));
   }
 
   // -- Public API ------------------------
@@ -326,6 +339,7 @@ export class UploadManagerService {
   cancelBatch(batchId: string): void {
     cancelUploadManagerBatch(batchId, this.actionDeps, (jobId) => this.cancelJob(jobId));
     this.batchService.releaseTrayOrchestratorForBatch(batchId);
+    this.clearBatchDedup(batchId);
   }
 
   /**
@@ -445,5 +459,31 @@ export class UploadManagerService {
    */
   private async checkDedupHash(contentHash: string) {
     return checkUploadDedupHash(this.supabase.client, contentHash);
+  }
+
+  /**
+   * Claim `contentHash` for `jobId` within `batchId`. Returns the jobId that
+   * already owns the hash in this batch (intra-batch duplicate), or null when
+   * this job is the owner. Check-and-set is synchronous, so concurrent siblings
+   * resolve deterministically by event-loop order.
+   */
+  private claimBatchHash(batchId: string, contentHash: string, jobId: string): string | null {
+    const key = `${batchId} ${contentHash}`;
+    const owner = this.batchDedupClaims.get(key);
+    if (owner && owner !== jobId) {
+      return owner;
+    }
+    this.batchDedupClaims.set(key, jobId);
+    return null;
+  }
+
+  /** Drop a finished/cancelled batch's hash claims. */
+  private clearBatchDedup(batchId: string): void {
+    const prefix = `${batchId} `;
+    for (const key of this.batchDedupClaims.keys()) {
+      if (key.startsWith(prefix)) {
+        this.batchDedupClaims.delete(key);
+      }
+    }
   }
 }

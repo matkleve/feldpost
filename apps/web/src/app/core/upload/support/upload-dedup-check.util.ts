@@ -41,6 +41,14 @@ export async function runUploadDedupCheck(
     deps.jobState.updateJob(jobId, { contentHash, contentHashAlgo: hashAlgo });
   }
 
+  // Intra-batch duplicate (e.g. the same file picked via two folders): a
+  // byte-identical sibling already owns this hash in the batch. Deterministic
+  // and local — no second server round-trip, decided before placement/tray.
+  const ownerJobId = ctx.claimBatchHash(job.batchId, contentHash, jobId);
+  if (ownerJobId) {
+    return skipIntraBatchDuplicate(deps, jobId, job, ownerJobId, ctx);
+  }
+
   deps.jobState.setPhase(jobId, 'dedup_check');
   const match = await ctx.checkDedupHash(contentHash);
   if (!match) {
@@ -61,4 +69,32 @@ export async function runUploadDedupCheck(
     ctx,
   });
   return result;
+}
+
+/**
+ * Skip a job whose bytes are already owned by an earlier sibling in the same
+ * batch. Silent (same-user semantics); links the sibling's media row if it has
+ * already persisted, otherwise the skipped row simply shows without it.
+ */
+function skipIntraBatchDuplicate(
+  deps: UploadDedupCheckDeps,
+  jobId: string,
+  job: UploadJob,
+  ownerJobId: string,
+  ctx: Pick<PipelineContext, 'emitUploadSkipped' | 'emitBatchProgress' | 'drainQueue'>,
+): 'skipped' {
+  const owner = deps.jobState.findJob(ownerJobId);
+  deps.jobState.setPhase(jobId, 'skipped');
+  deps.jobState.updateJob(jobId, { existingMediaId: owner?.mediaId });
+  deps.queue.markDone(jobId);
+  ctx.emitUploadSkipped({
+    jobId,
+    batchId: job.batchId,
+    fileName: job.file.name,
+    contentHash: job.contentHash ?? '',
+    existingMediaId: owner?.mediaId,
+  });
+  ctx.emitBatchProgress(job.batchId);
+  ctx.drainQueue();
+  return 'skipped';
 }

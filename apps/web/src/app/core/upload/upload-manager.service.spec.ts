@@ -107,8 +107,15 @@ function buildFakeSupabaseService() {
   };
 }
 
+let makeFileSeq = 0;
 function makeFile(name = 'photo.jpg'): File {
-  return new File([new Uint8Array(512)], name, { type: 'image/jpeg' });
+  // Unique bytes per call so distinct logical files are not collapsed by
+  // intra-batch content-hash dedup.
+  makeFileSeq += 1;
+  const content = new Uint8Array(512);
+  content[0] = makeFileSeq & 0xff;
+  content[1] = (makeFileSeq >> 8) & 0xff;
+  return new File([content], name, { type: 'image/jpeg' });
 }
 
 // -- Setup ------------------------

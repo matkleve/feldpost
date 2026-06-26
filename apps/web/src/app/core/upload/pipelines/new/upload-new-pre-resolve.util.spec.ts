@@ -161,6 +161,7 @@ describe('runPreUploadLocationResolve -- text before EXIF', () => {
       getAbortSignal: vi.fn(),
       checkDedupHash: vi.fn().mockResolvedValue(null),
       getCurrentUserId: vi.fn().mockReturnValue('user-1'),
+      claimBatchHash: vi.fn().mockReturnValue(null),
       emitDuplicateDetected: vi.fn(),
     };
 
@@ -221,6 +222,7 @@ describe('runPreUploadLocationResolve -- text before EXIF', () => {
         registeredByUserId: 'user-1',
       }),
       getCurrentUserId: vi.fn().mockReturnValue('user-1'),
+      claimBatchHash: vi.fn().mockReturnValue(null),
       emitDuplicateDetected: vi.fn(),
     };
 
@@ -291,6 +293,7 @@ describe('runPreUploadLocationResolve -- text before EXIF', () => {
         registeredByUserId: 'user-1',
       }),
       getCurrentUserId: vi.fn().mockReturnValue('user-1'),
+      claimBatchHash: vi.fn().mockReturnValue(null),
       emitDuplicateDetected: vi.fn(),
     };
 
@@ -360,6 +363,7 @@ describe('runPreUploadLocationResolve -- text before EXIF', () => {
         registeredByUserId: 'user-1',
       }),
       getCurrentUserId: vi.fn().mockReturnValue('user-1'),
+      claimBatchHash: vi.fn().mockReturnValue(null),
       emitDuplicateDetected: vi.fn(),
     };
 
