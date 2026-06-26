@@ -110,6 +110,17 @@ curl -s https://178-105-242-74.sslip.io/health
 
 Webhook / backfill URL: `https://178-105-242-74.sslip.io/generate`
 
+> **Rotating the worker host:** the `notify_thumbnail_worker()` trigger reads the
+> endpoint from the `app.thumbnail_worker_url` GUC and falls back to the URL above
+> when it is unset. To repoint the trigger without a code migration:
+>
+> ```sql
+> alter database postgres set app.thumbnail_worker_url =
+>   'https://<new-host>/generate';
+> ```
+>
+> The new value applies on the next DB connection.
+
 ## 5. Supabase Database Webhook (new uploads)
 
 Dashboard → **Database** → **Webhooks** → Create hook:
