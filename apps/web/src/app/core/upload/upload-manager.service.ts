@@ -234,7 +234,13 @@ export class UploadManagerService {
 
   // -- beforeunload ------------------------
 
-  private readonly beforeUnloadHandler = (): void => {};
+  private readonly beforeUnloadHandler = (event: BeforeUnloadEvent): void => {
+    // Trigger the browser's native "Leave site?" confirmation while uploads are
+    // in progress. registerUploadManagerEffects only attaches this listener
+    // while isBusy() is true, so it never fires when no upload is active.
+    event.preventDefault();
+    event.returnValue = '';
+  };
 
   constructor() {
     registerUploadManagerEffects({
