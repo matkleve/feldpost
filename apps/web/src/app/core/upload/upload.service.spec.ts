@@ -121,6 +121,16 @@ function setup(
 ) {
   const fakeSupabase = buildFakeSupabase(supabaseOverrides);
   const fakeAuth = buildFakeAuth(userId);
+  // organizationId() mirrors AuthService: resolve the org from the profiles
+  // row, so existing profileResult overrides still drive this path.
+  (fakeAuth as { organizationId: unknown }).organizationId = vi
+    .fn()
+    .mockImplementation(async () => {
+      if (!fakeAuth.user()) return null;
+      const { data, error } = await fakeSupabase.client.from('profiles').select().eq().single();
+      const orgId = (data as { organization_id?: string } | null)?.organization_id;
+      return error || !orgId ? null : orgId;
+    });
   const fakeGeocoding = buildFakeGeocoding(geocodingResult);
 
   TestBed.configureTestingModule({

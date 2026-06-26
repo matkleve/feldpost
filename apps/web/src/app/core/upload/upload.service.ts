@@ -139,6 +139,7 @@ export class UploadService {
   private uploadFilePersistDeps(): UploadFilePersistDeps {
     return {
       getUser: () => this.auth.user(),
+      getOrganizationId: () => this.auth.organizationId(),
       validateFile: (f) => this.validateFile(f),
       resolveMimeType: (f) => this.resolveMimeType(f),
       resolveMediaType: (f) => this.resolveMediaType(f),

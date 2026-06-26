@@ -18,6 +18,8 @@ import type { ExifCoords, FileValidation, ParsedExif, UploadResult } from '../up
 
 export interface UploadFilePersistDeps {
   getUser: () => User | null;
+  /** Resolve the current user's organization_id (cached, see AuthService). */
+  getOrganizationId: () => Promise<string | null>;
   validateFile: (file: File) => FileValidation;
   resolveMimeType: (file: File) => string;
   resolveMediaType: (file: File) => MediaType;
@@ -64,20 +66,10 @@ export async function persistUploadFile(
     return { error: 'Upload cancelled by user.' };
   }
 
-  const profileQuery = deps.supabaseClient
-    .from('profiles')
-    .select('organization_id')
-    .eq('id', user.id);
-
-  const { data: profile, error: profileError } = await deps
-    .withAbort(profileQuery, input.abortSignal)
-    .single();
-
-  if (profileError || !profile) {
-    return { error: profileError ?? new Error('Profile not found.') };
+  const orgId = await deps.getOrganizationId();
+  if (!orgId) {
+    return { error: new Error('Profile not found.') };
   }
-
-  const orgId: string = profile.organization_id;
 
   const uuid = crypto.randomUUID();
   const ext = (input.file.name.split('.').pop() ?? 'jpg').toLowerCase();

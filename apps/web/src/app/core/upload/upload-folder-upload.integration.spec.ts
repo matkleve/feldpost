@@ -91,6 +91,7 @@ function buildFakeAuthService() {
     user: userSignal.asReadonly(),
     session: signal(null).asReadonly(),
     loading: signal(false).asReadonly(),
+    organizationId: vi.fn().mockResolvedValue('org-1'),
     _userSignal: userSignal,
   };
 }

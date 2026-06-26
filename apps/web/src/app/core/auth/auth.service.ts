@@ -59,6 +59,14 @@ export class AuthService {
   /** Shortcut: the authenticated user from the current session. */
   readonly user = computed<User | null>(() => this._session()?.user ?? null);
 
+  /**
+   * Cached organization_id for the current user, keyed by user id.
+   * organization_id is session-stable, so it is fetched at most once per user
+   * instead of re-querying `profiles` on every upload. Cleared on sign-out;
+   * an account switch invalidates it automatically because the user id changes.
+   */
+  private _orgIdCache: { userId: string; orgId: string } | null = null;
+
   /** True while the user must set a new password before using the app. */
   private readonly _passwordRecoveryPending = signal(false);
   readonly passwordRecoveryPending = this._passwordRecoveryPending.asReadonly();
@@ -161,8 +169,38 @@ export class AuthService {
    * Clears the Supabase session from storage and updates the session signal.
    * Redirects to /auth/login after sign-out.
    */
+  /**
+   * Resolve the current user's organization_id, fetching `profiles` at most
+   * once per user and serving cached results thereafter. Returns null when
+   * unauthenticated or when the profile lookup fails.
+   */
+  async organizationId(): Promise<string | null> {
+    const user = this.user();
+    if (!user) {
+      return null;
+    }
+    if (this._orgIdCache?.userId === user.id) {
+      return this._orgIdCache.orgId;
+    }
+
+    const { data, error } = await this.supabase.client
+      .from('profiles')
+      .select('organization_id')
+      .eq('id', user.id)
+      .single();
+
+    const orgId = data?.organization_id as string | undefined;
+    if (error || !orgId) {
+      return null;
+    }
+
+    this._orgIdCache = { userId: user.id, orgId };
+    return orgId;
+  }
+
   async signOut(): Promise<void> {
     clearAccountProfileCache();
+    this._orgIdCache = null;
     this._passwordRecoveryPending.set(false);
     await this.supabase.client.auth.signOut();
     // session signal is set to null by onAuthStateChange

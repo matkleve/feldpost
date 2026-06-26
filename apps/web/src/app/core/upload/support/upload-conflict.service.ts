@@ -36,23 +36,15 @@ export class UploadConflictService {
     coords: ExifCoords | undefined,
     titleAddress: string | undefined,
   ): Promise<ConflictCandidate | null> {
-    const user = this.auth.user();
-    if (!user) return null;
-
-    const { data: profile } = await this.supabase.client
-      .from('profiles')
-      .select('organization_id')
-      .eq('id', user.id)
-      .single();
-
-    if (!profile) return null;
+    const orgId = await this.auth.organizationId();
+    if (!orgId) return null;
 
     const lat = coords?.lat ?? null;
     const lng = coords?.lng ?? null;
     const address = titleAddress ?? null;
 
     const { data: candidates, error } = await this.supabase.client.rpc('find_photoless_conflicts', {
-      p_org_id: profile.organization_id,
+      p_org_id: orgId,
       p_lat: lat,
       p_lng: lng,
       p_address: address,

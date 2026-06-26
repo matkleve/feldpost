@@ -45,26 +45,18 @@ export class UploadStorageService {
         return null;
       }
 
-      const profileQuery = this.supabase.client
-        .from('profiles')
-        .select('organization_id')
-        .eq('id', user.id);
-      const { data: profile, error: profileError } = await this.withAbort(
-        profileQuery,
-        abortSignal,
-      ).single();
-
-      if (!profile) {
+      const orgId = await this.auth.organizationId();
+      if (!orgId) {
         ev.end('error', {
-          errorMessage: profileError?.message ?? 'Profile fetch failed',
-          errorType: profileError?.code ?? 'profile_fetch_failed',
+          errorMessage: 'Profile fetch failed',
+          errorType: 'profile_fetch_failed',
         });
         return null;
       }
 
       const uuid = crypto.randomUUID();
       const ext = (file.name.split('.').pop() ?? 'jpg').toLowerCase();
-      const storagePath = `${profile.organization_id}/${user.id}/${uuid}.${ext}`;
+      const storagePath = `${orgId}/${user.id}/${uuid}.${ext}`;
       ev.set({ storagePath, bytesWritten: file.size });
 
       const { error } = await this.supabase.client.storage.from('media').upload(storagePath, file, {
@@ -99,16 +91,5 @@ export class UploadStorageService {
       });
       throw e;
     }
-  }
-
-  private withAbort<T extends { abortSignal?: (signal: AbortSignal) => T }>(
-    builder: T,
-    signal?: AbortSignal,
-  ): T {
-    if (!signal) return builder;
-    if (typeof builder.abortSignal === 'function') {
-      return builder.abortSignal(signal);
-    }
-    return builder;
   }
 }
