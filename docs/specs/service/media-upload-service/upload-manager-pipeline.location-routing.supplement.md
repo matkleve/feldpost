@@ -32,7 +32,9 @@ Normative FSM and persistence matrix for **upload location routing**: panel mode
 
 ## Pre-upload resolution (phased pipeline, OD-4)
 
-Normative order before dedup and upload bytes. **`job.parsedExif.coords`** is raw EXIF metadata (DB `exif_*`); **`job.coords`** is placement only (set via `applyChosenPlacementSource` / tray).
+Normative order before upload bytes. **`job.parsedExif.coords`** is raw EXIF metadata (DB `exif_*`); **`job.coords`** is placement only (set via `applyChosenPlacementSource` / tray).
+
+**Dedup gate (single, early):** content-hash dedup runs **once**, before Phase 1 title work / Phase 2 geocode / trays, so a duplicate never enters location resolution or the tray and progress never regresses to `dedup_check` after placement. Optional-location jobs run the same single gate. Intra-batch duplicates are caught client-side (deterministic, no server call); cross-client concurrency is arbitrated by the `UNIQUE(organization_id, content_hash)` index — **not** a second client check. See [dedup-scope supplement](./upload-manager-pipeline.dedup-scope.supplement.md).
 
 | Phase | Step | Notes |
 | --- | --- | --- |

@@ -69,6 +69,30 @@ Migration: `20260611120000_dedup_hashes_org_scope.sql`.
 | `upload_anyway` | New media row + storage object; org hash row unchanged |
 | Replace / attach | Same dedup gate (photo-only validation on those flows) |
 
+## Single gate, deterministic intra-batch
+
+Content-hash dedup is a **single** gate, run **before** title extraction /
+geocode / trays — duplicates never enter location resolution or the tray, and
+progress never regresses to `dedup_check` after placement.
+
+| Layer | Mechanism | Covers |
+| --- | --- | --- |
+| Intra-batch (same selection) | Per-batch in-memory hash registry on the manager (`claimBatchHash`); first job owns the hash, later byte-identical siblings skip — **deterministic, no server call** | Double folder pick / renamed copies within one batch (Goal 3) |
+| Org / resume / colleague | One `check_dedup_hashes` RPC at the same gate | Prior uploads, colleague duplicates |
+| Cross-client race | DB `UNIQUE(organization_id, content_hash)` arbitration (below) | Two clients, identical bytes, same instant |
+
+Intra-batch skips are visible (`uploadSkipped`); `existingMediaId` MAY be
+undefined until the owning sibling finishes uploading.
+
+## Concurrency contract (cross-client race)
+
+When two clients write identical bytes for the same org simultaneously, neither
+sees the other at check time. The unique index is the arbiter: the hash
+registration MUST use `ON CONFLICT (organization_id, content_hash) DO NOTHING`;
+the client that inserts **0 rows** lost the race and reconciles its file as a
+duplicate (remove the orphan storage object + media row, surface as skip/issue).
+This replaces the legacy best-effort **second** client dedup check.
+
 ## Acceptance criteria
 
 - [x] `dedup_hashes` uses `UNIQUE(organization_id, content_hash)` with `organization_id` backfill
@@ -77,4 +101,6 @@ Migration: `20260611120000_dedup_hashes_org_scope.sql`.
 - [x] Same-user match auto-skips without modal
 - [x] Cross-user org match surfaces `duplicate_file` issue + modal
 - [x] `photo_v1` + `binary_v1` cover photo, document, and video
+- [x] Intra-batch (same-selection) duplicates skipped deterministically before storage write, single early gate
+- [ ] Hash registration uses `ON CONFLICT DO NOTHING`; losing client reconciles the orphan (cross-client concurrency)
 - [ ] `use_existing` links project context when batch has project filter (parent AC — verify end-to-end)
