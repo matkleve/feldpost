@@ -404,6 +404,12 @@ export interface PipelineContext {
    * Deferred internally until the owning job has a persisted mediaId.
    */
   mergeDuplicateAddress(ownerJobId: string, addressLabel: string): void;
+  /**
+   * Attach an address to an already-persisted media row (server same-user
+   * dedup, where the existing media id is known). Idempotent at the DB level
+   * (location dedupe key + unique link), so a same-address resume is a no-op.
+   */
+  attachAddressToMedia(mediaId: string, addressLabel: string): void;
   getCurrentUserId(): string | undefined;
   emitUploadSkipped(event: UploadSkippedEvent): void;
   emitDuplicateDetected(event: DuplicateDetectedEvent): void;

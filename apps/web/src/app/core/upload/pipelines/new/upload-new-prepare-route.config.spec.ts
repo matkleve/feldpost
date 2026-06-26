@@ -139,6 +139,7 @@ function createPipelineContextMock() {
     checkDedupHash: vi.fn().mockResolvedValue(null),
     claimBatchHash: vi.fn().mockReturnValue(null),
     mergeDuplicateAddress: vi.fn(),
+    attachAddressToMedia: vi.fn(),
     getCurrentUserId: vi.fn().mockReturnValue('user-1'),
     emitDuplicateDetected: vi.fn(),
     emitUploadSkipped: vi.fn(),

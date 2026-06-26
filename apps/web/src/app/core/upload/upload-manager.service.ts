@@ -242,6 +242,7 @@ export class UploadManagerService {
     checkDedupHash: (hash) => this.checkDedupHash(hash),
     claimBatchHash: (batchId, hash, jobId) => this.claimBatchHash(batchId, hash, jobId),
     mergeDuplicateAddress: (ownerJobId, label) => this.mergeDuplicateAddress(ownerJobId, label),
+    attachAddressToMedia: (mediaId, label) => this.attachAddressToMedia(mediaId, label),
     getCurrentUserId: () => this.auth.user()?.id,
     emitUploadSkipped: (event) => this._uploadSkipped$.next(event),
     emitDuplicateDetected: (event) => this._duplicateDetected$.next(event),
@@ -533,5 +534,18 @@ export class UploadManagerService {
     for (const label of labels) {
       void this.mediaLocations.addFromFreeText(mediaId, label);
     }
+  }
+
+  /**
+   * Attach an address to an already-persisted media (server same-user dedup).
+   * Uses addLocation (no geocode) so a folder resume that re-picks identical
+   * files is a cheap DB no-op; a genuinely new address is added.
+   */
+  private attachAddressToMedia(mediaId: string, addressLabel: string): void {
+    const label = addressLabel.trim();
+    if (!label) {
+      return;
+    }
+    void this.mediaLocations.addLocation({ mediaItemId: mediaId, address_label: label });
   }
 }
