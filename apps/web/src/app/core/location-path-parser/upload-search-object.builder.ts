@@ -117,7 +117,10 @@ function applyTokenToFields(
 
   if (key === 'street' && fields.street) {
     fields.street = `${fields.street} ${token.value}`.trim();
-  } else {
+  } else if (!filenameOverride || fields[key] == null) {
+    // Folder segments still fill/refine fields; the filename only supplements
+    // fields the folder left empty (a folder/filename disagreement is recorded
+    // as a sourceDeviation above, not silently overwritten).
     fields[key] = token.value;
   }
 
