@@ -1,12 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { SupabaseService } from '../../supabase/supabase.service';
+import {
+  signUrlWithBucketFallback,
+  type SignedUrlFallbackResult,
+} from '../../supabase/storage-fallback.util';
 
-const SIGN_BUCKETS: ReadonlyArray<'media' | 'images'> = ['media', 'images'];
-
-export interface SignedUrlFallbackResult {
-  data: { signedUrl: string } | null;
-  error: { message?: string } | null;
-}
+export type { SignedUrlFallbackResult } from '../../supabase/storage-fallback.util';
 
 @Injectable({ providedIn: 'root' })
 export class SupabaseStorageAdapter {
@@ -17,21 +16,7 @@ export class SupabaseStorageAdapter {
     expiresInSeconds: number,
     options?: { transform?: { width: number; height: number; resize: 'cover' | 'contain' } },
   ): Promise<SignedUrlFallbackResult> {
-    let lastError: { message?: string } | null = null;
-
-    for (const bucket of SIGN_BUCKETS) {
-      const { data, error } = await this.supabase.client.storage
-        .from(bucket)
-        .createSignedUrl(path, expiresInSeconds, options);
-
-      if (!error && data?.signedUrl) {
-        return { data: { signedUrl: data.signedUrl }, error: null };
-      }
-
-      lastError = error ?? { message: 'Failed to sign URL' };
-    }
-
-    return { data: null, error: lastError };
+    return signUrlWithBucketFallback(this.supabase.client, path, expiresInSeconds, options);
   }
 
   async createSignedUrlsWithFallback(

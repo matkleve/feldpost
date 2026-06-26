@@ -7,6 +7,10 @@ import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { GeocodingService } from '../geocoding/geocoding.service';
 import { SupabaseService } from '../supabase/supabase.service';
+import {
+  downloadWithBucketFallback,
+  signUrlWithBucketFallback,
+} from '../supabase/storage-fallback.util';
 import { persistUploadFile, type UploadFilePersistDeps } from './support/upload-file-persist.util';
 import {
   convertHeicToJpegUploadFile,
@@ -31,6 +35,9 @@ export type {
 } from './upload.types';
 
 // -- Service ------------------------
+
+/** Signed-URL lifetime for upload-originated links (1 hour). */
+const UPLOAD_SIGNED_URL_TTL_SECONDS = 3600;
 
 @Injectable({ providedIn: 'root' })
 export class UploadService {
@@ -73,41 +80,29 @@ export class UploadService {
   async getSignedUrl(
     storagePath: string,
   ): Promise<{ url: string; error: null } | { error: Error | string }> {
-    const buckets: Array<'media' | 'images'> = ['media', 'images'];
-    let lastError: unknown = null;
+    const { data, error } = await signUrlWithBucketFallback(
+      this.supabase.client,
+      storagePath,
+      UPLOAD_SIGNED_URL_TTL_SECONDS,
+    );
 
-    for (const bucket of buckets) {
-      const { data, error } = await this.supabase.client.storage
-        .from(bucket)
-        .createSignedUrl(storagePath, 3600);
-
-      if (!error && data?.signedUrl) {
-        return { url: data.signedUrl, error: null };
-      }
-
-      lastError = error;
+    if (data?.signedUrl) {
+      return { url: data.signedUrl, error: null };
     }
 
-    return { error: mapUploadStorageError(lastError) };
+    return { error: mapUploadStorageError(error) };
   }
 
   async downloadFile(
     storagePath: string,
   ): Promise<{ ok: true; blob: Blob } | { ok: false; error: string }> {
-    const buckets: Array<'media' | 'images'> = ['media', 'images'];
-    let lastError: unknown = null;
+    const { data, error } = await downloadWithBucketFallback(this.supabase.client, storagePath);
 
-    for (const bucket of buckets) {
-      const { data, error } = await this.supabase.client.storage.from(bucket).download(storagePath);
-
-      if (!error && data instanceof Blob) {
-        return { ok: true, blob: data };
-      }
-
-      lastError = error;
+    if (data) {
+      return { ok: true, blob: data };
     }
 
-    const mapped = mapUploadStorageError(lastError);
+    const mapped = mapUploadStorageError(error);
     return {
       ok: false,
       error: typeof mapped === 'string' && mapped.trim().length > 0 ? mapped : 'Download failed.',

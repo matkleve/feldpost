@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import JSZip from 'jszip';
 import { SupabaseService } from '../../supabase/supabase.service';
+import { signUrlWithBucketFallback } from '../../supabase/storage-fallback.util';
 import type { WorkspaceMedia } from '../../workspace-view/workspace-view.types';
 import {
   composeStreetWithNumber,
@@ -153,24 +154,17 @@ export class EdgeExportOrchestratorAdapter {
   }
 
   private async createSignedUrl(storagePath: string): Promise<string> {
-    const buckets: Array<'media' | 'images'> = ['media', 'images'];
-    let lastErrorMessage = 'Failed to sign media URL.';
+    const { data, error } = await signUrlWithBucketFallback(
+      this.supabase.client,
+      storagePath,
+      SIGNED_URL_TTL_SECONDS,
+    );
 
-    for (const bucket of buckets) {
-      const { data, error } = await this.supabase.client.storage
-        .from(bucket)
-        .createSignedUrl(storagePath, SIGNED_URL_TTL_SECONDS);
-
-      if (!error && data?.signedUrl) {
-        return data.signedUrl;
-      }
-
-      if (error?.message) {
-        lastErrorMessage = error.message;
-      }
+    if (data?.signedUrl) {
+      return data.signedUrl;
     }
 
-    throw new Error(lastErrorMessage);
+    throw new Error(error?.message ?? 'Failed to sign media URL.');
   }
 
   private formatDate(date: Date): string {
