@@ -15,7 +15,6 @@ import { isGroupBlocked } from './upload-location-resolution.helpers';
 import { uploadTraceDecision, uploadTraceEnter } from '../address-resolution/upload-address-resolution.debug';
 import { UploadLocationTrayProducerAdapter } from '../../upload-resolver-tray-orchestrator/adapters/upload-location-tray-producer.adapter';
 import { UploadPreResolveWaveService } from '../support/upload-pre-resolve-wave.service';
-import { USE_TRAY_ORCHESTRATOR } from '../../upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.types';
 import type { DisambiguationRequiredEvent, UploadDisambiguationGroup } from '../upload-manager.types';
 
 @Injectable({ providedIn: 'root' })
@@ -121,7 +120,7 @@ export class UploadLocationDisambiguationRegistrationService {
     updated: UploadDisambiguationGroup,
     isNewGroup: boolean,
   ): void {
-    if (!USE_TRAY_ORCHESTRATOR || !isGroupBlocked(updated)) {
+    if (!isGroupBlocked(updated)) {
       return;
     }
     this.injector.get(UploadLocationTrayProducerAdapter).syncGroupToOrchestrator(updated);

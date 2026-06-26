@@ -5,7 +5,6 @@
 
 import { Injectable, inject } from '@angular/core';
 import { UploadResolverTrayOrchestratorService } from '../../upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.service';
-import { USE_TRAY_ORCHESTRATOR } from '../../upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.types';
 import { uploadTraceDecision, uploadTraceEnter } from '../address-resolution/upload-address-resolution.debug';
 
 @Injectable({ providedIn: 'root' })
@@ -31,7 +30,7 @@ export class UploadPreResolveWaveService {
    * @see docs/specs/service/media-upload-service/upload-resolver-tray-orchestrator.md # Early vs final notifyScanIdle
    */
   notifyFirstTrayReady(batchId: string, detail?: Record<string, unknown>): void {
-    if (!USE_TRAY_ORCHESTRATOR || this.earlyTrayPresented.has(batchId)) {
+    if (this.earlyTrayPresented.has(batchId)) {
       return;
     }
     this.earlyTrayPresented.add(batchId);
@@ -60,7 +59,7 @@ export class UploadPreResolveWaveService {
       });
       // Early tray already closed the collecting window -- avoid presenting the same bundle twice.
       // @see docs/specs/service/media-upload-service/upload-resolver-tray-orchestrator.md # Early vs final notifyScanIdle
-      if (USE_TRAY_ORCHESTRATOR && !this.earlyTrayPresented.has(batchId)) {
+      if (!this.earlyTrayPresented.has(batchId)) {
         this.trayOrchestrator.notifyScanIdle(batchId);
       }
       return;

@@ -7,6 +7,4 @@ export const UPLOAD_DEV_FLAGS = {
   dockAlwaysVisible: false,
   /** Seed orchestrator with fixture bundle (no real upload). */
   mockResolverTray: false,
-  /** Route tray through UploadResolverTrayOrchestratorService (production default). */
-  useTrayOrchestrator: true,
 } as const;

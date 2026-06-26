@@ -37,7 +37,6 @@ import type {
   TrayResolveItem,
   TrayResolveOption,
 } from '../../../core/upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.types';
-import { USE_TRAY_ORCHESTRATOR } from '../../../core/upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.types';
 import { ChipComponent } from '../../../shared/components/chip/chip.component';
 import { DropdownShellComponent } from '../../../shared/dropdown-trigger/shell/dropdown-shell.component';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
@@ -93,10 +92,8 @@ export class UploadResolverTrayComponent implements OnInit {
 
   readonly passiveStatusLine = this.panelSignals.passiveStatusLine;
 
-  private readonly useOrchestrator =
-    USE_TRAY_ORCHESTRATOR ||
-    UPLOAD_DEV_FLAGS.useTrayOrchestrator ||
-    UPLOAD_DEV_FLAGS.mockResolverTray;
+  /** The orchestrator is the only tray path (mock seeding also routes through it). */
+  private readonly useOrchestrator = true;
 
   private readonly _selectedOptionId = signal<string | null>(null);
   readonly cityDraft = signal('');

@@ -6,9 +6,6 @@
 export const PRESENTATION_BUNDLE_WINDOW_MS = 5000;
 export const PRESENTATION_BUNDLE_MAX_DIALOGUE_UNITS = 5;
 
-/** When true, tray and upload-location-resolution route through the orchestrator. */
-export const USE_TRAY_ORCHESTRATOR = true;
-
 export type TrayAnswerKind = 'single_choice' | 'text';
 
 export type TrayItemStatus = 'blocked' | 'ready' | 'resolved' | 'skipped';
