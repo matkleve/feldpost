@@ -55,6 +55,10 @@ describe('runUploadDedupCheck — intra-batch address merge', () => {
     expect(outcome).toBe('skipped');
     expect(ctx.mergeDuplicateAddress).toHaveBeenCalledWith('owner-1', 'Hauptstraße 5, Wien');
     expect(ctx.checkDedupHash).not.toHaveBeenCalled();
+    expect(deps.jobState.updateJob).toHaveBeenCalledWith(
+      'dup-1',
+      expect.objectContaining({ statusLabel: 'Already uploaded · address added' }),
+    );
   });
 
   it('does not merge when the duplicate shares the owner address (true double pick)', async () => {

@@ -91,17 +91,22 @@ function skipIntraBatchDuplicate(
   // Same file under a different folder address: attach this address to the
   // owner media (one media, multiple addresses). Same address -> nothing to add.
   const dupAddress = job.titleAddress?.trim();
-  if (
+  const addressMerged = !!(
     dupAddress &&
     job.groupingKey &&
     owner?.groupingKey &&
     job.groupingKey !== owner.groupingKey
-  ) {
-    ctx.mergeDuplicateAddress(ownerJobId, dupAddress);
+  );
+  if (addressMerged) {
+    ctx.mergeDuplicateAddress(ownerJobId, dupAddress!);
   }
 
   deps.jobState.setPhase(jobId, 'skipped');
-  deps.jobState.updateJob(jobId, { existingMediaId: owner?.mediaId });
+  deps.jobState.updateJob(jobId, {
+    existingMediaId: owner?.mediaId,
+    // Calm, informative framing: the upload was not wasted, it added an address.
+    ...(addressMerged ? { statusLabel: 'Already uploaded · address added' } : {}),
+  });
   deps.queue.markDone(jobId);
   ctx.emitUploadSkipped({
     jobId,
