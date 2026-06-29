@@ -33,20 +33,15 @@ function makeDeps(owner: Partial<UploadJob> | null) {
   } as never;
 }
 
-function makeCtx(
-  ownerJobId: string | null,
-  match: { mediaItemId: string; registeredByUserId: string } | null = null,
-): PipelineContext {
+function makeCtx(ownerJobId: string | null): PipelineContext {
   return {
     claimBatchHash: vi.fn().mockReturnValue(ownerJobId),
-    checkDedupHash: vi.fn().mockResolvedValue(match),
+    checkDedupHash: vi.fn().mockResolvedValue(null),
     getCurrentUserId: vi.fn().mockReturnValue('user-1'),
     emitUploadSkipped: vi.fn(),
-    emitDuplicateDetected: vi.fn(),
     emitBatchProgress: vi.fn(),
     drainQueue: vi.fn(),
     mergeDuplicateAddress: vi.fn(),
-    attachAddressToMedia: vi.fn(),
   } as unknown as PipelineContext;
 }
 
@@ -81,15 +76,5 @@ describe('runUploadDedupCheck — intra-batch address merge', () => {
     expect(outcome).toBe('no_match');
     expect(ctx.checkDedupHash).toHaveBeenCalledWith('hash-abc');
     expect(ctx.mergeDuplicateAddress).not.toHaveBeenCalled();
-  });
-
-  it('attaches the address to the existing media on a same-user server match', async () => {
-    const ctx = makeCtx(null, { mediaItemId: 'existing-1', registeredByUserId: 'user-1' });
-    const deps = makeDeps(null);
-
-    const outcome = await runUploadDedupCheck(deps, 'dup-1', makeJob(), undefined, ctx);
-
-    expect(outcome).toBe('skipped');
-    expect(ctx.attachAddressToMedia).toHaveBeenCalledWith('existing-1', 'Hauptstraße 5, Wien');
   });
 });

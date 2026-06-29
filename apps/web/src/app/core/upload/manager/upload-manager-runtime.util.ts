@@ -25,7 +25,6 @@ export interface UploadManagerPipelineContextDeps {
   checkDedupHash: (hash: string) => Promise<DedupHashMatch | null>;
   claimBatchHash: (batchId: string, hash: string, jobId: string) => string | null;
   mergeDuplicateAddress: (ownerJobId: string, addressLabel: string) => void;
-  attachAddressToMedia: (mediaId: string, addressLabel: string) => void;
   getCurrentUserId: () => string | undefined;
   emitUploadSkipped: (event: UploadSkippedEvent) => void;
   emitDuplicateDetected: (event: DuplicateDetectedEvent) => void;
@@ -48,8 +47,6 @@ export function createUploadManagerPipelineContext(
     claimBatchHash: (batchId, hash, jobId) => deps.claimBatchHash(batchId, hash, jobId),
     mergeDuplicateAddress: (ownerJobId, addressLabel) =>
       deps.mergeDuplicateAddress(ownerJobId, addressLabel),
-    attachAddressToMedia: (mediaId, addressLabel) =>
-      deps.attachAddressToMedia(mediaId, addressLabel),
     getCurrentUserId: () => deps.getCurrentUserId(),
     emitUploadSkipped: (event) => deps.emitUploadSkipped(event),
     emitDuplicateDetected: (event) => deps.emitDuplicateDetected(event),
