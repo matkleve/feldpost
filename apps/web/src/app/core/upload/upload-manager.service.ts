@@ -217,7 +217,7 @@ export class UploadManagerService {
   // -- Intra-batch dedup registry ------------------------
 
   /**
-   * Per-batch content-hash ownership: `${batchId} ${hash}` -> first jobId.
+   * Per-batch content-hash ownership: `${batchId} ${hash}` -> first jobId.
    * Lets a later job in the same batch detect a byte-identical sibling
    * deterministically (double folder pick) without a second server round-trip.
    */
@@ -280,8 +280,12 @@ export class UploadManagerService {
       beforeUnloadHandler: this.beforeUnloadHandler,
     });
 
-    // Release a batch's intra-batch hash claims once it finishes.
-    this.batchComplete$.subscribe((event) => this.clearBatchDedup(event.batchId));
+    // Release a batch's intra-batch hash claims + any orphaned address merges
+    // (owners that failed/were dismissed without an imageUploaded) once it ends.
+    this.batchComplete$.subscribe((event) => {
+      this.clearBatchDedup(event.batchId);
+      this.clearPendingMergesForBatch(event.batchId);
+    });
 
     // Attach a duplicate's deferred address once its owner media persists.
     this._imageUploaded$.subscribe((event) =>
@@ -355,6 +359,7 @@ export class UploadManagerService {
     cancelUploadManagerBatch(batchId, this.actionDeps, (jobId) => this.cancelJob(jobId));
     this.batchService.releaseTrayOrchestratorForBatch(batchId);
     this.clearBatchDedup(batchId);
+    this.clearPendingMergesForBatch(batchId);
   }
 
   /**
@@ -483,7 +488,7 @@ export class UploadManagerService {
    * resolve deterministically by event-loop order.
    */
   private claimBatchHash(batchId: string, contentHash: string, jobId: string): string | null {
-    const key = `${batchId} ${contentHash}`;
+    const key = `${batchId} ${contentHash}`;
     const owner = this.batchDedupClaims.get(key);
     if (owner && owner !== jobId) {
       return owner;
@@ -494,10 +499,22 @@ export class UploadManagerService {
 
   /** Drop a finished/cancelled batch's hash claims. */
   private clearBatchDedup(batchId: string): void {
-    const prefix = `${batchId} `;
+    const prefix = `${batchId} `;
     for (const key of this.batchDedupClaims.keys()) {
       if (key.startsWith(prefix)) {
         this.batchDedupClaims.delete(key);
+      }
+    }
+  }
+
+  /** Drop deferred address merges for a finished/cancelled batch's jobs. */
+  private clearPendingMergesForBatch(batchId: string): void {
+    if (this.pendingAddressMerges.size === 0) {
+      return;
+    }
+    for (const job of this.jobState.snapshot()) {
+      if (job.batchId === batchId) {
+        this.pendingAddressMerges.delete(job.id);
       }
     }
   }
