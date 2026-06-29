@@ -149,6 +149,7 @@ export class UploadBatchService {
 
     const completed = batchJobs.filter((j) => j.phase === 'complete').length;
     const skipped = batchJobs.filter((j) => j.phase === 'skipped').length;
+    const mergedAddresses = batchJobs.filter((j) => j.duplicateAddressMerged).length;
     const failed = batchJobs.filter((j) => j.phase === 'error').length;
     const finishedAt = new Date();
     const durationMs = finishedAt.getTime() - batch.startedAt.getTime();
@@ -172,6 +173,7 @@ export class UploadBatchService {
       totalFiles: total,
       completedFiles: completed,
       skippedFiles: skipped,
+      mergedAddressFiles: mergedAddresses,
       failedFiles: failed,
       durationMs,
     });

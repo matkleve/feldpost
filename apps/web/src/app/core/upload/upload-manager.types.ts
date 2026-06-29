@@ -165,6 +165,8 @@ export interface UploadJob {
   contentHashAlgo?: 'photo_v1' | 'binary_v1';
   /** If phase === 'skipped', the existing media row id that matched. */
   existingMediaId?: string;
+  /** Skipped duplicate that contributed a new address to the existing media. */
+  duplicateAddressMerged?: boolean;
   /** Step 3: duplicate tag before geocode -- upload may still proceed. */
   duplicateOfMediaId?: string;
   /** Optional UI issue classification derived by pipeline decisions. */
@@ -307,6 +309,8 @@ export interface BatchCompleteEvent {
   totalFiles: number;
   completedFiles: number;
   skippedFiles: number;
+  /** Skipped duplicates that added a new address to the existing media. */
+  mergedAddressFiles: number;
   failedFiles: number;
   durationMs: number;
 }

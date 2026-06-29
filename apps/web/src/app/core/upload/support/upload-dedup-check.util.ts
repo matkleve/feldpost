@@ -105,7 +105,9 @@ function skipIntraBatchDuplicate(
   deps.jobState.updateJob(jobId, {
     existingMediaId: owner?.mediaId,
     // Calm, informative framing: the upload was not wasted, it added an address.
-    ...(addressMerged ? { statusLabel: 'Already uploaded · address added' } : {}),
+    ...(addressMerged
+      ? { duplicateAddressMerged: true, statusLabel: 'Already uploaded · address added' }
+      : {}),
   });
   deps.queue.markDone(jobId);
   ctx.emitUploadSkipped({
