@@ -68,6 +68,16 @@ Collapsed: logo and title hidden; header grid collapses to a single 32px column;
 
 Header `padding-inline`: **0** — panel padding is the only horizontal inset (matches nav rows).
 
+### Collapsed toggle-slot icon swap
+
+While collapsed, the collapse button's icon slot shows the Feldpost brand mark (`.nav__collapse-logo`, `/assets/logo.svg`) at rest instead of the `view_sidebar` toggle icon. As soon as the pointer hovers anywhere over `.sidebar` (the whole rail, not just the button), the slot swaps back to the `view_sidebar` icon (`.nav__collapse-icon`) as an expand affordance, then swaps back to the logo on pointer-leave. Pure CSS (`.sidebar:hover .nav__collapse-icon`); no new component state. This does **not** change rail width — the deferred hover-to-expand-width behavior below is unaffected.
+
+| State | Icon slot shows |
+| --- | --- |
+| Expanded | `view_sidebar` icon (unchanged) |
+| Collapsed, rail not hovered | Feldpost logo mark |
+| Collapsed, rail hovered | `view_sidebar` icon |
+
 ## Map layout side effect
 
 When `sidebarCollapsed` changes (after init), `NavComponent` calls `WorkspacePaneLayoutMapEffectsService.getMapEffects()?.invalidateMapSize()` immediately, on the next tick, and after `200ms` so Leaflet reflows after the width transition.
@@ -101,3 +111,4 @@ sequenceDiagram
 - [x] Collapse control persists across reload
 - [x] Map `invalidateSize` runs on toggle, not on component init
 - [ ] Hover-to-expand desktop rail (deferred — not implemented)
+- [x] Collapsed toggle slot shows brand logo at rest, swaps to `view_sidebar` icon on rail hover

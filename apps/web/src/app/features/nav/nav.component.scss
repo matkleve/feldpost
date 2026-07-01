@@ -120,6 +120,17 @@
   flex-shrink: 0;
 }
 
+// Logo swapped in for the collapse-btn icon only while the rail is
+// collapsed (see :host.nav--collapsed below); hidden while expanded.
+// @see docs/specs/component/workspace/sidebar.collapse.supplement.md
+.nav__collapse-logo {
+  display: none;
+  width: var(--sidebar-icon-size);
+  height: var(--sidebar-icon-size);
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
 .nav__header-title {
   min-width: 0;
   font-family: var(--font-serif), ui-serif, Georgia, serif;
@@ -506,6 +517,33 @@
     @media (min-width: 768px) {
       left: 0;
       right: auto;
+    }
+  }
+
+  // Collapsed rail shows the brand mark in the toggle slot at rest;
+  // hovering the rail swaps it back to the expand icon as an affordance.
+  // @see docs/specs/component/workspace/sidebar.collapse.supplement.md
+  .nav__collapse-logo {
+    @media (min-width: 768px) {
+      display: block;
+    }
+  }
+
+  .nav__collapse-icon {
+    @media (min-width: 768px) {
+      display: none;
+    }
+  }
+
+  .sidebar:hover .nav__collapse-logo {
+    @media (min-width: 768px) {
+      display: none;
+    }
+  }
+
+  .sidebar:hover .nav__collapse-icon {
+    @media (min-width: 768px) {
+      display: inline-flex;
     }
   }
 

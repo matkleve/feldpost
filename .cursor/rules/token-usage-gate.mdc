@@ -59,7 +59,31 @@ Angular component SCSS attribute scoping raises specificity by +1 attribute sele
 **Rule:** If you set `color:` on an `hlmBtn` element via component SCSS, you MUST also add an explicit `&:hover, &:focus-visible { color: var(--primary); }` block in the same SCSS.  
 Never rely on `hlmBtn`'s Tailwind hover to win against your own component `color:` rule.
 
-## 6. Forbidden legacy patterns
+## 6. Cascade-layer trap (mandatory read — 2nd recurrence, see `docs/ai-diary/2026-07-01.md`)
+
+**Unlayered CSS always beats every `@layer` rule, regardless of selector specificity or source order.** If a base rule that sets an interactive property (`background`, `border-color`, `box-shadow`, `color`) lives **outside** `@layer components`/`@layer states` "to beat some third-party class", it will *also* permanently beat your own `@layer states` hover/active/`[data-active]` override for that same property — the state rule compiles fine and never fires visually.
+
+```scss
+/* BUG: unlayered — always wins, even during :hover */
+button.my-toolbar__trigger {
+  background: var(--chrome-surface);
+}
+
+@layer states {
+  /* Never applies — states layer cannot out-rank an unlayered rule */
+  button.my-toolbar__trigger:hover {
+    background: color-mix(in srgb, var(--brand-gold) 12%, var(--chrome-surface));
+  }
+}
+```
+
+**Rule:**
+1. Base chrome (frosted/outline/custom backgrounds) belongs in `@layer components`, not unlayered — **unless** the selector truly must beat a third-party unlayered utility (rare; verify the third-party class is actually applied in the current template before assuming this).
+2. Before leaving a rule unlayered, grep the template for the framework class (e.g. `hlmBtn`) you're trying to beat. If it isn't on the element anymore (post-refactor drift), the unlayered escape hatch is stale — move the rule into `@layer components`.
+3. Any property changed by a `@layer states` hover/active/`data-active` rule MUST have its resting value declared inside `@layer components` (or also unlayered) — never split across layered/unlayered for the same property+selector.
+4. When a hover/active visual "does nothing" despite correct SCSS, check layering first before touching specificity or `!important`.
+
+## 7. Forbidden legacy patterns
 
 - `var(--color-*)` — removed Phase 7; use semantic tweakcn names
 - `var(--fp-*)` — removed
