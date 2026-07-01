@@ -56,15 +56,24 @@
   .time-field__picker {
     display: flex;
     gap: var(--spacing-2);
-    min-width: 6.5rem;
-    touch-action: none;
+    touch-action: pan-y;
   }
 
+  // Native scroll (touch/trackpad/mouse) with CSS snap; `overscroll-behavior`
+  // contains momentum at the list bounds so it never chains to the map/page.
+  // Row height (1.5rem) × 5 visible rows == max-height, so exactly 5 full
+  // rows render with the middle one centered under the active-row marker.
+  // Block padding of 2 rows lets edge values (hour 0/23, minute 0/59) reach
+  // that same center slot. @see docs/specs/component/filters/time-field-control.md
   .time-field__wheel {
-    flex: 1 1 0;
+    flex: 0 0 2rem;
+    width: 2rem;
     min-width: 0;
     max-height: 7.5rem;
+    padding-block: 3rem;
     overflow-y: scroll;
+    overscroll-behavior-y: contain;
+    scroll-snap-type: y mandatory;
     scroll-behavior: smooth;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -79,7 +88,7 @@
     align-items: center;
     justify-content: center;
     width: 100%;
-    min-height: 1.75rem;
+    min-height: 1.5rem;
     margin: 0;
     padding: 0;
     border: 0;
@@ -89,6 +98,7 @@
     line-height: var(--line-height-tight);
     color: var(--muted-foreground);
     cursor: pointer;
+    scroll-snap-align: center;
 
     &:hover:not(:disabled) {
       @include emphasis.hover(8%);
@@ -99,5 +109,18 @@
   .time-field__wheel-item--selected {
     color: var(--interaction-selected-ink);
     @include emphasis.selected-bordered(10%, 24%);
+  }
+
+  // Footer action row — same bordered-strip treatment as
+  // `calendar-picker-panel__actions`, one-click destructive remove (no confirm
+  // step, see component ts). @see docs/specs/component/filters/time-field-control.md
+  .time-field__actions {
+    margin-top: var(--spacing-2);
+    padding-top: var(--spacing-2);
+    border-top: 1px solid var(--menu-border-subtle);
+  }
+
+  .time-field__remove-btn {
+    width: 100%;
   }
 }

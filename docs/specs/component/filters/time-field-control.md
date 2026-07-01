@@ -38,11 +38,12 @@ Detail: [`time-field-control.acceptance-criteria.md`](time-field-control.accepta
 | # | User action | System response |
 | --- | --- | --- |
 | 1 | Focus input | Open picker; snap wheels to parsed value |
-| 2 | Type in input | Parse via `parseTimeInput`; emit on `input`; sync wheel position |
+| 2 | Type in input | Parse via `parseTimeInput`; emit on `input`; sync wheel position using the freshly parsed hour/minute (not the not-yet-round-tripped `value` input) |
 | 3 | Enter / change on input | Normalize display; close picker |
-| 4 | Scroll wheel over picker | Left half → hour ±1; right half → minute ±1; emit; map must not scroll |
-| 5 | Pointer down on wheel row | Set hour or minute; emit; stop propagation so map does not steal event |
+| 4 | Scroll/drag hour or minute column | Native scroll (wheel, trackpad, touch); CSS `scroll-snap` settles on the nearest row; whichever row is centered under the column midpoint is promoted to the active value on every scroll frame (live, no discrete-step lag); `overscroll-behavior: contain` stops scroll chaining to the map/page |
+| 5 | Pointer down on wheel row | Set hour or minute; emit; smooth-scroll that row to center; stop propagation so map does not steal event |
 | 6 | Escape / outside click | Close picker (shell `closeRequested`) |
+| 7 | Click "Remove time" footer button | One-click destructive: emits `valueChange(null)` and closes picker immediately — no arm/confirm step (low-stakes, reversible: user can just pick a new time); disabled when `value()` is already empty |
 
 ## Component hierarchy
 
@@ -51,9 +52,11 @@ app-time-field-control
 ├── .time-field__control
 │   └── input.time-field__input
 └── app-dropdown-shell (option-menu-surface time-field-panel)
-    └── .time-field__picker
-        ├── .time-field__wheel (hours)
-        └── .time-field__wheel (minutes)
+    ├── .time-field__picker
+    │   ├── .time-field__wheel (hours)
+    │   └── .time-field__wheel (minutes)
+    └── .time-field__actions
+        └── button.time-field__remove-btn (hlmBtn variant="destructive")
 ```
 
 ## Visual Behavior Contract
@@ -62,15 +65,16 @@ app-time-field-control
 | --- | --- | --- | --- | --- | --- | --- |
 | Time shell | `.time-field__control` | `:host` | `.time-field__input` | `.time-field__control` | 0 | `2.25rem` matches calendar date control |
 | Frosted panel chrome | `app-dropdown-shell` | shell host | shell host | `.option-menu-surface.time-field-panel` | 300 | Frosted bg over map |
-| Wheel columns | `.time-field__wheel` | shell | wheel rows | `.time-field__wheel-item` | content | Hidden scrollbars; max-height ~7.5rem |
+| Wheel columns | `.time-field__wheel` | shell | wheel rows | `.time-field__wheel-item` | content | Hidden scrollbars; max-height ~7.5rem = 5 × row height; centered row always matches `selectedHour()`/`selectedMinute()` |
 | Selected row | wheel item | item | item | `.time-field__wheel-item--selected` | states | Secondary selected ink |
+| Remove-time footer action | `.time-field__actions` | shell | `.time-field__remove-btn` | `.time-field__remove-btn` | content | `variant="destructive"` full-width row below wheels; `disabled` when no value |
 
 ## File map
 
 | File | Purpose |
 | --- | --- |
-| `shared/time-field-control/time-field-control.component.ts` | Parse, wheel scroll, emit, non-passive wheel bind |
-| `shared/time-field-control/time-field-control.component.html` | Shell + portaled picker |
+| `shared/time-field-control/time-field-control.component.ts` | Parse, native wheel-scroll → active-value sync (passive `scroll` listener, rAF-throttled), emit |
+| `shared/time-field-control/time-field-control.component.html` | Shell + portaled picker + remove-time footer action |
 | `shared/time-field-control/time-field-control.component.scss` | Control + wheel geometry |
 | `shared/dropdown-trigger/shell/dropdown-shell.component.scss` | `:host.time-field-panel` overflow |
 

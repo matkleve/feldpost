@@ -28,7 +28,6 @@
     (closeRequested)="onPopoverCloseRequested()"
   >
     <div
-      #picker
       class="time-field__picker"
       role="group"
       [attr.aria-label]="ariaLabel()"
@@ -60,6 +59,20 @@
           </button>
         }
       </div>
+    </div>
+    <div class="time-field__actions">
+      <button
+        hlmBtn
+        type="button"
+        variant="destructive"
+        size="sm"
+        class="time-field__remove-btn"
+        [disabled]="!value()"
+        (pointerdown)="$event.stopPropagation()"
+        (click)="onRemoveClick()"
+      >
+        {{ t('workspace.capturedDate.action.removeTime', 'Remove time') }}
+      </button>
     </div>
   </app-dropdown-shell>
 }

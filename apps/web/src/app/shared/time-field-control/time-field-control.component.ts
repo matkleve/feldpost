@@ -15,6 +15,7 @@ import {
 import { DecimalPipe } from '@angular/common';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { DropdownShellComponent } from '../dropdown-trigger/shell/dropdown-shell.component';
+import { HLM_BUTTON_IMPORTS } from '../ui/button';
 import { parseTimeInput } from '../ui-primitives/parse-time-input';
 
 const HOURS = Array.from({ length: 24 }, (_, index) => index);
@@ -23,7 +24,7 @@ const MINUTES = Array.from({ length: 60 }, (_, index) => index);
 @Component({
   selector: 'app-time-field-control',
   standalone: true,
-  imports: [DropdownShellComponent, DecimalPipe],
+  imports: [DropdownShellComponent, DecimalPipe, ...HLM_BUTTON_IMPORTS],
   templateUrl: './time-field-control.component.html',
   styleUrl: './time-field-control.component.scss',
 })
@@ -43,25 +44,28 @@ export class TimeFieldControlComponent {
   readonly minutes = MINUTES;
 
   private readonly controlRef = viewChild<ElementRef<HTMLElement>>('control');
-  private readonly pickerRef = viewChild<ElementRef<HTMLElement>>('picker');
   private readonly hourWheelRef = viewChild<ElementRef<HTMLElement>>('hourWheel');
   private readonly minuteWheelRef = viewChild<ElementRef<HTMLElement>>('minuteWheel');
 
-  private wheelUnbind: (() => void) | null = null;
+  private wheelScrollUnbind: (() => void) | null = null;
+  // Wheels mid-flight from our own `scrollWheelToValue()` smooth-scroll (click,
+  // focus-open, typed commit) — live scroll-sync ignores these so it doesn't
+  // emit every intermediate row the animation passes through.
+  private readonly settlingWheels = new Set<HTMLElement>();
 
   constructor() {
     effect(() => {
       const open = this.popoverOpen();
       untracked(() => {
         if (!open) {
-          this.unbindPickerWheelListener();
+          this.unbindWheelScrollSync();
           return;
         }
-        afterNextRender(() => this.bindPickerWheelListener());
+        afterNextRender(() => this.bindWheelScrollSync());
       });
     });
 
-    this.destroyRef.onDestroy(() => this.unbindPickerWheelListener());
+    this.destroyRef.onDestroy(() => this.unbindWheelScrollSync());
   }
 
   readonly shellText = computed(() => this.value() ?? '');
@@ -88,8 +92,12 @@ export class TimeFieldControlComponent {
 
   onInput(event: Event): void {
     const raw = (event.target as HTMLInputElement).value;
-    this.valueChange.emit(this.normalizeTime(raw));
-    queueMicrotask(() => this.scrollWheelsToSelection());
+    const normalized = this.normalizeTime(raw);
+    this.valueChange.emit(normalized);
+    if (!normalized) return;
+    const hour = parseInt(normalized.slice(0, 2), 10);
+    const minute = parseInt(normalized.slice(3, 5), 10);
+    queueMicrotask(() => this.scrollWheelsToSelection(hour, minute));
   }
 
   onCommit(event: Event): void {
@@ -103,6 +111,16 @@ export class TimeFieldControlComponent {
   }
 
   onPopoverCloseRequested(): void {
+    this.popoverOpen.set(false);
+  }
+
+  // Stable state: one-click destructive action — clears the value immediately,
+  // no arm/confirm step (unlike `TwoStepConfirmInteraction`); low-stakes and
+  // reversible (user can just pick a new time), so a confirm dialog is overkill.
+  // @see docs/specs/component/filters/time-field-control.md#actions
+  onRemoveClick(): void {
+    if (!this.value()) return;
+    this.valueChange.emit(null);
     this.popoverOpen.set(false);
   }
 
@@ -124,52 +142,81 @@ export class TimeFieldControlComponent {
     this.selectMinute(value);
   }
 
-  private onPickerWheel(event: WheelEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
+  // Stable state: wheels scroll natively (touch/trackpad/mouse); whichever row
+  // sits under the center marker is promoted to the active value on every
+  // scroll frame, so dragging/scrolling already previews the value live.
+  // @see docs/specs/component/filters/time-field-control.md#actions
+  private bindWheelScrollSync(): void {
+    this.unbindWheelScrollSync();
 
-    const picker = this.pickerRef()?.nativeElement;
-    if (!picker) {
-      return;
-    }
-
-    const midX = picker.getBoundingClientRect().left + picker.clientWidth / 2;
-    const delta = event.deltaY > 0 ? 1 : -1;
-
-    if (event.clientX < midX) {
-      const next = this.wrapHour(this.selectedHour() + delta);
-      this.emitTime(next, this.selectedMinute());
-      this.scrollWheelToValue(this.hourWheelRef(), next);
-      return;
-    }
-
-    const next = this.wrapMinute(this.selectedMinute() + delta);
-    this.emitTime(this.selectedHour(), next);
-    this.scrollWheelToValue(this.minuteWheelRef(), next);
+    const hourUnbind = this.bindWheelScrollListener(this.hourWheelRef(), 'hour');
+    const minuteUnbind = this.bindWheelScrollListener(this.minuteWheelRef(), 'minute');
+    this.wheelScrollUnbind = () => {
+      hourUnbind?.();
+      minuteUnbind?.();
+    };
   }
 
-  private bindPickerWheelListener(): void {
-    this.unbindPickerWheelListener();
-
-    const picker = this.pickerRef()?.nativeElement;
-    if (!picker) {
-      return;
-    }
-
-    const handler = (event: WheelEvent) => this.onPickerWheel(event);
-    picker.addEventListener('wheel', handler, { passive: false });
-    this.wheelUnbind = () => picker.removeEventListener('wheel', handler);
+  private unbindWheelScrollSync(): void {
+    this.wheelScrollUnbind?.();
+    this.wheelScrollUnbind = null;
   }
 
-  private unbindPickerWheelListener(): void {
-    this.wheelUnbind?.();
-    this.wheelUnbind = null;
+  private bindWheelScrollListener(
+    wheelRef: ElementRef<HTMLElement> | undefined,
+    kind: 'hour' | 'minute',
+  ): (() => void) | null {
+    const wheel = wheelRef?.nativeElement;
+    if (!wheel) return null;
+
+    let pendingFrame: number | null = null;
+    const handler = (): void => {
+      if (pendingFrame !== null) return;
+      pendingFrame = requestAnimationFrame(() => {
+        pendingFrame = null;
+        if (this.settlingWheels.has(wheel)) return;
+        this.syncActiveValueFromScroll(wheel, kind);
+      });
+    };
+
+    wheel.addEventListener('scroll', handler, { passive: true });
+    return () => {
+      wheel.removeEventListener('scroll', handler);
+      if (pendingFrame !== null) cancelAnimationFrame(pendingFrame);
+    };
+  }
+
+  private syncActiveValueFromScroll(wheel: HTMLElement, kind: 'hour' | 'minute'): void {
+    const centerY = wheel.scrollTop + wheel.clientHeight / 2;
+    let closestValue = 0;
+    let closestDistance = Infinity;
+
+    for (const item of Array.from(wheel.children) as HTMLElement[]) {
+      const itemCenter = item.offsetTop + item.offsetHeight / 2;
+      const distance = Math.abs(itemCenter - centerY);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestValue = Number(item.dataset['wheelValue']);
+      }
+    }
+
+    const current = kind === 'hour' ? this.selectedHour() : this.selectedMinute();
+    if (closestValue === current) return;
+
+    const hour = kind === 'hour' ? closestValue : this.selectedHour();
+    const minute = kind === 'minute' ? closestValue : this.selectedMinute();
+    // Scroll position already reflects this value (it's the scroll that
+    // drove the change) — only emit, do not re-scroll and fight the gesture.
+    this.valueChange.emit(this.formatTime(hour, minute));
   }
 
   private emitTime(hour: number, minute: number): void {
-    const next = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-    this.valueChange.emit(next);
-    queueMicrotask(() => this.scrollWheelsToSelection());
+    this.valueChange.emit(this.formatTime(hour, minute));
+    queueMicrotask(() => this.scrollWheelsToSelection(hour, minute));
+  }
+
+  private formatTime(hour: number, minute: number): string {
+    return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
   }
 
   private normalizeTime(raw: string): string | null {
@@ -179,21 +226,12 @@ export class TimeFieldControlComponent {
     return parsed || null;
   }
 
-  private wrapHour(value: number): number {
-    if (value < 0) return 23;
-    if (value > 23) return 0;
-    return value;
-  }
-
-  private wrapMinute(value: number): number {
-    if (value < 0) return 59;
-    if (value > 59) return 0;
-    return value;
-  }
-
-  private scrollWheelsToSelection(): void {
-    this.scrollWheelToValue(this.hourWheelRef(), this.selectedHour());
-    this.scrollWheelToValue(this.minuteWheelRef(), this.selectedMinute());
+  private scrollWheelsToSelection(
+    hour = this.selectedHour(),
+    minute = this.selectedMinute(),
+  ): void {
+    this.scrollWheelToValue(this.hourWheelRef(), hour);
+    this.scrollWheelToValue(this.minuteWheelRef(), minute);
   }
 
   private scrollWheelToValue(wheelRef: ElementRef<HTMLElement> | undefined, value: number): void {
@@ -202,6 +240,19 @@ export class TimeFieldControlComponent {
     const item = wheel.querySelector<HTMLElement>(`[data-wheel-value="${value}"]`);
     if (!item) return;
     const offset = item.offsetTop - wheel.clientHeight / 2 + item.offsetHeight / 2;
-    wheel.scrollTop = Math.max(0, offset);
+    const target = Math.max(0, offset);
+    if (wheel.scrollTop === target) return;
+    this.markWheelSettling(wheel);
+    wheel.scrollTop = target;
+  }
+
+  private markWheelSettling(wheel: HTMLElement): void {
+    this.settlingWheels.add(wheel);
+    const clear = () => this.settlingWheels.delete(wheel);
+    if ('onscrollend' in wheel) {
+      wheel.addEventListener('scrollend', clear, { once: true });
+      return;
+    }
+    setTimeout(clear, 400);
   }
 }

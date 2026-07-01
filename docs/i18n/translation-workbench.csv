@@ -1560,4 +1560,5 @@ colleagues.chat.toast.member_invited,Member invited to channel.,chat member invi
 workspace.imageDetail.section.addressNotes,Address fragments,media detail section label for low-confidence address fragments from filename parsing,Address fragments,Adressfragmente,Frammenti di indirizzo
 workspace.imageDetail.section.addressNotes.aria,Unresolved address fragments,aria label for address notes evidence section in media detail,Unresolved address fragments,Nicht auflösbare Adressfragmente,Frammenti di indirizzo non risolti
 workspace.imageDetail.locationMismatch,GPS and address diverge by,media detail mismatch indicator label prefix (followed by metres value),GPS and address diverge by,GPS und Adresse weichen ab um,GPS e indirizzo divergono di
+workspace.capturedDate.action.removeTime,Remove time,button label at the bottom of the time-field wheel picker; one-click destructive action that clears the selected time value,Remove time,Uhrzeit entfernen,Rimuovi orario
 "

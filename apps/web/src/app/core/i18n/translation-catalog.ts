@@ -1575,6 +1575,15 @@ export const TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> = [
     it: 'Cancella',
   },
   {
+    key: 'workspace.capturedDate.action.removeTime',
+    original: 'Remove time',
+    context:
+      'Button label at the bottom of the time-field wheel picker; one-click destructive action that clears the selected time value.',
+    en: 'Remove time',
+    de: 'Uhrzeit entfernen',
+    it: 'Rimuovi orario',
+  },
+  {
     key: 'workspace.capturedDate.action.done',
     original: 'Done',
     context: 'Button label in captured date editor to save changes.',
