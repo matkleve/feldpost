@@ -32,7 +32,7 @@ Outputs: `itemSelected(id)` on row click; `actionTriggered({ itemId, actionId })
 - `.rail-select-list` (role=`listbox`, scroll owner)
   - `.rail-select-list__row-wrap` (`--active` selected, `--with-actions`)
     - `.rail-select-list__row` (role=`option`) → `leading` (`__dot`/`__avatar`/`__icon`) + `__labels` (`__label` + `__secondary`) + `__badge`
-    - `.rail-select-list__row-action` (`hlmBtn variant="ghost" size="icon-sm"` — geometry + gold hover from the button primitive; only reveal/`--pinned`/`--active` live in SCSS) or `app-inline-confirm-action`
+    - `.rail-select-list__row-action` (`hlmBtn variant="ghost" size="icon-xs"` — geometry + gold hover from the button primitive; only reveal/`--pinned`/`--active` live in SCSS) or `app-inline-confirm-action`
 
 Row density is owned solely by `:host(--normal)` / `:host(--large)`; feature sidebars must not redefine row padding/gap/height. Row/section action buttons are `hlmBtn size="icon-xs"` (1.5rem square) so they sit **inset** in the 2rem row with equal spacing-1 padding top/bottom (centered) and right (`--with-actions` padding-inline-end). The primary nav row (`app-rail-nav-button`) is `hlmBtn size="xs"` (2rem labeled).
 
