@@ -13,12 +13,14 @@ $map-filter-toolbar-compact-max: 31.875rem;
 // Single cycle button replaces full card-variant toggle group.
 $toolbar-view-toggle-compact-max: 23.75rem;
 
-// Spacious default: icon + text + chevron. Compact (container narrow): icon only.
+// Spacious default: text + chevron only (icon hidden). Compact (container narrow): icon only.
 // @param $compact-max Optional container max-width; defaults to $toolbar-menu-compact-max.
 // @see docs/specs/ui/workspace/workspace-pane.md
 @mixin toolbar-menu-trigger-responsive($block, $container, $compact-max: $toolbar-menu-compact-max) {
   @container #{$container} (max-width: #{$compact-max}) {
+    // Unlayered — beats the components-layer `display: none` from toolbar-menu-trigger-parts.
     .#{$block}__menu-trigger-icon {
+      display: inline-flex;
       font-size: 22px;
       line-height: 1;
     }
@@ -115,6 +117,8 @@ $toolbar-view-toggle-compact-max: 23.75rem;
 }
 
 // Base menu-trigger part layout (spacious mode).
+// Spacious mode shows label + chevron only; icon is reserved for compact mode
+// (toolbar-menu-trigger-responsive re-shows it and hides the label instead).
 // @see docs/specs/ui/workspace/workspace-pane.md
 @mixin toolbar-menu-trigger-parts($block) {
   .#{$block}__menu-trigger {
@@ -123,6 +127,7 @@ $toolbar-view-toggle-compact-max: 23.75rem;
   }
 
   .#{$block}__menu-trigger-icon {
+    display: none;
     flex-shrink: 0;
     font-size: 1.125rem;
     line-height: 1;

@@ -6,7 +6,7 @@ Floating row of **three dropdown triggers** (Filter, Projects, Timespace) direct
 
 ## What It Looks Like
 
-Horizontal trigger row, left-aligned under `ss-search-bar` inside `.map-search-chrome`. Each trigger: **icon + label + chevron** in spacious mode (default at typical search-chrome widths up to `36rem`); **icon-only** below the map-specific container-query breakpoint (`31.875rem` on `map-filter-toolbar` container — three triggers, proportional to workspace’s four-trigger `42.5rem` contract). Row MUST NOT wrap to a second line; collapse to icon-only instead. Active filters / project / timespace set `data-active='true'` → **secondary** selected-ink at rest; hover → **primary** gold.
+Horizontal trigger row, left-aligned under `ss-search-bar` inside `.map-search-chrome`. Each trigger: **label + chevron only** (no icon) in spacious mode (default at typical search-chrome widths up to `36rem`); **icon-only** below the map-specific container-query breakpoint (`31.875rem` on `map-filter-toolbar` container — three triggers, proportional to workspace’s four-trigger `42.5rem` contract). Row MUST NOT wrap to a second line; collapse to icon-only instead. Active filters / project / timespace set `data-active='true'` → **secondary** selected-ink at rest; hover → **primary** gold.
 
 ## Where It Lives
 
@@ -74,6 +74,6 @@ app-map-filter-toolbar
 - [x] Three triggers: Filter, Projects, Timespace with `data-dd-part` icon/label/chevron slots
 - [x] Triggers use `toolbar-menu-trigger` gold hover + secondary `data-active` emphasis
 - [x] Frosted `outline-control` shells in `@layer components`; hover states in `@layer states`
-- [x] Spacious default shows icon + label + chevron on each trigger
+- [x] Spacious default shows label + chevron only (icon hidden) on each trigger
 - [x] Container query collapses to icon-only below `31.875rem` (aria-label + title on each button); row never wraps to a second line
 - [ ] Filter trigger shows active count badge when filters applied (workspace parity — future)

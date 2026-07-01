@@ -26,31 +26,29 @@
   padding: 0;
 }
 
-// Frosted map trigger — plain button + outline-control (no hlmBtn; avoids triple hover stack).
-// @see docs/design/tokens.md § Frosted chrome
-button.map-filter-toolbar__menu-trigger {
-  @include frosted-chrome.outline-control;
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.25rem;
-  padding-block: 0;
-  border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
-  font-family: inherit;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  line-height: var(--line-height-tight);
-  cursor: pointer;
-}
-
 @layer components {
   @include fp-toolbar-menu-trigger.toolbar-menu-trigger-components('map-filter-toolbar');
   @include fp-toolbar-breakpoints.toolbar-menu-trigger-parts('map-filter-toolbar');
 
+  // Frosted map trigger — plain button + outline-control (no hlmBtn; avoids triple hover stack).
+  // Kept in @layer components (not unlayered) so @layer states hover/active backgrounds below
+  // can win the cascade — an unlayered rule here would always beat layered states overrides.
+  // @see docs/design/tokens.md § Frosted chrome
   button.map-filter-toolbar__menu-trigger {
-    // background/backdrop-filter owned by unlayered block above — must beat hlmBtn bg-background.
+    @include frosted-chrome.outline-control;
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.25rem;
+    padding-block: 0;
+    border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
     color: var(--muted-foreground);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-tight);
+    cursor: pointer;
     transition:
       background var(--motion-duration-fast) var(--motion-ease-out),
       border-color var(--motion-duration-fast) var(--motion-ease-out),
