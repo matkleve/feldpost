@@ -1,30 +1,28 @@
-<section class="project-dashboard">
-  <header class="project-dashboard__header">
-    <h1 class="project-dashboard__title">{{ t('projects.dashboard.title', 'Projects dashboard') }}</h1>
-    <p class="project-dashboard__sub">{{ projectCountLabel() }}</p>
-  </header>
+<header class="project-dashboard__header">
+  <h1 class="project-dashboard__title">{{ t('projects.dashboard.title', 'Projects dashboard') }}</h1>
+  <p class="project-dashboard__sub">{{ projectCountLabel() }}</p>
+</header>
 
-  <div class="project-dashboard__layout">
-    <article class="project-dashboard__widget project-dashboard__widget--hero">
-      <header class="project-dashboard__widget-header">
-        <span class="material-icons project-dashboard__widget-icon" aria-hidden="true">{{ heroWidget.icon }}</span>
-        <h2 class="project-dashboard__widget-title">{{ t(heroWidget.titleKey, heroWidget.titleFallback) }}</h2>
-      </header>
-      <p class="project-dashboard__widget-hint">{{ t(heroWidget.hintKey, heroWidget.hintFallback) }}</p>
-      <div class="project-dashboard__widget-placeholder" aria-hidden="true"></div>
-    </article>
+<div class="project-dashboard__layout">
+  <article class="project-dashboard__widget project-dashboard__widget--hero">
+    <header class="project-dashboard__widget-header">
+      <span class="material-icons project-dashboard__widget-icon" aria-hidden="true">{{ heroWidget.icon }}</span>
+      <h2 class="project-dashboard__widget-title">{{ t(heroWidget.titleKey, heroWidget.titleFallback) }}</h2>
+    </header>
+    <p class="project-dashboard__widget-hint">{{ t(heroWidget.hintKey, heroWidget.hintFallback) }}</p>
+    <div class="project-dashboard__widget-placeholder" aria-hidden="true"></div>
+  </article>
 
-    <div class="project-dashboard__secondary">
-      @for (widget of secondaryWidgets; track widget.id) {
-        <article class="project-dashboard__widget">
-          <header class="project-dashboard__widget-header">
-            <span class="material-icons project-dashboard__widget-icon" aria-hidden="true">{{ widget.icon }}</span>
-            <h2 class="project-dashboard__widget-title">{{ t(widget.titleKey, widget.titleFallback) }}</h2>
-          </header>
-          <p class="project-dashboard__widget-hint">{{ t(widget.hintKey, widget.hintFallback) }}</p>
-          <div class="project-dashboard__widget-placeholder" aria-hidden="true"></div>
-        </article>
-      }
-    </div>
+  <div class="project-dashboard__secondary">
+    @for (widget of secondaryWidgets; track widget.id) {
+      <article class="project-dashboard__widget">
+        <header class="project-dashboard__widget-header">
+          <span class="material-icons project-dashboard__widget-icon" aria-hidden="true">{{ widget.icon }}</span>
+          <h2 class="project-dashboard__widget-title">{{ t(widget.titleKey, widget.titleFallback) }}</h2>
+        </header>
+        <p class="project-dashboard__widget-hint">{{ t(widget.hintKey, widget.hintFallback) }}</p>
+        <div class="project-dashboard__widget-placeholder" aria-hidden="true"></div>
+      </article>
+    }
   </div>
-</section>
+</div>

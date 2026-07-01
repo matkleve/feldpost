@@ -70,7 +70,7 @@ const DASHBOARD_WIDGETS: DashboardWidget[] = [
   templateUrl: './project-dashboard-view.component.html',
   styleUrl: './project-dashboard-view.component.scss',
   host: {
-    class: 'flex min-h-0 min-w-0 flex-1 flex-col',
+    class: 'flex min-h-0 min-w-0 flex-1 flex-col h-full overflow-hidden',
   },
 })
 export class ProjectDashboardViewComponent {
