@@ -67,7 +67,7 @@
             </button>
           } @else {
             <app-inline-confirm-action
-              [size]="dense() ? 'xs' : 'sm'"
+              [size]="size() === 'large' ? 'sm' : 'xs'"
               [tone]="action.action.tone ?? 'danger'"
               revealOnParentHover="sidebar-row-wrap"
               [idleIcon]="action.action.idleIcon"

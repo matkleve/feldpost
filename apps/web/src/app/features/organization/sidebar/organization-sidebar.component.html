@@ -5,16 +5,19 @@
     [title]="t('organization.page.title', 'Organization')"
   />
 
-  <div pageRailBody class="organization-sidebar__section-list" role="list">
-    @for (section of sections(); track section.id) {
-      <app-rail-detail-nav-item
-        [icon]="section.icon"
-        [title]="t(section.labelKey, section.labelFallback)"
-        [subtitle]="t(section.subtitleKey, section.subtitleFallback)"
-        [active]="activeSection() === section.id"
-        [disabled]="loading()"
-        (clicked)="sectionSelected.emit(section.id)"
-      />
-    }
-  </div>
+  <app-rail-section
+    pageRailBody
+    icon="tune"
+    [label]="t('organization.sidebar.label', 'Organization sections')"
+    [expanded]="sectionsExpanded()"
+    (expandedChange)="sectionsExpanded.set($event)"
+    [fillHeight]="true"
+  >
+    <app-rail-select-list
+      [items]="sectionItems()"
+      [selectedId]="activeSection()"
+      [listAriaLabel]="t('organization.sidebar.label', 'Organization sections')"
+      (itemSelected)="onSectionSelected($event)"
+    />
+  </app-rail-section>
 </app-page-rail>

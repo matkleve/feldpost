@@ -4,6 +4,7 @@ import type {
   RailSelectListActionEvent,
   RailSelectListItem,
   RailSelectListLeading,
+  RailSelectListSize,
 } from './rail-select-list.types';
 
 @Component({
@@ -14,16 +15,19 @@ import type {
   styleUrl: './rail-select-list.component.scss',
   host: {
     class: 'rail-select-list-host',
-    '[class.rail-select-list--compact]': 'compact()',
-    '[class.rail-select-list--dense]': 'dense()',
+    '[class.rail-select-list--grow]': 'grow()',
+    '[class.rail-select-list--normal]': "size() === 'normal'",
+    '[class.rail-select-list--large]': "size() === 'large'",
   },
 })
 export class RailSelectListComponent {
   readonly items = input<RailSelectListItem[]>([]);
   readonly selectedId = input<string | null>(null);
   readonly loading = input(false);
-  readonly compact = input(false);
-  readonly dense = input(false);
+  /** Whether the list flex-grows to fill its container (default: sized to content). */
+  readonly grow = input(false);
+  /** Row density. `normal` (default) matches the site-wide compact rail row; `large` is one step up. */
+  readonly size = input<RailSelectListSize>('normal');
   readonly listAriaLabel = input('List');
   readonly loadingMessage = input('Loading…');
   readonly emptyMessage = input('No items');

@@ -132,7 +132,7 @@ On any quiet host using the mixins above, **icon, label, and chevron slots must 
 - `apps/web/src/app/features/map/map-shell/scss/_map-shell-style-switch.scss` — map basemap switch (tertiary violet pierce over toggle CVA)
 - `apps/web/src/app/features/map/search-bar/search-bar.component.scss` — map search clear (ghost + linked bar-hover ink)
 - `apps/web/src/app/shared/menu-panel/menu-panel-search-row.component.scss` — dropdown search clear (geometry only)
-- `apps/web/src/app/shared/rail-detail-nav-item/rail-detail-nav-item.component.scss` — page-rail detail rows
+- `apps/web/src/app/shared/rail-select-list/rail-select-list.component.scss` — page-rail select rows (`emphasis.hover` / `selected`)
 - `apps/web/src/app/shared/rail-section/rail-section.component.scss` — collapsible rail headers
 - `apps/web/src/styles/_interaction-emphasis-quiet-row.scss` — **canonical mixin source** for feature list rows
 - `apps/web/src/app/features/upload/upload-resolver-tray/upload-resolver-tray.component.scss` — resolver choice rows

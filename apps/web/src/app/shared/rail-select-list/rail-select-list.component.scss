@@ -1,60 +1,19 @@
 @use '../../../styles/interaction-emphasis-quiet-row' as emphasis;
 
 // Scrollable quiet-row list for page-grid side rails (projects, colleagues, …).
-// @see docs/design/page-rail-grid.md
+// Two densities: `normal` (default, site-wide compact row) and `large` (one step up).
+// @see docs/specs/component/page-rail/rail-select-list.md
 :host {
   display: flex;
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   flex-direction: column;
   min-height: 0;
   min-width: 0;
 }
 
-:host(.rail-select-list--compact) {
-  flex: 0 0 auto;
-}
-
-:host(.rail-select-list--dense) {
-  .rail-select-list__row-wrap {
-    align-items: stretch;
-    min-height: 1.75rem;
-  }
-
-  .rail-select-list__row {
-    gap: var(--spacing-2);
-    padding: var(--spacing-1) var(--spacing-2);
-    font-size: var(--font-size-xs);
-    line-height: var(--line-height-tight);
-  }
-
-  .rail-select-list__avatar {
-    width: 1.25rem;
-    height: 1.25rem;
-    font-size: var(--font-size-2xs);
-  }
-
-  .rail-select-list__icon {
-    width: 1.25rem;
-    font-size: 1rem;
-    text-align: center;
-  }
-
-  .rail-select-list__row-action {
-    .material-icons {
-      font-size: 1rem;
-    }
-  }
-
-  .rail-select-list__badge {
-    min-width: 1rem;
-    font-size: var(--font-size-2xs);
-    line-height: 1rem;
-  }
-
-  .rail-select-list__status {
-    padding: var(--spacing-2);
-    font-size: var(--font-size-xs);
-  }
+// Grow to fill the remaining rail height (e.g. a fill-height section body).
+:host(.rail-select-list--grow) {
+  flex: 1 1 auto;
 }
 
 .rail-select-list {
@@ -70,7 +29,6 @@
   display: flex;
   align-items: stretch;
   gap: var(--spacing-1);
-  min-height: 2.25rem;
   border-radius: var(--radius-md);
   color: var(--muted-foreground);
   transition:
@@ -104,17 +62,93 @@
   min-width: 0;
   min-height: 0;
   gap: var(--spacing-2);
-  padding: var(--spacing-2);
   border: 0;
   border-radius: var(--radius-md);
   background: transparent;
   color: inherit;
-  font-size: var(--font-size-sm);
   text-align: left;
   cursor: pointer;
 
   &:focus-visible {
     outline: none;
+  }
+}
+
+// ── Size: normal (default) — calibrated to the upload-resolver choice row ──────
+:host(.rail-select-list--normal) {
+  .rail-select-list__row-wrap {
+    min-height: 2rem;
+  }
+
+  .rail-select-list__row {
+    padding-block: var(--spacing-1);
+    padding-inline: var(--spacing-2);
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-tight);
+  }
+
+  .rail-select-list__avatar {
+    width: 1.25rem;
+    height: 1.25rem;
+    font-size: var(--font-size-2xs);
+  }
+
+  .rail-select-list__icon,
+  .rail-select-list__row-action .material-icons {
+    font-size: 1.125rem;
+  }
+
+  .rail-select-list__secondary {
+    font-size: var(--font-size-2xs);
+  }
+
+  .rail-select-list__badge {
+    min-width: 1rem;
+    font-size: var(--font-size-2xs);
+    line-height: 1rem;
+  }
+
+  .rail-select-list__status {
+    padding: var(--spacing-2);
+    font-size: var(--font-size-xs);
+  }
+}
+
+// ── Size: large — one step up (comfortable) ───────────────────────────────────
+:host(.rail-select-list--large) {
+  .rail-select-list__row-wrap {
+    min-height: 2.5rem;
+  }
+
+  .rail-select-list__row {
+    padding: var(--spacing-2);
+    font-size: var(--font-size-sm);
+  }
+
+  .rail-select-list__avatar {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: var(--font-size-xs);
+  }
+
+  .rail-select-list__icon,
+  .rail-select-list__row-action .material-icons {
+    font-size: 1.25rem;
+  }
+
+  .rail-select-list__secondary {
+    font-size: var(--font-size-xs);
+  }
+
+  .rail-select-list__badge {
+    min-width: 1.25rem;
+    font-size: var(--font-size-2xs);
+    line-height: 1.25rem;
+  }
+
+  .rail-select-list__status {
+    padding: var(--spacing-3);
+    font-size: var(--font-size-sm);
   }
 }
 
@@ -139,7 +173,6 @@
     background var(--motion-duration-fast) var(--motion-ease-out);
 
   .material-icons {
-    font-size: 1.125rem;
     line-height: 1;
   }
 
@@ -183,12 +216,9 @@
 .rail-select-list__avatar {
   display: grid;
   place-items: center;
-  width: 1.5rem;
-  height: 1.5rem;
   border-radius: var(--radius-full);
   background: var(--muted);
   color: var(--foreground);
-  font-size: var(--font-size-xs);
   font-weight: 600;
   flex-shrink: 0;
 }
@@ -198,7 +228,6 @@
 }
 
 .rail-select-list__icon {
-  font-size: 1.125rem;
   line-height: 1;
   flex-shrink: 0;
 }
@@ -219,27 +248,22 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  font-size: var(--font-size-xs);
+  color: var(--muted-foreground);
 }
 
 // Unread count pill for chat channel rows
 // @see chat-system strategy phase 8
 .rail-select-list__badge {
   flex-shrink: 0;
-  min-width: 1.25rem;
   padding: 0 var(--spacing-1);
   border-radius: var(--radius-full);
   background: var(--primary);
   color: var(--primary-foreground);
-  font-size: var(--font-size-2xs);
   font-weight: 600;
-  line-height: 1.25rem;
   text-align: center;
 }
 
 .rail-select-list__status {
-  padding: var(--spacing-3);
   color: var(--muted-foreground);
-  font-size: var(--font-size-sm);
   text-align: center;
 }

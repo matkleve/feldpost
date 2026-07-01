@@ -2,7 +2,7 @@
 
 Composable left-rail building blocks for `app-page-grid` gutter column 1.
 
-**Related:** [page-rail-grid.md](../../design/page-rail-grid.md), `app-page-rail-title`, `app-rail-search-field`, `app-rail-select-list`.
+**Related:** [page-rail-grid.md](../../design/page-rail-grid.md), [rail-select-list.md](rail-select-list.md), `app-page-rail-title`, `app-rail-search-field`.
 
 ## Components
 
@@ -10,9 +10,9 @@ Composable left-rail building blocks for `app-page-grid` gutter column 1.
 | --- | --- |
 | `app-page-rail` | Shell: title, nav, search, toolbar, scroll body, footer slots |
 | `app-rail-nav-button` | Primary nav row (dashboard, invites) |
-| `app-rail-section` | Collapsible section with header actions |
-| `app-rail-group-heading` | Uppercase recency bucket label |
-| `app-rail-detail-nav-item` | Icon + title + subtitle + chevron row (organization) |
+| `app-rail-section` | Collapsible section with header actions (used everywhere: channels/DMs, projects Starred + time buckets, organization) |
+| `app-rail-group-heading` | Uppercase recency bucket label (inside a section) |
+| `app-rail-select-list` | Canonical selection list (`size: normal \| large`) — see [rail-select-list.md](rail-select-list.md) |
 | `app-rail-status` | Centered empty/loading line |
 
 ## `app-page-rail` slots
@@ -37,17 +37,17 @@ Composable left-rail building blocks for `app-page-grid` gutter column 1.
 
 ## Interaction emphasis
 
-All rail row hosts (`app-rail-nav-button`, `app-rail-detail-nav-item`, `app-rail-select-list` row wrap, `app-rail-section` header) follow [`state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis and [`interaction-emphasis-ink-contract.md`](../../system/interaction-emphasis-ink-contract.md). Icon, label, and chevron slots **inherit host ink** on hover — no child `var(--primary)` when host uses `emphasis.hover()`.
+All rail row hosts (`app-rail-nav-button`, `app-rail-select-list` row wrap, `app-rail-section` header) follow [`state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis and [`interaction-emphasis-ink-contract.md`](../../system/interaction-emphasis-ink-contract.md). Icon, label, and chevron slots **inherit host ink** on hover — no child `var(--primary)` when host uses `emphasis.hover()`.
 
 ## Usage
 
-- **Projects:** shell + nav + search + toolbar + grouped `app-rail-select-list` + footer.
+- **Projects:** shell + nav + search + toolbar + `app-rail-section` (Starred, all-projects) with grouped `app-rail-select-list` + footer.
 - **Messaging:** shell + nav + search + `app-rail-section` (channels/DMs) + group headings.
-- **Organization:** shell + title + `app-rail-detail-nav-item` list (no group headings).
+- **Organization:** shell + title + single `app-rail-section` wrapping an `app-rail-select-list` (icon leading + `secondaryLabel` subtitle).
 
 ## Acceptance Criteria
 
 - [ ] All three page rails use `app-page-rail` shell.
-- [ ] Collapsible sections use `app-rail-section`; list rows use `app-rail-select-list` or `app-rail-detail-nav-item`.
+- [ ] Grouped rows are wrapped in collapsible `app-rail-section`; every list row uses `app-rail-select-list` (`size="normal"` unless a rail opts into `large`).
 - [ ] No duplicate rail padding/gap/scroll SCSS in feature sidebars.
 - [x] Rail row hover: gold ink on host and all child slots (icon, label, chevron) — see ink inheritance contract.

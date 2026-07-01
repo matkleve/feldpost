@@ -1,3 +1,6 @@
+/** Row density axis: `normal` is the site-wide default; `large` is one step up. */
+export type RailSelectListSize = 'normal' | 'large';
+
 export type RailSelectListLeading =
   | { kind: 'dot'; color: string }
   | { kind: 'avatar'; text: string; online?: boolean }

@@ -37,8 +37,7 @@ Feature sidebars project into `[pageGridLeft]` using **`app-page-rail`** and chi
 | Search | `app-rail-search-field` |
 | Collapsible section | `app-rail-section` |
 | Group label | `app-rail-group-heading` |
-| Select rows | `app-rail-select-list` |
-| Detail nav rows | `app-rail-detail-nav-item` |
+| Select rows | `app-rail-select-list` (leading icon/avatar/dot, `secondaryLabel` subtitle, `size: normal \| large`) |
 | Empty/loading | `app-rail-status` |
 
 ### Inputs

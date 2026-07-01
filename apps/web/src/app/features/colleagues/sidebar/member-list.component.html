@@ -42,7 +42,6 @@
       }
 
       <app-rail-select-list
-        [compact]="true"
         [items]="channelListItems()"
         [selectedId]="selectedChannelId()"
         [listAriaLabel]="t('colleagues.channels.title', 'Channels')"
@@ -63,7 +62,6 @@
       @for (group of dmTimeGroups(); track group.key) {
         <app-rail-group-heading [label]="group.label" />
         <app-rail-select-list
-          [compact]="true"
           [items]="group.items"
           [selectedId]="activeDmMemberId()"
           [loading]="loading()"

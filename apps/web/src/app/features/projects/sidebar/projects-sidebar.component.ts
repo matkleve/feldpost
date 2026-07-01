@@ -15,6 +15,7 @@ import { PageRailTitleComponent } from '../../../shared/page-rail-title';
 import { RailNavButtonComponent } from '../../../shared/rail-nav-button';
 import { RailSearchFieldComponent } from '../../../shared/rail-search-field';
 import { RailGroupHeadingComponent } from '../../../shared/rail-group-heading';
+import { RailSectionComponent } from '../../../shared/rail-section';
 import { RailStatusComponent } from '../../../shared/rail-status';
 import { RailSelectListComponent, type RailSelectListItem } from '../../../shared/rail-select-list';
 import { ToolbarDropdownStackComponent } from '../../../shared/dropdown-trigger/toolbar/toolbar-dropdown-stack.component';
@@ -45,6 +46,7 @@ interface ProjectSidebarTimeGroup {
     RailNavButtonComponent,
     RailSearchFieldComponent,
     RailGroupHeadingComponent,
+    RailSectionComponent,
     RailStatusComponent,
     RailSelectListComponent,
     ToolbarDropdownStackComponent,
@@ -87,6 +89,8 @@ export class ProjectsSidebarComponent {
   readonly activeDropdown = signal<ProjectsSidebarDropdown>(null);
   readonly dropdownAnchor = signal<HTMLElement | null>(null);
   readonly isDragging = signal(false);
+  readonly starredExpanded = signal(true);
+  readonly projectsExpanded = signal(true);
   readonly starredProjectIds = signal<Set<string>>(this.readStarredProjectIds());
 
   private static readonly STARRED_PROJECTS_STORAGE_KEY = 'feldpost.projects.starred';

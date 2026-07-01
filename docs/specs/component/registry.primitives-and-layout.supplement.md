@@ -24,16 +24,24 @@
 - **Purpose**: Collapsible section with icon heading and projected header actions (`railSectionActions`).
 - **Spec**: [`docs/specs/component/page-rail/page-rail.md`](page-rail/page-rail.md)
 
+### `<app-rail-select-list>` — Rail Select List
+
+- **File**: `apps/web/src/app/shared/rail-select-list/`
+- **Purpose**: Canonical scrollable quiet-row selection list for page rails (projects, colleagues, organization, invites). Absorbs the former `rail-detail-nav-item` via `leading` icon + `secondaryLabel` subtitle.
+- **Spec**: [`docs/specs/component/page-rail/rail-select-list.md`](page-rail/rail-select-list.md)
+- **Variant axes**:
+  | Input | Type | Values | Visual effect |
+  |---|---|---|---|
+  | `size` | `RailSelectListSize` | `normal` (default), `large` | Row height / label font — `normal` matches the site-wide compact rail row (≈ upload-resolver choice), `large` is one step up |
+  | `grow` | `boolean` | `false` (default), `true` | Flex-grow to fill remaining rail height |
+- **Other inputs**: `items`, `selectedId`, `loading`, `listAriaLabel`, `loadingMessage`, `emptyMessage`
+- **Row model** (`RailSelectListItem`): `label`, `secondaryLabel`, `badge`, `leading` (`dot`/`avatar`/`icon`), `actions` (button/confirm)
+- **Used in**: `projects-sidebar`, `member-list`, `organization-sidebar`, `channel-detail-panel`, `colleagues-invite-reusable-links-panel`
+
 ### `<app-rail-group-heading>` — Rail Group Heading
 
 - **File**: `apps/web/src/app/shared/rail-group-heading/`
-- **Purpose**: Uppercase recency bucket label above `app-rail-select-list` groups.
-- **Spec**: [`docs/specs/component/page-rail/page-rail.md`](page-rail/page-rail.md)
-
-### `<app-rail-detail-nav-item>` — Rail Detail Nav Item
-
-- **File**: `apps/web/src/app/shared/rail-detail-nav-item/`
-- **Purpose**: Settings-overlay-style row (icon, title, subtitle, chevron) for organization-style rails.
+- **Purpose**: Uppercase recency bucket label above `app-rail-select-list` groups (inside a `rail-section`).
 - **Spec**: [`docs/specs/component/page-rail/page-rail.md`](page-rail/page-rail.md)
 
 ### `<app-rail-status>` — Rail Status

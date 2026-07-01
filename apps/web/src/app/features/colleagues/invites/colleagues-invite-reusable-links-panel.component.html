@@ -15,7 +15,6 @@
       <app-rail-select-list
         [items]="activeItems()"
         [selectedId]="selectedId()"
-        [compact]="true"
         (itemSelected)="onItemSelected($event)"
         (actionTriggered)="onAction($event)"
       />
@@ -34,7 +33,6 @@
       <app-rail-select-list
         [items]="expiredItems()"
         [selectedId]="selectedId()"
-        [compact]="true"
         (itemSelected)="onItemSelected($event)"
         (actionTriggered)="onAction($event)"
       />

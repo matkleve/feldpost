@@ -6,4 +6,5 @@ export type {
   RailSelectListItem,
   RailSelectListLeading,
   RailSelectListRowAction,
+  RailSelectListSize,
 } from './rail-select-list.types';
