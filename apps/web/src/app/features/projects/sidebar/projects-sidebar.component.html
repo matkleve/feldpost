@@ -77,45 +77,45 @@
   } @else if (!hasVisibleProjects()) {
     <app-rail-status pageRailBody [message]="projectListEmptyMessage()" />
   } @else {
-    @if (starredProjectItems().length > 0) {
-      <app-rail-section
-        pageRailBody
-        icon="star"
-        [label]="t('projects.sidebar.section.starred', 'Starred')"
-        [expanded]="starredExpanded()"
-        (expandedChange)="starredExpanded.set($event)"
-      >
-        <app-rail-select-list
-          [items]="starredProjectItems()"
-          [selectedId]="selectedProjectId()"
-          [listAriaLabel]="t('projects.sidebar.section.starred', 'Starred')"
-          [emptyMessage]="projectListEmptyMessage()"
-          (itemSelected)="onProjectClick($event)"
-          (actionTriggered)="onProjectListAction($event)"
-        />
-      </app-rail-section>
-    }
-
-    <app-rail-section
-      pageRailBody
-      icon="folder"
-      [label]="t('projects.page.title', 'Projects')"
-      [expanded]="projectsExpanded()"
-      (expandedChange)="projectsExpanded.set($event)"
-      [fillHeight]="true"
-    >
-      @for (group of projectTimeGroups(); track group.key) {
-        <app-rail-group-heading [label]="group.label" />
-        <app-rail-select-list
-          [items]="group.items"
-          [selectedId]="selectedProjectId()"
-          [listAriaLabel]="group.label"
-          [emptyMessage]="projectListEmptyMessage()"
-          (itemSelected)="onProjectClick($event)"
-          (actionTriggered)="onProjectListAction($event)"
-        />
+    <ng-container pageRailBody>
+      @if (starredProjectItems().length > 0) {
+        <app-rail-section
+          icon="star"
+          [label]="t('projects.sidebar.section.starred', 'Starred')"
+          [expanded]="starredExpanded()"
+          (expandedChange)="starredExpanded.set($event)"
+        >
+          <app-rail-select-list
+            [items]="starredProjectItems()"
+            [selectedId]="selectedProjectId()"
+            [listAriaLabel]="t('projects.sidebar.section.starred', 'Starred')"
+            [emptyMessage]="projectListEmptyMessage()"
+            (itemSelected)="onProjectClick($event)"
+            (actionTriggered)="onProjectListAction($event)"
+          />
+        </app-rail-section>
       }
-    </app-rail-section>
+
+      <app-rail-section
+        icon="folder"
+        [label]="t('projects.page.title', 'Projects')"
+        [expanded]="projectsExpanded()"
+        (expandedChange)="projectsExpanded.set($event)"
+        [fillHeight]="true"
+      >
+        @for (group of projectTimeGroups(); track group.key) {
+          <app-rail-group-heading [label]="group.label" />
+          <app-rail-select-list
+            [items]="group.items"
+            [selectedId]="selectedProjectId()"
+            [listAriaLabel]="group.label"
+            [emptyMessage]="projectListEmptyMessage()"
+            (itemSelected)="onProjectClick($event)"
+            (actionTriggered)="onProjectListAction($event)"
+          />
+        }
+      </app-rail-section>
+    </ng-container>
   }
 
   <div pageRailFooter class="projects-sidebar__footer">
