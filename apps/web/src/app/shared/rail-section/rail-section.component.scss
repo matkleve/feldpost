@@ -6,7 +6,6 @@
   display: flex;
   flex-shrink: 0;
   flex-direction: column;
-  gap: var(--spacing-2);
 }
 
 :host.rail-section-host--fill {
@@ -42,8 +41,7 @@
     @include emphasis.hover();
 
     .rail-section__heading,
-    .rail-section__icon .material-icons,
-    .rail-section__actions :where(button) {
+    .rail-section__icon .material-icons {
       color: inherit;
     }
   }
@@ -122,6 +120,8 @@
   text-overflow: ellipsis;
 }
 
+// Container owns the hover-reveal + gap; projected action buttons carry their
+// own geometry/emphasis via `hlmBtn variant="ghost" size="icon-sm"`.
 .rail-section__actions {
   display: flex;
   flex-shrink: 0;
@@ -130,35 +130,6 @@
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--motion-duration-fast) var(--motion-ease-out);
-
-  :where(button) {
-    display: inline-grid;
-    flex-shrink: 0;
-    place-items: center;
-    align-self: center;
-    width: 1.75rem;
-    height: 1.75rem;
-    padding: 0;
-    border: 0;
-    border-radius: var(--radius-md);
-    background: transparent;
-    color: inherit;
-    cursor: pointer;
-    transition:
-      background var(--motion-duration-fast) var(--motion-ease-out),
-      color var(--motion-duration-fast) var(--motion-ease-out);
-
-    .material-icons {
-      font-size: 1.125rem;
-      line-height: 1;
-    }
-
-    &:hover,
-    &:focus-visible {
-      @include emphasis.hover();
-      outline: none;
-    }
-  }
 }
 
 .rail-section__header:hover .rail-section__actions,

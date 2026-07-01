@@ -28,14 +28,3 @@
   min-height: 0;
   overflow-y: auto;
 }
-
-// Single body wrapper (projects, organization) — compact internal stack.
-// @see docs/specs/component/page-rail/page-rail.md
-.page-rail__scroll > [pageRailBody] {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  gap: var(--spacing-1);
-  min-height: 0;
-  width: 100%;
-}

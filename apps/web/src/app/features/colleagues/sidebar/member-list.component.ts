@@ -15,6 +15,7 @@ import { RailSectionComponent } from '../../../shared/rail-section';
 import { RailGroupHeadingComponent } from '../../../shared/rail-group-heading';
 import { RailStatusComponent } from '../../../shared/rail-status';
 import { RailSelectListComponent, type RailSelectListItem } from '../../../shared/rail-select-list';
+import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 
 interface MessagingSidebarTimeGroup {
   key: MessagingSidebarActivityGroupKey;
@@ -34,6 +35,7 @@ interface MessagingSidebarTimeGroup {
     RailGroupHeadingComponent,
     RailStatusComponent,
     RailSelectListComponent,
+    ...HLM_BUTTON_IMPORTS,
   ],
   templateUrl: './member-list.component.html',
   styleUrl: './member-list.component.scss',
@@ -44,7 +46,7 @@ interface MessagingSidebarTimeGroup {
 export class MemberListComponent {
   private readonly i18nService = inject(I18nService);
 
-  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
+  readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
   readonly members = input<OrgMember[]>([]);
   readonly activeDmMemberId = input<string | null>(null);

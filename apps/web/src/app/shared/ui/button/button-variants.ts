@@ -33,6 +33,8 @@ export const buttonVariants = cva(
       size: {
         // Labeled rows: symmetric `ps-2 pe-2` only (no px); `size="icon"` is square geometry without inline padding utilities.
         default: 'h-10 py-2 ps-2 pe-2 [&_.material-icons]:text-lg',
+        // Rail-row fit: h-8 (2rem) matches the `normal` rail row height; padding stays spacing-2.
+        xs: 'h-8 rounded-md ps-2 pe-2 [&_.material-icons]:text-lg',
         sm: 'h-9 rounded-md ps-2 pe-2 [&_.material-icons]:text-lg',
         lg: 'h-11 rounded-md ps-2 pe-2 [&_.material-icons]:text-lg',
         icon: 'h-10 w-10',

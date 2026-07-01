@@ -63,7 +63,9 @@ On map/upload **frosted** shells (`frosted-chrome.surface`), `variant="outline"`
 | Input | Type | Default |
 | ----- | ---- | ------- |
 | `variant` | `'default' \| 'destructive' \| 'outline' \| 'secondary' \| 'ghost' \| 'link'` | `'default'` |
-| `size` | `'default' \| 'sm' \| 'lg' \| 'icon' \| 'icon-sm' \| 'icon-md'` | `'default'` |
+| `size` | `'default' \| 'xs' \| 'sm' \| 'lg' \| 'icon' \| 'icon-sm' \| 'icon-xs' \| 'icon-md'` | `'default'` |
+
+Labeled heights: `xs` = h-8 (2rem, fits a `normal` rail row), `sm` = h-9, `default` = h-10, `lg` = h-11. Icon-only squares: `icon-xs` h-6, `icon-sm` h-8, `icon-md` h-9, `icon` h-10. Horizontal padding is locked to spacing-2 for every labeled size.
 | `iconPlacement` | `'start' \| 'end'` | balanced (padding semantics) |
 
 ## File Map

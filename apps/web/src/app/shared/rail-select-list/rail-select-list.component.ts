@@ -1,5 +1,6 @@
 import { Component, input, output } from '@angular/core';
 import { InlineConfirmActionComponent } from '../inline-confirm-action/inline-confirm-action.component';
+import { HLM_BUTTON_IMPORTS } from '../ui/button';
 import type {
   RailSelectListActionEvent,
   RailSelectListItem,
@@ -10,7 +11,7 @@ import type {
 @Component({
   selector: 'app-rail-select-list',
   standalone: true,
-  imports: [InlineConfirmActionComponent],
+  imports: [InlineConfirmActionComponent, ...HLM_BUTTON_IMPORTS],
   templateUrl: './rail-select-list.component.html',
   styleUrl: './rail-select-list.component.scss',
   host: {

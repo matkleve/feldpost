@@ -152,35 +152,17 @@
   }
 }
 
+// Geometry + gold quiet-row hover come from `hlmBtn variant="ghost" size="icon-sm"`.
+// Only the hover-reveal + toggle states live here.
 .rail-select-list__row-action {
-  display: inline-grid;
   flex-shrink: 0;
-  place-items: center;
   align-self: center;
-  width: 2rem;
-  height: 2rem;
-  padding: 0;
-  border: 0;
-  border-radius: var(--radius-md);
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
   opacity: 0;
   pointer-events: none;
   transition:
     opacity var(--motion-duration-fast) var(--motion-ease-out),
     color var(--motion-duration-fast) var(--motion-ease-out),
     background var(--motion-duration-fast) var(--motion-ease-out);
-
-  .material-icons {
-    line-height: 1;
-  }
-
-  &:hover,
-  &:focus-visible {
-    @include emphasis.hover();
-    outline: none;
-  }
 
   &--pinned {
     opacity: 1;
