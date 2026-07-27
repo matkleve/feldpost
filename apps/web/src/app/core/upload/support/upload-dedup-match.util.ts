@@ -6,8 +6,9 @@ export type { DedupHashMatch };
 export function shouldAutoSkipDedupMatch(
   match: DedupHashMatch,
   currentUserId: string | undefined,
+  hashAlgo: UploadJob['contentHashAlgo'],
 ): boolean {
-  return !!currentUserId && match.registeredByUserId === currentUserId;
+  return hashAlgo === 'photo_v1' && !!currentUserId && match.registeredByUserId === currentUserId;
 }
 
 type DedupMatchHandlerDeps = {
@@ -19,6 +20,7 @@ type DedupMatchHandlerDeps = {
 type ApplyDedupMatchArgs = {
   jobId: string;
   job: UploadJob;
+  hashAlgo: UploadJob['contentHashAlgo'];
   contentHash: string;
   match: DedupHashMatch;
   currentUserId: string | undefined;
@@ -28,9 +30,9 @@ type ApplyDedupMatchArgs = {
 
 /** Same-user → silent skip; colleague → duplicate issue + modal event. */
 export function applyDedupMatch(args: ApplyDedupMatchArgs): 'skipped' | 'issue' {
-  const { jobId, job, contentHash, match, currentUserId, deps, ctx } = args;
+  const { jobId, job, hashAlgo, contentHash, match, currentUserId, deps, ctx } = args;
 
-  if (shouldAutoSkipDedupMatch(match, currentUserId)) {
+  if (shouldAutoSkipDedupMatch(match, currentUserId, hashAlgo)) {
     handleDedupSkip({
       jobId,
       job,

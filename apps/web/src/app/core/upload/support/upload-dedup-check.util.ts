@@ -53,6 +53,7 @@ export async function runUploadDedupCheck(
   const result = applyDedupMatch({
     jobId,
     job,
+    hashAlgo,
     contentHash,
     match,
     currentUserId: ctx.getCurrentUserId(),

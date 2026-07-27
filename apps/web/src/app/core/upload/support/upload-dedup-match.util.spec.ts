@@ -16,13 +16,24 @@ function makeJob(overrides: Partial<UploadJob> = {}): UploadJob {
 }
 
 describe('shouldAutoSkipDedupMatch', () => {
-  it('auto-skips when registrant is current user', () => {
+  it('auto-skips photo_v1 matches when registrant is current user', () => {
     expect(
       shouldAutoSkipDedupMatch(
         { mediaItemId: 'm1', registeredByUserId: 'user-a' },
         'user-a',
+        'photo_v1',
       ),
     ).toBe(true);
+  });
+
+  it('does not auto-skip binary_v1 same-user matches', () => {
+    expect(
+      shouldAutoSkipDedupMatch(
+        { mediaItemId: 'm1', registeredByUserId: 'user-a' },
+        'user-a',
+        'binary_v1',
+      ),
+    ).toBe(false);
   });
 
   it('does not auto-skip for colleague upload', () => {
@@ -30,6 +41,7 @@ describe('shouldAutoSkipDedupMatch', () => {
       shouldAutoSkipDedupMatch(
         { mediaItemId: 'm1', registeredByUserId: 'user-a' },
         'user-b',
+        'photo_v1',
       ),
     ).toBe(false);
   });
@@ -44,8 +56,40 @@ describe('applyDedupMatch', () => {
     const result = applyDedupMatch({
       jobId: 'job-1',
       job: makeJob(),
+      hashAlgo: 'photo_v1',
       contentHash: 'abc',
       match: { mediaItemId: 'media-1', registeredByUserId: 'other-user' },
+      currentUserId: 'me',
+      deps: {
+        setPhase,
+        updateJob: vi.fn(),
+        markDone,
+      },
+      ctx: {
+        emitUploadSkipped: vi.fn(),
+        emitBatchProgress: vi.fn(),
+        drainQueue: vi.fn(),
+        emitDuplicateDetected,
+      },
+    });
+
+    expect(result).toBe('issue');
+    expect(setPhase).toHaveBeenCalledWith('job-1', 'missing_data');
+    expect(emitDuplicateDetected).toHaveBeenCalled();
+    expect(markDone).toHaveBeenCalledWith('job-1');
+  });
+
+  it('routes binary_v1 same-user matches to duplicate issue flow', () => {
+    const emitDuplicateDetected = vi.fn();
+    const markDone = vi.fn();
+    const setPhase = vi.fn();
+
+    const result = applyDedupMatch({
+      jobId: 'job-1',
+      job: makeJob(),
+      hashAlgo: 'binary_v1',
+      contentHash: 'abc',
+      match: { mediaItemId: 'media-1', registeredByUserId: 'me' },
       currentUserId: 'me',
       deps: {
         setPhase,

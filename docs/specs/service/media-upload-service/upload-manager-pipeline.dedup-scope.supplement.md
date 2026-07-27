@@ -64,7 +64,8 @@ Migration: `20260611120000_dedup_hashes_org_scope.sql`.
 
 | Scenario | UX |
 | --- | --- |
-| Same user, hash match | **Auto-skip** — `phase=skipped`, "Already uploaded" |
+| Same user, `photo_v1` hash match | **Auto-skip** — `phase=skipped`, "Already uploaded" |
+| Same user, `binary_v1` hash match | **Issue** — `issueKind=duplicate_file`, explicit confirmation via duplicate modal |
 | Colleague, hash match | **Issue** — `issueKind=duplicate_file`, modal via `duplicateDetected$` |
 | `upload_anyway` | New media row + storage object; org hash row unchanged |
 | Replace / attach | Same dedup gate (photo-only validation on those flows) |
@@ -74,7 +75,8 @@ Migration: `20260611120000_dedup_hashes_org_scope.sql`.
 - [x] `dedup_hashes` uses `UNIQUE(organization_id, content_hash)` with `organization_id` backfill
 - [x] `check_dedup_hashes` is org-scoped and returns `registered_by_user_id`
 - [x] Orphan guard on `storage_path`
-- [x] Same-user match auto-skips without modal
+- [x] Same-user `photo_v1` match auto-skips without modal
+- [x] Same-user `binary_v1` match requires explicit duplicate confirmation
 - [x] Cross-user org match surfaces `duplicate_file` issue + modal
 - [x] `photo_v1` + `binary_v1` cover photo, document, and video
 - [ ] `use_existing` links project context when batch has project filter (parent AC — verify end-to-end)
