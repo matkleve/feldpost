@@ -177,14 +177,31 @@ block layered over `:root` for sandstone, resolving `oklch()`, hex and `var()`
 chains. A token it cannot resolve is **reported and fails the run** rather than
 silently skipped. Then added to `design-system:check`, and so to `npm run verify`.
 
-**A6 — Touch targets: the constitution and the size scale disagree.**
-The constitution requires **≥ 44 px desktop / 48 px mobile**. The button scale
-is `icon` 40 px (used 78×), `icon-sm` 32 px (7×), `icon-xs` 24 px (6×), and only
-**6** SCSS files declare a 44/48 px minimum anywhere. The constitution allows
-compact visuals *if* the real hit area still meets the minimum — but no
-component states how, and nothing checks. Pick one: raise `icon` to 44, add a
-hit-zone recipe to the action kernel, or amend the constitution to say where the
-rule applies. Any of the three beats a rule that is quietly false.
+**A6 — Touch targets: the constitution and the size scale disagreed. ✅ Resolved by amendment.**
+
+*Correction to the first version of this item.* It was filed under Accessibility
+and called High impact, which overstated it. **Nothing here failed WCAG AA.**
+The AA requirement for target size is **24 × 24 px** with a spacing condition
+(SC 2.5.8, WCAG 2.2); 44 × 44 px is **AAA** (SC 2.5.5) and platform guidance
+(Apple 44pt, Material 48dp). Every size in the scale — `icon` 40 px (used 78×),
+`icon-md` 36, `icon-sm` 32 (7×), `icon-xs` 24 (6×) — clears AA, with `icon-xs`
+sitting exactly on the floor where the spacing condition starts to matter (the
+rail row actions sit close together).
+
+The real defect was never accessibility. It was that
+`docs/design/constitution.md` stated 44/48 px as non-negotiable **everywhere**
+while the product had never done that — a rule that describes nothing, in the
+document that is supposed to outrank everything else. That is the same
+doc-versus-code drift as § S3 and § X3, in the highest-authority file.
+
+*Resolved 2026-09-08* by scoping the rule to the surface, which is what the
+codebase already did: **field surfaces** (map controls and markers, upload and
+capture, primary dialog actions, nav) keep 44/48 px — and those are exactly the
+files that already declare a `2.75rem`/`3rem` minimum in their SCSS — while
+**dense desktop chrome** (rail rows, toolbar triggers, workspace-pane controls)
+may sit at the AA floor of 24 px plus the spacing condition. The old escape
+clause ("compact controls are acceptable when the real hit area meets the
+minimum") is gone: nothing measured it. The spacing condition can be measured.
 
 **A7 — Put axe into the Playwright suite you already have.**
 `apps/web/e2e/` has 4 specs and a working auth setup. A per-route axe pass is
@@ -301,7 +318,7 @@ two repos does not "fix" them.
 | --- | --- | --- |
 | **1 — user-visible defects** ✅ *landed 2026-09-08* | A3, A5, S1, S3, M1 | Each is small, each is felt: a failing contrast pair, a missing press, a contradictory doc, motion that ignores the OS setting. |
 | **2 — floors that stay** | A1, A2, X2, M3, T1 | Turn on the rules while the violation count is 19, 4, 0 and a known list. Cheapest they will ever be. |
-| **3 — the contracts** | S2, S4, S7, A4, A6, A8, E1, T2, X1, X3 | Documentation and token work that needs owner decisions, not just code. |
+| **3 — the contracts** | S2, S4, S7, A4, A8, E1, T2, X1, X3 | Documentation and token work that needs owner decisions, not just code. |
 | **4 — enforcement reach** | S5, S6, A7, E2, E3, X4 | Bigger builds: registry coverage, axe in e2e, an empty-state primitive. |
 
 ---
@@ -337,7 +354,7 @@ two repos does not "fix" them.
 | **S4** | Canonical five-state table in `state-visuals.md` | **P1** | S | Med | `active` is not covered anywhere |
 | **S2** | `-deep` hover tokens instead of `/90` opacity | **P1** | M | High | invisible on saturated gold, inverts on dark |
 | **M3** | Replace `transition-all` in 3 primitives, then lock the rule | **P1** | S | Med | toggle-group, toast, tabs |
-| **A6** | Touch targets: 40 px `icon` vs the 44/48 px rule | **P1** | M | High | `icon` used 78×; 6 files declare a minimum |
+| ✅ **A6** | Touch targets scoped by surface (constitution amended) | **P2** | S | Med | not an AA failure — AA is 24 px; the doc was false |
 | **A4** | Border contrast + the 3 baselined pairs | **P1** | M | High | borders 1.18–1.32:1; sandstone primary button **2.26:1** |
 | **E1** | Fill the loading/error visual contract | **P2** | M | Med | section is literally marked "(placeholder)" |
 | **X1** | Every `!important` names what it fights | **P2** | S | Med | 19 occurrences, 2 commented |
