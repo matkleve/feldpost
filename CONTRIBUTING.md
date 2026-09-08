@@ -23,10 +23,18 @@ node scripts/verify.mjs design-system    # doc-links | specs | design-system | i
 
 ### Known debt
 
-`specs` is a **soft** check: it reports, it does not fail the run. `lint:specs`
-carries 201 errors that predate the gate — tracked in
-[`docs/specs/SPEC-SIZE-BACKLOG.md`](docs/specs/SPEC-SIZE-BACKLOG.md). Do not add
-to it: a spec you touch leaves the linter no worse than you found it.
+Three checks are **soft**: they report, they do not fail the run. All three were
+red on `main` before the gate existed (measured 2026-09-08):
+
+| Soft check | Debt |
+| --- | --- |
+| `specs` | 201 errors — [`docs/specs/SPEC-SIZE-BACKLOG.md`](docs/specs/SPEC-SIZE-BACKLOG.md) |
+| `lint` | 151 errors + 1068 warnings (`--max-warnings 0`) |
+| `test` | the test bundle does not compile — ~101 TS errors, 4 unresolved imports in `*.spec.ts` |
+
+The counts are a ratchet: they may only go down. Do not add to them. Everything
+green today (`doc-links`, `design-system`, `i18n`, `build`) fails hard, and a
+soft check is promoted to hard the moment its count reaches zero.
 
 ## Before opening a PR
 

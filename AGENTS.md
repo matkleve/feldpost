@@ -44,10 +44,18 @@ run tells you everything that is wrong. CI runs the same command
 Re-run one check alone with `node scripts/verify.mjs <name>`
 (`doc-links`, `specs`, `design-system`, `i18n`, `lint`, `test`, `build`).
 
-`specs` is currently a **soft** check: it reports and does not fail the run,
-because `lint:specs` carries 201 errors that predate the gate
-([`docs/specs/SPEC-SIZE-BACKLOG.md`](docs/specs/SPEC-SIZE-BACKLOG.md)). Do not
-add to that debt — a spec you touch leaves the linter no worse than you found it.
+Three checks start **soft** — they report and do not fail the run — because they
+were already red on `main` before the gate existed (measured 2026-09-08):
+
+| Soft check | Debt |
+| --- | --- |
+| `specs` | 201 errors ([`docs/specs/SPEC-SIZE-BACKLOG.md`](docs/specs/SPEC-SIZE-BACKLOG.md)) |
+| `lint` | 151 errors + 1068 warnings (`--max-warnings 0`, so warnings fail too) |
+| `test` | **the test bundle does not compile** — ~101 TS errors, 4 unresolved imports in `*.spec.ts` |
+
+Those counts are a ratchet: they may only go down. **Do not add to them** — code
+or a spec you touch leaves its checker no worse than you found it. Everything
+green today (`doc-links`, `design-system`, `i18n`, `build`) fails hard.
 
 ### Creating GitHub Issues (Required)
 

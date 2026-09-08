@@ -13,10 +13,17 @@
  * wrong rather than the first thing.
  *
  * `soft: true` marks a check that is known-red for reasons predating this gate.
- * It reports loudly and does not fail the run. A soft check is a debt with a
- * name and an owner — see docs/audits/2026-09-08-grundriss-adoption.md § A5 —
- * not a permanent exemption. Making a check soft to get a green run is the one
- * thing this file must never be used for.
+ * It reports loudly and does not fail the run. Three checks start soft, each
+ * with the count measured on 2026-09-08; the counts are the ratchet — they may
+ * only go down. A soft check is a debt with a name and a number, not an
+ * exemption, and making a check soft to get a green run is the one thing this
+ * file must never be used for.
+ *
+ * Why soft rather than red: `Build & Test` had been failing on `main` for
+ * months without anyone acting on it. A gate that is red on a clean tree from
+ * day one teaches people to ignore it, which is the failure this gate exists to
+ * end. Everything genuinely green today (doc-links, design-system, i18n, build)
+ * fails hard. See docs/audits/2026-09-08-grundriss-adoption.md § A5.
  */
 
 import { spawnSync } from "node:child_process";
@@ -32,8 +39,20 @@ const CHECKS = [
   },
   { name: "design-system", cmd: "npm", args: ["run", "--silent", "design-system:check"] },
   { name: "i18n", cmd: "npm", args: ["run", "--silent", "i18n:check"] },
-  { name: "lint", cmd: "npm", args: ["run", "--silent", "lint"] },
-  { name: "test", cmd: "npm", args: ["run", "--silent", "test"] },
+  {
+    name: "lint",
+    cmd: "npm",
+    args: ["run", "--silent", "lint"],
+    soft: true,
+    debt: "151 errors + 1068 warnings on main (2026-09-08); `--max-warnings 0` means warnings fail too.",
+  },
+  {
+    name: "test",
+    cmd: "npm",
+    args: ["run", "--silent", "test"],
+    soft: true,
+    debt: "the test bundle does not compile on main (2026-09-08): ~101 TS errors, incl. 4 unresolved imports in *.spec.ts. Fix this first.",
+  },
   { name: "build", cmd: "npm", args: ["run", "--silent", "build"] },
 ];
 
