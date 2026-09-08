@@ -56,7 +56,10 @@
   --muted-foreground: oklch(0.6268 0 0);
   --accent: oklch(0.3211 0 0);
   --accent-foreground: oklch(0.8109 0 0);
-  --destructive: oklch(0.6368 0.2078 25.3313);
+  // L lowered 0.6368 → 0.57 so `--destructive-foreground` (#fafafa) clears WCAG AA on the
+  // filled destructive button: was 3.61:1, now 4.73:1. Hue and chroma unchanged.
+  // @see scripts/audit-theme-contrast.mjs · docs/audits/2026-09-08-design-system-adoption.md § A3
+  --destructive: oklch(0.5700 0.2078 25.3313);
   --destructive-foreground: oklch(0.9851 0 0);
   --border: oklch(0.2520 0 0);
   --input: oklch(0.2520 0 0);
@@ -158,7 +161,10 @@
   --muted-foreground: oklch(0.5510 0.0234 264.3637);
   --accent: oklch(0.9491 0 0);
   --accent-foreground: oklch(0.2101 0.0318 264.6645);
-  --destructive: oklch(0.6368 0.2078 25.3313);
+  // L lowered 0.6368 → 0.57 so `--destructive-foreground` (#fafafa) clears WCAG AA on the
+  // filled destructive button: was 3.61:1, now 4.73:1. Hue and chroma unchanged.
+  // @see scripts/audit-theme-contrast.mjs · docs/audits/2026-09-08-design-system-adoption.md § A3
+  --destructive: oklch(0.5700 0.2078 25.3313);
   --destructive-foreground: oklch(0.9851 0 0);
   --border: oklch(0.9276 0.0058 264.5313);
   --input: oklch(0.9276 0.0058 264.5313);
@@ -397,3 +403,7 @@ html[data-theme="sandstone"] {
 // Headings + default anchor styling; emitted here so it follows Tailwind Preflight (not top-level @use).
 // @see docs/migration/phase-8-global-scss-elimination.md §7
 @include meta.load-css('styles/typography-baseline');
+
+// Last global emit on purpose: the reduced-motion override has to sit after
+// everything it overrides. @see docs/design/motion.md
+@include meta.load-css('styles/reduced-motion');

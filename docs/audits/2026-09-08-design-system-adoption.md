@@ -4,6 +4,7 @@
 
 **Date:** 2026-09-08
 **Companion to:** [`2026-09-08-grundriss-adoption.md`](2026-09-08-grundriss-adoption.md) (process layer)
+**Status:** **Wave 1 landed** on 2026-09-08 (A3, A5, S1, S3, M1 — marked ✅ in § 6). The rest are proposals.
 **Question:** past process, what is worth importing at the level a user actually feels — interaction states, motion, type, contrast?
 
 ---
@@ -27,7 +28,7 @@ Six things a user can feel today, all measured (§ 7):
 | --- | --- |
 | **The primary button has no pressed state.** | 3 of 6 `buttonVariants` (`default`, `secondary`, `link`) define `hover:` and no `active:`. Quiet, outline and destructive have all three. |
 | **Hover on the primary button is an opacity shift.** | `hover:bg-primary/90`. On sandstone, `--primary` *is* the saturated gold — a 10 % alpha change on a saturated fill is close to invisible, and inverts on dark. |
-| **The destructive button fails WCAG AA.** | `destructive-foreground #fafafa` on `destructive #ef4444` = **3.61:1**, needs 4.5:1 (light theme). The audit that finds this is not wired into any gate. |
+| **The destructive button failed WCAG AA — in all three themes.** | `#fafafa` on `#ef4444` = **3.61:1**, needs 4.5:1. Fixed (✅ A3). Worse: the audit that should have found it was reading a **hand-copied hex palette** that had drifted from `styles.scss`, so it reported the failure in light only and passed dark and sandstone. Reading the real tokens turned 1 reported failure into **6 actual ones** — see A3/A5. |
 | **No global `prefers-reduced-motion`.** | 7 component files and 2 global partials handle it ad hoc; 165 raw `ms` values elsewhere do not. |
 | **The UI type floor is 12 px.** | `--font-size-2xs: 0.75rem` (12 px) and `--font-size-xs` ≈ 13.6 px carry chat, metadata, invite and upload copy — for a product whose constitution opens with *"sunlight, dirty gloves, one-handed use"*. |
 | **The canonical disabled contract points at a deleted file.** | `state-visuals.md` cites `apps/web/src/styles/primitives/button.scss` and `opacity: 0.66`; that folder does not exist and the real primitive uses `disabled:opacity-50`. |
@@ -58,7 +59,7 @@ Six things a user can feel today, all measured (§ 7):
 
 ### S · Interaction states
 
-**S1 — Give `default`, `secondary` and `link` a pressed state.**
+**S1 — Give `default`, `secondary` and `link` a pressed state. ✅ Landed.**
 Every variant defines `hover:`; only `ghost`/`outline` (via
 `quietInteractionEmphasis`) and `destructive` define `active:`. So the *primary*
 action — the one people press most — has no press feedback, while a quiet
@@ -75,12 +76,19 @@ than Grundriss would, because in the sandstone theme `--primary` is the brand
 gold. Define `--primary-deep` / `--secondary-deep` (and their dark and sandstone
 values) and use them, the way `--brand-gold` washes are already tokenised.
 
-**S3 — Reconcile the disabled contract with the code.**
+**S3 — Reconcile the disabled contract with the code. ✅ Landed.**
 `docs/design/state-visuals.md` § Disabled is normative and says `opacity: 0.66`
 "matches `.ui-button:disabled` in `apps/web/src/styles/primitives/button.scss`".
 That folder does not exist, `.ui-button` appears nowhere in the tree, and the
 real primitive's base row says `disabled:opacity-50`. One of the two numbers is
-the contract; today a reader following the doc implements the wrong one.
+the contract, and a reader following the doc implemented the wrong one.
+
+The doc now states what ships (`0.5`, linked to `button-variants.ts`) and the
+dead reference is gone. **Which number is right stays open**, recorded in the
+doc as an owner decision: `0.66` is the more legible of the two, and this
+product's first constitutional sentence is about sunlight and gloves. Raising it
+is a one-token change — a deliberate visual decision, not a cleanup, so it was
+not made here.
 
 **S4 — Write the five-state table down in one place.**
 `state-visuals.md` covers disabled (thoroughly), hover/selected (thoroughly) and
@@ -124,10 +132,25 @@ permanent floor.
 It is a keyboard-access rule sitting at warning level in a config that runs with
 `--max-warnings 0` — so it already fails the build, but reads as optional.
 
-**A3 — Fix the destructive button contrast. It fails WCAG AA today.**
-3.61:1 against a required 4.5:1, light theme. Destructive is the one button
-where misreading the label has consequences, and the design constitution lists
-WCAG AA as a baseline requirement. Darken `--destructive` or use a darker ink.
+**A3 — Fix the destructive button contrast. ✅ Landed.**
+3.61:1 against a required 4.5:1 — and once the audit was reading real tokens
+(A5), in **all three themes**, not just light. `--destructive` lightness went
+`oklch(0.6368 …)` → `oklch(0.5700 …)`; hue and chroma unchanged; white ink now
+clears at **4.73:1** everywhere.
+
+*What the real palette then showed.* Five further failures the stale table had
+been hiding, none of them mechanical:
+
+| Theme | Pair | Ratio | Why it is not a cleanup |
+| --- | --- | --- | --- |
+| sandstone | primary button text | **2.26:1** | white on the brand gold — the gold *is* the brand, so the ink is the decision |
+| dark | primary button text | 3.62:1 | white on `#3e8cc9`; needs a darker primary or a dark ink |
+| sandstone | muted on card | 4.42:1 | 0.08 short; a small darkening of `--muted-foreground` clears it |
+
+These three are recorded in a `BASELINE` ratchet in the script: a listed pair
+that gets *worse* fails, a listed pair that starts *passing* also fails (telling
+you to delete the entry), and anything unlisted fails on its first regression.
+They are owner decisions about brand colour, not something to fix by guessing.
 
 **A4 — Decide the border-vs-background warnings. All three themes.**
 1.27:1 (light), 1.34:1 (dark), 1.22:1 (sandstone) — against the 3:1 that
@@ -138,10 +161,21 @@ now the audit cannot tell the difference because the pair list does not record
 which is which. Grundriss's contrast script records a purpose string per pair
 (`"the border of a control (WCAG 1.4.11)"`) for exactly this reason.
 
-**A5 — Wire the contrast audit into the gate.**
-`scripts/audit-theme-contrast.mjs` exits 1 correctly on failure. It is simply
-never called: `design-system:check` does not include it. It is one line.
-(= § B3 of the process audit; repeated here because A3/A4 are what it finds.)
+**A5 — Wire the contrast audit into the gate. ✅ Landed — and it needed more than one line.**
+`scripts/audit-theme-contrast.mjs` exits 1 correctly and was simply never
+called. But wiring it in as it stood would have gated on the wrong numbers: its
+palettes were a **hand-maintained hex table**, commented "hex values from
+styles.scss", that had drifted from the product. It claimed dark `--destructive`
+was `#7f1d1d` and sandstone `#c53030`; both themes actually resolve to
+`#ef4444`. A contrast gate reading a second copy of the palette measures the
+copy — the same one-owner-per-rule failure as everywhere else in these two
+audits, in the one place where being wrong is invisible.
+
+The script now parses `apps/web/src/styles.scss` directly: `:root` for light,
+the `tweakcn-dark-semantic-palette` mixin for dark, the `html[data-theme="sandstone"]`
+block layered over `:root` for sandstone, resolving `oklch()`, hex and `var()`
+chains. A token it cannot resolve is **reported and fails the run** rather than
+silently skipped. Then added to `design-system:check`, and so to `npm run verify`.
 
 **A6 — Touch targets: the constitution and the size scale disagree.**
 The constitution requires **≥ 44 px desktop / 48 px mobile**. The button scale
@@ -168,12 +202,20 @@ deficiency and direct sunlight.
 
 ### M · Motion
 
-**M1 — One global `prefers-reduced-motion` block.**
-Today: 7 component SCSS files and 2 global partials handle it; everything else
-animates regardless. Grundriss handles it once, globally, and forbids
-re-implementing it per component. Add the global rule (transitions and
-animations to ~0.01 ms, keeping opacity changes that carry meaning), then delete
-the per-component copies as they are touched.
+**M1 — One global `prefers-reduced-motion` block. ✅ Landed.**
+7 component SCSS files and 2 global partials handled it; everything else
+animated regardless — while `motion.md` already said reduced motion "disables
+all transforms and fades". `apps/web/src/styles/_reduced-motion.scss`, emitted
+last, now owns it: durations and delays collapse to 0.01 ms (not 0, so
+`transitionend` / `animationend` still fire and no FSM waiting on them hangs).
+
+Two decisions worth knowing. The `!important` is deliberate and the comment says
+what it fights — component SCSS and Tailwind utilities both declare transitions
+later in the cascade, and an OS accessibility setting has to win over both.
+And continuous progress indicators are **exempt**: a spinner frozen mid-rotation
+reads as a hung app, which is worse than the motion it avoids. The existing two
+are BEM `…__spinner`; new ones opt out with `data-motion="essential"`.
+Per-component copies can be deleted as those files are touched.
 
 **M2 — Use the motion tokens that already exist.**
 **165** raw `ms` literals and **11** `cubic-bezier()` calls in component SCSS,
@@ -257,7 +299,7 @@ two repos does not "fix" them.
 
 | Wave | Contents | Why together |
 | --- | --- | --- |
-| **1 — user-visible defects** | A3, A5, S1, S3, M1 | Each is small, each is felt: a failing contrast pair, a missing press, a contradictory doc, motion that ignores the OS setting. |
+| **1 — user-visible defects** ✅ *landed 2026-09-08* | A3, A5, S1, S3, M1 | Each is small, each is felt: a failing contrast pair, a missing press, a contradictory doc, motion that ignores the OS setting. |
 | **2 — floors that stay** | A1, A2, X2, M3, T1 | Turn on the rules while the violation count is 19, 4, 0 and a known list. Cheapest they will ever be. |
 | **3 — the contracts** | S2, S4, S7, A4, A6, A8, E1, T2, X1, X3 | Documentation and token work that needs owner decisions, not just code. |
 | **4 — enforcement reach** | S5, S6, A7, E2, E3, X4 | Bigger builds: registry coverage, axe in e2e, an empty-state primitive. |
@@ -283,11 +325,11 @@ two repos does not "fix" them.
 
 | # | Change | Prio | Effort | Impact | Evidence |
 | --- | --- | :---: | :---: | :---: | --- |
-| **A3** | Fix destructive-button contrast | **P0** | S | High | **3.61:1**, needs 4.5:1 (light) |
-| **A5** | Wire the contrast audit into `design-system:check` | **P0** | S | High | script exits 1 correctly, is never called |
-| **S1** | Pressed state for `default` / `secondary` / `link` | **P0** | S | High | 3 of 6 variants have `hover:` and no `active:` |
-| **S3** | Reconcile disabled: 0.66 vs `opacity-50`, dead file reference | **P0** | S | Med | `styles/primitives/` does not exist |
-| **M1** | One global `prefers-reduced-motion` | **P0** | S | High | 7 files handle it, the rest ignore it |
+| ✅ **A3** | Fix destructive-button contrast | **P0** | S | High | was 3.61:1 in **all 3** themes, now 4.73:1 |
+| ✅ **A5** | Contrast audit reads real tokens, and is in the gate | **P0** | M | High | its palette was a stale hand-copy; hid 5 failures |
+| ✅ **S1** | Pressed state for `default` / `secondary` / `link` | **P0** | S | High | was 3 of 6 variants with `hover:` and no `active:` |
+| ✅ **S3** | Reconcile disabled: doc now matches code, dead ref gone | **P0** | S | Med | 0.5-vs-0.66 left as an owner decision |
+| ✅ **M1** | One global `prefers-reduced-motion` | **P0** | S | High | was 7 files handling it, the rest ignoring it |
 | **A1** | Turn on 8 more a11y template rules | **P1** | M | High | **19** findings total; 3 rules already clean |
 | **A2** | `click-events-have-key-events` → `error` | **P1** | S | Med | keyboard rule sitting at `warn` |
 | **X2** | `outline: none` with no focus replacement | **P1** | S | High | 4 files |
@@ -296,7 +338,7 @@ two repos does not "fix" them.
 | **S2** | `-deep` hover tokens instead of `/90` opacity | **P1** | M | High | invisible on saturated gold, inverts on dark |
 | **M3** | Replace `transition-all` in 3 primitives, then lock the rule | **P1** | S | Med | toggle-group, toast, tabs |
 | **A6** | Touch targets: 40 px `icon` vs the 44/48 px rule | **P1** | M | High | `icon` used 78×; 6 files declare a minimum |
-| **A4** | Border contrast: decide decorative vs control boundary | **P2** | M | Med | 1.22–1.34:1 in all 3 themes vs 3:1 (WCAG 1.4.11) |
+| **A4** | Border contrast + the 3 baselined pairs | **P1** | M | High | borders 1.18–1.32:1; sandstone primary button **2.26:1** |
 | **E1** | Fill the loading/error visual contract | **P2** | M | Med | section is literally marked "(placeholder)" |
 | **X1** | Every `!important` names what it fights | **P2** | S | Med | 19 occurrences, 2 commented |
 | **X3** | Repair the two dead `styles/primitives/` citations | **P2** | S | Med | contract files citing deleted code |

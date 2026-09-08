@@ -23,10 +23,19 @@ Use for **`app-panel-trigger`** and other **native button** hosts when the contr
 | Concern | Treatment |
 | ------- | ----------- |
 | **Pointer** | `cursor: not-allowed` |
-| **Overall legibility** | `opacity: 0.66` on the **host** (matches `.ui-button:disabled` in `apps/web/src/styles/primitives/button.scss`) |
+| **Overall legibility** | `opacity: 0.5` on the **host** — shipped by `disabled:opacity-50` in the base row of [`button-variants.ts`](../../apps/web/src/app/shared/ui/button/button-variants.ts), which every `hlmBtn` variant inherits |
 | **Hover / active chrome** | **None** — `:disabled` must not apply hover or pressed fills |
 | **Focus** | Native disabled buttons are not focusable; **no** `:focus-visible` ring |
 | **Chevron / icon / label** | Same opacity applies to all children (single host treatment) |
+
+> **Open (owner decision):** this row read `opacity: 0.66` until 2026-09-08 and cited
+> `apps/web/src/styles/primitives/button.scss` — a file that is not in the tree, and a
+> `.ui-button` class that appears nowhere. The shipped value has been `0.5` for as long as
+> `button-variants.ts` has existed, so the contract and the product disagreed and the
+> contract pointed at deleted code. The doc now states what ships. **Whether `0.5` is right
+> is still open:** `0.66` is the more legible of the two, and this product's first
+> constitutional sentence is about sunlight and gloves. Raising it is a one-token change in
+> the base row — a deliberate visual decision, not a cleanup.
 
 **Implementation note:** Prefer **native `disabled`** on a real `<button type="button">` for correct semantics. If **`aria-disabled="true"`** is required while keeping the node focusable for custom focus management, pair it with **`pointer-events: none`** (or an equivalent guard) and **the same visual recipe** as above — document the exception in the component spec.
 
@@ -168,6 +177,8 @@ On any quiet host using the mixins above, **icon, label, and chevron slots must 
 ---
 
 ## Changelog
+
+- **2026-09-08** — **Disabled legibility reconciled with the code:** documented value corrected from `opacity: 0.66` to the shipped `0.5`, and the dead `styles/primitives/button.scss` / `.ui-button` reference removed. Whether `0.5` or `0.66` is the right number is recorded as an open owner decision above. Audit: [`docs/audits/2026-09-08-design-system-adoption.md`](../audits/2026-09-08-design-system-adoption.md) § S3.
 
 - **2026-06-22 (c)** — **Map style switch** re-tiered to **tertiary violet** (map view placement); generic toggles remain secondary blue.
 - **2026-06-22 (b)** — **High-attention tier:** gold = pointer focus **and** selection that needs attention (multi-select, flyout pick, linked-hover); not passive mode context. Supersedes narrow “pointer only” wording from (a).
