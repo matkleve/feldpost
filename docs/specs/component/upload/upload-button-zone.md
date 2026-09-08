@@ -24,7 +24,7 @@ When the panel is closed and a batch is active, upload progress is shown **only 
 ## Interaction emphasis
 
 - Canonical: [`docs/design/state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis
-- [x] Implements contract via `.map-upload-btn` in [`_map-shell-upload.scss`](../../../../apps/web/src/app/features/map/map-shell/_map-shell-upload.scss) (uploading progress ring uses primary — documented exception)
+- [x] Implements contract via `.map-upload-btn` in [`_map-shell-upload.scss`](../../../../apps/web/src/app/features/map/map-shell/scss/_map-shell-upload.scss) (uploading progress ring uses primary — documented exception)
 
 ## Actions
 

@@ -27,29 +27,35 @@ docs/                 → Design docs, element specs, glossary (source of truth)
 
 ## Development
 
-### Install dependencies
-
 ```bash
-npm install
+npm install && npm --prefix apps/web install   # once
+npm run dev                                    # dev server (cd apps/web && ng serve)
+npm run verify                                 # ← the gate. Run before every commit.
 ```
 
-### Run the dev server
+### `npm run verify` — the gate
 
-```bash
-cd apps/web && ng serve
-```
+One command runs every check: doc links, spec lint, design-system gates, i18n
+gates, ESLint, unit tests, `ng build`. It keeps going after a failure, so one
+run tells you everything that is wrong. CI runs the same command
+(`.github/workflows/verify.yml`) — local and CI cannot drift.
 
-### Build
+**Never report work as done without a green `verify` — paste the output.**
+Re-run one check alone with `node scripts/verify.mjs <name>`
+(`doc-links`, `specs`, `design-system`, `i18n`, `lint`, `test`, `build`).
 
-```bash
-cd apps/web && ng build
-```
+Three checks start **soft** — they report and do not fail the run — because they
+were already red on `main` before the gate existed (measured 2026-09-08):
 
-### Run tests
+| Soft check | Debt |
+| --- | --- |
+| `specs` | 201 errors ([`docs/specs/SPEC-SIZE-BACKLOG.md`](docs/specs/SPEC-SIZE-BACKLOG.md)) |
+| `lint` | 151 errors + 1068 warnings (`--max-warnings 0`, so warnings fail too) |
+| `test` | **the test bundle does not compile** — ~101 TS errors, 4 unresolved imports in `*.spec.ts` |
 
-```bash
-cd apps/web && ng test
-```
+Those counts are a ratchet: they may only go down. **Do not add to them** — code
+or a spec you touch leaves its checker no worse than you found it. Everything
+green today (`doc-links`, `design-system`, `i18n`, `build`) fails hard.
 
 ### Creating GitHub Issues (Required)
 
@@ -61,9 +67,9 @@ node scripts/create-github-issues.mjs path/to/issues.json
 
 Build a JSON file first (see `scripts/create-github-issues.example.json` for the schema: `{ title, body, labels?, milestone? }`), then run the script once. Auth resolves automatically from `GITHUB_TOKEN` env var or `gh auth token`.
 
-### Design System Gates (Required)
+### Design System Gates
 
-Run from repository root when changes touch design-system docs, panel SCSS, or geometry logic:
+Part of `npm run verify`. Run alone while iterating on design-system docs, panel SCSS, or geometry logic:
 
 ```bash
 npm run design-system:check
@@ -81,9 +87,9 @@ Reference workflow and checklist:
 - `.github/pull_request_template.md`
 - `CONTRIBUTING.md`
 
-### i18n Gates (Required)
+### i18n Gates
 
-Run from repository root when changes touch translation workbench CSV, `translation-catalog.ts`, or `seed_i18n.sql`:
+Part of `npm run verify`. Run alone while iterating on the translation workbench CSV, `translation-catalog.ts`, or `seed_i18n.sql`:
 
 ```bash
 npm run i18n:check
@@ -119,7 +125,7 @@ CI workflow: `.github/workflows/i18n-check.yml`
   - Do not reference archived files/specs from active specs or service contracts
 - For non-obvious behavior gates or state transitions, add concise inline comments that reference the governing element spec section (for example `upload-panel.md § Media Item Menu Contract`).
 - Commit messages follow **Conventional Commits** (`feat:`, `fix:`, `chore:`)
-- Always run `ng build` to verify changes compile before submitting
+- Always run `npm run verify` before submitting; never report done without pasting its output
 
 ## Universal Invariants
 
@@ -135,9 +141,9 @@ Every change MUST declare a **class** before work starts (in the issue, PR descr
 
 | Class | Examples | Required before merge |
 | --- | --- | --- |
-| **Trivial** | typo, copy/label text, log line, comment, single token swap, pure rename, migration cleanup (see exemption below) | `ng build` passes + the gate script for the touched area (e.g. `npm run design-system:check` if SCSS/tokens). No ownership matrix, no FSM tables. |
-| **Standard** | new non-stateful component, new service method, list/filter/sort, a self-contained UI surface | spec touched first; `ng build`; component-reuse/registry check; `npm run lint:specs`; relevant gate script; `/code-review` skill on the diff. |
-| **Sensitive** | RLS or migrations, auth, billing/money, export, stateful/FSM UI, **the upload pipeline**, anything touching `organization_id` scoping | full ceremony: ownership matrix + FSM/transition tables; `/security-review` skill; the matching `validate-*-rls.sql` / `validate-dsgvo-security.sql`; **LIVE VERIFICATION** (`docs/agent-workflows/agent-communication.md`); fresh-context adversarial review by a different agent than the implementer. |
+| **Trivial** | typo, copy/label text, log line, comment, single token swap, pure rename, migration cleanup (see exemption below) | `npm run verify` green. No ownership matrix, no FSM tables. |
+| **Standard** | new non-stateful component, new service method, list/filter/sort, a self-contained UI surface | spec touched first; `npm run verify` green; component-reuse/registry check; `/code-review` skill on the diff. |
+| **Sensitive** | RLS or migrations, auth, billing/money, export, stateful/FSM UI, **the upload pipeline**, anything touching `organization_id` scoping | full ceremony: `npm run verify` green; ownership matrix + FSM/transition tables; `/security-review` skill; the matching `validate-*-rls.sql` / `validate-dsgvo-security.sql`; **LIVE VERIFICATION** (`docs/agent-workflows/agent-communication.md`); fresh-context adversarial review by a different agent than the implementer. |
 
 The class is a **floor, not a ceiling** — reviewers may escalate. Anything that changes a security boundary or the data model is **Sensitive** regardless of how small the diff looks.
 

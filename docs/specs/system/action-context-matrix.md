@@ -253,7 +253,7 @@ sequenceDiagram
 
 ### Upload Pipeline Reference
 
-Use [upload-manager-pipeline](upload-manager-pipeline.md) for the full resolution algorithm, prompt order, and issue-state transitions. The matrix only decides action availability; the pipeline decides how unresolved locations become `missing_gps`, `document_unresolved`, or `address_ambiguous` flows.
+Use [upload-manager-pipeline](../service/media-upload-service/upload-manager-pipeline.md) for the full resolution algorithm, prompt order, and issue-state transitions. The matrix only decides action availability; the pipeline decides how unresolved locations become `missing_gps`, `document_unresolved`, or `address_ambiguous` flows.
 
 ## Acceptance Criteria
 
@@ -261,7 +261,7 @@ Use [upload-manager-pipeline](upload-manager-pipeline.md) for the full resolutio
 - [ ] The action table has one column per context ID and every listed action is mapped in that table.
 - [ ] `open_details_or_selection`, `open_in_media`, `zoom_house`, `zoom_street`, `copy_address`, `copy_gps`, `open_google_maps`, `assign_to_project`, `change_location_map`, `change_location_address`, `remove_from_project`, `delete_media`, `delete_locations`, `download`, `share_link`, `copy_link`, `native_share`, `download_zip`, `select_all`, `select_none`, `candidate_select`, `manual_location_entry`, and `cancel_location_prompt` are all present as action IDs.
 - [ ] `address_ambiguous` is documented as upload-internal only, with exactly `candidate_select`, `manual_location_entry`, and `cancel_location_prompt`.
-- [ ] `file > folder > country` is documented as the address-source precedence rule and points to [upload-manager-pipeline](upload-manager-pipeline.md).
+- [ ] `file > folder > country` is documented as the address-source precedence rule and points to [upload-manager-pipeline](../service/media-upload-service/upload-manager-pipeline.md).
 - [ ] `map_point` excludes all actions except `create_marker_here`.
 - [ ] Cluster and multi-target actions include explicit count guards, batch policies, or target-resolution rules where required.
 - [ ] Multi-target download behavior is separated from the explicit `download_zip` action.

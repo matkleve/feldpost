@@ -62,7 +62,7 @@ All conditions are mandatory:
 
 - [x] Current page semantics implemented and validated in projects route depth (`/projects/:projectId`)
 - [x] Collapse behavior implemented on narrow viewports (ellipsis current crumb)
-- [x] Separator and spacing rhythm validated across themes (desktop/mobile screenshot evidence in `docs/design-system/evidence/wave-3/`)
+- [x] Separator and spacing rhythm validated across themes (desktop/mobile screenshot evidence in `docs/design/design-system/evidence/wave-3/`)
 
 ## Current Progress Snapshot
 

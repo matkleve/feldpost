@@ -1,0 +1,34 @@
+// ── Reduced motion (global, single owner) ─────────────────────────────────────
+//
+// `docs/design/motion.md` already says: "prefers-reduced-motion: reduce disables
+// all transforms and fades, keeping only immediate state changes." Until this
+// file that rule lived in 7 component stylesheets and was ignored by every other
+// transition in the app. One global rule; components do not re-implement it.
+//
+// `!important` is deliberate, and what it fights is specific: component
+// stylesheets and Tailwind utilities both declare transition/animation later in
+// the cascade, and an operating-system accessibility setting has to win over
+// both. It is not a licence to use `!important` elsewhere — see
+// `.cursor/rules/token-usage-gate.mdc` § 6 on stale escape hatches.
+//
+// Durations collapse to 0.01ms rather than 0 so `transitionend` / `animationend`
+// still fire: an FSM waiting for one of those events would otherwise hang.
+//
+// Exempt: continuous progress indicators. A spinner frozen mid-rotation reads as
+// a hung app, which is a worse outcome than the motion it avoids. Existing ones
+// are BEM `…__spinner`; new ones opt out with `data-motion="essential"`.
+@media (prefers-reduced-motion: reduce) {
+  *:not([data-motion='essential']):not([class*='__spinner']),
+  *:not([data-motion='essential']):not([class*='__spinner'])::before,
+  *:not([data-motion='essential']):not([class*='__spinner'])::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  html {
+    scroll-behavior: auto !important;
+  }
+}

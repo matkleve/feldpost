@@ -41,7 +41,9 @@ Primitives (no single Angular host)
 
 **`app-chip` (semantic chip component):** Figma component set **`96:74`** is the source of truth for default chrome. Chip body height **`var(--spacing-4)` (16px)**, pill radius, **primary ladder stops 95 / 90** (default / hover fills — `docs/design/tokens.md` §3.1a), label **`var(--font-size-2xs)`** with **`var(--foreground)`**. `ChipComponent` has **no** `size` input — one geometry scale.
 
-**`ui-chip` (directive primitive + quick-info chips):** Uses [chip.scss](apps/web/src/styles/primitives/chip.scss) sizing (`ui-chip--sm` / `md` / `lg`) and interaction emphasis — **different** host and contracts from `app-chip`. Do not assume the same pixel height as Figma `app-chip` without checking that primitive’s spec.
+**`ui-chip` (directive primitive + quick-info chips):** Uses `ui-chip` sizing (`ui-chip--sm` / `md` / `lg`) and interaction emphasis — **different** host and contracts from `app-chip`. Do not assume the same pixel height as Figma `app-chip` without checking that primitive’s spec.
+
+> ⚠ SPEC GAP: this paragraph cited `apps/web/src/styles/primitives/chip.scss` as the sizing source; that file is not in the tree and no `ui-chip` stylesheet exists. Name the current owner of `ui-chip--sm` / `md` / `lg` before building against it.
 
 Icon-only **`app-chip`** remains **square** at the same outer dimension as the chip height (16px).
 

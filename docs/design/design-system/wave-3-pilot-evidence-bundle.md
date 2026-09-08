@@ -18,10 +18,10 @@
 
 Captured from running app (`http://localhost:53339`) in browser automation with explicit viewport sizes.
 
-- Pilot B Desktop (1440x900): `docs/design-system/evidence/wave-3/pilot-b-projects-list-desktop.png`
-- Pilot B Mobile (390x844): `docs/design-system/evidence/wave-3/pilot-b-projects-list-mobile.png`
-- Pilot C Desktop (1440x900): `docs/design-system/evidence/wave-3/pilot-c-breadcrumb-detail-desktop.png`
-- Pilot C Mobile (390x844): `docs/design-system/evidence/wave-3/pilot-c-breadcrumb-detail-mobile.png`
+- Pilot B Desktop (1440x900): `docs/design/design-system/evidence/wave-3/pilot-b-projects-list-desktop.png`
+- Pilot B Mobile (390x844): `docs/design/design-system/evidence/wave-3/pilot-b-projects-list-mobile.png`
+- Pilot C Desktop (1440x900): `docs/design/design-system/evidence/wave-3/pilot-c-breadcrumb-detail-desktop.png`
+- Pilot C Mobile (390x844): `docs/design/design-system/evidence/wave-3/pilot-c-breadcrumb-detail-mobile.png`
 
 ---
 
@@ -29,7 +29,7 @@ Captured from running app (`http://localhost:53339`) in browser automation with 
 
 **Contract Reference:** `popover-panel-contract.md`
 
-**Target Component:** [map-shell.component.ts](../../apps/web/src/app/features/map/map-shell/map-shell.component.ts)
+**Target Component:** [map-shell.component.ts](../../../apps/web/src/app/features/map/map-shell/component/map-shell.component.ts)
 
 ### Implementation Evidence
 
@@ -279,7 +279,7 @@ npx vitest run src/app/features/map/map-shell/map-shell.component.spec.ts \
 
 **Contract Reference:** `table-primitive-contract.md`
 
-**Target Component:** [projects-page.component.ts](../../apps/web/src/app/features/projects/projects-page.component.ts) — list mode
+**Target Component:** [projects-page.component.ts](../../../apps/web/src/app/features/projects/page/projects-page.component.ts) — list mode
 
 ### Implementation Evidence
 
@@ -543,7 +543,7 @@ npx vitest run src/app/features/projects/projects-page.component.spec.ts \
 
 **Contract Reference:** `breadcrumbs-contract.md`
 
-**Target Component:** [projects-page.component.ts](../../apps/web/src/app/features/projects/projects-page.component.ts) — breadcrumb nav
+**Target Component:** [projects-page.component.ts](../../../apps/web/src/app/features/projects/page/projects-page.component.ts) — breadcrumb nav
 
 ### Implementation Evidence
 
@@ -798,9 +798,9 @@ All three pilots pass design system governance checks.
 
 **Contract Documents:**
 
-- `docs/design-system/popover-panel-contract.md`
-- `docs/design-system/table-primitive-contract.md`
-- `docs/design-system/breadcrumbs-contract.md`
+- `docs/design/design-system/popover-panel-contract.md`
+- `docs/design/design-system/table-primitive-contract.md`
+- `docs/design/design-system/breadcrumbs-contract.md`
 
 **Implementation Files:**
 

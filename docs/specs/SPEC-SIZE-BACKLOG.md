@@ -1,6 +1,8 @@
 # Spec size backlog (≥400 lines)
 
-**Status:** `npm run lint:specs` is **green** (0 errors, 0 warnings) as of the supplement sweep.
+**Status (2026-09-08):** `npm run lint:specs` exits **1** — **201 errors, 32 warnings across 183 specs**, mostly `spec-max-lines` and missing required sections. The "green after the supplement sweep" line this replaces had been false long enough that nobody noticed; the check ran only on `docs/specs/**` PRs, so it was rarely seen failing.
+
+It is wired into `npm run verify` as a **soft** check (reports, does not fail the run) until this backlog is worked off — see `scripts/verify.mjs` and [`docs/audits/2026-09-08-grundriss-adoption.md`](../audits/2026-09-08-grundriss-adoption.md) § A5. **Do not add to the debt:** a spec you touch must leave the linter no worse than you found it.
 
 **Lint excludes (non–element-spec):** `system/security/**`, `GOVERNANCE-*.md`, `service/location-resolver/address-resolver.md`, `search-algorithm-addresses-and-places.md`, `system/user-lifecycle.md`, `spec-size-backlog.md`, `*.deep-dive.md`, `upload-manager-pipeline.data.md`, and **any** `*.supplement.md` (split-out bodies linked from parents). See `shouldIncludeSpecFile` in `scripts/lint-specs.mjs`.
 

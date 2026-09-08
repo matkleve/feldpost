@@ -131,7 +131,7 @@ See [Agent Quick Reference](agent-workflows/agent-quick-reference.md#development
 ### Reference
 
 - **[Database Schema](architecture/database-schema.md)** - Tables & relationships
-- **[User Lifecycle](user-lifecycle.md)** - Auth flows
+- **[User Lifecycle](specs/system/user-lifecycle.md)** - Auth flows
 - **[Role Permissions](playbooks/security/role-permissions.md)** - Access control
 - **[Settings Registry](settings-registry.md)** - All user settings
 

@@ -1,7 +1,7 @@
 # Map Context Menu
 
-> **Use cases:** [use-cases/map-context-menu.md](../use-cases/map-context-menu.md)
-> **System spec:** [map-secondary-click-system](map-secondary-click-system.md)
+> **Use cases:** [use-cases/map-context-menu.md](../../../use-cases/map-context-menu.md)
+> **System spec:** [map-secondary-click-system](../../system/map-secondary-click-system.md)
 
 ## What It Is
 

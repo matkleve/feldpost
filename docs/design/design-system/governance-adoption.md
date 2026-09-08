@@ -113,11 +113,11 @@ Wave 4: Feature rollout and deprecation cleanup
 
 ## CI Enforcement
 
-- GitHub Actions workflow: [../../.github/workflows/design-system-check.yml](../../.github/workflows/design-system-check.yml)
+- GitHub Actions workflow: [../../.github/workflows/design-system-check.yml](../../../.github/workflows/design-system-check.yml)
 - Mandatory command in CI: `npm run design-system:check`
 - Gate outcome: pull requests touching design-system docs, panel SCSS, or design-system scripts must pass registry + breakpoint audits.
-- PR checklist template: [../../.github/pull_request_template.md](../../.github/pull_request_template.md)
-- Contributor runbook: [../../CONTRIBUTING.md](../../CONTRIBUTING.md)
+- PR checklist template: [../../.github/pull_request_template.md](../../../.github/pull_request_template.md)
+- Contributor runbook: [../../CONTRIBUTING.md](../../../CONTRIBUTING.md)
 
 ## MCP and External Reference Protocol
 

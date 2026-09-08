@@ -42,5 +42,5 @@ Two-step inline destructive control built on `hlmBtn` + `twoStepConfirm`: first 
 
 ## Related
 
-- Detail-row grid contract: [`media-detail-inline-section.md`](../ui/media-detail/media-detail-inline-section.md)
-- Modal alternative: [`confirm-dialog.md`](confirm-dialog/confirm-dialog.md)
+- Detail-row grid contract: [`media-detail-inline-section.md`](../../ui/media-detail/media-detail-inline-section.md)
+- Modal alternative: [`confirm-dialog.md`](../confirm-dialog/confirm-dialog.md)

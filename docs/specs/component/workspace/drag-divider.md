@@ -10,7 +10,7 @@ A thin vertical bar (2px visual width, neutral border token at rest) occupying t
 
 ## Where It Lives
 
-- **Parent (canonical):** **`app-authenticated-app-layout`** (split host) — renders the divider between the **main column** (route outlet: map, media, projects, …) and **Workspace Pane**. **Rollback:** divider may return under `MapShellComponent` only if layout hoist is reverted; see [workspace-pane § Interim implementation](../ui/workspace/workspace-pane.md#interim-implementation-rollback--partial-landing).
+- **Parent (canonical):** **`app-authenticated-app-layout`** (split host) — renders the divider between the **main column** (route outlet: map, media, projects, …) and **Workspace Pane**. **Rollback:** divider may return under `MapShellComponent` only if layout hoist is reverted; see [workspace-pane § Interim implementation](../../ui/workspace/workspace-pane.md#interim-implementation-rollback--partial-landing).
 - **Appears when**: `photoPanelOpen()` is `true` (desktop only, hidden at `< 768px`) — product: Workspace Pane open ([symbol rename backlog](../../../backlog/media-photo-symbol-rename-roadmap.md) for future `workspacePaneOpen`).
 - **Component**: `DragDividerComponent` at `apps/web/src/app/shared/workspace-pane/drag-divider/`
 

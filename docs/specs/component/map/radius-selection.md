@@ -1,6 +1,6 @@
 # Radius Selection
 
-> **System spec:** [map-secondary-click-system](map-secondary-click-system.md)
+> **System spec:** [map-secondary-click-system](../../system/map-secondary-click-system.md)
 
 ## What It Is
 

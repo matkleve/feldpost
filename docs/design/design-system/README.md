@@ -61,7 +61,7 @@ Out of scope:
 ## Authority Model
 
 - Element specs (`docs/specs/`) are the feature behavior source of truth.
-- Design-system docs (`docs/design-system/`) are the reusable UI primitive, variant, and composition source of truth.
+- Design-system docs (`docs/design/design-system/`) are the reusable UI primitive, variant, and composition source of truth.
 - Composition docs in this folder must map to element-spec contracts and not redefine feature behavior.
 - If divergence appears, align design-system docs to the element spec contract.
 

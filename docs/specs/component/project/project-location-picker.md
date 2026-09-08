@@ -17,7 +17,7 @@ Minimal UI on `/projects/:id` to link org `locations` to a project via `project_
 
 ## Component
 
-- `app-project-location-picker` — [`project-location-picker.component.ts`](../../../../apps/web/src/app/features/projects/project-location-picker.component.ts)
+- `app-project-location-picker` — [`project-location-picker.component.ts`](../../../../apps/web/src/app/features/projects/cards/project-location-picker.component.ts)
 
 ## Acceptance criteria
 

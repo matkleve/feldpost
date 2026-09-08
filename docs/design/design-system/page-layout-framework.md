@@ -9,7 +9,7 @@
 
 | Category                 | File/Folder                                                            | Purpose                                                             | Status         | Priority |
 | ------------------------ | ---------------------------------------------------------------------- | ------------------------------------------------------------------- | -------------- | -------- |
-| **Layout Specs**         | `docs/design-system/layout-width-breakpoint-scale.md`                  | Canonical widths, breakpoints, clamp tokens                         | ✅ Reference   | HIGH     |
+| **Layout Specs**         | `docs/design/design-system/layout-width-breakpoint-scale.md`                  | Canonical widths, breakpoints, clamp tokens                         | ✅ Reference   | HIGH     |
 |                          | `docs/design/layout.md`                                                | Layout system overview, primitives, breakpoints                     | ✅ Reference   | HIGH     |
 |                          | `docs/design/constitution.md`                                          | Design non-negotiables (field-first, map-primary)                   | ✅ Reference   | MEDIUM   |
 | **Container Components** | `apps/web/src/app/shared/containers/page-container.component.ts`       | Full-page wrapper (standard padding + flex layout)                  | ✅ Implemented | HIGH     |
@@ -29,7 +29,7 @@
 |                          | `apps/web/src/app/features/media/media-page-header.component.ts`      | Media page header with breadcrumb + count                           | ✅ Implemented | MEDIUM   |
 | **Element Specs**        | `docs/specs/page/projects-page.md`                                    | Spec contract for projects page                                     | ✅ Reference   | HIGH     |
 |                          | `docs/specs/page/media-page.md`                                     | Spec contract for media page                                        | ✅ Reference   | HIGH     |
-| **UI Standards**         | `docs/design-system/`                                                  | Design system folder (structure, components, usage)                 | 🔶 Partial     | MEDIUM   |
+| **UI Standards**         | `docs/design/design-system/`                                                  | Design system folder (structure, components, usage)                 | 🔶 Partial     | MEDIUM   |
 | **Shared Components**    | `apps/web/src/app/shared/ui-primitives/`                               | Button, text, icon components                                       | ✅ Reference   | MEDIUM   |
 |                          | `apps/web/src/app/shared/dropdown-trigger/`                            | Dropdown, segmented, grouping/filter/sort                           | ✅ Reference   | MEDIUM   |
 

@@ -5,7 +5,7 @@
 
 ## Terminology (symbols)
 
-Upload pipeline streams such as **`imageReplaced$`** use **image** in the TypeScript symbol only; payloads refer to **media items**. See [symbol rename backlog](../../../../backlog/media-photo-symbol-rename-roadmap.md).
+Upload pipeline streams such as **`imageReplaced$`** use **image** in the TypeScript symbol only; payloads refer to **media items**. See [symbol rename backlog](../../../backlog/media-photo-symbol-rename-roadmap.md).
 
 ## What It Is
 
@@ -392,7 +392,7 @@ Implementation: `apps/web/src/app/core/media-download/media-preview-target.helpe
 
 Slot size no longer gates icon-only for non-images; only missing preview target gates signing.
 
-v2 rows (`preview_generation_status`): see [media-preview-converter ADR](../../../../architecture/media-preview-converter.md).
+v2 rows (`preview_generation_status`): see [media-preview-converter ADR](../../../architecture/media-preview-converter.md).
 
 File identity: [media-file-identity.md](./media-file-identity.md).
 

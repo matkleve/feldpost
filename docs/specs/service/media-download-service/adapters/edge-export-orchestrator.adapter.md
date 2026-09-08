@@ -1,7 +1,7 @@
 # Media Download Adapter - Edge Export Orchestrator
 
 > Parent spec: [../media-download-service.md](../media-download-service.md)
-> Related specs: [../../workspace/workspace-actions-bar.md](../../workspace/workspace-actions-bar.md), [../../action-context-matrix.md](../../action-context-matrix.md)
+> Related specs: [../../workspace/workspace-actions-bar.md](../../../ui/workspace/workspace-actions-bar.md), [../../action-context-matrix.md](../../../system/action-context-matrix.md)
 
 ## What It Is
 

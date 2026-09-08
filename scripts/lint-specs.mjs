@@ -27,7 +27,7 @@
  */
 
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
-import { join, basename, resolve, relative } from "node:path";
+import { join, basename, dirname, resolve, relative } from "node:path";
 
 // ─── Config ────────────────────────────────────────────────────────────────
 
@@ -136,6 +136,7 @@ function parseSettingsEntries(filePath, parsed, specRootDir) {
       entries.push({
         section: match[1].trim(),
         sourceSpec: relative(specRootDir, filePath).replaceAll("\\", "/"),
+        specPath: filePath,
         what: match[2].trim(),
       });
     }
@@ -155,7 +156,29 @@ function parseSettingsEntries(filePath, parsed, specRootDir) {
   return { entries, diagnostics, hasSettingsSection: true };
 }
 
-function renderSettingsRegistry(entries) {
+/**
+ * Rebase relative links copied out of a spec so they still resolve from
+ * `docs/settings-registry.md`.
+ *
+ * The "What it configures" text is lifted verbatim from a `## Settings` bullet.
+ * A link written relative to `docs/specs/ui/search-bar/` is wrong the moment it
+ * lands two folders up — silently, because nothing followed it. Caught by
+ * `scripts/check-doc-links.mjs`; fixed here rather than in the registry, which
+ * is generated and would lose a manual repair on the next --fix.
+ */
+function rebaseRelativeLinks(text, specPath, registryDir) {
+  return text.replace(/\]\(\s*([^)\s]+?)\s*\)/g, (whole, target) => {
+    if (/^(https?:|mailto:|tel:|data:|#|\/)/.test(target)) return whole;
+
+    const [path, ...fragment] = target.split("#");
+    if (!path) return whole;
+
+    const rebased = relative(registryDir, resolve(dirname(specPath), path)).replaceAll("\\", "/");
+    return `](${rebased}${fragment.length ? `#${fragment.join("#")}` : ""})`;
+  });
+}
+
+function renderSettingsRegistry(entries, registryDir) {
   const sortedEntries = [...entries].sort((a, b) => {
     const sectionCompare = a.section.localeCompare(b.section);
     if (sectionCompare !== 0) {
@@ -181,7 +204,7 @@ function renderSettingsRegistry(entries) {
   } else {
     for (const entry of sortedEntries) {
       lines.push(
-        `| ${escapeTableCell(entry.section)} | ${escapeTableCell(entry.sourceSpec)} | ${escapeTableCell(entry.what)} |`,
+        `| ${escapeTableCell(entry.section)} | ${escapeTableCell(entry.sourceSpec)} | ${escapeTableCell(rebaseRelativeLinks(entry.what, entry.specPath, registryDir))} |`,
       );
     }
   }
@@ -203,7 +226,7 @@ function ruleSettingsRegistrySync(specFiles, config, projectRoot, specRootDir) {
   }
 
   const registryPath = join(projectRoot, "docs", "settings-registry.md");
-  const generatedRegistry = renderSettingsRegistry(entries);
+  const generatedRegistry = renderSettingsRegistry(entries, dirname(registryPath));
 
   if (config.fix) {
     writeFileSync(registryPath, generatedRegistry, "utf-8");

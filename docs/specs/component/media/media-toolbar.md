@@ -53,7 +53,7 @@ The toolbar MAY be omitted when route configuration suppresses operator UI.
 
 ## Shell composition
 
-`MediaToolbar` MUST use the shared **toolbar pane** shell (`app-pane-toolbar`, three slots) for layout geometry—see [pane-toolbar](../../workspace/pane-toolbar.md). Route copy MAY use the logical name **MediaToolbar** while the physical shell stays the shared layout primitive (do not introduce a second three-column toolbar host).
+`MediaToolbar` MUST use the shared **toolbar pane** shell (`app-pane-toolbar`, three slots) for layout geometry—see [pane-toolbar](../workspace/pane-toolbar.md). Route copy MAY use the logical name **MediaToolbar** while the physical shell stays the shared layout primitive (do not introduce a second three-column toolbar host).
 
 ## Component Hierarchy
 

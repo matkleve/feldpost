@@ -12,7 +12,7 @@ Single horizontal bar; optional clusters in left and right (`flex: 1` each), opt
 
 - **Code:** `apps/web/src/app/shared/pane-chrome/toolbar/`
 - **Canonical spec:** this document (`docs/specs/component/workspace/pane-toolbar.md`)
-- **Consumers today:** `/projects` toolbar shell ([projects-toolbar](apps/web/src/app/features/projects/projects-toolbar.component.html)), `/media` toolbar shell ([media.component.html](apps/web/src/app/features/media/media.component.html)), workspace chrome wrapper ([workspace-pane-toolbar](apps/web/src/app/shared/workspace-pane/chrome/workspace-pane-toolbar/workspace-pane-toolbar.component.ts))
+- **Consumers today:** `/projects` toolbar shell ([workspace-projects-toolbar](../../../../apps/web/src/app/shared/workspace-pane/projects-panel/workspace-projects-toolbar.component.html)), `/media` toolbar shell ([media.component.html](../../../../apps/web/src/app/features/media/media.component.html)), workspace chrome wrapper ([workspace-toolbar](../../../../apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component.ts))
 - **Related:** Domain bundles (dropdown triggers, segmented switches, etc.) **compose inside slots**—same pattern can repeat across routes without a separate “filter toolbar” primitive.
 
 ## Actions
@@ -60,7 +60,7 @@ app-pane-toolbar
 When viewport width is insufficient to show primary controls without clipping:
 
 1. **Overflow policy:** Secondary operators collapse behind a single **menu affordance** (e.g. icon button with “more” / hamburger) placed by **parent composition** (typically **right** slot or dedicated left slot—product decision in Figma).
-2. **Menu surface:** Reuse shared overlay/menu primitives ([dropdown-system.md](../../filters/dropdown-system.md) patterns) with focus management and `aria-expanded` on the opener.
+2. **Menu surface:** Reuse shared overlay/menu primitives ([dropdown-system.md](../filters/dropdown-system.md) patterns) with focus management and `aria-expanded` on the opener.
 3. **Pane toolbar component** MAY gain optional inputs later (e.g. breakpoint token, `overflowMode`) **or** overflow MAY remain entirely in the parent—either way, **geometry contract** of three slots remains for wide layouts.
 
 Until implemented, narrow layouts rely on parent/CSS only; this does not block shipping primitives elsewhere.

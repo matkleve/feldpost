@@ -24,5 +24,7 @@
 | [root-docs-open-after-move-2026-04-15.md](root-docs-open-after-move-2026-04-15.md) | Historical | Open items after move (German headings). |
 | [untouched-files-updated-root-and-readme-2026-04-15.md](untouched-files-updated-root-and-readme-2026-04-15.md) | Historical | README touch list. |
 | [ui-containers-audit.md](ui-containers-audit.md) | Reference | Container system research / plan (2026-03-25); verify against current layout specs before execution. |
+| [2026-09-08-grundriss-adoption.md](2026-09-08-grundriss-adoption.md) | Reference | Grundriss ↔ Feldpost process comparison; 31 proposed adoptions with a priority table. Proposals only — nothing here is a contract until it lands in `AGENTS.md`, a gate script, or a spec. |
+| [2026-09-08-design-system-adoption.md](2026-09-08-design-system-adoption.md) | Reference | Grundriss ↔ Feldpost comparison at the design-system level (interaction states, motion, type, contrast); 24 proposals with a priority table. Proposals only. |
 
 When adding a new audit, prefix the filename with an ISO date, add one row here, and include the standard banner at the top of the audit file (see existing files after this README lands).
