@@ -14,8 +14,8 @@
 | Phase | Artifact | Status |
 | --- | --- | --- |
 | 0 — Baseline | `00-baseline.md` | ✅ done |
-| 1 — Static structure map | `01-structure.md` | ⏳ next |
-| 2 — Happy-path trace | `02-happy-path.md` | ☐ |
+| 1 — Static structure map | `01-structure.md` | ✅ done |
+| 2 — Happy-path trace | `02-happy-path.md` | ⏳ next |
 | 3 — Branch matrix | `03-branch-matrix.md` | ☐ |
 | 4 — State machine audit | `04-state-machine.md` | ☐ |
 | 5 — Spec ↔ code drift | `05-spec-drift.md` | ☐ |
@@ -66,6 +66,16 @@ one link line in `docs/audits/README.md`, one bullet in `docs/backlog/README.md`
 
 `/tmp/claude-0/-home-user-feldpost/46618c86-d69f-59dc-a604-dec63a9c282a/scratchpad/` — raw gate logs from Phase 0. All numbers quoted in the deliverables are reproducible from the commands in `00-baseline.md` § 2 on commit `8e4b1e09`.
 
+## Phase 1 headline results (do not re-derive)
+
+- **One 11-file runtime cycle** (value imports only) spanning facade → manager → pipeline → location → tray adapter, hub `core/upload/location/upload-location-resolution.service.ts`; six siblings break DI with lazy `injector.get`. `01-structure.md` § 3.
+- `registerDisambiguationGroup` has **five writer services / eight call sites**. → Phase 4 multi-owner transition, Phase 6 duplication.
+- **5 dead files ≈ 500 LOC**: `pipelines/attach/upload-attach-hash.util.ts`, `support/upload-timeout.util.ts`, `upload.helpers.ts`, `upload-panel/upload-panel-dialog-handlers.service.ts` (316 LOC, writes to DB), `upload-resolver-tray/upload-resolver-tray.mock.ts` (109 LOC). Plus 1 test-only file. `01-structure.md` § 5.
+  - **Note for Phase 7:** the plan assumes `support/upload-timeout.util.ts` implements live timeout handling. It has no importer.
+- **`features/upload/upload-button-zone` does not exist** although `docs/specs/component/upload/upload-button-zone.md` (128 lines) does. → Phase 5 drift row.
+- DB access in **17 files across 7 folders** incl. the UI layer (`upload-panel-job-file-actions.service.ts:269`), against a 2-file `adapters/`. Four `*.types.ts` inside one service module where `AGENTS.md` allows one.
+- Ownership boundary between `manager/`/`pipelines/`/`support/`/`location/` is **nowhere written down** (answer to plan § 3 Q4).
+
 ## Next step
 
-Phase 1 — static structure map: import edge list for the 129 non-test files in scope, layer classification, cycles, test-only orphans, folder-level Mermaid graph → `01-structure.md`.
+Phase 2 — line-level happy-path trace of one JPEG with EXIF GPS from `submit()` to a visible `/media` row → `02-happy-path.md`.
