@@ -2,7 +2,7 @@
 
 > **Element spec:** [specs/page/map-page.md](../specs/page/map-page.md)
 > **Contracts:** [map-page spec](../specs/page/map-page.md), [workspace-pane](../specs/ui/workspace/workspace-pane.md)
-> **Product use cases:** [UC1](README.md#uc1--technician-on-site-view-history), [UC2](README.md#uc2--clerk-preparing-a-quote), [UC3](README.md#uc3--upload-and-correct-a-new-image)
+> **Product use cases** (archived catalogue): [UC1](../archive/2026-04-15-doc-cleanup/archive/use-cases-README.md#uc1--technician-on-site-view-history), [UC2](../archive/2026-04-15-doc-cleanup/archive/use-cases-README.md#uc2--clerk-preparing-a-quote), [UC3](../archive/2026-04-15-doc-cleanup/archive/use-cases-README.md#uc3--upload-and-correct-a-new-image)
 > **Related specs:** [workspace-pane](../specs/ui/workspace/workspace-pane.md), [drag-divider](../specs/component/workspace/drag-divider.md), [search-bar](../specs/ui/search-bar/search-bar.md), [upload-button-zone](../specs/component/upload/upload-button-zone.md), [photo-marker](../specs/ui/media-marker/media-marker.md), [image-detail-view](../specs/ui/media-detail/media-detail-view.md), [map-context-menu](../specs/component/map/map-context-menu.md)
 > **Related use cases:** [map-context-menu](map-context-menu.md)
 

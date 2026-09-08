@@ -1,6 +1,6 @@
 # Active Filter Chips
 
-> **Service contract:** [filter-service](../service/filter/filter-service.md)
+> **Service contract:** [filter-service](../../service/filter/filter-service.md)
 
 ## What It Is
 

@@ -144,7 +144,7 @@ Do **not** use the name `restoreFromQuery`; the input is a full route snapshot.
 { provide: WORKSPACE_PANE_SHELL_HOST, useExisting: AuthenticatedAppLayoutComponent }
 ```
 
-Restore orchestration passes **`this`** as `shellHost`. [`MapShellComponent`](../../../../apps/web/src/app/features/map/map-shell/map-shell.component.ts) injects `WORKSPACE_PANE_SHELL_HOST` for pane mutations; restore does **not** go through map shell.
+Restore orchestration passes **`this`** as `shellHost`. [`MapShellComponent`](../../../../apps/web/src/app/features/map/map-shell/component/map-shell.component.ts) injects `WORKSPACE_PANE_SHELL_HOST` for pane mutations; restore does **not** go through map shell.
 
 ### Orchestration triggers (dual path)
 

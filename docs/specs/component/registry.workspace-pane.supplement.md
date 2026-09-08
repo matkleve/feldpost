@@ -238,7 +238,7 @@
 
 - **File**: `apps/web/src/app/shared/workspace-pane/media-detail/location-picker-row/location-picker-row.component.ts`
 - **Purpose**: Shared two-line format D content (icon + primary + optional secondary) inside location add/search dropdown option buttons.
-- **Spec**: [`docs/specs/ui/media-detail/media-detail-location-section.md`](../../ui/media-detail/media-detail-location-section.md)
+- **Spec**: [`docs/specs/ui/media-detail/media-detail-location-section.md`](../ui/media-detail/media-detail-location-section.md)
 - **Variant axes**: none
 - **Other inputs**: `primary`, `secondary`, `icon` (Material ligature)
 - **Composed of**: standalone
@@ -302,7 +302,7 @@
 
 - **File**: `apps/web/src/app/shared/workspace-pane/media-detail/address-field-combobox/address-field-combobox.component.ts`
 - **Purpose**: Per-field combobox that provides hierarchically-constrained address suggestions (country/city/district/street) when editing individual address rows in the media detail location section. Assistive — free-text always allowed.
-- **Spec**: [`docs/specs/component/address-field-combobox/address-field-combobox.md`](../address-field-combobox/address-field-combobox.md)
+- **Spec**: [`docs/specs/component/address-field-combobox/address-field-combobox.md`](address-field-combobox/address-field-combobox.md)
 - **Variant axes**: `field` (`country` | `city` | `district` | `street`), `verificationState` (`verified` | `unverified` | `unknown`)
 - **Outputs**: `valueChange`, `suggestionSelected`, `resolveRequested`
 - **Composed of**: `app-dropdown-shell`

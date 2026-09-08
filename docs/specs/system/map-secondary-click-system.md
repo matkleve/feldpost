@@ -1,7 +1,7 @@
 # Map Secondary-Click System
 
-> **Use cases:** [use-cases/map-secondary-click-system.md](../use-cases/map-secondary-click-system.md)
-> **Child specs:** [map-context-menu](component/map/map-context-menu.md), [media-marker-context-menu](media-marker/media-marker-context-menu.md), [radius-selection](component/map/radius-selection.md)
+> **Use cases:** [use-cases/map-secondary-click-system.md](../../use-cases/map-secondary-click-system.md)
+> **Child specs:** [map-context-menu](../component/map/map-context-menu.md), [media-marker-context-menu](../ui/media-marker/media-marker-context-menu.md), [radius-selection](../component/map/radius-selection.md)
 > **Action contract:** [action-context-matrix](action-context-matrix.md)
 
 ## What It Is

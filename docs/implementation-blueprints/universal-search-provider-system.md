@@ -1,8 +1,8 @@
 # Universal Search Provider System — Implementation Blueprint
 
-> **Specs**: [element-specs/search-bar.md](../element-specs/search-bar.md) (host surface),
-> [element-specs/filter-toolbar.md](../element-specs/filter-toolbar.md) (chip toolbar),
-> [element-specs/search-bar-query-behavior.md](../element-specs/search-bar-query-behavior.md) (base query rules)
+> **Specs**: [search-bar.md](../specs/ui/search-bar/search-bar.md) (host surface),
+> [map-filter-toolbar.md](../specs/component/map/map-filter-toolbar.md) (chip toolbar),
+> [search-bar-query-behavior.md](../specs/ui/search-bar/search-bar-query-behavior.md) (base query rules)
 > **Status**: Planned. Extends the implemented search stack (orchestrator + 3 resolvers + `/` command mode) with a formal provider interface, `#`/`+`/`-` keyword operators, and a reusable filter toolbar.
 
 ## Goals
@@ -133,7 +133,7 @@ German reference copy: "Projekt" / "Suche nach einem konkreten Projekt".
 
 ## 3. Filter Toolbar Sync Contract
 
-Full UI contract in [element-specs/filter-toolbar.md](../element-specs/filter-toolbar.md).
+Full UI contract in [map-filter-toolbar.md](../specs/component/map/map-filter-toolbar.md).
 Architecture decision (resolves the "map-only vs reusable" question): **reusable
 component, single source of truth in `FilterService`**, map ships first.
 

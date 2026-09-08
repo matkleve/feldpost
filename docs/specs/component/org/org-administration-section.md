@@ -1,6 +1,6 @@
 # Org Administration Section
 
-> **Audit & plan:** [org-administration-audit.md](../org-administration-audit.md) — read it first for the DB/RLS gaps each sub-section depends on.
+> **Audit & plan:** [org-administration-audit.md](../../../org-administration-audit.md) — read it first for the DB/RLS gaps each sub-section depends on.
 
 ## What It Is
 

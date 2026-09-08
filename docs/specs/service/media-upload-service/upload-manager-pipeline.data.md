@@ -3,7 +3,7 @@
 > Parent pipeline spec: [upload-manager-pipeline.md](./upload-manager-pipeline.md)
 > Contains the full **Data** section (document preview, location algorithm, field matrices, issue contracts, status labels).
 
-**Upload events:** Tables may reference **`imageReplaced$`** / **`ImageReplacedEvent`** — symbols use **image**; domain meaning is **media item** replacement. See [symbol rename backlog](../../../../backlog/media-photo-symbol-rename-roadmap.md).
+**Upload events:** Tables may reference **`imageReplaced$`** / **`ImageReplacedEvent`** — symbols use **image**; domain meaning is **media item** replacement. See [symbol rename backlog](../../../backlog/media-photo-symbol-rename-roadmap.md).
 
 ## Data
 

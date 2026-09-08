@@ -1,10 +1,10 @@
 # Project Details View
 
-> **Use cases:** [use-cases/projects-page-workspace.md](../use-cases/projects-page-workspace.md)
+> **Use cases:** [use-cases/projects-page-workspace.md](../../../use-cases/projects-page-workspace.md)
 
 ## Terminology (layout vs projects page)
 
-**Workspace Pane** (product) reuses **`WorkspacePaneComponent`**. **Canonical:** pane mounts under **authenticated app layout** with a global split — [workspace-pane § Layout host](../ui/workspace/workspace-pane.md#layout-host-canonical). **Interim:** pane may mount only under map routes; `/projects` may use **page-local visibility** (e.g. `workspacePaneOpen` on `ProjectsPageComponent`) until the layout hoist. See [workspace-pane § Interim implementation](../ui/workspace/workspace-pane.md#interim-implementation-until-layout-hoist).
+**Workspace Pane** (product) reuses **`WorkspacePaneComponent`**. **Canonical:** pane mounts under **authenticated app layout** with a global split — [workspace-pane § Layout host](../../ui/workspace/workspace-pane.md#layout-host-canonical). **Interim:** pane may mount only under map routes; `/projects` may use **page-local visibility** (e.g. `workspacePaneOpen` on `ProjectsPageComponent`) until the layout hoist. See [workspace-pane § Interim implementation](../../ui/workspace/workspace-pane.md#interim-implementation-until-layout-hoist).
 
 ## What It Is
 
@@ -128,7 +128,7 @@ sequenceDiagram
 | Name                | Type                                                    | Default | Controls                                 |
 | ------------------- | ------------------------------------------------------- | ------- | ---------------------------------------- |
 | `selectedProjectId` | `string \| null`                                        | `null`  | Active project scope                     |
-| `workspacePaneOpen` | `boolean`                                               | `false` | **Projects page:** scoped workspace surface visible (not necessarily identical to map-route `photoPanelOpen`; see [workspace-pane § Terminology](../ui/workspace/workspace-pane.md#terminology-symbols-and-product-language)) |
+| `workspacePaneOpen` | `boolean`                                               | `false` | **Projects page:** scoped workspace surface visible (not necessarily identical to map-route `photoPanelOpen`; see [workspace-pane § Terminology](../../ui/workspace/workspace-pane.md#terminology-symbols-and-product-language)) |
 | `selectedMediaId`   | `string \| null`                                        | `null`  | Active media details                     |
 | `mapFocusPayload`   | `{ mediaId: string; lat: number; lng: number } \| null` | `null`  | Navigation payload for `/map` focus      |
 | `isProjectFullView` | `boolean`                                               | `false` | Right→left full-width workspace mode     |
@@ -183,6 +183,6 @@ sequenceDiagram
 
 ## Use Cases
 
-> **Full use cases:** [use-cases/projects-page-workspace.md](../use-cases/projects-page-workspace.md)
+> **Full use cases:** [use-cases/projects-page-workspace.md](../../../use-cases/projects-page-workspace.md)
 
 This element must satisfy the project-scoped workspace scenarios in that document, including opening from a project row, browsing thumbnails, map handoff, and pane-close state preservation.

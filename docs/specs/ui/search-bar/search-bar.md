@@ -21,7 +21,7 @@ Floating search surface pinned top-center over the map. Frosted chrome (`frosted
 
 ## Interaction emphasis
 
-- Canonical: [`docs/design/state-visuals.md`](../../design/state-visuals.md) § Interaction emphasis; ink inheritance: [`interaction-emphasis-ink-contract.md`](../system/interaction-emphasis-ink-contract.md)
+- Canonical: [`docs/design/state-visuals.md`](../../../design/state-visuals.md) § Interaction emphasis; ink inheritance: [`interaction-emphasis-ink-contract.md`](../../system/interaction-emphasis-ink-contract.md)
 - [x] This component implements the contract (or documented exception below)
 
 | Control | Variant / host | Idle ink | Pointer / chrome hover | Implementation |

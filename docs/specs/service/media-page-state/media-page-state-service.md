@@ -6,7 +6,7 @@
 
 ## What It Is
 
-Root-scoped **facade** for the `/media` gallery: one `WorkspaceMedia[]` snapshot per `querySignature` (user, project filter, sorts, groupings, filter rules). Storage and cross-shell event dispatch are delegated to [`RouteSessionCacheService`](route-session-cache-service.md) (`shellKey: 'media'`).
+Root-scoped **facade** for the `/media` gallery: one `WorkspaceMedia[]` snapshot per `querySignature` (user, project filter, sorts, groupings, filter rules). Storage and cross-shell event dispatch are delegated to [`RouteSessionCacheService`](../route-session-cache/route-session-cache-service.md) (`shellKey: 'media'`).
 
 ## Upload invalidation (cross-shell)
 

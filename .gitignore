@@ -1,2 +1,8 @@
 .env.local
 .claude/worktrees/
+
+# Tool output belongs in a terminal, not in the tree. Both of these were
+# committed once and then read as if they were current — see
+# docs/audits/2026-09-08-grundriss-adoption.md § F4.
+/lint-specs-full.txt
+build_output.log

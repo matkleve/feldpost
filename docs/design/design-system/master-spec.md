@@ -9,7 +9,7 @@ Define one enforceable source for component standardization, variant/state contr
 Contract hierarchy:
 
 - `docs/specs/` defines feature-level behavior and wiring contracts (implementation source of truth).
-- `docs/design-system/` defines reusable primitives, variants, and composition/layout standards used to implement those features consistently.
+- `docs/design/design-system/` defines reusable primitives, variants, and composition/layout standards used to implement those features consistently.
 - When a design-system page conflicts with an element spec, the design-system documentation must be updated to match the element spec.
 
 Primary outcome: remove geometry drift (pane widths, min-width scatter, breakpoint drift) across map shell, overlays, and future surfaces.
@@ -131,7 +131,7 @@ Use external systems as input constraints, never as direct copy templates.
 ## Design System Decision Log
 
 - Standard path confirmed: reuse existing Feldpost design docs as primary source, no parallel rule island.
-- Storage location fixed: `docs/design-system/`.
+- Storage location fixed: `docs/design/design-system/`.
 - Scope fixed: include future components/variants, not only current runtime state.
 - Impact labels fixed: `Critical`, `High`, `Medium`, `Low` mandatory for migration planning.
 - Registry decision required: CSV or JSON format must be approved before rollout waves.

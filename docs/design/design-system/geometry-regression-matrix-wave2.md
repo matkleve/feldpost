@@ -50,11 +50,11 @@ Provide repeatable geometry checks for core responsive surfaces so width and bre
 
 CI workflow:
 
-- [../../.github/workflows/design-system-check.yml](../../.github/workflows/design-system-check.yml)
+- [../../.github/workflows/design-system-check.yml](../../../.github/workflows/design-system-check.yml)
 
 PR checklist:
 
-- [../../.github/pull_request_template.md](../../.github/pull_request_template.md)
+- [../../.github/pull_request_template.md](../../../.github/pull_request_template.md)
 
 1. Registry contract:
 

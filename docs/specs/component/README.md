@@ -8,8 +8,8 @@ Check before adding net-new shared UI: **[registry.md](registry.md)** (parent in
 
 ## Design tokens & floating menus
 
-- **Naming / tweakcn checklist:** [../design/tokens.md](../design/tokens.md)
-- **Which bucket owns which CSS concern:** [../design/token-layers.md](../design/token-layers.md)
+- **Naming / tweakcn checklist:** [../design/tokens.md](../../design/tokens.md)
+- **Which bucket owns which CSS concern:** [../design/token-layers.md](../../design/token-layers.md)
 - **`dd-*` / toolbar anchored shell:** [filters/dropdown-system.md](filters/dropdown-system.md)
 - **Runtime emission:** semantic custom properties are defined in **`apps/web/src/styles.scss`**. The legacy bridge file **`apps/web/src/styles/_legacy-design-tokens.scss`** is **absent** from **`apps/web`** (Phase 7 Batch 50); sole late global partial is **`@include meta.load-css('styles/typography-baseline')`** — [phase-7-token-migration.md](../../migration/phase-7-token-migration.md).
 

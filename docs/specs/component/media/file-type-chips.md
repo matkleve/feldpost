@@ -1,6 +1,6 @@
 # File-Type Chips (Upload Area Feature)
 
-> **Architecture parent:** [media-download-service](../service/media-download-service/media-download-service.md)
+> **Architecture parent:** [media-download-service](../../service/media-download-service/media-download-service.md)
 
 ## Agent entry points (read first)
 

@@ -7,8 +7,8 @@
 
 **Verwandte Artefakte:**
 
-- Spec: [`docs/specs/component/media/media-display.md`](../specs/component/media/media-display.md) § Intrinsic grid warm revisit  
-- Opacity-Matrix: [`docs/specs/component/media/media-display.rendering-matrix.supplement.md`](../specs/component/media/media-display.rendering-matrix.supplement.md)  
+- Spec: [`docs/specs/component/media/media-display.md`](../../specs/component/media/media-display.md) § Intrinsic grid warm revisit  
+- Opacity-Matrix: [`docs/specs/component/media/media-display.rendering-matrix.supplement.md`](../../specs/component/media/media-display.rendering-matrix.supplement.md)  
 - Session-Notizen: [`docs/ai-diary/2026-05-25.md`](../../ai-diary/2026-05-25.md)  
 - Live-Check-Pflicht: [`docs/agent-workflows/agent-communication.md`](../../agent-workflows/agent-communication.md) (LIVE VERIFICATION, zweiter `/media`-Besuch)
 
@@ -46,7 +46,7 @@ Warm-Revisit verkürzt bewusst den FSM-Pfad (`media-ready` → `content-visible`
 ### 2.2 Warm-Revisit im Display
 
 - **Helper:** `canWarmSkipGridLoadingSurface()` — Grid + intrinsic + Session-Ratio + gecachte Preview-URL ([`media-display-warm-revisit.helpers.ts`](../../../apps/web/src/app/shared/media-display/media-display-warm-revisit.helpers.ts)).  
-- **Ablauf (Spec):** Handoff → `registerPreviewPaths` → optional URL aus Cache seeden → legaler FSM-Pfad, **kein** Shortcut `loading-surface-visible` → `content-visible` ([`media-display.md`](../specs/component/media/media-display.md) § Intrinsic grid warm revisit).  
+- **Ablauf (Spec):** Handoff → `registerPreviewPaths` → optional URL aus Cache seeden → legaler FSM-Pfad, **kein** Shortcut `loading-surface-visible` → `content-visible` ([`media-display.md`](../../specs/component/media/media-display.md) § Intrinsic grid warm revisit).  
 - **Skip-Fade:** Transition-Map erlaubt `media-ready` → `content-visible` ([`media-display-state.ts`](../../../apps/web/src/app/shared/media-display/media-display-state.ts)); Fix für früheren No-Op-Bug dokumentiert in [`2026-05-25.md`](../../ai-diary/2026-05-25.md) (#1).
 
 ### 2.3 DOM-Gate für scharfes Bild (Grid)

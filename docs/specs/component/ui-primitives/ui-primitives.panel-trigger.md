@@ -1,6 +1,6 @@
 # UI Primitives — Panel Trigger (`app-panel-trigger`)
 
-> **Normative source:** [`specs/panel-trigger.spec.md`](/specs/panel-trigger.spec.md) at repository root.  
+> **Normative source:** [`panel-trigger.md`](panel-trigger.md).  
 > This file is the **`docs/specs/component/`** mirror required for `lint-specs` and the component index. All normative contract text lives in the source file above; sections below are stubs that satisfy the linter and link back.
 
 ## What It Is
@@ -48,7 +48,7 @@ Compact horizontal pill: 16px height, 4px radius, warm neutral fill at rest, war
 | 3 | `panelState` becomes `open` | Chevron rotates 180deg |
 | 4 | `disabled` | No toggle; opacity 0.66; no hover fill |
 
-See [`specs/panel-trigger.spec.md §Actions`](/specs/panel-trigger.spec.md#actions) for normative detail.
+See [`panel-trigger.md § Actions`](panel-trigger.md#actions) for normative detail.
 
 ## Component Hierarchy
 

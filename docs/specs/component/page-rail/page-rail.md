@@ -2,7 +2,7 @@
 
 Composable left-rail building blocks for `app-page-grid` gutter column 1.
 
-**Related:** [page-rail-grid.md](../../design/page-rail-grid.md), [rail-select-list.md](rail-select-list.md), `app-page-rail-title`, `app-rail-search-field`.
+**Related:** [page-rail-grid.md](../../../design/page-rail-grid.md), [rail-select-list.md](rail-select-list.md), `app-page-rail-title`, `app-rail-search-field`.
 
 ## Components
 

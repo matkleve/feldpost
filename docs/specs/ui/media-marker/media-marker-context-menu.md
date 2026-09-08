@@ -1,7 +1,7 @@
 # Media Marker Context Menu
 
 > **Use cases:** [use-cases/media-marker-context-menu.md](../../../use-cases/media-marker-context-menu.md)
-> **System spec:** [map-secondary-click-system](map-secondary-click-system.md)
+> **System spec:** [map-secondary-click-system](../../system/map-secondary-click-system.md)
 
 ## What It Is
 

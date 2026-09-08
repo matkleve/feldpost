@@ -1,0 +1,42 @@
+name: verify
+
+# The gate. No path filter on purpose: CI runs exactly what `npm run verify`
+# runs locally, for every change. The moment those two lists drift, CI stops
+# being trusted — and a check nobody trusts is a check nobody fixes.
+#
+# The older path-filtered workflows stay for the heavy/slow jobs (Supabase
+# contract checks, Deno edge tests). This one is the floor everything passes.
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  verify:
+    name: npm run verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # Two lockfiles: the repo-root scripts and the Angular app.
+      - name: Install repo-root dependencies
+        run: npm ci
+
+      - name: Install app dependencies
+        working-directory: apps/web
+        run: npm ci
+
+      - name: Verify
+        run: npm run verify

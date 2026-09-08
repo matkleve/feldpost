@@ -149,7 +149,7 @@ Create visual documentation (optional):
 These container components should become **permanent fixtures** in `apps/web/src/app/shared/containers/`:
 
 - Part of design token system
-- Documented in `docs/design-system/`
+- Documented in `docs/design/design-system/`
 - Versioned with Angular major version bumps
 - Exported from shared index for easy discovery
 

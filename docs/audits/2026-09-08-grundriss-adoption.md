@@ -6,6 +6,8 @@
 **Compared:** `matkleve/feldpost` @ `4133082` ↔ `matkleve/grundriss` @ `db2242e`
 **Question:** which conventions that Grundriss distilled from other projects are worth importing into Feldpost, and in what order?
 
+**Status:** **Wave 1 landed** on 2026-09-08 (A1, A2, A3, A5-partial, B4, E1, F4 — marked ✅ in § 6). Everything else is still a proposal. Nothing in this file is normative; the parts that landed are normative where they now live — `AGENTS.md`, `CONTRIBUTING.md`, `scripts/verify.mjs`.
+
 ---
 
 ## 1. TL;DR
@@ -17,9 +19,9 @@ The gap is not knowledge. Feldpost *has* most of the rules. The gap is **enforce
 | | Feldpost | Grundriss |
 | --- | --- | --- |
 | Rules written down | 1,126 lines across 19 instruction files | 147 lines + linked docs |
-| One command that runs every gate | ✗ (5 npm scripts + `ng build`, chosen by hand) | ✓ `npm run verify` |
-| CI runs what you run locally | ✗ (5 path-filtered workflows) | ✓ one workflow, `npm run verify` |
-| Broken relative links in `docs/` | **95 of 1,876** | 0 (gated) |
+| One command that runs every gate | ✅ `npm run verify` (was: 5 npm scripts + `ng build`, chosen by hand) | ✓ `npm run verify` |
+| CI runs what you run locally | ✅ `verify.yml`, no path filter (was: 5 path-filtered workflows) | ✓ one workflow, `npm run verify` |
+| Broken relative links in `docs/` | ✅ 0, gated (was: **109**) | 0 (gated) |
 | Specs naming a runnable check | **0 of 307** | required, gated |
 | Specs linked to a use case, both ways | **18 of 307**, one-way | required, gated |
 | Use cases with a stable ID | **0 of 21** | `UC-NNN`, gated |
@@ -27,7 +29,7 @@ The gap is not knowledge. Feldpost *has* most of the rules. The gap is **enforce
 | Raw `z-index:` / `ms` / `cubic-bezier()` in SCSS | 77 / 165 / 11 | gated to 0 |
 | Component registry | 1,370 lines of hand-written prose, no drift gate | `registry.json` + generator + scan gate |
 | Skills | 11 skills × **2 copies** (`.github/`, `.cursor/`), 2 already drifted | one source |
-| `.claude/` harness | one hook with an **invalid schema** (does nothing) | settings + SessionStart hook + subagent |
+| `.claude/` harness | ✅ working `PreToolUse` hook + permissions (was: an inert hook) | settings + SessionStart hook + subagent |
 | "How the code misleads" doc (TRAPS) | ✗ (lessons scattered in 11 diary files) | ✓ |
 | ADRs | ✗ (decisions in 3 unrelated files) | ✓ `docs/adr/` |
 
@@ -43,7 +45,7 @@ Not the framework — Feldpost is Angular and stays Angular. These five ideas ar
 
 1. **One gate, one answer.** `npm run verify` runs typecheck → lint → specs → study → registry → tokens → contrast → test → build, *continues after a failure*, and prints one summary. Six separate npm scripts is how a check gets skipped: not laziness, but because nobody can hold the list. CI runs the identical command, so the two can never drift.
 
-2. **A rule that isn't executable is a suggestion.** Grundriss converts prose into scripts wherever it can: "specs describe token names, not hex" is a script; "every spec names a check" is a script; "every doc link resolves" is a script. Feldpost writes the same rules — and 95 broken links and 0/307 named checks show what unenforced prose is worth.
+2. **A rule that isn't executable is a suggestion.** Grundriss converts prose into scripts wherever it can: "specs describe token names, not hex" is a script; "every spec names a check" is a script; "every doc link resolves" is a script. Feldpost writes the same rules — and 109 broken links and 0/307 named checks showed what unenforced prose is worth.
 
 3. **One owner per rule.** `CLAUDE.md` in Grundriss is five lines that point at `AGENTS.md`, recorded as ADR-0003. Feldpost maintains parallel rule sets for Copilot, Cursor and Claude, plus two full copies of its skills — and the copies *have already drifted* (`.cursor/skills/component-structure` gained an FSM section `.github/skills/` never got).
 
@@ -91,6 +93,8 @@ Each: **what**, **why here** (with Feldpost evidence), **how**. Priority and eff
 
 **A5 — Get `lint:specs` back to green before folding it into the gate. It is red on `main` today.**
 *Why:* `node scripts/lint-specs.mjs` currently exits **1** with **201 errors and 32 warnings across 183 specs** — mostly `spec-max-lines` and missing required sections. The `spec-lint` workflow runs `npm run lint:specs` with no `continue-on-error`, so it is failing on `main`, but its path filter means most PRs never trigger it. Two secondary symptoms confirm how long this has been true: `docs/specs/SPEC-SIZE-BACKLOG.md` still states *"`npm run lint:specs` is **green** (0 errors, 0 warnings)"*, and the committed `lint-specs-full.txt` is a dump of an older run (89 specs, 18 errors) that no longer matches anything. **A check people learn to ignore has stopped being a check** — and folding a red gate into A1 would poison the new one on day one.
+*Landed:* wired into `verify` as a **soft** check (reports, does not fail), and the false "green (0 errors, 0 warnings)" line in `docs/specs/SPEC-SIZE-BACKLOG.md` replaced with the real numbers and a no-new-debt rule. *Still open:* working the 201 errors off and promoting the check to hard.
+
 *How:* decide per rule, not per file. Either (a) fix the class — most errors are size caps with a documented split remedy — or (b) move the genuinely-exempt paths into `shouldIncludeSpecFile()` where the existing exclusions already live, with the reason in the commit. Then correct the false "green" line in `SPEC-SIZE-BACKLOG.md` and delete `lint-specs-full.txt` (F4). Only then add `lint:specs` to `verify`. Until it is green, wire it into `verify` as a **warning** step so the new gate starts trustworthy.
 
 ### B · Gates that catch what prose cannot
@@ -108,7 +112,7 @@ Each: **what**, **why here** (with Feldpost evidence), **how**. Priority and eff
 *How:* add it to `design-system:check` (and thus to `verify`). Adopt Grundriss's structure: an explicit `PAIRS` list `[foreground, background, minRatio, what it is used for]`, evaluated in **both** themes, and — the part that matters — **fail when a token has no pair**, so a new token is untested loudly rather than silently.
 
 **B4 — A docs link checker. 95 links are already broken.**
-*Why:* measured: **95 broken relative `.md` links out of 1,876**, excluding `docs/archive/`. Two of them are load-bearing: `CONTRIBUTING.md` points every contributor at `docs/design-system/master-spec.md` — that folder does not exist (it is `docs/design/design-system/`) — and `docs/audits/README.md` states that "the removed `docs/implementation-blueprints/` folder is not coming back" while `docs/implementation-blueprints/universal-search-provider-system.md` sits in the tree. *A doc that points at a file someone renamed is worse than no doc, because people trust it.*
+*Why:* measured: **109 broken relative links across 509 scanned documents**, excluding `docs/archive/`. And the gate only sees markdown *links* — a path written as a code span is invisible to it, which is how `CONTRIBUTING.md` sent every contributor to `docs/design-system/…` (the folder is `docs/design/design-system/`) in five consecutive lines, and how `docs/audits/README.md` came to state that "the removed `docs/implementation-blueprints/` folder is not coming back" while `docs/implementation-blueprints/universal-search-provider-system.md` sits in the tree. *A doc that points at a file someone renamed is worse than no doc, because people trust it.*
 *How:* extend `lint-specs.mjs` (it already resolves child-spec links) to walk all of `docs/` + root markdown, resolve every relative link, and report file:line. Run once, fix the 95, then it stays at 0. This is the highest evidence-to-effort ratio in the list.
 
 **B5 — Two-way traceability: spec ↔ use case.**
@@ -215,7 +219,7 @@ Four waves. Each is independently shippable and leaves the repo better than it f
 
 | Wave | Contents | Rationale |
 | --- | --- | --- |
-| **1 — Make the gate real** (1–2 days) | A3, A5, A1, A2, B4, E1, F4 | Nothing else is trustworthy until one command runs everything and CI runs the same command. B4 is here because it is one script and 95 real defects; A5 because a gate that starts red is a gate nobody will trust. |
+| **1 — Make the gate real** ✅ *landed 2026-09-08* | A3, A5 (soft), A1, A2, B4, E1, F4 | Nothing else is trustworthy until one command runs everything and CI runs the same command. B4 is here because it is one script and 95 real defects; A5 because a gate that starts red is a gate nobody will trust. |
 | **2 — Close the silent-failure gaps** (2–3 days) | B1, B2, B3, C2, E2, E3, E4, F1, F2, F3 | The gates that catch what prose cannot, plus the harness fixes. All are small and independent. |
 | **3 — Repair the knowledge system** (3–5 days) | D1, D2, D3, D6, D7, C3, B7, A4 | Documents and consolidation. Nothing here blocks feature work. |
 | **4 — Structural, staged** (ongoing) | C1, B5, B6, D4, D5 | The three that need a migration strategy. Enforce on new/edited artifacts first; backfill per area when that area is touched. Never big-bang. |
@@ -228,13 +232,13 @@ Four waves. Each is independently shippable and leaves the repo better than it f
 
 | # | Change | Prio | Effort | Impact | Risk | Evidence in Feldpost today |
 | --- | --- | :---: | :---: | :---: | :---: | --- |
-| **A1** | `npm run verify` — one gate | **P0** | S | High | Low | 5 scripts + `ng build`, chosen by hand per change class |
-| **A2** | One unconditional CI workflow running it | **P0** | S | High | Low | filters miss what the scripts check: template edits skip the template guard |
-| **A3** | Root `typecheck`/`lint`/`test`/`build` scripts | **P0** | S | High | Low | root `package.json` has none of the four |
-| **A5** | Get `lint:specs` green before it joins the gate | **P0** | M | High | Low | exits 1 today: **201 errors / 32 warnings**; a doc still calls it "green" |
-| **B4** | Docs link checker | **P0** | S | High | Low | **95 broken links / 1,876**; `CONTRIBUTING.md` points at a folder that doesn't exist |
+| ✅ **A1** | `npm run verify` — one gate | **P0** | S | High | Low | 5 scripts + `ng build`, chosen by hand per change class |
+| ✅ **A2** | One unconditional CI workflow running it | **P0** | S | High | Low | filters miss what the scripts check: template edits skip the template guard |
+| ✅ **A3** | Root `typecheck`/`lint`/`test`/`build` scripts | **P0** | S | High | Low | root `package.json` has none of the four |
+| 🟡 **A5** | Get `lint:specs` green before it joins the gate | **P0** | M | High | Low | wired in soft + status line corrected; the **201 errors / 32 warnings** still have to be worked off |
+| ✅ **B4** | Docs link checker | **P0** | S | High | Low | **95 broken links / 1,876**; `CONTRIBUTING.md` points at a folder that doesn't exist |
 | **B2** | `var(--x)` resolution check | **P0** | S | High | Low | contract says "no invented variable names"; nothing checks |
-| **E1** | Fix `.claude/settings.json` (invalid hook) + permissions | **P0** | S | Med | Low | the ESLint "write protection" is silently inactive |
+| ✅ **E1** | Fix `.claude/settings.json` (invalid hook) + permissions | **P0** | S | Med | Low | the ESLint "write protection" is silently inactive |
 | **E3** | One skills source; delete the duplicate tree | **P0** | M | High | Med | 11 skills × 2 copies, **2 already drifted** |
 | **D1** | `docs/TRAPS.md` | **P0** | M | High | Low | 5 recurring traps live only in dated diary entries |
 | **F2** | Two-attempt rule + revert-before-retry | **P0** | S | High | Low | `2026-07-01`: bug caused by a stale patch from an earlier attempt |
@@ -256,7 +260,7 @@ Four waves. Each is independently shippable and leaves the repo better than it f
 | **D5** | `UC-NNN` IDs + use-case index | **P2** | M | Med | Med | 21 slug-named files, 3 linking a deleted archive |
 | **E5** | `CLAUDE.md` pointer + ADR | **P2** | S | Low | Low | no `CLAUDE.md`; convention undocumented |
 | **F3** | Sibling-repository rule in the pitfalls | **P2** | S | Med | Low | this audit is the instance |
-| **F4** | Delete committed build artifacts | **P2** | S | Low | Low | `lint-specs-full.txt`, `apps/web/build_output.log` |
+| ✅ **F4** | Delete committed build artifacts | **P2** | S | Low | Low | `lint-specs-full.txt`, `apps/web/build_output.log` |
 | **C1** | Registry as JSON + generator + scan gate | **P3** | L | High | Med | 1,370 prose lines, 75 entries, no drift gate, 82 shared components |
 | **D4** | Studies + evidence grades `[A]`–`[D]` | **P3** | L | Med | Low | ~32 reasoning docs with no confidence or status axis |
 
@@ -282,7 +286,7 @@ grep -h '^### `' docs/specs/component/registry.*.supplement.md | wc -l   # 75
 find apps/web/src/app/shared -name '*.component.ts' | wc -l             # 82
 ```
 
-Broken links (95 of 1,876, `docs/archive/` excluded) were counted with a short Python walk that resolves every relative `.md` link against the filesystem — the same logic B4 proposes to make permanent.
+Broken links (109 across 509 scanned documents, `docs/archive/` excluded) are now counted by `scripts/check-doc-links.mjs`, which is the gate B4 proposed; the count is 0 after the repair pass in the same commit.
 
 ---
 
