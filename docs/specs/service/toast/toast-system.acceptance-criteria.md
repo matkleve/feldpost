@@ -51,7 +51,7 @@ Child of [`toast-system.md`](toast-system.md).
 ## Styling
 
 - [ ] `z-index: 400` on container — above dropdowns (300), below modals (500)
-- [ ] Severity styling from `hlmToast` / `toastVariants` — no bespoke left-border strip in feature SCSS
+- [ ] Severity styling comes from the semantic tokens on `.toast-indicator` via the host class (`:host(.success|.error|.warning|.info)`) — no bespoke left-border strip in feature SCSS
 - [ ] Works in light and dark themes via tweakcn semantic token ladder
 - [ ] **Optional / not shipped:** error toasts forcing `duration: 0` on narrow viewports — add only with spec + product sign-off
 

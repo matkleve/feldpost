@@ -10,7 +10,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
  * @see docs/MIGRATION_PLAN.md
  */
 export const selectVariants = cva(
-  'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none cursor-pointer',
+  'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none cursor-pointer',
   {
     variants: {
       size: {
@@ -19,7 +19,7 @@ export const selectVariants = cva(
         lg: 'h-12 px-4 text-base',
       },
       error: {
-        true: 'border-destructive focus:ring-destructive',
+        true: 'border-destructive focus-visible:ring-destructive',
         false: '',
       },
     },
