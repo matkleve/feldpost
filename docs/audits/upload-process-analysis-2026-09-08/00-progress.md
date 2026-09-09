@@ -5,7 +5,7 @@
 **Branch:** `claude/upload-process-analysis-0mnzwr` (branched from `origin/main` @ `8e4b1e09`)
 **Started:** 2026-09-08
 
-> Read this file plus the artifacts already produced. A resuming agent must not re-run Phases 0–4.
+> Read this file plus the artifacts already produced. A resuming agent must not re-run Phases 0–5.
 
 ---
 
@@ -18,8 +18,8 @@
 | 2 — Happy-path trace | `02-happy-path.md` | ✅ done |
 | 3 — Branch matrix | `03-branch-matrix.md` | ✅ done |
 | 4 — State machine audit | `04-state-machine.md` | ✅ done |
-| 5 — Spec ↔ code drift | `05-spec-drift.md` | ⏳ next |
-| 6 — Duplication / dead code / ownership | `06-health.md` | ☐ |
+| 5 — Spec ↔ code drift | `05-spec-drift.md` | ✅ done |
+| 6 — Duplication / dead code / ownership | `06-health.md` | ⏳ next |
 | 7 — Failure modes | `07-failure-modes.md` | ☐ |
 | 8 — Data & security | `08-data-security.md` | ☐ |
 | 9 — Test & spec-quality coverage | `09-coverage.md` | ☐ |
@@ -50,15 +50,15 @@ one link line in `docs/audits/README.md`, one bullet in `docs/backlog/README.md`
 
 | # | Lead | Status |
 | --- | --- | --- |
-| 1 | Stale File Map paths in `upload-manager-pipeline.md` | open → Phase 5 |
-| 2 | `upload-manager-playbook.md` predates the reorg | open → Phase 5 |
+| 1 | Stale File Map paths in `upload-manager-pipeline.md` | **confirmed and far larger** — 60 broken paths across 9 files; 17/17 File Map rows in that spec are broken |
+| 2 | `upload-manager-playbook.md` predates the reorg | **confirmed** — 11 broken/imaginary paths, "18+ phases" (real: 20), "~600 lines" (real: 19,049), and its central advice contradicts a Hard Blocker. Recommendation: archive |
 | 3 | Two coexisting location paths (Search Object vs legacy) | open → Phase 3/6 |
 | 4 | Two `@deprecated Removed` markers — removal complete? | open → Phase 6 |
 | 5 | 20 phases vs 5 proposed — real reachable count | **resolved** in Phase 4 § 2 — **all 20 reachable, none dead**; a collapse is a behaviour change, not a cleanup |
 | 6 | `UPLOAD_DEV_FLAGS.useTrayOrchestrator` implies a second tray path | **refuted** in Phase 3 § 8 — `USE_TRAY_ORCHESTRATOR` is a hard `const true`; 13 tray guards are dead |
 | 7 | Mojibake sweep | **confirmed**, scope pending → Phase 6.5 |
-| 8 | `media-upload-service/adapters/` empty | **refuted** in Phase 0 |
-| 9 | Spec size gate on `upload-manager-pipeline.md` | **confirmed with corrected numbers** (284 vs 180) |
+| 8 | `media-upload-service/adapters/` empty | **refuted** (Phase 0) but the mirror is **inverted** (Phase 5 § 4.5): 3 shipped adapters with no spec, 1 spec with no code |
+| 9 | Spec size gate on `upload-manager-pipeline.md` | **confirmed, corrected** — 284 vs 180, but the **largest offender is `upload-panel.md` at 310**, not the pipeline spec |
 
 ---
 
@@ -125,6 +125,17 @@ Structural: **six files write phases** on one happy path; `missing_data` has two
 - Two undocumented FSMs found: `UploadGroupResolutionStatus` (7 members, 17+ writers, no spec) and the tray orchestrator's bundle status.
 - Three overlapping "branch" unions for one concept; `UploadTrayStep` declared twice identically.
 
+## Phase 5 headline results (do not re-derive — full tables in `05-spec-drift.md`)
+
+- **60 broken code paths across 9 files**, verified with `existsSync`. `upload-manager-pipeline.md` § File Map: **17 of 17 rows broken**. `upload-manager.md` § File Map: 13 of 15. `upload-panel.feedback-triage.md`: 13 broken paths in 13 lines.
+- **C1 (blocker)** `upload-manager.md:277` ticks `- [x] Orphaned storage files are cleaned up when DB insert fails`. Phase 2 F1 proves the opposite. **Falsely ticked AC on a data-loss criterion.**
+- **C2 (high)** `upload-manager.md:280` ticks the `beforeunload` warning; the handler is empty.
+- **C3 (high)** `upload-manager.md:264` forbids auto-skip; `dedup.md` § Behavior matrix mandates it for same-user and ticks it. **Two normative specs contradict each other**; the code follows `dedup.md`.
+- **C4** `upload-manager.md:139` types `issueKind` with 4 members (code: 8) and names `duplicate_photo` first — the one member with no write site.
+- `docs/specs/component/upload/upload-button-zone.md` (128 lines) is a **contract for a component that does not exist**, and `upload-manager.md:241` wires an event to it.
+- Symmetry: 4 `types.ts` where the rule allows 1; adapters mirror **inverted**; `core/upload-resolver-tray-orchestrator` has **no governance-registry entry**. `core/upload` → `media-upload-service` name mismatch **is** registered, so it is legitimate.
+- Deferred: the 12 address-resolution / Search Object specs were **not** checked claim-by-claim (blocked on the same Branch C pass as `03-branch-matrix.md` L12).
+
 ## Next step
 
-Phase 5 — spec ↔ code drift audit: claim-by-claim over the 31 upload specs + service-module symmetry → `05-spec-drift.md`.
+Phase 6 — duplication, dead code, deprecated markers, oversized files, mojibake sweep → `06-health.md`.
