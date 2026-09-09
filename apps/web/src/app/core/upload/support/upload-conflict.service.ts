@@ -31,6 +31,10 @@ export class UploadConflictService {
   /**
    * Check for existing photoless rows that match the upload's location.
    * Returns the best-matching candidate, or null if no conflict found.
+   *
+   * The tenant is derived server-side by `find_photoless_conflicts` via
+   * `public.user_org_id()` — the client never sends an organization id.
+   * @see docs/audits/upload-process-analysis-2026-09-08/08-data-security.md § 5
    */
   async findConflict(
     coords: ExifCoords | undefined,
@@ -39,20 +43,11 @@ export class UploadConflictService {
     const user = this.auth.user();
     if (!user) return null;
 
-    const { data: profile } = await this.supabase.client
-      .from('profiles')
-      .select('organization_id')
-      .eq('id', user.id)
-      .single();
-
-    if (!profile) return null;
-
     const lat = coords?.lat ?? null;
     const lng = coords?.lng ?? null;
     const address = titleAddress ?? null;
 
     const { data: candidates, error } = await this.supabase.client.rpc('find_photoless_conflicts', {
-      p_org_id: profile.organization_id,
       p_lat: lat,
       p_lng: lng,
       p_address: address,
