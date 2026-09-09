@@ -196,6 +196,10 @@ async function insertUploadMediaRow(args: {
     .single();
 
   if (dbError) {
+    // The bytes already landed in storage; without this the object is
+    // orphaned with no media_items row ever referencing it.
+    // @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-02
+    await deps.supabaseClient.storage.from('media').remove([storagePath]);
     return { error: dbError };
   }
 

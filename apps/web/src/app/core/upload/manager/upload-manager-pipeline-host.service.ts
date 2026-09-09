@@ -5,6 +5,7 @@
 import { Injectable, inject } from '@angular/core';
 import { SupabaseService } from '../../supabase/supabase.service';
 import { cancelAllActiveUploads } from './upload-manager-cancel-active.util';
+import { removeUploadCancelResidue } from '../support/upload-cancel-residue.util';
 import { drainUploadManagerQueue } from './upload-manager-drain.util';
 import { handleUploadPipelineError } from './upload-manager-error.util';
 import { failUploadManagerJob } from './upload-manager-fail.util';
@@ -137,7 +138,7 @@ export class UploadManagerPipelineHostService {
   }
 
   cancelAllActive(): void {
-    cancelAllActiveUploads({
+    void cancelAllActiveUploads({
       snapshotJobs: () => this.jobState.snapshot(),
       isTerminalPhase: (phase) => TERMINAL_PHASES.has(phase),
       abortJobRequest: (jobId) => {
@@ -146,9 +147,8 @@ export class UploadManagerPipelineHostService {
       markDone: (jobId) => {
         this.queue.markDone(jobId);
       },
-      removeStoragePath: (storagePath) => {
-        this.supabase.client.storage.from('media').remove([storagePath]);
-      },
+      removeUploadResidue: (storagePath, mediaId) =>
+        removeUploadCancelResidue(storagePath, mediaId, this.supabase.client),
       markCancelledSignedOut: (jobId, failedAt) => {
         this.jobState.updateJob(jobId, {
           phase: 'error',

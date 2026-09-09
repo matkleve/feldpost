@@ -44,7 +44,12 @@ export interface UploadManagerActionsDeps {
   queuedLabel: string;
   abortJobRequest: (jobId: string) => void;
   markDone: (jobId: string) => void;
-  removeStoragePath: (storagePath: string) => void;
+  /**
+   * Removes whatever the job already persisted (storage object, DB row, or
+   * both — either may be absent depending on the phase it was cancelled in).
+   * @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-04
+   */
+  removeUploadResidue: (storagePath: string | undefined, mediaId: string | undefined) => Promise<void>;
   drainQueue: () => void;
 }
 
@@ -76,16 +81,15 @@ export function dismissAllUploadManagerCompleted(deps: UploadManagerActionsDeps)
   deps.removeTerminalJobs();
 }
 
-export function cancelUploadManagerJob(jobId: string, deps: UploadManagerActionsDeps): void {
+export async function cancelUploadManagerJob(
+  jobId: string,
+  deps: UploadManagerActionsDeps,
+): Promise<void> {
   const job = deps.findJob(jobId);
   if (!job || deps.isTerminalPhase(job.phase)) return;
 
   deps.abortJobRequest(jobId);
   deps.markDone(jobId);
-
-  if (job.storagePath) {
-    deps.removeStoragePath(job.storagePath);
-  }
 
   deps.updateJob(jobId, {
     phase: 'error',
@@ -95,6 +99,10 @@ export function cancelUploadManagerJob(jobId: string, deps: UploadManagerActions
   });
 
   deps.drainQueue();
+
+  if (job.storagePath || job.mediaId) {
+    await deps.removeUploadResidue(job.storagePath, job.mediaId);
+  }
 }
 
 export function cancelUploadManagerBatch(

@@ -30,6 +30,7 @@ import { ProjectsService } from '../projects/projects.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { UploadAttachPipelineService } from './pipelines/attach/upload-attach-pipeline.service';
 import { UploadBatchService } from './support/upload-batch.service';
+import { removeUploadCancelResidue } from './support/upload-cancel-residue.util';
 import {
   assignUploadManagerJobToProject,
   attachUploadManagerFile,
@@ -162,9 +163,8 @@ export class UploadManagerService {
     preResolveWave: this.preResolveWave,
     pipelineHost: this.pipelineHost,
     getPipelineCtx: () => this.pipelineCtx,
-    supabaseRemove: (storagePath: string) => {
-      this.supabase.client.storage.from('media').remove([storagePath]);
-    },
+    removeUploadResidue: (storagePath: string | undefined, mediaId: string | undefined) =>
+      removeUploadCancelResidue(storagePath, mediaId, this.supabase.client),
     hydrateDeferredPreviews: (jobs: ReadonlyArray<UploadJob>) => this.hydrateDeferredPreviews(jobs),
   };
 
@@ -311,9 +311,9 @@ export class UploadManagerService {
     dismissAllUploadManagerCompleted(this.actionDeps);
   }
 
-  /** Cancel a pending or active job. Cleans up partial storage if needed. */
+  /** Cancel a pending or active job. Cleans up partial storage/DB residue if needed. */
   cancelJob(jobId: string): void {
-    cancelUploadManagerJob(jobId, this.actionDeps);
+    void cancelUploadManagerJob(jobId, this.actionDeps);
   }
 
   /** Cancel all non-terminal jobs in a batch. */

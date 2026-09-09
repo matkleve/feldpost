@@ -74,6 +74,7 @@ function buildFakeSupabase(
   const storageFromChain = {
     upload: vi.fn().mockResolvedValue(storageUploadResult),
     createSignedUrl: vi.fn().mockResolvedValue(signedUrlResult),
+    remove: vi.fn().mockResolvedValue({ data: null, error: null }),
   };
 
   return {
@@ -418,6 +419,17 @@ describe('UploadService', () => {
       const result = await service.uploadFile(makeFile());
 
       expect(result.error).toBeTruthy();
+    });
+
+    it('removes the already-uploaded storage object when the DB insert fails', async () => {
+      // @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-02
+      const { service, fakeSupabase } = setup({
+        insertResult: { data: null, error: new Error('db error') },
+      });
+
+      await service.uploadFile(makeFile());
+
+      expect(fakeSupabase._storageFromChain.remove).toHaveBeenCalledTimes(1);
     });
 
     it('returns id on a successful upload with EXIF GPS (coords resolve later)', async () => {
