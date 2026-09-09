@@ -5,7 +5,7 @@
 **Branch:** `claude/upload-process-analysis-0mnzwr` (branched from `origin/main` @ `8e4b1e09`)
 **Started:** 2026-09-08
 
-> Read this file plus the artifacts already produced. A resuming agent must not re-run Phases 0–7.
+> Read this file plus the artifacts already produced. A resuming agent must not re-run Phases 0–8.
 
 ---
 
@@ -21,8 +21,8 @@
 | 5 — Spec ↔ code drift | `05-spec-drift.md` | ✅ done |
 | 6 — Duplication / dead code / ownership | `06-health.md` | ✅ done |
 | 7 — Failure modes | `07-failure-modes.md` | ✅ done |
-| 8 — Data & security | `08-data-security.md` | ⏳ next |
-| 9 — Test & spec-quality coverage | `09-coverage.md` | ☐ |
+| 8 — Data & security | `08-data-security.md` | ✅ done |
+| 9 — Test & spec-quality coverage | `09-coverage.md` | ⏳ next |
 | 10 — Live/manual verification | (folded into `10-findings.md`) | ☐ — **will be abandoned**, see blockers |
 | 11 — Synthesis | `10-findings.md`, `11-proposals.md` | ☐ |
 
@@ -161,6 +161,15 @@ Structural: **six files write phases** on one happy path; `missing_data` has two
 - Refuted: the plan's "poisoned dedup index" risk (ordering already prevents it) and its assumption that `support/upload-timeout.util.ts` is live.
 - Corrected in place: Phase 2 F4 — `resolveUploadAddress` **is** guarded; the other three fire-and-forget calls are not.
 
+## Phase 8 headline results (do not re-derive — full report in `08-data-security.md`)
+
+- 🔴 **S1 (blocker)** `find_photoless_conflicts` is `SECURITY DEFINER`, granted to `authenticated`, and filters on a **caller-supplied `p_org_id`** it never checks against `public.user_org_id()`. RLS is bypassed, so that parameter is the only tenant boundary → **cross-tenant read** of another org's photoless media UUID, address label and exact coordinates. It is the **sole** upload-path RPC that takes the org as an argument; every other one derives it server-side. `supabase/migrations/20260526200000_fix_find_photoless_conflicts_locations_join.sql:13-18,28,54,99-102`.
+- **Verified correct**, so nobody needs to re-check: dedup org scoping (SQL + RLS + orphan guard), `resolve_media_location` 10-arg usage after the overload drop, zero writes to the dropped `media_items` location columns, storage tenant policies (`foldername[1]=org`, `[2]=uid`, no UPDATE policy, viewers blocked), and **client validation is fully mirrored server-side** (size exact, MIME a superset).
+- **F9 narrowed**: the unsanitised path extension **cannot cross tenants** — the storage policy blocks it. Revised to `low`; corrected in `02-happy-path.md` in place.
+- `supabase:smoke` asserts the media-type contract in the *same migration* that carries S1, and says nothing about tenancy.
+- A server-side `cleanup_orphaned_storage_objects` job exists (helps F1.1); **no reconciler was found for the reverse case** (row kept, object deleted — F1.2–F1.4).
+- **Everything here is `unverified` against the hosted database** — no CLI, no credentials. `supabase migration list` is the check.
+
 ## Next step
 
-Phase 8 — data & security: tables/RPCs/buckets touched, org scoping in SQL, `resolve_media_location` overload, dropped columns, storage-path isolation, client-vs-server validation → `08-data-security.md`.
+Phase 9 — test & spec-quality coverage: map the 43 spec files to the branch matrix, name the highest-value missing tests, assess E2E feasibility, propose a spec split → `09-coverage.md`.
