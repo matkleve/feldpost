@@ -5,7 +5,7 @@
 **Branch:** `claude/upload-process-analysis-0mnzwr` (branched from `origin/main` @ `8e4b1e09`)
 **Started:** 2026-09-08
 
-> Read this file plus the artifacts already produced. A resuming agent must not re-run Phase 0 or Phase 1.
+> Read this file plus the artifacts already produced. A resuming agent must not re-run Phases 0–2.
 
 ---
 
@@ -15,8 +15,8 @@
 | --- | --- | --- |
 | 0 — Baseline | `00-baseline.md` | ✅ done |
 | 1 — Static structure map | `01-structure.md` | ✅ done |
-| 2 — Happy-path trace | `02-happy-path.md` | ⏳ next |
-| 3 — Branch matrix | `03-branch-matrix.md` | ☐ |
+| 2 — Happy-path trace | `02-happy-path.md` | ✅ done |
+| 3 — Branch matrix | `03-branch-matrix.md` | ⏳ next |
 | 4 — State machine audit | `04-state-machine.md` | ☐ |
 | 5 — Spec ↔ code drift | `05-spec-drift.md` | ☐ |
 | 6 — Duplication / dead code / ownership | `06-health.md` | ☐ |
@@ -76,6 +76,24 @@ one link line in `docs/audits/README.md`, one bullet in `docs/backlog/README.md`
 - DB access in **17 files across 7 folders** incl. the UI layer (`upload-panel-job-file-actions.service.ts:269`), against a 2-file `adapters/`. Four `*.types.ts` inside one service module where `AGENTS.md` allows one.
 - Ownership boundary between `manager/`/`pipelines/`/`support/`/`location/` is **nowhere written down** (answer to plan § 3 Q4).
 
+## Phase 2 headline results (do not re-derive — full evidence in `02-happy-path.md` § 3)
+
+36-step line-level trace of one GPS JPEG. Eleven defects visible from the trace alone:
+
+- **F1** storage object orphaned when the `media_items` insert fails — `core/upload/support/upload-file-persist.util.ts:198-200` (cancel paths clean up, the DB-error path does not).
+- **F2** the `beforeunload` warning is an **empty handler** — `core/upload/upload-manager.service.ts:237`; `upload-manager.md:280` carries it as a ticked `[x]` acceptance criterion.
+- **F3** the 180 s upload timeout rejects but never aborts the in-flight write → a row can be saved for a job shown as failed (`upload-new-run-upload-phase.util.ts:299-318`).
+- **F4** four un-caught fire-and-forget calls on the happy path (reverse geocode, dedup hash, mismatch persist, thumbnail persist).
+- **F5** the dedup RPC runs **twice per job** (`upload-new-pre-resolve.util.ts:336` and `:364/:378/:389`).
+- **F6** "is this a document?" decided two different ways → same file gets different `issueKind` on two paths.
+- **F7** two different types both named `ImageUploadedEvent` (service vs UI) — root cause of Phase-0 test error T8.
+- **F8** `media_items.mime_type` (raw) vs storage `contentType` (normalised) derived differently.
+- **F9** unsanitised user-controlled extension in the storage path (`upload-file-persist.util.ts:83-84`) — exploitability `unverified`.
+- **F10** `statusLabel` hardcoded English in three files; `i18n:guard` cannot see it.
+- **F11** `classifyBatch` rejection strands the whole batch at `queued` (`upload-manager-submit.util.ts:65-70`).
+
+Structural: **six files write phases** on one happy path; `missing_data` has two writers with divergent rules.
+
 ## Next step
 
-Phase 2 — line-level happy-path trace of one JPEG with EXIF GPS from `submit()` to a visible `/media` row → `02-happy-path.md`.
+Phase 3 — branch matrix: one row per branch from plan § 4 Phase 3 → `03-branch-matrix.md`.
