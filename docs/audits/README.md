@@ -24,5 +24,6 @@
 | [root-docs-open-after-move-2026-04-15.md](root-docs-open-after-move-2026-04-15.md) | Historical | Open items after move (German headings). |
 | [untouched-files-updated-root-and-readme-2026-04-15.md](untouched-files-updated-root-and-readme-2026-04-15.md) | Historical | README touch list. |
 | [ui-containers-audit.md](ui-containers-audit.md) | Reference | Container system research / plan (2026-03-25); verify against current layout specs before execution. |
+| [upload-process-analysis-2026-09-08/](upload-process-analysis-2026-09-08/10-findings.md) | Reference | Full static analysis of the upload subsystem (2026-09-08, commit `8e4b1e09`): structure, happy path, 51-row branch matrix, FSM, spec drift, health, failure modes, data/security, coverage, 50 findings + proposals. Read-only pass; not normative. |
 
 When adding a new audit, prefix the filename with an ISO date, add one row here, and include the standard banner at the top of the audit file (see existing files after this README lands).

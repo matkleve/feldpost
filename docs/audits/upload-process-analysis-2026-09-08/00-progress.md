@@ -5,7 +5,7 @@
 **Branch:** `claude/upload-process-analysis-0mnzwr` (branched from `origin/main` @ `8e4b1e09`)
 **Started:** 2026-09-08
 
-> Read this file plus the artifacts already produced. A resuming agent must not re-run Phases 0–9.
+> The audit is finished. This file remains the entry point: read it, then `10-findings.md`. A resuming agent should not re-run any phase — the open work is the `unverified` list in `10-findings.md` § 4.
 
 ---
 
@@ -23,11 +23,12 @@
 | 7 — Failure modes | `07-failure-modes.md` | ✅ done |
 | 8 — Data & security | `08-data-security.md` | ✅ done |
 | 9 — Test & spec-quality coverage | `09-coverage.md` | ✅ done |
-| 10 — Live/manual verification | (folded into `10-findings.md`) | ⏳ next — **abandoned with reason**, see blockers |
-| 11 — Synthesis | `10-findings.md`, `11-proposals.md` | ☐ |
+| 10 — Live/manual verification | (folded into `10-findings.md` § 3) | ⛔ **abandoned with reason** — recorded, not skipped silently |
+| 11 — Synthesis | `10-findings.md`, `11-proposals.md` | ✅ done |
 
-Plus, at the very end (the only permitted edits to existing files, plan § 11):
-one link line in `docs/audits/README.md`, one bullet in `docs/backlog/README.md`.
+Plus (the only permitted edits to existing files, plan § 11): ✅ one link row in `docs/audits/README.md`, ✅ one bullet in `docs/backlog/README.md`. Both done.
+
+**AUDIT COMPLETE.** All 12 artifacts exist and are committed. Definition of Done (plan § 8) is checked off in the section below.
 
 ---
 
@@ -182,6 +183,32 @@ Structural: **six files write phases** on one happy path; `missing_data` has two
 - Spec split proposed for the four oversized specs (cap is **180**, not the plan's 400); the largest is `upload-panel.md` at 310, 45 % of it Mermaid. **Sequence the splits after the drift fixes**, not before.
 - **`lint-specs-full.txt` explains the plan's "552 vs 400"**: it is a git-tracked lint snapshot from **2026-06-22** (89 specs, 18 errors, 400-line *warning*) still sitting at the repo root. Today's run is 183 specs / 201 errors against a 180-line *error* cap, and the pipeline spec is 284 lines. The plan quoted the stale file verbatim. Regenerate or delete it. `09-coverage.md` § 6.
 
-## Next step
+## Phase 10 — abandoned with reason
 
-Phase 10 — record as abandoned with reason and the per-finding `unverified` list, then Phase 11 synthesis → `10-findings.md`, `11-proposals.md`.
+No live backend, no Supabase credentials (`environment.ts:9` → `anonKey: 'test'`), no display server. Recorded in `10-findings.md` § 3 together with the nine findings that therefore stay theoretical and the exact check each needs. **Nothing was fabricated and no temporary patch was applied**, so there is nothing to disclose under plan § 4 Phase 10.
+
+## Phase 11 — synthesis
+
+- `10-findings.md` — 15-bullet executive summary (blocker/high first) + **50 findings** (3 blocker, 12 high, 24 medium, 11 low), each with `path:line`, severity, effort, spec clause and a suggested action; plus the Phase 10 record, the consolidated `unverified` list, an index of all 13 plan § 3 questions, and the 13 plan claims this audit corrected.
+- `11-proposals.md` — **13 sequenced proposals (P0–P12)** with severity, effort, change class, prerequisites, affected specs and PR boundaries; a dependency graph; and a three-item "this week" list.
+
+## Definition of Done (plan § 8)
+
+- [x] All eleven artifacts in § 11 exist, committed on the working branch (12 files incl. `00-progress.md`)
+- [x] Every branch in Phase 3 has a matrix row with a verdict, or an explicit `unverified` + the check needed (51 rows; 15 `unverified`, each with its check in `03-branch-matrix.md` § 9)
+- [x] Every finding has `path:line` evidence, a severity and an effort size (`10-findings.md` § 2)
+- [x] The state-machine diff names each of the 20 phases as reachable or dead (`04-state-machine.md` § 2 — **all 20 reachable**)
+- [x] The executive summary is ≤ 15 bullets and leads with blocker/high (`10-findings.md` § 1 — exactly 15, first two are blockers)
+- [x] Proposals are sequenced with prerequisites marked, and none was silently implemented (`11-proposals.md`; `git diff --name-only origin/main...HEAD` touches nothing under `apps/web/src/app/**`, `supabase/migrations/**` or `docs/specs/**`)
+- [x] The report states what could not be verified and why (`10-findings.md` §§ 3–4)
+
+## Gates re-run at the end (plan § 9)
+
+| Gate | Phase 0 | End | Verdict |
+| --- | --- | --- | --- |
+| `npm run lint:specs` | 183 specs, 201 errors, 32 warnings | identical (diffed line by line) | **unchanged** ✅ |
+| `npm run i18n:check` | violations=0 | violations=0 | unchanged ✅ |
+| `npm run design-system:check` | green | green | unchanged ✅ |
+| `cd apps/web && npm run lint` | 151 errors, 1068 warnings | identical | unchanged ✅ |
+| `cd apps/web && npx ng build` | green | green | unchanged ✅ |
+| `cd apps/web && npx ng test --watch=false` | RED, 101 errors | RED, 101 errors | unchanged ✅ |

@@ -1,0 +1,186 @@
+# 10 — Main report: findings
+
+**Audit:** full analysis of the file upload process · **Plan:** [`docs/backlog/prompt-analysis-upload-process.md`](../../backlog/prompt-analysis-upload-process.md)
+**Commit:** `8e4b1e09` · **Measured:** 2026-09-08 · **Branch:** `claude/upload-process-analysis-0mnzwr`
+**Scope:** `apps/web/src/app/core/upload/**`, `…/core/upload-resolver-tray-orchestrator/**`, `…/features/upload/**` — 129 non-test files / 19,049 LOC, 43 spec files / 7,054 LOC, 31 spec documents / 3,819 lines.
+
+**Method and its hard limit.** This is a **static** audit. The unit suite does not compile, so **no test in this repository executed during this work**; there are no Supabase credentials, so nothing was verified against a running database; there is no display server, so the app was never run. Every claim below is a code- or SQL-reading claim with a `path:line` anchor. Claims that would need a runtime are marked `unverified` with the exact check required, and are collected in § 4.
+
+---
+
+## 1. Executive summary
+
+1. 🔴 **`find_photoless_conflicts` allows a cross-tenant read.** It is `SECURITY DEFINER`, granted to every authenticated user, and filters on a **caller-supplied** `p_org_id` it never compares to `public.user_org_id()`. RLS is bypassed, so that parameter *is* the tenant boundary. One call returns another organisation's media UUID, address label and exact coordinates. It is the **only** upload-path RPC that takes the tenant as an argument. `supabase/migrations/20260526200000_fix_find_photoless_conflicts_locations_join.sql:13-18,28,54,99-102`
+2. 🔴 **A failed `media_items` insert leaves the storage object behind** — the two cancel branches clean up, the DB-error branch does not. `upload-manager.md:277` ticks `- [x] Orphaned storage files are cleaned up when DB insert fails`. `apps/web/src/app/core/upload/support/upload-file-persist.util.ts:198-200`
+3. **The unit suite has not compiled for some time.** 101 TypeScript errors across 26 spec files; **zero of 326 tests execute**. Six of the eleven upload-scope errors are stale-test-after-production-change. Nothing in this subsystem is currently protected by a test.
+4. **Three cancel paths delete the storage object and keep the row**, un-awaited — the mirror of finding 2, and no server-side reconciler was found for this direction. `core/upload/manager/upload-manager-actions.util.ts:85`, `…/upload-manager-cancel-active.util.ts:18`, `core/upload/support/upload-cancelled-storage-cleanup.util.ts:30`
+5. **The `beforeunload` warning does not exist** — the registered handler is `(): void => {}`. Closing the tab mid-upload is silent, while `upload-manager.md:280` ticks it as satisfied. `core/upload/upload-manager.service.ts:237`
+6. **The 180 s upload timeout rejects but never aborts its own request**, so a storage object *and* a row can land for a job the user sees as failed. `core/upload/pipelines/new/upload-new-run-upload-phase.util.ts:299-318`
+7. **Control flow depends on user-facing English text in two places**: lane and row-action routing substring-matches the status label in two languages (`features/upload/upload-phase.helpers.ts:67-75`), and cancellation is detected by `/cancelled/i` over the error message (`core/upload/support/upload-cancelled.util.ts:3-5`, 4 call sites). Translating either string changes behaviour.
+8. **Six user actions write `phase:` directly**, bypassing `setPhase` — no `jobPhaseChanged$` event and no terminal guard. `failJob` has no guard either, so `complete → error` is reachable. `core/upload/manager/upload-manager-actions.util.ts:54,88,119,134,258,288`
+9. **No transition map and no guard function exist anywhere** in the subsystem — a direct violation of `.cursor/rules/ui-state-machine.mdc` § Hard rules and root `AGENTS.md` § State-machine invariants, whose own worked example is "the upload queue".
+10. **All 20 `UploadPhase` members are reachable; none is dead.** The playbook's "collapse 20 phases to 5" is therefore a **behaviour change**, not a cleanup — and it must first contend with 12 writers of `queued`, 8 of `complete` and 5 of `missing_data`.
+11. **60 code paths referenced by specs do not exist.** Every one of the 17 File Map rows in `upload-manager-pipeline.md`, 13 of 15 in `upload-manager.md`, and 13 in 13 lines of `upload-panel.feedback-triage.md`. A 128-line spec (`upload-button-zone.md`) describes a component with no code, and `upload-manager.md:241` wires an event stream to it.
+12. **Two normative specs mandate opposite dedup behaviour.** `upload-manager.md:264` forbids auto-skip; `upload-manager-pipeline.dedup-scope.supplement.md` § Behavior matrix mandates it for same-user and ticks it. The code follows the latter.
+13. **Six call sites auto-switch the panel lane after a resolution action**, against the P0 rule at `upload-panel.feedback-triage.md:48` that was written to stop exactly that.
+14. **≈500 LOC of dead code**, including a 316-line panel service that duplicates the live one method-for-method, and **13 unreachable guards** in the tray component because `USE_TRAY_ORCHESTRATOR` is a hard `const true`. The `mockResolverTray` fixture path ships in the production bundle.
+15. **Verified correct, so nobody needs to re-check:** dedup org scoping in SQL and RLS with the orphan guard; `resolve_media_location` usage after the 9-arg overload drop; zero writes to the dropped `media_items` location columns; storage tenant policies; and client validation fully mirrored server-side (size exact, MIME a superset).
+
+---
+
+## 2. Findings table
+
+Columns per plan § 11. `path:line` is repo-relative; `core/…` = `apps/web/src/app/core/…`, `features/…` = `apps/web/src/app/features/…`.
+
+| ID | Sev | Eff | Area | Finding (one sentence) | Evidence (`path:line`) | Spec clause | Suggested action |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| **UP-01** | blocker | S | data/security | `find_photoless_conflicts` is `SECURITY DEFINER`, granted to `authenticated`, and trusts a caller-supplied `p_org_id`, permitting a cross-tenant read of another org's photoless media coordinates and address labels. | `supabase/migrations/20260526200000_fix_find_photoless_conflicts_locations_join.sql:13-18,28,54,99-102`; caller `apps/web/src/app/core/upload/support/upload-conflict.service.ts:54-59` | `supabase/AGENTS.md` § Database; `docs/security-boundaries.md` | derive the org server-side (`AND m.organization_id = public.user_org_id()`) and drop the parameter |
+| **UP-02** | blocker | S | storage/DB | A `media_items` insert failure after a successful storage write returns without removing the object, orphaning it. | `apps/web/src/app/core/upload/support/upload-file-persist.util.ts:198-200` (cf. the cleanup at `:135-138`, `:202-209`) | `upload-manager.md:277` — **ticked and false** | remove the object on the `dbError` branch; untick the AC until then |
+| **UP-03** | blocker | M | tests | The unit suite does not compile — 101 TS errors across 26 spec files, 0 of 326 tests execute; six upload-scope errors are stale-test drift. | `00-baseline.md` § 4; e.g. `core/upload/location/upload-location-resolution.service.spec.ts:39` (`'source_conflict'` no longer in `UploadJobIssueKind`) | root `AGENTS.md` § Red-test-first (Hard Blocker) | fix the 101 errors before any other work in this subsystem |
+| **UP-04** | high | M | storage/DB | Three cancel paths delete the storage object without deleting the `media_items` row, un-awaited; only the new-pipeline in-flight path does both. | `core/upload/manager/upload-manager-actions.util.ts:85` + `core/upload/upload-manager.service.ts:165-167`; `core/upload/manager/upload-manager-cancel-active.util.ts:18`; `core/upload/support/upload-cancelled-storage-cleanup.util.ts:30`; correct: `core/upload/pipelines/new/upload-new-run-upload-phase.util.ts:262-267` | `pipeline.md` § Cancel | one cancellation routine, awaited, that removes both |
+| **UP-05** | high | S | lifecycle | The `beforeunload` handler is empty, so no leave-site prompt appears while uploads are in flight. | `core/upload/upload-manager.service.ts:237`; attached at `core/upload/manager/upload-manager-effects.util.ts:22-28` | `upload-manager.md:280` — **ticked and false** | implement the handler; untick until then |
+| **UP-06** | high | M | robustness | The 180 s upload timeout rejects the race but never aborts the in-flight request, so a late success can persist an object and a row for a failed job. | `core/upload/pipelines/new/upload-new-run-upload-phase.util.ts:299-318`; signal passed but unused at `core/upload/support/upload-file-persist.util.ts:128` | `pipeline.md` Action 7 | abort the controller on timeout |
+| **UP-07** | high | M | behaviour | Lane assignment and row actions fall back to substring-matching the localized status label in two languages. | `features/upload/upload-phase.helpers.ts:67-75` | none — the fallback is unspecified | make `issueKind` authoritative; delete the label fallback |
+| **UP-08** | high | S | behaviour | Cancellation is detected by `/cancelled/i` over `job.error`; translating the message turns every cancel into a hard error. | `core/upload/support/upload-cancelled.util.ts:3-5`; callers `core/upload/pipelines/new/upload-new-pipeline.service.ts:135`, `…/attach/upload-attach-pipeline.service.ts:232`, `…/replace/upload-replace-pipeline.service.ts:65`, `core/upload/manager/upload-manager-error.util.ts:27` | `.cursor/rules/i18n-workflow.mdc` | add a `cancelled` phase or a boolean flag |
+| **UP-09** | high | M | FSM | Six user actions write `phase:` via `updateJob`, emitting no `jobPhaseChanged$` and bypassing the terminal guard. | `core/upload/manager/upload-manager-actions.util.ts:54,88,119,134,258,288` | `.cursor/rules/ui-state-machine.mdc` § Hard rules | route every transition through `setPhase` |
+| **UP-10** | high | S | FSM | `failJob` has no terminal-state guard, so a late rejection can flip a `complete` job to `error`. | `core/upload/support/upload-job-state.service.ts:173-187`; reached from `core/upload/manager/upload-manager-error.util.ts:36` | root `AGENTS.md` § State-machine invariants — "an action on a job already in a terminal state is a no-op" | add the same guard `setPhase` has at `:159` |
+| **UP-11** | high | L | FSM | No transition map or guard function exists; `setPhase` accepts any target from any non-terminal source. | `grep Record<UploadPhase` → only `features/upload/upload-phase.helpers.ts:21`, a presentation lookup | `.cursor/rules/ui-state-machine.mdc` § Hard rules | declare `Record<UploadPhase, UploadPhase[]>` + a guard, and assert it in the spec |
+| **UP-12** | high | S | UI contract | Six call sites auto-switch the panel lane immediately after a resolution action. | `features/upload/upload-panel/upload-panel-dialog-actions.service.ts:275,334`; `…/upload-panel-bulk-actions.service.ts:70`; `…/upload-panel-menu-action-router.service.ts:62,69,82` | `upload-panel.feedback-triage.md:48` (**P0**) | delete the six `setLane` calls |
+| **UP-13** | high | S | robustness | A `classifyBatch` rejection escapes `submit()` (never awaited at any call site) between `addJobs` and `drainQueue`, freezing the whole batch at `queued` with no error. | `core/upload/manager/upload-manager-submit.util.ts:65-70`; callers `features/upload/upload-panel/upload-panel-input-handlers.ts:52,62,150` | `address-resolution-model.md` | guard the await; drain regardless |
+| **UP-14** | high | M | memory | Object URLs handed to `MediaDownloadService` on completion are never revoked — `revokeLocalUrl` is defined twice and called nowhere, and the cache has no eviction. | `core/upload/pipelines/new/upload-new-post-save.util.ts:287-289`; `core/media-download/media-download.service.ts:382`; `core/media-download/adapters/signed-url-cache.adapter.ts:171` | — | revoke on dismiss/eviction, or cap the cache |
+| **UP-15** | high | S | robustness | The attach pipeline detects an RLS-blocked write, logs `✗ WRITE DID NOT PERSIST`, and completes the job anyway. | `core/upload/support/upload-db-postwrite.util.ts:48-62`; callers in `core/upload/pipelines/attach/upload-attach-record-update-runner.util.ts` | `docs/security-boundaries.md` | fail the job on a read-back mismatch |
+| **UP-16** | medium | S | spec drift | 60 code paths referenced by specs and playbooks do not exist, including 17 of 17 File Map rows in the pipeline spec and 13 of 15 in the manager spec. | `05-spec-drift.md` §§ 2.1–2.5 | `AGENTS.md` § Change-Completeness Rule | repoint or delete every row (mechanical) |
+| **UP-17** | medium | S | spec drift | `upload-manager.md:264` and `dedup.md` § Behavior matrix mandate opposite behaviour for the same input; the code follows `dedup.md`. | `05-spec-drift.md` C3 | both | reword `upload-manager.md:264` to "colleague matches" |
+| **UP-18** | medium | S | spec drift | `docs/specs/component/upload/upload-button-zone.md` (128 lines) is a contract for a component with no code, and `upload-manager.md:241` wires `batchProgress$` to it. | `find apps/web/src -iname "*button-zone*"` → 0 | — | archive the spec or build the component |
+| **UP-19** | medium | S | dead code | `features/upload/upload-panel/upload-panel-dialog-handlers.service.ts` (316 LOC) has no importer and duplicates the live dialog-actions service method-for-method; it injects Supabase and writes. | `06-health.md` § 1.6 | `AGENTS.md` § Change-Completeness Rule | delete |
+| **UP-20** | medium | S | dead code | `USE_TRAY_ORCHESTRATOR` is a hard `const true`, making `useOrchestrator` statically true and **13 tray guards unreachable**; `UPLOAD_DEV_FLAGS.useTrayOrchestrator` has no effect. | `core/upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.types.ts:10`; `features/upload/upload-resolver-tray/upload-resolver-tray.component.ts:96-99,109,113,118,127,144,151,216,241,278,391,422,429` | — | delete the constant, the flag and the dead branches |
+| **UP-21** | medium | S | dead code | Four more dead files (≈180 LOC) plus 7 dead exports and 2 dead union members (`issueKind:'duplicate_photo'` read in 10 places, `UploadTrayStep '2'`). | `06-health.md` §§ 5.1–5.4 | `AGENTS.md` § Change-Completeness Rule | delete |
+| **UP-22** | medium | S | dead code | The removed project-location tray survives as an empty stub, a dead facade delegation and a test-only helper. | `core/upload/location/upload-location-tray-flow.service.ts:83-90`; `core/upload/location/upload-location-resolution.service.ts:99-105`; `core/upload/support/upload-batch-project-tray.helpers.ts` | `AGENTS.md` § Change-Completeness Rule (its own example is this subsystem) | finish the deletion |
+| **UP-23** | medium | M | performance | The dedup RPC runs **twice per job** on every non-`optional` path, and re-enters `dedup_check`, emitting a phase transition no FSM contains. | `core/upload/pipelines/new/upload-new-pre-resolve.util.ts:336` and `:364`/`:378`/`:389` → `core/upload/support/upload-dedup-check.util.ts:44-45` | OD-4 ordering in `routing.md` | call it once |
+| **UP-24** | medium | S | behaviour | "Is this a document?" is decided two different ways on two paths that set the same `issueKind`. | `core/upload/pipelines/new/upload-new-prepare-route.util.ts:197` (`resolveMediaType`) vs `…/upload-new-post-save.util.ts:256-257` (raw MIME prefix) | `pipeline.md` Action 6 | one shared classifier |
+| **UP-25** | medium | S | types | Two different types are both named `ImageUploadedEvent` (service `{jobId,batchId,mediaId,coords}` vs UI `{id,lat,lng}`); the collision is the direct cause of a Phase-0 compile error. | `core/upload/upload-manager.types.ts:219-226` vs `core/workspace-pane/workspace-pane-shell-events.types.ts:7-13`; bridge `features/upload/upload-panel/upload-panel-lifecycle.service.ts:66-79`; break `features/upload/upload-panel/upload-panel.map-pick.spec.ts:42` | — | rename one |
+| **UP-26** | medium | M | architecture | An 11-file runtime import cycle spans facade → manager → pipeline → location → tray adapter; six sibling services break DI with lazy `injector.get` around one hub, and `registerDisambiguationGroup` has 5 writer services / 8 call sites. | `01-structure.md` §§ 3.1–3.2 | `AGENTS.md` § Code Conventions (facade slim, adapters own heavy logic) | give the location layer one owner |
+| **UP-27** | medium | M | architecture | Database access is spread over 17 files in 7 folders including the UI layer, against a 2-file `adapters/`; four `*.types.ts` exist in one service module where the rule allows one. | `01-structure.md` §§ 6.1, 6.3; raw `media_items` read at `features/upload/upload-panel/upload-panel-job-file-actions.service.ts:269-274` | `AGENTS.md` § Code Conventions | move DB access behind `adapters/`; consolidate types |
+| **UP-28** | medium | S | spec | Three shipped adapters have no spec while one spec has no code; `core/upload-resolver-tray-orchestrator` has **no governance-registry entry** at all. | `05-spec-drift.md` §§ 4.5–4.6; `docs/specs/GOVERNANCE-MODULE-REGISTRY.json` | `AGENTS.md` § Spec split and organization policy | add the adapter specs and the registry entry |
+| **UP-29** | medium | S | i18n | User-facing English escapes through `job.error` and two `statusLabel` render sites; `i18n:guard` cannot see service-produced strings. | `features/upload/upload-panel/upload-panel-item-helpers.ts:76-78`; `…/upload-panel-item.component.ts:176`; `…/upload-panel-menu-action-router.service.ts:118-123`; producers `core/upload/support/upload.service.util.ts:73,81`, `core/upload/support/upload-error-messages.util.ts:13,22-27,33-60+`, `core/upload/manager/upload-manager-actions.util.ts:90-91` | `.cursor/rules/i18n-workflow.mdc` | route error copy through i18n; extend `i18n:guard` to TS literals |
+| **UP-30** | medium | S | spec | `upload-manager.md:139` types `issueKind` with 4 members (code has 8) and names `duplicate_photo` first — the one member with no write site. | `05-spec-drift.md` C4 | — | sync the table; delete the dead member |
+| **UP-31** | medium | S | tests | Two spec files assert against mocks: the tray component test drives the mock orchestrator (the 349-LOC producer adapter has 0 tests), and one tests a **removed** feature. | `features/upload/upload-resolver-tray/upload-resolver-tray.component.spec.ts:12`; `core/upload/support/upload-batch-project-tray.helpers.spec.ts` | `AGENTS.md` § Red-test-first | test the producer; delete the other |
+| **UP-32** | medium | S | tests | Eight of the 20 committed upload fixtures have byte-level mojibake filenames, so the corpus cannot exercise the umlaut path the routing spec and the Photon curl gate both single out. | `apps/web/public/vienna_sample_photos/` — `Arsenalstra├ƒe…` etc. (U+251C + U+0192 where `ß` belongs) | `routing.md` § Webkitdirectory fallback; `supabase/AGENTS.md` § Photon | re-encode the filenames |
+| **UP-33** | medium | M | behaviour | Dropping a **folder** submits nothing — `onDrop` reads only `dataTransfer.files`; `webkitGetAsEntry` appears nowhere in `apps/web/src`. | `features/upload/upload-panel/upload-panel-input-handlers.ts:46-57` | `pipeline.md` Action 2a | read `dataTransfer.items` |
+| **UP-34** | medium | S | correctness | "Requeue at front" is documented in three places; no reordering exists — selection is plain array order. | `core/upload/manager/upload-manager-queue.util.ts:14-20` vs `core/upload/upload-manager.service.ts:412`, `upload-manager.md`, `pipeline.md` Action 6 | `pipeline.md` Action 6 | implement priority, or correct the three docs |
+| **UP-35** | medium | S | robustness | The dedup-hash insert ends in a bare `.then()` with no rejection handler; a lost hash silently defeats the resume-safety goal. | `core/upload/support/upload-db-postwrite.util.ts:32-38` | `dedup.md` § Goals #1 | add a catch and a retry or a log |
+| **UP-36** | medium | S | correctness | `resolving_address` is a cosmetic phase — `enrichWithReverseGeocode` is an empty method; the real work is an un-awaited call elsewhere. | `core/upload/support/upload-enrichment.service.ts:43-47`; phase set at `core/upload/pipelines/new/upload-new-post-save.util.ts:143-145`; real work at `core/upload/support/upload-file-persist.util.ts:211-220` | `routing.md` § Post-save enrichment FSM | delete the empty method and the phase, or move the work into it |
+| **UP-37** | medium | S | dedup | Only the first 64 KiB is hashed; `binary_v1` (head + size) is collidable for documents from a shared template. | `core/upload/support/content-hash.util.ts:17,103-113` | `dedup.md` § Hash algorithms — silent on truncation | document the limit, or hash the tail too |
+| **UP-38** | medium | M | spec | Four upload specs exceed the 180-line cap (`upload-panel.md` 310, pipeline 284, manager 281, overlay 254); six more miss required sections. | `00-baseline.md` § 7; split proposal in `09-coverage.md` § 6 | `docs/specs/README.md` § Spec split | split per `09-coverage.md`, **after** UP-16 |
+| **UP-39** | medium | S | governance | `lint-specs-full.txt` is a git-tracked lint snapshot from 2026-06-22 (89 specs, 400-line *warning*) still read as current; it is the source of the plan's wrong "552 vs 400" figures. | `lint-specs-full.txt:63,118`; today: 183 specs / 201 errors / 180-line error cap | plan § 9 | regenerate or delete |
+| **UP-40** | low | S | encoding | Double-encoded UTF-8 in 11 upload files (12 repo-wide); comments only, plus 4 `console`/test strings — **no UI impact**. | `06-health.md` § 8 | — | re-encode in one commit |
+| **UP-41** | low | S | hygiene | 38 `console.*` calls in production paths; `drainQueue` emits 3 lines per drain, so a large folder import produces thousands. | `core/upload/manager/upload-manager-drain.util.ts:36,42,50`; `06-health.md` § 6 | — | gate behind the existing debug flag |
+| **UP-42** | low | S | hygiene | Seven one-shot refactor scripts remain committed under `apps/web/scripts/`, two contributing eslint errors. | `06-health.md` § 5.5; `00-baseline.md` § 6 | — | delete |
+| **UP-43** | low | S | security hardening | The storage-path extension is unsanitised user input; the storage policy prevents any cross-tenant write, so the residual risk is a malformed key inside the caller's own prefix. | `core/upload/support/upload-file-persist.util.ts:83-84`; policy `supabase/migrations/20260327121000_storage_media_bucket_init.sql:66-77` | `supabase/AGENTS.md` § Storage | sanitise `ext` to `[a-z0-9]{1,10}` |
+| **UP-44** | low | S | hygiene | `Number('180000')` wraps a literal to defeat `no-magic-numbers`, hiding the timeout from a numeric search. | `core/upload/pipelines/new/upload-new-pipeline.service.ts:63` | — | name the constant and allow it |
+| **UP-45** | low | S | hygiene | `media_items.mime_type` stores the raw browser value while the storage object uses the normalised one, so the two can disagree. | `core/upload/support/upload-file-persist.util.ts:179` vs `:122` | — | use `resolveMimeType` for both |
+| **UP-46** | low | S | dead config | `image/tiff` is allowed by the bucket with no client path; `application/csv` is allowed on both sides but unreachable via the extension fallback. | `supabase/migrations/20260327121000_storage_media_bucket_init.sql:27`; `core/upload/support/upload-file-types.ts:27` | — | prune |
+| **UP-47** | low | S | duplication | Four haversine implementations exist, one private to the upload post-save path. | `core/upload/pipelines/new/upload-new-post-save.util.ts:308-320`; `core/search/search-bar-helpers.ts:245-252`; `core/search/engine/search-engine.ts:631-638`; `core/location-path-parser/disambiguation-algorithms.ts:51` | — | one shared helper |
+| **UP-48** | low | S | duplication | `core/upload/support/upload-timeout.util.ts` is an exact duplicate of a private copy — and it is the dead one. | `core/upload/support/upload-timeout.util.ts:1-20` vs `core/upload/pipelines/new/upload-new-run-upload-phase.util.ts:299-318` | — | keep one |
+| **UP-49** | low | M | docs | `docs/playbooks/upload-manager-playbook.md` describes a tree two reorganisations old, says "18+ phases" (20) and "~600 lines" (19,049), and advises keeping replaced code — contradicting a Hard Blocker. | `05-spec-drift.md` § 2.5 | `AGENTS.md` § Change-Completeness Rule | archive |
+| **UP-50** | low | S | spec | The pre-upload resolution table in `routing.md` is split in two by prose, so rows 5–6 render outside it. | `05-spec-drift.md` C11 | — | move the `###` blocks below the table |
+
+**Counts:** 3 blocker, 12 high, 24 medium, 11 low. **Answers to all 13 plan § 3 questions** are distributed across `01`–`09`; the index is in § 5 below.
+
+---
+
+## 3. Phase 10 — live/manual verification: **abandoned, with reason**
+
+Plan § 4 Phase 10 permits skipping when the app cannot run. It cannot:
+
+| Blocker | Evidence |
+| --- | --- |
+| No Supabase credentials | `apps/web/src/environments/environment.ts:9` ships `anonKey: 'test'`; no `SUPABASE_*` variables in the environment; no Supabase CLI (`which supabase` → not found) |
+| No display server / no live backend to serve | `npm start` would run `ng serve` against a project the container cannot authenticate to |
+| The instrumentation the plan names is available but useless without data | `core/upload/address-resolution/upload-address-resolution.debug.ts` and `core/wide-event` require a running flow |
+
+**Nothing was fabricated, and no temporary patch was applied** (plan § 4 Phase 10 permits one if reverted; none was made, so there is nothing to disclose).
+
+**Findings that therefore remain theoretical.** Each is stated in its own phase as `unverified`; consolidated here:
+
+| Finding | Why it needs a runtime | Exact check |
+| --- | --- | --- |
+| UP-02 orphaned object | requires a forced DB-insert failure | revoke `media_items` insert for one session, upload, then list the bucket prefix |
+| UP-05 no leave-site prompt | a browser-behaviour claim, not a code claim | start an upload, attempt to close the tab |
+| UP-06 timeout leak | needs a slow upload | throttle the network to force a >180 s upload, then check for a late row |
+| UP-14 object-URL leak | needs a memory profile | import 100+ files, take a heap snapshot, count retained `Blob`s |
+| UP-26 cycle causes a real initialisation hazard | the lazy `injector.get` work-arounds suggest it already did once | boot the app with the work-arounds removed |
+| UP-01 exploitability | the migration text is proven; the hosted state is not | call `find_photoless_conflicts` with a foreign `p_org_id` as an authenticated user of another org |
+| Hosted schema matches the committed migrations | `supabase/AGENTS.md` documents repeated drift | `supabase migration list` — Local and Remote equal on every row |
+| Whether Supabase Storage normalises `..` in keys (UP-43) | server behaviour | POST a crafted object key |
+| Whether the Supabase client honours the `signal` option (UP-06) | passed inside a cast object literal | inspect the installed `@supabase/storage-js`, or watch a cancelled request in devtools |
+
+---
+
+## 4. Everything else left unverified
+
+Beyond the runtime list above, these are **static** checks that were scoped out and can be completed without a backend:
+
+| # | Left unverified | Check |
+| --- | --- | --- |
+| 1 | **Branch C city tray** — the densest area, 858 LOC across `core/upload/location/upload-location-tray-flow.service.ts` and `core/upload-resolver-tray-orchestrator/adapters/upload-location-tray-producer.adapter.ts` | read both against `…/upload-address-resolution.branch-c-city-tray.md`; **this is the single biggest remaining gap** and blocks 4 other rows |
+| 2 | The 12 address-resolution and Search Object specs, claim-by-claim | same pass as #1 |
+| 3 | `upload-manager-pipeline.data.md` (290 lines of data matrices) | column-by-column diff against `media_items` and `UploadJob` |
+| 4 | Which of the two location paths runs more often (UP-26 context) | read `core/upload/address-resolution/upload-address-resolution.orchestrator.ts` (620 LOC) end to end |
+| 5 | Per-`issueKind` row-action sets vs `upload-panel.lane-and-row-actions.md` | enumerate from `upload-panel-item.component.ts:120-260` |
+| 6 | The webkitdirectory 5-row path matrix | read `core/folder-scan/folder-scan-from-file-list.helpers.ts` |
+| 7 | The session location-mode override (6 spec rows) | read `features/upload/upload-panel/upload-panel-signals.service.ts` |
+| 8 | The four `source-*` candidates' placement effects | read `applySourceConflictChoiceToJob` against `routing.md` Phase 3 |
+| 9 | The tray gate's `answerKind:'text'` exception owner | check whether `upload-resolver-tray.component.ts` bypasses the gate for text steps |
+| 10 | `registerContextDistanceGroup` vs the adapter contract | `grep` + compare with `…/adapters/upload-project-gps-reference.adapter.md` |
+| 11 | Whether the legacy `images` bucket's read policies are org-scoped | `core/upload/upload.service.ts:76,97` fall back to it; its policies were not audited |
+| 12 | Whether other repo RPCs share UP-01's shape | only the six upload-path RPCs were audited |
+| 13 | Dead **private** members inside the ten large files | the reference scan covered exported symbols only |
+| 14 | Structural clone detection across `core/upload/location/` + `core/upload/address-resolution/` (4,960 LOC) | only the file pairs the plan named were compared |
+
+---
+
+## 5. Where each plan § 3 question is answered
+
+| Q | Question | Answered in |
+| --- | --- | --- |
+| 1 | End-to-end sequence for a GPS JPEG; who owns each step; where the phase is written | `02-happy-path.md` §§ 1–2 |
+| 2 | Which of the 20 phases are reachable, from where, which are dead | `04-state-machine.md` § 2 — **all 20 reachable** |
+| 3 | Where state actually lives; overlapping copies | `04-state-machine.md` § 6 (S7), `01-structure.md` § 4; cross-service half → § 4 #4 above |
+| 4 | Ownership boundary between the layers; is it stated; does the code follow it | `01-structure.md` § 8 — **not stated, not followed** |
+| 5 | One location path or two | `06-health.md` § 3 — **two, both live; "legacy" is the default** |
+| 6 | Does each branch match its governing clause | `03-branch-matrix.md` (51 rows) |
+| 7 | Cancel / logout / tab close residue per phase | `07-failure-modes.md` § 1 |
+| 8 | Two batches or two jobs on the same group / hash | `07-failure-modes.md` § 4 |
+| 9 | Which failures are silent | `07-failure-modes.md` §§ 3, 8 — **9 of 30 silent** |
+| 10 | Hardcoded user-visible strings | `03-branch-matrix.md` § 7 |
+| 11 | Unreachable / duplicated / test-only code | `06-health.md` §§ 1, 5 |
+| 12 | Missing coverage on normative branches | `09-coverage.md` §§ 2–4 |
+| 13 | Unimplementable / untestable spec statements | `09-coverage.md` § 6 |
+
+## 6. Plan claims this audit corrected
+
+| Plan claim | Reality |
+| --- | --- |
+| 51 upload spec files / ≈3,900 lines | **31 / 3,819** |
+| `upload-manager-pipeline.md` "552 lines vs a 400 recommendation" | **284 vs a 180-line error cap** — the plan quoted the stale `lint-specs-full.txt` (UP-39) |
+| `media-upload-service/adapters/` "appears empty" | it holds one file; the **mirror is inverted** (UP-28) |
+| `features/upload/upload-button-zone` exists as code | it does not (UP-18) |
+| `core/upload/location/` 23 files, `support/` 24 | **18** and **23** |
+| video dedup is skipped | video **is** deduped; code and `dedup.md` agree |
+| `UPLOAD_DEV_FLAGS.useTrayOrchestrator` implies a second tray path | **no second path exists**, only its dead shell (UP-20) |
+| `support/upload-timeout.util.ts` implements live timeout handling | it has no importer (UP-48) |
+| "dedup row written but upload later fails → poisoned index" | the ordering already prevents it |
+| the dedup helper family is duplicated | it is a clean chain; the real defect is the double call (UP-23) |
+| `duplicateState` is a state machine to audit | **it does not exist** (0 hits) |
+| `apps/web/e2e/` has no upload scenario | it has a panel **visual** check; what is missing is an upload **flow** |
+| `ng test --browsers=ChromeHeadless` | the repo uses `@angular/build:unit-test` (Vitest); the flag is invalid |
+
+## 7. Gates re-run at the end (plan § 9)
+
+| Gate | Phase 0 | Now | Unchanged? |
+| --- | --- | --- | --- |
+| `npm run lint:specs` | 183 specs, 201 errors, 32 warnings | see `11-proposals.md` § 0 | required to be identical — new files under `docs/audits/` are outside the element-spec lint scope |
+| `npm run i18n:check` | 0 violations | — | — |
+| `cd apps/web && npm run lint` | 151 errors, 1068 warnings | — | baseline comparison only |
+| `npm run design-system:check` | green | — | no `docs/design` or SCSS file was touched |
