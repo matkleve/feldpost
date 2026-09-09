@@ -5,7 +5,7 @@
 **Branch:** `claude/upload-process-analysis-0mnzwr` (branched from `origin/main` @ `8e4b1e09`)
 **Started:** 2026-09-08
 
-> Read this file plus the artifacts already produced. A resuming agent must not re-run Phases 0–2.
+> Read this file plus the artifacts already produced. A resuming agent must not re-run Phases 0–3.
 
 ---
 
@@ -16,8 +16,8 @@
 | 0 — Baseline | `00-baseline.md` | ✅ done |
 | 1 — Static structure map | `01-structure.md` | ✅ done |
 | 2 — Happy-path trace | `02-happy-path.md` | ✅ done |
-| 3 — Branch matrix | `03-branch-matrix.md` | ⏳ next |
-| 4 — State machine audit | `04-state-machine.md` | ☐ |
+| 3 — Branch matrix | `03-branch-matrix.md` | ✅ done |
+| 4 — State machine audit | `04-state-machine.md` | ⏳ next |
 | 5 — Spec ↔ code drift | `05-spec-drift.md` | ☐ |
 | 6 — Duplication / dead code / ownership | `06-health.md` | ☐ |
 | 7 — Failure modes | `07-failure-modes.md` | ☐ |
@@ -55,7 +55,7 @@ one link line in `docs/audits/README.md`, one bullet in `docs/backlog/README.md`
 | 3 | Two coexisting location paths (Search Object vs legacy) | open → Phase 3/6 |
 | 4 | Two `@deprecated Removed` markers — removal complete? | open → Phase 6 |
 | 5 | 20 phases vs 5 proposed — real reachable count | open → Phase 4 |
-| 6 | `UPLOAD_DEV_FLAGS.useTrayOrchestrator` implies a second tray path | open → Phase 6 |
+| 6 | `UPLOAD_DEV_FLAGS.useTrayOrchestrator` implies a second tray path | **refuted** in Phase 3 § 8 — `USE_TRAY_ORCHESTRATOR` is a hard `const true`; 13 tray guards are dead |
 | 7 | Mojibake sweep | **confirmed**, scope pending → Phase 6.5 |
 | 8 | `media-upload-service/adapters/` empty | **refuted** in Phase 0 |
 | 9 | Spec size gate on `upload-manager-pipeline.md` | **confirmed with corrected numbers** (284 vs 180) |
@@ -94,6 +94,23 @@ one link line in `docs/audits/README.md`, one bullet in `docs/backlog/README.md`
 
 Structural: **six files write phases** on one happy path; `missing_data` has two writers with divergent rules.
 
+## Phase 3 headline results (do not re-derive — full matrix in `03-branch-matrix.md`)
+
+51 branch rows across intake / media types / dedup / location routing / conflicts / lifecycle / uploaded lane. New defects beyond Phase 2:
+
+- **Y10** six user actions (retry, cancel, place, assign-project, resolve-conflict, force-duplicate) write `phase:` via `updateJob` instead of `setPhase` → **no `jobPhaseChanged$` event**, and they bypass the terminal guard. `core/upload/manager/upload-manager-actions.util.ts:54,88,119,134,258,288`.
+- **Y3** cancel deletes the storage object but **not** the `media_items` row, un-awaited → row with a dangling `storage_path` (mirror of F1). Cancel is also modelled as `phase:'error'`, so the UI offers Retry on a cancelled job.
+- **C5** `getIssueKind` falls back to **substring-matching the localized status label** in two languages (`features/upload/upload-phase.helpers.ts:67-75`) to decide lane and row actions.
+- **C4** `duplicate_photo` is **never written** yet read in 10 places; `conflict_review` is never stored but is derived. Change-Completeness violation.
+- **C3** "requeue at front" is documented in three places but **no reordering exists** — selection is plain array order (`upload-manager-queue.util.ts:14-20`).
+- **I5** dropping a *folder* submits nothing — `onDrop` reads only `dataTransfer.files`, never `items`/`webkitGetAsEntry` (0 hits repo-wide).
+- **D7** only the first 64 KiB is hashed; `binary_v1` (head+size) is collidable for documents.
+- **§ 8** `USE_TRAY_ORCHESTRATOR` is `const true` → `useOrchestrator` is statically true; **13 dead guards** in `upload-resolver-tray.component.ts` + 3 more elsewhere. Lead 6 refuted.
+- **§ 7** i18n: `statusLabel` **is** translated by the panel (Phase 2 F10 was overstated and is corrected in place). Real leaks are `job.error` (all producers English), `upload-panel-item.component.ts:176`, `upload-panel-menu-action-router.service.ts:118-123`. `i18n:guard` is blind to service-produced strings.
+- Plan error: "video (dedup skipped)" is wrong — code **and** `dedup.md` Tier C both dedup video.
+
+**15 branches remain `unverified`**, each with the exact static check listed in `03-branch-matrix.md` § 9. The densest gap is **L12 Branch C city tray** (858 LOC across two files) — it needs its own pass.
+
 ## Next step
 
-Phase 3 — branch matrix: one row per branch from plan § 4 Phase 3 → `03-branch-matrix.md`.
+Phase 4 — state machine audit: extract every phase-write site, diff against the spec FSMs, verdict on all 20 `UploadPhase` members → `04-state-machine.md`.
