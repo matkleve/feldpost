@@ -71,15 +71,15 @@ The registry includes at minimum:
 
 ## Target Files
 
-- Registry file: `docs/design-system/registry.json`
-- JSON schema: `docs/design-system/registry.schema.json`
+- Registry file: `docs/design/design-system/registry.json`
+- JSON schema: `docs/design/design-system/registry.schema.json`
 - Validator script: `scripts/validate-design-system-registry.mjs`
 
 Current implementation:
 
 - [registry.json](./registry.json)
 - [registry.schema.json](./registry.schema.json)
-- [scripts/validate-design-system-registry.mjs](../../scripts/validate-design-system-registry.mjs)
+- [scripts/validate-design-system-registry.mjs](../../../scripts/validate-design-system-registry.mjs)
 
 ## Validation Command
 

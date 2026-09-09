@@ -102,7 +102,7 @@ Implementation note:
 - [x] Pilot C started and implemented on projects route depth.
 - [x] Pilot C focused semantics evidence green (`npx vitest run src/app/features/projects/projects-page.component.spec.ts`).
 - [x] Pilot C implementation evidence bundle attached: [wave-3-pilot-evidence-bundle.md](./wave-3-pilot-evidence-bundle.md)
-- [x] Pilot C screenshot bundle attached (desktop/mobile): `docs/design-system/evidence/wave-3/pilot-c-breadcrumb-detail-desktop.png`, `docs/design-system/evidence/wave-3/pilot-c-breadcrumb-detail-mobile.png`.
+- [x] Pilot C screenshot bundle attached (desktop/mobile): `docs/design/design-system/evidence/wave-3/pilot-c-breadcrumb-detail-desktop.png`, `docs/design/design-system/evidence/wave-3/pilot-c-breadcrumb-detail-mobile.png`.
 - [x] Pilot A started with map context-menu focus-return hardening.
 - [x] Pilot A focused regression evidence green for trigger/open-state semantics + close/focus path (`map-shell.component.spec.ts` targeted run).
 - [x] Pilot A full contract checklist complete (anchor->sheet fallback implemented and covered by focused tests).
@@ -110,7 +110,7 @@ Implementation note:
 - [x] Pilot B includes semantic table + sort semantics (`aria-sort`) + explicit load error state.
 - [x] Pilot B focused regression spec green (`npx vitest run src/app/features/projects/projects-page.component.spec.ts`).
 - [x] Pilot B/C implementation evidence bundle attached: [wave-3-pilot-evidence-bundle.md](./wave-3-pilot-evidence-bundle.md) (code-based evidence with test results).
-- [x] Pilot B screenshot bundle attached (desktop/mobile): `docs/design-system/evidence/wave-3/pilot-b-projects-list-desktop.png`, `docs/design-system/evidence/wave-3/pilot-b-projects-list-mobile.png`.
+- [x] Pilot B screenshot bundle attached (desktop/mobile): `docs/design/design-system/evidence/wave-3/pilot-b-projects-list-desktop.png`, `docs/design/design-system/evidence/wave-3/pilot-b-projects-list-mobile.png`.
 
 Current implementation references:
 

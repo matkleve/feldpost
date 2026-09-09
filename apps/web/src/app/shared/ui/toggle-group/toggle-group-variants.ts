@@ -34,8 +34,6 @@ const pillVerticalChrome = [
 export const pillToggleVariants = cva(
   [
     'inline-flex max-w-full items-center w-[var(--hlm-pill-toggle-width,auto)]',
-    'motion-reduce:[animation-duration:1ms] motion-reduce:[transition-duration:1ms]',
-    'motion-reduce:transition-none motion-reduce:duration-0',
   ].join(' '),
   {
     variants: {
@@ -111,7 +109,6 @@ export type PillToggleVariantProps = VariantProps<typeof pillToggleVariants>;
 export const toggleGroupVariants = cva(
   [
     'box-border inline-flex items-center justify-center rounded-md bg-muted gap-1 p-1',
-    'motion-reduce:transition-none motion-reduce:duration-0 motion-reduce:[animation-duration:1ms] motion-reduce:[transition-duration:1ms]',
   ].join(' '),
   {
     variants: {
@@ -135,7 +132,7 @@ export const toggleGroupItemVariants = cva(
   [
     // Horizontal padding lives on size variants only (`ps-*` / `pe-*`): icon+label rows need slightly larger inline-start than end for optical balance (matches action-interaction kernel intent; `icon` uses `p-0`).
     // @see docs/design/components/action-interaction-kernel.md#button-policy
-    'inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-sm text-sm font-medium text-muted-foreground ring-offset-background transition-all',
+    'inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-sm text-sm font-medium text-muted-foreground ring-offset-background transition-[color,background-color,box-shadow]',
     '[&_.material-icons]:text-[1.125rem] [&_.material-icons]:leading-none [&_.material-icons]:text-inherit',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
     'disabled:pointer-events-none disabled:opacity-50',
@@ -149,7 +146,6 @@ export const toggleGroupItemVariants = cva(
     'data-[destructive-hint=true]:data-[state=off]:hover:bg-[color:color-mix(in_srgb,var(--destructive)_10%,transparent)] data-[destructive-hint=true]:data-[state=off]:hover:text-destructive',
     'data-[destructive-hint=true]:data-[state=on]:bg-[color:color-mix(in_srgb,var(--destructive)_10%,transparent)] data-[destructive-hint=true]:data-[state=on]:text-destructive data-[destructive-hint=true]:data-[state=on]:shadow-none',
     'data-[destructive-hint=true]:data-[state=on]:hover:bg-[color:color-mix(in_srgb,var(--destructive)_14%,transparent)] data-[destructive-hint=true]:data-[state=on]:hover:text-destructive data-[destructive-hint=true]:data-[state=on]:hover:[&_.material-icons]:text-destructive',
-    'motion-reduce:transition-none motion-reduce:duration-0',
   ].join(' '),
   {
     variants: {

@@ -143,7 +143,7 @@ flowchart TD
 
 ## Persistence matrix
 
-Use glossary columns from [zoomable-map-contract supplement](./media-locations.zoomable-map-contract.supplement.md).
+Use glossary columns from [zoomable-map-contract supplement](../media-locations/media-locations.zoomable-map-contract.supplement.md).
 
 | Field | Text placement wins | EXIF placement wins | Optional mode |
 | --- | --- | --- | --- |

@@ -15,9 +15,38 @@ Load this file for every visual or product implementation task. These rules are 
 
 ## Sizes & Touch
 
-- Touch targets scale with browser font size and must remain accessible: mobile targets at least `3rem × 3rem (48×48px)`, desktop targets at least `2.75rem × 2.75rem (44×44px)`.
-- Compact visual controls are acceptable only when their real hit area still meets the target minimum via padding or transparent hit zones.
-- Layout dimensions, control heights, and spacing follow the rem-first sizing rules in the design token files.
+Touch targets scale with browser font size. The minimum depends on **where the
+control lives**, because the two surfaces are used by different hands.
+
+- **Field surfaces — anything used on site.** Map controls and markers, upload
+  and capture, primary dialog actions, the nav: mobile at least
+  `3rem × 3rem (48×48px)`, desktop at least `2.75rem × 2.75rem (44×44px)`. This
+  is the rule the product exists for and it is not negotiable there. A visually
+  smaller control is fine only when padding or a transparent hit zone brings the
+  real hit area up to that size — `size="icon"` is 40px, so it does **not** reach
+  it on its own.
+- **Dense desktop chrome.** Rail rows and their actions, toolbar triggers,
+  workspace-pane controls: at least `1.5rem × 1.5rem (24×24px)`, **and** no other
+  target inside a 24px-diameter circle centred on it. Below that size, or
+  crowded, fails.
+- **Why two numbers.** 44/48px is WCAG **AAA** (SC 2.5.5) and platform guidance
+  (Apple 44pt, Material 48dp). The **AA** requirement is 24×24px with that
+  spacing condition (SC 2.5.8, WCAG 2.2). Everything the product ships clears
+  AA; the field surfaces additionally hold themselves to AAA, because a gloved
+  hand in sunlight is not an accessibility edge case here, it is the primary
+  user.
+- Layout dimensions, control heights, and spacing follow the rem-first sizing
+  rules in the design token files.
+
+> **Amended 2026-09-08.** This section previously required 44/48px everywhere,
+> with no surface distinction. That was never true of the product — `size="icon"`
+> (40px) is used 78 times, `icon-sm` (32px) and `icon-xs` (24px) in the rails —
+> while the surfaces that genuinely need it (upload shell, map-shell upload, nav,
+> dialogs, workspace-pane footer, panel trigger) already declare a 44/48px
+> minimum in their SCSS. The old text made a non-negotiable out of a rule nothing
+> followed, which invites a future reader to "fix" deliberate dense chrome.
+> Owner decision, 2026-09-08: dense desktop chrome may sit at the AA floor.
+> Background: [`docs/audits/2026-09-08-design-system-adoption.md`](../audits/2026-09-08-design-system-adoption.md) § A6.
 
 ## Color
 

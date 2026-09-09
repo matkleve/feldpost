@@ -411,14 +411,14 @@ ng build --configuration=production
 ### Documentation
 
 - [Upload Manager Spec](../specs/service/media-upload-service/upload-manager.md)
-- [Agent Quick Reference](../agent-quick-reference.md)
+- [Agent Quick Reference](../agent-workflows/agent-quick-reference.md)
 - [Implementation Checklist](../agent-workflows/implementation-checklist.md)
 
 ### Code Reference
 
-- [Current Upload Manager](../../apps/web/src/app/core/upload-manager.service.ts)
-- [Upload Types](../../apps/web/src/app/core/upload-manager.types.ts)
-- [Upload Pipelines](../../apps/web/src/app/core/upload-*-pipeline.service.ts)
+- [Current Upload Manager](../../apps/web/src/app/core/upload/upload-manager.service.ts)
+- [Upload Types](../../apps/web/src/app/core/upload/upload-manager.types.ts)
+- Upload Pipelines — `apps/web/src/app/core/upload/*-pipeline.service.ts`
 
 ### Database Reference
 

@@ -8,14 +8,14 @@ Split-layout organization administration: a left rail lists admin sections (sett
 
 ## What It Looks Like
 
-Desktop: `app-page-grid` with left rail ~16–22rem. Section rail mirrors [settings overlay](../settings-overlay/settings-overlay.md) interaction emphasis (icon + stacked title/subtitle + chevron, selected ink). Center column shows one section at a time.
+Desktop: `app-page-grid` with left rail ~16–22rem. Section rail mirrors [settings overlay](../ui/settings-overlay/settings-overlay.md) interaction emphasis (icon + stacked title/subtitle + chevron, selected ink). Center column shows one section at a time.
 
 ## Where It Lives
 
 - **Route:** `/organization/:section` (`profile` | `roles` | `branding` | `billing` | `integrations` | `export` | `audit`)
 - **Nav:** Organization icon → `/organization/profile`
 - **Parent:** `app-authenticated-app-layout`
-- **Services:** [organization-service](../../service/organization/organization-service.md), [roles-service](../../service/roles/roles-service.md)
+- **Services:** [organization-service](../service/organization/organization-service.md), [roles-service](../service/roles/roles-service.md)
 - **Related:** [colleagues-page.md](./colleagues-page.md) (members, chat, invites)
 
 ## Actions

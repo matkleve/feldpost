@@ -8,7 +8,7 @@ import { cva } from 'class-variance-authority';
 // Backdrop/scrim applied to CDK backdrop via BrnDialog.setOverlayClass (not host geometry).
 // @see docs/MIGRATION_PLAN.md
 export const dialogOverlayVariants = cva(
-  'bg-black/80 backdrop-blur-sm data-[state=open]:opacity-100 data-[state=closed]:opacity-0 transition-opacity duration-200',
+  'bg-[var(--scrim)] backdrop-blur-sm data-[state=open]:opacity-100 data-[state=closed]:opacity-0 transition-opacity duration-200',
 );
 
 // Panel surface inside CDK dialog overlay (positioning owned by CDK / BrnDialog).

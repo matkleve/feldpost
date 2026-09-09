@@ -1,6 +1,6 @@
 # Dropdown System
 
-> **Action contract:** [action-context-matrix](action-context-matrix.md)
+> **Action contract:** [action-context-matrix](../../system/action-context-matrix.md)
 
 ## What It Is
 
@@ -17,11 +17,11 @@ Shared project-selector and upload-row menus MUST reuse **shell + option-menu** 
 
 ## Global CSS / token emission
 
-Semantic custom properties ship from **`apps/web/src/styles.scss`** (tweakcn `:root` / theme blocks and app extensions). The legacy bridge path **`apps/web/src/styles/_legacy-design-tokens.scss`** is **not on disk** (Phase 7 Batch 50; verify **`rg 'legacy-design-tokens|_legacy-design-tokens' apps/web`** → **0**). **`@include meta.load-css('styles/typography-baseline')`** remains the only late-loaded global partial, after Tailwind/Preflight, per the header comment in `styles.scss`. Token bucket ownership: [`docs/design/token-layers.md`](../../design/token-layers.md). Naming checklist: [`docs/design/tokens.md`](../../design/tokens.md). Bridge history: [`docs/migration/phase-7-token-migration.md`](../../../migration/phase-7-token-migration.md).
+Semantic custom properties ship from **`apps/web/src/styles.scss`** (tweakcn `:root` / theme blocks and app extensions). The legacy bridge path **`apps/web/src/styles/_legacy-design-tokens.scss`** is **not on disk** (Phase 7 Batch 50; verify **`rg 'legacy-design-tokens|_legacy-design-tokens' apps/web`** → **0**). **`@include meta.load-css('styles/typography-baseline')`** remains the only late-loaded global partial, after Tailwind/Preflight, per the header comment in `styles.scss`. Token bucket ownership: [`docs/design/token-layers.md`](../../../design/token-layers.md). Naming checklist: [`docs/design/tokens.md`](../../../design/tokens.md). Bridge history: [`docs/migration/phase-7-token-migration.md`](../../../migration/phase-7-token-migration.md).
 
 ## Toolbar menu panels (anchored UI)
 
-**Canonical naming:** Prefer **toolbar menu** / **menu panel** (product vocabulary). **`app-dropdown-shell`** is the anchored floating shell (fixed `top`/`left`); informal “dropdown” and library **Popover** naming are covered in [migration README — Anchored UI](../../migration/README.md#anchored-ui-toolbar-menus) and [glossary — Toolbar menus & naming](../../../glossary.md#toolbar-menus--naming).
+**Canonical naming:** Prefer **toolbar menu** / **menu panel** (product vocabulary). **`app-dropdown-shell`** is the anchored floating shell (fixed `top`/`left`); informal “dropdown” and library **Popover** naming are covered in [migration README — Anchored UI](../../../migration/README.md#anchored-ui-toolbar-menus) and [glossary — Toolbar menus & naming](../../../glossary.md#toolbar-menus--naming).
 
 **Width policy (toolbar shell):** Workspace/media/projects toolbars bind **`[panelClass]="toolbarDropdownPanelClass(activeDropdown())"`** (`toolbar-menu-panel-layout.ts`) so the shell always includes **`toolbar-dropdown option-menu-surface`**, and **appends `toolbar-dropdown--filter`** when the open panel is **Filter**. **`DropdownShellComponent`** SCSS mirrors the floors below; **horizontal `left` clamping** in toolbar TS must use **`toolbarDropdownPositionWidthPx(activeId)`** so the reserved width matches the active panel.
 

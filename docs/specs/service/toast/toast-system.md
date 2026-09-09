@@ -6,7 +6,7 @@ A global notification system that displays short, non-blocking feedback messages
 
 ## What It Looks Like
 
-Compact horizontal bars, bottom-left of viewport (`position: fixed`, `left: 1rem`, `bottom: 1rem`, `width: min(24rem, calc(100vw - 2rem))`), max 3 stacked. Chrome: Spartan `hlmToast` + `toastVariants` CVA, leading severity icon, message text (3-line clamp, `word-break: break-word`), dismiss (×). Severity via tweakcn semantic tokens (`--success`, `--destructive`, `--warning`, `muted-foreground`). z-index `400` (between dropdown plane `300` and modal plane `500`; `--z-toast` removed — see [`docs/design/token-layers.md`](../../../design/token-layers.md)).
+Compact horizontal bars, bottom-left of viewport (`position: fixed`, `left: 1rem`, `bottom: 1rem`, `width: min(24rem, calc(100vw - 2rem))`), max 3 stacked. Chrome: `.toast-surface` in `toast-item.component.scss` (card background, `--radius-md`, `--border`), leading severity indicator, message text (3-line clamp, `word-break: break-word`), dismiss (×). Severity via tweakcn semantic tokens (`--success`, `--destructive`, `--warning`, `muted-foreground`) applied to `.toast-indicator` through the host class the component binds from `item().type` (`:host(.success)`, `:host(.error)`, `:host(.warning)`, `:host(.info)`). z-index `400` (between dropdown plane `300` and modal plane `500`; `--z-toast` removed — see [`docs/design/token-layers.md`](../../../design/token-layers.md)).
 
 ## Where It Lives
 
@@ -153,7 +153,7 @@ interface ToastOptions {
 | `apps/web/src/app/shared/toast/toast-container.component.html` | `@for` over `toast.items()` |
 | `apps/web/src/app/shared/toast/toast-container.component.scss` | Viewport-fixed stack layout (`:host`) |
 | `apps/web/src/app/shared/toast/toast-item.component.ts` | Per-toast host classes + `animationend` → `markVisible` / `afterExit` |
-| `apps/web/src/app/shared/toast/toast-item.component.html` | `hlmToast` surface + icon + message + dismiss |
+| `apps/web/src/app/shared/toast/toast-item.component.html` | `.toast-surface` + indicator + message + `hlmBtn` dismiss |
 | `apps/web/src/app/shared/toast/toast-item.component.scss` | Enter/exit keyframes, message clamp, dismiss/icon styling |
 | `apps/web/src/app/core/toast/toast.service.spec.ts` | Unit tests — timers, stack limit, dedupe, pause/resume |
 

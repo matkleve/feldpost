@@ -22,13 +22,25 @@ export const buttonVariants = cva(
   'relative inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium leading-none ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_.material-icons]:inline-flex [&_.material-icons]:shrink-0 [&_.material-icons]:leading-none',
   {
     variants: {
+      // Every variant carries all five states: default · hover · active ·
+      // focus-visible · disabled. focus-visible and disabled come from the base
+      // row above; hover and active are per-variant. The filled variants had no
+      // `active:` at all, so the primary action gave no press feedback while a
+      // quiet toolbar icon did — and on touch, press is the only feedback there
+      // is. @see docs/design/state-visuals.md
+      //
+      // The filled press states step the same alpha ladder as their hover for
+      // now. Replacing that with `-deep` tokens (an alpha shift is barely
+      // visible on the saturated sandstone gold, and inverts on dark) is a
+      // separate change: docs/audits/2026-09-08-design-system-adoption.md § S2.
       variant: {
-        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        default: 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80',
         destructive: destructiveInteractionEmphasis,
         outline: outlineInteractionEmphasis,
-        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+        secondary:
+          'bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70',
         ghost: quietInteractionEmphasis,
-        link: 'text-primary underline-offset-4 hover:underline',
+        link: 'text-primary underline-offset-4 hover:underline active:text-primary/80',
       },
       size: {
         // Labeled rows: symmetric `ps-2 pe-2` only (no px); `size="icon"` is square geometry without inline padding utilities.

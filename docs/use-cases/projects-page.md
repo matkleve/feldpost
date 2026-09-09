@@ -3,7 +3,7 @@
 > **Primary spec anchor:** [projects-page](../specs/page/projects-page.md)
 > **Related spec:** [projects-dropdown](../specs/component/project/projects-dropdown.md)
 > **Related workspace behavior:** [workspace-view WV-7](workspace-view.md#wv-7-scope-to-projects)
-> **Personas:** [Technician](../archive/use-cases-README.md#persona-technician), [Clerk](../archive/use-cases-README.md#persona-clerk), [Admin](../archive/use-cases-README.md#persona-admin)
+> **Personas** (archived catalogue): [Technician](../archive/2026-04-15-doc-cleanup/archive/use-cases-README.md#persona-technician), [Clerk](../archive/2026-04-15-doc-cleanup/archive/use-cases-README.md#persona-clerk), [Admin](../archive/2026-04-15-doc-cleanup/archive/use-cases-README.md#persona-admin)
 
 ---
 
