@@ -5,7 +5,7 @@
 **Branch:** `claude/upload-process-analysis-0mnzwr` (branched from `origin/main` @ `8e4b1e09`)
 **Started:** 2026-09-08
 
-> Read this file plus the artifacts already produced. A resuming agent must not re-run Phases 0–6.
+> Read this file plus the artifacts already produced. A resuming agent must not re-run Phases 0–7.
 
 ---
 
@@ -20,8 +20,8 @@
 | 4 — State machine audit | `04-state-machine.md` | ✅ done |
 | 5 — Spec ↔ code drift | `05-spec-drift.md` | ✅ done |
 | 6 — Duplication / dead code / ownership | `06-health.md` | ✅ done |
-| 7 — Failure modes | `07-failure-modes.md` | ⏳ next |
-| 8 — Data & security | `08-data-security.md` | ☐ |
+| 7 — Failure modes | `07-failure-modes.md` | ✅ done |
+| 8 — Data & security | `08-data-security.md` | ⏳ next |
 | 9 — Test & spec-quality coverage | `09-coverage.md` | ☐ |
 | 10 — Live/manual verification | (folded into `10-findings.md`) | ☐ — **will be abandoned**, see blockers |
 | 11 — Synthesis | `10-findings.md`, `11-proposals.md` | ☐ |
@@ -148,6 +148,19 @@ Structural: **six files write phases** on one happy path; `missing_data` has two
 - 38 `console.*` in production paths; `drainQueue` logs 3 lines per drain.
 - Also resolved from Phase 3 § 9: **D5** (`reject` dismisses — matches spec), **D6** (apply-to-batch implemented), **D3** (`use_existing` does **not** link project context — the unchecked AC is correctly unchecked).
 
+## Phase 7 headline results (do not re-derive — 30-row matrix in `07-failure-modes.md`)
+
+- **F1.1 (blocker)** DB-insert failure after a successful storage write leaves an **orphaned object**; `upload-manager.md:277` ticks the opposite.
+- **F1.5 (high)** the 180 s timeout rejects but never aborts → a storage object **and** a `media_items` row can land for a job shown as failed.
+- **F1.2/F1.3/F1.4 (high)** three cancel paths delete the object and keep the row.
+- **F1.10 (high)** the attach pipeline detects an RLS-blocked write, logs `✗ WRITE DID NOT PERSIST`, and **completes the job anyway**.
+- **F5.4 (high)** object-URL leak **confirmed**: `revokeLocalUrl` exists in two places and is called from nowhere; the cache has no eviction. Resolves Phase 3 Y2.
+- **F7.1 (high)** a `classifyBatch` rejection freezes the whole batch at `queued` with no error; `submit()` is never awaited.
+- **F2.4** `resolving_address` is a **cosmetic phase** — `enrichWithReverseGeocode` is an empty method; the real work is an un-awaited call elsewhere.
+- **9 of 30 failure modes fail completely silently. 0 of 30 have a test.**
+- Refuted: the plan's "poisoned dedup index" risk (ordering already prevents it) and its assumption that `support/upload-timeout.util.ts` is live.
+- Corrected in place: Phase 2 F4 — `resolveUploadAddress` **is** guarded; the other three fire-and-forget calls are not.
+
 ## Next step
 
-Phase 7 — failure matrix: `Failure | Where | Handling | User-visible result | Residue | Severity` → `07-failure-modes.md`.
+Phase 8 — data & security: tables/RPCs/buckets touched, org scoping in SQL, `resolve_media_location` overload, dropped columns, storage-path isolation, client-vs-server validation → `08-data-security.md`.
