@@ -15,12 +15,21 @@
 // still fire: an FSM waiting for one of those events would otherwise hang.
 //
 // Exempt: continuous progress indicators. A spinner frozen mid-rotation reads as
-// a hung app, which is a worse outcome than the motion it avoids. Existing ones
-// are BEM `…__spinner`; new ones opt out with `data-motion="essential"`.
+// a hung app, which is a worse outcome than the motion it avoids.
+//
+// The match is on `spinner` anywhere in the class list, not on the `__spinner`
+// BEM tail: the first version of this file matched `[class*='__spinner']` and so
+// silently froze `.upload-panel__thumbnail-spinner`, `.invite-editor__qr-spinner`
+// and the `hlm-spinner` primitive, which carries `animate-spin` and no BEM class
+// at all. An exemption that depends on naming luck is not an exemption. All nine
+// spinner classes in the app contain `spinner`, and nothing else does.
+// New indicators opt out with `data-motion="essential"`.
+$motion-exempt: ':not([data-motion="essential"]):not([class*="spinner"]):not([class*="animate-spin"])';
+
 @media (prefers-reduced-motion: reduce) {
-  *:not([data-motion='essential']):not([class*='__spinner']),
-  *:not([data-motion='essential']):not([class*='__spinner'])::before,
-  *:not([data-motion='essential']):not([class*='__spinner'])::after {
+  *#{$motion-exempt},
+  *#{$motion-exempt}::before,
+  *#{$motion-exempt}::after {
     animation-duration: 0.01ms !important;
     animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
