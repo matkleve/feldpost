@@ -42,7 +42,7 @@ one link line in `docs/audits/README.md`, one bullet in `docs/backlog/README.md`
 ## Plan corrections established so far
 
 - Upload spec markdown files: **31 / 3,819 lines**, not the plan's 51 / ≈3,900.
-- `upload-manager-pipeline.md` is **284 lines against a 180-line error cap**, not "552 vs 400". The plan's § 6 lead 9 magnitude is wrong; the direction is right.
+- `upload-manager-pipeline.md` is **284 lines against a 180-line error cap**, not "552 vs 400" — the plan quoted the stale `lint-specs-full.txt` (see Phase 9). Direction right, magnitude and severity class wrong.
 - Plan § 6 lead 8 (`docs/specs/service/media-upload-service/adapters/` empty) is **refuted** — it holds `upload-project-gps-reference.adapter.md`.
 - Plan § 6 lead 7 (mojibake) is **confirmed and wider** — also `core/upload/upload-manager.types.ts:12`.
 
@@ -180,7 +180,7 @@ Structural: **six files write phases** on one happy path; `missing_data` has two
 - **E2E**: the plan's "no upload scenario" is half right — `e2e/phase-10-matrix.spec.ts:98-113` opens and screenshots the panel; no file is ever submitted. A flow test is feasible (config, auth setup and 20 purpose-built fixtures exist) and needs: a project entry, seeded credentials, and **teardown** (the `DUP_` fixtures guarantee a second run behaves differently).
 - ⚠ **Eight fixture filenames are byte-level mojibake** (`Arsenalstra├ƒe` — U+251C+U+0192 where `ß` belongs), so the committed corpus **cannot exercise the umlaut path** that `routing.md` and `supabase/AGENTS.md` single out.
 - Spec split proposed for the four oversized specs (cap is **180**, not the plan's 400); the largest is `upload-panel.md` at 310, 45 % of it Mermaid. **Sequence the splits after the drift fixes**, not before.
-- Plan § 9 references `lint-specs-full.txt`; **no such file exists** in the repo.
+- **`lint-specs-full.txt` explains the plan's "552 vs 400"**: it is a git-tracked lint snapshot from **2026-06-22** (89 specs, 18 errors, 400-line *warning*) still sitting at the repo root. Today's run is 183 specs / 201 errors against a 180-line *error* cap, and the pipeline spec is 284 lines. The plan quoted the stale file verbatim. Regenerate or delete it. `09-coverage.md` § 6.
 
 ## Next step
 

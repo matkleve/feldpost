@@ -165,7 +165,23 @@ This matters because `docs/specs/service/media-upload-service/upload-manager-pip
 
 ## 6. Spec quality and the split proposal (plan § 4 Phase 9.4)
 
-`npm run lint:specs` on this commit: **183 specs checked, 201 errors, 32 warnings** — unchanged from the Phase 0 baseline (`00-baseline.md` § 7), as plan § 9 requires. There is no `lint-specs-full.txt` in the repository to reconcile against (`find . -name 'lint-specs-full.txt'` → 0 hits); the plan's § 9 reference to it is stale.
+`npm run lint:specs` on this commit: **183 specs checked, 201 errors, 32 warnings** — unchanged from the Phase 0 baseline (`00-baseline.md` § 7), as plan § 9 requires.
+
+### Reconciliation with `lint-specs-full.txt` — and where the plan's "552 vs 400" came from
+
+`lint-specs-full.txt` **does** exist: a git-tracked, 135-line captured lint run at the repository root, last touched **2026-06-22**. Reconciled against today's run it is stale in three ways:
+
+| | `lint-specs-full.txt` (2026-06-22) | `npm run lint:specs` today |
+| --- | --- | --- |
+| Specs checked | **89** | **183** |
+| Result | 18 errors, 19 warnings | **201 errors**, 32 warnings |
+| Cap | "recommended max: **400** … Consider splitting" — **warn only** | **180 error / 150 warn** (`docs/specs/README.md`) |
+| `upload-manager-pipeline.md` | **552 lines**, `1 warn` (`:63`, `:118`) | **284 lines**, `1 error` |
+| `upload-panel.md` | 318 lines, **`OK`** | **310 lines**, `1 error` |
+
+**This is the source of plan § 2.1 / § 6 lead 9 / § 9's "552 counted lines vs a 400 recommendation".** The plan was not inventing figures — it quoted this committed snapshot verbatim. The snapshot predates both a 268-line reduction of `upload-manager-pipeline.md` and the tightening of the cap from a 400-line warning to a 180-line error, and it covers barely half the specs that exist now.
+
+**Finding:** a stale, git-tracked lint artefact at the repository root is being read as current, and it caused a downstream plan to state numbers that are wrong in both magnitude and severity class (warn vs error). Severity `low`, effort `S` — regenerate it or delete it; a captured lint run in version control has no way to stay honest. It is also the reason `00-baseline.md` § 7 flagged the plan's figures as irreproducible: they *were* reproducible, just against a June snapshot.
 
 ### Size-cap failures in upload scope
 
