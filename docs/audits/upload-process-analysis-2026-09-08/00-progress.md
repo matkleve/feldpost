@@ -5,7 +5,7 @@
 **Branch:** `claude/upload-process-analysis-0mnzwr` (branched from `origin/main` @ `8e4b1e09`)
 **Started:** 2026-09-08
 
-> Read this file plus the artifacts already produced. A resuming agent must not re-run Phases 0–8.
+> Read this file plus the artifacts already produced. A resuming agent must not re-run Phases 0–9.
 
 ---
 
@@ -22,8 +22,8 @@
 | 6 — Duplication / dead code / ownership | `06-health.md` | ✅ done |
 | 7 — Failure modes | `07-failure-modes.md` | ✅ done |
 | 8 — Data & security | `08-data-security.md` | ✅ done |
-| 9 — Test & spec-quality coverage | `09-coverage.md` | ⏳ next |
-| 10 — Live/manual verification | (folded into `10-findings.md`) | ☐ — **will be abandoned**, see blockers |
+| 9 — Test & spec-quality coverage | `09-coverage.md` | ✅ done |
+| 10 — Live/manual verification | (folded into `10-findings.md`) | ⏳ next — **abandoned with reason**, see blockers |
 | 11 — Synthesis | `10-findings.md`, `11-proposals.md` | ☐ |
 
 Plus, at the very end (the only permitted edits to existing files, plan § 11):
@@ -170,6 +170,18 @@ Structural: **six files write phases** on one happy path; `missing_data` has two
 - A server-side `cleanup_orphaned_storage_objects` job exists (helps F1.1); **no reconciler was found for the reverse case** (row kept, object deleted — F1.2–F1.4).
 - **Everything here is `unverified` against the hosted database** — no CLI, no credentials. `supabase migration list` is the check.
 
+## Phase 9 headline results (do not re-derive — full map in `09-coverage.md`)
+
+- 43 spec files / **326 `it(` blocks**, none of which can run. **`pipelines/replace/` and `pipelines/attach/` have zero spec files** — 13 files / 1,112 LOC untested and unspecced.
+- **0 of the 30 failure modes** in `07-failure-modes.md` has a test.
+- Five **normative** statements have no test, two of them behind **ticked** ACs (`beforeunload`, orphaned-storage cleanup).
+- **16 ready-to-implement missing tests** named, all runnable under Vitest with no browser or backend. T1–T3 target defects a ticked AC currently claims are handled.
+- Two mock-only specs: the tray component test drives the mock orchestrator (the 349-LOC producer adapter has 0 tests), and `upload-batch-project-tray.helpers.spec.ts` tests a **removed** feature.
+- **E2E**: the plan's "no upload scenario" is half right — `e2e/phase-10-matrix.spec.ts:98-113` opens and screenshots the panel; no file is ever submitted. A flow test is feasible (config, auth setup and 20 purpose-built fixtures exist) and needs: a project entry, seeded credentials, and **teardown** (the `DUP_` fixtures guarantee a second run behaves differently).
+- ⚠ **Eight fixture filenames are byte-level mojibake** (`Arsenalstra├ƒe` — U+251C+U+0192 where `ß` belongs), so the committed corpus **cannot exercise the umlaut path** that `routing.md` and `supabase/AGENTS.md` single out.
+- Spec split proposed for the four oversized specs (cap is **180**, not the plan's 400); the largest is `upload-panel.md` at 310, 45 % of it Mermaid. **Sequence the splits after the drift fixes**, not before.
+- Plan § 9 references `lint-specs-full.txt`; **no such file exists** in the repo.
+
 ## Next step
 
-Phase 9 — test & spec-quality coverage: map the 43 spec files to the branch matrix, name the highest-value missing tests, assess E2E feasibility, propose a spec split → `09-coverage.md`.
+Phase 10 — record as abandoned with reason and the per-finding `unverified` list, then Phase 11 synthesis → `10-findings.md`, `11-proposals.md`.
