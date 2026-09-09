@@ -5,7 +5,7 @@
 **Branch:** `claude/upload-process-analysis-0mnzwr` (branched from `origin/main` @ `8e4b1e09`)
 **Started:** 2026-09-08
 
-> Read this file plus the artifacts already produced. A resuming agent must not re-run Phases 0–3.
+> Read this file plus the artifacts already produced. A resuming agent must not re-run Phases 0–4.
 
 ---
 
@@ -17,8 +17,8 @@
 | 1 — Static structure map | `01-structure.md` | ✅ done |
 | 2 — Happy-path trace | `02-happy-path.md` | ✅ done |
 | 3 — Branch matrix | `03-branch-matrix.md` | ✅ done |
-| 4 — State machine audit | `04-state-machine.md` | ⏳ next |
-| 5 — Spec ↔ code drift | `05-spec-drift.md` | ☐ |
+| 4 — State machine audit | `04-state-machine.md` | ✅ done |
+| 5 — Spec ↔ code drift | `05-spec-drift.md` | ⏳ next |
 | 6 — Duplication / dead code / ownership | `06-health.md` | ☐ |
 | 7 — Failure modes | `07-failure-modes.md` | ☐ |
 | 8 — Data & security | `08-data-security.md` | ☐ |
@@ -54,7 +54,7 @@ one link line in `docs/audits/README.md`, one bullet in `docs/backlog/README.md`
 | 2 | `upload-manager-playbook.md` predates the reorg | open → Phase 5 |
 | 3 | Two coexisting location paths (Search Object vs legacy) | open → Phase 3/6 |
 | 4 | Two `@deprecated Removed` markers — removal complete? | open → Phase 6 |
-| 5 | 20 phases vs 5 proposed — real reachable count | open → Phase 4 |
+| 5 | 20 phases vs 5 proposed — real reachable count | **resolved** in Phase 4 § 2 — **all 20 reachable, none dead**; a collapse is a behaviour change, not a cleanup |
 | 6 | `UPLOAD_DEV_FLAGS.useTrayOrchestrator` implies a second tray path | **refuted** in Phase 3 § 8 — `USE_TRAY_ORCHESTRATOR` is a hard `const true`; 13 tray guards are dead |
 | 7 | Mojibake sweep | **confirmed**, scope pending → Phase 6.5 |
 | 8 | `media-upload-service/adapters/` empty | **refuted** in Phase 0 |
@@ -111,6 +111,20 @@ Structural: **six files write phases** on one happy path; `missing_data` has two
 
 **15 branches remain `unverified`**, each with the exact static check listed in `03-branch-matrix.md` § 9. The densest gap is **L12 Branch C city tray** (858 LOC across two files) — it needs its own pass.
 
+## Phase 4 headline results (do not re-derive — full audit in `04-state-machine.md`)
+
+- **All 20 `UploadPhase` members are reachable. None is dead.** 48 `setPhase` sites + 16 `failJob` sites + 12 direct `phase:` writes.
+- **Three write mechanisms, two unguarded**: `setPhase` (event + terminal guard), `failJob` (event, **no** guard), direct `updateJob({phase})` (**no event, no guard**, 9 live transitions).
+- **No transition map or guard function exists anywhere** in the subsystem — a direct violation of `.cursor/rules/ui-state-machine.mdc` § Hard rules and root `AGENTS.md` § State-machine invariants, whose own example is "the upload queue".
+- **T4 `complete → error` is possible** — `failJob` has no terminal guard, so a late post-save rejection can flip a completed job.
+- Multi-owner phases: `queued` 12 writers, `complete` 8, `missing_data` 5, `error` 5. `awaiting_disambiguation` has exactly 1 — the counter-example.
+- **S7** `isBusy` (all non-terminal) and `activeCount` (13-member `ACTIVE_PHASES`) disagree in the same service; a tray-paused job is busy-but-not-active.
+- Dead union members: `issueKind:'duplicate_photo'`, `UploadTrayStep '2'`. Deferred-by-spec: `UploadDisambiguationKind 'context_distance'`.
+- `manager.md:139` types `issueKind` with **4** members (code has 8) and names `duplicate_photo` first — a member with no write site.
+- **`duplicateState` does not exist** (0 hits) — plan § 4 Phase 4.4 artefact, refuted.
+- Two undocumented FSMs found: `UploadGroupResolutionStatus` (7 members, 17+ writers, no spec) and the tray orchestrator's bundle status.
+- Three overlapping "branch" unions for one concept; `UploadTrayStep` declared twice identically.
+
 ## Next step
 
-Phase 4 — state machine audit: extract every phase-write site, diff against the spec FSMs, verdict on all 20 `UploadPhase` members → `04-state-machine.md`.
+Phase 5 — spec ↔ code drift audit: claim-by-claim over the 31 upload specs + service-module symmetry → `05-spec-drift.md`.
