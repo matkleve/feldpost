@@ -136,7 +136,7 @@ flowchart LR
 | Per-job events   | `UploadManagerService.jobPhaseChanged$` | `Observable<...>`                                                                   |
 | Batch events     | `UploadManagerService.batchProgress$`   | `Observable<...>`                                                                   |
 | Skip events      | `UploadManagerService.uploadSkipped$`   | `Observable<...>`                                                                   |
-| Issue kind       | upload lane presenter                   | `'duplicate_photo' \| 'missing_gps' \| 'conflict_review' \| 'upload_error' \| null` |
+| Issue kind       | upload lane presenter                   | `'duplicate_file' \| 'duplicate_photo' \| 'missing_gps' \| 'address_deferred' \| 'address_ambiguous' \| 'document_unresolved' \| 'conflict_review' \| 'upload_error' \| null` |
 | Uploaded actions | upload row presenter                    | `UploadItemAction[]`                                                                |
 
 ## State
@@ -261,7 +261,7 @@ sequenceDiagram
 - [ ] EXIF GPS is preserved even when textual location is present.
 - [x] Title/folder-derived coordinates are compared against EXIF with a 15m tolerance and mismatches are persisted.
 - [x] Hash dedupe runs for photo, document, and video (`photo_v1` / `binary_v1` per [dedup-scope supplement](./upload-manager-pipeline.dedup-scope.supplement.md)).
-- [ ] Duplicate hash matches are resolved via explicit user decision (`use_existing`, `upload_anyway`, `reject`) rather than auto-skip.
+- [ ] Duplicate hash matches from a **colleague** are resolved via explicit user decision (`use_existing`, `upload_anyway`, `reject`); a same-user match auto-skips without a modal per [dedup-scope supplement](./upload-manager-pipeline.dedup-scope.supplement.md) § Behavior matrix.
 - [ ] Duplicate resolution supports a batch apply option for matching items.
 - [ ] Duplicate issue rows expose navigation to the existing placed media.
 - [ ] Duplicate issue rows expose `Upload anyway` only for duplicate-photo review, never for GPS issues.
@@ -274,7 +274,7 @@ sequenceDiagram
 - [x] Address resolution and coordinate resolution are enrichment — failure is silent
 - [ ] Geocoding enrichment `401` performs one silent auth refresh and one retry before failing
 - [ ] Persistent geocoding `401` causes controlled sign-out via `AuthService` (no manual storage-clearing workaround)
-- [x] Orphaned storage files are cleaned up when DB insert fails
+- [ ] Orphaned storage files are cleaned up when DB insert fails — **not implemented**: `persistUploadFile` removes the storage object on cancel but not on a `media_items` insert error; see `docs/audits/upload-process-analysis-2026-09-08/10-findings.md` UP-02
 - [x] Auth change (logout) cancels all active jobs
 - [x] Global progress indicator visible from any page when uploads are active
-- [x] `beforeunload` warning shown when `isBusy()` is true
+- [ ] `beforeunload` warning shown when `isBusy()` is true — **not implemented**: the registered handler is a no-op (`(): void => {}`); see `docs/audits/upload-process-analysis-2026-09-08/10-findings.md` UP-05
