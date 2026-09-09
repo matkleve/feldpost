@@ -5,7 +5,7 @@
 **Branch:** `claude/upload-process-analysis-0mnzwr` (branched from `origin/main` @ `8e4b1e09`)
 **Started:** 2026-09-08
 
-> Read this file plus the artifacts already produced. A resuming agent must not re-run Phases 0–5.
+> Read this file plus the artifacts already produced. A resuming agent must not re-run Phases 0–6.
 
 ---
 
@@ -19,8 +19,8 @@
 | 3 — Branch matrix | `03-branch-matrix.md` | ✅ done |
 | 4 — State machine audit | `04-state-machine.md` | ✅ done |
 | 5 — Spec ↔ code drift | `05-spec-drift.md` | ✅ done |
-| 6 — Duplication / dead code / ownership | `06-health.md` | ⏳ next |
-| 7 — Failure modes | `07-failure-modes.md` | ☐ |
+| 6 — Duplication / dead code / ownership | `06-health.md` | ✅ done |
+| 7 — Failure modes | `07-failure-modes.md` | ⏳ next |
 | 8 — Data & security | `08-data-security.md` | ☐ |
 | 9 — Test & spec-quality coverage | `09-coverage.md` | ☐ |
 | 10 — Live/manual verification | (folded into `10-findings.md`) | ☐ — **will be abandoned**, see blockers |
@@ -52,11 +52,11 @@ one link line in `docs/audits/README.md`, one bullet in `docs/backlog/README.md`
 | --- | --- | --- |
 | 1 | Stale File Map paths in `upload-manager-pipeline.md` | **confirmed and far larger** — 60 broken paths across 9 files; 17/17 File Map rows in that spec are broken |
 | 2 | `upload-manager-playbook.md` predates the reorg | **confirmed** — 11 broken/imaginary paths, "18+ phases" (real: 20), "~600 lines" (real: 19,049), and its central advice contradicts a Hard Blocker. Recommendation: archive |
-| 3 | Two coexisting location paths (Search Object vs legacy) | open → Phase 3/6 |
-| 4 | Two `@deprecated Removed` markers — removal complete? | open → Phase 6 |
+| 3 | Two coexisting location paths (Search Object vs legacy) | **confirmed — both live** (Phase 6 § 3). Discriminator is `job.groupingKey`; the "legacy" branch is the **default** for a plain photo upload |
+| 4 | Two `@deprecated Removed` markers — removal complete? | **behaviourally yes, structurally no** (Phase 6 § 2) — empty stub + dead facade delegation + a test-only helper survive |
 | 5 | 20 phases vs 5 proposed — real reachable count | **resolved** in Phase 4 § 2 — **all 20 reachable, none dead**; a collapse is a behaviour change, not a cleanup |
 | 6 | `UPLOAD_DEV_FLAGS.useTrayOrchestrator` implies a second tray path | **refuted** in Phase 3 § 8 — `USE_TRAY_ORCHESTRATOR` is a hard `const true`; 13 tray guards are dead |
-| 7 | Mojibake sweep | **confirmed**, scope pending → Phase 6.5 |
+| 7 | Mojibake sweep | **confirmed, scoped** — 11 upload files, 12 repo-wide, **no UI impact** (only comments + 4 console/test strings) |
 | 8 | `media-upload-service/adapters/` empty | **refuted** (Phase 0) but the mirror is **inverted** (Phase 5 § 4.5): 3 shipped adapters with no spec, 1 spec with no code |
 | 9 | Spec size gate on `upload-manager-pipeline.md` | **confirmed, corrected** — 284 vs 180, but the **largest offender is `upload-panel.md` at 310**, not the pipeline spec |
 
@@ -136,6 +136,18 @@ Structural: **six files write phases** on one happy path; `missing_data` has two
 - Symmetry: 4 `types.ts` where the rule allows 1; adapters mirror **inverted**; `core/upload-resolver-tray-orchestrator` has **no governance-registry entry**. `core/upload` → `media-upload-service` name mismatch **is** registered, so it is legitimate.
 - Deferred: the 12 address-resolution / Search Object specs were **not** checked claim-by-claim (blocked on the same Branch C pass as `03-branch-matrix.md` L12).
 
+## Phase 6 headline results (do not re-derive — full detail in `06-health.md`)
+
+- **Four cancellation routines, only one correct.** Three delete the storage object but keep the `media_items` row, un-awaited. `06-health.md` § 1.1.
+- **Cancellation is detected by regex over an English error message** (`upload-cancelled.util.ts:3-5`, 4 call sites). Translating the strings turns every cancel into a hard error. Second instance of presentation-text-as-control-flow after `getIssueKind`.
+- **Six auto lane-switches violate a P0 rule** (`upload-panel.feedback-triage.md:48` "never auto-switch lane/tab"). Resolves Phase 3 C7 with a `no`. `06-health.md` § 7.
+- `upload-panel-dialog-handlers.service.ts` (316 LOC, dead) is a **method-for-method duplicate** of the live dialog-actions service.
+- `support/upload-timeout.util.ts` is an **exact duplicate** of a private copy — and it is the dead one.
+- Dead: 5 files ≈ 500 LOC, 7 exports, 2 union members, **13 tray guards**, 7 committed throwaway scripts. The `mockResolverTray` path **ships in the production bundle**.
+- 12 deprecation/TODO markers classified; the dedup family is **not** duplicated (plan assumption refuted).
+- 38 `console.*` in production paths; `drainQueue` logs 3 lines per drain.
+- Also resolved from Phase 3 § 9: **D5** (`reject` dismisses — matches spec), **D6** (apply-to-batch implemented), **D3** (`use_existing` does **not** link project context — the unchecked AC is correctly unchecked).
+
 ## Next step
 
-Phase 6 — duplication, dead code, deprecated markers, oversized files, mojibake sweep → `06-health.md`.
+Phase 7 — failure matrix: `Failure | Where | Handling | User-visible result | Residue | Severity` → `07-failure-modes.md`.
