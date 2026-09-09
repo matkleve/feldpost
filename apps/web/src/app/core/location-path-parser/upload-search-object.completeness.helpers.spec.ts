@@ -57,7 +57,7 @@ describe('classifySearchObjectCompleteness', () => {
   });
 
   it('metadata_only: city without street', () => {
-    expect(classifySearchObjectCompleteness(baseSo({ city: 'Wien', district: 'Mariahilf' }))).toBe(
+    expect(classifySearchObjectCompleteness(baseSo({ city: 'Wien' }))).toBe(
       'metadata_only',
     );
   });

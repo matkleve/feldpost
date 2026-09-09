@@ -67,7 +67,7 @@ describe('UploadPanelInputHandlersService', () => {
       0: new File(['x'], 'photo.jpg', { type: 'image/jpeg' }),
       length: 1,
       item: (index: number) => (index === 0 ? fileList[0] : null),
-    } as FileList;
+    } as unknown as FileList;
     Object.defineProperty(input, 'files', { value: fileList, configurable: true });
 
     service.onFileInputChange({ target: input } as unknown as Event);

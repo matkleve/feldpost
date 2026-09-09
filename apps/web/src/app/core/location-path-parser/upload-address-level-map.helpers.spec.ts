@@ -116,12 +116,12 @@ describe('buildAdminConflictSignature', () => {
 
   it('produces the same signature regardless of conflict entry order', () => {
     const mapA = {
-      state: [{ level: 2, value: 'Wien', source: 'folder', field: 'state' as const }],
-      city: [{ level: 1, value: 'Innsbruck', source: 'folder', field: 'city' as const }],
+      state: [{ level: 2, value: 'Wien', source: 'folder' as const, field: 'state' as const }],
+      city: [{ level: 1, value: 'Innsbruck', source: 'folder' as const, field: 'city' as const }],
     };
     const mapB = {
-      city: [{ level: 1, value: 'Innsbruck', source: 'folder', field: 'city' as const }],
-      state: [{ level: 2, value: 'Wien', source: 'folder', field: 'state' as const }],
+      city: [{ level: 1, value: 'Innsbruck', source: 'folder' as const, field: 'city' as const }],
+      state: [{ level: 2, value: 'Wien', source: 'folder' as const, field: 'state' as const }],
     };
     const sigA = buildAdminConflictSignature(
       detectAdminLevelConflicts(mapA, { municipalities, postcodeMap, country: 'AT' }),

@@ -40,6 +40,8 @@ describe('UploadPanelComponent map-pick row state', () => {
 
     component.pendingLocationPickMediaId.set('media-pick-2');
     fakeManager._imageUploaded$.next({
+      jobId: job.id,
+      batchId: job.batchId,
       mediaId: 'media-pick-2',
       coords: { lat: 48.2, lng: 11.6 },
     });

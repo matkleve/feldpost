@@ -134,7 +134,7 @@ function buildFakeSupabaseService(rpcHandlers: Record<string, RpcHandler> = {}) 
   };
 }
 
-function makeFile(name: string, content: Uint8Array = new Uint8Array(512)): File {
+function makeFile(name: string, content: Uint8Array<ArrayBuffer> = new Uint8Array(512)): File {
   return new File([content], name, { type: 'image/jpeg' });
 }
 

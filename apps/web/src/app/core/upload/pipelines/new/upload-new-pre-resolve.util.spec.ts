@@ -49,7 +49,7 @@ describe('mergeTitleCandidateOnJob', () => {
     };
 
     const result = mergeTitleCandidateOnJob(
-      deps as Parameters<typeof mergeTitleCandidateOnJob>[0],
+      deps as unknown as Parameters<typeof mergeTitleCandidateOnJob>[0],
       job.id,
       job,
     );
@@ -82,7 +82,7 @@ describe('mergeTitleCandidateOnJob', () => {
     };
 
     const result = mergeTitleCandidateOnJob(
-      deps as Parameters<typeof mergeTitleCandidateOnJob>[0],
+      deps as unknown as Parameters<typeof mergeTitleCandidateOnJob>[0],
       job.id,
       job,
     );

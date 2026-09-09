@@ -1,3 +1,4 @@
+import { ElementRef } from '@angular/core';
 import { TwoStepConfirmGroup } from '../../../shared/ui/button/destructive-confirm.interaction';
 
 type UploadDestructiveAction = 'remove_from_project' | 'delete_media' | 'open_in_media';
@@ -6,7 +7,7 @@ describe('Upload panel destructive two-step contract', () => {
   let group: TwoStepConfirmGroup<UploadDestructiveAction>;
 
   beforeEach(() => {
-    group = new TwoStepConfirmGroup(document.createElement('div'));
+    group = new TwoStepConfirmGroup(new ElementRef(document.createElement('div')));
   });
 
   afterEach(() => {

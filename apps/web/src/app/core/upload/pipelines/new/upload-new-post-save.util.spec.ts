@@ -112,7 +112,9 @@ async function runFinalize(
   job: UploadJob,
   onUpdate: (job: UploadJob) => void,
   overrides: {
-    setPhase?: (phase: 'resolving_address' | 'resolving_coordinates' | 'complete') => void;
+    setPhase?: (
+      phase: 'resolving_address' | 'resolving_coordinates' | 'missing_data' | 'complete',
+    ) => void;
     enrichWithForwardGeocode?: () => Promise<{ coords: { lat: number; lng: number } } | undefined>;
     geocodeTitleAddress?: () => Promise<{ lat: number; lng: number } | undefined>;
   } = {},

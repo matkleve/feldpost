@@ -36,7 +36,6 @@ function buildJob(overrides: Partial<UploadJob> = {}): UploadJob {
     titleAddressCoords: { lat: 48.198, lng: 16.335 },
     parsedExif: { coords: { lat: 48.21, lng: 16.37 } },
     disambiguationGroupId: 'group-pending',
-    issueKind: 'source_conflict',
     ...overrides,
   };
 }
