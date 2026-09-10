@@ -42,10 +42,10 @@ Normative rules for upload and persist — audit: [`docs/audits/upload-flow-revi
 | **Never fabricate precision** | Do not reverse-geocode a city centroid (or any pin) into a street or house the user did not supply. |
 | **Reverse geocode scope** | Reverse geocoding is **enrichment for the coordinates-only case** (GPS/EXIF pin with no usable text address). When a text address is already established at a given tier, skip reverse or cap output to that tier. |
 | **Persist text-derived address** | Folder/file `titleAddress` and tray-resolved Search Object fields must reach `resolve_media_location` (or equivalent) so text is not lost to a failed or over-precise geocoder round-trip. |
-| **Explicit precision metadata** | Stored locations should carry an explicit precision level (reuse Search Object / `groupingKey` tier vocabulary: `country` / `state` / `postcode` / `city` / `street` / `houseNumber`) — **not implemented**; see NF-40 / improvement-plan item 14. |
+| **Explicit precision metadata** | `locations.address_precision` stores the highest established tier using Search Object / `groupingKey` vocabulary: `country` \| `state` \| `postcode` \| `city` \| `street` \| `houseNumber`. Migration `20260910140000_upload_address_precision.sql` (**unverified** in CI). |
 | **Later refinement** | Users may add detail post-upload via Media Detail and upload-panel placement actions; distinct from G4 deferred tray lifecycle. |
 
-**Current implementation gap (do not treat as spec):** `resolveUploadAddress` runs unconditionally whenever upload coords exist (`core/upload/support/upload-file-persist.util.ts:232-240`); structured `locations` fields come from reverse geocode only. Fix tracked as NF-40.
+**Upload persist (NF-40, 2026-09-10):** When `buildUploadAddressPersistContext` returns a text-established context (`locationSourceUsed` folder/file + `titleAddress`), `resolveUploadAddress` persists structured fields via `resolve_media_location` and **skips** reverse geocode. Coordinates-only uploads (EXIF GPS, no text) still reverse-geocode as before. See `upload-address-persist-context.helpers.ts`, `upload-address-resolve.util.ts`.
 
 ## Explicit non-goals
 
@@ -138,6 +138,7 @@ Normative detail: [search-tuning.distance-radii-contract.md](../search/search-tu
 
 ## Open points
 
+- **City-only pins vs `locationPinEligible`:** Step 6 sets `locationPinEligible=false` for tier-only Search Objects, but placement still forward-geocodes city text to `job.coords` (`upload-location-placement.service.ts`, `upload-new-pre-resolve.util.ts`). Product decision open — map-primary UX may hide city-only uploads until user confirms a pin.
 - DB columns `state` / `municipality` on `locations` (schema).
 - Runtime hash vs `duplicate_of` column naming at persistence layer.
 - Full Token Normalizer lookup seed (MVP uses local geo adapter).
