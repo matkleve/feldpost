@@ -355,17 +355,17 @@ flowchart TD
 
 | File                                                                   | Purpose                             | Spec                 |
 | ---------------------------------------------------------------------- | ----------------------------------- | -------------------- |
-| `apps/web/src/app/shared/workspace-pane/workspace-toolbar/workspace-toolbar.component.ts` (+ `.html`/`.scss`) | Toolbar with controls              | workspace-toolbar.md |
-| `apps/web/src/app/shared/dropdown-trigger/grouping-dropdown.component.ts` (+ `.html`/`.scss`) | Grouping dropdown with drag-reorder | grouping-dropdown.md |
-| `apps/web/src/app/shared/dropdown-trigger/sort-dropdown.component.ts` (+ `.html`/`.scss`)     | Sort dropdown with search           | sort-dropdown.md     |
-| `apps/web/src/app/shared/dropdown-trigger/filter-dropdown.component.ts` (+ `.html`/`.scss`)   | Notion-style filter builder (includes rule rows)         | filter-dropdown.md   |
-| `apps/web/src/app/shared/workspace-pane/workspace-toolbar/projects-dropdown.component.ts` (+ `.html`/`.scss`) | Projects checklist dropdown         | projects-dropdown.md |
+| `apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component.ts` (+ `.html`/`.scss`) | Toolbar with controls              | workspace-toolbar.md |
+| `apps/web/src/app/shared/dropdown-trigger/grouping/grouping-dropdown.component.ts` (+ `.html`/`.scss`) | Grouping dropdown with drag-reorder | grouping-dropdown.md |
+| `apps/web/src/app/shared/dropdown-trigger/sort/sort-dropdown.component.ts` (+ `.html`/`.scss`)     | Sort dropdown with search           | sort-dropdown.md     |
+| `apps/web/src/app/shared/dropdown-trigger/filter/filter-dropdown.component.ts` (+ `.html`/`.scss`)   | Notion-style filter builder (includes rule rows)         | filter-dropdown.md   |
+| `apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/projects-dropdown.component.ts` (+ `.html`/`.scss`) | Projects checklist dropdown         | projects-dropdown.md |
 | `apps/web/src/app/shared/ui-primitives/group-header.component.ts`                | Collapsible group heading           | active-selection-view.md / ui-primitives |
 | `apps/web/src/app/core/workspace-view/workspace-view.service.ts`                                       | Media pipeline: filter→sort→group   | workspace-view-system.md           |
 | `apps/web/src/app/core/filter/filter.service.ts`                                               | Filter rule state + query building  | filter-dropdown.md   |
 | `apps/web/src/app/core/metadata/metadata.service.ts`                                             | Property CRUD + value management    | docs/specs/service/metadata/metadata-service.md  |
-| `supabase/migrations/XXXXX_cluster_images_rpc.sql`                     | New RPC for cluster media loading   | (this doc)           |
-| `supabase/migrations/XXXXX_metadata_key_types.sql`                     | value_type + chip_options columns   | docs/specs/service/metadata/metadata-service.md  |
+| `supabase/migrations/20260309000001_cluster_images_rpc.sql`                     | New RPC for cluster media loading   | (this doc)           |
+| `supabase/migrations/20260521190000_metadata_keys_key_type.sql`                     | `key_type` column + composite uniqueness on metadata keys   | docs/specs/service/metadata/metadata-service.md  |
 
 ---
 

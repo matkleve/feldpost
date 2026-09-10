@@ -12,7 +12,7 @@ Grid-aligned label and value; rail actions for edit/remove on hover/focus per qu
 
 ## Where It Lives
 
-- **Code:** `apps/web/src/app/shared/workspace-pane/metadata-property-row.component.ts`
+- **Code:** `apps/web/src/app/shared/workspace-pane/media-detail/metadata-property-row.component.ts`
 - **Parent:** `MetadataSectionComponent`
 
 ## Actions
@@ -56,9 +56,9 @@ Editing vs display; `[attr.data-state]` on host recommended.
 
 | File | Purpose |
 | --- | --- |
-| `apps/web/src/app/shared/workspace-pane/metadata-property-row.component.ts` | Component |
-| `apps/web/src/app/shared/workspace-pane/metadata-property-row.component.html` | Template |
-| `apps/web/src/app/shared/workspace-pane/metadata-property-row.component.scss` | Styles |
+| `apps/web/src/app/shared/workspace-pane/media-detail/metadata-property-row.component.ts` | Component |
+| `apps/web/src/app/shared/workspace-pane/media-detail/metadata-property-row.component.html` | Template |
+| `apps/web/src/app/shared/workspace-pane/media-detail/metadata-property-row.component.scss` | Styles |
 
 ## Wiring
 

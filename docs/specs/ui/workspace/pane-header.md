@@ -4,7 +4,7 @@
 
 ## What It Is
 
-Title and chrome for the workspace pane: optional project color control, editable title, and close control. `WorkspacePaneHeaderComponent` is a thin standalone wrapper that forwards inputs/outputs to `PaneHeaderComponent`.
+Title and chrome for the workspace pane: optional project color control, editable title, and close control. `WorkspacePaneComponent` uses `PaneHeaderComponent` directly (the former `WorkspacePaneHeaderComponent` pass-through wrapper was removed).
 
 ## What It Looks Like
 
@@ -12,7 +12,7 @@ Leading optional color button (swatch + palette icon), centered title or inline 
 
 ## Where It Lives
 
-- **Code:** `apps/web/src/app/shared/workspace-pane/pane-header.component.ts` (inline template), `workspace-pane-header/workspace-pane-header.component.ts` (wrapper)
+- **Code:** `apps/web/src/app/shared/pane-chrome/header/pane-header.component.ts` (+ `.scss`)
 
 ## Actions
 
@@ -25,11 +25,10 @@ Leading optional color button (swatch + palette icon), centered title or inline 
 ## Component Hierarchy
 
 ```
-WorkspacePaneHeader (optional wrapper)
-└── PaneHeader
-    ├── Leading color button
-    ├── Title / input
-    └── Close
+PaneHeader
+├── Leading color button
+├── Title / input
+└── Close
 ```
 
 ## Visual Behavior Contract
@@ -58,10 +57,8 @@ Boolean inputs (`editable`, `editEnabled`, `colorPickerOpen`) compose edit and p
 
 | File | Purpose |
 | --- | --- |
-| `apps/web/src/app/shared/workspace-pane/pane-header.component.ts` | Header implementation |
-| `apps/web/src/app/shared/workspace-pane/pane-header.component.scss` | Styles |
-| `apps/web/src/app/shared/workspace-pane/workspace-pane-header/workspace-pane-header.component.ts` | Wrapper |
-| `apps/web/src/app/shared/workspace-pane/workspace-pane-header/workspace-pane-header.component.scss` | Wrapper (if any) |
+| `apps/web/src/app/shared/pane-chrome/header/pane-header.component.ts` | Header implementation |
+| `apps/web/src/app/shared/pane-chrome/header/pane-header.component.scss` | Styles |
 
 ## Wiring
 
@@ -70,4 +67,3 @@ Boolean inputs (`editable`, `editEnabled`, `colorPickerOpen`) compose edit and p
 ## Acceptance Criteria
 
 - [x] Close affordance emits to layout host to collapse pane.
-- [ ] Optional: merge wrapper into single component if duplication adds no behavior.

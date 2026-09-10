@@ -9,11 +9,11 @@ A horizontal row of tabs inside the Workspace Pane. Each tab represents a group 
 
 Scrollable horizontal row; `border-bottom: 1px solid var(--border)` underlines the row. Tab triggers use `[brnTabsTrigger][hlmTabsTrigger]`: muted foreground text by default; active trigger receives `color: var(--foreground)` + `border-bottom: 2px solid var(--primary)` (tweakcn primary token — was legacy `--color-clay`; background transparent — was legacy `--color-bg-elevated`). Overflow scrolls horizontally (scrollbar hidden). Active Selection tab is pinned leftmost and cannot be closed/renamed. Named Group tabs have a context menu on long-press.
 
-**Spec sync (2026-05-19, Phase 1 Wave P5):** Legacy `--color-clay` / `--color-bg-elevated` references replaced by tweakcn `var(--primary)` / `var(--foreground)` per `group-tab-bar.component.scss`.
+**Spec sync (2026-05-19, Phase 1 Wave P5):** Legacy `--color-clay` / `--color-bg-elevated` references replaced by tweakcn `var(--primary)` / `var(--foreground)` per workspace tab styling in `WorkspacePaneComponent`.
 
 ## Where It Lives
 
-- **Parent**: Workspace Pane
+- **Parent**: Workspace Pane — tab triggers live in `WorkspacePaneComponent` (`BrnTabs` / `HlmTabs`); named-group tabs remain a future contract (see Acceptance Criteria)
 - **Always visible** when Workspace Pane is open
 
 ## Actions
@@ -67,7 +67,8 @@ flowchart LR
 
 | File                                                     | Purpose           |
 | -------------------------------------------------------- | ----------------- |
-| `apps/web/src/app/shared/workspace-pane/group-tab-bar.component.ts` | Tab bar component |
+| `apps/web/src/app/shared/workspace-pane/shell/workspace-pane.component.html` | Tab list + triggers in pane template |
+| `apps/web/src/app/shared/workspace-pane/shell/workspace-pane.component.ts` | Tab state (`activeTab`) and content switching |
 
 ## Wiring
 

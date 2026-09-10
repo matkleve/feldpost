@@ -18,7 +18,7 @@ Each media card in the thumbnail grid shows a quiet checkbox affordance at top-l
 ## Where It Lives
 
 - **Route**: `/`
-- **Parent**: `WorkspacePaneComponent` content stack in `apps/web/src/app/shared/workspace-pane/workspace-pane.component.ts`
+- **Parent**: `WorkspacePaneComponent` content stack in `apps/web/src/app/shared/workspace-pane/shell/workspace-pane.component.ts`
 - **Appears when**: `selectedMediaIds.size > 0` in workspace selection scope
 
 ## Actions & Interactions
@@ -166,12 +166,12 @@ Share-set SQL, RLS, RPC stubs, and ER diagram (after Schema notes table): **[wor
 
 | File                                                                                     | Purpose                                                      |
 | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| `apps/web/src/app/shared/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.ts`   | Bottom action bar component                                  |
-| `apps/web/src/app/shared/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.html` | Template for selection, export, and inline dialogs                    |
-| `apps/web/src/app/shared/workspace-pane/workspace-pane-footer/workspace-pane-footer.component.scss` | Bar layout, transitions, responsive behavior                 |
+| `apps/web/src/app/shared/workspace-pane/footer/workspace-pane-footer/workspace-pane-footer.component.ts`   | Bottom action bar component                                  |
+| `apps/web/src/app/shared/workspace-pane/footer/workspace-pane-footer/workspace-pane-footer.component.html` | Template for selection, export, and inline dialogs                    |
+| `apps/web/src/app/shared/workspace-pane/footer/workspace-pane-footer/workspace-pane-footer.component.scss` | Bar layout, transitions, responsive behavior                 |
 | `apps/web/src/app/shared/project-select-dialog/project-select-dialog.component.ts`       | Project picker dialog (assign project)                      |
 | `apps/web/src/app/shared/text-input-dialog/text-input-dialog.component.ts`              | Text input dialog (bulk address change)                      |
-| `apps/web/src/app/features/map/map-shell/map-shell.component.ts`                                          | Host wiring for `?share` URL token resolve and pane opening  |
+| `apps/web/src/app/features/map/map-shell/component/map-shell.component.ts`                                          | Host wiring for `?share` URL token resolve and pane opening  |
 | `apps/web/src/app/core/workspace-selection/workspace-selection.service.ts`                                                    | Selection state, toggles, select all/none, keyboard handling |
 | `apps/web/src/app/core/workspace-view/workspace-view.service.ts`                                                         | Raw workspace media list updates after bulk actions           |
 | `apps/web/src/app/core/supabase/supabase.service.ts`                                                                     | Supabase client (bulk delete and other mutations)            |
