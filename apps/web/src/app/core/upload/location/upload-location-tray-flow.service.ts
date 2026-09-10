@@ -35,6 +35,7 @@ import {
   resolveLayerPackageJobs,
 } from './upload-location-layer-package-choice.util';
 import type { AdminFieldKey } from '../address-resolution/upload-address-level-map.types';
+import { CONTAINMENT_CHECK_ENTER_DIFFERENT_CANDIDATE_ID } from './upload-location-geocode-outcome.util';
 import type {
   DisambiguationResolvedEvent,
   UploadAddressCandidate,
@@ -139,14 +140,14 @@ export class UploadLocationTrayFlowService {
   }
 
   applyContainmentCheckChoice(group: UploadDisambiguationGroup, candidateId: string): void {
-    if (candidateId === 'enter-different') {
-      this.resolution().deferGroup(group.id);
+    if (candidateId === CONTAINMENT_CHECK_ENTER_DIFFERENT_CANDIDATE_ID) {
+      this.openContainmentFallbackTray(group);
       return;
     }
 
     for (const jobId of group.jobIds) {
       this.jobState.updateJob(jobId, {
-        resolutionStatus: 'failed',
+        resolutionStatus: 'resolved',
         pendingPartialLocation: true,
         disambiguationGroupId: undefined,
       });
@@ -166,6 +167,46 @@ export class UploadLocationTrayFlowService {
       selectedCandidateId: candidateId,
     };
     this.resolution().notifyDisambiguationResolved(resolvedEvent);
+    this.disambiguationStore.syncBatchDisambiguationAggregates(group.batchId);
+    this.disambiguationStore.pickNextActiveGroup(group.batchId);
+  }
+
+  private resolveContainmentGroupingKey(
+    group: UploadDisambiguationGroup,
+    sampleJob?: ReturnType<UploadJobStateService['findJob']>,
+  ): string | undefined {
+    if (sampleJob?.groupingKey) {
+      return sampleJob.groupingKey;
+    }
+    const prefix = 'containment|';
+    return group.queryKey.startsWith(prefix) ? group.queryKey.slice(prefix.length) : undefined;
+  }
+
+  private openContainmentFallbackTray(group: UploadDisambiguationGroup): void {
+    const sampleJob = this.jobState.findJob(group.jobIds[0]);
+    const groupingKey = this.resolveContainmentGroupingKey(group, sampleJob);
+    const groupState = groupingKey
+      ? this.orchestrator.getGroupState(group.batchId, groupingKey)
+      : undefined;
+    if (!groupState) {
+      this.resolution().deferGroup(group.id);
+      return;
+    }
+    this.disambiguationStore.patchGroup({
+      ...group,
+      resolutionStatus: 'resolved',
+      resolutionGateOpen: false,
+      selectedCandidateId: CONTAINMENT_CHECK_ENTER_DIFFERENT_CANDIDATE_ID,
+    });
+    const fallbackState: UploadGroupResolutionState = {
+      ...groupState,
+      status: 'needsTray',
+      trayStep: '1a',
+      containmentCheck: false,
+      candidates: [],
+    };
+    this.orchestrator.patchGroupState(group.batchId, fallbackState);
+    this.registerTrayStepGroup(group.batchId, fallbackState);
     this.disambiguationStore.syncBatchDisambiguationAggregates(group.batchId);
     this.disambiguationStore.pickNextActiveGroup(group.batchId);
   }
@@ -256,7 +297,7 @@ export class UploadLocationTrayFlowService {
     const so = job?.groupingKey
       ? this.orchestrator.getGroupState(group.batchId, job.groupingKey)?.searchObject
       : undefined;
-    const street = so?.street?.trim() ?? group.titleAddress.split(/\s+/)[0] ?? '';
+    const street = so?.street?.trim() ?? group.titleAddress.trim();
     const countryCode = so?.country?.trim().toLowerCase() ?? 'at';
     const hits = await this.geocoding.searchStreetHouseNumbers(
       { street, city: trimmed, countryCode },

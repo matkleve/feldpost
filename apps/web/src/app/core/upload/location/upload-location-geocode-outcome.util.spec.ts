@@ -54,6 +54,20 @@ describe('patchContainmentCheckOutcome', () => {
     expect(orchestrator.patchGroupState).toHaveBeenCalledWith('batch-1', result);
   });
 
+  it('emits i18n label keys for containment options', () => {
+    const orchestrator = { patchGroupState: vi.fn() };
+    const result = patchContainmentCheckOutcome(orchestrator as never, 'b', makeGroup());
+
+    expect(result.candidates?.[0]?.labelKey).toBe('upload.resolver.containment.option.keep');
+    expect(result.candidates?.[0]?.labelParams).toEqual({
+      street: 'Hauptstraße',
+      city: 'Wien',
+    });
+    expect(result.candidates?.[1]?.labelKey).toBe(
+      'upload.resolver.containment.option.enterDifferent',
+    );
+  });
+
   it('includes street and city in keep-address label', () => {
     const orchestrator = { patchGroupState: vi.fn() };
     const group = makeGroup({

@@ -56,7 +56,7 @@ Every tray scenario maps to exactly one contradiction class. The class determine
 | **C2** | Folder vs filename layers | Folder path layers vs filename-parsed layers | `detectPackageConflicts` | `layer_package` | "Which address information should we use?" | **Done** |
 | **C3** | Folder-level admin hierarchy | Different admin values at different folder depth levels for same field | `detectAdminLevelConflicts` | `admin_level_conflict` | "Level N says X, Level M says Y. Which is correct?" | **Done** |
 | **C4** | Folder-to-folder sibling | Sibling folders disagree on an admin field shared by a common child (e.g. `Wien/` and `St. Pölten/` both contain `1200/Straße`) | Gazetteer containment check after C3 resolution | `admin_level_conflict` (cascading) | "Postcode 1200 is in Wien. Is that correct for these files?" | **Gap G1** |
-| **C5** | Placement vs project anchor | Resolved coords far from org project GPS reference | `contextDistanceMaxMeters` (org km cap) | `context_distance` | "Is this photo in the right project area?" | **Spec only** |
+| **C5** | Placement vs project anchor | Resolved coords far from org project GPS reference | `contextDistanceMaxMeters` (org km cap) | `context_distance` *(reserved — tray deferred)* | "Is this photo in the right project area?" | **Distance filter done; tray deferred** — see [upload-project-gps-reference.adapter.md](./adapters/upload-project-gps-reference.adapter.md) |
 
 ### Class A — Ambiguity (one source, multiple valid interpretations)
 
@@ -69,7 +69,7 @@ Every tray scenario maps to exactly one contradiction class. The class determine
 
 | ID | Phenomenon | Trigger | Detector | `disambiguationKind` | Question | Impl |
 | --- | --- | --- | --- | --- | --- | --- |
-| **V1** | Resolved combination not in gazetteer | After C3/C4 propagation: `street` not found in resolved `city+postcode` | Photon 0-hit for resolved combo | *(new: `containment_check`)* | "{street} was not found in {city} {postcode}. Is this correct, or enter a different address?" | **Gap G3** |
+| **V1** | Resolved combination not in gazetteer | After C3/C4 propagation: `street` not found in resolved `city+postcode` | Photon 0-hit for resolved combo | `containment_check` | "{street} was not found in {city} {postcode}. Is this correct, or enter a different address?" | **Done** — `patchContainmentCheckOutcome` + `registerContainmentCheckGroup` |
 | **V2** | Post-upload field inconsistency | Media Detail open; forward geocode disagrees with stored fields | `AddressReconciliationService` confidence scoring | *(reconciliation banner, not tray)* | "We found a better match for this address. Apply?" | **Done** (sibling system) |
 
 ---
@@ -154,8 +154,8 @@ This gate prevents the system from silently pushing a user's city choice through
 | Gap | Title | Description | Related | Priority |
 | --- | --- | --- | --- | --- |
 | **G1** | Folder-to-folder sibling detection | When sibling folders provide different admin values for a shared child (e.g. `Wien/1200/` vs `St. Pölten/1200/`), the system must detect that the child's SO has inherited conflicting ancestry and open a tray scoped to `(postcode, conflicting-city-set)`, not per-street | C4 | High |
-| **G2** | Decision scope by tier, not by groupingKey | Admin-level tray decisions must propagate to all jobs sharing the resolved constraint, even if they have different `groupingKey` values (different streets). Current: scoped to `group.jobIds`. Required: fan-out to all jobs with same `(batchId, field, conflicting-value-set)` | Propagation scope rules | High |
-| **G3** | Post-resolution validation gate | After admin conflict resolution + propagation, validate the resulting `(street, city, postcode)` against Photon before proceeding. If 0 hits, open a V1 validation tray instead of letting the job reach `unresolvable` | V1 | Medium |
+| **G2** | Decision scope by tier, not by groupingKey | Admin-level tray registration merges jobs by `adminConflictQueryKey` (`buildAdminConflictSignature`) in `classifyBatch`, not per-street `groupingKey`. Resolution apply still scopes to `group.jobIds` until post-choice regroup. | Propagation scope rules | **Partial** — merge at tray open; full tier fan-out on apply still open |
+| **G3** | Post-resolution validation gate | After admin conflict resolution, Photon 0-hit on resolved `(street, city)` opens `containment_check` tray (`patchContainmentCheckOutcome`) instead of silent `partial`. | V1 | **Done** |
 | **G4** | Deferred resolution lifecycle | Skip must set an explicit `deferred` status that persists through upload and is actionable in Media Detail | Deferred contract | Medium |
 | **G5** | Cross-batch dedup for admin conflicts | Same `(field, conflicting-value-set)` across batches must reuse/merge, not open duplicate trays | Already documented in `address-resolution-model.md` | Medium |
 
@@ -185,8 +185,8 @@ All four systems implement the same principle: **the system must not silently pe
 ## Acceptance criteria
 
 - [ ] G1: Folder-to-folder sibling conflict detected and tray scoped to `(postcode, conflicting-city-set)`
-- [ ] G2: Admin-level resolution fans out to all jobs with same constraint violation, not just `group.jobIds`
-- [ ] G3: Post-resolution Photon probe before Step 5; V1 tray on 0 hits
+- [x] G2 (partial): `classifyBatch` merges admin conflicts into one `adminConflictQueryKey` group per `(batchId, field, conflicting-value-set)` — `upload-address-resolution.orchestrator.ts` `adminConflictAccum`; vitest `upload-address-resolution.orchestrator.spec.ts`
+- [x] G3: Photon 0-hit after admin resolution opens `containment_check` tray — `patchContainmentCheckOutcome`, `registerContainmentCheckGroup`; vitest `upload-location-tray-flow.service.spec.ts` (`G3:` cases)
 - [ ] G4: Skip → `deferred` status persists through upload and is visible/actionable in Media Detail
 - [ ] G5: Cross-batch admin conflict dedup (shared with `address-resolution-model.md` AC)
-- [ ] Contradiction taxonomy table above stays in sync with `disambiguationKind` type union in `upload-manager.types.ts`
+- [x] Contradiction taxonomy table above stays in sync with `disambiguationKind` type union in `upload-manager.types.ts` (`context_distance` reserved for deferred C5 tray)
