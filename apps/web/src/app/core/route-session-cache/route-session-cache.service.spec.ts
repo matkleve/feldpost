@@ -143,7 +143,7 @@ describe('RouteSessionCacheService', () => {
     await vi.advanceTimersByTimeAsync(800);
 
     expect(handler).not.toHaveBeenCalled();
-    expect(service.restore(ROUTE_SESSION_SHELL_KEYS.MEDIA, mediaSignature)?.[0].id).toBe('cached');
+    expect(service.restore<WorkspaceMedia[]>(ROUTE_SESSION_SHELL_KEYS.MEDIA, mediaSignature)?.[0].id).toBe('cached');
 
     service.registerRevalidateHandler(ROUTE_SESSION_SHELL_KEYS.MEDIA, handler);
     imageUploaded$.next({ mediaId: 'new-2' });

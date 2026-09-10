@@ -1,10 +1,10 @@
 import { TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
+import { signal, type Signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { describe, expect, it, beforeEach } from 'vitest';
 import { GeocoderProvider } from './geocoder.provider';
 import { GeocodingService } from '../../geocoding/geocoding.service';
-import { MediaClusterService } from '../../geocoding/media-cluster.service';
+import { MediaClusterService, type MediaCluster } from '../../geocoding/media-cluster.service';
 import { provideOrgSearchTuningTestDouble } from '../search-test.providers';
 
 describe('GeocoderProvider', () => {
@@ -17,7 +17,11 @@ describe('GeocoderProvider', () => {
   };
   let clusterMock: {
     ensureLoaded: ReturnType<typeof vi.fn>;
-    clusters: ReturnType<typeof signal<unknown[]>>['asReadonly'];
+    // `clusters` is a readonly signal *value* on the real service
+    // (`this.clusterRows.asReadonly()`), not a method that returns one — the
+    // previous type here (`ReturnType<typeof signal<...>>['asReadonly']`)
+    // named the type of the `.asReadonly` method itself.
+    clusters: Signal<MediaCluster[]>;
   };
 
   const schleiergasseResult = {
@@ -43,7 +47,7 @@ describe('GeocoderProvider', () => {
       reverse: vi.fn().mockResolvedValue(null),
     };
 
-    const emptyClusters = signal([]).asReadonly();
+    const emptyClusters = signal<MediaCluster[]>([]).asReadonly();
     clusterMock = {
       ensureLoaded: vi.fn().mockResolvedValue(undefined),
       clusters: emptyClusters,

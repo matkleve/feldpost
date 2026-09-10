@@ -80,7 +80,14 @@ describe('OrgSearchTuningService', () => {
       data: { fullName: 'Worker', organizationId: 'org-1', roles: ['worker'] },
       error: null,
     });
-    vi.mocked(supabase.client.rpc).mockResolvedValueOnce({ data: false, error: null });
+    vi.mocked(supabase.client.rpc).mockResolvedValueOnce({
+      data: false,
+      error: null,
+      success: true,
+      count: null,
+      status: 200,
+      statusText: 'OK',
+    });
     await service.bootstrapFromSession();
     await expect(service.saveOrgProfile({ resolver: { maxGeocoderResults: 4 } })).rejects.toThrow(
       /admin/i,

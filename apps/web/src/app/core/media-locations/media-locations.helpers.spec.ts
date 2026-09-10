@@ -270,7 +270,7 @@ describe('media-locations.helpers', () => {
     ).toBe('Liechtensteinstraße 135, 1090 Wien');
     expect(
       formatLocationDisplayLine(
-        { street: null, house_number: null, staircase: null, door: null, postcode: null, city: null, address_label: 'Site gate' },
+        { street: null, house_number: null, staircase: null, door: null, postcode: null, city: null, district: null, country: null, address_label: 'Site gate' },
         'Top',
       ),
     ).toBe('Site gate');
@@ -408,6 +408,8 @@ describe('media-locations.helpers', () => {
         door: null,
         postcode: null,
         city: null,
+        district: null,
+        country: null,
         address_label: null,
       }),
     ).toBe(true);
@@ -419,6 +421,8 @@ describe('media-locations.helpers', () => {
         door: null,
         postcode: null,
         city: null,
+        district: null,
+        country: null,
         address_label: 'Site gate',
       }),
     ).toBe(true);
@@ -430,6 +434,8 @@ describe('media-locations.helpers', () => {
         door: null,
         postcode: null,
         city: 'Wien',
+        district: null,
+        country: null,
         address_label: null,
       }),
     ).toBe(false);
@@ -441,6 +447,8 @@ describe('media-locations.helpers', () => {
         door: null,
         postcode: null,
         city: null,
+        district: null,
+        country: null,
         address_label: null,
       }),
     ).toBe(false);

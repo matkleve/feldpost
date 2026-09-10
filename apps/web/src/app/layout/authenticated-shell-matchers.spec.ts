@@ -3,7 +3,9 @@ import { describe, expect, it } from 'vitest';
 import { mapShellMatcher, mediaShellMatcher, projectsShellMatcher } from './authenticated-shell-matchers';
 
 function seg(...paths: string[]): UrlSegment[] {
-  return paths.map((path, index) => new UrlSegment(path, { index }));
+  // UrlSegment's second argument is matrix parameters ({[name]: string}),
+  // never an index — this helper doesn't use matrix params, so it's {}.
+  return paths.map((path) => new UrlSegment(path, {}));
 }
 
 describe('authenticated-shell-matchers', () => {

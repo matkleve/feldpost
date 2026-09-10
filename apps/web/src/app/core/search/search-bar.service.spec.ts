@@ -31,6 +31,8 @@ describe('SearchBarService', () => {
   let service: SearchBarService;
   let supabaseMock: { client: { from: ReturnType<typeof vi.fn> } };
   let geocodingMock: {
+    ensureGeocodeAvailable: ReturnType<typeof vi.fn>;
+    isGeocodeBlocked: ReturnType<typeof vi.fn>;
     search: ReturnType<typeof vi.fn>;
     searchStructured: ReturnType<typeof vi.fn>;
     reverse: ReturnType<typeof vi.fn>;

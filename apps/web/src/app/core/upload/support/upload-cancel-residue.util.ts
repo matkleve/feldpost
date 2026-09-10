@@ -13,7 +13,14 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 export async function removeUploadCancelResidue(
   storagePath: string | undefined,
   mediaId: string | undefined,
-  supabaseClient: Pick<SupabaseClient, 'storage' | 'from'>,
+  // Narrowed to what this function actually calls (`storage.from(...).remove(...)`,
+  // `from(...).delete()...`) rather than `Pick<SupabaseClient, 'storage' | 'from'>`,
+  // which requires a full StorageClient (19 methods) just to satisfy the type —
+  // and so forces every test mock to stub 19 unused methods too.
+  supabaseClient: {
+    storage: Pick<SupabaseClient['storage'], 'from'>;
+    from: SupabaseClient['from'];
+  },
 ): Promise<void> {
   if (storagePath) {
     await supabaseClient.storage.from('media').remove([storagePath]);

@@ -2,6 +2,7 @@ import { signal } from '@angular/core';
 import { describe, expect, it, vi } from 'vitest';
 import { MediaDetailDataFacade } from './media-detail-data.facade';
 import type { MediaRecord } from '../../shared/workspace-pane/media-detail/media-detail-view.types';
+import type { MetadataValueType } from '../metadata/metadata.types';
 
 const MOCK_MEDIA: MediaRecord = {
   id: 'img-1',
@@ -32,7 +33,7 @@ function createFacade(overrides?: { media?: Partial<MediaRecord> }) {
   const loading = signal(false);
   const error = signal<string | null>(null);
   const projectOptions = signal<any[]>([]);
-  const metadataKeyDefinitions = signal<{ id: string; key_name: string; key_type: string }[]>([]);
+  const metadataKeyDefinitions = signal<{ id: string; key_name: string; key_type: MetadataValueType }[]>([]);
 
   const supabase = {
     client: {
@@ -152,7 +153,7 @@ describe('MediaDetailDataFacade', () => {
   });
 
   it('marks no-photo rows without requesting signed urls', async () => {
-    const { facade, deps } = createFacade({ image: { storage_path: null, thumbnail_path: null } });
+    const { facade, deps } = createFacade({ media: { storage_path: null, thumbnail_path: null } });
 
     await facade.loadMedia('img-1', new AbortController().signal);
 

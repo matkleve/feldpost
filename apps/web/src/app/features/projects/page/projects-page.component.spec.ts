@@ -13,6 +13,7 @@ function createProject(overrides: Partial<ProjectListItem> = {}): ProjectListIte
     id: 'project-1',
     name: 'Pilot Project',
     colorKey: 'clay',
+    locationRequired: false, // deprecated, always false — docs/architecture/deprecated-schema.md
     archivedAt: null,
     createdAt: '2026-03-20T10:00:00.000Z',
     updatedAt: '2026-03-20T10:00:00.000Z',

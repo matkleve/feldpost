@@ -1,4 +1,3 @@
-import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
 import { describe, expect, it, beforeEach } from 'vitest';
@@ -6,6 +5,7 @@ import { DbAddressProvider } from './db-address.provider';
 import { SupabaseService } from '../../supabase/supabase.service';
 import { provideOrgSearchTuningTestDouble } from '../search-test.providers';
 import { SEARCH_TUNING_SYSTEM_DEFAULTS } from '../search-tuning.defaults';
+import type { SearchAddressCandidate } from '../search.models';
 
 function createQueryBuilder(result: { data: unknown[]; error: unknown }) {
   const builder = {
@@ -186,7 +186,7 @@ describe('DbAddressProvider', () => {
 
     expect(results).toHaveLength(2);
     expect(results[0]?.family).toBe('db-address');
-    expect(results[0]?.imageCount).toBe(2);
+    expect((results[0] as SearchAddressCandidate | undefined)?.imageCount).toBe(2);
     expect(results[0]?.label).toContain('Burgstrasse');
     expect((results[0]?.score ?? 0)).toBeGreaterThan(results[1]?.score ?? 0);
   });
@@ -316,8 +316,7 @@ describe('DbAddressProvider', () => {
       error: null,
     });
 
-    const tuningDouble = provideOrgSearchTuningTestDouble();
-    tuningDouble.useValue.orgSearchConfig = signal({
+    const tuningDouble = provideOrgSearchTuningTestDouble({
       ...SEARCH_TUNING_SYSTEM_DEFAULTS,
       resolver: {
         ...SEARCH_TUNING_SYSTEM_DEFAULTS.resolver,
