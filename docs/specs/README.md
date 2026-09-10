@@ -7,7 +7,7 @@
 - For the area you are touching, read the local README in that subfolder.
 - Active specs index is per-area — do not maintain a global flat table.
 
-Last updated: 2026-04-28
+Last updated: 2026-09-10
 
 Authoritative governance source: docs/specs/GOVERNANCE-MATRIX.md.
 
