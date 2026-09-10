@@ -34,6 +34,7 @@ import { isCancelledUploadJob } from '../../support/upload-cancelled.util';
 import { handleCancelledStorageCleanup } from '../../support/upload-cancelled-storage-cleanup.util';
 import { runUploadDedupCheck } from '../../support/upload-dedup-check.util';
 import { UploadEnrichmentService } from '../../support/upload-enrichment.service';
+import { buildUploadAddressPersistContext } from '../../address-resolution/upload-address-persist-context.helpers';
 import { UploadJobStateService } from '../../support/upload-job-state.service';
 import type { UploadJob } from '../../upload-manager.types';
 import type { PipelineContext } from '../../upload-manager.types';
@@ -142,8 +143,13 @@ export class UploadAttachPipelineService {
       emitBatchProgress: (batchId) => ctx.emitBatchProgress(batchId),
       drainQueue: () => ctx.drainQueue(),
       enrichWithReverseGeocode: (mediaId) => this.enrichment.enrichWithReverseGeocode(mediaId),
-      enrichWithForwardGeocode: (mediaId, titleAddress) =>
-        this.enrichment.enrichWithForwardGeocode(mediaId, titleAddress),
+      enrichWithForwardGeocode: (mediaId, titleAddress) => {
+        const job = this.jobState.findJob(jobId);
+        const addressContext = job
+          ? buildUploadAddressPersistContext({ job, groupState: null })
+          : null;
+        return this.enrichment.enrichWithForwardGeocode(mediaId, titleAddress, addressContext);
+      },
       // `warn` (missing thumbnailUrl at finalize) is left ungated: it flags a
       // real data anomaly rather than routine trace noise. See UP-41.
       log: uploadManagerDebugLog,

@@ -94,6 +94,7 @@ export interface MediaLocationAddressPatch {
   latitude?: number | null;
   longitude?: number | null;
   address_label?: string | null;
+  address_precision?: string | null;
 }
 
 export interface MediaLocationAddInput extends MediaLocationAddressPatch {

@@ -3,7 +3,11 @@
  * @see docs/specs/service/media-upload-service/address-resolution-model.md § Address precision principle
  */
 
-import type { ReverseGeocodeResult } from '../../geocoding/geocoding.service';
+import type {
+  ForwardGeocodeResult,
+  ReverseGeocodeResult,
+} from '../../geocoding/geocoding.service';
+import type { UploadAddressCandidate } from '../upload-manager.types';
 import type { UploadSearchObject } from './upload-address-resolution.types';
 
 /** Highest established tier in groupingKey order: country → state → postcode → city → street → houseNumber. */
@@ -92,6 +96,67 @@ export function deriveAddressPrecisionFromReverse(
     return 'country';
   }
   return 'country';
+}
+
+/** Forward-geocode / suggestion persist — highest tier established on geocoder fields. */
+export function deriveAddressPrecisionFromForwardResult(
+  result: Pick<
+    ForwardGeocodeResult,
+    'city' | 'street' | 'streetNumber' | 'zip' | 'country'
+  >,
+): AddressPrecisionTier | null {
+  return deriveAddressPrecisionFromFields({
+    country: result.country,
+    state: null,
+    postcode: result.zip,
+    city: result.city,
+    street: result.street,
+    houseNumber: result.streetNumber,
+  });
+}
+
+/** Tray / Issues candidate pick — structured fields only (not addressLabel parsing). */
+export function deriveAddressPrecisionFromCandidate(
+  candidate: Pick<UploadAddressCandidate, 'city' | 'state' | 'postcode'>,
+): AddressPrecisionTier | null {
+  return deriveAddressPrecisionFromFields({
+    country: null,
+    state: candidate.state ?? null,
+    postcode: candidate.postcode ?? null,
+    city: candidate.city ?? null,
+    street: null,
+    houseNumber: null,
+  });
+}
+
+/**
+ * Map pin without explicit address — coords are exact but address must not
+ * claim houseNumber from opportunistic reverse geocode.
+ */
+export function deriveAddressPrecisionFromPinReverse(
+  result: ReverseGeocodeResult,
+): AddressPrecisionTier | null {
+  const tier = deriveAddressPrecisionFromReverse(result);
+  if (tier === 'houseNumber') {
+    return 'street';
+  }
+  return tier;
+}
+
+export function geocodeResultToPrecisionFields(
+  result: Pick<
+    ForwardGeocodeResult,
+    'city' | 'street' | 'streetNumber' | 'zip' | 'country'
+  >,
+): AddressPrecisionFields {
+  return {
+    country: result.country,
+    state: null,
+    postcode: result.zip,
+    city: result.city,
+    street: result.street,
+    houseNumber: result.streetNumber,
+  };
 }
 
 /** Zero out address fields more precise than the established tier. */

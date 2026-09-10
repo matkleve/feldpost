@@ -56,6 +56,66 @@ describe('UploadEnrichmentService', () => {
     expect(mediaLocationsMock.syncListCacheAfterPlacement).toHaveBeenCalledWith('media-123');
   });
 
+  it('persists forward-geocode precision derived from input text, not geocoder over-precision', async () => {
+    const geocodingMock = {
+      forward: vi.fn().mockResolvedValue({
+        lat: 48.2082,
+        lng: 16.3738,
+        addressLabel: 'Fabricatedstraße 1, Wien',
+        city: 'Wien',
+        district: null,
+        street: 'Fabricatedstraße 1',
+        streetNumber: '1',
+        zip: '1010',
+        country: 'Austria',
+      }),
+    };
+
+    const rpcMock = vi.fn().mockResolvedValue({ data: true, error: null });
+    const supabaseMock = {
+      client: {
+        rpc: rpcMock,
+      },
+    };
+
+    TestBed.configureTestingModule({
+      providers: [
+        UploadEnrichmentService,
+        { provide: GeocodingService, useValue: geocodingMock },
+        { provide: SupabaseService, useValue: supabaseMock },
+        {
+          provide: MediaLocationsService,
+          useValue: { syncListCacheAfterPlacement: vi.fn().mockResolvedValue(1) },
+        },
+      ],
+    });
+
+    const service = TestBed.inject(UploadEnrichmentService);
+    await service.enrichWithForwardGeocode('media-vienna', 'Vienna', {
+      hasEstablishedTextAddress: true,
+      fields: {
+        country: 'AT',
+        state: null,
+        postcode: null,
+        city: 'Vienna',
+        street: null,
+        houseNumber: null,
+      },
+      precision: 'city',
+      addressLabel: 'Vienna',
+    });
+
+    expect(rpcMock).toHaveBeenCalledWith(
+      'resolve_media_location',
+      expect.objectContaining({
+        p_city: 'Vienna',
+        p_street: null,
+        p_house_number: null,
+        p_address_precision: 'city',
+      }),
+    );
+  });
+
   it('retries forward geocode with generic locality anchor when first query misses', async () => {
     const geocodingMock = {
       forward: vi

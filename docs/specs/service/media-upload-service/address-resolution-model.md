@@ -47,6 +47,8 @@ Normative rules for upload and persist — audit: [`docs/audits/upload-flow-revi
 
 **Upload persist (NF-40, 2026-09-10):** When `buildUploadAddressPersistContext` returns a text-established context (`locationSourceUsed` folder/file + `titleAddress`), `resolveUploadAddress` persists structured fields via `resolve_media_location` and **skips** reverse geocode. Coordinates-only uploads (EXIF GPS, no text) still reverse-geocode as before. See `upload-address-persist-context.helpers.ts`, `upload-address-resolve.util.ts`.
 
+**All writers:** Every path that creates/updates `locations` must pass honest `p_address_precision`. Full inventory: [address-resolution-model.address-precision-writers.supplement.md](./address-resolution-model.address-precision-writers.supplement.md).
+
 ## Explicit non-goals
 
 - **Project location is not an address fallback.** `project_locations` centroid is **only** Branch B Photon bias — media never inherit project address automatically.

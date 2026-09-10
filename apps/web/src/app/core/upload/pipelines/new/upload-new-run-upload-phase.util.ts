@@ -136,8 +136,13 @@ export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<vo
     emitBatchProgress: (batchId) => ctx.emitBatchProgress(batchId),
     drainQueue: () => ctx.drainQueue(),
     enrichWithReverseGeocode: (mediaId) => enrich.enrichWithReverseGeocode(mediaId),
-    enrichWithForwardGeocode: (mediaId, titleAddress) =>
-      enrich.enrichWithForwardGeocode(mediaId, titleAddress),
+    enrichWithForwardGeocode: (mediaId, titleAddress) => {
+      const job = jobState.findJob(jobId);
+      const addressContext = job
+        ? buildUploadAddressPersistContext({ job, groupState: null })
+        : null;
+      return enrich.enrichWithForwardGeocode(mediaId, titleAddress, addressContext);
+    },
     geocodeTitleAddress: (titleAddress) => enrich.forwardGeocodeAddress(titleAddress),
     mismatchToleranceMeters,
     persistMismatch: async (mediaId, distanceMeters) => {

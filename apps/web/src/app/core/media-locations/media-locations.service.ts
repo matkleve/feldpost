@@ -26,6 +26,11 @@ import {
   describeMediaLocationRpcError,
   splitStreetAndHouseNumber,
 } from './media-locations.helpers';
+import {
+  capFieldsToPrecisionTier,
+  deriveAddressPrecisionFromPinReverse,
+  geocodeResultToPrecisionFields,
+} from '../upload/address-resolution/upload-address-precision.helpers';
 import type {
   MediaItemLocationRow,
   MediaLocationAddInput,
@@ -273,9 +278,15 @@ export class MediaLocationsService {
     coords: { lat: number; lng: number },
   ): Promise<MediaLocationResult> {
     const reverse = await this.geocodingService.reverse(coords.lat, coords.lng);
+    const precision = reverse ? deriveAddressPrecisionFromPinReverse(reverse) : null;
+    const geocodeFields = reverse ? geocodeResultToPrecisionFields(reverse) : null;
+    const fields =
+      reverse && precision
+        ? capFieldsToPrecisionTier(geocodeFields!, precision)
+        : geocodeFields;
     const { street, house_number } = splitStreetAndHouseNumber(
-      reverse?.street,
-      reverse?.streetNumber,
+      fields?.street ?? reverse?.street,
+      fields?.houseNumber ?? reverse?.streetNumber,
     );
     return this.updateLocation({
       locationId,
@@ -284,10 +295,11 @@ export class MediaLocationsService {
       address_label: reverse?.addressLabel ?? null,
       street,
       house_number,
-      postcode: reverse?.zip ?? null,
-      city: reverse?.city ?? null,
+      postcode: fields?.postcode ?? reverse?.zip ?? null,
+      city: fields?.city ?? reverse?.city ?? null,
       district: reverse?.district ?? null,
-      country: reverse?.country ?? null,
+      country: fields?.country ?? reverse?.country ?? null,
+      address_precision: precision,
     });
   }
 

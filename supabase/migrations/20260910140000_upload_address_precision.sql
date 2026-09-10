@@ -248,3 +248,138 @@ GRANT EXECUTE ON FUNCTION public.update_location(
 GRANT EXECUTE ON FUNCTION public.resolve_media_location(
   uuid, numeric, numeric, text, text, text, text, text, text, text, text, text
 ) TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.update_media_item_location(
+  p_location_id uuid,
+  p_street text DEFAULT NULL,
+  p_house_number text DEFAULT NULL,
+  p_staircase text DEFAULT NULL,
+  p_door text DEFAULT NULL,
+  p_extra_information text DEFAULT NULL,
+  p_city text DEFAULT NULL,
+  p_district text DEFAULT NULL,
+  p_country text DEFAULT NULL,
+  p_latitude numeric DEFAULT NULL,
+  p_longitude numeric DEFAULT NULL,
+  p_address_label text DEFAULT NULL,
+  p_postcode text DEFAULT NULL,
+  p_floor text DEFAULT NULL,
+  p_address_precision text DEFAULT NULL
+)
+RETURNS public.media_item_locations
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public', 'extensions'
+AS $function$
+DECLARE
+  v_loc public.locations%ROWTYPE;
+  v_out public.media_item_locations%ROWTYPE;
+BEGIN
+  v_loc := public.update_location(
+    p_location_id,
+    p_street, p_house_number, p_staircase, p_door, p_floor, p_postcode, p_extra_information,
+    p_city, p_district, p_country, p_latitude, p_longitude, p_address_label,
+    p_address_precision
+  );
+
+  SELECT
+    loc.id,
+    k.media_item_id,
+    loc.organization_id,
+    loc.street,
+    loc.house_number,
+    loc.staircase,
+    loc.door,
+    loc.extra_information,
+    loc.city,
+    loc.district,
+    loc.country,
+    loc.latitude,
+    loc.longitude,
+    loc.address_label,
+    false,
+    k.sort_order,
+    loc.staircase_sort_key,
+    loc.door_sort_key,
+    loc.created_at,
+    loc.updated_at
+  INTO v_out
+  FROM public.locations loc
+  JOIN public.media_item_location_links k ON k.location_id = loc.id
+  WHERE loc.id = v_loc.id
+  ORDER BY k.sort_order
+  LIMIT 1;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'not_found';
+  END IF;
+
+  RETURN v_out;
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION public.bulk_update_media_addresses(
+  p_media_item_ids uuid[],
+  p_address_label text,
+  p_city text DEFAULT NULL::text,
+  p_district text DEFAULT NULL::text,
+  p_street text DEFAULT NULL::text,
+  p_country text DEFAULT NULL::text,
+  p_address_precision text DEFAULT NULL::text
+)
+RETURNS integer
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $function$
+DECLARE
+  _org_id uuid;
+  _updated int;
+BEGIN
+  SELECT organization_id INTO _org_id
+    FROM public.profiles
+   WHERE id = auth.uid();
+
+  IF _org_id IS NULL THEN
+    RAISE EXCEPTION 'User profile or organization not found';
+  END IF;
+
+  UPDATE public.locations loc
+     SET address_label = p_address_label,
+         city          = COALESCE(p_city, loc.city),
+         district      = COALESCE(p_district, loc.district),
+         street        = COALESCE(p_street, loc.street),
+         country       = COALESCE(p_country, loc.country),
+         address_precision = COALESCE(p_address_precision, loc.address_precision),
+         updated_at    = now()
+    FROM public.media_item_location_links k
+    JOIN public.media_items m ON m.id = k.media_item_id
+   WHERE loc.id = k.location_id
+     AND loc.organization_id = _org_id
+     AND (
+       m.id = ANY(p_media_item_ids)
+       OR m.source_image_id = ANY(p_media_item_ids)
+     );
+
+  GET DIAGNOSTICS _updated = ROW_COUNT;
+
+  UPDATE public.media_items m
+     SET location_status = CASE
+           WHEN p_address_label IS NOT NULL THEN 'resolved'
+           WHEN m.location_status = 'resolved' THEN 'resolved'
+           ELSE 'unresolvable'
+         END,
+         updated_at = now()
+   WHERE m.organization_id = _org_id
+     AND (
+       m.id = ANY(p_media_item_ids)
+       OR m.source_image_id = ANY(p_media_item_ids)
+     );
+
+  RETURN _updated;
+END;
+$function$;
+
+GRANT EXECUTE ON FUNCTION public.update_media_item_location(
+  uuid, text, text, text, text, text, text, text, text, numeric, numeric, text, text, text, text
+) TO authenticated;

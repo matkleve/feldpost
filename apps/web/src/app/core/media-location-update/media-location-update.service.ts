@@ -6,6 +6,12 @@ import {
 } from '../geocoding/geocoding.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import {
+  capFieldsToPrecisionTier,
+  deriveAddressPrecisionFromForwardResult,
+  deriveAddressPrecisionFromPinReverse,
+  geocodeResultToPrecisionFields,
+} from '../upload/address-resolution/upload-address-precision.helpers';
+import {
   describeLocationUpdateRpcError,
   LOCATION_UPDATE_NOT_FOUND_ERROR,
 } from './media-location-update.helpers';
@@ -22,15 +28,22 @@ export class MediaLocationUpdateService {
     mediaId: string,
     suggestion: ForwardGeocodeResult,
   ): Promise<MediaLocationUpdateResult> {
+    const geocodeFields = geocodeResultToPrecisionFields(suggestion);
+    const precision = deriveAddressPrecisionFromForwardResult(suggestion);
+    const fields = precision ? capFieldsToPrecisionTier(geocodeFields, precision) : geocodeFields;
+
     const payload = {
       p_media_item_id: mediaId,
       p_latitude: suggestion.lat,
       p_longitude: suggestion.lng,
       p_address_label: suggestion.addressLabel,
-      p_city: suggestion.city,
+      p_city: fields.city,
       p_district: suggestion.district,
-      p_street: suggestion.street,
-      p_country: suggestion.country,
+      p_street: fields.street,
+      p_house_number: fields.houseNumber,
+      p_postcode: fields.postcode,
+      p_country: fields.country,
+      p_address_precision: precision,
     };
 
     return this.finishResolveMediaLocationRpc(
@@ -39,14 +52,15 @@ export class MediaLocationUpdateService {
       { lat: suggestion.lat, lng: suggestion.lng },
       {
         address_label: suggestion.addressLabel,
-        street: suggestion.street,
-        house_number: suggestion.streetNumber,
-        postcode: suggestion.zip,
-        city: suggestion.city,
+        street: fields.street,
+        house_number: fields.houseNumber,
+        postcode: fields.postcode,
+        city: fields.city,
         district: suggestion.district,
-        country: suggestion.country,
+        country: fields.country,
         latitude: suggestion.lat,
         longitude: suggestion.lng,
+        address_precision: precision,
       },
     );
   }
@@ -64,15 +78,25 @@ export class MediaLocationUpdateService {
     coords: { lat: number; lng: number },
     reverse: ReverseGeocodeResult | null,
   ): Promise<MediaLocationUpdateResult> {
+    const precision = reverse ? deriveAddressPrecisionFromPinReverse(reverse) : null;
+    const geocodeFields = reverse ? geocodeResultToPrecisionFields(reverse) : null;
+    const fields =
+      reverse && precision
+        ? capFieldsToPrecisionTier(geocodeFields!, precision)
+        : geocodeFields;
+
     const payload = {
       p_media_item_id: mediaId,
       p_latitude: coords.lat,
       p_longitude: coords.lng,
       p_address_label: reverse?.addressLabel ?? null,
-      p_city: reverse?.city ?? null,
+      p_city: fields?.city ?? null,
       p_district: reverse?.district ?? null,
-      p_street: reverse?.street ?? null,
-      p_country: reverse?.country ?? null,
+      p_street: fields?.street ?? null,
+      p_house_number: fields?.houseNumber ?? null,
+      p_postcode: fields?.postcode ?? null,
+      p_country: fields?.country ?? null,
+      p_address_precision: precision,
     };
 
     return this.finishResolveMediaLocationRpc(
@@ -82,18 +106,20 @@ export class MediaLocationUpdateService {
       reverse
         ? {
             address_label: reverse.addressLabel,
-            street: reverse.street,
-            house_number: reverse.streetNumber,
-            postcode: reverse.zip,
-            city: reverse.city,
+            street: fields?.street ?? null,
+            house_number: fields?.houseNumber ?? null,
+            postcode: fields?.postcode ?? null,
+            city: fields?.city ?? null,
             district: reverse.district,
-            country: reverse.country,
+            country: fields?.country ?? null,
             latitude: coords.lat,
             longitude: coords.lng,
+            address_precision: precision,
           }
         : {
             latitude: coords.lat,
             longitude: coords.lng,
+            address_precision: null,
           },
     );
   }
@@ -142,6 +168,7 @@ export class MediaLocationUpdateService {
         p_latitude: patch.latitude ?? null,
         p_longitude: patch.longitude ?? null,
         p_address_label: patch.address_label ?? null,
+        p_address_precision: patch.address_precision ?? null,
       },
     );
 

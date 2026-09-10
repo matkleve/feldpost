@@ -16,6 +16,11 @@
 
 import { Injectable, inject } from '@angular/core';
 import { GeocodingService, type ReverseGeocodeResult } from '../geocoding/geocoding.service';
+import {
+  deriveAddressPrecisionFromForwardResult,
+  deriveAddressPrecisionFromReverse,
+  geocodeResultToPrecisionFields,
+} from '../upload/address-resolution/upload-address-precision.helpers';
 import { SupabaseService } from '../supabase/supabase.service';
 import { AuthService } from '../auth/auth.service';
 import { WideEventService } from '../wide-event/wide-event.service';
@@ -423,6 +428,7 @@ export class LocationResolverService {
     mediaItemIds: string[],
     result: ReverseGeocodeResult,
   ): Promise<void> {
+    const precision = deriveAddressPrecisionFromReverse(result);
     const { error } = await this.supabase.client.rpc('bulk_update_media_addresses', {
       p_media_item_ids: mediaItemIds,
       p_address_label: result.addressLabel,
@@ -430,6 +436,7 @@ export class LocationResolverService {
       p_district: result.district,
       p_street: result.street,
       p_country: result.country,
+      p_address_precision: precision,
     });
     if (error) {
       console.error('[LocationResolver] Failed to persist address:', {
@@ -442,13 +449,17 @@ export class LocationResolverService {
 
   /** Persist address for a single image via the individual RPC. */
   private async persistAddressSingle(imageId: string, result: ReverseGeocodeResult): Promise<void> {
+    const precision = deriveAddressPrecisionFromReverse(result);
     const { error } = await this.supabase.client.rpc('resolve_media_location', {
       p_media_item_id: imageId,
       p_address_label: result.addressLabel,
       p_city: result.city,
       p_district: result.district,
       p_street: result.street,
+      p_house_number: result.streetNumber,
+      p_postcode: result.zip,
       p_country: result.country,
+      p_address_precision: precision,
     });
     if (error) {
       console.error('[LocationResolver] Failed to persist address for', imageId, {
@@ -482,15 +493,33 @@ export class LocationResolverService {
       return;
     }
 
+    const fields = geocodeResultToPrecisionFields({
+      city: address.city,
+      street: address.street,
+      streetNumber: address.streetNumber ?? null,
+      zip: address.zip ?? null,
+      country: address.country,
+    });
+    const precision = deriveAddressPrecisionFromForwardResult({
+      city: address.city,
+      street: address.street,
+      streetNumber: address.streetNumber ?? null,
+      zip: address.zip ?? null,
+      country: address.country,
+    });
+
     const { error } = await this.supabase.client.rpc('resolve_media_location', {
       p_media_item_id: imageId,
       p_latitude: lat,
       p_longitude: lng,
       p_address_label: address.addressLabel,
-      p_city: address.city,
+      p_city: fields.city,
       p_district: address.district,
-      p_street: address.street,
-      p_country: address.country,
+      p_street: fields.street,
+      p_house_number: fields.houseNumber,
+      p_postcode: fields.postcode,
+      p_country: fields.country,
+      p_address_precision: precision,
     });
     if (error) {
       console.error('[LocationResolver] Failed to persist GPS + address for', imageId, {

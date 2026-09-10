@@ -48,6 +48,7 @@ export function selectUploadManagerAddressCandidate(
       job.mediaId,
       { lat: candidate.lat, lng: candidate.lng },
       deps.emitBatchProgress,
+      candidate,
     );
     return;
   }
