@@ -59,7 +59,7 @@ const CHECKS = [
     cmd: "npm",
     args: ["run", "--silent", "test"],
     soft: true,
-    debt: "the test bundle does not compile on main (2026-09-08): ~101 TS errors, incl. 4 unresolved imports in *.spec.ts. Fix this first.",
+    debt: "the test bundle does not compile on main (2026-09-10): 62 TS errors, all in 4 map-shell spec files testing a component API moved to gpsService/mapPlacementService in an earlier refactor. (Was ~101 errors / 4 unresolved imports on 2026-09-08 — the rest was mechanical and is fixed.) See docs/audits/2026-09-10-map-shell-test-migration-plan.md.",
   },
   { name: "build", cmd: "npm", args: ["run", "--silent", "build"] },
 ];

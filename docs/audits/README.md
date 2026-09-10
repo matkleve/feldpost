@@ -28,5 +28,6 @@
 | [2026-09-08-grundriss-adoption.md](2026-09-08-grundriss-adoption.md) | Reference | Grundriss ↔ Feldpost process comparison; 31 proposed adoptions with a priority table. Proposals only — nothing here is a contract until it lands in `AGENTS.md`, a gate script, or a spec. |
 | [2026-09-08-design-system-adoption.md](2026-09-08-design-system-adoption.md) | Reference | Grundriss ↔ Feldpost comparison at the design-system level (interaction states, motion, type, contrast); 24 proposals with a priority table. Proposals only. |
 | [2026-09-09-ui-primitives-conformance.md](2026-09-09-ui-primitives-conformance.md) | Reference | Per-primitive conformance pass over `shared/ui/` (17 primitives) against the state, motion, token, spec-coverage and dead-code rules. Proposals only. |
+| [2026-09-10-map-shell-test-migration-plan.md](2026-09-10-map-shell-test-migration-plan.md) | Reference | Old-API-to-new-facade mapping table for the 64 remaining test-bundle compile errors, all in `MapShellComponent`'s 4 spec files. A plan, not a diff — see the doc for why. |
 
 When adding a new audit, prefix the filename with an ISO date, add one row here, and include the standard banner at the top of the audit file (see existing files after this README lands).

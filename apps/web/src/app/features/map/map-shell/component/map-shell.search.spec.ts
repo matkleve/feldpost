@@ -123,7 +123,7 @@ describe('MapShellComponent – search bar', () => {
       },
     ]);
 
-    const context = fixture.componentInstance.searchQueryContext();
+    const context = fixture.componentInstance.searchContext.searchQueryContext();
     expect(context.dataCentroid?.lat).toBeCloseTo(48.8616, 4);
     expect(context.dataCentroid?.lng).toBeCloseTo(2.3422, 4);
   });
@@ -167,7 +167,7 @@ describe('MapShellComponent – search bar', () => {
     fixture.componentInstance.goToUserPosition();
     await Promise.resolve();
 
-    expect(fixture.componentInstance.searchQueryContext().countryCodes).toEqual(['fr']);
+    expect(fixture.componentInstance.searchContext.searchQueryContext().countryCodes).toEqual(['fr']);
 
     Object.defineProperty(navigator, 'geolocation', {
       configurable: true,
