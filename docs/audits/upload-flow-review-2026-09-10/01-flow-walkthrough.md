@@ -13,6 +13,7 @@ the flow is *trying* to do, so the rest of the review has somewhere to attach:
 | [`03-hard-cases-and-decisions.md`](./03-hard-cases-and-decisions.md) | The decisions that are expensive to revisit, what each gave up, and the ones that were reversed |
 | [`04-status-of-prior-findings.md`](./04-status-of-prior-findings.md) | Every UP-xx finding from 2026-09-08 re-measured against HEAD |
 | [`05-address-resolution-and-ui-findings.md`](./05-address-resolution-and-ui-findings.md) | NF-17 … NF-37 — Branch C / orchestrator, and the panel and tray UI |
+| [`06-improvement-plan.md`](./06-improvement-plan.md) | Post-integration improvement plan — open questions answered, ranked work, dependencies, and what not to do |
 
 ---
 
