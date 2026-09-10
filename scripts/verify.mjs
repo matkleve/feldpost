@@ -37,7 +37,7 @@ const CHECKS = [
     args: ["scripts/check-spec-code-paths.mjs"],
     soft: true,
     debt:
-      "262 broken code paths outside docs/specs/service/media-upload-service, docs/specs/component/upload, docs/specs/ui/upload (2026-09-10; down from 263 when the component registry became generated and app-map-shell's moved path was corrected) — those three folders were the upload-process audit's scope and are now clean; the rest is unrelated pre-existing drift across the wider docs/specs tree. Tracked in issue #189.",
+      "204 broken code paths (2026-09-10; 263 → 262 when the component registry became generated, → 204 after clearing component/filters, service/filename-parser and service/media-download-service). Clean so far: the upload folders (media-upload-service, component/upload, ui/upload), filters, filename-parser, media-download-service. Largest remaining: ui/workspace 29, component/media 21, component/workspace 19, page 18, component/project 18, component/ui-primitives 16. Roughly 58% are moved files needing a repoint and 42% describe code that no longer exists. Tracked in issue #189.",
   },
   {
     name: "component-registry",
