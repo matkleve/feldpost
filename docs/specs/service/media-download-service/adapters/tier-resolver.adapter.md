@@ -15,7 +15,6 @@ Headless adapter. Consumers pass `desiredSize` and optional `boxPixels`; adapter
 
 - Spec: `docs/specs/service/media-download-service/adapters/tier-resolver.adapter.md`
 - Runtime target: `apps/web/src/app/core/media-download/adapters/tier-resolver.adapter.ts`
-- Initial implementation source: `apps/web/src/app/core/media/media-orchestrator.service.ts`
 
 ## Actions & Interactions
 
@@ -77,8 +76,7 @@ flowchart TD
 | File                                                                          | Purpose                 |
 | ----------------------------------------------------------------------------- | ----------------------- |
 | `docs/specs/service/media-download-service/adapters/tier-resolver.adapter.md` | Tier adapter contract   |
-| `apps/web/src/app/core/media-download/adapters/tier-resolver.adapter.ts`      | New adapter file        |
-| `apps/web/src/app/core/media/media-orchestrator.service.ts`                   | Source logic to migrate |
+| `apps/web/src/app/core/media-download/adapters/tier-resolver.adapter.ts`      | Adapter implementation  |
 | `apps/web/src/app/core/media/media-renderer.types.ts`                         | Shared tier types       |
 
 ## Wiring
