@@ -26,7 +26,8 @@ If you cannot tell which one you are writing, ask what a reader would be doing w
 
 - **One file per calendar day: `YYYY-MM-DD.md`.** Example: [`2026-05-19.md`](./2026-05-19.md). The name is the only index this folder has; "the latest entry" must be a question with an answer.
 - Multiple sessions on the same day append to the same file, under their own `##` heading.
-- Two files predate this rule and are not a precedent: [`2026-05-23-file-preview-prereq.md`](./2026-05-23-file-preview-prereq.md) and `photon-curl-gate-2026-05-25.json` (a captured command output, not an entry).
+- Two files predate this rule and are not a precedent: [`2026-05-23-file-preview-prereq.md`](./2026-05-23-file-preview-prereq.md) and `photon-curl-gate-2026-05-25.json` (a captured command output, not an entry). Both are exempted by name in the checker below, so the rule holds for everything added from here on.
+- Enforced by `node scripts/verify.mjs specs` (rule `diary-entry-filename`), which also rejects a well-formed name that is not a real date, such as `2026-02-31.md`.
 
 ## Rules
 

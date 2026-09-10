@@ -11,6 +11,7 @@
  *   what-it-looks-like-len "What It Looks Like" section max lines (default: 40)
  *   has-acceptance-criteria At least one acceptance criterion checkbox
  *   agents-md-max-lines   Root AGENTS.md stays under its cap (default: 150)
+ *   diary-entry-filename  docs/ai-diary entries are named YYYY-MM-DD.md
  *
  * Excluded from element-spec rules (see shouldIncludeSpecFile):
  *   - readme.md, *.bak, spec-*audit* notes
@@ -43,6 +44,20 @@ const DEFAULT_WARN_LINES = 150;
  * one-line pointer. See docs/audits/2026-09-08-grundriss-adoption.md § C3.
  */
 const AGENTS_MD_MAX_LINES = 150;
+
+/**
+ * Diary entries are one file per calendar day, named YYYY-MM-DD.md. The name is
+ * the folder's only index, so "read the latest entry for your area" has to be a
+ * question with an answer — a topic-suffixed or undated file makes it guesswork.
+ * See docs/ai-diary/README.md § Layout and § Before you resume work.
+ *
+ * These two predate the rule and are grandfathered there by name, so they are
+ * exempted here rather than left to fire forever. Not a precedent for new files.
+ */
+const DIARY_GRANDFATHERED = new Set([
+  "2026-05-23-file-preview-prereq.md",
+  "photon-curl-gate-2026-05-25.json",
+]);
 const DEFAULT_MAX_WHAT_IT_IS = 5;
 const DEFAULT_MAX_WHAT_IT_LOOKS_LIKE = 40;
 
@@ -298,6 +313,47 @@ function ruleAgentsMdMaxLines(projectRoot) {
       message: `AGENTS.md has ${totalLines} lines (max: ${AGENTS_MD_MAX_LINES}). Move detail to its owning document (docs/specs/README.md, docs/migration/README.md, docs/agent-workflows/, apps/web/src/app/archive/README.md) and leave a one-line pointer. Do not drop a rule to fit.`,
     },
   ];
+}
+
+function ruleDiaryEntryFilename(projectRoot) {
+  const diaryDir = join(projectRoot, "docs", "ai-diary");
+  if (!existsSync(diaryDir)) {
+    return [];
+  }
+
+  const diagnostics = [];
+  for (const entry of readdirSync(diaryDir, { withFileTypes: true })) {
+    if (!entry.isFile()) continue;
+    const name = entry.name;
+    if (name === "README.md" || DIARY_GRANDFATHERED.has(name)) continue;
+
+    const match = /^(\d{4})-(\d{2})-(\d{2})\.md$/.exec(name);
+    // A real calendar date, not just four-two-two digits: Date normalizes
+    // 2026-02-31 to March 3, so round-tripping the parts is what rejects it.
+    const isRealDate =
+      match &&
+      (() => {
+        const [, y, m, d] = match;
+        const parsed = new Date(`${y}-${m}-${d}T00:00:00Z`);
+        return (
+          parsed.getUTCFullYear() === Number(y) &&
+          parsed.getUTCMonth() + 1 === Number(m) &&
+          parsed.getUTCDate() === Number(d)
+        );
+      })();
+
+    if (!isRealDate) {
+      diagnostics.push({
+        severity: "error",
+        rule: "diary-entry-filename",
+        file: join(diaryDir, name),
+        line: 1,
+        message: `Diary entry "${name}" is not named YYYY-MM-DD.md with a real calendar date. One file per calendar day; a second session on the same day appends under its own "##" heading instead of adding a file. See docs/ai-diary/README.md § Layout.`,
+      });
+    }
+  }
+
+  return diagnostics;
 }
 
 // ─── Rules ──────────────────────────────────────────────────────────────────
@@ -625,6 +681,7 @@ function main() {
   // after the per-spec table in the same shape.
   const repoDiagnostics = [
     ...ruleAgentsMdMaxLines(projectRoot),
+    ...ruleDiaryEntryFilename(projectRoot),
     ...ruleSettingsRegistrySync(files, config, projectRoot, specDir),
   ];
 
