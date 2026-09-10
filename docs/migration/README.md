@@ -2,11 +2,29 @@
 
 Canonical **index and status** for the Angular + Spartan (`hlm*` / `brn*`) + Tailwind migration. Per-phase checklists and decisions live in the linked files below — do not duplicate long status blocks here and in phase docs.
 
-**Agents — parallel streams:** [AGENTS.md — Multi-agent coordination (migration)](../../AGENTS.md#multi-agent-coordination-migration) (how to split independent migration work across agents; **no duplicate “next” list**—use this README’s Status + phase docs as the queue).
+**Agents — parallel streams:** see [Parallel migration streams](#parallel-migration-streams-agents) below (**no duplicate “next” list**—this README’s Status + phase docs are the queue).
 
 **CSS custom properties (`apps/web`):** Before any SCSS/token edit, read [`docs/design/agent-css-variable-contract.md`](../design/agent-css-variable-contract.md) ([closure status](./reports/agent-token-decision-closure.md)). Shell geometry: also [`docs/design/shell-layout-tokens.md`](../design/shell-layout-tokens.md).
 
-**Dead code:** `apps/web/src/app/archive/` is excluded from the build — do not migrate from or copy patterns there ([`AGENTS.md`](../../AGENTS.md) § Dead code).
+**Dead code:** `apps/web/src/app/archive/` is excluded from the build — do not migrate from or copy patterns there ([archive README](../../apps/web/src/app/archive/README.md)).
+
+---
+
+## Migration Exemption (Phase 6–8)
+
+Normative. Moved out of root [`AGENTS.md`](../../AGENTS.md) on 2026-09-10 (it is phase-specific and that file is capped at 150 lines); the rule is unchanged and root `AGENTS.md` points here.
+
+Migration cleanup is the canonical **Trivial**-class case (see `AGENTS.md` § Change Classification). Work classified as **migration cleanup** is exempt from the ownership matrix and FSM contract pre-requisites. Migration cleanup = replacing `ui-*` BEM with Tailwind/`hlm*`, wiring existing spartan directives, removing legacy SCSS, replacing `var(--color-*)` with tweakcn equivalents. Does **not** cover new components, new states/animations, or net-new visual decisions. If a change introduces a net-new visual element, the exemption does not apply.
+
+The always-applied rules that grant this exemption cite it by name: [`.cursor/rules/visual-behavior.mdc`](../../.cursor/rules/visual-behavior.mdc) and [`.cursor/rules/ui-state-machine.mdc`](../../.cursor/rules/ui-state-machine.mdc).
+
+## Parallel migration streams (agents)
+
+Normative. Moved out of root [`AGENTS.md`](../../AGENTS.md) § Multi-agent coordination on 2026-09-10 — this index already claimed to be the single queue, so the coordination note belongs with the queue.
+
+When migration work spans **several independent streams** (see the **phase index** below—not a separate “wave” checklist), the coordinator should **decompose** into **sibling tasks** runnable in parallel when dependencies do not force a single serial chain. **Do not** collapse everything into one default subagent or one undifferentiated mega-change unless scope is explicitly narrowed or a true blocking dependency requires it. **Do not** maintain a second, free-floating “what to do next” list anywhere — the migration index and phase docs are the single queue; update those when status changes so work is not duplicated.
+
+---
 
 ## Status (summary)
 

@@ -9,7 +9,7 @@
 ## Spec split and organization
 
 - Canonical contracts live in `docs/specs/`; parents link to children—**no duplicate normative bodies** across `ui/` and `service/` for the same concern (UI may hold a short stub that links to the service spec).
-- Split oversized specs when `lint-specs` warns or errors on line count; use adapter mirror (`adapters/*.adapter.md`) for adapter-shaped boundaries, or concern slices (AC, FSM, visual) in the same folder. Full rules: repository root `AGENTS.md` → **Spec split and organization policy**.
+- Split oversized specs when `lint-specs` warns or errors on line count; use adapter mirror (`adapters/*.adapter.md`) for adapter-shaped boundaries, or concern slices (AC, FSM, visual) in the same folder. Full rules: [`specs/README.md`](./specs/README.md) → **Spec split and organization policy** (moved there from root `AGENTS.md` on 2026-09-10).
 
 ## Spec Folder Taxonomy
 
@@ -19,7 +19,7 @@
 - `docs/specs/system/` for cross-cutting behavior systems
 - `docs/specs/page/` for route/page-level contracts
 
-Operational rules and governance belong in AGENTS/instructions files; `docs/specs/README.md` should stay focused on indexing and navigation.
+Spec-system governance (folder taxonomy, split policy, component spec coverage, feedback-to-spec sync, settings convention) lives in [`specs/README.md`](./specs/README.md); root `AGENTS.md` keeps the pointer, not the body.
 
 - Specs are the source of truth: code must match spec, not the other way around
 - Update specs **before** modifying features

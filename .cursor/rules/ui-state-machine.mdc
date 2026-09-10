@@ -5,7 +5,7 @@ alwaysApply: true
 
 # UI State Machine Contract
 
-Migration exemption: see `AGENTS.md` § Migration Exemption (Phase 6–8).
+Migration exemption: see `docs/migration/README.md` § Migration Exemption (Phase 6–8).
 
 ## When FSM is required
 

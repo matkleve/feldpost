@@ -25,6 +25,8 @@ Keep service architecture mirrored and predictable by coupling spec and code mod
 - Keep facade short and orchestration-only.
 - Push technical details into local `adapters/`.
 - Avoid deep nested service sub-structures.
+- Do not split module contracts into nested sub-service type files — one central `types.ts` per module.
+- **Forbidden:** global adapter folders such as `apps/web/src/app/core/adapters/`. Adapters are local to their module.
 
 ## Archive Protocol
 

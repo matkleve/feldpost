@@ -11,7 +11,17 @@ Last updated: 2026-04-28
 
 Authoritative governance source: docs/specs/GOVERNANCE-MATRIX.md.
 
-## Folder Taxonomy
+## Folder Taxonomy (Mandatory)
+
+Normative. Moved out of root `AGENTS.md` on 2026-09-10 (that file is capped at 150 lines and already named this README as the spec-system authority); the rules are unchanged and `AGENTS.md` § Spec governance points here.
+
+- `ui/` = feature-level UI contracts (for example map/workspace/media-detail systems)
+- `component/` = reusable UI building blocks and local component contracts
+- `service/` = service-module contracts mirrored to `apps/web/src/app/core/`
+- `system/` = cross-cutting behavior systems and orchestration matrices
+- `page/` = route/page-level contracts
+
+Per-folder detail:
 
 - docs/specs/component/: reusable component contracts, grouped in topic subfolders (`filters/`, `item-grid/`, `map/`, `media/`, `project/`, `upload/`, `workspace/`). Index: docs/specs/component/README.md. **Component reuse catalog:** docs/specs/component/registry.md (index) + docs/specs/component/registry.*.supplement.md (tables).
 - docs/specs/page/: route/page-level contracts.
@@ -40,13 +50,41 @@ Authoritative governance source: docs/specs/GOVERNANCE-MATRIX.md.
 - docs/specs/GOVERNANCE-DUPLICATION-REPORT.md
 - docs/specs/GOVERNANCE-TRACEABILITY-REPORT.json
 
-## Spec split and organization
+## Spec split and organization policy
 
-- One **canonical entry** per module/feature (parent spec); children are linked, not duplicated across `ui/` vs `service/`.
-- Line limits and required sections are enforced by `node scripts/lint-specs.mjs` (see `scripts/lint-specs.mjs` for caps).
-- **Parent spec line cap:** **180** lines (error), **150** (warn). Parents over the cap must be split; normative detail moves to child files with plain Markdown links (no duplicate bodies).
-- **Lint scope:** Element-spec rules apply only to contract markdown under `docs/specs/` that pass `shouldIncludeSpecFile()` in `scripts/lint-specs.mjs`. **Excluded from parent cap / element-spec skeleton:** `GOVERNANCE-*.md`, files under `system/security/`, named technical annexes, **split children** (`*.supplement.md`, `*.acceptance-criteria.md`, `parent-name.*.md` slices), and other paths documented in `isSplitChildSpec()` / `shouldIncludeSpecFile()` in `scripts/lint-specs.mjs`.
-- **Split strategy:** adapter-shaped → `service/<module>/adapters/*.adapter.md`; AC/FSM/visual tables → concern slices in the same folder (e.g. `.acceptance-criteria.md`). Authoritative rules: root `AGENTS.md` (**Spec split and organization policy**).
+Normative and authoritative (moved here from root `AGENTS.md` on 2026-09-10; rules unchanged).
+
+- **Single entry point:** Each feature or service module has **one** canonical contract parent (`docs/specs/service/<module>/` facade spec, or per-component spec under `component/` / `ui/`). Child files hold detail; the parent summarizes and links (plain Markdown links, no duplicate normative bodies across folders, and no duplication across `ui/` vs `service/`).
+- **Lint gate:** Run `node scripts/lint-specs.mjs`. **Parent spec line cap: 180 lines (error), 150 (warn).** Oversized parents must be split into linked children (`*.supplement.md`, `*.acceptance-criteria.md`, or `parent-name.slice.md` — see `scripts/lint-specs.mjs`); normative detail moves to the child, it is not duplicated. Settings and `docs/settings-registry.md` stay in sync when specs expose `## Settings`.
+- **Lint scope:** Element-spec rules apply only to contract markdown under `docs/specs/` that passes `shouldIncludeSpecFile()` in `scripts/lint-specs.mjs`. **Excluded from parent cap / element-spec skeleton:** `GOVERNANCE-*.md`, files under `system/security/`, named technical annexes, **split children** (`*.supplement.md`, `*.acceptance-criteria.md`, `parent-name.*.md` slices), and other paths documented in `isSplitChildSpec()` / `shouldIncludeSpecFile()`.
+- **When to split (if / then):**
+  - **Adapter boundaries** match `apps/web/src/app/core/<module>/adapters/` → add `docs/specs/service/<module>/adapters/<name>.adapter.md` and link from the facade spec (structural mirror).
+  - **Bloat is** long acceptance criteria, FSM, transition map, or Visual Behavior / ownership tables → add concern slices in the same folder, e.g. `<name>.acceptance-criteria.md` or `<name>.visual-behavior.md`; do not duplicate checkbox lists in both parent and child.
+  - **UI vs service:** Service orchestration and facade contracts belong under `docs/specs/service/`; UI composition stays under `docs/specs/ui/` or `component/`. **Never** paste the full service contract into a UI spec—use a **stub** that links to the service entry (see [`ui/workspace/workspace-view-system.md`](ui/workspace/workspace-view-system.md)).
+- **Anti-patterns:** Duplicate filenames with identical contract text in `ui/` and `service/`; flat `docs/specs/service/foo.md` without `docs/specs/service/foo/` when the module is a full service module—use a folder mirroring `core/<name>/` unless the registry documents an explicit thin-module exception.
+
+## Component Spec Coverage (Mandatory)
+
+Normative (moved here from root `AGENTS.md` on 2026-09-10; rules unchanged).
+
+- Every production component must have its own dedicated element spec in `docs/specs/component/` or `docs/specs/ui/`.
+- Parent specs may define shared contracts, but domain and shared components still require child specs for their own behavior, state, wiring, and acceptance criteria.
+- Do not collapse multiple non-trivial component contracts into one monolithic spec when a child-spec split is possible.
+- Before implementing or refactoring a component, create or update that component's dedicated spec first.
+
+## Feedback-to-Spec Sync (Mandatory)
+
+Normative (moved here from root `AGENTS.md` on 2026-09-10; rules unchanged).
+
+- When user feedback changes expected behavior, update the relevant spec(s) first in the same work session.
+- Do not defer spec synchronization when behavior requirements change.
+- Keep Acceptance Criteria aligned with the latest user-confirmed behavior before finalizing implementation.
+
+## Settings Overlay Convention
+
+Normative (moved here from root `AGENTS.md` on 2026-09-10; rules unchanged).
+
+For any feature that introduces user-configurable behavior, add an optional `## Settings` section to that feature's element spec. Use concise bullets in the form `- **Section**: what it configures`. The settings inventory is centralized in [`docs/settings-registry.md`](../settings-registry.md) and must stay in sync with all spec `## Settings` sections via `node scripts/lint-specs.mjs`. When adding a new configurable feature, update the spec first and then run the linter (or `--fix`) to refresh/validate the registry.
 
 ## References
 
