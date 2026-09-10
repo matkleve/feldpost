@@ -1,5 +1,7 @@
 # Backlog (deferred work)
 
+> **Closed to new documents (2026-09-10).** Open work is a **GitHub Issue** (see below); the *reasoning* behind a plan is a study — [`docs/study/`](../study/README.md), `type: proposal`, with an evidence grade on every claim and a status saying whether it still holds. The plans below stay readable where they are; each is reclassified into `docs/study/` **when it is next edited**, not in a bulk pass. Mapping and procedure: [`docs/study/README.md`](../study/README.md) § Where new reasoning goes.
+
 Non-authoritative notes and planned refactors that are **not** implementation contracts. Specs live under `docs/specs/`; this folder holds **do-later** engineering tasks, investigations, and cleanup queues.
 
 When picking something up, promote relevant behavior back into the governing spec in `docs/specs/` in the same change set.
@@ -15,7 +17,8 @@ When picking something up, promote relevant behavior back into the governing spe
 | What was true on a given date? | [`docs/audits/`](../audits/README.md) | Point-in-time findings. Dated, not normative, and expected to drift. |
 | What must the code do? | [`docs/specs/`](../specs/README.md) | The contract. Normative — code follows the spec, not the reverse. |
 | What happened? | [`docs/ai-diary/`](../ai-diary/README.md) | Day-by-day narrative: decisions taken, mistakes made, corrections received. |
-| What is deferred but planned? | this folder | Multi-step engineering plans too large for one issue. Each should still have an issue pointing at it. |
+| How does this code mislead me? | [`docs/TRAPS.md`](../TRAPS.md) | The shapes that read correctly and are wrong. Read before your second attempt at a bug. |
+| What is deferred but planned? | this folder (**closed**) | Multi-step engineering plans too large for one issue. Each should still have an issue pointing at it. New plans are a study with `type: proposal`. |
 
 Bulk-file issues from a JSON batch rather than one `gh issue create` at a time: `node scripts/create-github-issues.mjs path/to/issues.json` (schema in `scripts/create-github-issues.example.json`).
 

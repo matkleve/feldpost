@@ -2,6 +2,8 @@
 
 > **Provenance — read this before treating the format as canonical.**
 > This file was written **to the specification recorded in** [`docs/audits/2026-09-08-grundriss-adoption.md`](../audits/2026-09-08-grundriss-adoption.md) § D4, which is a secondhand record of the study system in the sibling **Grundriss** repository. Grundriss is **not reachable from this environment**, so nothing here was checked against its canonical `STUDY-FORMAT.md` or its `new-study.mjs` scaffolder. Per § F3 (the sibling-repository rule) this is a port, not an invention — but it is an unverified port. **When Grundriss becomes accessible, reconcile field names, `type` and `status` vocabularies, and the id scheme against it, and treat every divergence as Grundriss-wins.**
+>
+> **Known Feldpost extension:** the `historical` status was added on 2026-09-10 so that dated audits and move passes have a status to be reclassified into. It may not exist in Grundriss; reconcile it first.
 
 A **study** is a reasoning document: an analysis, an investigation, a comparison, or a proposal, recorded with a stated confidence for every claim and a status saying whether it still holds.
 
@@ -12,7 +14,9 @@ Studies exist because Feldpost's four kinds of memory get read at different mome
 | Contract | `docs/specs/` | What it **should** do |
 | Reasoning | `docs/study/` | **Why this** and not the alternatives — with evidence grades |
 | Narrative | `docs/ai-diary/` | What **happened** |
-| Findings | `docs/audits/` | What was **true** at one point in time |
+| Traps | [`docs/TRAPS.md`](../TRAPS.md) | How this code **misleads** people |
+
+Point-in-time findings — what was **true** on a stated date — are studies too: `type: review`, `status: historical`. The folders that used to hold them (`docs/audits/`, `docs/backlog/`, `docs/implementation-blueprints/`) are **closed to new documents**; see [`README.md`](./README.md) § Where new reasoning goes.
 
 ---
 
@@ -59,6 +63,7 @@ Below the frontmatter, state **when** it was measured, **on what** (branch and c
 | `accepted` | The owner signed off. The normative text now lives in a spec; this file keeps the reasoning. |
 | `active` | Describes the world as it is and still holds. |
 | `partially-remediated` | Some findings are fixed. The body must name which ones, and where the fix landed. |
+| `historical` | Describes the world as it was on a stated date, and makes **no claim to still hold**. The status a dated audit or move-pass gets when it is reclassified. Distinct from `active` (claims to still hold) and from `superseded` (names a specific replacement). |
 | `rejected` | The proposal was declined. Kept so it is not re-derived from scratch. |
 | `superseded` | Replaced by a later study named in `corrected-by`. |
 
