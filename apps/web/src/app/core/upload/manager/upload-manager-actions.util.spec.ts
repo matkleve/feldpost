@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { UploadJob } from '../upload-manager.types';
-import { cancelUploadManagerJob } from './upload-manager-actions.util';
+import { cancelUploadManagerJob, retryUploadManagerJob } from './upload-manager-actions.util';
 import type { UploadManagerActionsDeps } from './upload-manager-actions.util';
 
 function job(overrides: Partial<UploadJob>): UploadJob {
@@ -91,6 +91,40 @@ describe('cancelUploadManagerJob', () => {
     await cancelUploadManagerJob('job-1', deps);
 
     expect(removeUploadResidue).not.toHaveBeenCalled();
+    expect(updateJob).not.toHaveBeenCalled();
+  });
+
+  // @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-08
+  it('marks the job wasCancelled instead of relying on the error message text', async () => {
+    const current = job({});
+    const { deps, updateJob } = buildDeps(current);
+
+    await cancelUploadManagerJob('job-1', deps);
+
+    expect(updateJob).toHaveBeenCalledWith(
+      'job-1',
+      expect.objectContaining({ wasCancelled: true }),
+    );
+  });
+});
+
+describe('retryUploadManagerJob', () => {
+  it('retries a genuinely failed job', () => {
+    const current = job({ phase: 'error', error: 'Network error' });
+    const { deps, updateJob } = buildDeps(current);
+
+    retryUploadManagerJob('job-1', deps);
+
+    expect(updateJob).toHaveBeenCalledWith('job-1', expect.objectContaining({ phase: 'queued' }));
+  });
+
+  // @see docs/audits/upload-process-analysis-2026-09-08/03-branch-matrix.md Y3
+  it('refuses to retry a job the user cancelled', () => {
+    const current = job({ phase: 'error', error: 'Upload cancelled by user.', wasCancelled: true });
+    const { deps, updateJob } = buildDeps(current);
+
+    retryUploadManagerJob('job-1', deps);
+
     expect(updateJob).not.toHaveBeenCalled();
   });
 });

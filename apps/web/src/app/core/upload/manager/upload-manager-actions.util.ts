@@ -55,7 +55,9 @@ export interface UploadManagerActionsDeps {
 
 export function retryUploadManagerJob(jobId: string, deps: UploadManagerActionsDeps): void {
   const job = deps.findJob(jobId);
-  if (!job || job.phase !== 'error') return;
+  // A cancelled job is not a failure to retry — it was stopped on purpose.
+  // @see docs/audits/upload-process-analysis-2026-09-08/03-branch-matrix.md Y3
+  if (!job || job.phase !== 'error' || job.wasCancelled) return;
 
   deps.updateJob(jobId, {
     phase: 'queued',
@@ -96,6 +98,7 @@ export async function cancelUploadManagerJob(
     statusLabel: 'Cancelled',
     error: 'Upload cancelled by user.',
     failedAt: job.phase,
+    wasCancelled: true,
   });
 
   deps.drainQueue();

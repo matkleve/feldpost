@@ -212,6 +212,8 @@ A ticked-but-false AC is worse than an unticked one: it is the reason nobody has
 
 ### P6 — Get user-facing text out of control flow
 
+**Status: P6a done (2026-09-10). P6b and UP-29 not started.** P6a used the `wasCancelled` boolean design the proposal offered as an alternative to a new `cancelled` phase — smaller blast radius (no FSM/lane/`TERMINAL_PHASES` changes), and it closes both the UP-08 defect and its Y3 symptom (Retry offered on a cancelled job). P6b (making `issueKind` authoritative, deleting the status-label fallback in `upload-phase.helpers.ts:66-75`) is a separate, larger sweep across 5 producers — not attempted here. UP-29 (i18n-guard extension) depends on P6b landing first, per this proposal's own sequencing.
+
 | | |
 | --- | --- |
 | **Findings** | UP-07, UP-08, UP-29 |

@@ -172,6 +172,14 @@ export interface UploadJob {
   addressCandidates?: UploadAddressCandidate[];
   /** Allows one explicit user-approved bypass of duplicate skip handling. */
   forceDuplicateUpload?: boolean;
+  /**
+   * Set alongside `phase: 'error'` when the job was deliberately cancelled
+   * (by the user or by sign-out), as opposed to genuinely failing. Existing
+   * consumers must not derive this from `error`'s message text — the string
+   * is user-facing copy and goes through i18n.
+   * @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-08
+   */
+  wasCancelled?: boolean;
 
   // ── Replace / Attach mode fields ──
 

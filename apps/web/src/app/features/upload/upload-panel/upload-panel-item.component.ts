@@ -261,8 +261,14 @@ export class UploadPanelItemComponent implements OnDestroy {
         actions.push('change_location_map');
         actions.push('change_location_address');
         actions.push('assign_to_project');
-      } else if (issueKind === 'conflict_review' || issueKind === 'upload_error') {
+      } else if (issueKind === 'conflict_review') {
         actions.push('retry');
+      } else if (issueKind === 'upload_error') {
+        // A cancelled job is not a failure to retry — it was stopped on purpose.
+        // @see docs/audits/upload-process-analysis-2026-09-08/03-branch-matrix.md Y3
+        if (!job.wasCancelled) {
+          actions.push('retry');
+        }
       } else if (issueKind === 'address_ambiguous') {
         if ((job.addressCandidates?.length ?? 0) > 0) {
           actions.push('candidate_select');

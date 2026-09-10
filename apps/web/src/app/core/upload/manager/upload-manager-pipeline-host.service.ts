@@ -155,6 +155,7 @@ export class UploadManagerPipelineHostService {
           statusLabel: 'Cancelled',
           error: 'Upload cancelled — user signed out.',
           failedAt,
+          wasCancelled: true,
         });
       },
     });
