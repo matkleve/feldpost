@@ -95,7 +95,7 @@ Test Files  15 failed | 186 passed (201)
 | **UP-32** | Mojibake unchanged — 8 of 20 sample photos carry `├ƒ` where `ß` belongs, so the umlaut path stays untestable | `apps/web/public/vienna_sample_photos/Arsenalstra├ƒe, 03. Bezirk, Wien_0007.jpg` |
 | **UP-33** | `onDrop` reads only `dataTransfer.files`; `webkitGetAsEntry` has **zero** occurrences in `apps/web/src`, so folder drag-drop submits nothing | `features/upload/upload-panel/upload-panel-input-handlers.ts:46-56` |
 | **UP-34** | "Requeue at front" is documented in a comment; the implementation is plain array order | `core/upload/upload-manager.service.ts:414` vs `core/upload/manager/upload-manager-queue.util.ts:14-20` |
-| **UP-36** | `enrichWithReverseGeocode` is still an empty no-op; the `resolving_address` phase is cosmetic | `core/upload/support/upload-enrichment.service.ts:43-47` |
+| **UP-36** | **Superseded by [NF-39](02-new-issues.md) § 3** — stub is a symptom; real reverse geocode runs unawaited in `persistUploadFile` during `saving_record`; `resolving_address` is a false signal; upload reaches `complete` before the street address may exist; geocoder failure is silent (`location_status: 'unresolvable'`) | stub `core/upload/support/upload-enrichment.service.ts:43-47`; unawaited `core/upload/support/upload-file-persist.util.ts:232-240`; false phase `…/upload-new-post-save.util.ts:146-147` |
 | **UP-37** | Content hash still reads the first 64 KiB only | `core/upload/support/content-hash.util.ts:17` |
 | **UP-43** | Storage key extension still taken unsanitized from `file.name.split('.').pop()` | `core/upload/support/upload-file-persist.util.ts:83-84` |
 | **UP-44** | `Number('180000')` literal wrapper unchanged | `core/upload/pipelines/new/upload-new-pipeline.service.ts:63` |

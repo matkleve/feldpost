@@ -14,6 +14,7 @@ the flow is *trying* to do, so the rest of the review has somewhere to attach:
 | [`04-status-of-prior-findings.md`](./04-status-of-prior-findings.md) | Every UP-xx finding from 2026-09-08 re-measured against HEAD |
 | [`05-address-resolution-and-ui-findings.md`](./05-address-resolution-and-ui-findings.md) | NF-17 … NF-37 — Branch C / orchestrator, and the panel and tray UI |
 | [`06-improvement-plan.md`](./06-improvement-plan.md) | Post-integration improvement plan — open questions answered, ranked work, dependencies, and what not to do |
+| [`07-what-happens-when.md`](./07-what-happens-when.md) | Product-owner walkthrough — phase-by-phase "what you see vs what runs", branch points, geocoding directions |
 
 ---
 
@@ -110,6 +111,9 @@ then a reverse geocode fills in the human-readable address label.
 
 Several of those last steps are fire-and-forget by design — the user should not wait for
 an address label — which is also why several of them can fail without anybody noticing.
+See [**NF-39**](./02-new-issues.md) § 3 and the product walkthrough
+[`07-what-happens-when.md`](./07-what-happens-when.md) for how reverse geocode timing
+and phase labels diverge today.
 
 ## 6. What the user sees
 

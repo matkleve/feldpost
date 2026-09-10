@@ -2,7 +2,7 @@
 
 **Compiled:** 2026-09-10 · **Branch:** `cursor/upload-fixes-integration-3be6` (PR #128 stacked on `cursor/upload-flow-review-3be6`).
 
-This document records the structural work that remains after the NF-01…NF-37 integration pass. NF-01…NF-37 are treated as **addressed** unless noted open in [`02-new-issues.md`](./02-new-issues.md). A new finding from this investigation — **NF-38** (HEIC dedup fingerprint instability) — is recorded there and cross-referenced below.
+This document records the structural work that remains after the NF-01…NF-37 integration pass. NF-01…NF-37 are treated as **addressed** unless noted open in [`02-new-issues.md`](./02-new-issues.md). New findings from this investigation — **NF-38** (HEIC dedup fingerprint instability) and **NF-39** (unawaited reverse geocode + false `resolving_address` phase) — are recorded there and cross-referenced below.
 
 **Method:** Static reading of `apps/web/src/app/core/upload/**` and related specs. Every `path:line` anchor was re-verified against integration-branch HEAD.
 
@@ -11,10 +11,11 @@ This document records the structural work that remains after the NF-01…NF-37 i
 | Document | Role |
 | --- | --- |
 | [`01-flow-walkthrough.md`](./01-flow-walkthrough.md) | What the flow is trying to do |
-| [`02-new-issues.md`](./02-new-issues.md) | NF-01 … NF-38 findings |
+| [`02-new-issues.md`](./02-new-issues.md) | NF-01 … NF-39 findings |
 | [`03-hard-cases-and-decisions.md`](./03-hard-cases-and-decisions.md) | Decisions expensive to revisit; reversals in § H |
 | [`04-status-of-prior-findings.md`](./04-status-of-prior-findings.md) | UP-xx re-measured status |
 | [`05-address-resolution-and-ui-findings.md`](./05-address-resolution-and-ui-findings.md) | NF-17 … NF-37 (address resolution and UI) |
+| [`07-what-happens-when.md`](./07-what-happens-when.md) | Product-owner phase walkthrough and geocoding directions |
 
 ---
 
@@ -278,7 +279,7 @@ Ordered by value (correctness and regression-prevention first). Each item: probl
 | 2 | UP-05 | `beforeUnloadHandler = () => {}` (`upload-manager.service.ts:239`) | Wire `preventDefault` + i18n when busy | **Standard** |
 | 3 | UP-14 | `revokeLocalUrl` never called (`media-download.service.ts:382-383`) | Call on job remove/complete/cancel | **Standard** |
 | 4 | UP-09 | Direct `phase:` via `updateJob` in actions | Absorbed by item 3 | **Sensitive** |
-| 5 | UP-36 | `enrichWithReverseGeocode` no-op (`upload-enrichment.service.ts:43-47`) | Implement or remove cosmetic `resolving_address` phase | **Standard** / **Trivial** |
+| 5 | UP-36 | Superseded by **NF-39** — see item 13 | **Sensitive** — product decision required |
 | 6 | UP-27 | Scattered `.from()`/`.rpc()` | `UploadDbAdapter` incrementally | **Standard** |
 | 7 | UP-34 | "Requeue at front" documented but not implemented | Implement or delete spec comments | **Standard** |
 | 8 | UP-25 | Duplicate `ImageUploadedEvent` types | Alias consolidation | **Trivial** |
@@ -295,6 +296,7 @@ Ordered by value (correctness and regression-prevention first). Each item: probl
 | **G4** Deferred-address lifecycle | Medium — Skip writes `failed` + `pendingPartialLocation` | **Build** if product wants "answer later", or **remove** G4 AC from specs |
 | **G1** Sibling-folder conflict | Low frequency | **Remove from active AC** unless product confirms; move to backlog appendix |
 | **C5** `context_distance` tray | None — filter ships, tray never fires (NF-15) | **Remove** from union + spec table or mark deferred indefinitely |
+| **Step 4** `exifContextCheck` (EXIF reverse superset vs Search Object) | None — config flag in `upload-location-config.ts:26-27`, `:71`; zero runtime consumers in upload code | **Remove** from active AC or **build** Step 4 check; same spec-trust class as C5 and G1 ([**NF-39**](./02-new-issues.md) § 3) |
 
 Per `AGENTS.md` Change-Completeness Rule: specs with unchecked AC for unbuilt behavior are a trust problem.
 
@@ -314,6 +316,33 @@ Per `AGENTS.md` Change-Completeness Rule: specs with unchecked AC for unbuilt be
 
 ---
 
+### 13. Reverse geocode timing, phase honesty, and failure visibility (NF-39)
+
+**Problem:** Reverse geocoding runs in `persistUploadFile` during `saving_record` via `resolveUploadAddress`, **without `await`** (`core/upload/support/upload-file-persist.util.ts:232-240`). The post-save `resolving_address` phase awaits an empty `enrichWithReverseGeocode` stub (`core/upload/support/upload-enrichment.service.ts:43-47`; phase at `…/upload-new-post-save.util.ts:146-147`). The job reaches `complete` before the street address may exist; geocoder failure writes `location_status: 'unresolvable'` with no user-visible error (`core/upload/address-resolution/upload-address-resolve.util.ts:22-24`, `:45-47`). Supersedes UP-36. Product context: [`07-what-happens-when.md`](./07-what-happens-when.md) § 2–6.
+
+Violates `upload-manager.md` principle: *"Uploading is a background task — don't make me think"* — a user who cares about the address has no signal it is missing after green completion.
+
+**Proposed change — product decision open (pick one or combine):**
+
+| Option | What changes | Upside | Downside |
+| --- | --- | --- | --- |
+| **A — Await before `complete`** | `await resolveUploadAddress` (or move into `enrichWithReverseGeocode` and await there) before `setPhase('complete')` | Honest phases; user knows address is ready (or failed) at completion | Adds 1–3 s to visible upload time on GPS-only paths; Nominatim failures block completion unless paired with error routing |
+| **B — Async with visible pending state** | Keep background resolve but add job/row state (`address_pending`) and UI copy in Uploaded lane until RPC completes or times out | Keeps fast completion; user can see address still loading | Requires new UI state, timeout policy, and spec for "done but enriching" |
+| **C — Retry on failure** | Exponential backoff / manual Retry when `unresolvable` | Recovers transient Nominatim/rate-limit failures | Does not alone fix premature `complete` or false `resolving_address` label |
+| **D — Surface failure** | On null/error, route to Issues (`missing_data` or new kind) or toast — do not silently complete | User knows address is missing | May feel noisy if GPS-only uploads are common; product must define required vs optional address |
+
+**Minimum engineering regardless of option:** Stop emitting `resolving_address` around the empty stub unless that method performs the work; align phase labels with where geocode actually runs (see [`07-what-happens-when.md`](./07-what-happens-when.md)).
+
+**Cost:** Small-to-medium depending on option — one await/move for A; new state + UI for B; policy + i18n for D.
+
+**Risk:** A without D still leaves hard failures invisible unless geocode is awaited and errors propagate. B requires LIVE VERIFICATION on second visit to `/media` (address line hydration).
+
+**Change class:** **Sensitive** — upload pipeline + user-visible completion semantics. Red-test-first: stub geocoder slow/fail; assert phase and lane behavior match product choice.
+
+**Depends on:** Product owner decision on options A–D (not chosen in this audit). Item 3 (transition map) helps if new phases like `address_pending` are added.
+
+---
+
 ## Dependency ordering
 
 ```mermaid
@@ -328,6 +357,7 @@ flowchart TD
   CYCLES[8. Circular imports]
   HAV[9. Haversine consolidate]
   BACKLOG[10. UP backlog items]
+  NF39[13. NF-39 reverse geocode / UP-36]
 
   HEIC --> TRAY
   HEIC --> PIPE
@@ -361,6 +391,7 @@ flowchart TD
 | Transition map + idempotency (3) | Haversine consolidation (9) |
 | Commit coordinator (5) | Supabase adapter layer (UP-27) |
 | G5 cross-batch dedup (6) | Phase collapse (12, later) |
+| NF-39 address completion semantics (13) | Spec line-count (UP-38) |
 | Replace/attach/new parity via consolidation (4) | `beforeunload` wiring (UP-05) |
 | Fix mojibake fixtures (UP-32) | Spec line-count (UP-38) |
 
@@ -377,7 +408,7 @@ flowchart TD
 | **Build G1 sibling-folder tray preemptively** | High complexity, rare case; demote spec instead. |
 | **Full single-pipeline rewrite** | Replace cancel semantics differ (restore vs delete). Extract shared tails (4), do not merge modes. |
 | **Playwright in CI in this environment** | No display server; invest in integration specs + LIVE VERIFICATION. |
-| **Implement reverse-geocode enrichment as no-op phase** | Either wire `enrichWithReverseGeocode` (UP-36) or stop emitting `resolving_address` to users. |
+| **Implement reverse-geocode enrichment as no-op phase** | Superseded by **NF-39** / item 13 — requires product decision on await vs pending vs failure surfacing; see [`07-what-happens-when.md`](./07-what-happens-when.md) |
 | **Re-fix NF-01…NF-37** | Addressed in integration pass; re-audit only with live DB for migration `20260910120000`. |
 
 ---
@@ -389,5 +420,7 @@ flowchart TD
 | UP-26 haversine UI import | **Removed** from item 9 problem statement | Fixed on integration branch — tray producer imports from `upload-location-precedence.helpers.ts:13-19`, not `features/…/search-bar-helpers` |
 | Integration status | NF-01…NF-37 treated as addressed | Per integration pass on `cursor/upload-fixes-integration-3be6` |
 | NF-38 | **Added** as new high finding | Discovered during open-question investigation; not among NF-01…NF-37 |
+| NF-39 | **Added** | Reverse geocode unawaited in `saving_record`; false `resolving_address`; silent `unresolvable`; supersedes UP-36 |
+| `07-what-happens-when.md` | **Added** | Product-owner phase walkthrough linked from index and item 13 |
 | UP-10 `failJob` terminal guard | **Not listed as open** | Fixed in integration pass (`04-status-of-prior-findings.md` § 6) |
 | UP-07, UP-12, UP-23, UP-24, UP-33, UP-43–46 | **Removed from open backlog** | Fixed in integration pass |
