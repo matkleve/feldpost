@@ -326,13 +326,15 @@ These came from a shallow pass and are **starting points**; confirm or refute ea
 
 ## 8. Definition of done
 
-- [ ] All eleven artifacts in § 11 exist, committed on the working branch.
-- [ ] Every branch in § 4.2/Phase 3 has a matrix row with a verdict (or an explicit `unverified` + the check needed).
-- [ ] Every finding has `path:line` evidence, a severity, and an effort size.
-- [ ] The state-machine diff names each of the 20 phases as reachable or dead.
-- [ ] The executive summary is ≤ 15 bullets and leads with `blocker`/`high` findings.
-- [ ] Proposals are sequenced with prerequisites marked, and none of them was silently implemented.
-- [ ] The report states what could not be verified and why.
+**Status: done, 2026-09-08.** See [`00-progress.md`](../audits/upload-process-analysis-2026-09-08/00-progress.md) for the evidence behind each line below (this analysis pass is a separate, earlier phase from the fix work tracked in `11-proposals.md`).
+
+- [x] All eleven artifacts in § 11 exist, committed on the working branch.
+- [x] Every branch in § 4.2/Phase 3 has a matrix row with a verdict (or an explicit `unverified` + the check needed).
+- [x] Every finding has `path:line` evidence, a severity, and an effort size.
+- [x] The state-machine diff names each of the 20 phases as reachable or dead.
+- [x] The executive summary is ≤ 15 bullets and leads with `blocker`/`high` findings.
+- [x] Proposals are sequenced with prerequisites marked, and none of them was silently implemented.
+- [x] The report states what could not be verified and why.
 
 ---
 

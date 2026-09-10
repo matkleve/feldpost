@@ -65,6 +65,8 @@ Red = do first. Green = independently shippable today, no prerequisite.
 
 ### P0 — Make the unit suite compile again
 
+**Status: done (partial scope), 2026-09-09.** The 11 upload-scope errors were fixed so upload specs compile and run in isolation (`npx vitest run --dir src/app/core/upload`); the remaining ~90 errors across unrelated spec files were left out of scope. `npx ng test --watch=false` for the whole repo is therefore still red — see the individual fix commits on `claude/upload-process-analysis-0mnzwr`.
+
 | | |
 | --- | --- |
 | **Findings** | UP-03 |
@@ -84,6 +86,8 @@ Red = do first. Green = independently shippable today, no prerequisite.
 ---
 
 ### P1 — Close the cross-tenant read in `find_photoless_conflicts`
+
+**Status: done, 2026-09-09.** Migration + client-side change landed, red-test-first. LIVE VERIFICATION (`supabase migration list` against the hosted schema) and the fresh-context adversarial review still need a human/different agent — see the commit for the exact caveat.
 
 | | |
 | --- | --- |
@@ -111,6 +115,8 @@ and drop `p_org_id` from the signature, since `apps/web/src/app/core/upload/supp
 
 ### P2 — Stop losing data on the failure paths
 
+**Status: done, 2026-09-10 (all three sub-PRs — P2a, P2b, P2c).** Each landed red-test-first on `claude/upload-process-analysis-0mnzwr`; see the per-finding "Fixed" notes in `10-findings.md`. LIVE VERIFICATION and the fresh-context adversarial review required by `AGENTS.md` § Change Classification for Sensitive-class work are still open — flagged in every P2 commit message.
+
 | | |
 | --- | --- |
 | **Findings** | UP-02, UP-04, UP-06, UP-13, UP-15, UP-35 |
@@ -120,17 +126,19 @@ and drop `p_org_id` from the signature, since `apps/web/src/app/core/upload/supp
 | **Affected specs** | `upload-manager.md` ACs, `upload-manager-pipeline.md` § Cancel |
 | **PR boundary** | **split into three PRs** — they share a theme, not a mechanism |
 
-**P2a — Storage/DB residue (UP-02, UP-04).** One awaited cancellation routine that removes both the object and the row, replacing the four current ones (`06-health.md` § 1.1); plus the missing removal on the DB-error branch at `core/upload/support/upload-file-persist.util.ts:198-200`. Red tests first: T1 and T2 from `09-coverage.md` § 4.
+**P2a — Storage/DB residue (UP-02, UP-04). Done.** One awaited cancellation routine that removes both the object and the row, replacing the four current ones (`06-health.md` § 1.1); plus the missing removal on the DB-error branch at `core/upload/support/upload-file-persist.util.ts:198-200`. Red tests first: T1 and T2 from `09-coverage.md` § 4.
 
-**P2b — Timeout abort (UP-06).** Abort the controller when the race rejects, so a late success cannot persist. Red test T4. Confirm first that the Supabase client honours the `signal` option passed at `upload-file-persist.util.ts:128` — it is inside a cast object literal, so the type system does not prove it exists.
+**P2b — Timeout abort (UP-06). Done.** Abort the controller when the race rejects, so a late success cannot persist. Red test T4. Confirm first that the Supabase client honours the `signal` option passed at `upload-file-persist.util.ts:128` — it is inside a cast object literal, so the type system does not prove it exists. **Confirmed: it does not** — `.upload()` drops `signal` entirely (see `10-findings.md` UP-06); the shipped fix also cleans up a late-arriving success, not just the abort call this line originally asked for.
 
-**P2c — Silent failures (UP-13, UP-15, UP-35).** Guard the `classifyBatch` await; fail the job on an RLS read-back mismatch instead of logging and completing; give the dedup insert a rejection handler. Red tests T11, T14, T10.
+**P2c — Silent failures (UP-13, UP-15, UP-35). Done.** Guard the `classifyBatch` await; fail the job on an RLS read-back mismatch instead of logging and completing; give the dedup insert a rejection handler. Red tests T11, T14, T10.
 
 **LIVE VERIFICATION is required** for all three (`AGENTS.md` § Change Classification), and the checks are named in `10-findings.md` § 3.
 
 ---
 
 ### P3 — Untick the acceptance criteria that are false
+
+**Status: done, 2026-09-09.** All four edits landed in `upload-manager.md` (commit `85225509`).
 
 | | |
 | --- | --- |
@@ -337,8 +345,10 @@ Everything else has a distinct user-visible meaning or a distinct owner. A reali
 
 If only three things happen:
 
-1. **P1** — the tenancy hole. Small, independent, and the only finding in this audit with a security consequence.
-2. **P0** — the suite. Nothing else can be verified until it compiles, and every Sensitive change is formally blocked by `AGENTS.md` § Red-test-first without it.
-3. **P3** — untick the two false acceptance criteria. It takes minutes, and it stops the next reader concluding, as this one nearly did, that the orphaned-storage case is already handled.
+1. **P1** — the tenancy hole. Small, independent, and the only finding in this audit with a security consequence. **Done 2026-09-09.**
+2. **P0** — the suite. Nothing else can be verified until it compiles, and every Sensitive change is formally blocked by `AGENTS.md` § Red-test-first without it. **Done (upload scope) 2026-09-09.**
+3. **P3** — untick the two false acceptance criteria. It takes minutes, and it stops the next reader concluding, as this one nearly did, that the orphaned-storage case is already handled. **Done 2026-09-09.**
 
-**P4 and P5 can run in parallel with all of the above** — they touch nothing the others touch, and together they remove ≈700 LOC of dead code and 60 broken references, which makes every later diff easier to read.
+**P4 and P5 can run in parallel with all of the above** — they touch nothing the others touch, and together they remove ≈700 LOC of dead code and 60 broken references, which makes every later diff easier to read. **Not started.**
+
+**Beyond the original "this week" list, P2 (all three sub-PRs) also landed 2026-09-09/10** — see § 2 above. **P4–P12 remain open**; P4 and P5 are still independently shippable today.
