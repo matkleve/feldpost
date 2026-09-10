@@ -30,7 +30,7 @@ find in a private codebase. The raw weight:
 | npm gate scripts (`design-system:*`, `i18n:*`, `supabase:smoke*`, `lint:specs`) | **~25** |
 | CI workflows enforcing gates | `design-system-check`, `i18n-check`, `spec-lint`, `supabase-contract-check` |
 | Agent roles (`.github/agents/`) | `planner`, `spec-writer`, `implementer`, `reviewer`, `checker` |
-| Reusable skills (`.github/skills/`, `.cursor/skills/`) | `write-element-spec`, `implement-from-spec`, `check-spec`, `spec-audit`, `service-symmetry`, `component-structure`, `safe-file-split`, `issue-triage-next`, … |
+| Reusable skills (`.cursor/skills/` is the source; `.github/skills/` holds generated pointer stubs) | `write-element-spec`, `implement-from-spec`, `check-spec`, `spec-audit`, `service-symmetry`, `component-structure`, `safe-file-split`, `issue-triage-next`, … |
 
 **What's good (keep it):** RLS-first security boundary, the design constitution,
 the glossary as canonical naming, the ownership matrix discipline, the spec lint
