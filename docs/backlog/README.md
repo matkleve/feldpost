@@ -19,6 +19,8 @@ When picking something up, promote relevant behavior back into the governing spe
 
 Bulk-file issues from a JSON batch rather than one `gh issue create` at a time: `node scripts/create-github-issues.mjs path/to/issues.json` (schema in `scripts/create-github-issues.example.json`).
 
+The 2026-09-10 batch (`scripts/issues-2026-09-10-upload-and-cleanup.json`, 53 items) was filed as issues **#136–#188**. **#130–#135 are duplicates of #136–#141** from an interrupted first run and still need closing by hand — the agent token can create issues but not update them.
+
 ## Prioritized plans (cross-cutting)
 
 - **[Workspace pane layout + spec priorities](./workspace-pane-layout-and-spec-priorities.md)** — Target: same `WorkspacePane` on any route with layout-level split; P0 implementation hoist + spec updates; media-download / address-resolver follow-ups.
