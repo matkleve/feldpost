@@ -1,3 +1,11 @@
+---
+id: UC-011
+specs:
+  - docs/specs/page/projects-page.md
+  - docs/specs/component/project/project-details-view.md
+  - docs/specs/component/upload/upload-panel.md
+---
+
 # Project Mixed Media - Use Cases
 
 > Related specs: [projects-page](../specs/page/projects-page.md), [project-details-view](../specs/component/project/project-details-view.md), [upload-panel](../specs/component/upload/upload-panel.md), [filter-panel](../specs/component/filters/item-grid-filter-operator.md)

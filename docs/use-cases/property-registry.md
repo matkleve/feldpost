@@ -1,3 +1,12 @@
+---
+id: UC-015
+specs:
+  - docs/specs/service/metadata/metadata-service.md
+  - docs/specs/component/filters/sort-dropdown.md
+  - docs/specs/component/filters/grouping-dropdown.md
+  - docs/specs/component/filters/filter-dropdown.md
+---
+
 # Property Registry — Use Cases & Interaction Scenarios
 
 > **Related specs:** [custom-properties](../specs/service/metadata/metadata-service.md), [sort-dropdown](../specs/component/filters/sort-dropdown.md), [grouping-dropdown](../specs/component/filters/grouping-dropdown.md), [filter-dropdown](../specs/component/filters/filter-dropdown.md), [search-bar](../specs/ui/search-bar/search-bar.md)

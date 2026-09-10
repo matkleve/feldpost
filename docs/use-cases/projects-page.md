@@ -1,3 +1,10 @@
+---
+id: UC-013
+specs:
+  - docs/specs/page/projects-page.md
+  - docs/specs/component/project/projects-dropdown.md
+---
+
 # Projects Page — Use Cases & Interaction Scenarios
 
 > **Primary spec anchor:** [projects-page](../specs/page/projects-page.md)

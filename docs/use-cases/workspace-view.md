@@ -1,3 +1,11 @@
+---
+id: UC-021
+specs:
+  - docs/specs/ui/workspace/workspace-pane.md
+  - docs/specs/service/workspace-view/workspace-view-system.md
+  - docs/specs/ui/workspace/workspace-toolbar.md
+---
+
 # Workspace View — Use Cases & Interaction Scenarios
 
 > **Related specs:** [workspace-pane](../specs/ui/workspace/workspace-pane.md), [workspace-view-system](../specs/service/workspace-view/workspace-view-system.md), [workspace-toolbar](../specs/ui/workspace/workspace-toolbar.md), [thumbnail-grid](../specs/component/item-grid/item-grid.md), [group-tab-bar](../specs/component/workspace/group-tab-bar.md), [filter-dropdown](../specs/component/filters/filter-dropdown.md), [sort-dropdown](../specs/component/filters/sort-dropdown.md), [grouping-dropdown](../specs/component/filters/grouping-dropdown.md), [projects-dropdown](../specs/component/project/projects-dropdown.md)

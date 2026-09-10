@@ -1,4 +1,11 @@
-﻿# QR Invite Flow - Use Cases and Interaction Scenarios
+﻿---
+id: UC-016
+specs:
+  - docs/specs/ui/settings-overlay/qr-invite-flow.md
+  - docs/specs/ui/settings-overlay/settings-overlay.md
+---
+
+# QR Invite Flow - Use Cases and Interaction Scenarios
 
 > Element spec: [specs/qr-invite-flow.md](../specs/ui/settings-overlay/qr-invite-flow.md)
 > Related specs: [specs/settings-overlay.md](../specs/ui/settings-overlay/settings-overlay.md), [specs/search-bar.md](../specs/ui/search-bar/search-bar.md)

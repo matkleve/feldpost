@@ -1,3 +1,12 @@
+---
+id: UC-002
+specs:
+  - docs/specs/service/metadata/metadata-service.md
+  - docs/specs/component/filters/sort-dropdown.md
+  - docs/specs/component/filters/grouping-dropdown.md
+  - docs/specs/component/filters/filter-dropdown.md
+---
+
 # Custom Properties in Operators — Use Cases
 
 > **Related specs:** [custom-properties](../specs/service/metadata/metadata-service.md), [property-registry](../specs/service/metadata/metadata-service.md), [sort-dropdown](../specs/component/filters/sort-dropdown.md), [grouping-dropdown](../specs/component/filters/grouping-dropdown.md), [filter-dropdown](../specs/component/filters/filter-dropdown.md)

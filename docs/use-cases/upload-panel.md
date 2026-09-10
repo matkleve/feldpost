@@ -1,3 +1,10 @@
+---
+id: UC-019
+specs:
+  - docs/specs/component/upload/upload-panel.md
+  - docs/specs/service/media-upload-service/upload-manager.md
+---
+
 # Upload Panel — Use Cases and Interaction Scenarios
 
 > Element spec: [specs/component/upload/upload-panel.md](../specs/component/upload/upload-panel.md)

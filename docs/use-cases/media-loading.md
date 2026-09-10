@@ -1,3 +1,11 @@
+---
+id: UC-009
+specs:
+  - docs/specs/ui/media-detail/media-detail-media-viewer.md
+  - docs/specs/ui/media-marker/media-marker.md
+  - docs/specs/component/item-grid/item-grid.md
+---
+
 # Media Loading — Use Cases & Interaction Scenarios
 > **Related specs:** [photo-marker](../specs/ui/media-marker/media-marker.md), [thumbnail-card](../specs/component/item-grid/item-grid.md), [thumbnail-grid](../specs/component/item-grid/item-grid.md), [image-detail-view](../specs/ui/media-detail/media-detail-view.md)
 > **Storage docs:** Supabase Storage Image Transformations (signed URLs with `transform` options)

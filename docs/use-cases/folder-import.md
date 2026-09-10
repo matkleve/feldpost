@@ -1,3 +1,11 @@
+---
+id: UC-003
+specs:
+  - docs/specs/service/folder-scan/folder-scan.md
+  - docs/specs/service/filename-parser/filename-parser.md
+  - docs/specs/service/location-path-parser/location-path-parser.md
+---
+
 # Folder-Based Bulk Import
 
 **Who this is for:** engineers implementing the bulk import feature and product owners validating the flow.  

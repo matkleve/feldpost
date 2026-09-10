@@ -1,3 +1,10 @@
+---
+id: UC-004
+specs:
+  - docs/specs/ui/media-detail/media-detail-view.md
+  - docs/specs/ui/media-detail/media-detail-inline-editing.md
+---
+
 # Image Editing — Use Cases & Interaction Scenarios
 
 > **Related specs:** [image-detail-view](../specs/ui/media-detail/media-detail-view.md), [workspace-view](workspace-view.md)

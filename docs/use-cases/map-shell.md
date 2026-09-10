@@ -1,3 +1,10 @@
+---
+id: UC-007
+specs:
+  - docs/specs/page/map-page.md
+  - docs/specs/ui/workspace/workspace-pane.md
+---
+
 # Map Shell — Interaction Scenarios
 
 > **Element spec:** [specs/page/map-page.md](../specs/page/map-page.md)
