@@ -64,9 +64,7 @@ export async function submitUploadManagerFiles(
 
   deps.addJobs(newJobs);
   deps.hydrateDeferredPreviews(newJobs);
-  if (deps.classifyBatch) {
-    await deps.classifyBatch(batchId);
-  }
+  await runClassifyBatchGuarded(batchId, deps);
   deps.drainQueue();
 
   return batchId;
@@ -141,9 +139,7 @@ export async function submitUploadManagerFolder(
 
   deps.addJobs(newJobs);
   deps.hydrateDeferredPreviews(newJobs);
-  if (deps.classifyBatch) {
-    await deps.classifyBatch(batchId);
-  }
+  await runClassifyBatchGuarded(batchId, deps);
   deps.drainQueue();
 
   return batchId;
@@ -196,12 +192,31 @@ export async function submitUploadManagerWebkitFolder(
 
   deps.addJobs(newJobs);
   deps.hydrateDeferredPreviews(newJobs);
-  if (deps.classifyBatch) {
-    await deps.classifyBatch(batchId);
-  }
+  await runClassifyBatchGuarded(batchId, deps);
   deps.drainQueue();
 
   return batchId;
+}
+
+/**
+ * Runs the optional Search Object classification pass, guarding its await so
+ * a rejection can't escape submit() between addJobs() and drainQueue() — an
+ * unguarded throw here left the whole batch stuck at `queued` forever, since
+ * submit() callers don't await/catch the returned promise.
+ * @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-13
+ */
+async function runClassifyBatchGuarded(
+  batchId: string,
+  deps: Pick<UploadManagerSubmitDeps, 'classifyBatch'>,
+): Promise<void> {
+  if (!deps.classifyBatch) {
+    return;
+  }
+  try {
+    await deps.classifyBatch(batchId);
+  } catch (err) {
+    console.error('[upload-manager] classifyBatch failed; draining queue without it:', err);
+  }
 }
 
 async function resolveUploadProjectIdFromFolderName(

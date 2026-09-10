@@ -1,6 +1,7 @@
 import { Observable } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import {
+  submitUploadManagerFiles,
   submitUploadManagerFolder,
   type UploadManagerSubmitDeps,
 } from './upload-manager-submit.util';
@@ -153,6 +154,32 @@ describe('submitUploadManagerFolder hierarchy config controls', () => {
       'leaf-to-root',
       true,
     );
+  });
+});
+
+describe('submitUploadManagerFiles classifyBatch guard', () => {
+  // @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-13
+  it('still drains the queue when classifyBatch rejects, instead of freezing the batch', async () => {
+    const file = new File(['x'], 'photo.jpg', { type: 'image/jpeg' });
+    const deps = createBaseDeps({
+      classifyBatch: vi.fn().mockRejectedValue(new Error('classify failed')),
+    });
+
+    await expect(submitUploadManagerFiles([file], undefined, deps)).resolves.toBeDefined();
+
+    expect(deps.addJobs).toHaveBeenCalled();
+    expect(deps.drainQueue).toHaveBeenCalled();
+  });
+
+  it('drains the queue normally when classifyBatch succeeds', async () => {
+    const file = new File(['x'], 'photo.jpg', { type: 'image/jpeg' });
+    const classifyBatch = vi.fn().mockResolvedValue(undefined);
+    const deps = createBaseDeps({ classifyBatch });
+
+    await submitUploadManagerFiles([file], undefined, deps);
+
+    expect(classifyBatch).toHaveBeenCalled();
+    expect(deps.drainQueue).toHaveBeenCalled();
   });
 });
 

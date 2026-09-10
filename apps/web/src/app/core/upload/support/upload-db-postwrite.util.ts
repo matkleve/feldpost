@@ -13,6 +13,8 @@ type InsertDedupHashArgs = {
   organizationId: string | undefined;
   hashAlgo: string | undefined;
   insert: (payload: DedupInsertPayload) => PromiseLike<unknown>;
+  /** @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-35 */
+  onError?: (error: unknown) => void;
 };
 
 /** First path segment of `{org_id}/{user_id}/{uuid}.ext` storage paths. */
@@ -25,7 +27,7 @@ export function organizationIdFromStoragePath(storagePath: string | undefined): 
 }
 
 export function insertDedupHashFireAndForget(args: InsertDedupHashArgs): void {
-  const { contentHash, mediaItemId, userId, organizationId, hashAlgo, insert } = args;
+  const { contentHash, mediaItemId, userId, organizationId, hashAlgo, insert, onError } = args;
   if (!contentHash || !organizationId) {
     return;
   }
@@ -35,7 +37,17 @@ export function insertDedupHashFireAndForget(args: InsertDedupHashArgs): void {
     user_id: userId,
     organization_id: organizationId,
     hash_algo: hashAlgo ?? 'photo_v1',
-  }).then();
+  }).then(undefined, (error: unknown) => {
+    // A lost dedup hash silently defeats resume-safety (re-uploading the same
+    // file goes undetected next time); at minimum, surface it instead of
+    // leaving an unhandled rejection.
+    // @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-35
+    if (onError) {
+      onError(error);
+    } else {
+      console.error('[upload] dedup hash insert failed:', error);
+    }
+  });
 }
 
 type VerifyStoragePathWriteArgs = {
@@ -45,7 +57,15 @@ type VerifyStoragePathWriteArgs = {
   logError: (...args: unknown[]) => void;
 };
 
-export async function verifyStoragePathWrite(args: VerifyStoragePathWriteArgs): Promise<void> {
+/**
+ * @returns `persisted: false` when the read-back proves the write was blocked
+ *   (RLS silently no-opped the update) — callers must treat that as a failure
+ *   rather than completing the job.
+ * @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-15
+ */
+export async function verifyStoragePathWrite(
+  args: VerifyStoragePathWriteArgs,
+): Promise<{ persisted: boolean }> {
   const { expectedStoragePath, readBack, logInfo, logError } = args;
   const { storagePath, error } = await readBack();
   logInfo('[attach-pipeline] verification read-back:', {
@@ -59,5 +79,7 @@ export async function verifyStoragePathWrite(args: VerifyStoragePathWriteArgs): 
       'Got:',
       storagePath,
     );
+    return { persisted: false };
   }
+  return { persisted: true };
 }

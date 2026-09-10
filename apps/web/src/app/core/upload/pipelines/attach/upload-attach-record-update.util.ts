@@ -81,12 +81,21 @@ export async function performAttachRecordUpdate(
     return null;
   }
 
-  await verifyStoragePathWrite({
+  const { persisted } = await verifyStoragePathWrite({
     expectedStoragePath: args.storagePath,
     readBack: args.readBackStoragePath,
     logInfo: args.logInfo,
     logError: args.logError,
   });
+  if (!persisted) {
+    // The DB update returned no error, but the read-back proves it did not
+    // actually persist — most likely an RLS policy silently blocked the
+    // write. Fail the job instead of completing with a stale/wrong row.
+    // @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-15
+    await args.removeStoragePath(args.storagePath);
+    args.onFail('replacing_record', 'Write did not persist — RLS likely blocked the update.');
+    return null;
+  }
 
   insertDedupHashFireAndForget({
     contentHash: args.contentHash,
