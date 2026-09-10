@@ -98,9 +98,8 @@ Where `GroupingProperty` = `{ id: string; label: string; icon: string }`.
 
 | File                                                                             | Purpose                                      |
 | -------------------------------------------------------------------------------- | -------------------------------------------- |
-| `apps/web/src/app/shared/dropdown-trigger/grouping-dropdown.component.ts`   | Dropdown with drag-reorder (inline template) |
-| `apps/web/src/app/shared/dropdown-trigger/grouping-dropdown.component.scss` | Base styles                                       |
-| `apps/web/src/app/shared/workspace-pane/workspace-toolbar/grouping-dropdown.component.scss` | Toolbar-specific styling overrides |
+| `apps/web/src/app/shared/dropdown-trigger/grouping/grouping-dropdown.component.ts`   | Dropdown with drag-reorder (inline template) |
+| `apps/web/src/app/shared/dropdown-trigger/grouping/grouping-dropdown.component.scss` | Styles (toolbar + CDK drag exceptions)       |
 
 ## Wiring
 

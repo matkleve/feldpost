@@ -144,11 +144,10 @@ flowchart TD
 | File                                              | Purpose                                 |
 | ------------------------------------------------- | --------------------------------------- |
 | `docs/specs/service/filename-parser/filename-parser.md`           | Service spec (this document)            |
-| `core/filename-parser.service.ts`                 | Main service implementation             |
-| `core/filename-parser/date-patterns.const.ts`     | ISO, timestamp, and German date regexes |
-| `core/filename-parser/metadata-keywords.const.ts` | DRAFT, THUMB, TEMP, and other keywords  |
-| `core/filename-parser.util.ts`                    | Shared utilities (normalization, etc.)  |
-| `core/filename-parser.service.spec.ts`            | Unit tests for all pattern types        |
+| `apps/web/src/app/core/filename-parser/filename-parser.service.ts`                 | Main service implementation             |
+| `apps/web/src/app/core/filename-parser/filename-parser.types.ts`     | `ParsedAddress` and module types |
+| `apps/web/src/app/core/filename-parser/filename-parser.helpers.ts` | Shared helpers (symmetry module stub)  |
+| `apps/web/src/app/core/filename-parser/filename-parser.service.spec.ts`            | Unit tests for address extraction patterns        |
 
 ## Wiring
 

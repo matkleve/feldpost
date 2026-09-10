@@ -17,7 +17,7 @@ Shared project-selector and upload-row menus MUST reuse **shell + option-menu** 
 
 ## Global CSS / token emission
 
-Semantic custom properties ship from **`apps/web/src/styles.scss`** (tweakcn `:root` / theme blocks and app extensions). The legacy bridge path **`apps/web/src/styles/_legacy-design-tokens.scss`** is **not on disk** (Phase 7 Batch 50; verify **`rg 'legacy-design-tokens|_legacy-design-tokens' apps/web`** → **0**). **`@include meta.load-css('styles/typography-baseline')`** remains the only late-loaded global partial, after Tailwind/Preflight, per the header comment in `styles.scss`. Token bucket ownership: [`docs/design/token-layers.md`](../../../design/token-layers.md). Naming checklist: [`docs/design/tokens.md`](../../../design/tokens.md). Bridge history: [`docs/migration/phase-7-token-migration.md`](../../../migration/phase-7-token-migration.md).
+Semantic custom properties ship from **`apps/web/src/styles.scss`** (tweakcn `:root` / theme blocks and app extensions). The Phase 7 legacy bridge partial `_legacy-design-tokens.scss` was removed (Batch 50; verify **`rg 'legacy-design-tokens|_legacy-design-tokens' apps/web`** → **0**). **`@include meta.load-css('styles/typography-baseline')`** remains the only late-loaded global partial, after Tailwind/Preflight, per the header comment in `styles.scss`. Token bucket ownership: [`docs/design/token-layers.md`](../../../design/token-layers.md). Naming checklist: [`docs/design/tokens.md`](../../../design/tokens.md). Bridge history: [`docs/migration/phase-7-token-migration.md`](../../../migration/phase-7-token-migration.md).
 
 ## Toolbar menu panels (anchored UI)
 
@@ -187,7 +187,7 @@ box-shadow:    var(--shadow-md)
 - **Map / Leaflet pierced CSS:** `apps/web/src/styles/_map-shell-leaflet-global.scss`
 - **Sort / grouping / filter (feature panels)**: `apps/web/src/app/shared/dropdown-trigger/` — `sort-dropdown`, `grouping-dropdown`, `filter-dropdown` (`.ts` + `.html` + `.scss` as applicable)
 - **Projects (workspace toolbar only)**: `apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/projects-dropdown.component.ts` + `.scss` (inline template)
-- **Context menu**: `apps/web/src/app/shared/workspace-pane/media-detail-view.component.html` + `.scss`
+- **Context menu**: `apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view.component.html` + `.scss`
 - **Analysis (non-normative):** [`dropdown-component-structure-audit-2026-05-17.md`](../../../migration/reports/dropdown-component-structure-audit-2026-05-17.md), [`dropdown-deep-analysis-2026-05-17.md`](../../../migration/reports/dropdown-deep-analysis-2026-05-17.md) — DOM/stacking notes reconciled with this spec (2026-05-17).
 
 ## Actions
@@ -265,7 +265,7 @@ Not applicable - state is owned by consuming dropdown components (sort/grouping/
 | `apps/web/src/app/shared/dropdown-trigger/grouping/grouping-dropdown.component.scss` | Grouping-specific drag/drop and selected-state exceptions |
 | `apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/projects-dropdown.component.scss` | Project-specific checkbox/count exceptions                |
 | `apps/web/src/app/shared/dropdown-trigger/filter/filter-dropdown.component.scss`   | Filter-rule form-specific exceptions                      |
-| `apps/web/src/app/shared/workspace-pane/media-detail-view.component.scss`                   | Media detail context-menu positioning/ownership           |
+| `apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view.component.scss`                   | Media detail context-menu positioning/ownership           |
 
 ## Wiring
 

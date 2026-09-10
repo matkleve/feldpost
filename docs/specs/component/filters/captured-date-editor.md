@@ -69,9 +69,9 @@ flowchart LR
 
 | File                                                                            | Purpose                       |
 | ------------------------------------------------------------------------------- | ----------------------------- |
-| `docs/specs/component/filters/captured-date-editor.md`                          | Captured Date Editor contract |
-| `apps/web/src/app/shared/workspace-pane/media-detail-view.component.ts`   | Inline edit logic host        |
-| `apps/web/src/app/shared/workspace-pane/media-detail-view.component.html` | Captured date row markup      |
+| `docs/specs/component/filters/captured-date-editor.md`                          | Captured Date Editor contract (historical) |
+| `apps/web/src/app/shared/calendar-dropdown/calendar-dropdown.component.ts`   | Successor: calendar dropdown host          |
+| `apps/web/src/app/shared/calendar-dropdown/calendar-picker-panel.component.ts` | Successor: date picker panel             |
 
 ## Wiring
 
