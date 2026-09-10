@@ -1,3 +1,4 @@
+import { haversineMeters } from '../geo/haversine.util';
 import type { GeocoderSearchResult } from '../geocoding/geocoding.service';
 import type { SearchAddressCandidate, SearchQueryContext, SearchRecentCandidate } from './search.models';
 
@@ -242,27 +243,7 @@ export function distanceToSearchContextMeters(
   return Math.min(...distances);
 }
 
-export function haversineMeters(
-  leftLat: number,
-  leftLng: number,
-  rightLat: number,
-  rightLng: number,
-): number {
-  const toRad = (degrees: number) => (degrees * Math.PI) / 180;
-  const earthRadiusMeters = 6371000;
-
-  const deltaLat = toRad(rightLat - leftLat);
-  const deltaLng = toRad(rightLng - leftLng);
-  const lat1 = toRad(leftLat);
-  const lat2 = toRad(rightLat);
-
-  const a =
-    Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
-    Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLng / 2) * Math.sin(deltaLng / 2);
-
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return earthRadiusMeters * c;
-}
+export { haversineMeters };
 
 function expDecayMeters(distanceMeters: number, tauMeters: number): number {
   return Math.exp(-distanceMeters / tauMeters);
