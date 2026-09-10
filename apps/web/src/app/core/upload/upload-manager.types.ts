@@ -115,8 +115,6 @@ export type UploadJobIssueKind =
 export type UploadDisambiguationKind =
   | 'geocode'
   | 'source'
-  /** Reserved for C5 context-distance tray — filter ships; tray deferred per adapter spec. */
-  | 'context_distance'
   | 'layer_package'
   | 'admin_level_conflict'
   | 'city_step'

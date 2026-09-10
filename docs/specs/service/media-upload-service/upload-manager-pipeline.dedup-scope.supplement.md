@@ -32,8 +32,16 @@ Implementation: `isContentHashDedupEligible()` in `upload-dedup-eligibility.util
 
 | Algo | Inputs | Used for |
 | --- | --- | --- |
-| `photo_v1` | First 64 KB + file size + EXIF GPS, `capturedAt`, `direction` | Field photos |
-| `binary_v1` | First 64 KB + file size + `\|algo=binary_v1` | Documents, video |
+| `photo_v1` | First 64 KiB + file size + EXIF GPS, `capturedAt`, `direction` | Field photos |
+| `binary_v1` | First 64 KiB + file size + `\|algo=binary_v1` | Documents, video |
+
+### 64 KiB head truncation (UP-37)
+
+Content fingerprints hash **only the first 65 536 bytes** of the source file (`readFileHead` in `content-hash.util.ts`), plus `file.size` and algorithm-specific metadata. This is load-bearing:
+
+- For typical field photos the 64 KiB head is a **strict subset** of the full file — head hash and full-file SHA-256 **differ**.
+- Dedup is intentionally **not** a whole-file hash; changing the truncation window would change every stored `content_hash` in `dedup_hashes`.
+- EXIF GPS / `capturedAt` / `direction` are mixed into `photo_v1` separately; they do not replace the byte head.
 
 Filename is never in the fingerprint. EXIF edits change `photo_v1` only.
 

@@ -67,9 +67,6 @@ export function resolverQuestionKeyForGroup(
   if (group.disambiguationKind === 'source') {
     return 'upload.resolver.question.source';
   }
-  if (group.disambiguationKind === 'context_distance') {
-    return 'upload.resolver.question.contextDistance';
-  }
   if (group.disambiguationKind === 'containment_check') {
     return 'upload.resolver.question.containmentCheck';
   }
