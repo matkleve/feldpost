@@ -102,7 +102,7 @@ Verified against code on `cursor/upload-heic-hash-order-3be6`:
 - **Tier-identity inclusion is not viable as the primary rule.** A circle containing only coarse markers yields no areas in play and therefore includes nothing; and a single precise pin in one district would pull in every `city=Wien` item org-wide. Viable only as a narrowly scoped fallback.
 - **Confirmed against SQL:** `viewport_markers` and `cluster_images` have **no `media_type` filter** — neither function body references the column. This is all media with coordinates, not photos only.
 
-> Arithmetic note for the reviewer: the half-diagonal of a 29.4 × 22.8 km rectangle is 18.6 km, so the ~19.7 km figure implies an anchor off the bbox centre. Worth confirming which anchor the ~5 km under-coverage is measured from before any implementation.
+> **Anchor note (resolved).** Both radii above are measured from the point the geocoder returns for Vienna, which sits ~1.4 km off the bbox centre — not from the centre itself. From the centre the half-diagonal is 18.6 km; from the geocoder point the farthest corner is 19.9–20.0 km, which is the ~19.7 km quoted for a Stephansplatz anchor. The equal-area disc is centred on that same geocoder point, so the like-for-like comparison is 19.9 km against 14.6 km ≈ **5.3 km**. Comparing 14.6 km to the 18.6 km centroid half-diagonal mismatches the anchors and understates the gap.
 
 ### P2 — UX analysis: containment is right; absorb its cost
 
