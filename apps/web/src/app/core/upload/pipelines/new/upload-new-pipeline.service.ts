@@ -164,6 +164,7 @@ export class UploadNewPipelineService {
       thumbnailPersistence: this.thumbnailPersistence,
       previewGeneration: this.previewGeneration,
       getUserId: () => this.auth.user()?.id,
+      addressOrchestrator: this.addressOrchestrator,
     });
   }
 

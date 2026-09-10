@@ -20,6 +20,8 @@ import {
   formatUploadFailureMessage,
   uploadFailureMessageToToastText,
 } from '../../support/upload-error-messages.util';
+import { buildUploadAddressPersistContext } from '../../address-resolution/upload-address-persist-context.helpers';
+import type { UploadAddressResolutionOrchestrator } from '../../address-resolution/upload-address-resolution.orchestrator';
 import { resolveUploadPhaseInputs } from '../../location/upload-location-inputs.helpers';
 import { awaitHeicConversionForUpload } from './upload-new-prepare-route.util';
 import { runStorageUploadWithTimeout } from '../../support/upload-storage-timeout.util';
@@ -41,6 +43,7 @@ type RunNewUploadPhaseArgs = {
   thumbnailPersistence: MediaThumbnailPersistenceService;
   previewGeneration: MediaPreviewGenerationService;
   getUserId: () => string | undefined;
+  addressOrchestrator: UploadAddressResolutionOrchestrator;
 };
 
 export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<void> {
@@ -61,6 +64,7 @@ export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<vo
     thumbnailPersistence,
     previewGeneration,
     getUserId,
+    addressOrchestrator,
   } = args;
 
   const job = jobState.findJob(jobId);
@@ -87,11 +91,21 @@ export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<vo
     parsedExif,
   });
 
+  const groupState =
+    jobForUpload.groupingKey != null
+      ? addressOrchestrator.getGroupState(jobForUpload.batchId, jobForUpload.groupingKey)
+      : undefined;
+  const addressContext = buildUploadAddressPersistContext({
+    job: jobForUpload,
+    groupState,
+  });
+
   const result = await runUploadCall({
     jobId,
     job: jobForUpload,
     coords: locationInputs.coords,
     parsedExif: locationInputs.parsedExif,
+    addressContext,
     uploadService,
     jobState,
     timeoutMs: uploadPhaseTimeoutMs,
@@ -155,6 +169,7 @@ export async function runUploadCall(args: {
   job: UploadJob;
   coords: ExifCoords | undefined;
   parsedExif: ParsedExif | undefined;
+  addressContext?: ReturnType<typeof buildUploadAddressPersistContext>;
   uploadService: UploadService;
   jobState: UploadJobStateService;
   timeoutMs: number;
@@ -167,6 +182,7 @@ export async function runUploadCall(args: {
     job,
     coords,
     parsedExif,
+    addressContext,
     uploadService,
     jobState,
     timeoutMs,
@@ -187,6 +203,7 @@ export async function runUploadCall(args: {
     job.relativePath,
     { pendingPartialLocation: job.pendingPartialLocation },
     job.addressNotes,
+    addressContext,
   );
 
   return runStorageUploadWithTimeout(uploadPromise, timeoutMs, 'Upload timed out. Please retry.', () => {

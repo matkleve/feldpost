@@ -8,6 +8,7 @@ import type { User } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { GeocodingService } from '../../geocoding/geocoding.service';
 import { resolveUploadAddress } from '../address-resolution/upload-address-resolve.util';
+import type { UploadAddressPersistContext } from '../address-resolution/upload-address-persist-context.helpers';
 import {
   describeUploadPersistError,
   mapUploadStorageError,
@@ -41,6 +42,8 @@ export interface UploadFilePersistInput {
   /** Low-confidence filename/folder address fragments. @see upload-manager-pipeline.md § Action 11c */
   addressNotes?: string[];
   options?: { pendingPartialLocation?: boolean };
+  /** Text-derived address context — skips reverse geocode when established (NF-40). */
+  addressContext?: UploadAddressPersistContext | null;
 }
 
 /**
@@ -111,6 +114,7 @@ export async function persistUploadFile(
     relativePath: input.relativePath,
     addressNotes: input.addressNotes,
     options: input.options,
+    addressContext: input.addressContext,
     abortSignal: input.abortSignal,
     deps,
   });
@@ -156,6 +160,7 @@ async function insertUploadMediaRow(args: {
   relativePath?: string;
   addressNotes?: string[];
   options?: { pendingPartialLocation?: boolean };
+  addressContext?: UploadAddressPersistContext | null;
   abortSignal?: AbortSignal;
   deps: UploadFilePersistDeps;
 }): Promise<UploadResult> {
@@ -170,6 +175,7 @@ async function insertUploadMediaRow(args: {
     relativePath,
     addressNotes,
     options,
+    addressContext,
     abortSignal,
     deps,
   } = args;
@@ -237,6 +243,7 @@ async function insertUploadMediaRow(args: {
       geocoding: deps.geocoding,
       supabaseClient: deps.supabaseClient,
       describePersistError: describeUploadPersistError,
+      addressContext,
     });
   }
 
