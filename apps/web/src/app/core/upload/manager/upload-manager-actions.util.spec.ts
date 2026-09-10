@@ -24,7 +24,7 @@ function buildDeps(current: UploadJob): {
   removeUploadResidue: ReturnType<typeof vi.fn>;
   updateJob: ReturnType<typeof vi.fn>;
 } {
-  const removeUploadResidue = vi.fn().mockResolvedValue(undefined);
+  const removeUploadResidue = vi.fn().mockResolvedValue({ errors: [] });
   const updateJob = vi.fn();
   const deps: UploadManagerActionsDeps = {
     findJob: () => current,
@@ -63,7 +63,10 @@ describe('cancelUploadManagerJob', () => {
     let resolveResidue!: () => void;
     const deps: UploadManagerActionsDeps = {
       ...buildDeps(current).deps,
-      removeUploadResidue: () => new Promise((resolve) => (resolveResidue = resolve as () => void)),
+      removeUploadResidue: () =>
+        new Promise((resolve) => {
+          resolveResidue = () => resolve({ errors: [] });
+        }),
     };
     const updateJob = vi.fn();
     deps.updateJob = updateJob;

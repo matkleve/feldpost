@@ -49,6 +49,7 @@ import {
 import { checkUploadDedupHash } from './manager/upload-manager-dedup.util';
 import { selectUploadManagerAddressCandidate } from './manager/upload-manager-select-address.util';
 import { registerUploadManagerEffects } from './manager/upload-manager-effects.util';
+import { installUploadSignOutGuard } from './manager/upload-sign-out-guard.util';
 import { emitUploadManagerBatchProgress } from './manager/upload-manager-lifecycle.util';
 import { UploadManagerMissingDataService } from './manager/upload-manager-missing-data.service';
 import { UploadManagerPipelineHostService } from './manager/upload-manager-pipeline-host.service';
@@ -238,6 +239,12 @@ export class UploadManagerService {
   private readonly beforeUnloadHandler = (): void => {};
 
   constructor() {
+    installUploadSignOutGuard({
+      supabaseClient: this.supabase.client,
+      hasRunning: () => this.queue.hasRunning(),
+      cancelAllActive: () => this.pipelineHost.cancelAllActive(),
+    });
+
     registerUploadManagerEffects({
       createEffect: (runner) => {
         effect(runner);

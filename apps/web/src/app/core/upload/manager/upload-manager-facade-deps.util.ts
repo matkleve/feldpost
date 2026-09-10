@@ -34,7 +34,10 @@ export interface UploadManagerFacadeDepsInput {
   preResolveWave: UploadPreResolveWaveService;
   pipelineHost: UploadManagerPipelineHostService;
   getPipelineCtx: () => PipelineContext;
-  removeUploadResidue: (storagePath: string | undefined, mediaId: string | undefined) => Promise<void>;
+  removeUploadResidue: (
+    storagePath: string | undefined,
+    mediaId: string | undefined,
+  ) => Promise<{ errors: string[] }>;
   hydrateDeferredPreviews: (jobs: ReadonlyArray<UploadJob>) => void;
 }
 
