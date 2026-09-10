@@ -49,4 +49,18 @@ Illegal jumps for a given file are avoided by pipeline branching, not by blockin
 
 ## Guard policy
 
-Illegal transitions are **rejected** (state unchanged). Violations are reported via `reportTransitionViolation` (test hook + `ngDevMode` console warning). Production never throws — a bad edge must not break an in-flight user upload.
+**Terminality is the only hard invariant.** A pipeline-channel transition out of a terminal phase is rejected with no mutation, so a finished job can never be resurrected by background work. `failJob` enforces the same rule independently.
+
+**Every other edge in the map is an assertion, not a permission.** An unmapped non-terminal transition is reported via `reportTransitionViolation` — the Vitest hook in `src/test/vitest.setup.ts` throws, `ngDevMode` logs `console.error` — and then **applied**. The map documents pipeline structure; when the two disagree, the running pipeline is the authority and the map is the bug.
+
+This is deliberate, and the reason is measured: the map shipped wrong on **eight** edges (NF-38 and the conflict-resume edge below). Giving an unreliable map veto power over a Sensitive pipeline produces one of two user-visible failures — a silently stranded job, or a *successful* upload reported as failed, which invites the user to re-upload a file that is already stored. Neither is acceptable; screaming in dev and test while the upload proceeds is.
+
+`setPhase` and `transitionTo` return `boolean`. It is now `false` only for an unknown job id or a terminal source, so callers that own the next pipeline step should treat `false` as "this job is gone", not "retry".
+
+### Post-dedup edges (NF-38)
+
+After `finishPreResolveDedup`, jobs stay in `dedup_check` until location routing advances them. Required: `dedup_check → { resolving_location, awaiting_disambiguation, conflict_check, missing_data }`.
+
+### Conflict resume edge
+
+`awaiting_conflict_resolution` is **non-terminal**, so `USER_TERMINAL_RESURRECTIONS` never covered it and `resolveUploadManagerConflict` could not requeue a job. `awaiting_conflict_resolution → queued` lives in the pipeline edge set, which the user channel falls through to for non-terminal sources.

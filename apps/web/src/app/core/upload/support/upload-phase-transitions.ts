@@ -80,7 +80,6 @@ const PIPELINE_TRANSITIONS: ReadonlySet<string> = new Set([
   edge('dedup_check', 'conflict_check'),
 
   // New-only location / conflict cluster
-  edge('parsing_exif', 'extracting_title'),
   edge('extracting_title', 'hashing'),
   edge('extracting_title', 'dedup_check'),
   edge('extracting_title', 'resolving_location'),
@@ -95,6 +94,9 @@ const PIPELINE_TRANSITIONS: ReadonlySet<string> = new Set([
   edge('awaiting_disambiguation', 'missing_data'),
   edge('conflict_check', 'awaiting_conflict_resolution'),
   edge('conflict_check', 'uploading'),
+  // `awaiting_conflict_resolution` is non-terminal, so the user-channel branch of
+  // canTransition() falls through to this set rather than USER_TERMINAL_RESURRECTIONS.
+  edge('awaiting_conflict_resolution', 'queued'),
 
   // Upload + persist (new: saving_record; attach/replace: replacing_record)
   edge('uploading', 'saving_record'),
@@ -120,7 +122,6 @@ const USER_TERMINAL_RESURRECTIONS: ReadonlyMap<UploadPhase, ReadonlySet<UploadPh
   ['error', new Set<UploadPhase>(['queued'])],
   ['skipped', new Set<UploadPhase>(['queued'])],
   ['missing_data', new Set<UploadPhase>(['queued', 'complete', 'error'])],
-  ['awaiting_conflict_resolution', new Set<UploadPhase>(['queued'])],
 ]);
 
 const NON_TERMINAL_PHASES: readonly UploadPhase[] = [
@@ -208,11 +209,6 @@ export function reportTransitionViolation(
   if (typeof ngDevMode !== 'undefined' && ngDevMode) {
     console.error(detail);
   }
-}
-
-/** Whether the last {@link reportTransitionViolation} call would throw in tests. */
-export function hasTransitionViolationReporter(): boolean {
-  return violationReporter != null;
 }
 
 /** @internal Test helper — enumerate pipeline edges for property-style checks. */

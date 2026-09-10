@@ -5,7 +5,7 @@
  * Emits domain events when jobs change phase, fail, skip, or complete.
  *
  * Ground rules (Spec: upload-manager-pipeline.md):
- * - Phase transitions: guarded by upload-phase-transitions.ts
+ * - Phase transitions: checked against upload-phase-transitions.ts; only terminality is enforced
  * - TERMINAL_PHASES: complete, error, missing_data, skipped (job leaves queue)
  * - ACTIVE_PHASES: All phases with ongoing work (shown in 'uploading' lane)
  * - Event emission: jobPhaseChanged$ from pipeline-channel transitions only
@@ -34,7 +34,6 @@ import {
   ACTIVE_PHASES,
   TERMINAL_PHASES,
   canTransition,
-  hasTransitionViolationReporter,
   reportTransitionViolation,
   type PhaseTransitionOptions,
   type TransitionChannel,
@@ -145,9 +144,15 @@ export class UploadJobStateService {
   }
 
   /**
-   * Guarded phase transition. Returns false when the transition map rejects the edge
-   * (no state mutation). Pipeline violations are reported loudly and fail the job in prod
-   * so stranded uploads are visible — silent rejection is worse than a surfaced error.
+   * Guarded phase transition.
+   *
+   * Terminality is the only hard invariant: the pipeline may never resurrect a finished job,
+   * so a terminal source is rejected with no mutation. Every other edge in the transition map
+   * is an *assertion about pipeline structure*, not a permission — an incomplete map is a bug
+   * in the map, and must not veto work the pipeline actually did. Unmapped non-terminal edges
+   * are therefore reported loudly (tests throw, dev logs) and then applied.
+   *
+   * @see docs/specs/service/media-upload-service/upload-manager.phase-fsm.supplement.md
    */
   transitionTo(
     jobId: string,
@@ -164,24 +169,12 @@ export class UploadJobStateService {
       return true;
     }
 
-    if (!canTransition(from, phase, options.channel)) {
-      reportTransitionViolation(jobId, from, phase, options.channel, options.reason);
-      if (
-        options.channel === 'pipeline' &&
-        !TERMINAL_PHASES.has(from) &&
-        !hasTransitionViolationReporter()
-      ) {
-        this.failJob(
-          jobId,
-          from,
-          `Upload pipeline error: invalid phase transition (${from} → ${phase}). Please retry.`,
-        );
-      }
+    if (options.channel === 'pipeline' && TERMINAL_PHASES.has(from)) {
       return false;
     }
 
-    if (options.channel === 'pipeline' && TERMINAL_PHASES.has(from)) {
-      return false;
+    if (!canTransition(from, phase, options.channel)) {
+      reportTransitionViolation(jobId, from, phase, options.channel, options.reason);
     }
 
     const previousPhase = from;

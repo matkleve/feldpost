@@ -64,8 +64,11 @@ describe('UploadJobStateService.transitionTo', () => {
     expect(phaseChanged).toHaveBeenCalledOnce();
   });
 
-  it('fails the job on illegal pipeline transitions when no test reporter is installed', () => {
-    setTransitionViolationReporter(undefined);
+  // An unmapped non-terminal edge is a bug in the map, not grounds to break the upload.
+  // @see upload-manager.phase-fsm.supplement.md § Guard policy
+  it('reports but still applies an unmapped non-terminal pipeline transition', () => {
+    const reporter = vi.fn();
+    setTransitionViolationReporter(reporter);
     const service = new UploadJobStateService();
     service.addJobs([createJob({ phase: 'hashing' })]);
 
@@ -73,9 +76,30 @@ describe('UploadJobStateService.transitionTo', () => {
       channel: 'pipeline',
     });
 
-    expect(changed).toBe(false);
+    expect(reporter).toHaveBeenCalledOnce();
+    expect(changed).toBe(true);
     const job = service.findJob('job-1');
-    expect(job?.phase).toBe('error');
-    expect(job?.error).toContain('invalid phase transition');
+    expect(job?.phase).toBe('conflict_check');
+    expect(job?.error).toBeUndefined();
+    setTransitionViolationReporter(undefined);
+  });
+
+  // Regression: awaiting_conflict_resolution is non-terminal, so USER_TERMINAL_RESURRECTIONS
+  // never applied to it and resolveUploadManagerConflict silently failed to requeue.
+  it('allows user-channel awaiting_conflict_resolution → queued without reporting', () => {
+    const reporter = vi.fn();
+    setTransitionViolationReporter(reporter);
+    const service = new UploadJobStateService();
+    service.addJobs([createJob({ phase: 'awaiting_conflict_resolution' })]);
+
+    const changed = service.transitionTo('job-1', 'queued', {
+      channel: 'user',
+      statusLabel: 'Queued',
+    });
+
+    expect(reporter).not.toHaveBeenCalled();
+    expect(changed).toBe(true);
+    expect(service.findJob('job-1')?.phase).toBe('queued');
+    setTransitionViolationReporter(undefined);
   });
 });
