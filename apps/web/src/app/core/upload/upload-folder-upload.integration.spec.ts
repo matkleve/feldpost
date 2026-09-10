@@ -8,7 +8,9 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { clearInflightDedupRegistryForTests } from './support/upload-inflight-dedup.registry';
+import { clearHeicConversionRegistryForTests } from './support/upload-heic-prepare.util';
 import * as fs from 'fs';
 import * as path from 'path';
 import { UploadManagerService } from './upload-manager.service';
@@ -184,6 +186,10 @@ async function setup(rpcHandlers: Record<string, RpcHandler> = {}) {
 // ── Tests ─────────────────────────────────────────────────────────────────
 
 describe('UploadManagerService — folder upload integration (SO → dedup → DB lookup → tray)', () => {
+  beforeEach(() => {
+    clearInflightDedupRegistryForTests();
+    clearHeicConversionRegistryForTests();
+  });
   it('(a) multiple photos, same address, single Photon hit → auto-resolve & upload all', async () => {
     const { service, fakeGeocoding } = await setup();
 
