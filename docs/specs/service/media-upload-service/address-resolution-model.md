@@ -21,6 +21,7 @@ Child specs hold detail; this document is the index and cross-cutting rules.
 | Config | [upload-location-config.md](./upload-location-config.md) |
 | Tray bundles | [upload-resolver-tray-orchestrator.md](./upload-resolver-tray-orchestrator.md) |
 | Tray FSM | [upload-resolver-tray.stepper-fsm.supplement.md](../../component/upload/upload-resolver-tray.stepper-fsm.supplement.md) |
+| Area extent & map display (PO 2026-09-10) | [address-resolution-model.area-extent-decisions.supplement.md](./address-resolution-model.area-extent-decisions.supplement.md) |
 | Token normalizer | [../token-normalizer/token-normalizer.md](../token-normalizer/token-normalizer.md) |
 | Local geo (AT) | [upload-address-resolution.local-geo.md](./upload-address-resolution.local-geo.md) |
 
@@ -63,7 +64,7 @@ Normative rules for upload and persist — audit: [`docs/audits/upload-flow-revi
 | 3 | Content hash → tag duplicate; **job continues** | — |
 | 4 | EXIF reverse `lang=en`; superset vs SO or EXIF-only | — |
 | 5 | Photon when `street`; branches A/B/C; drop hits **> `contextDistanceMaxMeters`** from job anchor (org Search Tuning km cap) | See Branch C + enqueue contract |
-| 6 | No street or tier-only SO → admin centroid; `locationPinEligible=false` | — |
+| 6 | No street or tier-only SO → admin centroid; persist at established precision (map rendering per [area-extent decisions](./address-resolution-model.area-extent-decisions.supplement.md) — not street-text gating) | — |
 | 7 | Placement + EXIF within `exifAssistRadiusMeters` (default **80 m**) → EXIF refines | — |
 | 8 | `placementResolvedBy` → upload bytes | — |
 
@@ -138,9 +139,19 @@ Normative detail: [search-tuning.distance-radii-contract.md](../search/search-tu
 - **Upload location config (`exifAssistRadiusMeters`, `sourceAgreementRadiusMeters`)**: meter radii for EXIF fine-tune and text-vs-EXIF tray — not the org km slider ([upload-location-config.md](./upload-location-config.md)).
 - **Org Search Tuning (`contextDistanceMaxMeters`)**: km cap for unrealistic Internet/upload geocode distance from anchor ([distance radii contract](../search/search-tuning.distance-radii-contract.md)).
 
+## Product decisions (2026-09-10 — map & extent)
+
+Recorded in [area-extent-decisions supplement](./address-resolution-model.area-extent-decisions.supplement.md); implementation item 15 in [`06-improvement-plan.md`](../../../audits/upload-flow-review-2026-09-10/06-improvement-plan.md).
+
+1. **Area selection:** full containment of known area inside radius — not centroid distance (not current behavior).
+2. **Map display:** remove `locationPinEligible` proxy; drive pins and zoom affordances from `address_precision`.
+3. **Known area:** capture Nominatim `boundingbox` on geocode responses we already make (rectangle accepted; zero extra requests).
+
+**Proxy-condition pattern:** third instance on this branch after tray `!isHeic` and NF-39 `resolving_address` — see supplement § Proxy-condition anti-pattern.
+
 ## Open points
 
-- **City-only pins vs `locationPinEligible`:** Step 6 sets `locationPinEligible=false` for tier-only Search Objects, but placement still forward-geocodes city text to `job.coords` (`upload-location-placement.service.ts`, `upload-new-pre-resolve.util.ts`). Product decision open — map-primary UX may hide city-only uploads until user confirms a pin.
+- **Coarse-precision map visuals:** behavioral decisions above are signed off; **how** city-level pins/overlays look requires explicit product sign-off per component styling gate — not approved in item 15.
 - DB columns `state` / `municipality` on `locations` (schema).
 - Runtime hash vs `duplicate_of` column naming at persistence layer.
 - Full Token Normalizer lookup seed (MVP uses local geo adapter).

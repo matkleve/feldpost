@@ -55,10 +55,25 @@ Note: This is primarily a Leaflet layer managed by `MapAdapter`, not a standalon
 | -------------------- | ------------------------------------------ | ------------------------------------ |
 | Radius gesture input | center point + drag distance               | Read for draw/commit behavior        |
 | Active radius filter | `FilterService` (`center`, `radiusMeters`) | Set/update/clear                     |
-| In-radius media set  | map/query pipeline result set              | Read for radius context-menu actions |
+| In-radius media set  | map/query pipeline result set (containment filter — see § Area selection semantics) | Read for radius context-menu actions |
 | Project actions      | existing project creation/assignment flows | Delegate from radius menu            |
 
 No direct Supabase access from the radius overlay itself; persistence/query work is delegated to existing service flows.
+
+## Area selection semantics (product decision 2026-09-10)
+
+When the user commits a radius, media are included only if each item's **known geographic area** is **fully contained** inside the circle.
+
+| Known precision | Known area | Inclusion rule |
+| --- | --- | --- |
+| Point (`street`, `houseNumber`) | Stored coordinates | Point inside circle |
+| Coarse (`city`, `postcode`, …) | Persisted geocoder bounding box (axis-aligned rectangle) | All four corners of rectangle inside circle |
+
+One rule — no per-precision special cases in the selection predicate beyond how known area is derived.
+
+**Not current behavior.** `RadiusSelectionService.selectRadiusImages` uses haversine distance from circle centre to marker coordinates (from `viewport_markers`), with no extent and no precision gate (`radius-selection.service.ts:56-60`). A city-centroid photo is included when circling central Vienna even when the city's extent is not fully contained — a live "confidently wrong" outcome.
+
+Centroid-plus-distance **cannot** implement full containment; it requires stored extent ([area-extent decisions](../../service/media-upload-service/address-resolution-model.area-extent-decisions.supplement.md) Decision 3). Implementation: improvement-plan item 15.
 
 ## State
 
@@ -140,3 +155,4 @@ sequenceDiagram
 - [ ] Radius filter integrates with `FilterService` and Active Filter Chips
 - [ ] Removing the chip removes the circle
 - [ ] Only one radius selection at a time
+- [ ] **Area selection:** coarse-precision media included only when known-area bbox is fully inside circle — not centroid distance alone (item 15)

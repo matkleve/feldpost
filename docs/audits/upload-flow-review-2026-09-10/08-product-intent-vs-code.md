@@ -155,11 +155,11 @@ Refinement after successful upload is real via Media Detail (and upload-panel ro
 
 ## Open product questions
 
-1. **Allowed precision levels (statement 5):** Should the product enumerate stored levels (e.g. `country` / `city` / `street` / `house`) aligned with Search Object / `groupingKey` tiers, or is free-form partial fields enough?
-2. **City-only pins:** Should city-level uploads have **no map pin**, a city centroid pin, or a pin only after user confirms? Spec Step 6 says `locationPinEligible=false` for tier-only SO — verify whether that reaches `media_items` / map markers today (static trace shows coords still set after forward geocode).
+1. ~~**Allowed precision levels (statement 5):**~~ **Decided** — stored tiers aligned with Search Object / `groupingKey` vocabulary; see [address-resolution-model.md](../../specs/service/media-upload-service/address-resolution-model.md) § Address precision principle and item 14/15 in [`06-improvement-plan.md`](./06-improvement-plan.md).
+2. ~~**City-only pins / `locationPinEligible`:**~~ **Decided (2026-09-10)** — remove street-text gate; drive map affordances from `address_precision`; capture geocoder bbox for known area. **Visual treatment of coarse pins/overlays not approved** — behavioral decisions in [area-extent supplement](../../specs/service/media-upload-service/address-resolution-model.area-extent-decisions.supplement.md); styling gate applies to implementation task.
 
 ---
 
 ## Planned fix (not implemented here)
 
-See [`06-improvement-plan.md`](./06-improvement-plan.md) item 14 and [**NF-40**](./02-new-issues.md). Distinct from [**NF-39**](./02-new-issues.md) (timing/visibility of reverse geocode).
+See [`06-improvement-plan.md`](./06-improvement-plan.md) items 14–15 and [**NF-40**](./02-new-issues.md). Distinct from [**NF-39**](./02-new-issues.md) (timing/visibility of reverse geocode).

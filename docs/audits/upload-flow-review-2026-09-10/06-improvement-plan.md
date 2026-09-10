@@ -358,11 +358,38 @@ Violates `upload-manager.md` principle: *"Uploading is a background task — don
 
 **Cost:** Medium–large — upload persist path, enrichment service, `GeocodingService` call sites, `resolve_media_location` + RLS validation SQL, Media Detail display rules for partial precision.
 
-**Risk:** High — wrong precision breaks map pins, search, and org dedupe keys (`address_dedupe_key`). City-centroid pins vs `locationPinEligible=false` (spec Step 6) needs explicit product decision. Must not regress EXIF-only paths (reverse still required when no text).
+**Risk:** High — wrong precision breaks map pins, search, and org dedupe keys (`address_dedupe_key`). Map display and containment semantics decided in item 15 (visual treatment still open). Must not regress EXIF-only paths (reverse still required when no text).
 
 **Change class:** **Sensitive** — upload pipeline + data model + `resolve_media_location` RPC. Red-test-first: `Vienna/` fixture asserts `street` null and `city` only at persist; street folder asserts text wins over reverse.
 
-**Depends on:** Product decision on allowed precision levels (open question in `08-product-intent-vs-code.md`). Item 13 (NF-39) should be coordinated — same `persistUploadFile` block. Cross-ref NF-39, not duplicate.
+**Depends on:** Product decision on allowed precision levels (open question in `08-product-intent-vs-code.md`). Item 13 (NF-39) should be coordinated — same `persistUploadFile` block. Cross-ref NF-39, not duplicate. **Superseded in part** by product decisions in item 15 (map display, extent, containment) — precision column work here remains prerequisite for item 15.
+
+---
+
+### 15. Known area extent, containment selection, precision-driven map display (PO 2026-09-10)
+
+**Problem:** Three related mismatches between product intent and code, documented in [area-extent decisions supplement](../../specs/service/media-upload-service/address-resolution-model.area-extent-decisions.supplement.md) and [zoomable-map-contract §10](../../specs/service/media-locations/media-locations.zoomable-map-contract.supplement.md):
+
+1. **Radius selection** uses centroid distance (`RadiusSelectionService.selectRadiusImages` — `radius-selection.service.ts:56-60`), not full containment of known area. City-level photos at centroids are wrongly included in small circles (live behavior).
+2. **`locationPinEligible`** gates map pins and zoom affordances on **street text** instead of **`address_precision`** — a proxy-condition anti-pattern (third instance on this branch after tray `!isHeic` and NF-39 `resolving_address`).
+3. **Geocoder `boundingbox`** arrives in Nominatim responses we already proxy (`geocode/index.ts:366-371`) but is discarded in `GeocodingService` parse paths (`geocoding.service.ts:873-891`); no extent stored on `locations`.
+4. **`viewport_markers` drift:** spec said address-only rows excluded; SQL filters coords/`geog` only (`20260524120000_locations_nn_junction.sql:816-820`).
+
+**Proposed change:**
+
+1. **Capture bbox** — Extend geocode parse types and persist Nominatim `boundingbox` (or PostGIS envelope) on forward/reverse paths; migration on `locations` (**unverified** — no DB in agent environments).
+2. **Containment selection** — Replace distance test in radius selection with full containment of known area (point for street/house; rectangle for coarse precision).
+3. **Remove pin gate** — Delete `locationPinEligible`; drive tile map icon, zoom targets, and picker lists from `address_precision` + coords.
+4. **Align `viewport_markers`** — Filter RPC (or client post-filter) with precision-aware zoomable rule; reconcile with supplement §10.
+5. **Map rendering from precision** — Behavioral only in this item; **visual treatment of coarse locations (city bbox overlay vs hidden pin) is NOT approved** — requires explicit product sign-off in the task that touches SCSS/markers per `AGENTS.md` component styling gate.
+
+**Cost:** Medium–large — geocoding types, upload persist + enrichment writers, `media-locations.helpers`, radius selection, optional `viewport_markers` migration, red-test-first containment cases.
+
+**Risk:** High — wrong containment or bbox breaks project-from-radius, workspace selection, and map curation. Rectangle vs true admin boundary is accepted approximation (PO decision). Must not regress point-precision EXIF uploads.
+
+**Change class:** **Sensitive** — upload data model + map selection semantics + media-locations read paths. Red-test-first: `Vienna/` bbox excluded from block-sized radius, included when circle covers full bbox; street folder unchanged.
+
+**Depends on:** Item 14 precision column + writers (partially landed on `cursor/upload-heic-hash-order-3be6`). Item 15 bbox migration independent but should ship with containment filter. Visual marker treatment blocked until separate PO sign-off.
 
 ---
 
@@ -382,6 +409,7 @@ flowchart TD
   BACKLOG[10. UP backlog items]
   NF39[13. NF-39 reverse geocode / UP-36]
   NF40[14. NF-40 address precision]
+  EXTENT[15. Extent + containment + precision map]
 
   HEIC --> TRAY
   HEIC --> PIPE
@@ -392,7 +420,8 @@ flowchart TD
   HEIC --> TEST
   FSM --> TEST
   COMMIT --> TEST
-  HAV --> CYCLES
+  NF40 --> EXTENT
+  HEIC --> EXTENT
 ```
 
 **Correctness track:** 1 (NF-38) → 2 → 3 → 5 → 6  
@@ -417,8 +446,9 @@ flowchart TD
 | G5 cross-batch dedup (6) | Phase collapse (12, later) |
 | NF-39 address completion semantics (13) | Spec line-count (UP-38) |
 | NF-40 address precision / no fabrication (14) | G4 deferred lifecycle (11) |
+| Known area + containment + precision map (15) | Spec line-count (UP-38) |
 | Replace/attach/new parity via consolidation (4) | `beforeunload` wiring (UP-05) |
-| Fix mojibake fixtures (UP-32) | Spec line-count (UP-38) |
+| Fix mojibake fixtures (UP-32) | Circular import breakup (8) |
 
 ---
 
@@ -447,5 +477,6 @@ flowchart TD
 | NF-38 | **Added** as new high finding | Discovered during open-question investigation; not among NF-01…NF-37 |
 | NF-39 | **Added** | Reverse geocode unawaited in `saving_record`; false `resolving_address`; silent `unresolvable`; supersedes UP-36 |
 | `07-what-happens-when.md` | **Added** | Product-owner phase walkthrough linked from index and item 13 |
+| Item 15 + area-extent supplement | **Added** | PO decisions: containment selection, remove `locationPinEligible`, capture geocoder bbox |
 | UP-10 `failJob` terminal guard | **Not listed as open** | Fixed in integration pass (`04-status-of-prior-findings.md` § 6) |
 | UP-07, UP-12, UP-23, UP-24, UP-33, UP-43–46 | **Removed from open backlog** | Fixed in integration pass |

@@ -142,7 +142,7 @@ This gate prevents the system from silently pushing a user's city choice through
 | Event | Behavior |
 | --- | --- |
 | User clicks **Skip** on a tray card | Jobs in that group get `resolutionStatus: 'deferred'`; job stays in upload queue with label "Address deferred" |
-| All cards in bundle skipped | Bundle flushes; jobs with `deferred` groups proceed to upload **without** location (no pin, `locationPinEligible: false`) |
+| All cards in bundle skipped | Bundle flushes; jobs with `deferred` groups proceed to upload **without** location coords (no map pin; precision unset) |
 | After upload completes | Deferred jobs appear in Media Detail with a reconciliation hint: "Address needs review" |
 | User opens Media Detail for deferred item | `AddressReconciliationService` triggers with relaxed constraints (same as "Try again" flow) |
 | Explicit "Resolve now" in upload queue | Re-opens the original tray question for that group (re-register with original candidates) |

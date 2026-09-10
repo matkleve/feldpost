@@ -91,7 +91,7 @@ ActiveSelectionView                        ← content area within WorkspacePane
 | Field            | Source                                                                             | Type               |
 | ---------------- | ---------------------------------------------------------------------------------- | ------------------ |
 | Cluster media    | `supabase.rpc('cluster_images', {cluster_lat, cluster_lng, zoom})` → media items   | `WorkspaceMedia[]` |
-| Radius media     | `supabase.rpc('viewport_markers', {...})` filtered by radius                       | `WorkspaceMedia[]` |
+| Radius media     | `supabase.rpc('viewport_markers', {...})` then **containment filter** on known area (not centroid distance — see [radius-selection](../../component/map/radius-selection.md) § Area selection semantics) | `WorkspaceMedia[]` |
 | Thumbnail URLs   | Supabase Storage signed URLs (batch-signed, 256×256 transform)                     | `string[]`         |
 | Projects list    | `supabase.from('projects').select('id, name').eq('organization_id', org)`          | `Project[]`        |
 | Metadata keys    | `supabase.from('metadata_keys').select('id, key_name').eq('organization_id', org)` | `MetadataKey[]`    |

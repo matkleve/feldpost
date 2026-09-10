@@ -1,0 +1,95 @@
+# Address resolution — area extent & map display decisions (supplement)
+
+> **Parent:** [address-resolution-model.md](./address-resolution-model.md)  
+> **Audit:** [`docs/audits/upload-flow-review-2026-09-10/08-product-intent-vs-code.md`](../../../audits/upload-flow-review-2026-09-10/08-product-intent-vs-code.md) · plan item 15 in [`06-improvement-plan.md`](../../../audits/upload-flow-review-2026-09-10/06-improvement-plan.md)
+
+Product-owner decisions recorded **2026-09-10**. Normative intent below; implementation tracked in improvement-plan item 15. **Not implemented in this change set.**
+
+---
+
+## Proxy-condition anti-pattern (recurring defect class)
+
+A **proxy condition** is a runtime predicate whose name or shape does **not** state the invariant it enforces. It hides the real signal behind an incidental correlate. Recognizing the class is what caught three defects on this branch:
+
+| Instance | Proxy (what code checked) | Actual invariant | Status |
+| --- | --- | --- | --- |
+| Tray Continue gate | `!isHeic(job.file)` | Phase 0 file prepare complete | Fixed on `cursor/upload-heic-hash-order-3be6` |
+| Post-save phase | `resolving_address` around empty stub | Reverse geocode completion or honest pending state | Open — NF-39 |
+| Map / zoom affordances | `locationPinEligible` (`street` + coords) | Stored address **precision** sufficient for point pin | **Decision 2** — spec updated; code pending item 15 |
+
+**Rule for specs and reviews:** When a gate's comment or name disagrees with what it actually tests, treat it as a proxy until the real signal (`filePrepareComplete`, phase work location, `address_precision`, …) is named in code and spec.
+
+---
+
+## Decision 1 — Radius / area selection uses full containment
+
+When a user draws a circle on the map, a photo is **included only if the photo's known geographic area is entirely inside the circle**.
+
+| Precision | Known area | Inclusion test |
+| --- | --- | --- |
+| `houseNumber` / `street` (point-known) | Effectively a point at stored coords | Point-in-circle (same as today for true point pins) |
+| `city` / `postcode` / coarser | Extent from stored bounding box (Decision 3) | **Full containment:** every corner of the known-area rectangle must lie inside the circle |
+
+**Not current behavior.** `RadiusSelectionService.selectRadiusImages` tests `map.distance(center, cell) <= radiusMeters` on marker coordinates from `viewport_markers` — centroid distance, with **no** pin-eligibility gate and **no** extent (`radius-selection.service.ts:56-60`). A `Vienna/` city-level photo at a centroid is included when circling central Vienna even though the city's extent is not fully contained.
+
+**Why centroid distance is insufficient:** A city-level photo's "known area" is not its centre. Centroid-plus-distance cannot implement full containment; it requires a stored **extent** (Decision 3).
+
+Normative map contract: [radius-selection.md](../../component/map/radius-selection.md) § Area selection semantics · [media-locations.zoomable-map-contract.supplement.md](../media-locations/media-locations.zoomable-map-contract.supplement.md) § Known area.
+
+---
+
+## Decision 2 — Remove `locationPinEligible`; drive map UX from `address_precision`
+
+**Decision:** Retire `locationPinEligible` (street text + coords) as the gate for map pins, tile zoom affordances, and list-side zoom targets. Use **`locations.address_precision`** (and coords presence) instead.
+
+**Reasoning (product):** The gate keys on **address text** to decide whether to show a **coordinate** — a category error. It was a **proxy for precision** when precision was not stored. Precision is now stored explicitly ([address-precision-writers supplement](./address-resolution-model.address-precision-writers.supplement.md)); the proxy is redundant and strictly worse than the real signal.
+
+| Concern | Old proxy | Normative signal |
+| --- | --- | --- |
+| Viewport pins / `viewport_markers` eligibility | `street` present | Coords + `geog`; precision governs **how** drawn, not whether coords exist |
+| Tile map icon / zoom picker | `locationPinEligible` | Precision tier ≥ street (or product rule in zoomable contract §3) |
+| Radius selection (Decision 1) | (none today — raw coords) | Known-area extent from precision + bbox |
+
+**Implementation drift (2026-09-10):** Code still uses `locationPinEligible` in `media-locations.helpers.ts:309-314` and downstream affordances. Specs updated; code removal is item 15.
+
+Replace Step 6's `locationPinEligible=false` language in the parent flow table with: tier-only Search Objects persist at established precision; map **rendering** follows precision rules in the zoomable contract — not street-text gating.
+
+---
+
+## Decision 3 — Capture geocoder bounding box (zero extra requests)
+
+**Decision:** Persist the Nominatim **`boundingbox`** returned on forward and reverse geocode responses already proxied through `supabase/functions/geocode/index.ts`.
+
+| Property | Detail |
+| --- | --- |
+| Cost | **Zero additional external requests** — bbox is present in responses we already fetch |
+| Storage | New column(s) on `locations` (e.g. `extent_bbox` or PostGIS envelope derived from bbox) — migration required; **unverified** in agent environments |
+| Use | Known-area rectangle for Decision 1 containment; coarse-precision map overlays (visual treatment **not** signed off — see item 15) |
+
+**Honest limitation (accepted):** Geocoder bounding boxes are **axis-aligned rectangles**, not true administrative boundaries. "Fully contains Vienna" is exact against the rectangle and approximate against the real city edge. True polygons would require boundary data we do not have and new external dependencies. Product owner accepted the rectangle.
+
+**Implementation drift (2026-09-10):** Bbox is **discarded today.** Edge function forwards Nominatim JSON unchanged (`geocode/index.ts:366-371`), but `GeocodingService` types omit `boundingbox` (`geocoding.service.ts:26-35`, `132-140`); `parseReverseResponse` / `parseForwardResponse` never read it (`:873-891`). Nothing persists extent to `locations`.
+
+---
+
+## Reverse-geocode call pattern (context for external-request minimization)
+
+Verified against code on `cursor/upload-heic-hash-order-3be6`:
+
+| Stage | Granularity | Evidence |
+| --- | --- | --- |
+| Forward search (folder text) | **Once per `groupingKey`** in orchestrator pre-resolve; sibling jobs reuse via `applyPreResolveFromOrchestrator` (`upload-location-placement.service.ts:90-98`, `upload-address-resolution.orchestrator.ts`) | Group-level Photon/Nominatim search |
+| Reverse at persist | **Once per uploaded file** when `finalCoords` exist | `persistUploadFile` → `resolveUploadAddress` per `media_items` insert (`upload-file-persist.util.ts:238-247`) |
+| NF-40 conditional reverse (branch) | Skips reverse when text address established | `resolveUploadAddress` early return when `addressContext.hasEstablishedTextAddress` (`upload-address-resolve.util.ts:35-44`) |
+
+**Historical waste (pre-NF-40):** A 200-image `Vienna/` folder made **200 reverse calls** re-deriving an address already known from the folder name — one per persist — while forward ran at group level. NF-40 on this branch eliminates those when text is established; coords-only paths still reverse once per file.
+
+---
+
+## Acceptance criteria (implementation — item 15)
+
+- [ ] `locations` stores geocoder bbox (or derived geometry) on forward/reverse persist paths
+- [ ] Radius selection uses full containment against known area, not centroid distance alone
+- [ ] `locationPinEligible` removed; affordances keyed on `address_precision`
+- [ ] `viewport_markers` spec and SQL aligned (see zoomable contract § drift)
+- [ ] Red-test-first: `Vienna/` at city precision excluded from small block radius; included when circle fully contains bbox
