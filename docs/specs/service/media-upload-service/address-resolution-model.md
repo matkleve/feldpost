@@ -136,6 +136,6 @@ Normative detail: [search-tuning.distance-radii-contract.md](../search/search-tu
 - [x] Bundle caps: 5 s max window, 5 dialogue units max; 1A+1B = one unit — `PRESENTATION_BUNDLE_WINDOW_MS=5000`, `PRESENTATION_BUNDLE_MAX_DIALOGUE_UNITS=5`, shared `dialogueUnitId` via `dialogueUnitIdForGroup` (`upload-location-tray-producer.adapter.ts`).
 - [ ] Same `groupingKey` across concurrent batches reuses one disambiguation group/result instead of opening a second tray (see "Cross-batch same-address dedup" above).
 - [ ] **G1** Folder-to-folder sibling conflict detected when child SO inherits conflicting ancestry ([contradiction-resolution-model.md](./contradiction-resolution-model.md#open-gaps-implementation-required))
-- [ ] **G2** Admin-level resolution fans out by `(batchId, field, conflicting-value-set)`, not just `group.jobIds` ([contradiction-resolution-model.md](./contradiction-resolution-model.md#resolution-scope-rules))
-- [ ] **G3** Post-resolution validation gate: Photon probe before Step 5; V1 tray on 0 hits ([contradiction-resolution-model.md](./contradiction-resolution-model.md#post-resolution-validation-gate-gap-g3))
+- [x] **G2 (partial)** Admin conflicts merge by `adminConflictQueryKey` at tray open — full apply fan-out still open ([contradiction-resolution-model.md](./contradiction-resolution-model.md#open-gaps-implementation-required))
+- [x] **G3** Post-resolution validation gate: Photon 0-hit opens `containment_check` tray ([contradiction-resolution-model.md](./contradiction-resolution-model.md#post-resolution-validation-gate-gap-g3))
 - [ ] **G4** Skip → `deferred` status persists through upload and is actionable in Media Detail ([contradiction-resolution-model.md](./contradiction-resolution-model.md#deferred-resolution-contract-gap-g4))

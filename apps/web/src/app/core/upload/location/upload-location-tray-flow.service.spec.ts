@@ -341,17 +341,26 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
     trayFlow.applyContainmentCheckChoice(group, 'keep-address');
 
     const updatedJob = jobState.findJob('job-cc');
+    expect(updatedJob?.resolutionStatus).toBe('resolved');
     expect(updatedJob?.pendingPartialLocation).toBe(true);
     const updatedGroup = disambiguationStore.groups().find((g) => g.id === group.id)!;
     expect(updatedGroup.resolutionStatus).toBe('resolved');
     expect(updatedGroup.selectedCandidateId).toBe('keep-address');
   });
 
-  it('G3: applyContainmentCheckChoice with enter-different defers group', () => {
-    jobState.addJobs([buildJob({ id: 'job-defer' })]);
+  it('G3: applyContainmentCheckChoice with enter-different opens fallback text tray', async () => {
+    jobState.addJobs([
+      buildJob({
+        id: 'job-defer',
+        relativePath: 'AT/Wien/1200/Hauptstraße/photo.jpg',
+      }),
+    ]);
+    await orchestrator.classifyBatch('batch-tray');
+    const groupingKey = orchestrator.listGroupStates('batch-tray')[0]?.groupingKey;
+    expect(groupingKey).toBeTruthy();
     const group = disambiguationStore.createGroup({
       batchId: 'batch-tray',
-      queryKey: 'containment|key',
+      queryKey: `containment|${groupingKey}`,
       folderDisplayPath: 'AT/Wien/Hauptstraße',
       titleAddress: 'Hauptstraße, Wien',
       jobIds: ['job-defer'],
@@ -364,6 +373,13 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
 
     trayFlow.applyContainmentCheckChoice(group, 'enter-different');
 
-    expect(resolutionMock.deferGroup).toHaveBeenCalledWith(group.id);
+    expect(resolutionMock.deferGroup).not.toHaveBeenCalled();
+    expect(resolutionMock.registerDisambiguationGroup).toHaveBeenCalledWith(
+      expect.objectContaining({
+        disambiguationKind: 'city_step',
+        trayStep: '1a',
+        candidates: [],
+      }),
+    );
   });
 });

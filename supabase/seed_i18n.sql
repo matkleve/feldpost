@@ -34630,6 +34630,68 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.containment.option.keep', 'apps/web/src/app/core/upload/location/upload-location-geocode-outcome.util.ts patchContainmentCheckOutcome', 'en', '{city}')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'apps/web/src/app/core/upload/location/upload-location-geocode-outcome.util.ts patchContainmentCheckOutcome', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.containment.option.keep'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Containment-check tray — confirm resolved address despite Photon 0-hit', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.containment.option.keep'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Keep: {street}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.containment.option.keep'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.resolver.containment.option.enterDifferent', 'Containment-check tray — open text fallback for new address', 'en', 'apps/web/src/app/core/upload/location/upload-location-geocode-outcome.util.ts patchContainmentCheckOutcome')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Containment-check tray — open text fallback for new address', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.containment.option.enterDifferent'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Enter a different address', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.containment.option.enterDifferent'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Andere Adresse eingeben', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.resolver.containment.option.enterDifferent'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'upload.resolver.question.layerPackage', 'Which address information should we use?', 'en', 'apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:resolverQuestion')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

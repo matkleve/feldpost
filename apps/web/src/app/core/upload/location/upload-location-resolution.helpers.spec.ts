@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildBranchCCity01Candidates,
   buildDisambiguationQueryKey,
   buildSearchQuery,
   classifySearchHits,
@@ -9,6 +10,7 @@ import {
   isExifAuthoritativeOverWeakFilenameStreet,
   normalizeAddressForGrouping,
   pickDiscriminatingField,
+  shouldForceBranchCCityTray,
   shouldSplitGroupByPhotonUnitCoords,
 } from './upload-location-resolution.helpers';
 import type { UploadGroupResolutionState } from '../address-resolution/upload-address-resolution.types';
@@ -183,6 +185,88 @@ describe('upload-location-resolution.helpers', () => {
     expect(
       isExifAuthoritativeOverWeakFilenameStreet(groupState, () => job),
     ).toBe(true);
+  });
+
+  describe('shouldForceBranchCCityTray (CITY-01)', () => {
+    const branchCGroup: Pick<UploadGroupResolutionState, 'geocodeBranch' | 'searchObject'> = {
+      geocodeBranch: 'branch_c',
+      searchObject: so({ street: 'Neustiftgasse', city: null, houseNumber: null }),
+    };
+
+    const autoOutcome = {
+      kind: 'auto' as const,
+      candidate: {
+        id: 'photon-1',
+        addressLabel: 'Neustiftgasse, St. Pölten',
+        lat: 48.2,
+        lng: 15.62,
+        city: 'St. Pölten',
+      },
+    };
+
+    it('forces city tray when Photon city differs from EXIF reverse-geocode city (name, not distance)', () => {
+      expect(
+        shouldForceBranchCCityTray(branchCGroup, autoOutcome, 'Wien'),
+      ).toBe(true);
+    });
+
+    it('does not force when cities match even if pins are far apart', () => {
+      expect(
+        shouldForceBranchCCityTray(branchCGroup, autoOutcome, 'St. Pölten'),
+      ).toBe(false);
+    });
+
+    it('does not force when auto candidate city is null (CITY-02 path)', () => {
+      expect(
+        shouldForceBranchCCityTray(
+          branchCGroup,
+          {
+            kind: 'auto',
+            candidate: {
+              id: 'photon-2',
+              addressLabel: 'Neustiftgasse',
+              lat: 48.2,
+              lng: 15.62,
+              city: null,
+            },
+          },
+          'Wien',
+        ),
+      ).toBe(false);
+    });
+
+    it('does not force when EXIF reverse city is missing', () => {
+      expect(shouldForceBranchCCityTray(branchCGroup, autoOutcome, null)).toBe(false);
+      expect(shouldForceBranchCCityTray(branchCGroup, autoOutcome, '')).toBe(false);
+    });
+
+    it('does not force when Search Object already has city or house number', () => {
+      expect(
+        shouldForceBranchCCityTray(
+          { ...branchCGroup, searchObject: so({ street: 'Neustiftgasse', city: 'Wien' }) },
+          autoOutcome,
+          'Graz',
+        ),
+      ).toBe(false);
+      expect(
+        shouldForceBranchCCityTray(
+          { ...branchCGroup, searchObject: so({ street: 'Neustiftgasse', houseNumber: '12' }) },
+          autoOutcome,
+          'Graz',
+        ),
+      ).toBe(false);
+    });
+
+    it('buildBranchCCity01Candidates yields two cities for pickDiscriminatingField', () => {
+      const candidates = buildBranchCCity01Candidates(
+        autoOutcome.candidate,
+        'Wien',
+        { lat: 48.17, lng: 16.37 },
+      );
+      expect(candidates).toHaveLength(2);
+      expect(pickDiscriminatingField(candidates)).toBe('city');
+      expect(candidates.map((c) => c.city)).toEqual(['St. Pölten', 'Wien']);
+    });
   });
 
   it('isExifAuthoritativeOverWeakFilenameStreet false when folder path present', () => {
