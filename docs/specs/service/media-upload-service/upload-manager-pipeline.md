@@ -1,5 +1,7 @@
 # Upload Manager Pipeline
 
+> **Split contracts:** [Data contracts](./upload-manager-pipeline.data.md) · [Location routing](./upload-manager-pipeline.location-routing.supplement.md) · [Dedup scope](./upload-manager-pipeline.dedup-scope.supplement.md) · [Wiring](./upload-manager-pipeline.wiring.supplement.md)
+
 ## What It Is
 
 Child spec for the operational pipeline owned by `UploadManagerService`: folder submission with address-hint extraction, photo-only deduplication, replace/attach event flow, location-conflict handling, and EXIF-vs-text-address reconciliation (15m tolerance).
@@ -89,25 +91,7 @@ Full field matrices, location-resolution algorithm, duplicate/issue contracts, a
 
 ## State
 
-| Name                         | Type                                                                                                                                     | Default       | Controls                                                                     |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ---------------------------------------------------------------------------- |
-| `batch.status`               | `'scanning' \| 'uploading' \| 'complete' \| 'cancelled'`                                                                                 | `'uploading'` | Batch lifecycle during folder submissions                                    |
-| `batch.folderAddressHint`    | `string \| null`                                                                                                                         | `null`        | Default textual address for folder jobs                                      |
-| `job.titleAddressSource`     | `'file' \| 'folder' \| null`                                                                                                             | `null`        | Provenance of the active textual address                                     |
-| `job.titleAddressCoords`     | `ExifCoords \| undefined`                                                                                                                | `undefined`   | Geocoded coordinates from textual address                                    |
-| `job.addressDisambiguation`  | `{ algorithm:string; probability:number; candidates:{city:string; probability:number}[] } \| undefined`                                  | `undefined`   | Ambiguous city ranking result                                                |
-| `job.addressNotes`           | `string[]`                                                                                                                               | `[]`          | Unmapped parsed fragments preserved                                          |
-| `job.locationMismatch`       | `{ distanceMeters:number } \| undefined`                                                                                                 | `undefined`   | EXIF vs text-derived mismatch payload                                        |
-| `job.contentHash`            | `string \| undefined`                                                                                                                    | `undefined`   | Dedup identity for resume-safe uploads                                       |
-| `job.duplicateState`         | `'none' \| 'duplicate_issue' \| 'resolved'`                                                                                              | `'none'`      | Duplicate detection + modal lifecycle                                        |
-| `job.duplicateDecision`      | `'use_existing' \| 'upload_anyway' \| 'reject' \| undefined`                                                                             | `undefined`   | Final duplicate decision per job                                             |
-| `job.duplicateTargetMediaId` | `string \| undefined`                                                                                                                    | `undefined`   | Existing image selected via duplicate flow                                   |
-| `job.existingMediaId`        | `string \| undefined`                                                                                                                    | `undefined`   | Existing image match selected via `use_existing` decision                    |
-| `job.issueKind`              | `'duplicate_photo' \| 'missing_gps' \| 'address_ambiguous' \| 'document_unresolved' \| 'conflict_review' \| 'upload_error' \| undefined` | `undefined`   | UI-level issue semantics separate duplicate, GPS, and document-location gaps |
-| `job.availableActions`       | `UploadItemAction[]`                                                                                                                     | `[]`          | Uploaded and issue row actions derived after state settle                    |
-| `job.conflictCandidate`      | `ConflictCandidate \| undefined`                                                                                                         | `undefined`   | Existing photoless row candidate                                             |
-| `job.conflictResolution`     | `ConflictResolution \| undefined`                                                                                                        | `undefined`   | User choice after conflict popup                                             |
-| `job.mode`                   | `'new' \| 'replace' \| 'attach'`                                                                                                         | `'new'`       | Routes pipeline and output events                                            |
+Job and batch state fields: [upload-manager-pipeline.data.md § Job / Batch State Fields](./upload-manager-pipeline.data.md#job--batch-state-fields).
 
 ## File Map
 
@@ -147,99 +131,11 @@ Full field matrices, location-resolution algorithm, duplicate/issue contracts, a
 
 ## Pipeline Service Coverage Addendum (C-01)
 
-The services below are part of pipeline behavior and are covered here as partial contracts pending dedicated mirrored service specs.
-
-| Service | Implementation file | Current coverage scope in this spec |
-| --- | --- | --- |
-| `UploadConflictService` | `core/upload/support/upload-conflict.service.ts` | Conflict detection lifecycle (`awaiting_conflict_resolution`), candidate lookup, and conflict-resolution resume flow. |
-| `UploadEnrichmentService` | `core/upload/support/upload-enrichment.service.ts` | Reverse/forward geocode enrichment path, unresolvable fallback, and non-blocking enrichment semantics. |
-| `UploadStorageService` | `core/upload/support/upload-storage.service.ts` | Storage upload/delete role in pipeline persistence and cleanup behavior. |
+Partial-contract coverage for `UploadConflictService`, `UploadEnrichmentService`, and `UploadStorageService` pending dedicated mirrored service specs: [upload-manager-pipeline.data.md § Pipeline Service Coverage Addendum (C-01)](./upload-manager-pipeline.data.md#pipeline-service-coverage-addendum-c-01).
 
 ## Wiring
 
-### Injected Services
-
-- `UploadJobStateService` — owns job state, phase transitions, and failure events
-- `UploadBatchService` — owns batch progress and completion state
-- `UploadQueueService` — enforces concurrency and running-slot tracking
-- `FolderScanService` — recursively scans directories; uses `FilenameParserService` + `LocationPathParserService` per file
-- `FilenameParserService` — extracts address and date from all filenames (standalone or via FolderScanService)
-- `LocationPathParserService` — parses and validates address components from path hierarchies
-- `UploadNewPipelineService` — executes normal upload path
-- `UploadReplacePipelineService` — executes replace path
-- `UploadAttachPipelineService` — executes attach path
-- `GeocodingService` — forward-geocodes text-derived addresses to coordinates
-- `SupabaseService` — used for RPC/storage cleanup through service abstraction
-
-### Inputs / Outputs
-
-- **Inputs**: `File[]`, `FileSystemDirectoryHandle`, `mediaId`, conflict-resolution choice
-- **Outputs**: `batchId`, `jobId`, and event streams on `UploadManagerService`
-
-### Subscriptions
-
-- Manager-owned consumers subscribe to `imageUploaded$`, `imageReplaced$`, `imageAttached$`, `uploadSkipped$`, `locationConflict$`, `jobPhaseChanged$`, `batchProgress$`, and `batchComplete$`.
-- **Domain note:** **`image*` stream names** are legacy symbols; events carry **media item** identities. See [symbol rename backlog](../../../backlog/media-photo-symbol-rename-roadmap.md).
-- Folder scan progress updates batch totals during `submitFolder()`.
-
-### Supabase Calls
-
-- `rpc('check_dedup_hashes', { hashes })` — duplicate detection
-- Storage remove on cancellation/cleanup via `SupabaseService`
-- Conflict lookup and save/update behavior are delegated through upload pipeline services
-
-### Wiring Flow (Mermaid)
-
-```mermaid
-sequenceDiagram
-  actor User
-  participant UI as UploadPanel or MediaDetail
-  participant Manager as UploadManagerService
-  participant FSS as FolderScanService
-  participant FPS as FilenameParserService
-  participant LPP as LocationPathParserService
-  participant Queue as UploadQueueService
-  participant Pipeline as Upload*PipelineService
-  participant GCS as GeocodingService
-  participant DB as Supabase
-
-  User->>UI: select files or folder
-  alt Folder import
-    UI->>Manager: submitFolder(dirHandle)
-    Manager->>FSS: scanFolder(dirHandle)
-    FSS->>LPP: extractFolderAddressHint(folderName)
-    LPP-->>FSS: AddressExtractionResult
-    loop For each discovered file
-      FSS->>FPS: parseFilename(name, path)
-      FPS->>LPP: parseFilename(hint)
-      LPP-->>FPS: AddressExtractionResult with validation
-      FPS-->>FSS: FilenameParseResult
-    end
-    FSS-->>Manager: UploadJob[] with merged address hints
-  else Standard multi-file upload
-    UI->>Manager: submit(files)
-  end
-
-  Manager->>Queue: reserve slot
-  Queue-->>Manager: slot granted
-  Manager->>Pipeline: run(jobId)
-  Pipeline->>GCS: forward(textAddressContext)
-  GCS-->>Pipeline: ExifCoords
-  Pipeline->>DB: dedup check / conflict lookup / save
-  DB-->>Pipeline: match or save result
-
-  alt Duplicate hash detected
-    Pipeline-->>Manager: duplicateDetected$ + modal event
-    UI->>Manager: resolveConflict(decision, applyToBatch?)
-    Manager->>Pipeline: resume with decision
-  else Conflict candidate found
-    Pipeline-->>Manager: awaiting_conflict_resolution + locationConflict$
-    UI->>Manager: resolveConflict(...)
-    Manager->>Pipeline: resume queued job
-  else Success
-    Pipeline-->>Manager: phase and domain events
-  end
-```
+Injected services, input/output contract, event subscriptions, Supabase calls, and the submit → dedup/conflict → completion sequence diagram: [upload-manager-pipeline.wiring.supplement.md](./upload-manager-pipeline.wiring.supplement.md).
 
 ## Acceptance Criteria
 

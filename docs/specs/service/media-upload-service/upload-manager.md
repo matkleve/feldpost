@@ -1,6 +1,7 @@
 # Upload Manager
 
 > **Related specs:** [media-download-service](../media-download-service/media-download-service.md), [upload-panel-system](../../ui/upload/upload-panel-system.md), [upload-panel (component)](../../component/upload/upload-panel.md)
+> **Split contracts:** [Wiring & data flow](upload-manager.wiring.supplement.md) · [Acceptance criteria](upload-manager.acceptance-criteria.md)
 
 ## What It Is
 
@@ -94,37 +95,7 @@ Upload Manager System
 
 ## Data
 
-### Data Flow (Mermaid)
-
-```mermaid
-flowchart TD
-  UI[UploadPanel or ImageDetail] --> M[UploadManagerService]
-  M --> Q[UploadQueueService max 3 concurrent]
-  Q --> P{job.mode}
-  P -->|new| N[UploadNewPipelineService]
-  P -->|replace| R[UploadReplacePipelineService]
-  P -->|attach| A[UploadAttachPipelineService]
-  N --> S[(Supabase Storage plus media_items table)]
-  R --> S
-  A --> S
-  N --> E[Event streams]
-  R --> E
-  A --> E
-  E --> UI
-  E --> UAI[Uploaded item action presenter]
-  UAI --> NAV[In media, add to project, prioritize, download, project open when bound]
-```
-
-### Issue and Action Semantics (Mermaid)
-
-```mermaid
-flowchart LR
-  A[Upload job] --> B{Issue kind}
-  B -->|duplicate_file| C[Upload anyway<br/>Use existing<br/>Reject]
-  B -->|missing_gps| D[Place on map<br/>Defer<br/>Dismiss]
-  B -->|conflict_review| E[Resolve conflict<br/>Retry<br/>Dismiss]
-  B -->|none and complete| F[Open in media<br/>Add to project<br/>Prioritize<br/>Download]
-```
+Data-flow and issue/action-semantics diagrams: [upload-manager.wiring.supplement.md § Data Flow](upload-manager.wiring.supplement.md#data-flow-mermaid).
 
 | Field            | Source                                  | Type                                                                                |
 | ---------------- | --------------------------------------- | ----------------------------------------------------------------------------------- |
@@ -177,104 +148,14 @@ flowchart LR
 
 ## Pipeline Service Coverage Addendum (C-01)
 
-The services below are currently covered as partial contracts through this parent spec and the pipeline child spec.
-
-| Service | Implementation file | Current coverage scope |
-| --- | --- | --- |
-| `UploadConflictService` | `core/upload/support/upload-conflict.service.ts` | Conflict detection trigger, paused conflict state, and resume semantics via manager orchestration. |
-| `UploadEnrichmentService` | `core/upload/support/upload-enrichment.service.ts` | Non-blocking enrichment behavior for reverse/forward geocoding after persistence stages. |
-| `UploadStorageService` | `core/upload/support/upload-storage.service.ts` | Storage-path based gating and persistence/cleanup role in upload workflows. |
-| `UploadNotificationService` | `core/upload/support/upload-notification.service.ts` | Manager failure-event consumption for toast notifications (`uploadFailed$`). |
+Partial-contract coverage for `UploadConflictService`, `UploadEnrichmentService`, `UploadStorageService`, and `UploadNotificationService` pending dedicated mirrored service specs: [upload-manager-pipeline.data.md § Pipeline Service Coverage Addendum (C-01)](./upload-manager-pipeline.data.md#pipeline-service-coverage-addendum-c-01).
 
 ## Wiring
 
-### Wiring Flow (Mermaid)
-
-```mermaid
-sequenceDiagram
-  actor User
-  participant UI as UploadPanelComponent
-  participant Manager as UploadManagerService
-  participant Queue as UploadQueueService
-  participant Pipeline as Upload*PipelineService
-  participant DB as Supabase
-
-  User->>UI: select files/folder
-  UI->>Manager: submit/submitFolder
-  Manager->>Queue: markRunning + slot check
-  Queue-->>Manager: available slot
-  Manager->>Pipeline: run(jobId)
-  Pipeline->>DB: upload/save/conflict checks
-  Pipeline-->>Manager: phase and domain events
-  Manager-->>UI: jobs/batches signals + observables
-```
-
-- `UploadManagerService` is `providedIn: 'root'` — no module import needed
-- Inject into `UploadPanelComponent` for intake, lane rows, and placement handoff
-- Inject into `ImageDetailView` for `replaceFile()` and `attachFile()`
-- Subscribe to `imageUploaded$` in `MapShellComponent` to upsert map markers
-- Subscribe to `imageReplaced$` and `imageAttached$` in map/detail/grid consumers for immediate thumbnail refresh
-- Subscribe to `uploadFailed$` for user-facing error notifications
-- Subscribe to `batchProgress$` where global progress affordance is shown
-- Consume `locationConflict$` through upload conflict UI flow before resume
-- `dedup_hashes` table and conflict contract remain defined in `upload-manager-pipeline.md`
-
-### Event Consumers
-
-| Event               | Consumer               | Reaction                                                                    |
-| ------------------- | ---------------------- | --------------------------------------------------------------------------- |
-| `imageUploaded$`    | `MapShellComponent`    | Adds optimistic marker to the map                                           |
-| `imageUploaded$`    | `ThumbnailGrid`        | Refreshes grid if the uploaded media item belongs to the active group       |
-| `imageReplaced$`    | `MapShellComponent`    | Rebuilds marker DivIcon with the replacement thumbnail                      |
-| `imageReplaced$`    | `ThumbnailCard`        | Resets thumbnail loading cycle to the new local object URL                  |
-| `imageReplaced$`    | `ImageDetailView`      | Refreshes signed URLs and hero media preview                                |
-| `imageAttached$`    | `MapShellComponent`    | Updates a formerly photoless marker with thumbnail content                  |
-| `imageAttached$`    | `ThumbnailCard`        | Replaces no-photo state with uploaded thumbnail                             |
-| `imageAttached$`    | `ImageDetailView`      | Switches from upload prompt to media display                                |
-| `uploadFailed$`     | `MapShellComponent`    | Shows toast notification                                                    |
-| `uploadSkipped$`    | `UploadPanelComponent` | Shows skip reason (`duplicate_reject`, `already_uploaded`, `policy_denied`) |
-| `locationConflict$` | `UploadPanelComponent` | Shows conflict resolution popup                                             |
-| `jobPhaseChanged$`  | `UploadPanelComponent` | Updates per-file status label and icon                                      |
-| `jobPhaseChanged$`  | `MediaMarker`          | Shows or hides pending indicator on markers                                 |
-| `jobPhaseChanged$`  | `ThumbnailCard`        | Shows or hides uploading overlay                                            |
-| `batchProgress$`    | `UploadPanelComponent` | Updates the batch progress bar                                              |
-| `batchProgress$`    | `UploadButtonZone`     | Shows progress ring or badge on the upload button                           |
-| `batchComplete$`    | `UploadPanelComponent` | Shows batch summary                                                         |
-| `missingData$`      | `UploadPanelComponent` | Emits placement request output to map shell                                 |
+Wiring sequence (submit → queue → pipeline → events) and the event-consumer table: [upload-manager.wiring.supplement.md](upload-manager.wiring.supplement.md).
 
 ## Acceptance Criteria
 
-- [x] Uploads continue when the originating component is destroyed (navigate away)
-- [x] Maximum 3 concurrent uploads enforced globally across all entry points
-- [x] FIFO queue: first file submitted is first to upload
-- [x] `missing_data` jobs do not consume concurrency slots
-- [x] Job state is reactive (Angular signals) — any component can bind to `jobs()`
-- [x] `imageUploaded$` fires with coords + mediaId when a job completes
-- [x] `uploadFailed$` fires when a critical phase fails
-- [x] Failed jobs can be retried via `retryJob()`
-- [x] Completed/failed jobs can be dismissed individually or in bulk
-- [x] **Path A**: GPS in EXIF → upload → save → reverse-geocode address (non-blocking)
-- [x] **Path B**: No GPS + address in title → upload → save with address → forward-geocode coords (non-blocking)
-- [x] **Path C**: No GPS + no address → job enters `missing_data`, emits `missingData$` for placement flow
-- [ ] Folder-level title addresses are applied as defaults to files without file-level title addresses.
-- [ ] File-level title addresses override folder-level defaults.
-- [ ] EXIF GPS is preserved even when textual location is present.
-- [x] Title/folder-derived coordinates are compared against EXIF with a 15m tolerance and mismatches are persisted.
-- [x] Hash dedupe runs for photo, document, and video (`photo_v1` / `binary_v1` per [dedup-scope supplement](./upload-manager-pipeline.dedup-scope.supplement.md)).
-- [ ] Duplicate hash matches from a **colleague** are resolved via explicit user decision (`use_existing`, `upload_anyway`, `reject`); a same-user match auto-skips without a modal per [dedup-scope supplement](./upload-manager-pipeline.dedup-scope.supplement.md) § Behavior matrix.
-- [ ] Duplicate resolution supports a batch apply option for matching items.
-- [ ] Duplicate issue rows expose navigation to the existing placed media.
-- [ ] Duplicate issue rows expose `Upload anyway` only for duplicate-photo review, never for GPS issues.
-- [ ] Persisted successful uploads expose follow-up actions including `Add to project`, `Prioritize`, `Open in /media`, and `Download`.
-- [ ] `Open project` appears only when the saved media item is already bound to a project.
-- [ ] `Change location` in uploaded rows exposes `Click on map` and `Enter address` as separate flows.
-- [ ] Address-suggestion hover previews map position without persisting until suggestion selection.
-- [ ] Ambiguous street+house matches are auto-assigned only when disambiguation probability is at or above threshold (default `0.95`).
-- [x] Parser residual fragments are preserved as address notes and remain visible in media details.
-- [x] Address resolution and coordinate resolution are enrichment — failure is silent
-- [ ] Geocoding enrichment `401` performs one silent auth refresh and one retry before failing
-- [ ] Persistent geocoding `401` causes controlled sign-out via `AuthService` (no manual storage-clearing workaround)
-- [x] Orphaned storage files are cleaned up when DB insert fails, and when a job is cancelled or signed out of after storage/DB residue already exists — `upload-file-persist.util.ts`, `upload-cancel-residue.util.ts`; see `docs/audits/upload-process-analysis-2026-09-08/10-findings.md` UP-02, UP-04
-- [x] Auth change (logout) cancels all active jobs
-- [x] Global progress indicator visible from any page when uploads are active
-- [ ] `beforeunload` warning shown when `isBusy()` is true — **not implemented**: the registered handler is a no-op (`(): void => {}`); see `docs/audits/upload-process-analysis-2026-09-08/10-findings.md` UP-05
+Full checklist: [upload-manager.acceptance-criteria.md](upload-manager.acceptance-criteria.md).
+
+- [ ] Implementation satisfies the linked acceptance criteria and stays aligned with this parent contract.
