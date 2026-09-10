@@ -56,7 +56,13 @@
                   "maximumError": "20kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "fileReplacements": [
+                {
+                  "replace": "src/app/features/upload/upload-resolver-tray/upload-resolver-tray.mock-orchestrator.ts",
+                  "with": "src/app/features/upload/upload-resolver-tray/upload-resolver-tray.mock-orchestrator.production.ts"
+                }
+              ]
             },
             "development": {
               "optimization": false,

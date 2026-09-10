@@ -161,7 +161,7 @@ A ticked-but-false AC is worse than an unticked one: it is the reason nobody has
 
 ### P4 — Delete the dead code
 
-**Status: P4a, P4c, P4d, P4e done (2026-09-10). P4b and P4f not started** — P4b needs the deliberate `mockResolverTray` decision this proposal itself calls for below, not a unilateral one; P4f needs re-encode tooling this pass didn't build.
+**Status: P4a, P4b, P4c, P4d, P4e done (2026-09-10). Only P4f not started** — needs re-encode tooling this pass didn't build. P4b's `mockResolverTray` decision (below) was made deliberately, not unilaterally: kept as a dev/QA affordance, gated so it is genuinely excluded from production builds (`angular.json` `fileReplacements` swap, verified against the built `dist/web` output) rather than merely runtime-suppressed.
 
 | | |
 | --- | --- |
@@ -174,13 +174,13 @@ A ticked-but-false AC is worse than an unticked one: it is the reason nobody has
 | Group | Contents | LOC | Status |
 | --- | --- | --- | --- |
 | P4a | `features/upload/upload-panel/upload-panel-dialog-handlers.service.ts` (UP-19) | 316 | **Done** |
-| P4b | `USE_TRAY_ORCHESTRATOR`, `UPLOAD_DEV_FLAGS.useTrayOrchestrator`, the 13 dead tray guards, `upload-resolver-tray.mock.ts` (UP-20) | ~200 | Not started |
+| P4b | `USE_TRAY_ORCHESTRATOR`, `UPLOAD_DEV_FLAGS.useTrayOrchestrator`, the 13 dead tray guards, `upload-resolver-tray.mock.ts` (UP-20) | ~200 | **Done** |
 | P4c | `upload-attach-hash.util.ts`, `upload-timeout.util.ts`, `upload.helpers.ts`, 7 dead exports, `issueKind:'duplicate_photo'` + its 10 readers, `UploadTrayStep '2'` (UP-21, UP-48) | ~120 | **Done**, except `upload.helpers.ts` — kept deliberately, it satisfies the module-symmetry rule |
 | P4d | the project-tray remnant: stub, facade delegation, test-only helper (UP-22) | ~60 | **Done** |
 | P4e | 7 committed refactor scripts under `apps/web/scripts/` (UP-42) | — | **Done** |
 | P4f | mojibake re-encode across 11 files (UP-40) and console gating (UP-41) | — | Not started |
 
-**Caveat on P4b.** `mockResolverTray` currently ships in the production bundle and is one constant away from seeding fixture data (`06-health.md` § 4). Decide deliberately whether to keep it as a dev affordance behind a build-time flag or remove it; do not delete it silently.
+**Caveat on P4b — resolved 2026-09-10.** `mockResolverTray` currently ships in the production bundle and is one constant away from seeding fixture data (`06-health.md` § 4). Decide deliberately whether to keep it as a dev affordance behind a build-time flag or remove it; do not delete it silently. **Decision (asked of the user explicitly): kept as a dev/QA affordance, behind a build-time flag.** `UPLOAD_DEV_FLAGS.mockResolverTray` is now `!environment.production && <raw flag>`, and `upload-resolver-tray.mock-orchestrator.ts` (the fixture data itself) is swapped for an empty stub in production via `angular.json`'s `fileReplacements` — verified by grepping the built `dist/web` output for fixture strings (present in a dev build, absent in production).
 
 **Caveat on P4f.** Re-encode with a tool, not by hand, and keep it in its own commit — it rewrites whole files and would otherwise bury a real diff.
 

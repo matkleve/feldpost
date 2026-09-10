@@ -37,7 +37,6 @@ import type {
   TrayResolveItem,
   TrayResolveOption,
 } from '../../../core/upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.types';
-import { USE_TRAY_ORCHESTRATOR } from '../../../core/upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.types';
 import { ChipComponent } from '../../../shared/components/chip/chip.component';
 import { DropdownShellComponent } from '../../../shared/dropdown-trigger/shell/dropdown-shell.component';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
@@ -46,13 +45,13 @@ import {
   resolverScoreFillPercent,
 } from './upload-resolver-tray.helpers';
 import { UPLOAD_DEV_FLAGS } from '../upload-dev-flags';
+import { environment } from '../../../../environments/environment';
 import {
   MOCK_ORCHESTRATOR_BATCH_ID,
   UPLOAD_RESOLVER_TRAY_MOCK_MEDIA_NAMES,
   UPLOAD_RESOLVER_TRAY_MOCK_ORCHESTRATOR_ITEMS,
 } from './upload-resolver-tray.mock-orchestrator';
 import { UploadPanelSignalsService } from '../upload-panel/upload-panel-signals.service';
-import { UploadLocationResolutionService } from '../../../core/upload/location/upload-location-resolution.service';
 
 export interface AffectedMediaRow {
   jobId: string;
@@ -73,7 +72,6 @@ export class UploadResolverTrayComponent implements OnInit {
   private readonly orchestrator = inject(UploadResolverTrayOrchestratorService);
   private readonly uploadManager = inject(UploadManagerService);
   private readonly uploadService = inject(UploadService);
-  private readonly resolution = inject(UploadLocationResolutionService);
   private readonly panelSignals = inject(UploadPanelSignalsService);
 
   readonly panelOpen = input(false);
@@ -93,11 +91,6 @@ export class UploadResolverTrayComponent implements OnInit {
 
   readonly passiveStatusLine = this.panelSignals.passiveStatusLine;
 
-  private readonly useOrchestrator =
-    USE_TRAY_ORCHESTRATOR ||
-    UPLOAD_DEV_FLAGS.useTrayOrchestrator ||
-    UPLOAD_DEV_FLAGS.mockResolverTray;
-
   private readonly _selectedOptionId = signal<string | null>(null);
   readonly cityDraft = signal('');
   readonly mediaMenuOpen = signal(false);
@@ -105,17 +98,13 @@ export class UploadResolverTrayComponent implements OnInit {
 
   private readonly mediaChipTrigger = viewChild<ElementRef<HTMLElement>>('mediaChipTrigger');
 
-  readonly activeItem = computed(() =>
-    this.useOrchestrator ? this.orchestrator.activeItem() : null,
-  );
+  readonly activeItem = computed(() => this.orchestrator.activeItem());
 
-  readonly bundleItems = computed(() =>
-    this.useOrchestrator ? this.orchestrator.activeItems() : [],
-  );
+  readonly bundleItems = computed(() => this.orchestrator.activeItems());
 
   readonly activeItemStatus = computed(() => {
     const item = this.activeItem();
-    if (!item || !this.useOrchestrator) {
+    if (!item) {
       return 'ready' as const;
     }
     return this.orchestrator.itemStatuses().get(item.id) ?? 'ready';
@@ -124,9 +113,6 @@ export class UploadResolverTrayComponent implements OnInit {
   readonly isItemBlocked = computed(() => this.activeItemStatus() === 'blocked');
 
   readonly carouselIndicator = computed(() => {
-    if (!this.useOrchestrator) {
-      return null;
-    }
     const items = this.bundleItems();
     const item = this.activeItem();
     if (!items.length || !item) {
@@ -140,17 +126,9 @@ export class UploadResolverTrayComponent implements OnInit {
     return formatBundleCarouselIndicator(unitIndex, unitTotal, item.trayStepLabel);
   });
 
-  readonly canGoToPreviousGroup = computed(() => {
-    if (!this.useOrchestrator) {
-      return false;
-    }
-    return this.orchestrator.activeItemIndex() > 0;
-  });
+  readonly canGoToPreviousGroup = computed(() => this.orchestrator.activeItemIndex() > 0);
 
   readonly canGoToNextGroup = computed(() => {
-    if (!this.useOrchestrator) {
-      return false;
-    }
     const items = this.bundleItems();
     return this.orchestrator.activeItemIndex() < items.length - 1;
   });
@@ -189,7 +167,7 @@ export class UploadResolverTrayComponent implements OnInit {
     if (!item) {
       return [];
     }
-    if (UPLOAD_DEV_FLAGS.mockResolverTray) {
+    if (!environment.production && UPLOAD_DEV_FLAGS.mockResolverTray) {
       return item.jobIds.map((jobId) => ({
         jobId,
         label: UPLOAD_RESOLVER_TRAY_MOCK_MEDIA_NAMES[jobId] ?? jobId,
@@ -213,7 +191,7 @@ export class UploadResolverTrayComponent implements OnInit {
       return false;
     }
     const item = this.activeItem();
-    if (!item?.jobIds.length || !this.useOrchestrator) {
+    if (!item?.jobIds.length) {
       return true;
     }
     if (
@@ -238,9 +216,6 @@ export class UploadResolverTrayComponent implements OnInit {
   });
 
   readonly continueLabel = computed(() => {
-    if (!this.useOrchestrator) {
-      return this.t('upload.resolver.continue', 'Continue');
-    }
     const items = this.bundleItems();
     const item = this.activeItem();
     if (!item || !items.length) {
@@ -275,23 +250,14 @@ export class UploadResolverTrayComponent implements OnInit {
     if (this.embeddedInPane()) {
       return 'hidden';
     }
-    if (this.useOrchestrator) {
-      if (this.orchestrator.hasActivePresentation()) {
-        return 'active';
-      }
-      if (this.orchestrator.hasPresentationBacklog() && !this.panelOpen()) {
-        return 'passive';
-      }
-      if (UPLOAD_DEV_FLAGS.mockResolverTray) {
-        return 'hidden';
-      }
-      if (UPLOAD_DEV_FLAGS.dockAlwaysVisible) {
-        return 'passive';
-      }
-      return 'hidden';
-    }
-    if (this.resolution.pendingGroupCount() > 0) {
+    if (this.orchestrator.hasActivePresentation()) {
       return 'active';
+    }
+    if (this.orchestrator.hasPresentationBacklog() && !this.panelOpen()) {
+      return 'passive';
+    }
+    if (!environment.production && UPLOAD_DEV_FLAGS.mockResolverTray) {
+      return 'hidden';
     }
     if (UPLOAD_DEV_FLAGS.dockAlwaysVisible) {
       return 'passive';
@@ -339,7 +305,7 @@ export class UploadResolverTrayComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (UPLOAD_DEV_FLAGS.mockResolverTray) {
+    if (!environment.production && UPLOAD_DEV_FLAGS.mockResolverTray) {
       this.orchestrator.resetAll();
       this.orchestrator.presentBundleImmediately(
         MOCK_ORCHESTRATOR_BATCH_ID,
@@ -388,9 +354,6 @@ export class UploadResolverTrayComponent implements OnInit {
   }
 
   goToAdjacentGroup(delta: -1 | 1): void {
-    if (!this.useOrchestrator) {
-      return;
-    }
     this.orchestrator.goToAdjacentItem(delta);
     const item = this.orchestrator.activeItem();
     if (item) {
@@ -419,20 +382,14 @@ export class UploadResolverTrayComponent implements OnInit {
     if (!optionId) {
       return;
     }
-    if (this.useOrchestrator) {
-      this.orchestrator.resolveActiveItem({ optionId });
-      return;
-    }
+    this.orchestrator.resolveActiveItem({ optionId });
   }
 
   onDefer(): void {
-    if (this.useOrchestrator) {
-      const item = this.activeItem();
-      this.orchestrator.skipActiveItem();
-      if (item) {
-        this.deferRequested.emit(item.id);
-      }
-      return;
+    const item = this.activeItem();
+    this.orchestrator.skipActiveItem();
+    if (item) {
+      this.deferRequested.emit(item.id);
     }
   }
 
