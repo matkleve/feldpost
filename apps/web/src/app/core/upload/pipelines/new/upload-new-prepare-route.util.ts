@@ -7,6 +7,12 @@ import type { UploadQueueService } from '../../support/upload-queue.service';
 import type { UploadService } from '../../upload.service';
 import type { ParsedExif } from '../../upload.service';
 import type { UploadLocationConfigService } from '../../location/upload-location-config.service';
+import {
+  awaitHeicConversionForUpload,
+  ensureHeicConversionScheduled,
+  formatHeicConversionError,
+} from '../../support/upload-heic-prepare.util';
+import { isUploadDocumentFile } from '../../support/upload.service.util';
 
 type NewPrepareRouteDeps = {
   jobState: UploadJobStateService;
@@ -18,65 +24,7 @@ type NewPrepareRouteDeps = {
   attachPipeline: UploadAttachPipelineService;
 };
 
-const heicConversionByJobId = new Map<string, Promise<void>>();
-
-function applyConvertedFileToJob(
-  deps: Pick<NewPrepareRouteDeps, 'jobState'>,
-  jobId: string,
-  convertedFile: File,
-): void {
-  const current = deps.jobState.findJob(jobId);
-  if (!current) {
-    return;
-  }
-  let newThumbnailUrl = current.thumbnailUrl;
-  if (newThumbnailUrl) {
-    URL.revokeObjectURL(newThumbnailUrl);
-  }
-  newThumbnailUrl = URL.createObjectURL(convertedFile);
-  deps.jobState.updateJob(jobId, { file: convertedFile, thumbnailUrl: newThumbnailUrl });
-}
-
-/** Singleflight HEIC→JPEG for one job (prepare may have started this in background). */
-function ensureHeicConversionScheduled(
-  deps: Pick<NewPrepareRouteDeps, 'jobState' | 'uploadService'>,
-  jobId: string,
-  sourceFile: File,
-): Promise<void> {
-  const existing = heicConversionByJobId.get(jobId);
-  if (existing) {
-    return existing;
-  }
-  const conversion = (async (): Promise<void> => {
-    deps.jobState.setPhase(jobId, 'converting_format');
-    const convertedFile = await deps.uploadService.convertToJpeg(sourceFile);
-    applyConvertedFileToJob(deps, jobId, convertedFile);
-  })();
-  const tracked = conversion.finally(() => {
-    heicConversionByJobId.delete(jobId);
-  });
-  heicConversionByJobId.set(jobId, tracked);
-  return tracked;
-}
-
-/**
- * Upload gate: JPEG bytes required. Waits background conversion from prepare, or
- * converts now when tray resolved before this job's prepare ran (common in batches).
- */
-export async function awaitHeicConversionForUpload(
-  deps: Pick<NewPrepareRouteDeps, 'jobState' | 'uploadService'>,
-  jobId: string,
-): Promise<void> {
-  const job = deps.jobState.findJob(jobId);
-  if (!job || !deps.uploadService.isHeic(job.file)) {
-    return;
-  }
-  await ensureHeicConversionScheduled(deps, jobId, job.file);
-  const after = deps.jobState.findJob(jobId);
-  if (after && deps.uploadService.isHeic(after.file)) {
-    throw new Error('HEIC conversion did not produce a JPEG file');
-  }
-}
+export { awaitHeicConversionForUpload };
 
 export async function resumeIfAlreadyRoutedNewJob(
   deps: NewPrepareRouteDeps,
@@ -193,7 +141,7 @@ export function routeJobToMissingData(
   job: UploadJob,
   ctx: PipelineContext,
 ): void {
-  const isDocument = deps.uploadService.resolveMediaType(job.file) === 'document';
+  const isDocument = isUploadDocumentFile(job.file, (file) => deps.uploadService.resolveMediaType(file));
   if (job.locationRequirementMode === 'optional') {
     return;
   }
@@ -227,16 +175,22 @@ async function prepareExifAndFile(
 ): Promise<{ job: UploadJob; parsedExif: ParsedExif } | null> {
   const isHeic = deps.uploadService.isHeic(job.file);
 
-  // Fire both immediately — EXIF parse and HEIC→JPEG conversion are independent of each other.
   deps.jobState.setPhase(jobId, 'parsing_exif');
   const exifPromise: Promise<ParsedExif> = job.parsedExif
     ? Promise.resolve(job.parsedExif)
     : deps.uploadService.parseExif(job.file);
-  const convertPromise: Promise<File> | null = isHeic
-    ? deps.uploadService.convertToJpeg(job.file)
-    : null;
 
-  // Await EXIF first (usually fast); switch phase label to converting_format once it's done.
+  let convertPromise: Promise<void> | null = null;
+  if (isHeic) {
+    convertPromise = ensureHeicConversionScheduled(deps, jobId, job.file, { setPhase: false }).catch(
+      (err) => {
+        const message = formatHeicConversionError(job.file.name, err);
+        ctx.failJob(jobId, 'converting_format', message);
+        throw err;
+      },
+    );
+  }
+
   const parsedExif = await exifPromise;
   if (isHeic) {
     deps.jobState.setPhase(jobId, 'converting_format');
@@ -246,28 +200,12 @@ async function prepareExifAndFile(
     deps.jobState.updateJob(jobId, { direction: parsedExif.direction });
   }
 
-  if (isHeic) {
-    const conversion = (async (): Promise<void> => {
-      try {
-        const convertedFile = await convertPromise!;
-        applyConvertedFileToJob(deps, jobId, convertedFile);
-      } catch (err) {
-        const message =
-          err instanceof Error && err.message === 'HEIC_CONVERSION_FAILED'
-            ? `Could not convert "${job.file.name}" to JPEG. Try exporting as JPEG and upload again.`
-            : err instanceof Error
-              ? err.message
-              : 'HEIC conversion failed.';
-        ctx.failJob(jobId, 'converting_format', message);
-        throw err;
-      }
-    })();
-    heicConversionByJobId.set(
-      jobId,
-      conversion.finally(() => {
-        heicConversionByJobId.delete(jobId);
-      }),
-    );
+  if (convertPromise) {
+    try {
+      await convertPromise;
+    } catch {
+      return null;
+    }
     job = deps.jobState.findJob(jobId)!;
     if (job.phase === 'error') {
       return null;
