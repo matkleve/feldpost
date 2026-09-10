@@ -54,8 +54,8 @@ finished"; a phase called `resolving_address` labelling a function that resolved
 match — it had created a second overload, breaking every call that omitted the new parameter.
 
 If a condition is a proxy for something else, either compute the real thing or name it for
-what it actually tests. The catalogue of instances lives in `docs/TRAPS.md`; this clause is
-the rule, that file is the evidence.
+what it actually tests. The catalogue of instances lives in [`docs/TRAPS.md`](TRAPS.md); this
+clause is the rule, that file is the evidence.
 
 ## 4. Claims carry their evidence
 

@@ -63,7 +63,7 @@ Corrections of *fact* (a broken link, a wrong path, a typo) are fine. Correction
 | What a component or service **must do** | [`docs/specs/`](../specs/README.md) | a contract, not a choice between options |
 | An analysis or proposal, with evidence grades | [`docs/study/`](../study/README.md) | reasoning that nobody has accepted yet; a study is `[D]` until an owner signs it off |
 | What happened in a work session | [`docs/ai-diary/`](../ai-diary/) | narrative, dated, append-only |
-| How the code misleads a reader | `docs/TRAPS.md` | a recurring trap, not a decision |
+| How the code misleads a reader | [`docs/TRAPS.md`](../TRAPS.md) | a recurring trap, not a decision |
 | A non-negotiable that outranks everything | [`docs/CONSTITUTION.md`](../CONSTITUTION.md) | an ADR can be superseded; a constitutional clause is amended by a pull request that changes only that file |
 
 A study that gets accepted often produces an ADR: the study keeps the evidence and the
