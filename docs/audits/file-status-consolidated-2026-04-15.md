@@ -152,7 +152,7 @@
 | docs/security-boundaries.md | PROTECTED |  |
 | docs/settings-registry.md | PROTECTED |  |
 | docs/setup-guide.md | PROTECTED |  |
-| docs/skills/feldpost-component/SKILL.md | PROTECTED |  |
+| docs/skills/feldpost-component/SKILL.md | REMOVED (2026-09-10; content promoted to `.cursor/rules/` + component-structure skill) |  |
 | docs/specs/component/filters/active-filter-chips.md | PROTECTED |  |
 | docs/specs/component/workspace/active-selection-view.md | PROTECTED |  |
 | docs/specs/component/map/auth-map-background.md | PROTECTED |  |

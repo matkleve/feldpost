@@ -18,6 +18,10 @@ Migration exemption: see `docs/migration/README.md` § Migration Exemption (Phas
 - State transitions validated by a guard function backed by an explicit transition map (`Record<State, State[]>`).
 - Stateful component roots: `[attr.data-state]` bound to the enum.
 - Parents pass one state value — never coordinate multiple visual-state flags.
+- There is no global state-machine folder. Each component owns its own state machine file beside its implementation files.
+- Threshold rules like "more than 2 states" are invalid and must not be used.
+- **Component visual FSM guard:** reject unlisted transitions; keep current state (see `media-display-state.ts`).
+- **Service FSM (upload pipeline):** terminality is the only hard invariant; unmapped non-terminal transitions are reported (`reportTransitionViolation` in `upload-phase-transitions.ts`; Vitest hook throws, `ngDevMode` logs) and then applied (`upload-job-state.service.ts`).
 
 ## FSM ↔ CSS ↔ DOM alignment
 
@@ -30,6 +34,12 @@ Three artifacts must stay in sync for layered stateful components:
 ## Stable State Comments
 
 Every stateful component segments state logic with `Stable state:` comment blocks (in `.ts`, `.html`, `.scss`) including `@see docs/specs/...`.
+
+Placement contract:
+
+- In `*.component.ts`: place stable-state comments above the state enum/contract and above derived state helpers.
+- In `*.component.html`: place stable-state comments immediately before each state branch/region.
+- In `*.component.scss`: place stable-state comments immediately above each state selector block.
 
 ## Transition & Animation Contract
 
