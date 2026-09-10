@@ -158,22 +158,22 @@ flowchart LR
 | -------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
 | `core/upload/upload-manager.service.ts`                              | Queue management, concurrency, pipeline orchestration                        |
 | `core/upload/upload-manager.types.ts`                                | Shared upload domain types and event contracts                               |
-| `core/upload/upload-job-state.service.ts`                            | Job state signal store + phase events                                        |
-| `core/upload/upload-batch.service.ts`                                | Batch lifecycle and progress computation                                     |
-| `core/upload/upload-queue.service.ts`                                | Running-slot tracking and concurrency guard                                  |
-| `core/upload/upload-new-pipeline.service.ts`                         | New upload path including missing-data and conflict branching                |
-| `core/upload/upload-replace-pipeline.service.ts`                     | Replace existing media path                                                  |
-| `core/upload/upload-attach-pipeline.service.ts`                      | Attach media to photoless row path                                           |
-| `core/upload/upload-conflict.service.ts`                             | Conflict-candidate lookup for photoless row matching                         |
-| `core/upload/upload-enrichment.service.ts`                           | Post-upload forward/reverse geocode enrichment helper                        |
-| `core/upload/upload-storage.service.ts`                              | Storage upload/delete helper for pipeline persistence                         |
-| `core/upload/upload-notification.service.ts`                         | Upload-failure toast consumer bound to manager event streams                  |
-| `core/content-hash.util.ts`                                          | `computeContentHash()` — SHA-256 from file head + EXIF                       |
+| `core/upload/support/upload-job-state.service.ts`                    | Job state signal store + phase events                                        |
+| `core/upload/support/upload-batch.service.ts`                        | Batch lifecycle and progress computation                                     |
+| `core/upload/support/upload-queue.service.ts`                        | Running-slot tracking and concurrency guard                                  |
+| `core/upload/pipelines/new/upload-new-pipeline.service.ts`           | New upload path including missing-data and conflict branching                |
+| `core/upload/pipelines/replace/upload-replace-pipeline.service.ts`   | Replace existing media path                                                  |
+| `core/upload/pipelines/attach/upload-attach-pipeline.service.ts`     | Attach media to photoless row path                                           |
+| `core/upload/support/upload-conflict.service.ts`                     | Conflict-candidate lookup for photoless row matching                         |
+| `core/upload/support/upload-enrichment.service.ts`                   | Post-upload forward/reverse geocode enrichment helper                        |
+| `core/upload/support/upload-storage.service.ts`                      | Storage upload/delete helper for pipeline persistence                         |
+| `core/upload/support/upload-notification.service.ts`                 | Upload-failure toast consumer bound to manager event streams                  |
+| `core/upload/support/content-hash.util.ts`                           | `computeContentHash()` — SHA-256 from file head + EXIF                       |
 | `core/upload/upload.service.ts`                                      | Per-file storage/DB operations and EXIF handling                             |
-| `core/geocoding.service.ts`                                          | Reverse/forward geocoding adapter                                            |
+| `core/geocoding/geocoding.service.ts`                                | Reverse/forward geocoding adapter                                            |
 | `docs/specs/service/media-upload-service/upload-location-config.md`  | Child spec for location-confidence and disambiguation contract               |
 | `docs/specs/service/media-upload-service/upload-manager-pipeline.md` | Child spec for pipeline, deduplication, folder upload, and conflict handling |
-| `features/upload/upload-panel.component.ts`                          | Panel UI; delegates ingestion to `UploadManagerService`                      |
+| `features/upload/upload-panel/upload-panel.component.ts`             | Panel UI; delegates ingestion to `UploadManagerService`                      |
 
 ## Pipeline Service Coverage Addendum (C-01)
 
@@ -181,10 +181,10 @@ The services below are currently covered as partial contracts through this paren
 
 | Service | Implementation file | Current coverage scope |
 | --- | --- | --- |
-| `UploadConflictService` | `core/upload/upload-conflict.service.ts` | Conflict detection trigger, paused conflict state, and resume semantics via manager orchestration. |
-| `UploadEnrichmentService` | `core/upload/upload-enrichment.service.ts` | Non-blocking enrichment behavior for reverse/forward geocoding after persistence stages. |
-| `UploadStorageService` | `core/upload/upload-storage.service.ts` | Storage-path based gating and persistence/cleanup role in upload workflows. |
-| `UploadNotificationService` | `core/upload/upload-notification.service.ts` | Manager failure-event consumption for toast notifications (`uploadFailed$`). |
+| `UploadConflictService` | `core/upload/support/upload-conflict.service.ts` | Conflict detection trigger, paused conflict state, and resume semantics via manager orchestration. |
+| `UploadEnrichmentService` | `core/upload/support/upload-enrichment.service.ts` | Non-blocking enrichment behavior for reverse/forward geocoding after persistence stages. |
+| `UploadStorageService` | `core/upload/support/upload-storage.service.ts` | Storage-path based gating and persistence/cleanup role in upload workflows. |
+| `UploadNotificationService` | `core/upload/support/upload-notification.service.ts` | Manager failure-event consumption for toast notifications (`uploadFailed$`). |
 
 ## Wiring
 

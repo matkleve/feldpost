@@ -1,5 +1,16 @@
 # Upload Manager Implementation Playbook
 
+> Status: DEPRECATED (archived) — 2026-09-10. Describes a file tree that predates two reorganisations
+> (`core/upload-manager.service.ts` etc. moved under `core/upload/` and then split into
+> `manager/`/`support/`/`pipelines/`/`location/` years ago). Its counts are wrong by an order of
+> magnitude ("~600 lines" vs the real 19,049 across the subsystem; "18+ phases" vs the real 20, all
+> reachable), and its central advice ("keep old service for backward compatibility during transition")
+> contradicts the root `AGENTS.md` § Change-Completeness Rule Hard Blocker. Its one durable
+> contribution — that the phase count is a UX problem worth solving — is preserved in
+> [`docs/audits/upload-process-analysis-2026-09-08/11-proposals.md`](../audits/upload-process-analysis-2026-09-08/11-proposals.md)
+> P12, which also explains why a "20 → 5" collapse is a product decision, not a free cleanup.
+> Full drift accounting: [`05-spec-drift.md`](../audits/upload-process-analysis-2026-09-08/05-spec-drift.md) § 2.5.
+
 **Step-by-step guide for improving the Upload Manager system**
 
 ---

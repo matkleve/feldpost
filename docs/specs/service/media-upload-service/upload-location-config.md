@@ -10,7 +10,7 @@ This service is invisible to users. Its behavior surfaces only through upload tr
 
 ## Where It Lives
 
-- Service: `UploadLocationConfigService` in `core/upload/upload-location-config.service.ts`
+- Service: `UploadLocationConfigService` in `core/upload/location/upload-location-config.service.ts`
 - Consumers: `FilenameParserService`, `LocationPathParserService`, `UploadManagerService`, folder scan and upload routing helpers
 - Trigger: any upload path that needs to compare file-title, folder-title, and EXIF-derived location candidates
 
@@ -52,7 +52,7 @@ UploadLocationConfigService
 ### Configurable Algorithm Constants (Canonical)
 
 All algorithm variables of `UploadLocationConfigService` are configurable constants.
-Source of truth: `apps/web/src/app/core/upload/upload-location-config.ts`.
+Source of truth: `apps/web/src/app/core/upload/location/upload-location-config.ts`.
 
 | Constant | Type | Default | Purpose |
 | --- | --- | --- | --- |
@@ -101,7 +101,7 @@ No mutable user-facing state is owned here. The service exposes a deterministic 
 | File                                                                         | Purpose                            |
 | ---------------------------------------------------------------------------- | ---------------------------------- |
 | `docs/specs/service/media-upload-service/upload-location-config.md`          | Canonical location-config contract |
-| `apps/web/src/app/core/upload/upload-location-config.service.ts`             | Runtime configuration source       |
+| `apps/web/src/app/core/upload/location/upload-location-config.service.ts`    | Runtime configuration source       |
 | `apps/web/src/app/core/upload/upload-manager.service.ts`                     | Upload orchestration consumer      |
 | `apps/web/src/app/core/filename-parser/filename-parser.service.ts`           | Filename candidate consumer        |
 | `apps/web/src/app/core/location-path-parser/location-path-parser.service.ts` | Path candidate consumer            |

@@ -41,6 +41,8 @@ Normative order before dedup and upload bytes. **`job.parsedExif.coords`** is ra
 | 2 | Text geocode (SO or legacy) | Runs when high-confidence text exists **even if** EXIF metadata present |
 | 3 | Source agreement | Only when `titleAddressCoords` **and** `parsedExif.coords`; ≤ `sourceAgreementRadiusMeters` → text placement; else `disambiguationKind: 'source'` tray. **Tray membership:** `jobIds` on a source group MUST be jobs in the same `groupingKey` that each have **both** `titleAddressCoords` and `parsedExif.coords` (same folder batch is not enough). Media chip count = `jobIds.length`. **Idempotent:** at most one open group per `(batchId, queryKey)` where `queryKey = source\|{groupingKey}`; after user resolves, no re-register; concurrent `finalizePlacement` singleflight shares one reverse-geocode. Candidate IDs: `source-text`, `source-exif`, `source-both`, `source-none`. |
 | 4 | `applyChosenPlacementSource` | EXIF-only when geocode failed and no text coords (Branch B) |
+| 5 | Geocode far-hit filter | Org `contextDistanceMaxMeters` (Settings → **Max distance for internet results (km)**) — drop Photon hits farther than cap from **job anchor** (EXIF → project) before trays; same key as search bar |
+| 6 | `routePreparedNewJob` / upload | `finalCoords` from `job.coords`; `exif_*` from `parsedExif.coords` |
 
 ### Phase 3 — source-conflict resolution record
 
@@ -67,8 +69,6 @@ While `UploadResolverTrayOrchestratorService.hasActivePresentation()` is true, t
 Exception: `answerKind: 'text'` city step (no file prepare dependency on option list).
 
 UI MAY show `upload.resolver.waitingPrepare` while disabled.
-| 5 | Geocode far-hit filter | Org `contextDistanceMaxMeters` (Settings → **Max distance for internet results (km)**) — drop Photon hits farther than cap from **job anchor** (EXIF → project) before trays; same key as search bar |
-| 6 | `routePreparedNewJob` / upload | `finalCoords` from `job.coords`; `exif_*` from `parsedExif.coords` |
 
 **Branch A (`missing_data_route`):** After Phase 2 failure when **no** `titleAddressCoords` and **no** `parsedExif.coords`. Phase 3 source-conflict **does not** run.
 

@@ -376,6 +376,14 @@
     "status": "active"
   },
   {
+    "module_slug": "core/upload-resolver-tray-orchestrator",
+    "module_type": "full-service-module",
+    "owner": "core",
+    "spec_path": "docs/specs/service/media-upload-service/upload-resolver-tray-orchestrator.md",
+    "code_path": "apps/web/src/app/core/upload-resolver-tray-orchestrator",
+    "status": "active"
+  },
+  {
     "module_slug": "core/toast",
     "module_type": "full-service-module",
     "owner": "core",

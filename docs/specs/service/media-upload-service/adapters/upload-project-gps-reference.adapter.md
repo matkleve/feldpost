@@ -38,6 +38,6 @@ export interface UploadProjectGpsReferencePoint {
 ## Acceptance criteria
 
 - [ ] Adapter spec approved (this file).
-- [ ] Implementation under `apps/web/src/app/core/upload/adapters/upload-project-gps-reference.adapter.ts`.
+- [ ] Implementation under `apps/web/src/app/core/upload/adapters/upload-project-gps-reference.adapter.ts`. <!-- planned -->
 - [ ] No import of `MediaClusterService` from upload pipeline.
 - [ ] Vitest uses fixture points, not live DB.

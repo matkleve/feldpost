@@ -191,6 +191,7 @@ Verified by counting references across the whole app *and* within the declaring 
 | `DEFAULT_FILE_TYPE_CHIPS` | `features/upload/upload-panel/upload-panel.constants.ts:46` | zero references |
 | `resolveUploadLocationInputs` | `core/upload/pipelines/new/upload-new-run-upload-phase.util.ts:149` | referenced only by its own spec (§ 2 marker 1) |
 | `detectProjectAddressTrayScenario` | `core/upload/support/upload-batch-project-tray.helpers.ts:11` | referenced only by its own spec |
+| `removeGroupMapping` | `core/upload-resolver-tray-orchestrator/adapters/upload-location-tray-producer.adapter.ts:147` | zero references anywhere; found 2026-09-10 while writing the adapter's spec (P5/UP-28) — not in the original 2026-09-08 sweep |
 
 ### 5.4 Dead union members
 

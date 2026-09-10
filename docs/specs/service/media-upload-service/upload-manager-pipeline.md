@@ -125,28 +125,25 @@ Full field matrices, location-resolution algorithm, duplicate/issue contracts, a
 | `docs/specs/service/media-upload-service/upload-manager.md`                   | Upload manager facade contract |
 | **Services**                                                         |                                                  |
 | `core/upload/upload-manager.service.ts`                              | Batch submission, queue draining, event fan-out  |
-| `core/upload/upload-new-pipeline.service.ts`                         | New-upload path                                  |
-| `core/upload/folder-scan.service.ts`                                 | Folder scan + folder-address-hint extraction     |
-| `core/filename-parser.service.ts`                                    | File-level metadata (address, date) extraction   |
-| `core/location-path-parser.service.ts`                               | Address component parsing and validation         |
-| `core/geocoding.service.ts`                                          | Forward geocoding for text-derived coordinates   |
-| `core/upload/upload-replace-pipeline.service.ts`                     | Replace path                                     |
-| `core/upload/upload-attach-pipeline.service.ts`                      | Attach path                                      |
-| `core/upload/upload-queue.service.ts`                                | Concurrency and running-slot management          |
-| `core/upload/upload-job-state.service.ts`                            | Job phase state and phase-change events          |
-| `core/upload/upload-conflict.service.ts`                             | Conflict-candidate lookup for photoless row matching prior to resolution |
-| `core/upload/upload-enrichment.service.ts`                           | Forward/reverse geocode enrichment orchestration and unresolvable fallback |
-| `core/upload/upload-storage.service.ts`                              | Storage upload/delete helper used by upload pipelines |
+| `core/upload/pipelines/new/upload-new-pipeline.service.ts`           | New-upload path                                  |
+| `core/folder-scan/folder-scan.service.ts`                            | Folder scan + folder-address-hint extraction     |
+| `core/filename-parser/filename-parser.service.ts`                    | File-level metadata (address, date) extraction   |
+| `core/location-path-parser/location-path-parser.service.ts`          | Address component parsing and validation         |
+| `core/geocoding/geocoding.service.ts`                                | Forward geocoding for text-derived coordinates   |
+| `core/upload/pipelines/replace/upload-replace-pipeline.service.ts`   | Replace path                                     |
+| `core/upload/pipelines/attach/upload-attach-pipeline.service.ts`     | Attach path                                      |
+| `core/upload/support/upload-queue.service.ts`                        | Concurrency and running-slot management          |
+| `core/upload/support/upload-job-state.service.ts`                    | Job phase state and phase-change events          |
+| `core/upload/support/upload-conflict.service.ts`                     | Conflict-candidate lookup for photoless row matching prior to resolution |
+| `core/upload/support/upload-enrichment.service.ts`                   | Forward/reverse geocode enrichment orchestration and unresolvable fallback |
+| `core/upload/support/upload-storage.service.ts`                      | Storage upload/delete helper used by upload pipelines |
 | **Utilities & Constants**                                            |                                                  |
 | `core/location-path-parser/city-registry.const.ts`                   | City whitelist lookup table                      |
 | `core/location-path-parser/postal-code-patterns.const.ts`            | Country-specific postal code regexes             |
 | `core/location-path-parser/street-keywords.const.ts`                 | Street type keywords (Gasse, Str., etc.)         |
-| `core/filename-parser/date-patterns.const.ts`                        | ISO, timestamp, German date format regexes       |
-| `core/filename-parser/metadata-keywords.const.ts`                    | DRAFT, THUMB, TEMP metadata keyword set          |
-| `core/location-path-parser.util.ts`                                  | Shared validation utilities                      |
-| `core/filename-parser.util.ts`                                       | Filename normalization utilities                 |
+| `core/location-path-parser/location-path-parser.util.ts`             | Shared validation utilities                      |
 | `features/upload/upload-duplicate-resolution-modal/*`                | Duplicate decision modal with batch-apply option |
-| `core/content-hash.util.ts`                                          | Content hash generation                          |
+| `core/upload/support/content-hash.util.ts`                           | Content hash generation                          |
 
 ## Pipeline Service Coverage Addendum (C-01)
 
@@ -154,9 +151,9 @@ The services below are part of pipeline behavior and are covered here as partial
 
 | Service | Implementation file | Current coverage scope in this spec |
 | --- | --- | --- |
-| `UploadConflictService` | `core/upload/upload-conflict.service.ts` | Conflict detection lifecycle (`awaiting_conflict_resolution`), candidate lookup, and conflict-resolution resume flow. |
-| `UploadEnrichmentService` | `core/upload/upload-enrichment.service.ts` | Reverse/forward geocode enrichment path, unresolvable fallback, and non-blocking enrichment semantics. |
-| `UploadStorageService` | `core/upload/upload-storage.service.ts` | Storage upload/delete role in pipeline persistence and cleanup behavior. |
+| `UploadConflictService` | `core/upload/support/upload-conflict.service.ts` | Conflict detection lifecycle (`awaiting_conflict_resolution`), candidate lookup, and conflict-resolution resume flow. |
+| `UploadEnrichmentService` | `core/upload/support/upload-enrichment.service.ts` | Reverse/forward geocode enrichment path, unresolvable fallback, and non-blocking enrichment semantics. |
+| `UploadStorageService` | `core/upload/support/upload-storage.service.ts` | Storage upload/delete role in pipeline persistence and cleanup behavior. |
 
 ## Wiring
 

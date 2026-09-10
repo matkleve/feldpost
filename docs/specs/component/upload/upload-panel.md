@@ -262,7 +262,7 @@ flowchart LR
 | `features/upload/upload-panel/upload-panel.component.html` | Compact panel UI: drop zone, segmented switch, lane list             |
 | `features/upload/upload-panel/upload-panel.component.scss` | Lane switch visuals, transparent section surfaces, status tokens     |
 | `core/upload/upload-manager.service.ts`                    | Root upload lifecycle, per-job phases, batch tracking, event streams |
-| `features/map/map-shell/map-shell.component.ts`            | Consumes placement and zoom outputs from the panel                   |
+| `features/map/map-shell/component/map-shell.component.ts`  | Consumes placement and zoom outputs from the panel                   |
 
 ## Wiring
 

@@ -6,6 +6,7 @@
     "test": "cd apps/web && npx ng test --watch=false",
     "build": "cd apps/web && npx ng build",
     "check:doc-links": "node scripts/check-doc-links.mjs",
+    "check:spec-code-paths": "node scripts/check-spec-code-paths.mjs",
     "sync-tokens": "node scripts/sync-tokens.mjs",
     "lint:specs": "node scripts/lint-specs.mjs",
     "design-system:check": "node scripts/validate-design-system-registry.mjs && node scripts/audit-panel-breakpoints.mjs && node scripts/guard-visual-behavior.mjs && node scripts/lint-design-tokens.mjs && node scripts/guard-interaction-emphasis.mjs && node scripts/audit-theme-contrast.mjs",

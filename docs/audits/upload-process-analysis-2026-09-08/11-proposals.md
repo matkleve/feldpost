@@ -186,6 +186,8 @@ A ticked-but-false AC is worse than an unticked one: it is the reason nobody has
 
 ### P5 — Repoint every spec path
 
+**Status: done, 2026-09-10.** All 6 findings resolved (UP-18 turned out to be refuted, not fixed — see its `10-findings.md` note). Added the CI guard script this proposal asked for (`scripts/check-spec-code-paths.mjs`, wired into `scripts/verify.mjs` as a `soft` check with the measured non-upload debt count — 263 broken paths across the wider `docs/specs/` tree that were out of this task's scope).
+
 | | |
 | --- | --- |
 | **Findings** | UP-16, UP-18, UP-28, UP-49, UP-50, UP-39 |

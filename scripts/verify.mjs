@@ -31,6 +31,14 @@ import { spawnSync } from "node:child_process";
 const CHECKS = [
   { name: "doc-links", cmd: "node", args: ["scripts/check-doc-links.mjs"] },
   {
+    name: "spec-code-paths",
+    cmd: "node",
+    args: ["scripts/check-spec-code-paths.mjs"],
+    soft: true,
+    debt:
+      "263 broken code paths outside docs/specs/service/media-upload-service, docs/specs/component/upload, docs/specs/ui/upload (2026-09-10) — those three were the upload-process audit's scope and are now clean; the rest is unrelated pre-existing drift across the wider docs/specs tree.",
+  },
+  {
     name: "specs",
     cmd: "npm",
     args: ["run", "--silent", "lint:specs"],
