@@ -379,4 +379,77 @@ describe('runPreUploadLocationResolve — text before EXIF', () => {
     expect(job.phase).toBe('extracting_title');
     expect(ctx.emitUploadSkipped).not.toHaveBeenCalled();
   });
+
+  // @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-23
+  // @see docs/audits/upload-process-analysis-2026-09-08/09-coverage.md § 4 T5
+  // Known bug, not fixed here (out of this task's scope — the fix changes
+  // where dedup_check re-enters, i.e. control flow this task was told not to
+  // touch). This documents the current (double-call) behavior so the fix,
+  // whenever it lands, can flip it from `.fails` to a normal `it`.
+  it.fails(
+    'calls checkDedupHash exactly once for an EXIF-only job with no title address',
+    async () => {
+      const exifCoords = { lat: 48.21, lng: 16.37 };
+      let job = createJob({
+        titleAddress: undefined,
+        titleAddressSource: undefined,
+        groupingKey: undefined,
+        parsedExif: { coords: exifCoords },
+      });
+
+      const { runPreUploadLocationResolve } = await import('./upload-new-pre-resolve.util');
+      const deps = {
+        jobState: {
+          findJob: vi.fn(() => job),
+          updateJob: vi.fn((_id: string, patch: Partial<typeof job>) => {
+            job = { ...job, ...patch };
+          }),
+          setPhase: vi.fn((_id: string, phase: typeof job.phase) => {
+            job = { ...job, phase };
+          }),
+        },
+        queue: { markDone: vi.fn() },
+        uploadService: {
+          resolveMediaType: vi.fn().mockReturnValue('photo'),
+          isPhotoFile: vi.fn().mockReturnValue(true),
+        },
+        filenameParser: { extractAddress: vi.fn().mockReturnValue(undefined) },
+        locationConfig: {
+          getConfig: vi.fn().mockReturnValue({
+            titleConfidenceThreshold: 0.8,
+            filenameAlwaysOverridesFolder: true,
+          }),
+        },
+        locationResolution: {},
+        addressOrchestrator: {},
+      };
+      const ctx = {
+        emitBatchProgress: vi.fn(),
+        drainQueue: vi.fn(),
+        emitMissingData: vi.fn(),
+        failJob: vi.fn(),
+        emitUploadSkipped: vi.fn(),
+        emitImageUploaded: vi.fn(),
+        emitImageReplaced: vi.fn(),
+        emitImageAttached: vi.fn(),
+        emitLocationConflict: vi.fn(),
+        getAbortSignal: vi.fn(),
+        abortJobRequest: vi.fn(),
+        checkDedupHash: vi.fn().mockResolvedValue(null),
+        getCurrentUserId: vi.fn().mockReturnValue('user-1'),
+        emitDuplicateDetected: vi.fn(),
+      };
+
+      const outcome = await runPreUploadLocationResolve(
+        deps as never,
+        job.id,
+        job.parsedExif ?? {},
+        ctx as never,
+      );
+
+      expect(outcome).toBe('continue');
+      expect(job.coords).toEqual(exifCoords);
+      expect(ctx.checkDedupHash).toHaveBeenCalledOnce();
+    },
+  );
 });

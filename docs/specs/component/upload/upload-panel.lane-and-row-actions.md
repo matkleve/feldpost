@@ -4,7 +4,7 @@
 
 ## What It Is
 
-Normative contracts for Upload Panel **lane rows**: per-lane actions, status text, media item menus, dropdown visibility, action registry, wiring sequence, and destructive 3-dot menu rules. Split from `upload-panel.md` for spec size; implementation must satisfy this document together with the parent.
+Normative contracts for Upload Panel **lane rows**: per-lane actions, status text, media item menus, dropdown visibility, action registry, wiring sequence, and destructive 3-dot menu rules — plus the lane-action summary and change-location flow diagrams. Split from `upload-panel.md` for spec size; implementation must satisfy this document together with the parent.
 
 ## What It Looks Like
 
@@ -35,6 +35,49 @@ flowchart LR
   J[UploadJob] --> L{Lane + issue kind}
   L --> M[Menu contract row]
   M --> R[Registry-filtered actions]
+```
+
+### Lane Actions (Mermaid)
+
+```mermaid
+flowchart LR
+  A[Upload job] --> B{Lane}
+  B -->|uploading| C[View progress<br/>View file details<br/>Cancel]
+  B -->|uploaded| D[Row click: map focus when coords exist<br/>Change location > Add/Change GPS<br/>Change location > Add/Change address<br/>Open in /media<br/>Assign project<br/>Optional Prioritize<br/>Download]
+  B -->|issues duplicate_photo| E[Upload anyway<br/>Open existing media<br/>Dismiss]
+  B -->|issues missing_gps| F[Add GPS<br/>Add/Change address<br/>Retry<br/>Dismiss]
+  B -->|issues document_unresolved| H[Add GPS<br/>Add/Change address<br/>Assign project<br/>Dismiss]
+  B -->|issues conflict_review| G[Resolve conflict<br/>Retry<br/>Dismiss]
+```
+
+### Change Location Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+  actor User
+  participant Row as UploadPanelItem
+  participant Panel as UploadPanelComponent
+  participant Map as MapShellComponent
+  participant DB as resolve_media_location RPC
+
+  User->>Row: Context menu > Change location
+  alt Add/Change GPS
+    Row->>Panel: change_location_map(mediaId)
+    Panel->>Map: locationMapPickRequested(mediaId)
+    User->>Map: Click map
+    Map->>DB: persist(latitude, longitude, address)
+    Map-->>Panel: imageUploaded(id, lat, lng)
+  else Add/Change address
+    Row->>Panel: change_location_address(mediaId)
+    User->>Panel: Types search text
+    Panel-->>User: Suggestions under input
+    User->>Panel: Hover Suggestion
+    Panel->>Map: locationPreviewRequested(lat, lng)
+    User->>Panel: Click suggestion
+    Panel->>DB: persist(latitude, longitude, address)
+    Panel->>Map: imageUploaded(id, lat, lng)
+  end
+  Note over Panel,DB: Persisted media location update only; do not requeue upload pipeline
 ```
 
 ## Lane Item Features

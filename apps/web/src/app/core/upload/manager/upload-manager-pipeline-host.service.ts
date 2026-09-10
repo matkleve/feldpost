@@ -7,6 +7,7 @@ import { SupabaseService } from '../../supabase/supabase.service';
 import { cancelAllActiveUploads } from './upload-manager-cancel-active.util';
 import { removeUploadCancelResidue } from '../support/upload-cancel-residue.util';
 import { drainUploadManagerQueue } from './upload-manager-drain.util';
+import { uploadManagerDebugLog } from '../support/upload-manager-debug.util';
 import { handleUploadPipelineError } from './upload-manager-error.util';
 import { failUploadManagerJob } from './upload-manager-fail.util';
 import {
@@ -82,7 +83,7 @@ export class UploadManagerPipelineHostService {
         logJobIdPrefixLen: UploadManagerPipelineHostService.LOG_JOB_ID_PREFIX_LEN,
       });
 
-      console.log(
+      uploadManagerDebugLog(
         `[upload-manager] runPipeline: job ${jobId.slice(0, UploadManagerPipelineHostService.LOG_JOB_ID_PREFIX_LEN)} pipeline finished`,
       );
     } catch (err) {
