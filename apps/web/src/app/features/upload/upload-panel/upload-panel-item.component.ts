@@ -56,13 +56,13 @@ export interface UploadItemActionEvent {
  * Renders job state (thumbnail, progress, actions, menu) based on:
  *  - Current lane (uploading|uploaded|issues)
  *  - Job phase (queued → complete|error|missing_data)
- *  - Issue kind (duplicate_photo|missing_gps|document_unresolved|upload_error)
+ *  - Issue kind (duplicate_file|missing_gps|document_unresolved|upload_error)
  *
  * Action Gating (Spec: upload-panel.md § Wiring/Data):
  * ✅ Uploading lane: view_file_details, cancel_upload
  * ✅ Uploaded lane: change_location_*, open_in_media, assign_to_project, open_project?, priority?, download?
  * ✅ Issues lane: Actions depend on issue kind:
- *    - duplicate_photo: open_existing_media, upload_anyway
+ *    - duplicate_file: open_existing_media, upload_anyway
  *    - missing_gps: change_location_map, change_location_address, retry
  *    - document_unresolved: change_location_map, change_location_address, assign_to_project
  *    - upload_error/conflict_review: retry
@@ -123,7 +123,7 @@ export class UploadPanelItemComponent implements OnDestroy {
   readonly showDuplicateExistingMediaShortcut = computed(() => {
     const job = this.job();
     return (
-      (getIssueKind(job) === 'duplicate_file' || getIssueKind(job) === 'duplicate_photo') &&
+      getIssueKind(job) === 'duplicate_file' &&
       !!job.existingMediaId
     );
   });
@@ -198,7 +198,7 @@ export class UploadPanelItemComponent implements OnDestroy {
       return true;
     }
     return (
-      (getIssueKind(job) === 'duplicate_file' || getIssueKind(job) === 'duplicate_photo') &&
+      getIssueKind(job) === 'duplicate_file' &&
       !!job.existingMediaId
     );
   }
@@ -207,8 +207,7 @@ export class UploadPanelItemComponent implements OnDestroy {
     const name = this.job().file.name;
     if (
       this.job().phase === 'missing_data' &&
-      getIssueKind(this.job()) !== 'duplicate_file' &&
-      getIssueKind(this.job()) !== 'duplicate_photo'
+      getIssueKind(this.job()) !== 'duplicate_file'
     ) {
       return `Place ${name} on map`;
     }
@@ -225,8 +224,7 @@ export class UploadPanelItemComponent implements OnDestroy {
     const issueKind = getIssueKind(this.job());
     if (
       this.job().phase === 'missing_data' &&
-      issueKind !== 'duplicate_file' &&
-      issueKind !== 'duplicate_photo'
+      issueKind !== 'duplicate_file'
     ) {
       return 'add_location_alt';
     }
@@ -254,7 +252,7 @@ export class UploadPanelItemComponent implements OnDestroy {
 
     if (lane === 'issues') {
       const issueKind = getIssueKind(job);
-      if (issueKind === 'duplicate_file' || issueKind === 'duplicate_photo') {
+      if (issueKind === 'duplicate_file') {
         if (job.existingMediaId) {
           actions.push('open_existing_media');
         }

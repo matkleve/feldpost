@@ -114,14 +114,3 @@ export function resolverScoreFillPercent(score: number | undefined): number {
   }
   return Math.round(Math.min(1, Math.max(0, score)) * 100);
 }
-
-export function optionDisplayLabel(
-  group: UploadDisambiguationGroup,
-  rowLabel: string,
-  candidate: { addressLabel: string; city?: string | null },
-): string {
-  if (group.collapseStage === 'city') {
-    return (candidate.city ?? rowLabel).trim() || candidate.addressLabel;
-  }
-  return candidate.addressLabel;
-}

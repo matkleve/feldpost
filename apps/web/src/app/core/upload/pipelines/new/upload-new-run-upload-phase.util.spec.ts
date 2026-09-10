@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { resolveUploadLocationInputs, runUploadCall } from './upload-new-run-upload-phase.util';
+import { runUploadCall } from './upload-new-run-upload-phase.util';
 import type { PipelineContext, UploadJob } from '../../upload-manager.types';
-import type { ParsedExif } from '../../upload.service';
 
 function createJob(mode: UploadJob['locationRequirementMode']): UploadJob {
   return {
@@ -36,24 +35,6 @@ function createDeferred<T>() {
   });
   return { promise, resolve };
 }
-
-describe('resolveUploadLocationInputs', () => {
-  const coords = { lat: 48.2, lng: 16.37 };
-  const parsedExif: ParsedExif = { coords, capturedAt: new Date() };
-
-  it('passes coords through when auto location is required', () => {
-    const result = resolveUploadLocationInputs(createJob('required'), coords, parsedExif);
-    expect(result.coords).toEqual(coords);
-    expect(result.parsedExif?.coords).toEqual(coords);
-  });
-
-  it('strips assignment coords when panel mode is optional', () => {
-    const result = resolveUploadLocationInputs(createJob('optional'), coords, parsedExif);
-    expect(result.coords).toBeUndefined();
-    expect(result.parsedExif?.coords).toEqual(coords);
-    expect(result.parsedExif?.capturedAt).toEqual(parsedExif.capturedAt);
-  });
-});
 
 describe('runUploadCall', () => {
   beforeEach(() => {

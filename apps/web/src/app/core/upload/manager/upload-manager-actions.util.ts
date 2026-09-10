@@ -291,8 +291,7 @@ export function forceUploadManagerDuplicateUpload(
   const isDuplicateResume =
     !!job?.existingMediaId &&
     (job.phase === 'skipped' ||
-      (job.phase === 'missing_data' &&
-        (job.issueKind === 'duplicate_file' || job.issueKind === 'duplicate_photo')));
+      (job.phase === 'missing_data' && job.issueKind === 'duplicate_file'));
   if (!job || !isDuplicateResume) return;
 
   deps.updateJob(jobId, {

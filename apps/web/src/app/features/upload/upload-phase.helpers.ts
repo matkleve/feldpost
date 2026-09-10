@@ -9,7 +9,6 @@ import type { UploadJob, UploadPhase } from '../../core/upload/upload-manager.se
 export type UploadLane = 'uploading' | 'uploaded' | 'issues';
 export type UploadIssueKind =
   | 'duplicate_file'
-  | 'duplicate_photo'
   | 'missing_gps'
   | 'address_deferred'
   | 'address_ambiguous'
@@ -103,5 +102,5 @@ export function getIssueKind(job: UploadJob): UploadIssueKind {
 }
 
 export function isDuplicateIssueKind(issueKind: UploadIssueKind): boolean {
-  return issueKind === 'duplicate_file' || issueKind === 'duplicate_photo';
+  return issueKind === 'duplicate_file';
 }

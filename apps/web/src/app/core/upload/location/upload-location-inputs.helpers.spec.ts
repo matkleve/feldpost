@@ -31,6 +31,19 @@ describe('upload-location-inputs.helpers', () => {
     expect(result.parsedExif?.coords).toEqual({ lat: 48.2, lng: 16.37 });
   });
 
+  it('strips manualCoords when panel mode is optional, keeping parsedExif intact', () => {
+    const job = createJob({ locationRequirementMode: 'optional' });
+    const parsedExif = { coords: { lat: 48.2, lng: 16.37 }, capturedAt: new Date() };
+    const result = resolveUploadPhaseInputs({
+      job,
+      manualCoords: { lat: 48.21, lng: 16.38 },
+      parsedExif,
+    });
+    expect(result.coords).toBeUndefined();
+    expect(result.parsedExif?.coords).toEqual(parsedExif.coords);
+    expect(result.parsedExif?.capturedAt).toEqual(parsedExif.capturedAt);
+  });
+
   it('usesTextPlacementSource is true for file and folder', () => {
     expect(usesTextPlacementSource(createJob({ locationSourceUsed: 'folder' }))).toBe(true);
     expect(usesTextPlacementSource(createJob({ locationSourceUsed: 'file' }))).toBe(true);

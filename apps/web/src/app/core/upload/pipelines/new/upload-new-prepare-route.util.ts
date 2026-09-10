@@ -1,6 +1,5 @@
 import type { FilenameParserService } from '../../../filename-parser/filename-parser.service';
 import type { UploadAttachPipelineService } from '../attach/upload-attach-pipeline.service';
-import { runUploadDedupCheck } from '../../support/upload-dedup-check.util';
 import type { UploadConflictService } from '../../support/upload-conflict.service';
 import type { UploadJobStateService } from '../../support/upload-job-state.service';
 import type { PipelineContext, UploadJob } from '../../upload-manager.types';
@@ -277,21 +276,6 @@ async function prepareExifAndFile(
   }
 
   return { job, parsedExif };
-}
-
-/**
- * Hash + dedup check after placement; shows modal or marks skip.
- * @see docs/specs/service/media-upload-service/upload-manager-pipeline.md § Actions 7–9
- */
-export async function hashAndCheckDedupForNewJob(
-  deps: Pick<NewPrepareRouteDeps, 'jobState' | 'queue' | 'uploadService'>,
-  jobId: string,
-  job: UploadJob,
-  parsedExif: ParsedExif,
-  ctx: PipelineContext,
-): Promise<boolean> {
-  const outcome = await runUploadDedupCheck(deps, jobId, job, parsedExif, ctx);
-  return outcome === 'skipped' || outcome === 'issue';
 }
 
 /** Panel "No auto location" — only explicit optional disables GPS/filename routing. */

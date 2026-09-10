@@ -72,18 +72,6 @@ export const UPLOAD_RESOLVER_TRAY_MOCK_ORCHESTRATOR_ITEMS: EnqueueTrayItemInput[
   },
 ];
 
-/** Resolve mock dependsOnItemId placeholder after 1A item id is known. */
-export function bindMockOrchestratorDependencies(
-  items: EnqueueTrayItemInput[],
-  firstItemId: string,
-): EnqueueTrayItemInput[] {
-  return items.map((item) =>
-    item.dependsOnItemId === '__MOCK_1A__'
-      ? { ...item, dependsOnItemId: firstItemId }
-      : item,
-  );
-}
-
 export const UPLOAD_RESOLVER_TRAY_MOCK_MEDIA_NAMES: Readonly<Record<string, string>> = {
   'mock-job-1': 'Fundament_Nord_01.jpg',
   'mock-job-2': 'Fundament_Nord_02.jpg',

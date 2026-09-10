@@ -12,6 +12,7 @@ import type {
 import type {
   UploadAddressCandidate,
   UploadDiscriminatingField,
+  UploadTrayStep,
 } from '../upload-manager.types';
 
 export type UploadAddressFieldSource = 'folder' | 'filename';
@@ -62,8 +63,6 @@ export type UploadGroupResolutionStatus =
   | 'ambiguous';
 
 export type UploadGeocodeBranch = 'branch_a' | 'branch_b' | 'branch_c' | 'metadata_only';
-
-export type UploadTrayStep = '1a' | '1b' | '2' | '3';
 
 export interface UploadProjectCentroid {
   lat: number;

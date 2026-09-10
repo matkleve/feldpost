@@ -21,8 +21,6 @@ import type { ExifCoords } from '../upload.types';
 import type {
   DisambiguationRequiredEvent,
   DisambiguationResolvedEvent,
-  UploadAddressCandidate,
-  UploadDisambiguationGroup,
   UploadJob,
 } from '../upload-manager.types';
 

@@ -79,7 +79,7 @@ export function statusLabelText(
 
   const issueKind = getIssueKind(job);
   if (job.phase === 'missing_data') {
-    if (issueKind === 'duplicate_file' || issueKind === 'duplicate_photo') {
+    if (issueKind === 'duplicate_file') {
       return t('upload.status.missingData.duplicate', 'File already in workspace');
     }
     if (issueKind === 'document_unresolved') {
@@ -92,7 +92,7 @@ export function statusLabelText(
   if (job.phase === 'complete') return t('upload.status.complete', 'Uploaded');
 
   if (job.phase === 'skipped') {
-    if (issueKind === 'duplicate_file' || issueKind === 'duplicate_photo') {
+    if (issueKind === 'duplicate_file') {
       return t('upload.status.skipped.duplicate', 'Already uploaded');
     }
     return t('upload.status.skipped', 'Skipped');

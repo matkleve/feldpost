@@ -120,7 +120,7 @@ flowchart TD
 ```mermaid
 flowchart LR
   A[Upload job] --> B{Issue kind}
-  B -->|duplicate_photo| C[Upload anyway<br/>Use existing<br/>Reject]
+  B -->|duplicate_file| C[Upload anyway<br/>Use existing<br/>Reject]
   B -->|missing_gps| D[Place on map<br/>Defer<br/>Dismiss]
   B -->|conflict_review| E[Resolve conflict<br/>Retry<br/>Dismiss]
   B -->|none and complete| F[Open in media<br/>Add to project<br/>Prioritize<br/>Download]
@@ -136,7 +136,7 @@ flowchart LR
 | Per-job events   | `UploadManagerService.jobPhaseChanged$` | `Observable<...>`                                                                   |
 | Batch events     | `UploadManagerService.batchProgress$`   | `Observable<...>`                                                                   |
 | Skip events      | `UploadManagerService.uploadSkipped$`   | `Observable<...>`                                                                   |
-| Issue kind       | upload lane presenter                   | `'duplicate_file' \| 'duplicate_photo' \| 'missing_gps' \| 'address_deferred' \| 'address_ambiguous' \| 'document_unresolved' \| 'conflict_review' \| 'upload_error' \| null` |
+| Issue kind       | upload lane presenter                   | `'duplicate_file' \| 'missing_gps' \| 'address_deferred' \| 'address_ambiguous' \| 'document_unresolved' \| 'conflict_review' \| 'upload_error' \| null` |
 | Uploaded actions | upload row presenter                    | `UploadItemAction[]`                                                                |
 
 ## State

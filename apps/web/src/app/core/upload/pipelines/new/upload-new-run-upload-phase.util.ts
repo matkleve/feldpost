@@ -149,15 +149,6 @@ export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<vo
   });
 }
 
-/** @deprecated Use resolveUploadPhaseInputs from upload-location-inputs.helpers.ts */
-export function resolveUploadLocationInputs(
-  job: UploadJob,
-  coords: ExifCoords | undefined,
-  parsedExif: ParsedExif | undefined,
-): { coords: ExifCoords | undefined; parsedExif: ParsedExif | undefined } {
-  return resolveUploadPhaseInputs({ job, manualCoords: coords, parsedExif });
-}
-
 export async function runUploadCall(args: {
   jobId: string;
   job: UploadJob;

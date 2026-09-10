@@ -47,7 +47,7 @@ export class UploadPanelRowHandlersService {
 
   canOpenDuplicateInWorkspace(job: UploadJob): boolean {
     return (
-      (getIssueKind(job) === 'duplicate_file' || getIssueKind(job) === 'duplicate_photo') &&
+      getIssueKind(job) === 'duplicate_file' &&
       !!job.existingMediaId
     );
   }

@@ -2,7 +2,7 @@
  * UploadPanelDialogActionsService — Modal dialog handlers (duplicate, project, location).
  *
  * Handles user responses from three main dialog flows:
- *  1. **Duplicate Resolution** (issueKind=duplicate_photo)
+ *  1. **Duplicate Resolution** (issueKind=duplicate_file)
  *     - Modal: Choose use_existing, upload_anyway, reject
  *     - Actions: Attach to row | Force new upload | Skip entirely
  *
@@ -432,8 +432,7 @@ export class UploadPanelDialogActionsService {
       }
       return (
         job.phase === 'skipped' ||
-        (job.phase === 'missing_data' &&
-          (job.issueKind === 'duplicate_file' || job.issueKind === 'duplicate_photo'))
+        (job.phase === 'missing_data' && job.issueKind === 'duplicate_file')
       );
     });
   }
