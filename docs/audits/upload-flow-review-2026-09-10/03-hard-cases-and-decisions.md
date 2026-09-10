@@ -38,9 +38,9 @@ This is the whole reason the subsystem is large. Four sources can each claim to 
 
 **Case.** The folder says `Wien` and nothing else.
 
-**Decision.** Place an admin centroid and set `locationPinEligible = false` ([`address-resolution-model.md`](../../specs/service/media-upload-service/address-resolution-model.md) step 6). The item is findable by city but never renders as a precise pin.
+**Decision (2026-03 — superseded in part 2026-09-10).** Place an admin centroid; tier-only Search Objects persist at established precision. Legacy spec used `locationPinEligible = false` as a street-text proxy — **retired** per [area-extent decisions](../../specs/service/media-upload-service/address-resolution-model.area-extent-decisions.supplement.md) Decision 2: map affordances follow `address_precision`; known area uses geocoder bbox (Decision 3). Visual treatment of coarse pins not yet approved.
 
-**Given up.** Two classes of item now exist — pinnable and not — and every consumer of location data has to respect the flag. The alternative was a pin in the middle of Vienna, which is a lie with a coordinate attached.
+**Given up.** Two classes of item now exist — pinnable and not — and every consumer of location data has to respect the flag. The alternative was a pin in the middle of Vienna, which is a lie with a coordinate attached. *(Partially revised: city-level items may appear on map once item 15 lands; radius selection uses full containment, not centroid distance.)*
 
 ### A4 — EXIF says one thing, the folder says another
 
