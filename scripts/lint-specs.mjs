@@ -10,6 +10,7 @@
  *   what-it-is-length      "What It Is" section max lines (default: 5)
  *   what-it-looks-like-len "What It Looks Like" section max lines (default: 40)
  *   has-acceptance-criteria At least one acceptance criterion checkbox
+ *   agents-md-max-lines   Root AGENTS.md stays under its cap (default: 150)
  *
  * Excluded from element-spec rules (see shouldIncludeSpecFile):
  *   - readme.md, *.bak, spec-*audit* notes
@@ -33,6 +34,15 @@ import { join, basename, dirname, resolve, relative } from "node:path";
 
 const DEFAULT_MAX_LINES = 180;
 const DEFAULT_WARN_LINES = 150;
+
+/**
+ * Root AGENTS.md cap. Same reasoning as the spec cap, one level up: an
+ * instruction file longer than this gets skimmed instead of read, and skimming
+ * is worse than a short file because the reader believes they read it. The
+ * remedy is the same too — move detail to its owning document and leave a
+ * one-line pointer. See docs/audits/2026-09-08-grundriss-adoption.md § C3.
+ */
+const AGENTS_MD_MAX_LINES = 150;
 const DEFAULT_MAX_WHAT_IT_IS = 5;
 const DEFAULT_MAX_WHAT_IT_LOOKS_LIKE = 40;
 
@@ -258,6 +268,36 @@ function ruleSettingsRegistrySync(specFiles, config, projectRoot, specRootDir) {
   }
 
   return diagnostics;
+}
+
+function ruleAgentsMdMaxLines(projectRoot) {
+  const agentsPath = join(projectRoot, "AGENTS.md");
+  if (!existsSync(agentsPath)) {
+    return [];
+  }
+
+  const lines = readFileSync(agentsPath, "utf-8")
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n")
+    .split("\n");
+  // Trailing newline terminates the last line; it does not start a new one.
+  // Keeps the reported number identical to `wc -l AGENTS.md`.
+  if (lines.at(-1) === "") lines.pop();
+  const totalLines = lines.length;
+
+  if (totalLines <= AGENTS_MD_MAX_LINES) {
+    return [];
+  }
+
+  return [
+    {
+      severity: "error",
+      rule: "agents-md-max-lines",
+      file: agentsPath,
+      line: 1,
+      message: `AGENTS.md has ${totalLines} lines (max: ${AGENTS_MD_MAX_LINES}). Move detail to its owning document (docs/specs/README.md, docs/migration/README.md, docs/agent-workflows/, apps/web/src/app/archive/README.md) and leave a one-line pointer. Do not drop a rule to fit.`,
+    },
+  ];
 }
 
 // ─── Rules ──────────────────────────────────────────────────────────────────
@@ -581,14 +621,14 @@ function main() {
     totalWarnings += warnings.length;
   }
 
-  const settingsRegistryDiagnostics = ruleSettingsRegistrySync(
-    files,
-    config,
-    projectRoot,
-    specDir,
-  );
+  // Repository-level diagnostics: not tied to a single spec file, reported
+  // after the per-spec table in the same shape.
+  const repoDiagnostics = [
+    ...ruleAgentsMdMaxLines(projectRoot),
+    ...ruleSettingsRegistrySync(files, config, projectRoot, specDir),
+  ];
 
-  for (const diagnostic of settingsRegistryDiagnostics) {
+  for (const diagnostic of repoDiagnostics) {
     if (diagnostic.severity === "error") {
       totalErrors += 1;
     } else {
@@ -658,12 +698,12 @@ function main() {
     }
   }
 
-  if (settingsRegistryDiagnostics.length > 0) {
+  if (repoDiagnostics.length > 0) {
     if (filesWithIssues.length === 0) {
       console.log("");
     }
 
-    for (const d of settingsRegistryDiagnostics) {
+    for (const d of repoDiagnostics) {
       const color = d.severity === "error" ? COL_RED : COL_YELLOW;
       const icon = d.severity === "error" ? "✖" : "⚠";
       const displayFile = d.file.replace(projectRoot + "\\", "");
