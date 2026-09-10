@@ -23,6 +23,7 @@ One parent index plus three generated bodies (markdown tables and bullet entries
 - **Source:** `docs/specs/component/registry.json`
 - **Bodies (generated — do not hand-edit):** `docs/specs/component/registry.*.supplement.md`
 - **Generator:** `scripts/generate-component-registry.mjs`
+- **Gate:** `scripts/check-component-registry.mjs` — coverage of `shared/`, path and spec existence, `specId` agreement, supplement freshness
 - **Code:** `apps/web/src/app/shared/` and `apps/web/src/app/features/` (per-entry paths in `registry.json`)
 
 ## Actions
@@ -32,6 +33,7 @@ One parent index plus three generated bodies (markdown tables and bullet entries
 3. If the exact variant is missing: stop, flag it in a comment, and ask before implementing.
 4. If no component covers the pattern: propose extraction before writing inline HTML.
 5. When adding or changing a registered entry, edit `registry.json` — never a supplement — then run `node scripts/generate-component-registry.mjs`.
+6. When adding a component under `apps/web/src/app/shared/`, add its entry in the same change: `node scripts/check-component-registry.mjs` fails without one.
 
 ## Component Hierarchy
 
@@ -56,3 +58,4 @@ Entry schema in `registry.json`. `useFor` is the prose that makes the reuse gate
 - [ ] New reusable components are checked against the supplements before implementation.
 - [ ] Missing variants are flagged rather than duplicated inline.
 - [ ] Catalog edits happen in `registry.json`; the supplements are regenerated in the same commit.
+- [ ] `node scripts/check-component-registry.mjs` exits 0: every shared component has an entry, every path and spec resolves, and no supplement is stale.
