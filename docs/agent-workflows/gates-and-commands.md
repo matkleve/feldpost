@@ -17,13 +17,13 @@ npm run verify              # everything
 node scripts/verify.mjs <name>   # one check
 ```
 
-Checks, in run order: `doc-links`, `spec-code-paths`, `specs`, `design-system`, `i18n`, `lint`, `test`, `build`. The runner keeps going after a failure, so one run tells you everything that is wrong. CI runs the identical command (`.github/workflows/verify.yml`) — local and CI cannot drift.
+Checks, in run order: `doc-links`, `skills-source`, `spec-code-paths`, `specs`, `design-system`, `i18n`, `lint`, `test`, `build`. The runner keeps going after a failure, so one run tells you everything that is wrong. CI runs the identical command (`.github/workflows/verify.yml`) — local and CI cannot drift.
 
 ### Soft checks are debt with a number, not an exemption
 
 Some checks are marked `soft: true` in [`scripts/verify.mjs`](../../scripts/verify.mjs): they report loudly and do not fail the run, because they were already red on `main` before the gate existed. Each carries a measured count, and **that count is a ratchet — it may only go down.** Code or a spec you touch leaves its checker no worse than you found it. Making a check soft to get a green run is the one thing that file must never be used for.
 
-The current counts live in `scripts/verify.mjs` (the `debt` string on each check) — they are updated there when the number moves, so this document does not restate them and cannot go stale. As of 2026-09-10 the soft checks are `spec-code-paths`, `specs`, `lint`, and `test`; spec-size debt is tracked in [`docs/specs/SPEC-SIZE-BACKLOG.md`](../specs/SPEC-SIZE-BACKLOG.md). Everything else (`doc-links`, `design-system`, `i18n`, `build`) fails hard.
+The current counts live in `scripts/verify.mjs` (the `debt` string on each check) — they are updated there when the number moves, so this document does not restate them and cannot go stale. As of 2026-09-10 the soft checks are `spec-code-paths`, `specs`, `lint`, and `test`; spec-size debt is tracked in [`docs/specs/SPEC-SIZE-BACKLOG.md`](../specs/SPEC-SIZE-BACKLOG.md). Everything else (`doc-links`, `skills-source`, `design-system`, `i18n`, `build`) fails hard.
 
 ## Design-system gates
 

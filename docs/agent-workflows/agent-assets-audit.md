@@ -12,7 +12,7 @@ Inventory Feldpost agent-facing assets, remove proven duplicate prompt entrypoin
 | --- | --- | --- | --- |
 | `.github/agents/` | Canonical task agents for spec writing, planning, implementation, checking, and review | Keep | Richer than matching prompt files, includes handoffs and clearer tool scope. |
 | `.github/instructions/` | Scoped instruction overlays | Keep | These are reusable conventions, not standalone task workflows. |
-| `.cursor/skills/` | Cursor-invokable mirrors of project skills | Keep in sync with `.github/skills/` | Cursor does not discover `.github/skills/` directly, so every project skill must be mirrored here. |
+| `.cursor/skills/` | Project skills | Canonical source (**since 2026-09-10**) | Cursor does not discover `.github/skills/`, so the discovered tree is the one that must hold the real content. The `.github/skills/<name>/` rows below are this audit's 2026-04-29 snapshot, when the content lived there; those paths now hold generated pointer stubs. |
 | `.github/skills/check-spec/` | Check one implementation against one spec | Keep | Narrow checkbox-oriented workflow; not replaced by path-to-issues audit. |
 | `.github/skills/spec-audit/` | Audit spec markdown consistency | Keep | Reviews spec internals, not implementation or GitHub issues. |
 | `.github/skills/implement-from-spec/` | Implementation workflow | Keep | Skill form remains useful even though prompt duplicate is removed. |
@@ -61,8 +61,7 @@ Audit workflows must report folder coverage, including examined and skipped area
 ## Cleanup Rules
 
 - Prefer `.github/agents/` for role-based multi-step workflows with handoffs.
-- Prefer `.github/skills/` for reusable user-invoked workflows, especially workflows with command-like behavior.
-- Mirror every `.github/skills/<name>/` directory to `.cursor/skills/<name>/` so Cursor can invoke the same workflow.
+- Author every reusable user-invoked workflow as `.cursor/skills/<name>/SKILL.md`. That tree is the single source; `.github/skills/<name>/SKILL.md` holds a generated pointer stub only. **Reversed 2026-09-10** — this rule previously said the opposite, and following it now would reintroduce two divergent copies of each skill. Enforced by `node scripts/verify.mjs skills-source` (hard gate).
 - Keep `.github/instructions/` as narrow overlays only.
 - Do not keep a `.github/prompts/` file when a richer agent or skill has the same purpose and stricter constraints.
 - Do not delete specialized skills just because they share words like "audit", "spec", or "review"; delete only exact workflow duplicates.
