@@ -44,6 +44,7 @@ const CHECKS = [
     cmd: "node",
     args: ["scripts/check-component-registry.mjs"],
   },
+  { name: "spec-coverage", cmd: "node", args: ["scripts/check-spec-coverage.mjs"] },
   {
     name: "specs",
     cmd: "npm",
@@ -69,6 +70,16 @@ const CHECKS = [
   },
   { name: "build", cmd: "npm", args: ["run", "--silent", "build"] },
 ];
+
+// `--list` exists so documentation can point at a command instead of copying
+// the check names into prose. The copy in docs/agent-workflows/gates-and-commands.md
+// had already lost `component-registry` by the time `spec-coverage` was added.
+if (process.argv.includes("--list")) {
+  for (const check of CHECKS) {
+    console.log(`${check.name}\t${check.soft ? "soft (known debt)" : "hard"}`);
+  }
+  process.exit(0);
+}
 
 const only = process.argv.slice(2);
 const selected = only.length ? CHECKS.filter((c) => only.includes(c.name)) : CHECKS;
