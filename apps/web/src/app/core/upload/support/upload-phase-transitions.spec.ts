@@ -8,8 +8,8 @@ import {
 describe('upload-phase-transitions', () => {
   it('rejects illegal pipeline transitions', () => {
     expect(canTransition('complete', 'uploading', 'pipeline')).toBe(false);
-    expect(canTransition('queued', 'uploading', 'pipeline')).toBe(false);
     expect(canTransition('validating', 'complete', 'pipeline')).toBe(false);
+    expect(canTransition('hashing', 'conflict_check', 'pipeline')).toBe(false);
   });
 
   it('blocks pipeline transitions from terminal phases', () => {
@@ -47,6 +47,19 @@ describe('upload-phase-transitions', () => {
   it('allows dedup no-match fall-through dedup_check → uploading', () => {
     expect(canTransition('dedup_check', 'uploading', 'pipeline')).toBe(true);
     expect(canTransition('dedup_check', 'converting_format', 'pipeline')).toBe(true);
+  });
+
+  it('allows NF-38 post-dedup location and conflict routing edges', () => {
+    expect(canTransition('parsing_exif', 'extracting_title', 'pipeline')).toBe(true);
+    expect(canTransition('dedup_check', 'resolving_location', 'pipeline')).toBe(true);
+    expect(canTransition('dedup_check', 'awaiting_disambiguation', 'pipeline')).toBe(true);
+    expect(canTransition('dedup_check', 'conflict_check', 'pipeline')).toBe(true);
+  });
+
+  it('allows queue resume and post-conflict upload edges', () => {
+    expect(canTransition('queued', 'uploading', 'pipeline')).toBe(true);
+    expect(canTransition('conflict_check', 'uploading', 'pipeline')).toBe(true);
+    expect(canTransition('awaiting_disambiguation', 'resolving_location', 'pipeline')).toBe(true);
   });
 
   it('allows queued → complete mediaId shortcut', () => {

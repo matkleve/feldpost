@@ -52,6 +52,8 @@ function edge(from: UploadPhase, to: UploadPhase): string {
 const PIPELINE_TRANSITIONS: ReadonlySet<string> = new Set([
   // Queue entry + resume shortcuts
   edge('queued', 'validating'),
+  edge('queued', 'uploading'),
+  edge('queued', 'awaiting_disambiguation'),
   edge('queued', 'complete'),
 
   // Prepare
@@ -66,13 +68,19 @@ const PIPELINE_TRANSITIONS: ReadonlySet<string> = new Set([
   edge('converting_format', 'dedup_check'),
   edge('converting_format', 'uploading'),
   edge('hashing', 'dedup_check'),
+  edge('hashing', 'resolving_location'),
   edge('dedup_check', 'hashing'),
   edge('dedup_check', 'converting_format'),
   edge('dedup_check', 'uploading'),
   edge('dedup_check', 'skipped'),
   edge('dedup_check', 'missing_data'),
+  // NF-38: dedup runs before location resolution — post-dedup placement + routing
+  edge('dedup_check', 'resolving_location'),
+  edge('dedup_check', 'awaiting_disambiguation'),
+  edge('dedup_check', 'conflict_check'),
 
   // New-only location / conflict cluster
+  edge('parsing_exif', 'extracting_title'),
   edge('extracting_title', 'hashing'),
   edge('extracting_title', 'dedup_check'),
   edge('extracting_title', 'resolving_location'),
@@ -83,8 +91,10 @@ const PIPELINE_TRANSITIONS: ReadonlySet<string> = new Set([
   edge('resolving_location', 'missing_data'),
   edge('resolving_location', 'conflict_check'),
   edge('awaiting_disambiguation', 'queued'),
+  edge('awaiting_disambiguation', 'resolving_location'),
   edge('awaiting_disambiguation', 'missing_data'),
   edge('conflict_check', 'awaiting_conflict_resolution'),
+  edge('conflict_check', 'uploading'),
 
   // Upload + persist (new: saving_record; attach/replace: replacing_record)
   edge('uploading', 'saving_record'),
@@ -196,8 +206,13 @@ export function reportTransitionViolation(
   const detail = `[upload-phase] illegal transition ${from} → ${to} (channel=${channel}, job=${jobId})${reason ? `: ${reason}` : ''}`;
   violationReporter?.(detail);
   if (typeof ngDevMode !== 'undefined' && ngDevMode) {
-    console.warn(detail);
+    console.error(detail);
   }
+}
+
+/** Whether the last {@link reportTransitionViolation} call would throw in tests. */
+export function hasTransitionViolationReporter(): boolean {
+  return violationReporter != null;
 }
 
 /** @internal Test helper — enumerate pipeline edges for property-style checks. */
