@@ -42,6 +42,7 @@ So the same defect class the previous audit closed twice already survives in two
 | **NF-14** | medium | spec trust | The **open-gap table understates the code**: G2 and G3 ship, with tests, while the spec lists both as unimplemented and leaves their acceptance criteria unchecked. G4 genuinely is not implemented. | fan-out key `core/upload/address-resolution/upload-address-resolution.orchestrator.ts:231-244`; G3 call site `core/upload/location/upload-location-pre-resolve-orchestrator.service.ts:149`, tests `…/upload-location-tray-flow.service.spec.ts:279,326,350`; no `'deferred'` in `core/upload/upload-manager.types.ts:37` |
 | **NF-15** | low | dead code | **`context_distance` (contradiction class C5) is a dead union member** — read in one place, never written. Same class as `duplicate_photo`, which was deleted in P4c. | `core/upload/upload-manager.types.ts:115`; sole reader `features/upload/upload-resolver-tray/upload-resolver-tray.helpers.ts:70` |
 | **NF-16** | low | change completeness | `project_address_* = Step 2` **still appears in a type comment** — the last surviving reference to the removed project tray, the concept root `AGENTS.md` cites as this repository's canonical Change-Completeness failure. | `core/upload/upload-manager.types.ts:80` (only hit across `apps/web/src` and `docs/specs`) |
+| **NF-38** | high | dedup / HEIC | **HEIC dedup fingerprints the converted JPEG, not the source HEIC.** `applyConvertedFileToJob` swaps `job.file` to `heic2any` output before the dedup gate; `computeUploadContentHash` then hashes whatever `job.file` points at. If encoder output varies across runs, the same photo yields a different fingerprint each upload and duplicate detection silently never fires — no error, no UI signal. See § 3 (NF-38). Fix: [`06-improvement-plan.md`](./06-improvement-plan.md) item 1. | swap `core/upload/support/upload-heic-prepare.util.ts:33`; conversion before dedup `…/upload-new-prepare-route.util.ts:185-213` → `…/upload-new-pre-resolve.util.ts:336` → `core/upload/support/upload-dedup-check.util.ts:91` → `core/upload/support/content-hash.util.ts:121-127`; encoder `core/upload/support/upload.service.util.ts:142-143`; same ordering attach `:170-197`, replace `…/upload-replace-pipeline-run.util.ts:103-127` |
 
 ---
 
@@ -67,6 +68,7 @@ Merged `cursor/upload-pipeline-integrity-3be6`, `cursor/upload-branch-c-resoluti
 | **NF-14** | **fixed** | Branch C spec/open-gap table synced; G2/G3 marked implemented. |
 | **NF-15** | **open (annotated)** | `context_distance` union member retained with comment — reserved for unbuilt C5 tray; sole reader in tray helpers unchanged. |
 | **NF-16** | **fixed** | Stale `project_address_*` type comment removed. |
+| **NF-38** | **open** | HEIC dedup hashes converted JPEG bytes, not source HEIC — see § 3 and [`06-improvement-plan.md`](./06-improvement-plan.md) item 1. |
 
 ---
 
@@ -105,6 +107,28 @@ Two things compound it. The util **discards both results** (`upload-cancel-resid
 
 The result is that the one cancellation path where residue is *most* likely — the user closes their session with uploads in flight — is the one that reliably leaves it, silently, while the fix for exactly this class of bug is recorded as landed.
 
+### NF-38 — HEIC dedup fingerprints encoder output, not source bytes
+
+The chain (new pipeline; attach and replace follow the same ordering with conversion before `runUploadDedupCheck`):
+
+1. `prepareExifAndFile` schedules HEIC conversion on the **original** file and **awaits** it before returning (`core/upload/pipelines/new/upload-new-prepare-route.util.ts:185-213`).
+2. `ensureHeicConversionScheduled` calls `heic2any` at quality `0.85` (`core/upload/support/upload.service.util.ts:142-143`), then `applyConvertedFileToJob` replaces `job.file` with the JPEG (`core/upload/support/upload-heic-prepare.util.ts:74-79`, swap at `:33`).
+3. EXIF for the hash is parsed from the **original** file before conversion (`core/upload/pipelines/new/upload-new-prepare-route.util.ts:179-181`) and passed separately — it is **not** re-read from the JPEG.
+4. `finishPreResolveDedup` → `runUploadDedupCheck` passes the **post-swap** `job.file` to `computeUploadContentHash` (`core/upload/pipelines/new/upload-new-pre-resolve.util.ts:161`, `core/upload/support/upload-dedup-check.util.ts:91`).
+5. `computeUploadContentHash` reads the first 64 KiB and `file.size` from whatever `File` it receives (`core/upload/support/content-hash.util.ts:121-127`); for `photo_v1` it combines those byte inputs with the separately supplied EXIF metadata (`:128-132`).
+
+**Consequence:** Duplicate detection for HEIC depends on `heic2any` producing **byte-identical** JPEG output for the same source on every run. Construction-site photos overwhelmingly arrive as HEIC. If encoder output varies, the same photo uploaded twice produces two different `contentHash` values — dedup silently never fires. No error, no UI signal, no Issues-lane row.
+
+The EXIF component of `photo_v1` does not rescue this: GPS, `capturedAt`, and `direction` are stable (parsed from the original), but they are **combined** with a potentially changing 64 KiB head and file size from the JPEG. Two uploads of the same HEIC with identical EXIF still diverge when the encoded bytes differ.
+
+**Undermines today's fixes:** Both assume a stable fingerprint.
+- **NF-01** (replace hash retirement): `retireStaleDedupHashesFireAndForget` keys off `contentHash` computed at dedup time (`core/upload/support/upload-db-postwrite.util.ts:67-74`; called from `…/upload-replace-pipeline-finish.util.ts:133`). A varying hash leaves orphan rows or fails to retire the right one.
+- **NF-04** (in-flight dedup guard): the registry is keyed by `contentHash` (`core/upload/support/upload-inflight-dedup.registry.ts:15-29`; lookup at `upload-dedup-check.util.ts:100-107`). Two concurrent uploads of the same HEIC that encode to different bytes both miss each other.
+
+**Not yet proven:** Whether `heic2any` output is in fact non-deterministic for a fixed input at quality `0.85`. The defect is that the design **depends on determinism it never verified** — that is a design failure regardless of how the experiment lands. **Experiment to settle it:** convert the same HEIC fixture twice in one browser session via `convertHeicToJpegUploadFile`, byte-compare the two `File` blobs, and compare `computeUploadContentHash` results with the same `parsedExif`. If bytes or hashes differ, dedup is broken for HEIC in practice.
+
+**Fix:** [`06-improvement-plan.md`](./06-improvement-plan.md) item 1 — hash original source bytes, move conversion after the dedup gate.
+
 ---
 
 ## 4. Verified correct — do not re-audit
@@ -131,3 +155,4 @@ Same limitation as the previous audit. These are the checks that would settle th
 | NF-04 | Submit a folder containing the same photo twice; count resulting `media_items` rows |
 | NF-08 | Convert a ~20 MB HEIC and check whether the JPEG exceeds 25 MiB on a real device |
 | NF-09 | Instrument `convertToJpeg` with a call counter and submit a batch of HEICs |
+| NF-38 | Convert the same HEIC fixture twice in one session; byte-compare JPEG output and `computeUploadContentHash` results with identical `parsedExif` |
