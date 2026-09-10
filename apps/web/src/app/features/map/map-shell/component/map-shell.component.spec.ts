@@ -3,14 +3,36 @@
  *
  * GPS, search bar, context menus, radius selection, and marker interaction
  * live in their own sibling spec files. Shared setup: map-shell.spec-setup.ts.
+ *
+ * Rewritten 2026-09-10 for the facade refactor — see
+ * docs/audits/2026-09-10-map-shell-test-migration-plan.md.
+ *
+ * `uploadPanelOpen`/`uploadPanelPinned` moved to UploadShellUiService (the
+ * component field is private, so tests reach it via TestBed.inject).
+ * `setMapViewMode`/`mapBasemap`/`mapViewMode` moved to
+ * `component.basemapService` (setViewMode gained a `map` param and the
+ * old rename). `activeBaseTileLayer` is now a private field of that service
+ * with no accessor — the tile-swap test proves the tracking behavior across
+ * two calls instead of poking the field directly. `handleMapClick` and the
+ * state it touches (`suppressMapClickUntil`, radius-selection clearing) moved
+ * to MapClickHandlerService / MapShellInstanceService /
+ * RadiusDrawingOrchestratorService. `enterPlacementMode`/`cancelPlacement`
+ * are on `component.mapPlacementService`; `placementActive`/`photoPanelOpen`/
+ * `selectedMarkerKey`/`selectedMarkerKeys`/`detailMediaId` are all on
+ * `component.state`.
  */
 
 import { TestBed } from '@angular/core/testing';
 import { MapShellComponent } from './map-shell.component';
 import { MapShellState } from './map-shell.state';
+import { MapShellInstanceService } from './map-shell-instance.service';
 import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-view.service';
 import { MapBasemapLayerService } from '../leaflet/map-basemap-layer.service';
+import { MapClickHandlerService } from '../handlers/map-click-handler.service';
+import { RadiusDrawingOrchestratorService } from '../radius/radius-drawing-orchestrator.service';
+import { UploadShellUiService } from '../../../upload/upload-shell/upload-shell-ui.service';
 import { buildTestBed, createMapStub } from './map-shell.spec-setup';
+import type { MapMouseEvent } from '../leaflet/map-leaflet.service';
 
 describe('MapShellComponent – structure, upload panel & placement', () => {
   beforeEach(async () => {
@@ -66,7 +88,7 @@ describe('MapShellComponent – structure, upload panel & placement', () => {
   it('upload panel is not visible by default', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
-    expect(fixture.componentInstance.uploadPanelOpen()).toBe(false);
+    expect(TestBed.inject(UploadShellUiService).uploadPanelOpen()).toBe(false);
   });
 
   it('toggleUploadPanel() makes the panel visible', () => {
@@ -75,35 +97,37 @@ describe('MapShellComponent – structure, upload panel & placement', () => {
 
     fixture.componentInstance.toggleUploadPanel();
 
-    expect(fixture.componentInstance.uploadPanelOpen()).toBe(true);
+    expect(TestBed.inject(UploadShellUiService).uploadPanelOpen()).toBe(true);
   });
 
-  it('setMapViewMode("photo") persists photo map preference', () => {
+  it('setViewMode("photo") persists photo map preference', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
+    const basemapService = fixture.componentInstance.basemapService;
 
-    expect(fixture.componentInstance.mapBasemap()).toBe('default');
+    expect(basemapService.mapBasemap()).toBe('default');
 
-    fixture.componentInstance.setMapViewMode('photo');
+    basemapService.setViewMode('photo', undefined);
 
-    expect(fixture.componentInstance.mapBasemap()).toBe('satellite');
-    expect(fixture.componentInstance.mapViewMode()).toBe('photo');
+    expect(basemapService.mapBasemap()).toBe('satellite');
+    expect(basemapService.mapViewMode()).toBe('photo');
     expect(window.localStorage.getItem('sitesnap.settings.map.basemap')).toBe('satellite');
   });
 
-  it('setMapViewMode("street") resets analog material', () => {
+  it('setViewMode("street") resets analog material', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
+    const basemapService = fixture.componentInstance.basemapService;
 
-    fixture.componentInstance.setMapViewMode('photo');
-    fixture.componentInstance.setMapViewMode('street');
+    basemapService.setViewMode('photo', undefined);
+    basemapService.setViewMode('street', undefined);
 
-    expect(fixture.componentInstance.mapBasemap()).toBe('default');
-    expect(fixture.componentInstance.mapViewMode()).toBe('street');
+    expect(basemapService.mapBasemap()).toBe('default');
+    expect(basemapService.mapViewMode()).toBe('street');
     expect(window.localStorage.getItem('sitesnap.settings.map.basemap')).toBe('default');
   });
 
-  it('setMapViewMode("photo") replaces the active tile layer when map exists', () => {
+  it('setViewMode("photo") replaces the active tile layer when map exists', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
 
@@ -114,25 +138,24 @@ describe('MapShellComponent – structure, upload panel & placement', () => {
     const applyBasemapLayerSpy = vi
       .spyOn(basemapLayerService, 'applyBasemapLayer')
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .mockReturnValue({ activeBaseTileLayer: nextLayer as any });
+      .mockReturnValueOnce({ activeBaseTileLayer: previousLayer as any })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .mockReturnValueOnce({ activeBaseTileLayer: nextLayer as any });
 
-    const component = fixture.componentInstance as unknown as {
-      map: Record<string, unknown>;
-      activeBaseTileLayer: { addTo: ReturnType<typeof vi.fn> } | null;
-      setMapViewMode: (mode: 'street' | 'photo') => void;
-    };
+    const basemapService = fixture.componentInstance.basemapService;
 
-    component.map = mapStub;
-    component.activeBaseTileLayer = previousLayer;
+    // First call establishes `previousLayer` as the service's tracked tile
+    // layer (its own field is private — there is no other way to set it up).
+    basemapService.setViewMode('photo', mapStub as never);
+    // Second call proves it was actually tracked: the service must pass it
+    // back in as `activeBaseTileLayer` so the old layer can be removed.
+    basemapService.setViewMode('street', mapStub as never);
 
-    component.setMapViewMode('photo');
-
-    expect(applyBasemapLayerSpy).toHaveBeenCalledWith({
+    expect(applyBasemapLayerSpy).toHaveBeenNthCalledWith(2, {
       map: mapStub,
       activeBaseTileLayer: previousLayer,
-      basemap: 'satellite',
+      basemap: 'default',
     });
-    expect(component.activeBaseTileLayer).toBe(nextLayer);
   });
 
   it('toggleUploadPanel() hides the panel when called twice', () => {
@@ -142,101 +165,84 @@ describe('MapShellComponent – structure, upload panel & placement', () => {
     fixture.componentInstance.toggleUploadPanel();
     fixture.componentInstance.toggleUploadPanel();
 
-    expect(fixture.componentInstance.uploadPanelOpen()).toBe(false);
+    expect(TestBed.inject(UploadShellUiService).uploadPanelOpen()).toBe(false);
   });
 
   it('upload panel stays open until explicitly toggled closed', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
+    const uploadShellUi = TestBed.inject(UploadShellUiService);
 
     fixture.componentInstance.toggleUploadPanel();
-    expect(fixture.componentInstance.uploadPanelOpen()).toBe(true);
+    expect(uploadShellUi.uploadPanelOpen()).toBe(true);
 
     fixture.componentInstance.toggleUploadPanel();
-    expect(fixture.componentInstance.uploadPanelOpen()).toBe(false);
+    expect(uploadShellUi.uploadPanelOpen()).toBe(false);
 
     fixture.componentInstance.toggleUploadPanel();
-    expect(fixture.componentInstance.uploadPanelOpen()).toBe(true);
+    expect(uploadShellUi.uploadPanelOpen()).toBe(true);
   });
 
   it('map click closes upload panel when it is open', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
+    const uploadShellUi = TestBed.inject(UploadShellUiService);
 
-    fixture.componentInstance.uploadPanelPinned.set(true);
-    expect(fixture.componentInstance.uploadPanelOpen()).toBe(true);
+    uploadShellUi.openUploadPanel();
+    expect(uploadShellUi.uploadPanelOpen()).toBe(true);
 
-    (
-      fixture.componentInstance as unknown as {
-        handleMapClick: (event: { latlng: { lat: number; lng: number } }) => void;
-      }
-    ).handleMapClick({ latlng: { lat: 48.2082, lng: 16.3738 } });
+    TestBed.inject(MapClickHandlerService).handleMapClick({
+      latlng: { lat: 48.2082, lng: 16.3738 },
+    } as MapMouseEvent);
 
-    expect(fixture.componentInstance.uploadPanelOpen()).toBe(false);
+    expect(uploadShellUi.uploadPanelOpen()).toBe(false);
   });
 
   it('plain map click clears all map selection state', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
-
-    const component = fixture.componentInstance as unknown as {
-      selectedMarkerKey: { set: (value: string | null) => void; (): string | null };
-      selectedMarkerKeys: { set: (value: Set<string>) => void; (): Set<string> };
-      detailMediaId: { set: (value: string | null) => void; (): string | null };
-      clearRadiusSelectionVisuals: ReturnType<typeof vi.fn>;
-      handleMapClick: (event: {
-        latlng: { lat: number; lng: number };
-        originalEvent?: { button?: number };
-      }) => void;
-    };
+    const state = fixture.componentInstance.state;
 
     const workspaceView = TestBed.inject(WorkspaceViewService);
     const clearActiveSelectionSpy = vi
       .spyOn(workspaceView, 'clearActiveSelection')
       .mockImplementation(() => {});
+    const clearSelectionVisualsSpy = vi
+      .spyOn(TestBed.inject(RadiusDrawingOrchestratorService), 'clearSelectionVisuals')
+      .mockImplementation(() => {});
 
-    TestBed.inject(MapShellState).setSelectedMarkerKey('cluster-1');
-    TestBed.inject(MapShellState).setSelectedMarkerKeys(new Set(['cluster-1', 'cluster-2']));
-    TestBed.inject(MapShellState).setDetailMediaId('img-1');
-    component.clearRadiusSelectionVisuals = vi.fn();
+    state.setSelectedMarkerKey('cluster-1');
+    state.setSelectedMarkerKeys(new Set(['cluster-1', 'cluster-2']));
+    state.setDetailMediaId('img-1');
 
-    component.handleMapClick({
+    TestBed.inject(MapClickHandlerService).handleMapClick({
       latlng: { lat: 48.2082, lng: 16.3738 },
       originalEvent: { button: 0 },
-    });
+    } as MapMouseEvent);
 
-    expect(component.selectedMarkerKey()).toBeNull();
-    expect(component.selectedMarkerKeys().size).toBe(0);
-    expect(component.detailMediaId()).toBeNull();
+    expect(state.selectedMarkerKey()).toBeNull();
+    expect(state.selectedMarkerKeys().size).toBe(0);
+    expect(state.detailMediaId()).toBeNull();
     expect(clearActiveSelectionSpy).toHaveBeenCalled();
-    expect(component.clearRadiusSelectionVisuals).toHaveBeenCalled();
+    expect(clearSelectionVisualsSpy).toHaveBeenCalled();
   });
 
   it('primary map click clears marker selection even during click guard', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
+    const state = fixture.componentInstance.state;
 
-    const component = fixture.componentInstance as unknown as {
-      selectedMarkerKey: { set: (value: string | null) => void; (): string | null };
-      selectedMarkerKeys: { set: (value: Set<string>) => void; (): Set<string> };
-      suppressMapClickUntil: number;
-      handleMapClick: (event: {
-        latlng: { lat: number; lng: number };
-        originalEvent: { button: number };
-      }) => void;
-    };
+    state.setSelectedMarkerKey('cluster-1');
+    state.setSelectedMarkerKeys(new Set(['cluster-1', 'cluster-2']));
+    TestBed.inject(MapShellInstanceService).suppressMapClickUntil = Date.now() + 60_000;
 
-    TestBed.inject(MapShellState).setSelectedMarkerKey('cluster-1');
-    TestBed.inject(MapShellState).setSelectedMarkerKeys(new Set(['cluster-1', 'cluster-2']));
-    component.suppressMapClickUntil = Date.now() + 60_000;
-
-    component.handleMapClick({
+    TestBed.inject(MapClickHandlerService).handleMapClick({
       latlng: { lat: 48.2082, lng: 16.3738 },
       originalEvent: { button: 0 },
-    });
+    } as MapMouseEvent);
 
-    expect(component.selectedMarkerKey()).toBeNull();
-    expect(component.selectedMarkerKeys().size).toBe(0);
+    expect(state.selectedMarkerKey()).toBeNull();
+    expect(state.selectedMarkerKeys().size).toBe(0);
   });
 
   it('does not mount app-upload-panel (hosted by AuthenticatedAppLayout)', () => {
@@ -252,26 +258,26 @@ describe('MapShellComponent – structure, upload panel & placement', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
 
-    fixture.componentInstance.enterPlacementMode('test-key');
+    fixture.componentInstance.mapPlacementService.enterPlacementMode('test-key');
 
-    expect(fixture.componentInstance.placementActive()).toBe(true);
+    expect(fixture.componentInstance.state.placementActive()).toBe(true);
   });
 
   it('cancelPlacement resets placementActive to false', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
 
-    fixture.componentInstance.enterPlacementMode('test-key');
-    fixture.componentInstance.cancelPlacement();
+    fixture.componentInstance.mapPlacementService.enterPlacementMode('test-key');
+    fixture.componentInstance.mapPlacementService.cancelPlacement();
 
-    expect(fixture.componentInstance.placementActive()).toBe(false);
+    expect(fixture.componentInstance.state.placementActive()).toBe(false);
   });
 
   it('shows placement banner when placementActive is true', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
 
-    fixture.componentInstance.enterPlacementMode('test-key');
+    fixture.componentInstance.mapPlacementService.enterPlacementMode('test-key');
     fixture.detectChanges();
 
     const banner = (fixture.nativeElement as HTMLElement).querySelector('.map-placement-banner');
@@ -291,7 +297,7 @@ describe('MapShellComponent – structure, upload panel & placement', () => {
 
   it('photoPanelOpen signal defaults to false', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
-    expect(fixture.componentInstance.photoPanelOpen()).toBe(false);
+    expect(fixture.componentInstance.state.photoPanelOpen()).toBe(false);
   });
 
   it('photo panel DOM is not mounted on MapShellComponent (hosted by AuthenticatedAppLayout)', () => {
@@ -308,7 +314,7 @@ describe('MapShellComponent – structure, upload panel & placement', () => {
     TestBed.inject(MapShellState).setPhotoPanelOpen(true);
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.photoPanelOpen()).toBe(true);
+    expect(fixture.componentInstance.state.photoPanelOpen()).toBe(true);
     const panelShell = (fixture.nativeElement as HTMLElement).querySelector(
       'app-workspace-pane-shell',
     );
