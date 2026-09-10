@@ -1,5 +1,9 @@
 # registry.primitives-and-layout.supplement
 
+<!-- GENERATED FILE — do not edit by hand.
+     Source: docs/specs/component/registry.json
+     Regenerate: node scripts/generate-component-registry.mjs -->
+
 > Linked from [`registry.md`](registry.md). Split-out catalog body; excluded from element-spec lint (`.supplement.md`).
 
 ## Page rail composition
@@ -649,4 +653,3 @@
 - **Spec**: [`docs/specs/component/project/projects-view-toggle.md`](project/projects-view-toggle.md) (historical reference only)
 
 ---
-

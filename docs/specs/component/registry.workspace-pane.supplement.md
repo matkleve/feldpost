@@ -1,5 +1,9 @@
 # registry.workspace-pane.supplement
 
+<!-- GENERATED FILE — do not edit by hand.
+     Source: docs/specs/component/registry.json
+     Regenerate: node scripts/generate-component-registry.mjs -->
+
 > Linked from [`registry.md`](registry.md). Split-out catalog body; excluded from element-spec lint (`.supplement.md`).
 
 ## Workspace Pane — Shell
@@ -383,4 +387,3 @@
 - **Gaps**: none
 
 ---
-
