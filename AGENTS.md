@@ -3,27 +3,26 @@
 Feldpost is a geo-temporal image management system for construction companies.
 Angular SPA + Leaflet map + Supabase (Auth, PostgreSQL + PostGIS, Storage).
 
+**This file is capped at 150 lines** and the cap is enforced (`agents-md-max-lines` in `scripts/lint-specs.mjs`). A longer instruction file gets skimmed instead of read — which is worse than a short one, because the reader believes they read it. Detail moved out is still normative at its new address; § Document Authority is the map.
+
 ## Instruction precedence (resolve conflicts in this order)
 
 1. **Data and security** — Row-Level Security, migrations, and `supabase/AGENTS.md` (frontend is untrusted).
 2. **This file** — `AGENTS.md` at repository root (global engineering rules).
 3. **Always-applied rules** — `.cursor/rules/*.mdc` (normative extensions of this file; same authority as #2, must not contradict #1).
-4. **Spec system** — `docs/specs/README.md`, governance artifacts under `docs/specs/`, and **Spec split and organization policy** in this file.
+4. **Spec system** — [`docs/specs/README.md`](docs/specs/README.md) and governance artifacts under `docs/specs/` (folder taxonomy and the spec split policy live there).
 5. **Concrete specs** — implementation contracts under `docs/specs/...` for the feature or module you are changing.
 6. **Package `AGENTS.md`** — `apps/web/`, `supabase/`, or `docs/` only where they **narrow** scope; they must not contradict 1–5.
-7. **Tool overlays** — `.github/instructions/`, `.github/copilot-instructions.md`, and similar: shortcuts only; if something disagrees with 1–5, **1–5 win**.
+7. **Tool overlays** — `CLAUDE.md`, `.github/instructions/`, `.github/copilot-instructions.md` and similar: pointers and shortcuts only; if something disagrees with 1–5, **1–5 win**. There is **one** instruction file; tool-specific files must not carry project rules.
 
 Implementation contracts live under **`docs/specs/`** (not `docs/element-specs/`). Treat any legacy `element-specs` path as a rename unless explicitly archived.
 
 ## Project Structure
 
-```
-apps/web/             → Angular frontend application (Angular CLI 21.1.5)
-apps/web/src/app/     → Components, services, routing
-apps/web/src/         → index.html, main.ts, styles.scss
-supabase/             → Database migrations, RLS policies, edge functions
-docs/                 → Design docs, element specs, glossary (source of truth)
-```
+- `apps/web/` — Angular frontend (`src/app/` components and services; `src/styles.scss` global tokens)
+- `supabase/` — database migrations, RLS policies, edge functions
+- `docs/` — specs, design docs, glossary (source of truth)
+- `apps/web/src/app/archive/` — **dead code**, excluded from the build; never import, cite, or copy patterns from it ([rules and inventory](apps/web/src/app/archive/README.md))
 
 ## Development
 
@@ -33,117 +32,38 @@ npm run dev                                    # dev server (cd apps/web && ng s
 npm run verify                                 # ← the gate. Run before every commit.
 ```
 
-### `npm run verify` — the gate
+`npm run verify` runs every check — doc links, spec lint, design-system gates, i18n gates, ESLint, unit tests, `ng build` — and keeps going after a failure, so one run tells you everything that is wrong. CI runs the same command (`.github/workflows/verify.yml`), so local and CI cannot drift. Re-run one check with `node scripts/verify.mjs <name>`.
 
-One command runs every check: doc links, spec lint, design-system gates, i18n
-gates, ESLint, unit tests, `ng build`. It keeps going after a failure, so one
-run tells you everything that is wrong. CI runs the same command
-(`.github/workflows/verify.yml`) — local and CI cannot drift.
-
-**Never report work as done without a green `verify` — paste the output.**
-Re-run one check alone with `node scripts/verify.mjs <name>`
-(`doc-links`, `specs`, `design-system`, `i18n`, `lint`, `test`, `build`).
-
-Three checks start **soft** — they report and do not fail the run — because they
-were already red on `main` before the gate existed (measured 2026-09-08):
-
-| Soft check | Debt |
-| --- | --- |
-| `specs` | 201 errors ([`docs/specs/SPEC-SIZE-BACKLOG.md`](docs/specs/SPEC-SIZE-BACKLOG.md)) |
-| `lint` | 151 errors + 1068 warnings (`--max-warnings 0`, so warnings fail too) |
-| `test` | **the test bundle does not compile** — ~101 TS errors, 4 unresolved imports in `*.spec.ts` |
-
-Those counts are a ratchet: they may only go down. **Do not add to them** — code
-or a spec you touch leaves its checker no worse than you found it. Everything
-green today (`doc-links`, `design-system`, `i18n`, `build`) fails hard.
-
-### Creating GitHub Issues (Required)
-
-Use the batch script — never call `gh issue create` one-by-one in a loop (it requires an interactive permission prompt per call):
-
-```bash
-node scripts/create-github-issues.mjs path/to/issues.json
-```
-
-Build a JSON file first (see `scripts/create-github-issues.example.json` for the schema: `{ title, body, labels?, milestone? }`), then run the script once. Auth resolves automatically from `GITHUB_TOKEN` env var or `gh auth token`.
-
-### Design System Gates
-
-Part of `npm run verify`. Run alone while iterating on design-system docs, panel SCSS, or geometry logic:
-
-```bash
-npm run design-system:check
-```
-
-This command runs:
-
-- `node scripts/validate-design-system-registry.mjs`
-- `node scripts/audit-panel-breakpoints.mjs`
-- `node scripts/guard-visual-behavior.mjs`
-
-Reference workflow and checklist:
-
-- `.github/workflows/design-system-check.yml`
-- `.github/pull_request_template.md`
-- `CONTRIBUTING.md`
-
-### i18n Gates
-
-Part of `npm run verify`. Run alone while iterating on the translation workbench CSV, `translation-catalog.ts`, or `seed_i18n.sql`:
-
-```bash
-npm run i18n:check
-```
-
-After editing non-English translations, normalize first if needed:
-
-```bash
-node scripts/normalize-i18n-diacritics.mjs
-npm run i18n:check
-node scripts/import-i18n-csv-to-sql.mjs
-```
-
-CI workflow: `.github/workflows/i18n-check.yml`
+**Never report work as done without a green `verify` — paste the output.** Some checks are **soft**: they report and do not fail the run, because they were red before the gate existed. Their measured counts are a ratchet that **may only go down — do not add to them.** Counts, per-gate commands, the Node pin, and the GitHub-issue script: [`docs/agent-workflows/gates-and-commands.md`](docs/agent-workflows/gates-and-commands.md).
 
 ## Code Conventions
 
-- Use Angular **standalone components** (no NgModules)
-- Use Angular **signals** and new control flow syntax (`@if`, `@for`, `@switch`)
-- Prefer **`inject()`** over constructor injection
+- Use Angular **standalone components** (no NgModules), **signals**, the new control flow (`@if`, `@for`, `@switch`), and **`inject()`** over constructor injection
 - **SCSS** for component styling
 - Prefer standardized shared UI components from `apps/web/src/app/shared/` (especially dialogs/modals) before building feature-local variants
 - Avoid browser-native UI primitives (`window.prompt`, `window.confirm`, native context UI) for product flows when a shared component exists
 - When splitting large files or extracting inline templates/styles, always use a dedicated script that performs a strict 1:1 copy before removing the original block
-- Use service-module symmetry for new/refactored services:
-  - Docs: `docs/specs/service/[service-name]/`
-  - Code: `apps/web/src/app/core/[service-name]/`
-  - Required files per module: `[service-name].service.ts`, `[service-name].service.spec.ts`, `[service-name].types.ts`, `[service-name].helpers.ts`, `adapters/`, `README.md`
-  - Keep one central `types.ts` per module; do not split into nested sub-service type files
-  - Keep facade slim and delegate heavy logic to local `adapters/`
-  - Forbid global adapter folders like `apps/web/src/app/core/adapters/`
-  - Archive replaced code only as a last resort, using dated refactor snapshot folders and `.legacy.ts` suffix
-  - Do not reference archived files/specs from active specs or service contracts
-- For non-obvious behavior gates or state transitions, add concise inline comments that reference the governing element spec section (for example `upload-panel.md § Media Item Menu Contract`).
+- **Service-module symmetry (mandatory)** for new/refactored services: docs `docs/specs/service/[name]/` mirror code `apps/web/src/app/core/[name]/`; one central `types.ts` per module; slim facade delegating to local `adapters/`; no global adapter folder. Required files, archive protocol, full contract: [`docs/agent-workflows/service-symmetry-standard.md`](docs/agent-workflows/service-symmetry-standard.md)
+- For non-obvious behavior gates or state transitions, add concise inline comments that reference the governing element spec section (for example `upload-panel.md § Media Item Menu Contract`)
 - Commit messages follow **Conventional Commits** (`feat:`, `fix:`, `chore:`)
-- Always run `npm run verify` before submitting; never report done without pasting its output
 
 ## Universal Invariants
 
 - **RLS is the security boundary** — frontend is untrusted; Row-Level Security enforces all data access
 - **Adapter pattern** — never call Leaflet, Supabase, or Nominatim directly from components; use `MapAdapter`, `GeocodingAdapter`, `SupabaseService`
-- **Element specs are contracts** — implement features from `docs/specs/...`; spec governance itself lives in `docs/specs/README.md`
-- **Glossary is canonical** — use exact names from `docs/glossary.md`
-- **Database-first debugging** — for overlaps, feasibility, uniqueness, publication, immutability, or history: inspect PostgreSQL constraints, triggers, and RLS **before** assuming frontend or adapter bugs (`supabase/migrations/`, `docs/architecture/database-schema.md`).
+- **Element specs are contracts** — implement features from `docs/specs/...`; spec governance itself lives in [`docs/specs/README.md`](docs/specs/README.md)
+- **Glossary is canonical** — use exact names from [`docs/glossary.md`](docs/glossary.md)
+- **Database-first debugging** — for overlaps, feasibility, uniqueness, publication, immutability, or history: inspect PostgreSQL constraints, triggers, and RLS **before** assuming frontend or adapter bugs (`supabase/migrations/`, `docs/architecture/database-schema.md`)
 
 ## Change Classification (Fast Lane / Full Lane)
 
-Every change MUST declare a **class** before work starts (in the issue, PR description, or the agent's preflight). The class determines how much ceremony is required. This generalizes the Migration Exemption below: most changes do not need the full ownership-matrix ritual, and forcing them through it is the main source of process drag. **When unsure between two classes, pick the higher one.**
+Every change MUST declare a **class** before work starts (in the issue, PR description, or the agent's preflight). The class determines how much ceremony is required: most changes do not need the full ownership-matrix ritual, and forcing them through it is the main source of process drag. **When unsure between two classes, pick the higher one.**
 
 | Class | Examples | Required before merge |
 | --- | --- | --- |
-| **Trivial** | typo, copy/label text, log line, comment, single token swap, pure rename, migration cleanup (see exemption below) | `npm run verify` green. No ownership matrix, no FSM tables. |
+| **Trivial** | typo, copy/label text, log line, comment, single token swap, pure rename, migration cleanup ([Migration Exemption](docs/migration/README.md#migration-exemption-phase-68)) | `npm run verify` green. No ownership matrix, no FSM tables. |
 | **Standard** | new non-stateful component, new service method, list/filter/sort, a self-contained UI surface | spec touched first; `npm run verify` green; component-reuse/registry check; `/code-review` skill on the diff. |
-| **Sensitive** | RLS or migrations, auth, billing/money, export, stateful/FSM UI, **the upload pipeline**, anything touching `organization_id` scoping | full ceremony: `npm run verify` green; ownership matrix + FSM/transition tables; `/security-review` skill; the matching `validate-*-rls.sql` / `validate-dsgvo-security.sql`; **LIVE VERIFICATION** (`docs/agent-workflows/agent-communication.md`); fresh-context adversarial review by a different agent than the implementer. |
+| **Sensitive** | RLS or migrations, auth, billing/money, export, stateful/FSM UI, **the upload pipeline**, anything touching `organization_id` scoping | full ceremony: `npm run verify` green; ownership matrix + FSM/transition tables; `/security-review` skill; the matching `validate-*-rls.sql` / `validate-dsgvo-security.sql`; **LIVE VERIFICATION** ([`agent-communication.md`](docs/agent-workflows/agent-communication.md)); fresh-context adversarial review by a different agent than the implementer. |
 
 The class is a **floor, not a ceiling** — reviewers may escalate. Anything that changes a security boundary or the data model is **Sensitive** regardless of how small the diff looks.
 
@@ -163,136 +83,61 @@ Verification floor for any behavior change: `grep` the removed symbol/field/conc
 
 **State-machine invariants (stateful services, Hard Blocker):** any stateful service (queues, FSMs, resolvers — e.g. the upload queue) MUST declare in its spec its states, its **terminal** states, and its **idempotency rules** (an action on a job already in a terminal state is a no-op). Acceptance criteria MUST assert those invariants. This is the service-side counterpart to the UI FSM contract in `.cursor/rules/ui-state-machine.mdc`; see [`docs/playbooks/idea-to-ship-pipeline.md`](docs/playbooks/idea-to-ship-pipeline.md) § State coherence also applies to services.
 
-## Migration Exemption (Phase 6–8)
-
-Migration cleanup is the canonical **Trivial**-class case. Work classified as **migration cleanup** is exempt from the ownership matrix and FSM contract pre-requisites. Migration cleanup = replacing `ui-*` BEM with Tailwind/`hlm*`, wiring existing spartan directives, removing legacy SCSS, replacing `var(--color-*)` with tweakcn equivalents. Does NOT cover new components, new states/animations, or net-new visual decisions. If a change introduces a net-new visual element, the exemption does not apply.
-
 ## Component Structure Rules (Hard Blockers)
 
-- Ownership Matrix required before first HTML. No code without matrix.
+- Ownership Matrix required before first HTML. No code without matrix. Fixed column contract: `.cursor/rules/visual-behavior.mdc` § Ownership Matrix columns; per-component specs carry the filled matrix.
 - Max 3 HTML levels per component. Every additional level requires documented justification.
 - No interactive element inside interactive element. No button inside button.
 - No aria-hidden on nodes with interactive descendants.
 - Every CSS property defined exactly once per purpose. Duplicate ownership is a blocker.
 - **Flex/grid child hosts:** Every component `:host` that participates as a **flex or grid child** must declare **`min-height: 0`** and **`min-width: 0`** (in component SCSS). Omission is a **spec violation**. Example: `app-map-shell` `:host` must comply when touched.
-- **Styling stack (default):** Tailwind utility classes in templates **and** component SCSS are both standard. The "no mixing" rule means **do not solve the same visual concern twice** (e.g. duplicating spacing in Tailwind and SCSS) without an explicit plan—not "never use both languages."
+- **Styling stack (default):** Tailwind utility classes in templates **and** component SCSS are both standard. The "no mixing" rule means **do not solve the same visual concern twice** (e.g. duplicating spacing in Tailwind and SCSS) without an explicit plan — not "never use both languages."
 - Loading/Error/Empty are mutually exclusive. Each has exactly one visual owner.
-
-### Ownership Matrix (Mandatory)
-
-Per-component specs carry the full matrix and examples; column contract is fixed:
-
-| Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer (z-index/token) | Test Oracle |
-
-## Dead code (`apps/web/src/app/archive/`)
-
-The folder **`apps/web/src/app/archive/`** holds **dead code**: it is **excluded from the Angular app build** (`apps/web/tsconfig.app.json` → `exclude` includes `src/app/archive/**/*.ts`). Treat it as **historical reference only**.
-
-- **Do not** import, extend, or wire these files into production routes or libraries.
-- **Do not** cite them in specs, service contracts, or active implementation as a pattern source.
-- **Do not** copy SCSS, token names, or component structure from here — the tree is intentionally frozen and may reference removed paths or legacy conventions.
-
-**Current contents (avoid by name):** `item-grid-legacy/media-page/` — legacy **`MediaGridComponent`**, **`MediaCardComponent`**, **`MediaLoadingComponent`** (`.ts` / `.html` / `.scss` snapshots).
-
-## Document Authority
-
-- **Project rules and invariants**: `AGENTS.md`
-- **Spec system, structure contract, split policy, and index**: `docs/specs/README.md`; normative split rules also in **Spec split and organization policy** (this file).
-- **Spec writing template**: `docs/agent-workflows/element-spec-format.md`
-- **Post-implementation verification**: `docs/agent-workflows/implementation-checklist.md`
-- **Session memory (decisions, mistakes, communication)**: `docs/ai-diary/` — one file per day; read the latest entry before resuming the same feature area.
-- **Collaboration with the user (ask early, prompting)**: `docs/agent-workflows/agent-communication.md`
-
-## Collaboration with the user
-
-Agents should ask **enough questions that requirements are clear** before multi-file work — there is no fixed limit of one or two. Walk the ambiguity checklist in [`docs/agent-workflows/agent-communication.md`](docs/agent-workflows/agent-communication.md) (equivalence/dedupe, geographic precedence, fallbacks, UI semantics, allowed-file boundaries, call budget). Batch related questions in one message; do not guess table or tuning names from prompts — verify against `docs/architecture/database-schema.md` and service types.
-
-**Before coding:** restate the invariant in your own words and confirm; list open ambiguities and ask about each that is not locked in spec/plan; then list files you will touch, what you will not touch, and how you will verify.
-
-**Component styling gate (hard):** Do not change existing component visual styling (SCSS/Tailwind geometry, colors, borders, sizes, `hlmBtn` variant/size swaps, or replacing design-system primitives with custom CSS) unless the user explicitly approved that visual change in the **current** task. Behavior-only fixes are fine; visual diffs require ask-first. See [`.github/agents/README.md`](.github/agents/README.md) § Component styling gate.
-
-**When the user corrects you:** treat it as an invariant update — fix minimal code, sync spec/plan if applicable, add a short note to `docs/ai-diary/YYYY-MM-DD.md` if the mistake is likely to recur.
-
-**🔴 Live verification (product owner):** When agents change route cache, media preview FSM, signing, or tile aspect caches, you must run the browser checks in [`docs/agent-workflows/agent-communication.md`](docs/agent-workflows/agent-communication.md) § **LIVE VERIFICATION** — especially **second visit to `/media`**. `ng build` alone does not prove revisit UX. Agents must call this out explicitly; if they do not, ask for the LIVE CHECK block.
-
-**FSM ↔ CSS:** Layered stateful components require transition map, layer opacity matrix in spec supplement, and aligned SCSS — see `.cursor/rules/ui-state-machine.mdc` § FSM ↔ CSS ↔ DOM alignment. Example: [`docs/specs/component/media/media-display.rendering-matrix.supplement.md`](docs/specs/component/media/media-display.rendering-matrix.supplement.md).
-
-Full triggers, anti-patterns, and prompt templates: [`docs/agent-workflows/agent-communication.md`](docs/agent-workflows/agent-communication.md). Recent examples: geocoder [`docs/ai-diary/2026-05-23.md`](docs/ai-diary/2026-05-23.md); media grid FSM/cache [`docs/ai-diary/2026-05-25.md`](docs/ai-diary/2026-05-25.md).
 
 ## Required Feature Workflow
 
 1. Read the target element spec: `docs/specs/...`
-2. Read the relevant **service facade spec** under `docs/specs/service/<module>/` when the feature depends on that boundary (see `docs/specs/service/README.md` index).
-3. Read additional design docs only if the spec or service contract does not answer the question
-4. Reuse shared UI and adapter abstractions before introducing new structure
+2. Read the relevant **service facade spec** under `docs/specs/service/<module>/` when the feature depends on that boundary (index: `docs/specs/service/README.md`).
+3. Read additional design docs only if the spec or service contract does not answer the question.
+4. Reuse shared UI and adapter abstractions before introducing new structure.
 5. **Before creating any new Angular component, consult the component registry:** `docs/specs/component/registry.md` (index: slice map and workflow) **and** the linked `docs/specs/component/registry.*.supplement.md` files (selector/variant tables). If the required component or variant exists, use it. If a variant is missing, flag it and ask. Do not implement inline HTML patterns that duplicate a registered component.
-6. Verify the result against `docs/agent-workflows/implementation-checklist.md`
+6. Verify the result against [`docs/agent-workflows/implementation-checklist.md`](docs/agent-workflows/implementation-checklist.md).
 
-   *Figma-assisted flows (screenshots, Code Connect, strict No-Figma new-component gate from the archived rule): **(deferred — Figma work paused)**.*
+*Figma-assisted flows (screenshots, Code Connect, strict No-Figma new-component gate from the archived rule): **(deferred — Figma work paused)**.*
 
-## Multi-agent coordination (migration)
+## Collaboration with the user
 
-Canonical migration index: `docs/migration/README.md`.
+Ask **enough questions that requirements are clear** before multi-file work — there is no fixed limit of one or two. Walk the ambiguity checklist in [`docs/agent-workflows/agent-communication.md`](docs/agent-workflows/agent-communication.md) (equivalence/dedupe, geographic precedence, fallbacks, UI semantics, allowed-file boundaries, call budget), batch related questions in one message, and do not guess table or tuning names from prompts — verify against `docs/architecture/database-schema.md` and service types. Before inventing a convention, check the sibling repository for it first.
 
-- **CSS custom properties (`var(--*)`) in `apps/web`:** **MUST** read [`docs/design/agent-css-variable-contract.md`](docs/design/agent-css-variable-contract.md) before any SCSS or token edit — decision tree, forbidden legacy names, verification gates; **no invented variable names**. Shell geometry: also [`docs/design/shell-layout-tokens.md`](docs/design/shell-layout-tokens.md) and [`docs/migration/reports/agent-handoff-authenticated-shell-layout-ownership.md`](docs/migration/reports/agent-handoff-authenticated-shell-layout-ownership.md) §10. Closure status: [`docs/migration/reports/agent-token-decision-closure.md`](docs/migration/reports/agent-token-decision-closure.md).
+**Before coding:** restate the invariant in your own words and confirm; list open ambiguities and ask about each that is not locked in spec/plan; then list the files you will touch, what you will not touch, and how you will verify.
 
-### Parallel migration streams
+**When the user corrects you:** treat it as an invariant update — fix minimal code, sync spec/plan if applicable, add a short note to `docs/ai-diary/YYYY-MM-DD.md` if the mistake is likely to recur.
 
-When migration work spans **several independent streams** (see the **phase index** in `docs/migration/README.md`—not a separate “wave” checklist here), the coordinator should **decompose** into **sibling tasks** runnable in parallel when dependencies do not force a single serial chain. **Do not** collapse everything into one default subagent or one undifferentiated mega-change unless scope is explicitly narrowed or a true blocking dependency requires it. **Do not** maintain a second, free-floating “what to do next” list in this file; the migration index and phase docs are the single queue—update those when status changes so work is not duplicated.
+Also normative, and all in [`agent-communication.md`](docs/agent-workflows/agent-communication.md): the **component styling gate** (no unapproved visual diffs), **🔴 LIVE VERIFICATION** (route cache, media preview FSM, signing, tile aspect caches — `ng build` does not prove revisit UX; agents must emit the LIVE CHECK block), and the **two-attempt rule** (revert a failed attempt before trying the next idea; stop and offer options after two).
 
-## Component Spec Coverage (Mandatory)
+## Document Authority
 
-- Every production component must have its own dedicated element spec in `docs/specs/component/` or `docs/specs/ui/`.
-- Parent specs may define shared contracts, but domain and shared components still require child specs for their own behavior, state, wiring, and acceptance criteria.
-- Do not collapse multiple non-trivial component contracts into one monolithic spec when child-spec split is possible.
-- Before implementing or refactoring a component, create or update that component's dedicated spec first.
-
-## Feedback-to-Spec Sync (Mandatory)
-
-- When user feedback changes expected behavior, update the relevant spec(s) first in the same work session.
-- Do not defer spec synchronization when behavior requirements change.
-- Keep Acceptance Criteria aligned with the latest user-confirmed behavior before finalizing implementation.
-
-## Design Principles (summary)
-
-Field-first, map-primary, progressive disclosure, warmth, calm confidence.
-Non-negotiable rules: `docs/design/constitution.md`
-
-## Settings Overlay Convention
-
-For any feature that introduces user-configurable behavior, add an optional `## Settings` section to that feature's element spec in `docs/specs/`. Use concise bullets in the form `- **Section**: what it configures`. The settings inventory is centralized in `docs/settings-registry.md` and must stay in sync with all spec `## Settings` sections via `node scripts/lint-specs.mjs`. When adding a new configurable feature, update the spec first and then run the linter (or `--fix`) to refresh/validate the registry.
-
-## Spec Folder Taxonomy (Mandatory)
-
-Use the following top-level structure in `docs/specs/`:
-
-- `ui/` = feature-level UI contracts (for example map/workspace/media-detail systems)
-- `component/` = reusable UI building blocks and local component contracts
-- `service/` = service-module contracts mirrored to `apps/web/src/app/core/`
-- `system/` = cross-cutting behavior systems and orchestration matrices
-- `page/` = route/page-level contracts
-
-Authoring and governance rules belong in AGENTS/instructions. `docs/specs/README.md` remains primarily an index and navigation aid.
-
-## Spec split and organization policy
-
-- **Single entry point:** Each feature or service module has **one** canonical contract parent (`docs/specs/service/<module>/` facade spec, or per-component spec under `component/` / `ui/`). Child files hold detail; the parent summarizes and links (plain Markdown links, no duplicate normative bodies across folders).
-- **Lint gate:** Run `node scripts/lint-specs.mjs`. Default caps: warn **150** lines, error **180** on parent specs; oversized parents must be split into linked children (`*.supplement.md`, `*.acceptance-criteria.md`, or `parent-name.slice.md` — see `scripts/lint-specs.mjs`). Settings and `docs/settings-registry.md` stay in sync when specs expose `## Settings`.
-- **When to split (if / then):**
-  - **Adapter boundaries** match `apps/web/src/app/core/<module>/adapters/` → add `docs/specs/service/<module>/adapters/<name>.adapter.md` and link from the facade spec (structural mirror).
-  - **Bloat is** long acceptance criteria, FSM, transition map, or Visual Behavior / ownership tables → add concern slices in the same folder, e.g. `<name>.acceptance-criteria.md` or `<name>.visual-behavior.md`; do not duplicate checkbox lists in both parent and child.
-  - **UI vs service:** Service orchestration and facade contracts belong under `docs/specs/service/`; UI composition stays under `docs/specs/ui/` or `component/`. **Never** paste the full service contract into a UI spec—use a **stub** that links to the service entry (see `docs/specs/ui/workspace/workspace-view-system.md`).
-- **Anti-patterns:** Duplicate filenames with identical contract text in `ui/` and `service/`; flat `docs/specs/service/foo.md` without `docs/specs/service/foo/` when the module is a full service module—use a folder mirroring `core/<name>/` unless the registry documents an explicit thin-module exception.
+- **Gates, commands, soft-check debt, Node pin** — [`docs/agent-workflows/gates-and-commands.md`](docs/agent-workflows/gates-and-commands.md)
+- **Spec system** — [`docs/specs/README.md`](docs/specs/README.md): folder taxonomy, **spec split and organization policy**, component spec coverage, feedback-to-spec sync, settings overlay convention
+- **Spec writing template** — [`docs/agent-workflows/element-spec-format.md`](docs/agent-workflows/element-spec-format.md)
+- **Idea → ship pipeline (Definition of Ready / Done)** — [`docs/playbooks/idea-to-ship-pipeline.md`](docs/playbooks/idea-to-ship-pipeline.md)
+- **Post-implementation verification** — [`docs/agent-workflows/implementation-checklist.md`](docs/agent-workflows/implementation-checklist.md)
+- **Working with the user** — [`docs/agent-workflows/agent-communication.md`](docs/agent-workflows/agent-communication.md)
+- **Session memory (decisions, mistakes)** — [`docs/ai-diary/`](docs/ai-diary/) — one file per day; read the latest entry for your area before resuming it
+- **Migration** — [`docs/migration/README.md`](docs/migration/README.md): canonical phase queue, **Migration Exemption (Phase 6–8)**, **parallel migration streams** (how to split independent migration work across agents; no second "next" list anywhere)
+- **Dead code** — [`apps/web/src/app/archive/README.md`](apps/web/src/app/archive/README.md)
+- **CSS custom properties** — [`docs/design/agent-css-variable-contract.md`](docs/design/agent-css-variable-contract.md) is **mandatory reading** before any SCSS or token edit in `apps/web` (decision tree, forbidden legacy names, **no invented variable names**); shell geometry also [`docs/design/shell-layout-tokens.md`](docs/design/shell-layout-tokens.md)
+- **Design principles** — field-first, map-primary, progressive disclosure, warmth, calm confidence; non-negotiables in [`docs/design/constitution.md`](docs/design/constitution.md)
 
 ## Sub-rules Index
 
-Detailed normative contracts are in always-applied rule files under `.cursor/rules/`:
+Normative contracts in always-applied rule files under `.cursor/rules/`:
 
 - `scss-ownership.mdc` — SCSS ownership, geometry, typography, wrapper, comment contract, CSS layer architecture
-- `visual-behavior.mdc` — Visual Behavior Contract, Ownership Triad Rule, stacking/layer rules
-- `ui-state-machine.mdc` — FSM contract, stable state comments, animation/transition contract, component implementation order
-- `i18n-workflow.mdc` — Mandatory i18n workflow and translation pipeline steps
-- `bulk-operation-safety.mdc` — Bulk replace/edit quality gates
-- `token-usage-gate.mdc` — Design token lookup table; prevents hardcoded colors, radii, spacing, motion, z-index
-- `component-reuse-gate.mdc` — Mandatory component-registry pattern lookup before new UI wiring
-- ~~`figma-integration.mdc`~~ — **archived** (Figma work deferred); recoverable at `.cursor/rules/archive/figma-integration.mdc.archived`. Token-first / i18n-from-Figma / component-scan / **No-Figma No-Component** gates in that file are **(deferred — Figma work paused)** — reference-only until the rule is restored to `.cursor/rules/figma-integration.mdc`.
+- `visual-behavior.mdc` — Visual Behavior Contract, Ownership Triad Rule, ownership-matrix columns, stacking/layer rules
+- `ui-state-machine.mdc` — FSM contract, FSM ↔ CSS ↔ DOM alignment, stable state comments, animation/transition contract, component implementation order
+- `i18n-workflow.mdc` — mandatory i18n workflow and translation pipeline steps
+- `bulk-operation-safety.mdc` — bulk replace/edit quality gates
+- `token-usage-gate.mdc` — design token lookup table; prevents hardcoded colors, radii, spacing, motion, z-index
+- `component-reuse-gate.mdc` — mandatory component-registry pattern lookup before new UI wiring
+- ~~`figma-integration.mdc`~~ — **archived** (Figma work deferred); recoverable at `.cursor/rules/archive/figma-integration.mdc.archived`. Its token-first / i18n-from-Figma / component-scan / **No-Figma No-Component** gates are reference-only until the rule is restored.
