@@ -9,8 +9,21 @@ import {
   BrowserDynamicTestingModule,
   platformBrowserDynamicTesting,
 } from '@angular/platform-browser-dynamic/testing';
+import { setTransitionViolationReporter } from '../app/core/upload/support/upload-phase-transitions';
 
 declare const beforeEach: (fn: () => Promise<void> | void) => void;
+declare const afterEach: (fn: () => Promise<void> | void) => void;
+
+// Illegal upload FSM transitions must fail tests — silent rejection hid NF-38.
+beforeEach(() => {
+  setTransitionViolationReporter((detail) => {
+    throw new Error(detail);
+  });
+});
+
+afterEach(() => {
+  setTransitionViolationReporter(undefined);
+});
 
 // jsdom doesn't implement matchMedia. Several services (theme-aware map
 // tiles, reduced-motion checks) call `window.matchMedia(...)` from their

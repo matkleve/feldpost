@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { setTransitionViolationReporter } from './upload-phase-transitions';
 import { UploadJobStateService } from './upload-job-state.service';
 import type { UploadJob } from '../upload-manager.types';
 
@@ -18,6 +19,7 @@ function createJob(overrides: Partial<UploadJob> = {}): UploadJob {
 
 describe('UploadJobStateService.transitionTo', () => {
   it('rejects illegal pipeline transitions without mutating the job', () => {
+    setTransitionViolationReporter(undefined);
     const service = new UploadJobStateService();
     service.addJobs([createJob({ phase: 'complete' })]);
 
@@ -60,5 +62,20 @@ describe('UploadJobStateService.transitionTo', () => {
     service.transitionTo('job-1', 'validating', { channel: 'pipeline' });
 
     expect(phaseChanged).toHaveBeenCalledOnce();
+  });
+
+  it('fails the job on illegal pipeline transitions when no test reporter is installed', () => {
+    setTransitionViolationReporter(undefined);
+    const service = new UploadJobStateService();
+    service.addJobs([createJob({ phase: 'hashing' })]);
+
+    const changed = service.transitionTo('job-1', 'conflict_check', {
+      channel: 'pipeline',
+    });
+
+    expect(changed).toBe(false);
+    const job = service.findJob('job-1');
+    expect(job?.phase).toBe('error');
+    expect(job?.error).toContain('invalid phase transition');
   });
 });

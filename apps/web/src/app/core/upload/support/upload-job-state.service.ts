@@ -34,6 +34,7 @@ import {
   ACTIVE_PHASES,
   TERMINAL_PHASES,
   canTransition,
+  hasTransitionViolationReporter,
   reportTransitionViolation,
   type PhaseTransitionOptions,
   type TransitionChannel,
@@ -145,7 +146,8 @@ export class UploadJobStateService {
 
   /**
    * Guarded phase transition. Returns false when the transition map rejects the edge
-   * (no state mutation). Violations are reported loudly in tests/dev, never thrown in prod.
+   * (no state mutation). Pipeline violations are reported loudly and fail the job in prod
+   * so stranded uploads are visible — silent rejection is worse than a surfaced error.
    */
   transitionTo(
     jobId: string,
@@ -164,6 +166,17 @@ export class UploadJobStateService {
 
     if (!canTransition(from, phase, options.channel)) {
       reportTransitionViolation(jobId, from, phase, options.channel, options.reason);
+      if (
+        options.channel === 'pipeline' &&
+        !TERMINAL_PHASES.has(from) &&
+        !hasTransitionViolationReporter()
+      ) {
+        this.failJob(
+          jobId,
+          from,
+          `Upload pipeline error: invalid phase transition (${from} → ${phase}). Please retry.`,
+        );
+      }
       return false;
     }
 
@@ -192,8 +205,9 @@ export class UploadJobStateService {
     return true;
   }
 
-  setPhase(jobId: string, phase: UploadPhase): void {
-    this.transitionTo(jobId, phase, { channel: 'pipeline' });
+  /** Pipeline-channel transition. Returns false when the FSM rejects the edge. */
+  setPhase(jobId: string, phase: UploadPhase): boolean {
+    return this.transitionTo(jobId, phase, { channel: 'pipeline' });
   }
 
   failJob(jobId: string, failedAt: UploadPhase, error: string): void {
