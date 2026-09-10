@@ -48,12 +48,14 @@ Every old flat property/method, and exactly where it lives now. Found by reading
 | `linkedHoveredWorkspaceMediaIds` | `component.state.linkedHoveredWorkspaceMediaIds` | readonly signal |
 | `detailMediaId` | `component.state.detailMediaId` | readonly signal |
 | `uploadPanelOpen` | `TestBed.inject(UploadShellUiService).uploadPanelOpen` | readonly signal, **not reachable via the component** (field is `private`) |
-| `uploadPanelPinned` | `TestBed.inject(UploadShellUiService).uploadPanelPinned` | writable signal, **not reachable via the component** (field is `private`) |
+| `uploadPanelPinned` (old test poked the signal directly) | `TestBed.inject(UploadShellUiService).openUploadPanel()` / `.closeUploadPanel()` / `.toggleUploadPanel()` | **no longer a signal a test can reach at all** — see note below |
 | `searchQueryContext()` | `component.searchContext.searchQueryContext()` | computed signal — **fixed already**, see § 3 |
 
 `gpsService`, `mapPlacementService`, `basemapService`, `searchContext` and `state` are all `readonly` (not `private`) on `MapShellComponent` — `fixture.componentInstance.gpsService.X` or `fixture.componentInstance.state.X` works directly in a test, no new provider and no `TestBed.inject()` needed, just add the path segment.
 
-`uploadShellUi` is the one exception: `private readonly uploadShellUi = inject(UploadShellUiService)`. Reading or driving `uploadPanelOpen`/`uploadPanelPinned` needs `TestBed.inject(UploadShellUiService)` instead — `buildTestBed()` in the shared setup file already registers it as a real (non-mocked) instance, so injecting it gets the same instance the component holds internally.
+`uploadShellUi` is the one exception: `private readonly uploadShellUi = inject(UploadShellUiService)`. Reading `uploadPanelOpen` needs `TestBed.inject(UploadShellUiService)` instead — `buildTestBed()` in the shared setup file already registers it as a real (non-mocked) instance, so injecting it gets the same instance the component holds internally.
+
+**Note, added 2026-09-10:** the old test at `map-shell.component.spec.ts:166` did `fixture.componentInstance.uploadPanelPinned.set(true)` — reaching in and setting the panel-open signal directly. That signal is now `private` (`_uploadPanelPinned`) inside `UploadShellUiService`; it was a genuine encapsulation gap (the one place in 172 `@Injectable` services where a mutable signal was exposed unwrapped) and is fixed at the source rather than worked around in the test. See [`2026-09-10-spartan-and-state.md`](2026-09-10-spartan-and-state.md) § State. The rewritten test should call `openUploadPanel()` and assert `uploadPanelOpen()`, not touch the internal signal.
 
 **Forcing a value, not just reading one:** every `MapShellState` signal above has a matching public setter (`state.setPlacementActive(true)`, `state.setDetailMediaId('img-1')`, `state.setSelectedMarkerKeys(new Set(['a']))`, …) — call the setter, never assign to the readonly signal. `gpsService` and `basemapService` have **no direct setters**; their signals only change through the real flow (`goTo(...)`, `setViewMode(...)`), which is exactly the GPS-mocking question in § 5.
 

@@ -14,8 +14,16 @@ export class UploadShellUiService {
 
   private placementPanel: UploadPanelComponent | null = null;
 
-  readonly uploadPanelPinned = signal(false);
-  readonly uploadPanelOpen = this.uploadPanelPinned.asReadonly();
+  // Was `readonly uploadPanelPinned = signal(false)` — a `readonly` class field
+  // only stops *reassignment*, not `.set()`/`.update()`; any external caller
+  // with a reference to this service could mutate panel-open state directly,
+  // bypassing toggleUploadPanel()/closeUploadPanel()/openUploadPanel() below.
+  // The other 171 @Injectable services in this app all follow the
+  // private-signal + public-.asReadonly() pattern already visible one line
+  // down for `uploadPanelOpen` itself — this was the one field that didn't.
+  // @see docs/audits/2026-09-10-spartan-and-state.md § State
+  private readonly _uploadPanelPinned = signal(false);
+  readonly uploadPanelOpen = this._uploadPanelPinned.asReadonly();
 
   readonly uploadBatch = this.uploadManager.activeBatch;
   readonly uploadBatchProgress = computed(() => this.uploadBatch()?.overallProgress ?? 0);
@@ -50,15 +58,15 @@ export class UploadShellUiService {
   );
 
   toggleUploadPanel(): void {
-    this.uploadPanelPinned.update((open) => !open);
+    this._uploadPanelPinned.update((open) => !open);
   }
 
   closeUploadPanel(): void {
-    this.uploadPanelPinned.set(false);
+    this._uploadPanelPinned.set(false);
   }
 
   openUploadPanel(): void {
-    this.uploadPanelPinned.set(true);
+    this._uploadPanelPinned.set(true);
   }
 
   bindUploadPanel(panel: UploadPanelComponent | undefined): void {
