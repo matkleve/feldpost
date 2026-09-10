@@ -5,19 +5,18 @@
  * Emits domain events when jobs change phase, fail, skip, or complete.
  *
  * Ground rules (Spec: upload-manager-pipeline.md):
- * - Phase transitions: queued → validating → parsing_exif → ... → complete|error|missing_data|skipped
+ * - Phase transitions: guarded by upload-phase-transitions.ts
  * - TERMINAL_PHASES: complete, error, missing_data, skipped (job leaves queue)
  * - ACTIVE_PHASES: All phases with ongoing work (shown in 'uploading' lane)
- * - Event emission: jobPhaseChanged$, uploadFailed$, uploadSkipped$ for subscribers
- * - Atomic updates: setPhase(), updateJob() guarantee consistency
+ * - Event emission: jobPhaseChanged$ from pipeline-channel transitions only
  * - failJob() is idempotent on terminal phases — late rejections cannot flip complete → error
  *
  * Public API:
  *  - findJob(jobId): UploadJob | undefined
- *  - setPhase(jobId, phase): Update phase + emit jobPhaseChanged$
+ *  - transitionTo(jobId, phase, { channel }): Guarded phase write
+ *  - setPhase(jobId, phase): Pipeline-channel transition + emit jobPhaseChanged$
  *  - updateJob(jobId, patch): Merge partial state without changing phase
- *  - markJobFailed(jobId, reason, error): Set phase=error + emit uploadFailed$
- *  - markJobSkipped(jobId, reason): Set phase=skipped + emit uploadSkipped$
+ *  - failJob(jobId, failedAt, error): Set phase=error + emit uploadFailed$
  */
 
 import { Injectable, computed, signal } from '@angular/core';
@@ -31,29 +30,14 @@ import type {
   UploadPhase,
 } from '../upload-manager.types';
 import { unregisterInflightDedupHash } from './upload-inflight-dedup.registry';
-
-const TERMINAL_PHASES: ReadonlySet<UploadPhase> = new Set([
-  'complete',
-  'error',
-  'missing_data',
-  'skipped',
-]);
-
-const ACTIVE_PHASES: ReadonlySet<UploadPhase> = new Set([
-  'validating',
-  'parsing_exif',
-  'converting_format',
-  'hashing',
-  'dedup_check',
-  'extracting_title',
-  'resolving_location',
-  'conflict_check',
-  'uploading',
-  'saving_record',
-  'replacing_record',
-  'resolving_address',
-  'resolving_coordinates',
-]);
+import {
+  ACTIVE_PHASES,
+  TERMINAL_PHASES,
+  canTransition,
+  reportTransitionViolation,
+  type PhaseTransitionOptions,
+  type TransitionChannel,
+} from './upload-phase-transitions';
 
 function phaseLabel(phase: UploadPhase): string {
   switch (phase) {
@@ -101,6 +85,7 @@ function phaseLabel(phase: UploadPhase): string {
 }
 
 export { TERMINAL_PHASES, ACTIVE_PHASES, phaseLabel };
+export type { TransitionChannel, PhaseTransitionOptions };
 
 @Injectable({ providedIn: 'root' })
 export class UploadJobStateService {
@@ -158,25 +143,57 @@ export class UploadJobStateService {
     this._jobs.update((prev) => prev.filter((j) => !TERMINAL_PHASES.has(j.phase)));
   }
 
-  setPhase(jobId: string, phase: UploadPhase): void {
+  /**
+   * Guarded phase transition. Returns false when the transition map rejects the edge
+   * (no state mutation). Violations are reported loudly in tests/dev, never thrown in prod.
+   */
+  transitionTo(
+    jobId: string,
+    phase: UploadPhase,
+    options: PhaseTransitionOptions & { statusLabel?: string },
+  ): boolean {
     const job = this.findJob(jobId);
-    if (!job) return;
-    if (TERMINAL_PHASES.has(job.phase)) return;
+    if (!job) {
+      return false;
+    }
 
-    const previousPhase = job?.phase ?? 'queued';
-    this.updateJob(jobId, { phase, statusLabel: phaseLabel(phase) });
+    const from = job.phase;
+    if (from === phase) {
+      return true;
+    }
+
+    if (!canTransition(from, phase, options.channel)) {
+      reportTransitionViolation(jobId, from, phase, options.channel, options.reason);
+      return false;
+    }
+
+    if (options.channel === 'pipeline' && TERMINAL_PHASES.has(from)) {
+      return false;
+    }
+
+    const previousPhase = from;
+    const statusLabel = options.statusLabel ?? phaseLabel(phase);
+    this.updateJob(jobId, { phase, statusLabel });
 
     if (TERMINAL_PHASES.has(phase)) {
       unregisterInflightDedupHash(job.contentHash, jobId);
     }
 
-    this._jobPhaseChanged$.next({
-      jobId,
-      batchId: job.batchId,
-      previousPhase,
-      currentPhase: phase,
-      fileName: job.file.name,
-    });
+    if (options.channel === 'pipeline') {
+      this._jobPhaseChanged$.next({
+        jobId,
+        batchId: job.batchId,
+        previousPhase,
+        currentPhase: phase,
+        fileName: job.file.name,
+      });
+    }
+
+    return true;
+  }
+
+  setPhase(jobId: string, phase: UploadPhase): void {
+    this.transitionTo(jobId, phase, { channel: 'pipeline' });
   }
 
   failJob(jobId: string, failedAt: UploadPhase, error: string): void {

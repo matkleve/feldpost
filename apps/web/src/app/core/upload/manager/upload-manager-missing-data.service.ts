@@ -40,18 +40,22 @@ export class UploadManagerMissingDataService {
           error ? describeLocationUpdateRpcError(error) : LOCATION_UPDATE_NOT_FOUND_ERROR,
         ),
       );
+      this.jobState.transitionTo(jobId, 'error', {
+        channel: 'user',
+        statusLabel: failureMessage,
+      });
       this.jobState.updateJob(jobId, {
-        phase: 'error',
         issueKind: 'upload_error',
         error: failureMessage,
-        statusLabel: failureMessage,
       });
       return;
     }
 
-    this.jobState.updateJob(jobId, {
-      phase: 'complete',
+    this.jobState.transitionTo(jobId, 'complete', {
+      channel: 'user',
       statusLabel: phaseLabel('complete'),
+    });
+    this.jobState.updateJob(jobId, {
       coords,
       issueKind: undefined,
       locationSourceUsed: 'exif',
@@ -71,18 +75,22 @@ export class UploadManagerMissingDataService {
     const ok = await this.projects.addMediaToProject(mediaId, projectId);
     if (!ok) {
       const errorLabel = phaseLabel('error');
+      this.jobState.transitionTo(jobId, 'error', {
+        channel: 'user',
+        statusLabel: errorLabel,
+      });
       this.jobState.updateJob(jobId, {
-        phase: 'error',
         issueKind: 'upload_error',
         error: errorLabel,
-        statusLabel: errorLabel,
       });
       return;
     }
 
-    this.jobState.updateJob(jobId, {
-      phase: 'complete',
+    this.jobState.transitionTo(jobId, 'complete', {
+      channel: 'user',
       statusLabel: phaseLabel('complete'),
+    });
+    this.jobState.updateJob(jobId, {
       projectId,
       issueKind: undefined,
     });

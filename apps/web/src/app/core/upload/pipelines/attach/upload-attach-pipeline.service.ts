@@ -2,7 +2,7 @@
  * UploadAttachPipelineService — handles the 'attach' upload pipeline.
  *
  * Pipeline phases (Spec: upload-manager-pipeline.md § Attach Upload Pipeline):
- * validating → converting_format → hashing → dedup_check → uploading → saving_record → enrichment → complete
+ * validating → parsing_exif → hashing → dedup_check → uploading → replacing_record → enrichment → complete
  *
  * Purpose: Add a new photo to an existing photoless image row after conflict resolution.
  * Triggered by: conflict resolution response = 'use_existing' (user chooses to attach to found row)

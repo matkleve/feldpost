@@ -151,9 +151,11 @@ export class UploadManagerPipelineHostService {
       removeUploadResidue: (storagePath, mediaId) =>
         removeUploadCancelResidue(storagePath, mediaId, this.supabase.client),
       markCancelledSignedOut: (jobId, failedAt) => {
-        this.jobState.updateJob(jobId, {
-          phase: 'error',
+        this.jobState.transitionTo(jobId, 'error', {
+          channel: 'system',
           statusLabel: 'Cancelled',
+        });
+        this.jobState.updateJob(jobId, {
           error: 'Upload cancelled — user signed out.',
           failedAt,
           wasCancelled: true,

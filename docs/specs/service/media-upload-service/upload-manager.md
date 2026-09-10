@@ -22,6 +22,7 @@ This parent spec owns the top-level contract. Deep pipeline behavior is split in
 | [upload-location-config](upload-location-config.md)   | Canonical upload location thresholds, confidence gates, and disambiguation parameters                  |
 | [upload-manager-pipeline](upload-manager-pipeline.md) | Folder upload flow, deduplication, location-conflict detection, and replace/attach event orchestration |
 | [upload-manager-pipeline.dedup-scope](upload-manager-pipeline.dedup-scope.supplement.md) | Org-scoped content-hash dedup, resume vs colleague duplicate behavior |
+| [upload-manager.phase-fsm](upload-manager.phase-fsm.supplement.md) | Terminal phases, transition channels, idempotency rules |
 
 ## What It Looks Like
 
