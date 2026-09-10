@@ -124,6 +124,7 @@ Also normative, and all in [`agent-communication.md`](docs/agent-workflows/agent
 - **Post-implementation verification** — [`docs/agent-workflows/implementation-checklist.md`](docs/agent-workflows/implementation-checklist.md)
 - **Working with the user** — [`docs/agent-workflows/agent-communication.md`](docs/agent-workflows/agent-communication.md)
 - **Session memory (decisions, mistakes)** — [`docs/ai-diary/`](docs/ai-diary/) — one file per day; read the latest entry for your area before resuming it
+- **How this code misleads (TRAPS)** — [`docs/TRAPS.md`](docs/TRAPS.md) — read it before your **second** attempt at a bug; promote a lesson there when it has bitten twice, or once with a user-visible consequence
 - **Migration** — [`docs/migration/README.md`](docs/migration/README.md): canonical phase queue, **Migration Exemption (Phase 6–8)**, **parallel migration streams** (how to split independent migration work across agents; no second "next" list anywhere)
 - **Dead code** — [`apps/web/src/app/archive/README.md`](apps/web/src/app/archive/README.md)
 - **CSS custom properties** — [`docs/design/agent-css-variable-contract.md`](docs/design/agent-css-variable-contract.md) is **mandatory reading** before any SCSS or token edit in `apps/web` (decision tree, forbidden legacy names, **no invented variable names**); shell geometry also [`docs/design/shell-layout-tokens.md`](docs/design/shell-layout-tokens.md)
