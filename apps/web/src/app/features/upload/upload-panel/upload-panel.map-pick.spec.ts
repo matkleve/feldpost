@@ -1,5 +1,5 @@
 import { ACTION_CONTEXT_IDS } from '../../../core/action/action-context-ids';
-import { makeUploadJob, setupUploadPanel } from './upload-panel.test-utils.spec';
+import { makeUploadJob, setupUploadPanel } from './upload-panel.spec-setup';
 
 describe('UploadPanelComponent map-pick row state', () => {
   it('tracks pendingLocationPickMediaId when map pick is requested', async () => {

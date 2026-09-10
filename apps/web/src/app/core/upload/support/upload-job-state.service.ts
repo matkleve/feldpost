@@ -10,6 +10,7 @@
  * - ACTIVE_PHASES: All phases with ongoing work (shown in 'uploading' lane)
  * - Event emission: jobPhaseChanged$, uploadFailed$, uploadSkipped$ for subscribers
  * - Atomic updates: setPhase(), updateJob() guarantee consistency
+ * - failJob() is idempotent on terminal phases — late rejections cannot flip complete → error
  *
  * Public API:
  *  - findJob(jobId): UploadJob | undefined
@@ -29,6 +30,7 @@ import type {
   UploadJob,
   UploadPhase,
 } from '../upload-manager.types';
+import { unregisterInflightDedupHash } from './upload-inflight-dedup.registry';
 
 const TERMINAL_PHASES: ReadonlySet<UploadPhase> = new Set([
   'complete',
@@ -140,12 +142,15 @@ export class UploadJobStateService {
   }
 
   removeJob(jobId: string): void {
+    const job = this.findJob(jobId);
+    unregisterInflightDedupHash(job?.contentHash, jobId);
     this._jobs.update((prev) => prev.filter((j) => j.id !== jobId));
   }
 
   removeTerminalJobs(): void {
     const terminal = this._jobs().filter((j) => TERMINAL_PHASES.has(j.phase));
     for (const j of terminal) {
+      unregisterInflightDedupHash(j.contentHash, j.id);
       if (j.thumbnailUrl && j.phase !== 'complete') {
         URL.revokeObjectURL(j.thumbnailUrl);
       }
@@ -161,6 +166,10 @@ export class UploadJobStateService {
     const previousPhase = job?.phase ?? 'queued';
     this.updateJob(jobId, { phase, statusLabel: phaseLabel(phase) });
 
+    if (TERMINAL_PHASES.has(phase)) {
+      unregisterInflightDedupHash(job.contentHash, jobId);
+    }
+
     this._jobPhaseChanged$.next({
       jobId,
       batchId: job.batchId,
@@ -172,6 +181,11 @@ export class UploadJobStateService {
 
   failJob(jobId: string, failedAt: UploadPhase, error: string): void {
     const job = this.findJob(jobId);
+    if (!job || TERMINAL_PHASES.has(job.phase)) {
+      return;
+    }
+
+    unregisterInflightDedupHash(job.contentHash, jobId);
     this.updateJob(jobId, {
       phase: 'error',
       statusLabel: phaseLabel('error'),

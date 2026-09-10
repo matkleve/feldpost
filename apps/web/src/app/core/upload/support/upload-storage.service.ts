@@ -20,6 +20,8 @@ import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../../auth/auth.service';
 import { SupabaseService } from '../../supabase/supabase.service';
 import { WideEventService } from '../../wide-event/wide-event.service';
+import { resolveUploadMimeType } from './upload.service.util';
+import { sanitizeStorageFileExtension } from './upload-storage-path.util';
 
 @Injectable({ providedIn: 'root' })
 export class UploadStorageService {
@@ -63,12 +65,12 @@ export class UploadStorageService {
       }
 
       const uuid = crypto.randomUUID();
-      const ext = (file.name.split('.').pop() ?? 'jpg').toLowerCase();
+      const ext = sanitizeStorageFileExtension(file.name);
       const storagePath = `${profile.organization_id}/${user.id}/${uuid}.${ext}`;
       ev.set({ storagePath, bytesWritten: file.size });
 
       const { error } = await this.supabase.client.storage.from('media').upload(storagePath, file, {
-        contentType: file.type,
+        contentType: resolveUploadMimeType(file),
         upsert: false,
         ...(abortSignal ? ({ signal: abortSignal } as Record<string, unknown>) : {}),
       });

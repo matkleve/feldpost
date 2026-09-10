@@ -16,6 +16,7 @@ import {
 import { UploadLocationResolutionService } from './upload-location-resolution.service';
 import { isGroupBlocked } from './upload-location-resolution.helpers';
 import type { UploadJob } from '../upload-manager.types';
+import { UploadManagerService } from '../upload-manager.service';
 import { UploadProjectLocationsAdapter } from '../adapters/upload-project-locations.adapter';
 import { LocalGeoDataAdapter } from '../../location-path-parser/local-geo-data.adapter';
 import { OrgSearchTuningService } from '../../search/org-search-tuning.service';
@@ -83,6 +84,10 @@ describe('UploadLocationResolutionService — source conflict', () => {
         {
           provide: OrgSearchTuningService,
           useValue: { getTuning: vi.fn().mockReturnValue({}) },
+        },
+        {
+          provide: UploadManagerService,
+          useValue: { kickQueueAfterLocationGate: vi.fn() },
         },
       ],
     });
@@ -360,6 +365,10 @@ describe('UploadLocationResolutionService — source conflict', () => {
       .disambiguationGroups()
       .find((g) => g.disambiguationKind === 'source' && isGroupBlocked(g))!;
     service.applyCandidateToGroup(group.id, SOURCE_CONFLICT_NONE_CANDIDATE_ID);
+
+    const jobFirstUpdated = jobState.findJob(jobFirst.id)!;
+    expect(jobFirstUpdated.phase).toBe('missing_data');
+    expect(jobFirstUpdated.issueKind).toBe('missing_gps');
 
     const jobLate = buildJob({
       id: 'job-late',

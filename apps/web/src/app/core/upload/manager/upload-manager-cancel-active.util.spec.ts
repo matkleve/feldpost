@@ -21,7 +21,7 @@ const isTerminalPhase = (phase: UploadPhase): boolean =>
 describe('cancelAllActiveUploads', () => {
   it('removes both the storage object and the media_items row for a job that already has both', async () => {
     const active = job({ id: 'active-1', storagePath: 'org/user/uuid.jpg', mediaId: 'media-1' });
-    const removeUploadResidue = vi.fn().mockResolvedValue(undefined);
+    const removeUploadResidue = vi.fn().mockResolvedValue({ errors: [] });
     const deps: CancelAllActiveUploadsDeps = {
       snapshotJobs: () => [active],
       isTerminalPhase,
@@ -38,7 +38,7 @@ describe('cancelAllActiveUploads', () => {
 
   it('skips residue cleanup for a job that never reached storage or the DB', async () => {
     const active = job({ id: 'active-1', phase: 'queued' });
-    const removeUploadResidue = vi.fn().mockResolvedValue(undefined);
+    const removeUploadResidue = vi.fn().mockResolvedValue({ errors: [] });
     const deps: CancelAllActiveUploadsDeps = {
       snapshotJobs: () => [active],
       isTerminalPhase,
@@ -56,7 +56,7 @@ describe('cancelAllActiveUploads', () => {
   it('leaves terminal jobs untouched', async () => {
     const terminal = job({ id: 'done-1', phase: 'complete', mediaId: 'media-1' });
     const abortJobRequest = vi.fn();
-    const removeUploadResidue = vi.fn().mockResolvedValue(undefined);
+    const removeUploadResidue = vi.fn().mockResolvedValue({ errors: [] });
     const deps: CancelAllActiveUploadsDeps = {
       snapshotJobs: () => [terminal],
       isTerminalPhase,

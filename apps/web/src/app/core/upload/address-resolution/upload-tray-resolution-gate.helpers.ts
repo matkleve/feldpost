@@ -19,8 +19,20 @@ export function isJobReadyForTrayResolution(
   return !isHeic(job.file);
 }
 
+/** Job ids still awaiting tray input — excludes vanished or terminal jobs. */
+export function liveTrayResolutionJobIds(
+  jobIds: readonly string[],
+  findJob: (id: string) => UploadJob | undefined,
+): string[] {
+  return jobIds.filter((id) => {
+    const job = findJob(id);
+    return job != null && job.phase === 'awaiting_disambiguation';
+  });
+}
+
 /**
- * Every affected job in the active tray item must pass {@link isJobReadyForTrayResolution}.
+ * Every live affected job in the active tray item must pass {@link isJobReadyForTrayResolution}.
+ * Dead, cancelled, or dismissed jobs are pruned at this boundary (NF-11).
  * @see docs/specs/component/upload/upload-resolver-tray.md
  */
 export function areAllJobsReadyForTrayResolution(
@@ -28,11 +40,12 @@ export function areAllJobsReadyForTrayResolution(
   findJob: (id: string) => UploadJob | undefined,
   isHeic: (file: File) => boolean,
 ): boolean {
-  if (!jobIds.length) {
+  const liveIds = liveTrayResolutionJobIds(jobIds, findJob);
+  if (!liveIds.length) {
     return false;
   }
-  return jobIds.every((id) => {
-    const job = findJob(id);
-    return job != null && isJobReadyForTrayResolution(job, isHeic);
+  return liveIds.every((id) => {
+    const job = findJob(id)!;
+    return isJobReadyForTrayResolution(job, isHeic);
   });
 }

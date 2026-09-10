@@ -57,6 +57,7 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
     notifyDisambiguationResolved: ReturnType<typeof vi.fn>;
     applyPreResolveFromOrchestrator: ReturnType<typeof vi.fn>;
     deferGroup: ReturnType<typeof vi.fn>;
+    applyCandidateToGroup: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
@@ -65,6 +66,7 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
       notifyDisambiguationResolved: vi.fn(),
       applyPreResolveFromOrchestrator: vi.fn().mockResolvedValue('continue'),
       deferGroup: vi.fn(),
+      applyCandidateToGroup: vi.fn(),
     };
 
     TestBed.configureTestingModule({
@@ -341,17 +343,26 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
     trayFlow.applyContainmentCheckChoice(group, 'keep-address');
 
     const updatedJob = jobState.findJob('job-cc');
+    expect(updatedJob?.resolutionStatus).toBe('resolved');
     expect(updatedJob?.pendingPartialLocation).toBe(true);
     const updatedGroup = disambiguationStore.groups().find((g) => g.id === group.id)!;
     expect(updatedGroup.resolutionStatus).toBe('resolved');
     expect(updatedGroup.selectedCandidateId).toBe('keep-address');
   });
 
-  it('G3: applyContainmentCheckChoice with enter-different defers group', () => {
-    jobState.addJobs([buildJob({ id: 'job-defer' })]);
+  it('G3: applyContainmentCheckChoice with enter-different opens fallback text tray', async () => {
+    jobState.addJobs([
+      buildJob({
+        id: 'job-defer',
+        relativePath: 'AT/Wien/1200/Hauptstraße/photo.jpg',
+      }),
+    ]);
+    await orchestrator.classifyBatch('batch-tray');
+    const groupingKey = orchestrator.listGroupStates('batch-tray')[0]?.groupingKey;
+    expect(groupingKey).toBeTruthy();
     const group = disambiguationStore.createGroup({
       batchId: 'batch-tray',
-      queryKey: 'containment|key',
+      queryKey: `containment|${groupingKey}`,
       folderDisplayPath: 'AT/Wien/Hauptstraße',
       titleAddress: 'Hauptstraße, Wien',
       jobIds: ['job-defer'],
@@ -364,6 +375,39 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
 
     trayFlow.applyContainmentCheckChoice(group, 'enter-different');
 
-    expect(resolutionMock.deferGroup).toHaveBeenCalledWith(group.id);
+    expect(resolutionMock.deferGroup).not.toHaveBeenCalled();
+    expect(resolutionMock.registerDisambiguationGroup).toHaveBeenCalledWith(
+      expect.objectContaining({
+        disambiguationKind: 'city_step',
+        trayStep: '1a',
+        candidates: [],
+      }),
+    );
+  });
+
+  it('NF-18: applyTrayHouseSelection with streetCentroid applies centroid candidate, not deferGroup', async () => {
+    jobState.addJobs([buildJob({ id: 'job-house' })]);
+    const group = disambiguationStore.createGroup({
+      batchId: 'batch-tray',
+      queryKey: 'house|at|wien|1010|wien|mariahilfer|',
+      folderDisplayPath: 'AT/Wien/Mariahilfer Straße',
+      titleAddress: 'Mariahilfer Straße, Wien',
+      jobIds: ['job-house'],
+      confirmedCity: 'Wien',
+      disambiguationKind: 'house_step',
+      trayStep: '1b',
+      houseNumberCandidates: [
+        { id: 'hn-1', addressLabel: 'Mariahilfer Straße 1', lat: 48.1, lng: 16.1, city: 'Wien' },
+        { id: 'hn-2', addressLabel: 'Mariahilfer Straße 99', lat: 48.3, lng: 16.3, city: 'Wien' },
+      ],
+      candidates: [],
+    });
+    disambiguationStore.patchGroup(group);
+
+    trayFlow.applyTrayHouseSelection(group.id, null, true);
+    await Promise.resolve();
+
+    expect(resolutionMock.deferGroup).not.toHaveBeenCalled();
+    expect(resolutionMock.applyCandidateToGroup).toHaveBeenCalledWith(group.id, 'street-centroid');
   });
 });

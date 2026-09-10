@@ -22,7 +22,8 @@ Normative FSM and persistence matrix for **upload location routing**: panel mode
 | Event | Behavior |
 | --- | --- |
 | User toggles mode while workspace has one selected project filter | Store choice in in-memory `sessionLocationModeOverrides[projectId]` |
-| User switches to another filtered project | Restore that project's override, or `required` if none |
+| User toggles mode while workspace has zero or multiple project filters | Update global `locationRequirementMode` only; do **not** write a session override entry |
+| User switches to another filtered project (exactly one selected) | Restore that project's override, or `required` if none |
 | No project filter active | Toggle updates global signal only; no map entry required |
 | Clear project filter | Overrides map is **not** cleared |
 | Upload panel closes | Overrides **remain** in memory |

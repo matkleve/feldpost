@@ -159,4 +159,16 @@ export class UploadPanelDialogSignals {
   setPendingDuplicateResolutionJob(job: UploadJob | null): void {
     this._pendingDuplicateResolutionJob.set(job);
   }
+
+  clearLocationAddressSearchTimeout(): void {
+    const timeout = this.locationAddressSearchTimeout;
+    if (timeout) {
+      clearTimeout(timeout);
+      this.locationAddressSearchTimeout = null;
+    }
+  }
+
+  destroy(): void {
+    this.clearLocationAddressSearchTimeout();
+  }
 }

@@ -65,7 +65,9 @@ export class UploadPanelJobFileActionsService {
     const result = await this.uploadService.downloadFile(job.storagePath);
     if (!result.ok) {
       this.toastService.show({
-        message: typeof result.error === 'string' ? result.error : 'Download fehlgeschlagen.',
+        message: typeof result.error === 'string'
+          ? result.error
+          : this.t('upload.item.download.failed', 'Download failed.'),
         type: 'error',
         dedupe: true,
       });

@@ -27,6 +27,38 @@ This matters beyond the finding itself, because root [`AGENTS.md`](../../../AGEN
 
 ---
 
+## 6. Integration pass — UP-xx closed on `cursor/upload-fixes-integration-3be6` (2026-09-10)
+
+Three fix branches merged; measured with `npm run verify` on the integration branch after reconciliation.
+
+| ID | Prior status | Integration outcome | Evidence |
+| --- | --- | --- | --- |
+| **UP-07** | still open | **fixed** | `getIssueKind` prefers persisted `issueKind`; statusLabel heuristic demoted. |
+| **UP-10** | still open | **fixed** | `failJob` terminal guard added in `upload-job-state.service.ts`. |
+| **UP-12** | still open | **fixed** | Issues-lane resolution actions no longer call `setLane('uploading')`; former `it.fails` tests converted to normal assertions. |
+| **UP-23** | still open | **fixed** | Single `finishPreResolveDedup` pass per job in required-location path. |
+| **UP-24** | still open | **fixed** | Document detection unified on `resolveMediaType(file)`. |
+| **UP-33** | still open | **fixed** | Folder drag-drop via `webkitGetAsEntry` in `upload-panel-drop.helpers.ts`. |
+| **UP-43** | still open | **fixed** | Storage extension from resolved MIME mapping, not raw filename. |
+| **UP-44** | still open | **fixed** | Upload timeout uses numeric literal directly. |
+| **UP-45** | still open | **fixed** | DB row MIME aligned with storage via `resolveMimeType`. |
+| **UP-46** | still open | **fixed** | `image/tiff` and `.csv` extension mapping corrected in `upload-file-types.ts`. |
+
+**Re-measured test debt (integration branch, `npm run verify` test step):**
+
+```
+Test Files  15 failed | 186 passed (201)
+     Tests  39 failed | 1264 passed (1303)
+    Errors  34 errors
+```
+
+- Unrelated failure count **unchanged at 39** (same 15 failing files as baseline on `cursor/upload-flow-review-3be6`).
+- Passing tests **increased by 35** (1229 → 1264) from new upload specs added in this pass — not from fixing unrelated suites.
+- **`it.fails` count dropped from 5 to 0** — all five converted to normal tests (UP-12 ×3, UP-23 ×1, UP-24 ×1).
+- Upload scope: **68 spec files, 417 tests, 100% passing** (excluding empty `upload-panel.test-utils.spec.ts` harness).
+
+---
+
 ## 2. Fixed since the audit
 
 | ID | What landed | Evidence |

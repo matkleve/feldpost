@@ -40,6 +40,14 @@ import type { PipelineContext } from '../../upload-manager.types';
 import { UploadQueueService } from '../../support/upload-queue.service';
 import { UploadStorageService } from '../../support/upload-storage.service';
 import { UploadService } from '../../upload.service';
+import {
+  ensureHeicConversionScheduled,
+  formatHeicConversionError,
+} from '../../support/upload-heic-prepare.util';
+import {
+  DEFAULT_UPLOAD_PHASE_TIMEOUT_MS,
+  runStorageUploadWithTimeout,
+} from '../../support/upload-storage-timeout.util';
 
 type AttachPreparedJob = {
   job: UploadJob;
@@ -49,6 +57,8 @@ type AttachPreparedJob = {
 
 @Injectable({ providedIn: 'root' })
 export class UploadAttachPipelineService {
+  private static readonly UPLOAD_PHASE_TIMEOUT_MS = DEFAULT_UPLOAD_PHASE_TIMEOUT_MS;
+
   private readonly uploadService = inject(UploadService);
   private readonly auth = inject(AuthService);
   private readonly supabase = inject(SupabaseService);
@@ -156,18 +166,17 @@ export class UploadAttachPipelineService {
     }
     let currentJob = this.jobState.findJob(jobId)!;
     if (this.uploadService.isHeic(currentJob.file)) {
-      this.jobState.setPhase(jobId, 'converting_format');
-      const convertedFile = await this.uploadService.convertToJpeg(currentJob.file);
-      let newThumbnailUrl = currentJob.thumbnailUrl;
-      if (newThumbnailUrl) {
-        URL.revokeObjectURL(newThumbnailUrl);
+      try {
+        await ensureHeicConversionScheduled(
+          { jobState: this.jobState, uploadService: this.uploadService },
+          jobId,
+          currentJob.file,
+        );
+      } catch (err) {
+        const message = formatHeicConversionError(currentJob.file.name, err);
+        ctx.failJob(jobId, 'converting_format', message);
+        return null;
       }
-      newThumbnailUrl = URL.createObjectURL(convertedFile);
-
-      this.jobState.updateJob(jobId, {
-        file: convertedFile,
-        thumbnailUrl: newThumbnailUrl,
-      });
       currentJob = this.jobState.findJob(jobId)!;
     }
 
@@ -217,7 +226,20 @@ export class UploadAttachPipelineService {
         drainQueue: () => ctx.drainQueue(),
       });
 
-    const storagePath = await this.storage.upload(file, abortSignal);
+    let storagePath: string | null;
+    try {
+      storagePath = await runStorageUploadWithTimeout(
+        this.storage.upload(file, abortSignal),
+        UploadAttachPipelineService.UPLOAD_PHASE_TIMEOUT_MS,
+        'Upload timed out. Please retry.',
+        () => ctx.abortJobRequest(jobId),
+      );
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Storage upload failed.';
+      ctx.failJob(jobId, 'uploading', message);
+      return null;
+    }
+
     if (!storagePath) {
       console.error('[attach-pipeline] ✗ storage upload returned null');
       ctx.failJob(jobId, 'uploading', 'Storage upload failed.');

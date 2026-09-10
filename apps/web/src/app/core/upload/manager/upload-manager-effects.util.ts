@@ -2,7 +2,7 @@ export interface UploadManagerEffectsDeps<UserLike> {
   createEffect: (runner: () => void) => void;
   getUser: () => UserLike | null | undefined;
   hasRunning: () => boolean;
-  cancelAllActive: () => void;
+  cancelAllActive: () => Promise<void>;
   isBusy: () => boolean;
   addBeforeUnloadListener: (handler: (event: BeforeUnloadEvent) => void) => void;
   removeBeforeUnloadListener: (handler: (event: BeforeUnloadEvent) => void) => void;
@@ -15,7 +15,9 @@ export function registerUploadManagerEffects<UserLike>(
   deps.createEffect(() => {
     const user = deps.getUser();
     if (!user && deps.hasRunning()) {
-      deps.cancelAllActive();
+      void deps.cancelAllActive().catch((err) => {
+        console.error('[upload-manager] sign-out residue cleanup failed after session cleared:', err);
+      });
     }
   });
 

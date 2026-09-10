@@ -17,6 +17,9 @@ export class MediaItemUploadOverlayComponent {
 
   readonly progressPercent = computed(() => {
     const raw = this.overlay()?.progress ?? 0;
+    if (!Number.isFinite(raw)) {
+      return 0;
+    }
     return Math.max(0, Math.min(100, raw));
   });
 }

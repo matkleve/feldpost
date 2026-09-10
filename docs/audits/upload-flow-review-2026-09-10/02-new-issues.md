@@ -45,6 +45,31 @@ So the same defect class the previous audit closed twice already survives in two
 
 ---
 
+## Integration status (branch `cursor/upload-fixes-integration-3be6`, 2026-09-10)
+
+Merged `cursor/upload-pipeline-integrity-3be6`, `cursor/upload-branch-c-resolution-3be6`, and `cursor/upload-panel-tray-ui-3be6` onto `cursor/upload-flow-review-3be6`, then closed cross-boundary items NF-11 (core gate), NF-13 (UI label consumption), and NF-18 (street-centroid core path). Evidence rows above are unchanged; this table records outcome only.
+
+| ID | Status | Notes |
+| --- | --- | --- |
+| **NF-01** | **fixed** | Migration `20260910120000_retire_dedup_hashes_for_media_item.sql` + replace-pipeline hash retirement. **Migration unverified** — no DB in agent environment. |
+| **NF-02** | **fixed** | Replace cancel restores `oldStoragePath` instead of leaving a broken row. |
+| **NF-03** | **fixed** | Sign-out guard runs cancel-residue **before** session loss (`upload-sign-out-guard.util.ts`). |
+| **NF-04** | **fixed** | In-flight dedup registry blocks duplicate submits within the concurrency window. |
+| **NF-05** | **fixed** | Attach/replace upload paths now race storage against 180 s timeout. |
+| **NF-06** | **fixed** | Attach dedup-hash insert logs rejection via shared postwrite helper. |
+| **NF-07** | **fixed** | Replace old-object removal is awaited with error handling. |
+| **NF-08** | **fixed** | HEIC→JPEG re-validated against 25 MiB before swap. |
+| **NF-09** | **fixed** | HEIC conversion registered in singleflight map before decode starts. |
+| **NF-10** | **fixed** | Attach HEIC path uses shared `upload-heic-prepare.util.ts` with actionable errors. |
+| **NF-11** | **fixed** | UI prunes dead jobs in chip list and Continue gate; core `areAllJobsReadyForTrayResolution` now prunes non-`awaiting_disambiguation` jobs (integration reconciliation). |
+| **NF-12** | **open (documented)** | Text-answer path still bypasses file-prepare readiness gate by design — documented in `upload-resolver-tray.stepper-fsm.supplement.md` § Tray Continue gate — text answer exception. Not converted to a hard gate. |
+| **NF-13** | **fixed** | Containment option `labelKey`/`labelParams` flow through tray producer and resolve via `t()` in the tray component (integration reconciliation). |
+| **NF-14** | **fixed** | Branch C spec/open-gap table synced; G2/G3 marked implemented. |
+| **NF-15** | **open (annotated)** | `context_distance` union member retained with comment — reserved for unbuilt C5 tray; sole reader in tray helpers unchanged. |
+| **NF-16** | **fixed** | Stale `project_address_*` type comment removed. |
+
+---
+
 ## 3. The three that matter most
 
 ### NF-01 — replace poisons the dedup index against the file it replaced

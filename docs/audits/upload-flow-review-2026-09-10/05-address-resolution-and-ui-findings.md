@@ -78,3 +78,35 @@ So the trust problem in address resolution is not "specs describe things that we
 | The row's overlay button is not a button-in-button — the menu and thumbnail are excluded by `pointer-events` layering | `…/upload-panel-item.component.scss:131-149` |
 | Session location override behaves per spec on five of its six rows (the sixth is NF-30) | `…/upload-panel-signals.service.ts:100-127` |
 | All intake handlers pass `locationRequirementMode` on submit | `…/upload-panel-input-handlers.ts:52-76,146,178` |
+
+---
+
+## Integration status (branch `cursor/upload-fixes-integration-3be6`, 2026-09-10)
+
+Merged the three fix branches and closed cross-boundary items NF-18 (street-centroid core path), NF-11 (core tray gate pruning), and NF-13 (containment label i18n wiring). Evidence rows above are unchanged.
+
+| ID | Status | Notes |
+| --- | --- | --- |
+| **NF-17** | **fixed** | Ask later calls `isolateJobFromGroup` when group payload is present. |
+| **NF-18** | **fixed** | UI calls `applyTrayHouseSelection(groupId, null, true)`; core now resolves street centroid via `applyCandidateToGroup` instead of `deferGroup` (integration reconciliation). |
+| **NF-19** | **fixed** | `address_deferred` rows offer placement/recovery actions via row-action registry. |
+| **NF-20** | **fixed** | CITY-01 uses EXIF reverse-geocoded city name comparison, not haversine-only. |
+| **NF-21** | **fixed** | CITY-01 tray injects EXIF-implied city as second option when Photon returns one hit. |
+| **NF-22** | **fixed** | Project-select dialog uses `t('upload.projectSelect.confirm')` with proper diacritics. |
+| **NF-23** | **fixed** | Tray `source-none` writes `missing_gps`; `address_deferred` remains for genuine tray deferral (`deferGroup`). Combination verified coherent (integration check). |
+| **NF-24** | **fixed** | Consequence of NF-20 fix — wrong city no longer auto-skips city step via distance-only test. |
+| **NF-25** | **fixed** | Row actions driven by `upload-panel-row-action-registry.ts`. |
+| **NF-26** | **fixed** | Single loading indicator owner on active row (overlay OR spinner, not both). |
+| **NF-27** | **fixed** | Overlay status uses i18n-backed accessible label; duplicate raw label removed. |
+| **NF-28** | **fixed** | Modal focus trap + restore on duplicate dialog and location editor. |
+| **NF-29** | **fixed** | Location editor close button uses upload-specific aria key. |
+| **NF-30** | **fixed** | Location-mode override requires exactly one selected project filter. |
+| **NF-31** | **fixed** | Address-search debounce timer cleared on panel destroy. |
+| **NF-32** | **fixed** | Affected-media chip list prunes vanished jobs (UI); core gate also prunes (NF-11). |
+| **NF-33** | **fixed** | Hardcoded strings registered in i18n CSV. |
+| **NF-34** | **fixed** | NaN progress clamped to 0 in upload overlay. |
+| **NF-35** | **fixed** | `confirmTrayCity` street fallback uses full SO street, not first token. |
+| **NF-36** | **fixed** | Unit tests for `shouldForceBranchCCityTray`. |
+| **NF-37** | **partial** | Component-scoped tray FSM (`upload-resolver-tray-state.ts`) added; subsystem-wide `UploadPhase` transition map (UP-11) explicitly out of scope. |
+
+---

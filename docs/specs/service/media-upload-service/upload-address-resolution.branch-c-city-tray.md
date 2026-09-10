@@ -19,4 +19,4 @@ Implementation MUST reference row IDs in code comments (`@see` this file).
 
 ## Acceptance
 
-- [ ] Neustiftgasse folder + Wien EXIF: user sees city/disambiguation before source tray when CITY-01 applies.
+- [x] Neustiftgasse folder + Wien EXIF: user sees city/disambiguation before source tray when CITY-01 applies — `shouldForceBranchCCityTray` compares normalized EXIF reverse-geocode city vs `autoCandidate.city`; `buildBranchCCity01Candidates` injects both cities; vitest `upload-location-resolution.helpers.spec.ts` § `shouldForceBranchCCityTray (CITY-01)`.

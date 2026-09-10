@@ -1068,6 +1068,16 @@ upload.panel.subtitle,You can upload things here.,apps/web/src/app/features/uplo
 upload.panel.lane.uploading,Queue,apps/web/src/app/features/upload/upload-panel.component.ts computed:laneSwitchOptions option label/title/aria base,Queue,Warteschlange,Coda
 upload.panel.lane.uploaded,Uploaded,apps/web/src/app/features/upload/upload-panel.component.ts computed:laneSwitchOptions option label/title/aria base,Uploaded,Hochgeladen,Caricato
 upload.panel.lane.issues,Issues,apps/web/src/app/features/upload/upload-panel.component.ts computed:laneSwitchOptions option label/title/aria base,Issues,Probleme,Problemi
+upload.panel.queue.aria,Upload queue,aria label for upload panel file list,Upload queue,Upload-Warteschlange,Coda caricamento
+upload.panel.scanning.status,Scanning... {count} file{suffix} found,upload panel batch scanning status line,Scanning... {count} file{suffix} found,Scanne… {count} Datei{suffix} gefunden,Scansione… {count} file{suffix} trovati
+upload.item.fileName.aria,File name,aria label for upload row file name,File name,Dateiname,Nome file
+upload.item.rowAction.placeOnMap,Place {name} on map,upload row main action when placement needed,Place {name} on map,{name} auf der Karte platzieren,Posiziona {name} sulla mappa
+upload.item.rowAction.openInWorkspace,Open {name} in workspace,upload row main action to open workspace detail,Open {name} in workspace,{name} im Arbeitsbereich öffnen,Apri {name} nell'area di lavoro
+upload.item.rowAction.zoomToJob,Zoom map to {name},upload row main action to zoom map,Zoom map to {name},Karte auf {name} zoomen,Zoom mappa su {name}
+upload.item.download.failed,Download failed.,toast when uploaded file download fails,Download failed.,Download fehlgeschlagen.,Download non riuscito.
+upload.projectSelect.confirm,Select,upload panel project assignment dialog confirm button,Select,Auswählen,Seleziona
+upload.projectSelect.cancel,Cancel,upload panel project assignment dialog cancel button,Cancel,Abbrechen,Annulla
+upload.location.editor.close,Close location editor,upload panel location editor close button aria label,Close location editor,Standorteditor schließen,Chiudi editor posizione
 upload.item.menu.uploading.viewProgress,View progress,apps/web/src/app/features/upload/upload-panel-item.component.ts actionLabel menu item,View progress,Fortschritt anzeigen,Visualizza avanzamento
 upload.item.menu.uploading.viewFileDetails,View file details,apps/web/src/app/features/upload/upload-panel-item.component.ts actionLabel menu item,View file details,Dateidetails anzeigen,Visualizza dettagli file
 upload.item.menu.openInMedia,Open in /media,apps/web/src/app/features/upload/upload-panel-item.component.ts actionLabel menu item,Open in /media,In /media öffnen,Apri in /media
@@ -1116,6 +1126,8 @@ project.location.picker.aria,Project locations,apps/web/src/app/features/project
 upload.resolver.question.door,What's the door number for {street}?,apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:resolverQuestion,What's the door number for {street}?,Welche Türnummer hat {street}?,Qual è il numero civico di {street}?
 upload.resolver.question.adminLevelConflict,Folder levels disagree on region or city. Which value should we use?,apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:resolverQuestion,Folder levels disagree on region or city. Which value should we use?,Ordner-Ebenen widersprechen sich bei Region oder Stadt. Welchen Wert sollen wir verwenden?,I livelli delle cartelle non concordano su regione o città. Quale valore usare?
 upload.resolver.question.containmentCheck,{street} was not found in {city}. Is this address correct?,apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:resolverQuestion,Containment-check tray after Photon 0-hit,{street} was not found in {city}. Is this address correct?,{street} wurde in {city} nicht gefunden. Ist diese Adresse korrekt?,{street} non è stato trovato in {city}. Questo indirizzo è corretto?
+upload.resolver.containment.option.keep,Keep: {street}, {city},apps/web/src/app/core/upload/location/upload-location-geocode-outcome.util.ts patchContainmentCheckOutcome,Containment-check tray — confirm resolved address despite Photon 0-hit,Keep: {street}, {city},Behalten: {street}, {city},Mantieni: {street}, {city}
+upload.resolver.containment.option.enterDifferent,Enter a different address,apps/web/src/app/core/upload/location/upload-location-geocode-outcome.util.ts patchContainmentCheckOutcome,Containment-check tray — open text fallback for new address,Enter a different address,Andere Adresse eingeben,Inserisci un indirizzo diverso
 upload.resolver.question.layerPackage,Which address information should we use?,apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:resolverQuestion,Which address information should we use?,Welche Adressinformationen sollen wir verwenden?,Quali informazioni sull'indirizzo dobbiamo usare?
 upload.resolver.question.source,Photo GPS is far from the folder address ({distance}). Which location should we use?,apps/web/src/app/features/upload/upload-resolver-tray.component.ts method:resolverQuestion,Photo GPS is far from the folder address ({distance}). Which location should we use?,Foto-GPS liegt weit von der Ordneradresse entfernt ({distance}). Welchen Standort sollen wir verwenden?,Il GPS della foto è lontano dall'indirizzo della cartella ({distance}). Quale posizione usare?
 upload.resolver.folder.parsed,Parsed from folder: {address},apps/web/src/app/features/upload/upload-resolver-tray.component.ts computed:folderParsedSubtitle,Parsed from folder: {address},Aus Ordner gelesen: {address},Letto dalla cartella: {address}
@@ -1561,4 +1573,14 @@ workspace.imageDetail.section.addressNotes,Address fragments,media detail sectio
 workspace.imageDetail.section.addressNotes.aria,Unresolved address fragments,aria label for address notes evidence section in media detail,Unresolved address fragments,Nicht auflösbare Adressfragmente,Frammenti di indirizzo non risolti
 workspace.imageDetail.locationMismatch,GPS and address diverge by,media detail mismatch indicator label prefix (followed by metres value),GPS and address diverge by,GPS und Adresse weichen ab um,GPS e indirizzo divergono di
 workspace.capturedDate.action.removeTime,Remove time,button label at the bottom of the time-field wheel picker; one-click destructive action that clears the selected time value,Remove time,Uhrzeit entfernen,Rimuovi orario
+upload.panel.queue.aria,Upload queue,aria label for upload panel file list,Upload queue,Upload-Warteschlange,Coda caricamento
+upload.panel.scanning.status,Scanning... {count} file{suffix} found,upload panel batch scanning status line,Scanning... {count} file{suffix} found,Scanne… {count} Datei{suffix} gefunden,Scansione… {count} file{suffix} trovati
+upload.item.fileName.aria,File name,aria label for upload row file name,File name,Dateiname,Nome file
+upload.item.rowAction.placeOnMap,Place {name} on map,upload row main action when placement needed,Place {name} on map,{name} auf der Karte platzieren,Posiziona {name} sulla mappa
+upload.item.rowAction.openInWorkspace,Open {name} in workspace,upload row main action to open workspace detail,Open {name} in workspace,{name} im Arbeitsbereich öffnen,Apri {name} nell'area di lavoro
+upload.item.rowAction.zoomToJob,Zoom map to {name},upload row main action to zoom map,Zoom map to {name},Karte auf {name} zoomen,Zoom mappa su {name}
+upload.item.download.failed,Download failed.,toast when uploaded file download fails,Download failed.,Download fehlgeschlagen.,Download non riuscito.
+upload.projectSelect.confirm,Select,upload panel project assignment dialog confirm button,Select,Auswählen,Seleziona
+upload.projectSelect.cancel,Cancel,upload panel project assignment dialog cancel button,Cancel,Abbrechen,Annulla
+upload.location.editor.close,Close location editor,upload panel location editor close button aria label,Close location editor,Standorteditor schließen,Chiudi editor posizione
 "

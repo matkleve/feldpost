@@ -309,6 +309,8 @@ function candidatesToOptions(
     return candidates.map((c) => ({
       id: c.id,
       label: c.addressLabel,
+      labelKey: c.labelKey,
+      labelParams: c.labelParams,
       lat: c.lat,
       lng: c.lng,
       city: c.city,
@@ -341,6 +343,8 @@ function candidatesToOptions(
   return candidates.map((c) => ({
     id: c.id,
     label: c.addressLabel,
+    labelKey: c.labelKey,
+    labelParams: c.labelParams,
     lat: c.lat,
     lng: c.lng,
     score: c.score,

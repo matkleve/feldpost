@@ -50,7 +50,10 @@ export interface UploadManagerActionsDeps {
    * both — either may be absent depending on the phase it was cancelled in).
    * @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-04
    */
-  removeUploadResidue: (storagePath: string | undefined, mediaId: string | undefined) => Promise<void>;
+  removeUploadResidue: (
+    storagePath: string | undefined,
+    mediaId: string | undefined,
+  ) => Promise<{ errors: string[] }>;
   drainQueue: () => void;
 }
 
@@ -105,7 +108,10 @@ export async function cancelUploadManagerJob(
   deps.drainQueue();
 
   if (job.storagePath || job.mediaId) {
-    await deps.removeUploadResidue(job.storagePath, job.mediaId);
+    const { errors } = await deps.removeUploadResidue(job.storagePath, job.mediaId);
+    if (errors.length > 0) {
+      console.error('[upload-manager] cancel residue cleanup failed:', errors);
+    }
   }
 }
 

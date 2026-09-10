@@ -138,8 +138,8 @@ export class UploadManagerPipelineHostService {
     });
   }
 
-  cancelAllActive(): void {
-    void cancelAllActiveUploads({
+  async cancelAllActive(): Promise<void> {
+    await cancelAllActiveUploads({
       snapshotJobs: () => this.jobState.snapshot(),
       isTerminalPhase: (phase) => TERMINAL_PHASES.has(phase),
       abortJobRequest: (jobId) => {

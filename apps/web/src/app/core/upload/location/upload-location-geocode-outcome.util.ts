@@ -16,6 +16,15 @@ import {
 } from '../address-resolution/upload-address-resolution.debug';
 import type { UploadAddressCandidate } from '../upload-manager.types';
 
+/** Containment-check tray option ids — stable across core and UI. */
+export const CONTAINMENT_CHECK_KEEP_CANDIDATE_ID = 'keep-address';
+export const CONTAINMENT_CHECK_ENTER_DIFFERENT_CANDIDATE_ID = 'enter-different';
+
+/** i18n keys for containment-check option labels (fallback in addressLabel). */
+export const CONTAINMENT_CHECK_KEEP_LABEL_KEY = 'upload.resolver.containment.option.keep';
+export const CONTAINMENT_CHECK_ENTER_DIFFERENT_LABEL_KEY =
+  'upload.resolver.containment.option.enterDifferent';
+
 export function patchAmbiguousGeocodeOutcome(
   orchestrator: UploadAddressResolutionOrchestrator,
   batchId: string,
@@ -96,14 +105,17 @@ export function patchContainmentCheckOutcome(
     containmentCheck: true,
     candidates: [
       {
-        id: 'keep-address',
+        id: CONTAINMENT_CHECK_KEEP_CANDIDATE_ID,
         addressLabel: `Keep: ${street}, ${city}`.trim(),
+        labelKey: CONTAINMENT_CHECK_KEEP_LABEL_KEY,
+        labelParams: { street, city },
         lat: 0,
         lng: 0,
       },
       {
-        id: 'enter-different',
+        id: CONTAINMENT_CHECK_ENTER_DIFFERENT_CANDIDATE_ID,
         addressLabel: 'Enter a different address',
+        labelKey: CONTAINMENT_CHECK_ENTER_DIFFERENT_LABEL_KEY,
         lat: 0,
         lng: 0,
       },

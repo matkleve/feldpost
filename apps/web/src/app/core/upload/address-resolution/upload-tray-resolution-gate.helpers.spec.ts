@@ -46,13 +46,30 @@ describe('upload-tray-resolution-gate.helpers', () => {
     ).toBe(true);
   });
 
-  it('areAllJobsReadyForTrayResolution is false when any job is not ready', () => {
+  it('areAllJobsReadyForTrayResolution is false when any live job is not ready', () => {
     const jobs = new Map([
       ['a', job({ id: 'a', phase: 'awaiting_disambiguation' })],
-      ['b', job({ id: 'b', phase: 'parsing_exif' })],
+      [
+        'b',
+        job({
+          id: 'b',
+          phase: 'awaiting_disambiguation',
+          file: new File([], 'x.heic', { type: 'image/heic' }),
+        }),
+      ],
     ]);
     expect(
       areAllJobsReadyForTrayResolution(['a', 'b'], (id) => jobs.get(id), isHeic),
     ).toBe(false);
+  });
+
+  it('NF-11: prunes dead jobs so one cancelled job does not block the tray gate', () => {
+    const jobs = new Map([
+      ['a', job({ id: 'a', phase: 'awaiting_disambiguation' })],
+      ['b', job({ id: 'b', phase: 'missing_data' })],
+    ]);
+    expect(
+      areAllJobsReadyForTrayResolution(['a', 'b'], (id) => jobs.get(id), isHeic),
+    ).toBe(true);
   });
 });

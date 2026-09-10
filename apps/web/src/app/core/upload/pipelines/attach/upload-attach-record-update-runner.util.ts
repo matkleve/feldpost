@@ -114,9 +114,7 @@ export async function runAttachRecordUpdate(
     },
     onFail: (_phase, error) => failJob('replacing_record', error),
     onCancelled,
-    insertDedupHash: async (payload) => {
-      await supabaseClient.from('dedup_hashes').insert(payload);
-    },
+    insertDedupHash: (payload) => supabaseClient.from('dedup_hashes').insert(payload),
     logInfo: (...logArgs) => logInfo(...logArgs),
     logError: (...logArgs) => logError(...logArgs),
   });
