@@ -60,6 +60,8 @@
 
 ### `<app-group-tab-bar>` — Group Tab Bar
 
+> **Stale:** Gone from `apps/web/src` (verified 2026-09-10) — do not reach for it. Entry kept pending an owner decision to delete it or restore the component.
+
 - **File**: `apps/web/src/app/shared/workspace-pane/chrome/group-tab-bar.component.ts`
 - **Purpose**: Horizontal tab bar for switching between workspace pane content areas (e.g. selected items vs. detail).
 - **Spec**: [`docs/specs/component/workspace/group-tab-bar.md`](workspace/group-tab-bar.md)
@@ -125,6 +127,8 @@
 
 ### `<app-sorting-controls>` — Sorting Controls
 
+> **Stale:** Gone from `apps/web/src` (verified 2026-09-10) — do not reach for it. Entry kept pending an owner decision to delete it or restore the component.
+
 - **File**: `apps/web/src/app/shared/workspace-pane/toolbar/sorting-controls.component.ts`
 - **Purpose**: Sort direction toggle buttons (date-desc, date-asc, distance, name) within the workspace toolbar.
 - **Spec**: [`docs/specs/component/workspace/sorting-controls.md`](workspace/sorting-controls.md)
@@ -188,6 +192,8 @@
 
 ### `<app-editable-property-row>` — Editable Property Row
 
+> **Stale:** Gone from `apps/web/src` (verified 2026-09-10) — do not reach for it. Entry kept pending an owner decision to delete it or restore the component.
+
 - **File**: `apps/web/src/app/shared/workspace-pane/media-detail/editable-property-row.component.ts`
 - **Purpose**: Inline-editable key/value row; switches between display and edit mode.
 - **Spec**: [`docs/specs/component/workspace/editable-property-row.md`](workspace/editable-property-row.md)
@@ -214,6 +220,24 @@
 
 ---
 
+### `<app-calendar-picker-panel>` — Calendar Picker Panel
+
+- **File**: `apps/web/src/app/shared/calendar-dropdown/calendar-picker-panel.component.ts`
+- **Purpose**: Month-grid body portaled by `app-calendar-dropdown`: single or range pick, dual-month range view, disabled-day and min/max handling.
+- **Not for**: Mounting directly — the field, portal, and commit semantics belong to `app-calendar-dropdown`.
+- **Spec**: [`docs/specs/component/filters/calendar-picker-panel.md`](filters/calendar-picker-panel.md)
+- **Variant axes**:
+  | Input | Type | Values | Visual effect |
+  |---|---|---|---|
+  | `pickMode` | `'single' \| 'range'` | `single`, `range` | One month grid vs. dual-month range grid |
+  | `anchorTarget` | `RangeAnchorTarget` | `from`, `to` | Which end of the range the next click sets |
+  | `timeMode` | `TimeMode` | `dateOnly`, `optionalTime`, `requiredTime` | Time row visibility |
+- **Other inputs**: `draft`, `rangeDraft`, `viewAnchorDate`, `minDate`, `maxDate`, `disabledDates`, `nullable`
+- **Used in**: `app-calendar-dropdown` (portal body)
+- **Gaps**: none
+
+---
+
 ### `<app-time-field-control>` — Time Field Control
 
 - **File**: `apps/web/src/app/shared/time-field-control/time-field-control.component.ts`
@@ -227,6 +251,8 @@
 ---
 
 ### `<app-captured-date-editor>` — Captured Date Editor *(legacy)*
+
+> **Stale:** Gone from `apps/web/src` (verified 2026-09-10) — do not reach for it. Entry kept pending an owner decision to delete it or restore the component.
 
 - **File**: `apps/web/src/app/shared/workspace-pane/media-detail/captured-date-editor.component.ts`
 - **Purpose**: Inline date+time editor for the image capture timestamp.
@@ -248,6 +274,57 @@
 - **Composed of**: standalone
 - **Used in**: `app-media-location-add-search`
 - **Gaps**: none
+
+---
+
+### `<app-media-detail-location-section>` — Media Detail Location Section
+
+- **File**: `apps/web/src/app/shared/workspace-pane/media-detail/media-detail-location-section/media-detail-location-section.component.ts`
+- **Purpose**: Multi-address Location block in media detail: add/search row, optional list filter, scrollable saved-location list.
+- **Not for**: Persisting anything — presentational only; all writes go through the parent view and `MediaLocationsService`.
+- **Spec**: [`docs/specs/ui/media-detail/media-detail-location-section.md`](../ui/media-detail/media-detail-location-section.md)
+- **Other inputs**: `media` (required), `locations`, `saving`
+- **Outputs**: `addFromText`, `addFromGeocode`, `locationLinked`, `replace*`, `rowSaveRequested`, `rowDeleteRequested`, `mapPickRequested`, `showOnMapRequested`, `copyFieldRequested`
+- **Composed of**: `app-media-location-add-search`, `app-media-location-row`
+- **Used in**: `app-media-detail-view`
+- **Gaps**: none
+
+---
+
+### `<app-media-location-add-search>` — Media Location Add Search
+
+- **File**: `apps/web/src/app/shared/workspace-pane/media-detail/media-location-add-search/media-location-add-search.component.ts`
+- **Purpose**: Collapsed “Add or search address” row that expands into the four-zone dropdown (org recent/results, other media, Internet).
+- **Spec**: [`docs/specs/ui/media-detail/media-detail-location-section.md`](../ui/media-detail/media-detail-location-section.md)
+- **Composed of**: `app-dropdown-shell`, `app-location-picker-row`
+- **Used in**: `app-media-detail-location-section`
+- **Gaps**: none
+
+---
+
+### `<app-media-location-row>` — Media Location Row
+
+- **File**: `apps/web/src/app/shared/workspace-pane/media-detail/media-location-row/media-location-row.component.ts`
+- **Purpose**: One saved location in media detail: read line, inline field editing, and the edit / show-on-map / overflow / delete action slots.
+- **Spec**: [`docs/specs/ui/media-detail/media-detail-location-section.md`](../ui/media-detail/media-detail-location-section.md)
+- **Other inputs**: `location` (required), `saving`
+- **Outputs**: `editRequested`, `saveRequested`, `editCancelled`, `deleteRequested`, `mapPickRequested`, `showOnMapRequested`, `changeAddressRequested`, `copyFieldRequested`
+- **Composed of**: `app-dropdown-shell`, `app-confirm-dialog`, `app-inline-confirm-action`
+- **Used in**: `app-media-detail-location-section`
+- **Gaps**: none
+
+---
+
+### `<app-coordinates-field-editor>` — Coordinates Field Editor
+
+- **File**: `apps/web/src/app/shared/workspace-pane/media-detail/coordinates-field-editor/coordinates-field-editor.component.ts`
+- **Purpose**: Inline `lat, lng` edit row for a media detail location.
+- **Not for**: New work — the component has no callsite in `apps/web/src`; it is kept for reference per `apps/web/src/app/archive/media-detail-location-single/README.md`.
+- **Spec**: [`docs/specs/ui/media-detail/media-detail-location-section.md`](../ui/media-detail/media-detail-location-section.md)
+- **Other inputs**: `icon`, `isCorrected`, `initialValue`
+- **Outputs**: `saveRequested`, `cancelRequested`
+- **Used in**: nothing (verified 2026-09-10)
+- **Gaps**: unwired since the location section moved to multi-address rows
 
 ---
 
@@ -384,6 +461,36 @@
 - **Variant axes**: none (layout driven by active `ItemDisplayMode`)
 - **Composed of**: `app-item-grid`, `app-media-item`, `app-group-header`, `app-project-select-dialog`, `app-confirm-dialog`
 - **Used in**: `app-workspace-pane`
+- **Gaps**: none
+
+---
+
+## Workspace Pane — Projects Tab
+
+### `<app-workspace-projects-panel>` — Workspace Projects Panel
+
+- **File**: `apps/web/src/app/shared/workspace-pane/projects-panel/workspace-projects-panel.component.ts`
+- **Purpose**: Compact project manager in the workspace pane Projects tab; list, single-project detail, and inline new-project draft.
+- **Spec**: [`docs/specs/ui/workspace/workspace-pane-projects-tab.md`](../ui/workspace/workspace-pane-projects-tab.md)
+- **Variant axes**:
+  | Input | Type | Values | Visual effect |
+  |---|---|---|---|
+  | internal panel state | signal | `list`, `detail`, `new-draft` | Which body the panel renders |
+- **Composed of**: `app-workspace-projects-toolbar`, `app-item-grid`, `app-project-item`, `app-project-color-picker`, `app-dropdown-shell`
+- **Used in**: `app-workspace-pane`
+- **Gaps**: none
+
+---
+
+### `<app-workspace-projects-toolbar>` — Workspace Projects Toolbar
+
+- **File**: `apps/web/src/app/shared/workspace-pane/projects-panel/workspace-projects-toolbar.component.ts`
+- **Purpose**: Search field, archived toggle, and card-variant toggle above the workspace projects list.
+- **Spec**: [`docs/specs/component/workspace/pane-toolbar.md`](workspace/pane-toolbar.md)
+- **Other inputs**: `searchTerm`, `showArchived`, `cardVariant`
+- **Outputs**: `searchTermChange`, `showArchivedChange`, `cardVariantChange`
+- **Composed of**: `[hlmToggleGroup]` card-variant toggle, `hlmBtn`
+- **Used in**: `app-workspace-projects-panel`
 - **Gaps**: none
 
 ---

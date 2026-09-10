@@ -59,13 +59,15 @@ function renderBullet(label, value, boldColon = false) {
   return value.startsWith("\n") || value === "" ? `${head}${value}` : `${head} ${value}`;
 }
 
+/** A non-active entry's "not for" guidance is its status line; a live entry renders it as a bullet. */
+const STATUS_NOTE_LABEL = { deprecated: "Status", stale: "Stale" };
+
 function renderEntry(entry, entryLevel) {
   const out = [`${"#".repeat(entryLevel)} ${renderEntryHeading(entry)}`, ""];
 
-  // A deprecated entry's "not for" guidance is its status line: the component is
-  // gone and the replacement is named. Live entries render it as its own bullet.
-  const statusNote = entry.status !== "active" && entry.notFor;
-  if (statusNote) out.push(`> **Status:** ${entry.notFor}`, "");
+  const statusLabel = STATUS_NOTE_LABEL[entry.status];
+  const statusNote = statusLabel && entry.notFor;
+  if (statusNote) out.push(`> **${statusLabel}:** ${entry.notFor}`, "");
 
   const bullets = [];
   if (entry.path) {

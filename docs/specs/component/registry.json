@@ -97,6 +97,11 @@
           "id": "workspace-pane-media-detail",
           "heading": "Workspace Pane — Media Detail",
           "level": 2
+        },
+        {
+          "id": "workspace-pane-projects-tab",
+          "heading": "Workspace Pane — Projects Tab",
+          "level": 2
         }
       ]
     },
@@ -197,6 +202,36 @@
     {
       "slice": "primitives-and-layout",
       "section": "page-rail-composition",
+      "selector": "app-page-grid",
+      "name": "Page Grid",
+      "status": "active",
+      "path": "apps/web/src/app/shared/page-grid/page-grid.component.ts",
+      "spec": "docs/specs/component/page-rail/page-rail.md",
+      "specId": "component/page-rail/page-rail",
+      "useFor": "Centered page shell: fixed 52rem center column with `[pageGridLeft]` / `[pageGridRight]` rails in the outer gutters.",
+      "notFor": null,
+      "fields": [
+        {
+          "label": "Variant axes",
+          "value": "\n  | Input | Type | Values | Visual effect |\n  |---|---|---|---|\n  | `leftRail` | `boolean` | `true` (default), `false` | Mounts the left gutter column |\n  | `rightRailOpen` | `boolean` | `false` (default), `true` | Mounts the right gutter column |\n  | `centerExpanded` | `boolean` | `false` (default), `true` | Center spans columns 2–3 when the right rail is closed |\n  | `flushBottom` | `boolean` | `false` (default), `true` | Removes the bottom inset for full-height panes |"
+        },
+        {
+          "label": "Composed of",
+          "value": "standalone (`ng-content` per rail slot)"
+        },
+        {
+          "label": "Used in",
+          "value": "`media.component`, `projects-page`, `colleagues-page`, `organization-page`"
+        },
+        {
+          "label": "Gaps",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "slice": "primitives-and-layout",
+      "section": "page-rail-composition",
       "selector": "app-page-rail",
       "name": "Page Rail Shell",
       "status": "active",
@@ -209,6 +244,28 @@
         {
           "label": "Slots",
           "value": "`pageRailTitle`, `pageRailNav`, `pageRailSearch`, `pageRailToolbar`, `pageRailBody`, `pageRailFooter`"
+        },
+        {
+          "label": "Used in",
+          "value": "`projects-sidebar`, `member-list`, `organization-sidebar`"
+        }
+      ]
+    },
+    {
+      "slice": "primitives-and-layout",
+      "section": "page-rail-composition",
+      "selector": "app-page-rail-title",
+      "name": "Page Rail Title",
+      "status": "active",
+      "path": "apps/web/src/app/shared/page-rail-title/page-rail-title.component.ts",
+      "spec": "docs/specs/component/page-rail/page-rail.md",
+      "specId": "component/page-rail/page-rail",
+      "useFor": "Uppercase rail heading with an optional Material icon; fills the `pageRailTitle` slot.",
+      "notFor": null,
+      "fields": [
+        {
+          "label": "Other inputs",
+          "value": "`title` (required), `icon` (Material ligature)"
         },
         {
           "label": "Used in",
@@ -284,6 +341,32 @@
     {
       "slice": "primitives-and-layout",
       "section": "page-rail-composition",
+      "selector": "app-rail-search-field",
+      "name": "Rail Search Field",
+      "status": "active",
+      "path": "apps/web/src/app/shared/rail-search-field/rail-search-field.component.ts",
+      "spec": "docs/specs/component/page-rail/page-rail.md",
+      "specId": "component/page-rail/page-rail",
+      "useFor": "Bordered search input with magnifier and clear affordance; fills the `pageRailSearch` slot and is reused in chat headers and toolbars.",
+      "notFor": null,
+      "fields": [
+        {
+          "label": "Other inputs",
+          "value": "`value`, `placeholder`, `ariaLabel`"
+        },
+        {
+          "label": "Outputs",
+          "value": "`valueChange`, `submitted` (Enter)"
+        },
+        {
+          "label": "Used in",
+          "value": "`projects-sidebar`, `member-list`, `chat-header`, `channel-detail-panel`"
+        }
+      ]
+    },
+    {
+      "slice": "primitives-and-layout",
+      "section": "page-rail-composition",
       "selector": "app-rail-status",
       "name": "Rail Status",
       "status": "active",
@@ -331,6 +414,40 @@
     {
       "slice": "primitives-and-layout",
       "section": "shared-ui-primitives",
+      "selector": "app-context-action-bar",
+      "name": "Context Action Bar",
+      "status": "active",
+      "path": "apps/web/src/app/shared/context-action-bar/context-action-bar.component.ts",
+      "spec": "docs/specs/component/context-action-bar.md",
+      "specId": "component/context-action-bar",
+      "useFor": "Renders resolved `ActionEngineService` actions as either a compact footer row or a labeled section grid, with two-step confirm on destructive rows.",
+      "notFor": "Building an ad-hoc action row from raw `hlmBtn` elements — the destructive-confirm behaviour lives here.",
+      "fields": [
+        {
+          "label": "Variant axes",
+          "value": "\n  | Input | Type | Values | Visual effect |\n  |---|---|---|---|\n  | `variant` | `ContextActionBarVariant` | `footer`, `section` | Horizontal icon buttons vs. two-column labeled grid |"
+        },
+        {
+          "label": "Other inputs",
+          "value": "`actions: ResolvedAction[]`, `pending: boolean`"
+        },
+        {
+          "label": "Outputs",
+          "value": "`actionSelected`"
+        },
+        {
+          "label": "Used in",
+          "value": "`app-detail-actions`, workspace selection footer"
+        },
+        {
+          "label": "Gaps",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "slice": "primitives-and-layout",
+      "section": "shared-ui-primitives",
       "selector": "select[hlmSelect]",
       "name": "Native Select (spartan-style CVA)",
       "status": "active",
@@ -357,6 +474,66 @@
         {
           "label": "Gaps",
           "value": "overlay combobox (`BrnSelect`) not covered here"
+        }
+      ]
+    },
+    {
+      "slice": "primitives-and-layout",
+      "section": "shared-ui-primitives",
+      "selector": "hlm-form-field",
+      "name": "Form Field (spartan-style CVA)",
+      "status": "active",
+      "path": "apps/web/src/app/shared/ui/form-field/hlm-form-field.component.ts",
+      "spec": null,
+      "specId": null,
+      "useFor": "Wraps label + control + optional hint/error in one vertical rhythm.",
+      "notFor": null,
+      "fields": [
+        {
+          "label": "Other inputs",
+          "value": "`class` (merged via `twMerge`)"
+        },
+        {
+          "label": "Composed of",
+          "value": "local CVA (`formFieldVariants`) mirroring the spartan hlm API"
+        },
+        {
+          "label": "Used in",
+          "value": "auth pages, invite editor, member detail, settings sections"
+        },
+        {
+          "label": "Gaps",
+          "value": "published `@spartan-ng/ui-form-field-helm` swap pending Tailwind v4 releases"
+        }
+      ]
+    },
+    {
+      "slice": "primitives-and-layout",
+      "section": "shared-ui-primitives",
+      "selector": "hlm-spinner",
+      "name": "Spinner (spartan-style CVA)",
+      "status": "active",
+      "path": "apps/web/src/app/shared/ui/spinner/hlm-spinner.component.ts",
+      "spec": null,
+      "specId": null,
+      "useFor": "Decorative loading ring for inline busy affordances.",
+      "notFor": "Announcing progress — the ring is `aria-hidden`; the parent must supply the live status text.",
+      "fields": [
+        {
+          "label": "Variant axes",
+          "value": "\n  | Input | Type | Values | Visual effect |\n  |---|---|---|---|\n  | `size` | `SpinnerSize` | `sm`, `md` (default), `lg` | Ring diameter (0.75 / 1 / 1.25rem) |"
+        },
+        {
+          "label": "Composed of",
+          "value": "local CVA (`spinnerVariants`); no `@spartan-ng/brain/spinner` in the current pin"
+        },
+        {
+          "label": "Used in",
+          "value": "`app-address-search`"
+        },
+        {
+          "label": "Gaps",
+          "value": "published `@spartan-ng/ui-spinner-helm` swap pending Tailwind v4 releases"
         }
       ]
     },
@@ -1412,6 +1589,40 @@
     {
       "slice": "primitives-and-layout",
       "section": "dialogs",
+      "selector": "app-media-picker-dialog",
+      "name": "Media Picker Dialog",
+      "status": "active",
+      "path": "apps/web/src/app/shared/media-picker-dialog/media-picker-dialog.component.ts",
+      "spec": null,
+      "specId": null,
+      "useFor": "Modal media browser for picking one or more existing media items, with the full toolbar stack (search, filter, group, sort, card variant) and range/additive selection.",
+      "notFor": null,
+      "fields": [
+        {
+          "label": "Other inputs",
+          "value": "`excludeMediaIds: readonly string[]`"
+        },
+        {
+          "label": "Outputs",
+          "value": "`confirmed` (selected ids), `cancelled`"
+        },
+        {
+          "label": "Composed of",
+          "value": "`app-media-item`, `app-pane-toolbar`, `app-toolbar-dropdown-stack`, `app-filter-dropdown`, `app-grouping-dropdown`, `app-sort-dropdown`, `app-projects-dropdown`, spartan dialog"
+        },
+        {
+          "label": "Used in",
+          "value": "`app-project-detail-view`"
+        },
+        {
+          "label": "Gaps",
+          "value": "`@no-spec`"
+        }
+      ]
+    },
+    {
+      "slice": "primitives-and-layout",
+      "section": "dialogs",
       "selector": "app-share-link-audience-dialog",
       "name": "Share Link Audience Dialog",
       "status": "active",
@@ -1721,12 +1932,12 @@
       "section": "workspace-pane-chrome",
       "selector": "app-group-tab-bar",
       "name": "Group Tab Bar",
-      "status": "active",
+      "status": "stale",
       "path": "apps/web/src/app/shared/workspace-pane/chrome/group-tab-bar.component.ts",
       "spec": "docs/specs/component/workspace/group-tab-bar.md",
       "specId": "component/workspace/group-tab-bar",
       "useFor": "Horizontal tab bar for switching between workspace pane content areas (e.g. selected items vs. detail).",
-      "notFor": null,
+      "notFor": "Gone from `apps/web/src` (verified 2026-09-10) — do not reach for it. Entry kept pending an owner decision to delete it or restore the component.",
       "fields": [
         {
           "label": "Variant axes",
@@ -1875,12 +2086,12 @@
       "section": "workspace-pane-toolbar",
       "selector": "app-sorting-controls",
       "name": "Sorting Controls",
-      "status": "active",
+      "status": "stale",
       "path": "apps/web/src/app/shared/workspace-pane/toolbar/sorting-controls.component.ts",
       "spec": "docs/specs/component/workspace/sorting-controls.md",
       "specId": "component/workspace/sorting-controls",
       "useFor": "Sort direction toggle buttons (date-desc, date-asc, distance, name) within the workspace toolbar.",
-      "notFor": null,
+      "notFor": "Gone from `apps/web/src` (verified 2026-09-10) — do not reach for it. Entry kept pending an owner decision to delete it or restore the component.",
       "fields": [
         {
           "label": "Variant axes",
@@ -2030,12 +2241,12 @@
       "section": "workspace-pane-media-detail",
       "selector": "app-editable-property-row",
       "name": "Editable Property Row",
-      "status": "active",
+      "status": "stale",
       "path": "apps/web/src/app/shared/workspace-pane/media-detail/editable-property-row.component.ts",
       "spec": "docs/specs/component/workspace/editable-property-row.md",
       "specId": "component/workspace/editable-property-row",
       "useFor": "Inline-editable key/value row; switches between display and edit mode.",
-      "notFor": null,
+      "notFor": "Gone from `apps/web/src` (verified 2026-09-10) — do not reach for it. Entry kept pending an owner decision to delete it or restore the component.",
       "fields": [
         {
           "label": "Variant axes",
@@ -2092,6 +2303,36 @@
     {
       "slice": "workspace-pane",
       "section": "workspace-pane-media-detail",
+      "selector": "app-calendar-picker-panel",
+      "name": "Calendar Picker Panel",
+      "status": "active",
+      "path": "apps/web/src/app/shared/calendar-dropdown/calendar-picker-panel.component.ts",
+      "spec": "docs/specs/component/filters/calendar-picker-panel.md",
+      "specId": "component/filters/calendar-picker-panel",
+      "useFor": "Month-grid body portaled by `app-calendar-dropdown`: single or range pick, dual-month range view, disabled-day and min/max handling.",
+      "notFor": "Mounting directly — the field, portal, and commit semantics belong to `app-calendar-dropdown`.",
+      "fields": [
+        {
+          "label": "Variant axes",
+          "value": "\n  | Input | Type | Values | Visual effect |\n  |---|---|---|---|\n  | `pickMode` | `'single' \\| 'range'` | `single`, `range` | One month grid vs. dual-month range grid |\n  | `anchorTarget` | `RangeAnchorTarget` | `from`, `to` | Which end of the range the next click sets |\n  | `timeMode` | `TimeMode` | `dateOnly`, `optionalTime`, `requiredTime` | Time row visibility |"
+        },
+        {
+          "label": "Other inputs",
+          "value": "`draft`, `rangeDraft`, `viewAnchorDate`, `minDate`, `maxDate`, `disabledDates`, `nullable`"
+        },
+        {
+          "label": "Used in",
+          "value": "`app-calendar-dropdown` (portal body)"
+        },
+        {
+          "label": "Gaps",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "slice": "workspace-pane",
+      "section": "workspace-pane-media-detail",
       "selector": "app-time-field-control",
       "name": "Time Field Control",
       "status": "active",
@@ -2125,12 +2366,12 @@
       "section": "workspace-pane-media-detail",
       "selector": "app-captured-date-editor",
       "name": "Captured Date Editor *(legacy)*",
-      "status": "active",
+      "status": "stale",
       "path": "apps/web/src/app/shared/workspace-pane/media-detail/captured-date-editor.component.ts",
       "spec": "docs/specs/component/filters/captured-date-editor.md",
       "specId": "component/filters/captured-date-editor",
       "useFor": "Inline date+time editor for the image capture timestamp.",
-      "notFor": null,
+      "notFor": "Gone from `apps/web/src` (verified 2026-09-10) — do not reach for it. Entry kept pending an owner decision to delete it or restore the component.",
       "specMarkdown": "[`docs/specs/component/filters/captured-date-editor.md`](filters/captured-date-editor.md) — **superseded by** [`calendar-dropdown.md`](filters/calendar-dropdown.md)",
       "fields": [
         {
@@ -2182,6 +2423,130 @@
         {
           "label": "Gaps",
           "value": "none"
+        }
+      ]
+    },
+    {
+      "slice": "workspace-pane",
+      "section": "workspace-pane-media-detail",
+      "selector": "app-media-detail-location-section",
+      "name": "Media Detail Location Section",
+      "status": "active",
+      "path": "apps/web/src/app/shared/workspace-pane/media-detail/media-detail-location-section/media-detail-location-section.component.ts",
+      "spec": "docs/specs/ui/media-detail/media-detail-location-section.md",
+      "specId": "ui/media-detail/media-detail-location-section",
+      "useFor": "Multi-address Location block in media detail: add/search row, optional list filter, scrollable saved-location list.",
+      "notFor": "Persisting anything — presentational only; all writes go through the parent view and `MediaLocationsService`.",
+      "fields": [
+        {
+          "label": "Other inputs",
+          "value": "`media` (required), `locations`, `saving`"
+        },
+        {
+          "label": "Outputs",
+          "value": "`addFromText`, `addFromGeocode`, `locationLinked`, `replace*`, `rowSaveRequested`, `rowDeleteRequested`, `mapPickRequested`, `showOnMapRequested`, `copyFieldRequested`"
+        },
+        {
+          "label": "Composed of",
+          "value": "`app-media-location-add-search`, `app-media-location-row`"
+        },
+        {
+          "label": "Used in",
+          "value": "`app-media-detail-view`"
+        },
+        {
+          "label": "Gaps",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "slice": "workspace-pane",
+      "section": "workspace-pane-media-detail",
+      "selector": "app-media-location-add-search",
+      "name": "Media Location Add Search",
+      "status": "active",
+      "path": "apps/web/src/app/shared/workspace-pane/media-detail/media-location-add-search/media-location-add-search.component.ts",
+      "spec": "docs/specs/ui/media-detail/media-detail-location-section.md",
+      "specId": "ui/media-detail/media-detail-location-section",
+      "useFor": "Collapsed “Add or search address” row that expands into the four-zone dropdown (org recent/results, other media, Internet).",
+      "notFor": null,
+      "fields": [
+        {
+          "label": "Composed of",
+          "value": "`app-dropdown-shell`, `app-location-picker-row`"
+        },
+        {
+          "label": "Used in",
+          "value": "`app-media-detail-location-section`"
+        },
+        {
+          "label": "Gaps",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "slice": "workspace-pane",
+      "section": "workspace-pane-media-detail",
+      "selector": "app-media-location-row",
+      "name": "Media Location Row",
+      "status": "active",
+      "path": "apps/web/src/app/shared/workspace-pane/media-detail/media-location-row/media-location-row.component.ts",
+      "spec": "docs/specs/ui/media-detail/media-detail-location-section.md",
+      "specId": "ui/media-detail/media-detail-location-section",
+      "useFor": "One saved location in media detail: read line, inline field editing, and the edit / show-on-map / overflow / delete action slots.",
+      "notFor": null,
+      "fields": [
+        {
+          "label": "Other inputs",
+          "value": "`location` (required), `saving`"
+        },
+        {
+          "label": "Outputs",
+          "value": "`editRequested`, `saveRequested`, `editCancelled`, `deleteRequested`, `mapPickRequested`, `showOnMapRequested`, `changeAddressRequested`, `copyFieldRequested`"
+        },
+        {
+          "label": "Composed of",
+          "value": "`app-dropdown-shell`, `app-confirm-dialog`, `app-inline-confirm-action`"
+        },
+        {
+          "label": "Used in",
+          "value": "`app-media-detail-location-section`"
+        },
+        {
+          "label": "Gaps",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "slice": "workspace-pane",
+      "section": "workspace-pane-media-detail",
+      "selector": "app-coordinates-field-editor",
+      "name": "Coordinates Field Editor",
+      "status": "active",
+      "path": "apps/web/src/app/shared/workspace-pane/media-detail/coordinates-field-editor/coordinates-field-editor.component.ts",
+      "spec": "docs/specs/ui/media-detail/media-detail-location-section.md",
+      "specId": "ui/media-detail/media-detail-location-section",
+      "useFor": "Inline `lat, lng` edit row for a media detail location.",
+      "notFor": "New work — the component has no callsite in `apps/web/src`; it is kept for reference per `apps/web/src/app/archive/media-detail-location-single/README.md`.",
+      "fields": [
+        {
+          "label": "Other inputs",
+          "value": "`icon`, `isCorrected`, `initialValue`"
+        },
+        {
+          "label": "Outputs",
+          "value": "`saveRequested`, `cancelRequested`"
+        },
+        {
+          "label": "Used in",
+          "value": "nothing (verified 2026-09-10)"
+        },
+        {
+          "label": "Gaps",
+          "value": "unwired since the location section moved to multi-address rows"
         }
       ]
     },
@@ -2541,12 +2906,12 @@
       "section": "map-feature",
       "selector": "ss-gps-button",
       "name": "GPS Button",
-      "status": "active",
+      "status": "stale",
       "path": "apps/web/src/app/features/map/gps-button/gps-button.component.ts",
       "spec": "docs/specs/component/map/gps-button.md",
       "specId": "component/map/gps-button",
       "useFor": "Map overlay button that requests and animates to the user's GPS location.",
-      "notFor": null,
+      "notFor": "Gone from `apps/web/src` (verified 2026-09-10) — do not reach for it. Entry kept pending an owner decision to delete it or restore the component.",
       "fields": [
         {
           "label": "Variant axes",
@@ -2624,7 +2989,7 @@
       "selector": "app-map-shell",
       "name": "Map Shell",
       "status": "active",
-      "path": "apps/web/src/app/features/map/map-shell/map-shell.component.ts",
+      "path": "apps/web/src/app/features/map/map-shell/component/map-shell.component.ts",
       "spec": null,
       "specId": null,
       "useFor": "Root orchestrator for the map view; manages Leaflet map, markers, workspace pane, upload panel, and all map-layer interactions.",
@@ -2794,12 +3159,12 @@
       "section": "projects-feature",
       "selector": "app-project-card",
       "name": "Project Card",
-      "status": "active",
+      "status": "stale",
       "path": "apps/web/src/app/features/projects/cards/project-card.component.ts",
       "spec": "docs/specs/component/project/project-item.md",
       "specId": "component/project/project-item",
       "useFor": "Clickable project card shown in grid or compact-row layout.",
-      "notFor": null,
+      "notFor": "Gone from `apps/web/src` (verified 2026-09-10) — do not reach for it. Entry kept pending an owner decision to delete it or restore the component.",
       "fields": [
         {
           "label": "Variant axes",
@@ -2854,12 +3219,12 @@
       "section": "projects-feature",
       "selector": "app-projects-grid-view",
       "name": "Projects Grid View",
-      "status": "active",
+      "status": "stale",
       "path": "apps/web/src/app/features/projects/views/projects-grid-view.component.ts",
       "spec": null,
       "specId": null,
       "useFor": "Grouped card grid layout for the projects page.",
-      "notFor": null,
+      "notFor": "Gone from `apps/web/src` (verified 2026-09-10) — do not reach for it. Entry kept pending an owner decision to delete it or restore the component.",
       "fields": [
         {
           "label": "Variant axes",
@@ -2880,12 +3245,12 @@
       "section": "projects-feature",
       "selector": "app-projects-table-view",
       "name": "Projects Table View",
-      "status": "active",
+      "status": "stale",
       "path": "apps/web/src/app/features/projects/views/projects-table-view.component.ts",
       "spec": null,
       "specId": null,
       "useFor": "Tabular list layout for the projects page with sortable columns.",
-      "notFor": null,
+      "notFor": "Gone from `apps/web/src` (verified 2026-09-10) — do not reach for it. Entry kept pending an owner decision to delete it or restore the component.",
       "fields": [
         {
           "label": "Variant axes",
@@ -2906,12 +3271,12 @@
       "section": "projects-feature",
       "selector": "app-projects-toolbar",
       "name": "Projects Toolbar",
-      "status": "active",
+      "status": "stale",
       "path": "apps/web/src/app/features/projects/chrome/projects-toolbar.component.ts",
       "spec": null,
       "specId": null,
       "useFor": "Toolbar for the projects page: grouping, filter, sort, view-toggle, card-variant switch.",
-      "notFor": null,
+      "notFor": "Gone from `apps/web/src` (verified 2026-09-10) — do not reach for it. Entry kept pending an owner decision to delete it or restore the component.",
       "fields": [
         {
           "label": "Variant axes",
@@ -2932,12 +3297,12 @@
       "section": "projects-feature",
       "selector": "app-projects-page-header",
       "name": "Projects Page Header",
-      "status": "active",
+      "status": "stale",
       "path": "apps/web/src/app/features/projects/chrome/projects-page-header.component.ts",
       "spec": null,
       "specId": null,
       "useFor": "Title + action header bar for the `/projects` route.",
-      "notFor": null,
+      "notFor": "Gone from `apps/web/src` (verified 2026-09-10) — do not reach for it. Entry kept pending an owner decision to delete it or restore the component.",
       "fields": [
         {
           "label": "Variant axes",
@@ -3203,6 +3568,70 @@
       "notFor": null,
       "specMarkdown": "[`docs/specs/page/organization-page.md`](../page/organization-page.md) (rail contract)",
       "fields": []
+    },
+    {
+      "slice": "workspace-pane",
+      "section": "workspace-pane-projects-tab",
+      "selector": "app-workspace-projects-panel",
+      "name": "Workspace Projects Panel",
+      "status": "active",
+      "path": "apps/web/src/app/shared/workspace-pane/projects-panel/workspace-projects-panel.component.ts",
+      "spec": "docs/specs/ui/workspace/workspace-pane-projects-tab.md",
+      "specId": "ui/workspace/workspace-pane-projects-tab",
+      "useFor": "Compact project manager in the workspace pane Projects tab; list, single-project detail, and inline new-project draft.",
+      "notFor": null,
+      "fields": [
+        {
+          "label": "Variant axes",
+          "value": "\n  | Input | Type | Values | Visual effect |\n  |---|---|---|---|\n  | internal panel state | signal | `list`, `detail`, `new-draft` | Which body the panel renders |"
+        },
+        {
+          "label": "Composed of",
+          "value": "`app-workspace-projects-toolbar`, `app-item-grid`, `app-project-item`, `app-project-color-picker`, `app-dropdown-shell`"
+        },
+        {
+          "label": "Used in",
+          "value": "`app-workspace-pane`"
+        },
+        {
+          "label": "Gaps",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "slice": "workspace-pane",
+      "section": "workspace-pane-projects-tab",
+      "selector": "app-workspace-projects-toolbar",
+      "name": "Workspace Projects Toolbar",
+      "status": "active",
+      "path": "apps/web/src/app/shared/workspace-pane/projects-panel/workspace-projects-toolbar.component.ts",
+      "spec": "docs/specs/component/workspace/pane-toolbar.md",
+      "specId": "component/workspace/pane-toolbar",
+      "useFor": "Search field, archived toggle, and card-variant toggle above the workspace projects list.",
+      "notFor": null,
+      "fields": [
+        {
+          "label": "Other inputs",
+          "value": "`searchTerm`, `showArchived`, `cardVariant`"
+        },
+        {
+          "label": "Outputs",
+          "value": "`searchTermChange`, `showArchivedChange`, `cardVariantChange`"
+        },
+        {
+          "label": "Composed of",
+          "value": "`[hlmToggleGroup]` card-variant toggle, `hlmBtn`"
+        },
+        {
+          "label": "Used in",
+          "value": "`app-workspace-projects-panel`"
+        },
+        {
+          "label": "Gaps",
+          "value": "none"
+        }
+      ]
     }
   ]
 }

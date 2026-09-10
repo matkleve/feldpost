@@ -15,6 +15,8 @@
 
 #### `<ss-gps-button>` — GPS Button
 
+> **Stale:** Gone from `apps/web/src` (verified 2026-09-10) — do not reach for it. Entry kept pending an owner decision to delete it or restore the component.
+
 - **File**: `apps/web/src/app/features/map/gps-button/gps-button.component.ts`
 - **Purpose**: Map overlay button that requests and animates to the user's GPS location.
 - **Spec**: [`docs/specs/component/map/gps-button.md`](map/gps-button.md)
@@ -52,7 +54,7 @@
 
 #### `<app-map-shell>` — Map Shell
 
-- **File**: `apps/web/src/app/features/map/map-shell/map-shell.component.ts`
+- **File**: `apps/web/src/app/features/map/map-shell/component/map-shell.component.ts`
 - **Purpose**: Root orchestrator for the map view; manages Leaflet map, markers, workspace pane, upload panel, and all map-layer interactions.
 - **Map pierced CSS (Leaflet DivIcon / overlays):** `apps/web/src/styles/_map-shell-leaflet-global.scss` — selectors scoped under **`app-map-shell`**; **`@use`** from `apps/web/src/styles.scss` (Phase 8 Path A). See [`phase-8-global-scss-elimination.md`](../../migration/phase-8-global-scss-elimination.md) §7 and [`phase-10-visual-qa.md`](../../migration/phase-10-visual-qa.md#stacking-sanity).
 - **Spec**: @no-spec (UI system spec: `docs/specs/ui/`)
@@ -131,6 +133,8 @@
 
 #### `<app-project-card>` — Project Card
 
+> **Stale:** Gone from `apps/web/src` (verified 2026-09-10) — do not reach for it. Entry kept pending an owner decision to delete it or restore the component.
+
 - **File**: `apps/web/src/app/features/projects/cards/project-card.component.ts`
 - **Purpose**: Clickable project card shown in grid or compact-row layout.
 - **Spec**: [`docs/specs/component/project/project-item.md`](project/project-item.md)
@@ -158,6 +162,8 @@
 
 #### `<app-projects-grid-view>` — Projects Grid View
 
+> **Stale:** Gone from `apps/web/src` (verified 2026-09-10) — do not reach for it. Entry kept pending an owner decision to delete it or restore the component.
+
 - **File**: `apps/web/src/app/features/projects/views/projects-grid-view.component.ts`
 - **Purpose**: Grouped card grid layout for the projects page.
 - **Spec**: @no-spec
@@ -168,6 +174,8 @@
 ---
 
 #### `<app-projects-table-view>` — Projects Table View
+
+> **Stale:** Gone from `apps/web/src` (verified 2026-09-10) — do not reach for it. Entry kept pending an owner decision to delete it or restore the component.
 
 - **File**: `apps/web/src/app/features/projects/views/projects-table-view.component.ts`
 - **Purpose**: Tabular list layout for the projects page with sortable columns.
@@ -180,6 +188,8 @@
 
 #### `<app-projects-toolbar>` — Projects Toolbar
 
+> **Stale:** Gone from `apps/web/src` (verified 2026-09-10) — do not reach for it. Entry kept pending an owner decision to delete it or restore the component.
+
 - **File**: `apps/web/src/app/features/projects/chrome/projects-toolbar.component.ts`
 - **Purpose**: Toolbar for the projects page: grouping, filter, sort, view-toggle, card-variant switch.
 - **Spec**: @no-spec
@@ -190,6 +200,8 @@
 ---
 
 #### `<app-projects-page-header>` — Projects Page Header
+
+> **Stale:** Gone from `apps/web/src` (verified 2026-09-10) — do not reach for it. Entry kept pending an owner decision to delete it or restore the component.
 
 - **File**: `apps/web/src/app/features/projects/chrome/projects-page-header.component.ts`
 - **Purpose**: Title + action header bar for the `/projects` route.
