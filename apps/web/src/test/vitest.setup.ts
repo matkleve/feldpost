@@ -12,6 +12,27 @@ import {
 
 declare const beforeEach: (fn: () => Promise<void> | void) => void;
 
+// jsdom doesn't implement matchMedia. Several services (theme-aware map
+// tiles, reduced-motion checks) call `window.matchMedia(...)` from their
+// constructor, so without this polyfill any test that injects one of them
+// throws before a single assertion runs — see
+// docs/audits/2026-09-10-map-shell-test-migration-plan.md for how this was
+// found (it was masking every test in the map-shell spec suite, not just
+// the ones being migrated).
+if (typeof window !== 'undefined' && typeof window.matchMedia !== 'function') {
+  window.matchMedia = (query: string): MediaQueryList =>
+    ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }) as MediaQueryList;
+}
+
 const webRoot = process.cwd();
 const defaultResourceRoots = [webRoot, join(webRoot, 'src'), join(webRoot, 'src', 'app')];
 const indexedResourcesRoot = join(webRoot, 'src', 'app');

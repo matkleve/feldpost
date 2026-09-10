@@ -4,7 +4,7 @@
 
 **Date:** 2026-09-10
 **Scope:** the last 64 test-bundle compile errors, all in 4 files under `apps/web/src/app/features/map/map-shell/component/`.
-**Status:** mapping complete, one trivial rename already fixed, the rest **not yet rewritten** — see § 4 for why.
+**Status:** **done.** All 4 files rewritten and passing, plus 3 more (`context-menu`, `radius-draw`, `radius-selection`) that turned out to have the same drift hidden behind unsafe casts — see § 6.
 
 ---
 
@@ -18,7 +18,7 @@ The four spec files below were never updated for that refactor. They still call 
 | --- | --- | --- |
 | `map-shell.gps.spec.ts` | 27 | GPS button, tracking, geolocation |
 | `map-shell.component.spec.ts` | 25 | placement mode, basemap, panels, marker selection |
-| `map-shell.search.spec.ts` | 7 | search query context (2 of these already fixed — see § 3) |
+| `map-shell.search.spec.ts` | 7 | search query context. **Correction:** an earlier version of this row implied the file was essentially done after the 2-error `searchQueryContext` fix in § 3 — that undercounted; the file had 5 more unfixed errors (`onSearchMapCenterRequested`, `onZoomToLocation`, `goToUserPosition`, `onSearchClearRequested`) found only once the file was actually opened for the full rewrite. |
 | `map-shell.marker-interaction.spec.ts` | 5 | marker hover/select interaction |
 
 ---
@@ -93,3 +93,21 @@ Three things make this **not** a mechanical find-and-replace, unlike everything 
 7. Promote `test` from soft to hard in `scripts/verify.mjs` once this is done and `npm test` is fully green — not just compiling.
 
 Estimated size: a few hours of careful work per file for (2)-(4), not a quick pass — this is genuinely a small feature's worth of test-writing, done four times.
+
+---
+
+## 6. What actually happened (completion note, 2026-09-10)
+
+All 4 files were rewritten following § 2's mapping and § 5's plan (GPS-mocking option (a): a per-file `MapLeafletService` override, scoped with `TestBed.overrideProvider`, plus mocking `navigator.geolocation.getCurrentPosition` directly — the layer `MapGeolocationService` itself calls).
+
+**A real environment gap was hiding the actual signal.** `apps/web/src/test/vitest.setup.ts` — this repo's documented "shared test infrastructure" file — was never wired into `ng test` at all: the Angular `@angular/build:unit-test` builder only loads `setupFiles` from `angular.json`'s `test` target options, not from `vitest.config.ts`'s `test.setupFiles` (that field is only read when `runnerConfig` is explicitly enabled, which this project never did). So `window.matchMedia` — polyfilled in that setup file, needed by `MapShellBasemapService`'s constructor (theme-change tracking) — was `undefined` for every test that touched the map shell, and *every* test in *every* map-shell spec file failed at component construction, not just the 4 files with compile errors. This masked two more broken files (`map-shell.context-menu.spec.ts`, `map-shell.radius-draw.spec.ts`, `map-shell.radius-selection.spec.ts`) that compiled clean — same as `map-shell.marker-interaction.spec.ts` before its rewrite — only because every access went through `fixture.componentInstance as unknown as {...}` casts that suppress TypeScript's property checking. They would have thrown at runtime, same lesson as § 4 footnote and `2026-09-10-spartan-and-state.md` § 2.
+
+Fixed by:
+- Wiring `src/test/vitest.setup.ts` into `angular.json`'s `test` target (`options.setupFiles`) and adding it to `tsconfig.spec.json`'s `include` (the Angular compiler requires every file with `@Component`/etc. metadata reachable from a loaded file to be in the program).
+- Adding a `window.matchMedia` polyfill to that setup file.
+- Rewriting all 3 newly-discovered files the same way as the original 4, following the same mapping table (extended: `handleMapMouseDown`/`handleMapMouseUp`/`handleMapContextMenu`/the container contextmenu handler → `MapClickHandlerService`; `onMapContextCreateMarkerHere`/`onMapContextZoomStreetHere` → private on `MapContextMenuHandlerService`, reached only via its public `onMapMenuActionSelected(actionId)` dispatcher; `anyContextMenuOpen` → `component.menuVm` (`MapMenuViewModelService`); `openMarkerContextMenu` → `MapContextMenuOpenService`; `radiusDrawActive` → `RadiusDrawingOrchestratorService.isDrawActive()`; `selectRadiusImages`/`updateRadiusSelectionDraft` → `RadiusDrawingOrchestratorService.selectImages`/`.updateDraft`, the latter needing a real `startDraw()` call first since its prerequisite state is private — done by overriding `MapLeafletService` and `RadiusVisualsService` for that one test file, scoped the same way the GPS/search specs scope their `MapLeafletService` override).
+- Two more real bugs surfaced once matchMedia stopped masking everything, both `TestBed.overrideProvider`-after-`createComponent` ordering mistakes in the original rewrite (providers must be overridden *before* the fixture is created, never after) and one missing method on a `RadiusVisualsService` override (`clearCommittedSelectionVisuals`, called unconditionally by `MapShellInitService.cleanup()` on every fixture teardown, not just when a radius was drawn).
+
+**Result:** all 7 map-shell spec files compile and pass. `npm test` (`ng test`) now reports 39 failing tests across 15 files, none of them map-shell — pre-existing, unrelated drift (Supabase query-chain mocks missing `.or`/`.rpc`, a frozen `crypto.subtle` getter, etc.), out of this migration's scope. `scripts/verify.mjs`'s `test` debt description was updated to match; it stays a soft gate until those 15 files are addressed separately.
+
+**Not yet done:** § 5 item 7 (promoting `test` from soft to hard) — the 39 remaining failures block that. § 5 item 6 (fresh-context adversarial review) — this is Sensitive-class per `AGENTS.md` and still needs a review pass by a different agent than the implementer before this work is considered fully closed out.

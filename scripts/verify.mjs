@@ -52,14 +52,14 @@ const CHECKS = [
     cmd: "npm",
     args: ["run", "--silent", "lint"],
     soft: true,
-    debt: "151 errors + 1068 warnings on main (2026-09-08); `--max-warnings 0` means warnings fail too.",
+    debt: "145 errors + 1032 warnings on main (2026-09-10, down from 151+1068 on 2026-09-08); `--max-warnings 0` means warnings fail too.",
   },
   {
     name: "test",
     cmd: "npm",
     args: ["run", "--silent", "test"],
     soft: true,
-    debt: "the test bundle does not compile on main (2026-09-10): 62 TS errors, all in 4 map-shell spec files testing a component API moved to gpsService/mapPlacementService in an earlier refactor. (Was ~101 errors / 4 unresolved imports on 2026-09-08 — the rest was mechanical and is fixed.) See docs/audits/2026-09-10-map-shell-test-migration-plan.md.",
+    debt: "39 failing tests across 15 unrelated pre-existing files (2026-09-10) — Supabase query-chain mocks missing .or/.rpc, a frozen crypto.subtle getter, and similar drift; none are in map-shell. The test bundle now compiles cleanly and all 7 map-shell spec files (previously 62 compile errors across 4 files, plus 3 more files that compiled only via unsafe `as unknown as` casts) pass. See docs/audits/2026-09-10-map-shell-test-migration-plan.md.",
   },
   { name: "build", cmd: "npm", args: ["run", "--silent", "build"] },
 ];
