@@ -381,12 +381,7 @@ describe('runPreUploadLocationResolve — text before EXIF', () => {
   });
 
   // @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-23
-  // @see docs/audits/upload-process-analysis-2026-09-08/09-coverage.md § 4 T5
-  // Known bug, not fixed here (out of this task's scope — the fix changes
-  // where dedup_check re-enters, i.e. control flow this task was told not to
-  // touch). This documents the current (double-call) behavior so the fix,
-  // whenever it lands, can flip it from `.fails` to a normal `it`.
-  it.fails(
+  it(
     'calls checkDedupHash exactly once for an EXIF-only job with no title address',
     async () => {
       const exifCoords = { lat: 48.21, lng: 16.37 };

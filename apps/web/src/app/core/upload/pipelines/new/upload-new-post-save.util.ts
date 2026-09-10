@@ -1,5 +1,6 @@
 import type { UploadJob } from '../../upload-manager.types';
 import type { ExifCoords } from '../../upload.types';
+import { isUploadDocumentFile } from '../../support/upload.service.util';
 import {
   exifMetadataCoords,
   usesTextPlacementSource,
@@ -253,8 +254,7 @@ async function routeUnresolvedAfterFailedGeocode(args: {
 }): Promise<void> {
   const { updatedJob, jobId, setPhase, updateJob, markDone, emitBatchProgress, drainQueue } =
     args;
-  const mimeType = updatedJob.file.type.toLowerCase();
-  const isDocument = mimeType.startsWith('application/') || mimeType.startsWith('text/');
+  const isDocument = isUploadDocumentFile(updatedJob.file);
   updateJob({
     issueKind: isDocument ? 'document_unresolved' : 'missing_gps',
     locationSourceUsed: 'none',

@@ -8,6 +8,7 @@ export const ALLOWED_MIME_TYPES: ReadonlySet<string> = new Set([
   'image/heic',
   'image/heif',
   'image/webp',
+  'image/tiff',
   'video/mp4',
   'video/quicktime',
   'video/webm',
@@ -24,7 +25,6 @@ export const ALLOWED_MIME_TYPES: ReadonlySet<string> = new Set([
   'application/vnd.oasis.opendocument.graphics',
   'text/plain',
   'text/csv',
-  'application/csv',
 ]);
 
 export const PHOTO_MIME_TYPES: ReadonlySet<string> = new Set([

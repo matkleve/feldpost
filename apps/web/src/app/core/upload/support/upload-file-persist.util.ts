@@ -15,6 +15,7 @@ import {
 } from './upload.service.util';
 import type { MediaType } from './upload-file-types';
 import type { ExifCoords, FileValidation, ParsedExif, UploadResult } from '../upload.types';
+import { sanitizeStorageFileExtension } from './upload-storage-path.util';
 
 export interface UploadFilePersistDeps {
   getUser: () => User | null;
@@ -80,16 +81,18 @@ export async function persistUploadFile(
   const orgId: string = profile.organization_id;
 
   const uuid = crypto.randomUUID();
-  const ext = (input.file.name.split('.').pop() ?? 'jpg').toLowerCase();
+  const ext = sanitizeStorageFileExtension(input.file.name);
   const storagePath = `${orgId}/${user.id}/${uuid}.${ext}`;
 
   if (input.abortSignal?.aborted) {
     return { error: 'Upload cancelled by user.' };
   }
 
+  const resolvedMimeType = deps.resolveMimeType(input.file);
   const storageResult = await uploadFileToStorage(
     input.file,
     storagePath,
+    resolvedMimeType,
     deps,
     input.abortSignal,
   );
@@ -99,6 +102,7 @@ export async function persistUploadFile(
 
   return insertUploadMediaRow({
     file: input.file,
+    resolvedMimeType,
     user,
     orgId,
     storagePath,
@@ -116,10 +120,10 @@ export async function persistUploadFile(
 async function uploadFileToStorage(
   file: File,
   storagePath: string,
+  contentType: string,
   deps: UploadFilePersistDeps,
   abortSignal?: AbortSignal,
 ): Promise<UploadResult | { error: null }> {
-  const contentType = deps.resolveMimeType(file);
   const { error: storageError } = await deps.supabaseClient.storage
     .from('media')
     .upload(storagePath, file, {
@@ -143,6 +147,7 @@ async function uploadFileToStorage(
 /** Insert media_items row; fire-and-forget geocode when placement coords exist. */
 async function insertUploadMediaRow(args: {
   file: File;
+  resolvedMimeType: string;
   user: User;
   orgId: string;
   storagePath: string;
@@ -154,8 +159,20 @@ async function insertUploadMediaRow(args: {
   abortSignal?: AbortSignal;
   deps: UploadFilePersistDeps;
 }): Promise<UploadResult> {
-  const { file, user, orgId, storagePath, manualCoords, parsedExif, relativePath, addressNotes, options, abortSignal, deps } =
-    args;
+  const {
+    file,
+    resolvedMimeType,
+    user,
+    orgId,
+    storagePath,
+    manualCoords,
+    parsedExif,
+    relativePath,
+    addressNotes,
+    options,
+    abortSignal,
+    deps,
+  } = args;
 
   const parsed = parsedExif ?? (await deps.parseExif(file));
   const metadataExifCoords = parsed.coords;
@@ -176,7 +193,7 @@ async function insertUploadMediaRow(args: {
       organization_id: orgId,
       created_by: user.id,
       media_type: mediaType,
-      mime_type: file.type,
+      mime_type: resolvedMimeType,
       storage_path: storagePath,
       original_filename: file.name,
       relative_path: relativePath ?? null,
