@@ -161,7 +161,7 @@ A ticked-but-false AC is worse than an unticked one: it is the reason nobody has
 
 ### P4 — Delete the dead code
 
-**Status: P4a, P4b, P4c, P4d, P4e done (2026-09-10). Only P4f not started** — needs re-encode tooling this pass didn't build. P4b's `mockResolverTray` decision (below) was made deliberately, not unilaterally: kept as a dev/QA affordance, gated so it is genuinely excluded from production builds (`angular.json` `fileReplacements` swap, verified against the built `dist/web` output) rather than merely runtime-suppressed.
+**Status: all of P4 done (2026-09-10).** P4b's `mockResolverTray` decision (below) was made deliberately, not unilaterally: kept as a dev/QA affordance, gated so it is genuinely excluded from production builds (`angular.json` `fileReplacements` swap, verified against the built `dist/web` output) rather than merely runtime-suppressed. P4f's mojibake turned out to be **triple**-encoded, not double (`10-findings.md` UP-40) — re-encoded with a scratchpad script (not committed, per the caveat below), and it incidentally fixed 2 tests this whole audit-and-fix effort had been carrying as "known pre-existing failures" since Phase 0 (garbled "ß" in test-fixture filenames broke a German street-suffix match). Console gating (UP-41, the other half of P4f) was **not** done — the mojibake fix subsumed the "own commit" this proposal asked for, and the console-noise cleanup is a separate, smaller piece of work than the rest of P4f; it remains open.
 
 | | |
 | --- | --- |

@@ -132,20 +132,20 @@ export async function prepareNewJobForUpload(
 }
 
 /**
- * routePreparedNewJob() ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Route a job through conflict check ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ upload phase or ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ issues lane.
+ * routePreparedNewJob() — Route a job through conflict check → upload phase or → issues lane.
  *
  * Ground rules:
- *  - If job has coordinates: run conflict check ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ upload phase
- *  - If no coordinates + high-confidence address: run conflict check ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ upload phase
+ *  - If job has coordinates: run conflict check → upload phase
+ *  - If no coordinates + high-confidence address: run conflict check → upload phase
  *  - If no coordinates + low/no confidence:
  *    - For photos: set phase=missing_data, issueKind=missing_gps
  *    - For documents: set phase=missing_data, issueKind=document_unresolved
  *    - Mark job done (dequeue); emit MissingDataEvent
  *
  * Spec compliance (upload-manager-pipeline.md):
- *  ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ Document routing: issueKind=document_unresolved when no address
- *  ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ Confidence gating: Only high-confidence addresses proceed to upload
- *  ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ Conflict check: Run after address resolution
+ *  ✅ Document routing: issueKind=document_unresolved when no address
+ *  ✅ Confidence gating: Only high-confidence addresses proceed to upload
+ *  ✅ Conflict check: Run after address resolution
  */
 /**
  * Phase 6 — placement decided in pre-resolve; upload bytes only when job.coords is set.
