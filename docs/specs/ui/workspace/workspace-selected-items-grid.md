@@ -13,7 +13,7 @@ Scrollable column filling space below the workspace toolbar. When media exists, 
 
 ## Where It Lives
 
-- **Code:** `apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.ts`
+- **Code:** `apps/web/src/app/shared/workspace-pane/selected-items/workspace-selected-items-grid.component.ts`
 - **Parent:** `WorkspacePaneComponent` when `activeTab === 'selected-items'` and `detailMediaId === null`
 
 ## Actions
@@ -68,9 +68,9 @@ Programmatic UI states include loading, empty, filter-empty, grouped vs flat; ex
 
 | File | Purpose |
 | --- | --- |
-| `apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.ts` | Logic, signals, grid wiring |
-| `apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.html` | Template |
-| `apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.scss` | Layout and region styles |
+| `apps/web/src/app/shared/workspace-pane/selected-items/workspace-selected-items-grid.component.ts` | Logic, signals, grid wiring |
+| `apps/web/src/app/shared/workspace-pane/selected-items/workspace-selected-items-grid.component.html` | Template |
+| `apps/web/src/app/shared/workspace-pane/selected-items/workspace-selected-items-grid.component.scss` | Layout and region styles |
 | `apps/web/src/app/core/workspace-view/workspace-media-mapper.ts` | `WorkspaceMedia` → `MediaRecord` |
 
 ## Wiring

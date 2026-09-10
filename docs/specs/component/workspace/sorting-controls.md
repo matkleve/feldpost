@@ -4,7 +4,7 @@
 
 ## What It Is
 
-Compact control in the workspace toolbar for choosing sort field and direction, feeding `WorkspaceViewService.activeSort`.
+Compact control in the workspace toolbar for choosing sort field and direction, feeding `WorkspaceViewService.activeSort`. Implemented by `SortDropdownComponent` embedded in `WorkspaceToolbarComponent` (standalone `SortingControlsComponent` removed 2026-05).
 
 ## What It Looks Like
 
@@ -12,7 +12,7 @@ Label or icon affordance with popover/dropdown pattern consistent with other too
 
 ## Where It Lives
 
-- **Code:** `apps/web/src/app/shared/workspace-pane/sorting-controls.component.ts`
+- **Code:** `apps/web/src/app/shared/dropdown-trigger/sort/sort-dropdown.component.ts`
 - **Parent:** `WorkspaceToolbarComponent`
 
 ## Actions
@@ -25,8 +25,8 @@ Label or icon affordance with popover/dropdown pattern consistent with other too
 ## Component Hierarchy
 
 ```
-SortingControls
-└── (toolbar inline — triggers/dropdown per implementation)
+WorkspaceToolbar
+└── SortDropdownComponent
 ```
 
 ## Visual Behavior Contract
@@ -35,30 +35,30 @@ SortingControls
 
 | Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer | Test Oracle |
 | --- | --- | --- | --- | --- | --- | --- |
-| Control cluster | `:host` | `:host` | native buttons | `.sorting-controls` | content | sort updates service |
+| Control cluster | `app-sort-dropdown` host | dropdown shell | trigger + menu items | sort dropdown BEM | content | sort updates service |
 
 ### Ownership Triad
 
 | Behavior | Geometry Owner | State Owner | Visual Owner | Same element? |
 | --- | --- | --- | --- | --- |
-| Sort affordance | `:host` | activeSort binding | `:host` | yes |
+| Sort affordance | trigger | activeSort binding | trigger + menu | partial |
 
 ## Data
 
 | Source | Contract |
 | --- | --- |
-| `WorkspaceViewService` | Read/write `activeSort` |
+| `WorkspaceViewService` | Read/write `activeSort` / `activeSorts` |
 
 ## State
 
-Signal-driven; single `[attr.data-state]` recommended (`idle` \| `open`) when dropdown pattern is used.
+Signal-driven; dropdown open state owned by `SortDropdownComponent` + toolbar `activeDropdown`.
 
 ## File Map
 
 | File | Purpose |
 | --- | --- |
-| `apps/web/src/app/shared/workspace-pane/sorting-controls.component.ts` | Component |
-| `apps/web/src/app/shared/workspace-pane/sorting-controls.component.scss` | Styles |
+| `apps/web/src/app/shared/dropdown-trigger/sort/sort-dropdown.component.ts` | Sort dropdown component |
+| `apps/web/src/app/shared/dropdown-trigger/sort/sort-dropdown.component.scss` | Styles |
 
 ## Wiring
 

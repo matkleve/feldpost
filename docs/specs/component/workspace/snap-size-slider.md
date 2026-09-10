@@ -10,7 +10,7 @@ Horizontal row of icon buttons with one active state (`--active` class) matching
 
 ## Where It Lives
 
-- **Code:** `apps/web/src/app/shared/snap-size-slider/` (`snap-size-slider.component.html` + companion `.ts`/`.scss` when present in tree)
+- **Code:** `apps/web/src/app/shared/snap-size-slider/snap-size-slider.component.html` (markup only; TypeScript/SCSS implementation not present in tree — control not wired in workspace toolbar)
 - **Consumers:** `workspace-toolbar` and other workspace chrome needing discrete size snaps.
 
 ## Actions
@@ -45,9 +45,7 @@ Selection is the bound `value`; component may keep ephemeral focus state in the 
 
 | File | Purpose |
 | ---- | ------- |
-| `apps/web/src/app/shared/snap-size-slider/snap-size-slider.component.html` | Radiogroup markup |
-| `apps/web/src/app/shared/snap-size-slider/snap-size-slider.component.ts` | Inputs + `select()` (expected) |
-| `apps/web/src/app/shared/snap-size-slider/snap-size-slider.component.scss` | Step layout |
+| `apps/web/src/app/shared/snap-size-slider/snap-size-slider.component.html` | Radiogroup markup (orphan template; no `.ts` host in tree) |
 
 ## Wiring
 

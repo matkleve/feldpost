@@ -71,9 +71,9 @@ flowchart LR
 
 | File                                                           | Purpose                   |
 | -------------------------------------------------------------- | ------------------------- |
-| `apps/web/src/app/shared/workspace-pane/workspace-toolbar/workspace-toolbar.component.ts`   | Toolbar with four buttons |
-| `apps/web/src/app/shared/workspace-pane/workspace-toolbar/workspace-toolbar.component.html` | Template                  |
-| `apps/web/src/app/shared/workspace-pane/workspace-toolbar/workspace-toolbar.component.scss` | Styles                    |
+| `apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component.ts`   | Toolbar with four buttons |
+| `apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component.html` | Template                  |
+| `apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component.scss` | Styles                    |
 
 ## Wiring
 

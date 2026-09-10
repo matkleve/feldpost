@@ -298,15 +298,15 @@ export interface WorkspacePaneHostPort {
 | File                                                                 | Purpose                                                                  |
 | -------------------------------------------------------------------- | ------------------------------------------------------------------------ |
 | `layout/authenticated-app-layout.component.ts`                     | Authenticated route layout: horizontal split, `router-outlet`, pane host |
-| `shared/workspace-pane/workspace-pane.component.ts`            | Main pane component                                                      |
-| `shared/workspace-pane/workspace-pane.component.html`          | Template                                                                 |
-| `shared/workspace-pane/workspace-pane.component.scss`          | Desktop pane styles                                                      |
-| `core/workspace-pane-context.port.ts`                                | Selected-items provider contract per route context                       |
-| `core/workspace-pane-host.port.ts`                                   | Host ownership contract for pane lifecycle and tab state                 |
-| `core/workspace-pane-observer.adapter.ts`                            | Route/upload observer lifecycle orchestration                            |
-| `shared/workspace-pane/drag-divider/drag-divider.component.ts` | Resize handle (see [drag-divider spec](../../component/workspace/drag-divider.md)) |
-| `shared/workspace-pane/pane-header.component.ts`               | Header actions and title surface                                         |
-| `core/workspace-selection.service.ts`                                | Selection state used by export bar visibility/actions                    |
+| `shared/workspace-pane/shell/workspace-pane.component.ts`            | Main pane component (includes former shell geometry)                                                      |
+| `shared/workspace-pane/shell/workspace-pane.component.html`          | Template                                                                 |
+| `shared/workspace-pane/shell/workspace-pane.component.scss`          | Desktop pane + shell clip-path styles                                                      |
+| `core/workspace-pane/workspace-pane-context.port.ts`                                | Selected-items provider contract per route context                       |
+| `core/workspace-pane/workspace-pane-host.port.ts`                                   | Host ownership contract for pane lifecycle and tab state                 |
+| `core/workspace-pane/workspace-pane-observer.adapter.ts`                            | Route/upload observer lifecycle orchestration                            |
+| `shared/workspace-pane/shell/drag-divider/drag-divider.component.ts` | Resize handle (see [drag-divider spec](../../component/workspace/drag-divider.md)) |
+| `shared/pane-chrome/header/pane-header.component.ts`               | Header actions and title surface                                         |
+| `core/workspace-selection/workspace-selection.service.ts`                                | Selection state used by export bar visibility/actions                    |
 
 ## Wiring
 

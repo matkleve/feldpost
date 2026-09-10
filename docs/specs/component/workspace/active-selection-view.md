@@ -314,14 +314,14 @@ flowchart TD
 | `apps/web/src/app/core/workspace-view/workspace-view.service.ts`                                              | Data pipeline: filter → sort → group          | [workspace-view-system](../../service/workspace-view/workspace-view-system.md) |
 | `apps/web/src/app/core/filter/filter.service.ts`                                                      | Filter rule state + predicate builder         | [filter-dropdown](../filters/filter-dropdown.md)                       |
 | `apps/web/src/app/core/metadata/metadata.service.ts`                                                    | Property CRUD + metadata field/value contract | [metadata-service](../../service/metadata/metadata-service.md)          |
-| `apps/web/src/app/shared/workspace-pane/workspace-toolbar/workspace-toolbar.component.ts` (+ `.html`/`.scss`)        | Toolbar with controls                        | [workspace-toolbar](../../ui/workspace/workspace-toolbar.md)         |
+| `apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component.ts` (+ `.html`/`.scss`)        | Toolbar with controls                        | [workspace-toolbar](../../ui/workspace/workspace-toolbar.md)         |
 | `apps/web/src/app/shared/dropdown-trigger/grouping-dropdown.component.*` | Grouping dropdown with drag-reorder           | [grouping-dropdown](../filters/grouping-dropdown.md)                   |
 | `apps/web/src/app/shared/dropdown-trigger/sort-dropdown.component.*`     | Sort dropdown with search                     | [sort-dropdown](../filters/sort-dropdown.md)                           |
 | `apps/web/src/app/shared/dropdown-trigger/filter-dropdown.component.*`   | Notion-style filter builder                   | [filter-dropdown](../filters/filter-dropdown.md)                       |
 | `apps/web/src/app/shared/workspace-pane/workspace-toolbar/projects-dropdown.component.*` | Projects checklist dropdown                   | [projects-dropdown](../project/projects-dropdown.md)                   |
 | `apps/web/src/app/shared/ui-primitives/group-header.component.ts`                       | Collapsible group heading                     | [ui-primitives.group-header](../ui-primitives/ui-primitives.group-header.md)                                                 |
 | `apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.*`                      | Selected-items grid host (`ItemGrid` + `MediaItem`)                   | [item-grid](../item-grid/item-grid.md)                         |
-| `supabase/migrations/XXXXX_cluster_images_rpc.sql`                            | RPC for cluster media loading                 | [workspace-view-system](../../service/workspace-view/workspace-view-system.md) |
+| `supabase/migrations/20260309000001_cluster_images_rpc.sql`                            | RPC for cluster media loading                 | [workspace-view-system](../../service/workspace-view/workspace-view-system.md) |
 
 ## Wiring
 

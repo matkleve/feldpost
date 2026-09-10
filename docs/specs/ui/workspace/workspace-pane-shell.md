@@ -4,7 +4,7 @@
 
 ## What It Is
 
-Layout wrapper around the workspace pane column: owns clip-path open animation, desktop height and overflow, and mobile bottom-sheet geometry relative to the nav. Does not own workspace business logic.
+Layout wrapper around the workspace pane column: owns clip-path open animation, desktop height and overflow, and mobile bottom-sheet geometry relative to the nav. Shell geometry merged into `WorkspacePaneComponent` (2026-05 workspace-pane restructure); there is no separate `app-workspace-pane-shell` component.
 
 ## What It Looks Like
 
@@ -12,8 +12,8 @@ Desktop: full-height column with subtle slide-in from the right (`clip-path`). M
 
 ## Where It Lives
 
-- **Code:** `apps/web/src/app/shared/workspace-pane/workspace-pane-shell.component.ts`
-- **Parent:** `AuthenticatedAppLayoutComponent` (canonical split host)
+- **Code:** `apps/web/src/app/shared/workspace-pane/shell/workspace-pane.component.ts` (+ `.scss`)
+- **Layout host:** `apps/web/src/app/layout/authenticated-app-layout.component.ts` (split row + `WorkspacePaneShellHost` token)
 
 ## Actions
 
@@ -25,8 +25,8 @@ Desktop: full-height column with subtle slide-in from the right (`clip-path`). M
 ## Component Hierarchy
 
 ```
-WorkspacePaneShell
-└── ng-content (WorkspacePane and children)
+WorkspacePaneComponent (shell + content)
+└── ng-content regions (toolbar, grid, detail, footer)
 ```
 
 ## Visual Behavior Contract
@@ -35,31 +35,31 @@ WorkspacePaneShell
 
 | Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer | Test Oracle |
 | --- | --- | --- | --- | --- | --- | --- |
-| Shell column | `.workspace-pane-shell` | `.workspace-pane-shell` | n/a (non-interactive) | `@media` blocks | panel | clip animation runs |
+| Shell column | `.workspace-pane` host / shell SCSS | pane host | n/a (non-interactive) | `@media` blocks | panel | clip animation runs |
 
 ### Ownership Triad
 
 | Behavior | Geometry Owner | State Owner | Visual Owner | Same element? |
 | --- | --- | --- | --- | --- |
-| Open animation | `.workspace-pane-shell` | host open signal from parent | `.workspace-pane-shell` | yes |
+| Open animation | `app-workspace-pane` host | layout open signal from parent | `workspace-pane.component.scss` | yes |
 
 ## Data
 
-None — layout-only; width/open come from parent inputs.
+None — layout-only; width/open come from parent inputs on `WorkspacePaneComponent`.
 
 ## State
 
 | Input | Purpose |
 | --- | --- |
-| `open` | Visibility driver for shell |
+| `open` | Visibility driver for shell (layout host) |
 | `currentWidth`, `minWidth`, `maxWidth`, `defaultWidth` | Passed through to drag divider sibling in layout |
 
 ## File Map
 
 | File | Purpose |
 | --- | --- |
-| `apps/web/src/app/shared/workspace-pane/workspace-pane-shell.component.ts` | Component |
-| `apps/web/src/app/shared/workspace-pane/workspace-pane-shell.component.scss` | Clip-path and responsive shell |
+| `apps/web/src/app/shared/workspace-pane/shell/workspace-pane.component.ts` | Pane host (includes former shell inputs) |
+| `apps/web/src/app/shared/workspace-pane/shell/workspace-pane.component.scss` | Clip-path and responsive shell geometry |
 
 ## Wiring
 
@@ -67,6 +67,6 @@ None — layout-only; width/open come from parent inputs.
 
 ## Acceptance Criteria
 
-- [x] `display: contents` on `:host` where used so flex split remains on layout parent.
+- [x] Pane width driven by layout host + drag divider; shell SCSS on `WorkspacePaneComponent`.
 - [ ] Animation durations use design motion tokens (`--motion-duration-*`, `--motion-ease-*`).
 - [ ] `prefers-reduced-motion` disables shell entrance animation.

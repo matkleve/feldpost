@@ -89,9 +89,9 @@ None — the Drag Divider is purely a layout interaction component with no data 
 
 | File                                                                   | Purpose                                          |
 | ---------------------------------------------------------------------- | ------------------------------------------------ |
-| `apps/web/src/app/shared/workspace-pane/drag-divider/drag-divider.component.ts`   | Component with pointer tracking + keyboard logic |
-| `apps/web/src/app/shared/workspace-pane/drag-divider/drag-divider.component.html` | Template: hit zone, bar, grip indicator          |
-| `apps/web/src/app/shared/workspace-pane/drag-divider/drag-divider.component.scss` | Styles: rest/hover/active states, grip lines     |
+| `apps/web/src/app/shared/workspace-pane/shell/drag-divider/drag-divider.component.ts`   | Component with pointer tracking + keyboard logic |
+| `apps/web/src/app/shared/workspace-pane/shell/drag-divider/drag-divider.component.html` | Template: hit zone, bar, grip indicator          |
+| `apps/web/src/app/shared/workspace-pane/shell/drag-divider/drag-divider.component.scss` | Styles: rest/hover/active states, grip lines     |
 
 ## Wiring
 

@@ -97,9 +97,9 @@ Location status compatibility note:
 | `docs/specs/service/workspace-view/workspace-view-system.deep-dive.md`                        | Mermaid + extended architecture (lint: supplement only) |
 | `docs/specs/ui/workspace/workspace-view-system.md`                              | UI navigation entry; links to this file only |
 | `apps/web/src/app/core/workspace-view/workspace-view.service.ts`      | Pipeline orchestration (filter/sort/group) |
-| `apps/web/src/app/shared/workspace-pane/workspace-pane.component.ts`    | Parent host integration (authenticated layout)     |
-| `apps/web/src/app/shared/workspace-pane/workspace-toolbar/workspace-toolbar.component.ts` | Toolbar control signals feeding pipeline   |
-| `apps/web/src/app/shared/workspace-pane/workspace-selected-items-grid.component.ts`    | Item grid host + section/grid render consumer               |
+| `apps/web/src/app/shared/workspace-pane/shell/workspace-pane.component.ts`    | Parent host integration (authenticated layout)     |
+| `apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component.ts` | Toolbar control signals feeding pipeline   |
+| `apps/web/src/app/shared/workspace-pane/selected-items/workspace-selected-items-grid.component.ts`    | Item grid host + section/grid render consumer               |
 
 ## Wiring
 
