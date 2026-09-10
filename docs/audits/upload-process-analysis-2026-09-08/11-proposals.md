@@ -161,6 +161,8 @@ A ticked-but-false AC is worse than an unticked one: it is the reason nobody has
 
 ### P4 — Delete the dead code
 
+**Status: P4a, P4c, P4d, P4e done (2026-09-10). P4b and P4f not started** — P4b needs the deliberate `mockResolverTray` decision this proposal itself calls for below, not a unilateral one; P4f needs re-encode tooling this pass didn't build.
+
 | | |
 | --- | --- |
 | **Findings** | UP-19, UP-20, UP-21, UP-22, UP-40, UP-41, UP-42, UP-48 |
@@ -169,14 +171,14 @@ A ticked-but-false AC is worse than an unticked one: it is the reason nobody has
 | **Prerequisites** | **none — independently shippable today** |
 | **PR boundary** | **one PR per group**, so a revert is cheap |
 
-| Group | Contents | LOC |
-| --- | --- | --- |
-| P4a | `features/upload/upload-panel/upload-panel-dialog-handlers.service.ts` (UP-19) | 316 |
-| P4b | `USE_TRAY_ORCHESTRATOR`, `UPLOAD_DEV_FLAGS.useTrayOrchestrator`, the 13 dead tray guards, `upload-resolver-tray.mock.ts` (UP-20) | ~200 |
-| P4c | `upload-attach-hash.util.ts`, `upload-timeout.util.ts`, `upload.helpers.ts`, 7 dead exports, `issueKind:'duplicate_photo'` + its 10 readers, `UploadTrayStep '2'` (UP-21, UP-48) | ~120 |
-| P4d | the project-tray remnant: stub, facade delegation, test-only helper (UP-22) | ~60 |
-| P4e | 7 committed refactor scripts under `apps/web/scripts/` (UP-42) | — |
-| P4f | mojibake re-encode across 11 files (UP-40) and console gating (UP-41) | — |
+| Group | Contents | LOC | Status |
+| --- | --- | --- | --- |
+| P4a | `features/upload/upload-panel/upload-panel-dialog-handlers.service.ts` (UP-19) | 316 | **Done** |
+| P4b | `USE_TRAY_ORCHESTRATOR`, `UPLOAD_DEV_FLAGS.useTrayOrchestrator`, the 13 dead tray guards, `upload-resolver-tray.mock.ts` (UP-20) | ~200 | Not started |
+| P4c | `upload-attach-hash.util.ts`, `upload-timeout.util.ts`, `upload.helpers.ts`, 7 dead exports, `issueKind:'duplicate_photo'` + its 10 readers, `UploadTrayStep '2'` (UP-21, UP-48) | ~120 | **Done**, except `upload.helpers.ts` — kept deliberately, it satisfies the module-symmetry rule |
+| P4d | the project-tray remnant: stub, facade delegation, test-only helper (UP-22) | ~60 | **Done** |
+| P4e | 7 committed refactor scripts under `apps/web/scripts/` (UP-42) | — | **Done** |
+| P4f | mojibake re-encode across 11 files (UP-40) and console gating (UP-41) | — | Not started |
 
 **Caveat on P4b.** `mockResolverTray` currently ships in the production bundle and is one constant away from seeding fixture data (`06-health.md` § 4). Decide deliberately whether to keep it as a dev affordance behind a build-time flag or remove it; do not delete it silently.
 
