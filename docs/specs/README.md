@@ -72,6 +72,13 @@ Normative (moved here from root `AGENTS.md` on 2026-09-10; rules unchanged).
 - Do not collapse multiple non-trivial component contracts into one monolithic spec when a child-spec split is possible.
 - Before implementing or refactoring a component, create or update that component's dedicated spec first.
 
+## Spec-first (Mandatory)
+
+Normative (moved here from `docs/AGENTS.md` on 2026-09-10; rules unchanged). These state the *direction* of authority, which § Feedback-to-Spec Sync below assumes but does not say.
+
+- Specs are the source of truth: code must match spec, not the other way around.
+- Update specs **before** modifying features.
+
 ## Feedback-to-Spec Sync (Mandatory)
 
 Normative (moved here from root `AGENTS.md` on 2026-09-10; rules unchanged).

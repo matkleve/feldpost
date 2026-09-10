@@ -71,8 +71,11 @@ apps/web/            Angular frontend
   src/styles.scss    global tokens: the source of every colour, radius and spacing value
 supabase/            migrations, RLS policies, edge functions
 docs/                this folder
+  archive/           frozen documents — do not load in agentic sessions
 scripts/             the gates (verify.mjs runs them all)
 ```
+
+`docs/archive/` is the documentation counterpart to `apps/web/src/app/archive/`: kept for history, never a source of current truth. It holds superseded design references (retired token tables, the 2026-04-15 cleanup snapshot) that describe paths and token names the tree no longer has, so citing it produces confidently wrong answers. `docs/AGENTS.md` previously named one file here, `archive/reference-products.md`, at a path that has since moved — the rule generalizes to the whole tree.
 
 ### Commands
 

@@ -2,13 +2,9 @@
 
 ## Element Specs
 
-- Every UI element has a spec in `specs/` — this is the **implementation contract**
-- Specs are the source of truth: code must match spec, not the other way around
-- Update specs **before** modifying features
-
 Normative bodies (do not restate here):
 
-- Folder taxonomy, spec split policy, component spec coverage, feedback-to-spec sync, settings convention: [`specs/README.md`](./specs/README.md)
+- Spec-first direction of authority, folder taxonomy, spec split policy, component spec coverage, feedback-to-spec sync, settings convention: [`specs/README.md`](./specs/README.md)
 - Service-module symmetry: [`agent-workflows/service-symmetry-standard.md`](./agent-workflows/service-symmetry-standard.md)
 - Spec writing template: [`agent-workflows/element-spec-format.md`](./agent-workflows/element-spec-format.md)
 
@@ -24,4 +20,5 @@ Normative bodies (do not restate here):
 - `design/motion.md` — animation timing
 - `design/map-system.md` — map hierarchy, markers, clustering
 - `design/components/` — component-specific design rules
-- Do **not** load `archive/reference-products.md` in agentic sessions
+
+Do **not** load `docs/archive/` in agentic sessions — see [`README.md`](./README.md) § Where things live.
