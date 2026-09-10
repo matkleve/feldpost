@@ -9,7 +9,7 @@ specs:
 # Workspace View — Use Cases & Interaction Scenarios
 
 > **Related specs:** [workspace-pane](../specs/ui/workspace/workspace-pane.md), [workspace-view-system](../specs/service/workspace-view/workspace-view-system.md), [workspace-toolbar](../specs/ui/workspace/workspace-toolbar.md), [thumbnail-grid](../specs/component/item-grid/item-grid.md), [group-tab-bar](../specs/component/workspace/group-tab-bar.md), [filter-dropdown](../specs/component/filters/filter-dropdown.md), [sort-dropdown](../specs/component/filters/sort-dropdown.md), [grouping-dropdown](../specs/component/filters/grouping-dropdown.md), [projects-dropdown](../specs/component/project/projects-dropdown.md)
-> **Product use cases** (archived catalogue): [UC1](../archive/2026-04-15-doc-cleanup/archive/use-cases-README.md#uc1--technician-on-site-view-history) §6–7, [UC2](../archive/2026-04-15-doc-cleanup/archive/use-cases-README.md#uc2--clerk-preparing-a-quote) §6–10
+> **Note:** the product narratives this file used to cite (UC1–UC2 of the 2026-04 catalogue) were archived with no live successor. The interaction scenarios below are the live contract; do not follow links into `docs/archive/`.
 > **Related interaction scenarios:** [map-shell IS-2](map-shell.md#is-2-open-workspace-pane-via-marker-click)
 
 ---

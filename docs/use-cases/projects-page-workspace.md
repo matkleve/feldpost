@@ -9,7 +9,7 @@ specs:
 # Projects Page Workspace Flow — Use Cases
 
 > **Related specs:** [projects-page](../specs/page/projects-page.md), [project-details-view](../specs/component/project/project-details-view.md), [image-detail-view](../specs/ui/media-detail/media-detail-view.md), [map-shell](../specs/page/map-page.md)
-> **Personas** (archived catalogue): [Technician](../archive/2026-04-15-doc-cleanup/archive/use-cases-README.md#persona-technician), [Clerk](../archive/2026-04-15-doc-cleanup/archive/use-cases-README.md#persona-clerk)
+> **Who does what:** [role permissions matrix](../playbooks/security/role-permissions.md) (admin · clerk · worker · viewer); the field-user profile is [`docs/design/constitution.md`](../design/constitution.md) § The User
 
 ---
 
