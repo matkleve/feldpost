@@ -1,5 +1,21 @@
 import type { UploadJob, UploadPhase } from '../upload-manager.types';
 
+/**
+ * Sole writer of the "cancelled by sign-out" patch — sets phase, wasCancelled,
+ * and issueKind together so the caller can't produce the phase without the tag.
+ * @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-07, UP-08
+ */
+export function buildCancelledSignedOutPatch(failedAt: UploadPhase): Partial<UploadJob> {
+  return {
+    phase: 'error',
+    statusLabel: 'Cancelled',
+    error: 'Upload cancelled — user signed out.',
+    failedAt,
+    wasCancelled: true,
+    issueKind: 'upload_error',
+  };
+}
+
 export interface CancelAllActiveUploadsDeps {
   snapshotJobs: () => ReadonlyArray<UploadJob>;
   isTerminalPhase: (phase: UploadPhase) => boolean;

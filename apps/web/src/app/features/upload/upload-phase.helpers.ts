@@ -54,51 +54,16 @@ export function getLaneForJob(job: UploadJob): UploadLane {
   return 'uploading';
 }
 
+/**
+ * `job.issueKind` is authoritative — every producer that creates an issue
+ * state sets it explicitly at the point the issue is created (see the
+ * writers listed in `docs/audits/upload-process-analysis-2026-09-08/
+ * 04-state-machine.md` § 2–3). This function does not infer anything from
+ * `job.phase` or `job.statusLabel`.
+ * @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-07
+ */
 export function getIssueKind(job: UploadJob): UploadIssueKind {
-  if (job.phase === 'awaiting_disambiguation') {
-    return null;
-  }
-
-  if (job.issueKind) {
-    return job.issueKind;
-  }
-
-  const statusText = (job.statusLabel ?? '').toLowerCase();
-  const looksLikeDocumentUnresolved =
-    statusText.includes('choose location or project') ||
-    statusText.includes('standort oder projekt') ||
-    statusText.includes('waehle standort oder projekt');
-  const looksLikeLocationIssue =
-    statusText.includes('choose location') ||
-    statusText.includes('missing location') ||
-    statusText.includes('standort fehlt') ||
-    statusText.includes('gps fehlt');
-
-  if (looksLikeDocumentUnresolved) {
-    return 'document_unresolved';
-  }
-
-  if (job.phase === 'missing_data' && (job.addressCandidates?.length ?? 0) > 0) {
-    return 'address_ambiguous';
-  }
-
-  if (job.phase === 'missing_data' || looksLikeLocationIssue) {
-    return 'missing_gps';
-  }
-
-  if (job.phase === 'awaiting_conflict_resolution') {
-    return 'conflict_review';
-  }
-
-  if (job.phase === 'error') {
-    return 'upload_error';
-  }
-
-  if (job.phase === 'skipped' && !!job.existingMediaId) {
-    return 'duplicate_file';
-  }
-
-  return null;
+  return job.issueKind ?? null;
 }
 
 export function isDuplicateIssueKind(issueKind: UploadIssueKind): boolean {

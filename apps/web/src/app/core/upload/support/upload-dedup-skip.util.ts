@@ -15,7 +15,9 @@ export function handleDedupSkip(args: DedupSkipArgs): void {
   const { jobId, job, contentHash, existingMediaId, setPhase, updateJob, markDone, ctx } = args;
 
   setPhase(jobId, 'skipped');
-  updateJob(jobId, { existingMediaId });
+  // @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-07 —
+  // set issueKind explicitly here; getIssueKind() no longer infers it.
+  updateJob(jobId, { existingMediaId, issueKind: 'duplicate_file' });
   markDone(jobId);
   ctx.emitUploadSkipped({
     jobId,

@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { mergeDisambiguationGroupPatch } from './upload-location-disambiguation-registration.helpers';
-import type { UploadDisambiguationGroup } from '../upload-manager.types';
+import {
+  buildAwaitingDisambiguationJobPatch,
+  mergeDisambiguationGroupPatch,
+} from './upload-location-disambiguation-registration.helpers';
+import type { UploadAddressCandidate, UploadDisambiguationGroup } from '../upload-manager.types';
 
 const adminConflicts = [
   {
@@ -86,5 +89,30 @@ describe('mergeDisambiguationGroupPatch', () => {
     });
 
     expect(merged.adminLevelConflicts).toEqual(adminConflicts);
+  });
+});
+
+// @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-07
+describe('buildAwaitingDisambiguationJobPatch', () => {
+  it('does not set issueKind — awaiting_disambiguation is a paused phase, not an issue', () => {
+    const candidates: UploadAddressCandidate[] = [
+      { id: 'c-1', addressLabel: 'Innsbruck', lat: 0, lng: 0 },
+    ];
+
+    const patch = buildAwaitingDisambiguationJobPatch(
+      {
+        batchId: 'batch-1',
+        queryKey: 'geocode|innsbruck',
+        folderDisplayPath: 'Innsbruck',
+        titleAddress: 'Innsbruck',
+        jobIds: ['job-a'],
+        candidates,
+      },
+      'group-1',
+    );
+
+    expect(patch.issueKind).toBeUndefined();
+    expect(patch.addressCandidates).toBe(candidates);
+    expect(patch.disambiguationGroupId).toBe('group-1');
   });
 });

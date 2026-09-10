@@ -3,7 +3,9 @@ import { makeUploadJob, setupUploadPanel } from './upload-panel.test-utils.spec'
 describe('UploadPanelComponent missing_data prompt', () => {
   it('renders compact missing_data status text for missing_data jobs', async () => {
     const { component } = await setupUploadPanel({
-      initialJobs: [makeUploadJob({ phase: 'missing_data', statusLabel: 'Missing location' })],
+      initialJobs: [
+        makeUploadJob({ phase: 'missing_data', statusLabel: 'Missing location', issueKind: 'missing_gps' }),
+      ],
     });
     component.laneHandlers.setSelectedLane('issues');
 
@@ -40,7 +42,12 @@ describe('UploadPanelComponent error display', () => {
   it('renders error text in compact status line for error-phase jobs', async () => {
     const { component } = await setupUploadPanel({
       initialJobs: [
-        makeUploadJob({ phase: 'error', statusLabel: 'Failed', error: 'File too large' }),
+        makeUploadJob({
+          phase: 'error',
+          statusLabel: 'Failed',
+          error: 'File too large',
+          issueKind: 'upload_error',
+        }),
       ],
     });
     component.laneHandlers.setSelectedLane('issues');

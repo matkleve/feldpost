@@ -7,6 +7,7 @@ import { Injectable, Injector, inject } from '@angular/core';
 import { UploadJobStateService } from '../support/upload-job-state.service';
 import { UploadLocationDisambiguationStoreService } from './upload-location-disambiguation-store.service';
 import {
+  buildAwaitingDisambiguationJobPatch,
   mergeDisambiguationGroupPatch,
   type DisambiguationRegistrationInput,
 } from './upload-location-disambiguation-registration.helpers';
@@ -90,14 +91,7 @@ export class UploadLocationDisambiguationRegistrationService {
   ): void {
     for (const jobId of input.jobIds) {
       this.jobState.setPhase(jobId, 'awaiting_disambiguation');
-      this.jobState.updateJob(jobId, {
-        disambiguationGroupId: updated.id,
-        resolutionStatus: 'pending',
-        issueKind: 'address_ambiguous',
-        addressCandidates: input.candidates,
-        folderDisplayPath: input.folderDisplayPath,
-        statusLabel: 'Choose address',
-      });
+      this.jobState.updateJob(jobId, buildAwaitingDisambiguationJobPatch(input, updated.id));
     }
   }
 

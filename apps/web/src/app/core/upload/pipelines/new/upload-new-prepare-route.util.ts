@@ -320,7 +320,9 @@ async function runConflictCheck(
   const candidate = await deps.conflictService.findConflict(job.coords, job.titleAddress);
   if (!candidate) return false;
 
-  deps.jobState.updateJob(jobId, { conflictCandidate: candidate });
+  // @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-07 —
+  // set issueKind explicitly here; getIssueKind() no longer infers it from phase.
+  deps.jobState.updateJob(jobId, { conflictCandidate: candidate, issueKind: 'conflict_review' });
   deps.jobState.setPhase(jobId, 'awaiting_conflict_resolution');
 
   deps.queue.markDone(jobId);

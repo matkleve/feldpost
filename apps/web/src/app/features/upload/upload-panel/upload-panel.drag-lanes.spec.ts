@@ -112,7 +112,7 @@ describe('UploadPanelComponent lanes', () => {
     const { component } = await setupUploadPanel({
       initialJobs: [
         makeUploadJob({ phase: 'uploading', statusLabel: 'Uploading' }),
-        makeUploadJob({ phase: 'missing_data', statusLabel: 'Missing location' }),
+        makeUploadJob({ phase: 'missing_data', statusLabel: 'Missing location', issueKind: 'missing_gps' }),
       ],
     });
 
@@ -120,14 +120,16 @@ describe('UploadPanelComponent lanes', () => {
     expect(component.laneCounts().uploading).toBe(1);
   });
 
-  it('routes jobs with missing-location status text to issues lane', async () => {
+  // @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-07 —
+  // lane routing reads job.issueKind only; statusLabel text is never inspected,
+  // so a job merely mentioning "missing location" in its label stays uploading.
+  it('does not route jobs to issues lane based on status text alone', async () => {
     const { component } = await setupUploadPanel({
       initialJobs: [makeUploadJob({ phase: 'uploading', statusLabel: 'Missing location' })],
     });
-    component.laneHandlers.setSelectedLane('issues');
 
-    expect(component.visibleLaneJobs().length).toBe(1);
-    expect(component.visibleLaneJobs()[0]?.statusLabel).toBe('Missing location');
+    expect(component.laneCounts().issues).toBe(0);
+    expect(component.laneCounts().uploading).toBe(1);
   });
 });
 
