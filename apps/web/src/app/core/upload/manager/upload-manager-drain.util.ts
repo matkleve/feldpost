@@ -13,10 +13,13 @@
  *  - retryUploadManagerJob() (after retry)
  *  - Job completion (markDone → notifies queue there's now space)
  *
- * Logging: Debug console output for diagnostics (job phases, selected queue items)
+ * Logging: gated behind the upload-manager debug flag (see upload-manager-debug.util.ts) —
+ * a drain fires after every job transition, so ungated logging floods the console on a
+ * large folder import (UP-41).
  */
 
 import type { UploadJob } from '../upload-manager.types';
+import { uploadManagerDebugLog } from '../support/upload-manager-debug.util';
 import { selectQueuedJobsForStart } from './upload-manager-queue.util';
 
 export interface DrainUploadManagerQueueDeps {
@@ -33,13 +36,13 @@ export interface DrainUploadManagerQueueDeps {
 export function drainUploadManagerQueue(deps: DrainUploadManagerQueueDeps): void {
   const jobs = deps.snapshotJobs();
   const slotsAvailable = deps.availableSlots();
-  console.log('[upload-manager] drainQueue:', {
+  uploadManagerDebugLog('[upload-manager] drainQueue:', {
     totalJobs: jobs.length,
     slotsAvailable,
     phases: jobs.map((j) => `${j.id.slice(0, deps.logJobIdPrefixLen)}:${j.phase}:${j.mode}`),
   });
   if (slotsAvailable <= 0) {
-    console.log('[upload-manager] drainQueue: no slots available, exiting');
+    uploadManagerDebugLog('[upload-manager] drainQueue: no slots available, exiting');
     return;
   }
 
@@ -47,7 +50,7 @@ export function drainUploadManagerQueue(deps: DrainUploadManagerQueueDeps): void
     isJobBlocked: deps.isJobBlocked,
     isJobRunning: deps.isJobRunning,
   });
-  console.log(
+  uploadManagerDebugLog(
     '[upload-manager] drainQueue: starting',
     toStart.length,
     'jobs:',

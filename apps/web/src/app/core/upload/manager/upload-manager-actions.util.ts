@@ -16,6 +16,7 @@
  */
 
 import type { ConflictResolution, UploadJob, UploadPhase } from '../upload-manager.types';
+import { uploadManagerDebugLog } from '../support/upload-manager-debug.util';
 
 export interface UploadManagerActionsDeps {
   findJob: (jobId: string) => UploadJob | undefined;
@@ -200,7 +201,7 @@ export function attachUploadManagerFile(
   file: File,
   deps: UploadManagerActionsDeps,
 ): string {
-  console.log('[upload-manager] attachFile called:', {
+  uploadManagerDebugLog('[upload-manager] attachFile called:', {
     mediaId,
     fileName: file.name,
     fileSize: file.size,
@@ -236,7 +237,10 @@ export function attachUploadManagerFile(
 
   deps.addJobs([job]);
   hydrateUploadManagerDeferredPreviews([job], deps);
-  console.log('[upload-manager] attach job added to state, calling drainQueue. jobId:', jobId);
+  uploadManagerDebugLog(
+    '[upload-manager] attach job added to state, calling drainQueue. jobId:',
+    jobId,
+  );
   deps.drainQueue();
   return jobId;
 }

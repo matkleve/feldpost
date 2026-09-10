@@ -1,7 +1,7 @@
 # Upload Panel
 
 > **Related specs:** [media-download-service](../../service/media-download-service/media-download-service.md), [upload-manager](../../service/media-upload-service/upload-manager.md), [geocoding-service](../../service/geocoding/geocoding-service.md), [media-preview-service](../../service/media-preview/media-preview-service.md), [file-type-chips](../media/file-type-chips.md), [action-context-matrix](../../system/action-context-matrix.md)  
-> **Split contracts:** [Layout & visual states](upload-panel.layout-and-states.md) · [Lane & row actions](upload-panel.lane-and-row-actions.md) · [Feedback triage](upload-panel.feedback-triage.md) · [Acceptance criteria](upload-panel.acceptance-criteria.md)
+> **Split contracts:** [Layout & visual states](upload-panel.layout-and-states.md) · [Lane & row actions](upload-panel.lane-and-row-actions.md) · [Feedback triage](upload-panel.feedback-triage.md) · [Data flow & wiring](upload-panel.data-flow.supplement.md) · [Status & lane mapping](upload-panel.status-mapping.supplement.md) · [Acceptance criteria](upload-panel.acceptance-criteria.md)
 
 ## What It Is
 
@@ -97,69 +97,7 @@ section.upload-panel
 
 ## Data
 
-### Data Flow (Mermaid)
-
-```mermaid
-flowchart TD
-  U[User adds files] --> P[UploadPanelComponent]
-  P --> M[UploadManagerService submit/submitFolder]
-  M --> J[(jobs signal)]
-  M --> DD[duplicateDetected stream]
-  J --> B[Lane buckets by lane semantics plus issue kind]
-  B --> C[Lane counts]
-  B --> L[Lane list rows]
-  L --> I[UploadPanelItemComponent]
-  I -->|missing_data| R[placementRequested output]
-  I -->|uploaded row| Z[zoomToLocationRequested output]
-  I -->|uploaded actions| ZA[navigate, prioritize, add-to-project, download]
-  I -->|duplicate issue GPS action| Z2[openExistingPlacedMedia output]
-  DD --> DM[DuplicateResolutionModal]
-  DM -->|use_existing/upload_anyway/reject| M
-  I -->|dismiss| M
-```
-
-### Lane Actions (Mermaid)
-
-```mermaid
-flowchart LR
-  A[Upload job] --> B{Lane}
-  B -->|uploading| C[View progress<br/>View file details<br/>Cancel]
-  B -->|uploaded| D[Row click: map focus when coords exist<br/>Change location > Add/Change GPS<br/>Change location > Add/Change address<br/>Open in /media<br/>Assign project<br/>Optional Prioritize<br/>Download]
-  B -->|issues duplicate_photo| E[Upload anyway<br/>Open existing media<br/>Dismiss]
-  B -->|issues missing_gps| F[Add GPS<br/>Add/Change address<br/>Retry<br/>Dismiss]
-  B -->|issues document_unresolved| H[Add GPS<br/>Add/Change address<br/>Assign project<br/>Dismiss]
-  B -->|issues conflict_review| G[Resolve conflict<br/>Retry<br/>Dismiss]
-```
-
-### Change Location Flow (Mermaid)
-
-```mermaid
-sequenceDiagram
-  actor User
-  participant Row as UploadPanelItem
-  participant Panel as UploadPanelComponent
-  participant Map as MapShellComponent
-  participant DB as resolve_media_location RPC
-
-  User->>Row: Context menu > Change location
-  alt Add/Change GPS
-    Row->>Panel: change_location_map(mediaId)
-    Panel->>Map: locationMapPickRequested(mediaId)
-    User->>Map: Click map
-    Map->>DB: persist(latitude, longitude, address)
-    Map-->>Panel: imageUploaded(id, lat, lng)
-  else Add/Change address
-    Row->>Panel: change_location_address(mediaId)
-    User->>Panel: Types search text
-    Panel-->>User: Suggestions under input
-    User->>Panel: Hover Suggestion
-    Panel->>Map: locationPreviewRequested(lat, lng)
-    User->>Panel: Click suggestion
-    Panel->>DB: persist(latitude, longitude, address)
-    Panel->>Map: imageUploaded(id, lat, lng)
-  end
-  Note over Panel,DB: Persisted media location update only; do not requeue upload pipeline
-```
+Reactive data flow (submit → lane rows) and the panel-open wiring sequence: [upload-panel.data-flow.supplement.md](upload-panel.data-flow.supplement.md). Job phase state diagram and issue-kind/phase → lane mapping: [upload-panel.status-mapping.supplement.md](upload-panel.status-mapping.supplement.md). Lane action summary and change-location flow: [upload-panel.lane-and-row-actions.md](upload-panel.lane-and-row-actions.md).
 
 | Field                   | Source                                      | Type                                                                                                         |
 | ----------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
@@ -181,61 +119,6 @@ sequenceDiagram
 | Placement handoff       | `placementRequested` output                 | `jobId`                                                                                                      |
 | Item action set         | upload row presenter                        | `UploadItemAction[]`                                                                                         |
 | Issue kind              | upload lane mapping                         | `'duplicate_photo' \| 'missing_gps' \| 'document_unresolved' \| 'conflict_review' \| 'upload_error' \| null` |
-
-### Status Mapping (Mermaid)
-
-```mermaid
-stateDiagram-v2
-  [*] --> queued
-  queued --> validating
-  validating --> parsing_exif
-  parsing_exif --> converting_format: HEIC/HEIF
-  parsing_exif --> hashing: photo/image path
-  parsing_exif --> conflict_check: video/document path
-  converting_format --> hashing
-  hashing --> dedup_check
-  dedup_check --> duplicate_issue: duplicate match
-  duplicate_issue --> complete: use_existing
-  duplicate_issue --> uploading: upload_anyway
-  duplicate_issue --> skipped: reject
-  dedup_check --> extracting_title: no coords
-  dedup_check --> conflict_check: coords present
-  extracting_title --> conflict_check: title address found
-  extracting_title --> missing_data: no GPS + no address
-  conflict_check --> awaiting_conflict_resolution: photoless conflict
-  awaiting_conflict_resolution --> queued: user resolution
-  conflict_check --> uploading: no conflict
-  uploading --> saving_record
-  saving_record --> resolving_address: coords path
-  saving_record --> resolving_coordinates: title-address path
-  saving_record --> error
-  resolving_address --> complete
-  resolving_coordinates --> complete
-  missing_data --> queued: map/address placement provided
-  missing_data --> queued: project binding provided (document_unresolved)
-  queued --> error: timeout/failure
-  error --> queued: retry
-  complete --> [*]
-  error --> [*]
-  missing_data --> [*]
-  skipped --> [*]
-```
-
-### Lane Semantics (Mermaid)
-
-```mermaid
-flowchart LR
-  A[Job phase] --> B{Issue kind?}
-  B -->|duplicate_photo| C[Issues lane]
-  B -->|missing_gps| C
-  B -->|document_unresolved| C
-  B -->|conflict_review| C
-  B -->|upload_error| C
-  B -->|none| D{Phase family}
-  D -->|queued parsing uploading enrichment| E[Uploading lane]
-  D -->|complete attached replaced| F[Uploaded lane]
-  D -->|skipped reject| C
-```
 
 ## State
 
@@ -266,42 +149,7 @@ flowchart LR
 
 ## Wiring
 
-### Wiring Flow (Mermaid)
-
-```mermaid
-sequenceDiagram
-  actor User
-  participant Zone as UploadButtonZone
-  participant Panel as UploadPanelComponent
-  participant Manager as UploadManagerService
-  participant Map as MapShellComponent
-
-  User->>Zone: Click Upload Button
-  Zone->>Panel: visible = true
-  User->>Panel: Drop files
-  Panel->>Manager: submit(files)
-  Manager-->>Panel: jobs() updates
-  Panel-->>User: lane counts + selected lane list
-  alt missing_data item
-    User->>Panel: Click map-marker action
-    Panel-->>Map: placementRequested(jobId)
-    Map->>Panel: placeFile(jobId, coords)
-    Panel->>Manager: placeJob(jobId, coords)
-  else uploaded item with coords
-    User->>Panel: Click row
-    Panel-->>Map: zoomToLocationRequested({mediaId,lat,lng})
-  end
-  Manager-->>Map: imageUploaded event
-```
-
-- Receives visibility from `MapShellComponent` and uses parent-controlled open/close behavior.
-- Injects `UploadManagerService` to submit files and read reactive job/batch state.
-- Uses one canonical intake pipeline for picker, drop, folder, and capture file sources.
-- Keeps lane filters stable and deterministic as jobs move through phases.
-- Emits placement and zoom intents to `MapShellComponent` through dedicated outputs.
-- Keeps lane selection stable, including empty lanes.
-- Surfaces RLS permission denies as user-facing feedback while relying on backend enforcement.
-
+Open/submit/placement/zoom sequence and the wiring-contract bullets: [upload-panel.data-flow.supplement.md § Wiring](upload-panel.data-flow.supplement.md#wiring).
 
 ## Acceptance Criteria (rollup)
 

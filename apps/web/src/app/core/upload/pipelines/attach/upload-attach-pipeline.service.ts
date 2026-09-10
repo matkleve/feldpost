@@ -29,6 +29,7 @@ import { MediaDownloadService } from '../../../media-download/media-download.ser
 import { SupabaseService } from '../../../supabase/supabase.service';
 import { runAttachPostUpdate } from './upload-attach-post-update.util';
 import { runAttachRecordUpdate } from './upload-attach-record-update-runner.util';
+import { uploadManagerDebugLog } from '../../support/upload-manager-debug.util';
 import { isCancelledUploadJob } from '../../support/upload-cancelled.util';
 import { handleCancelledStorageCleanup } from '../../support/upload-cancelled-storage-cleanup.util';
 import { runUploadDedupCheck } from '../../support/upload-dedup-check.util';
@@ -95,7 +96,7 @@ export class UploadAttachPipelineService {
       setPhase: (phase) => this.jobState.setPhase(jobId, phase),
       failJob: (phase, error) => ctx.failJob(jobId, phase, error),
       onCancelled: handleCancelled,
-      logInfo: (...logArgs) => console.log(...logArgs),
+      logInfo: uploadManagerDebugLog,
       logError: (...logArgs) => console.error(...logArgs),
     });
     if (!recordUpdate) {
@@ -123,7 +124,9 @@ export class UploadAttachPipelineService {
       enrichWithReverseGeocode: (mediaId) => this.enrichment.enrichWithReverseGeocode(mediaId),
       enrichWithForwardGeocode: (mediaId, titleAddress) =>
         this.enrichment.enrichWithForwardGeocode(mediaId, titleAddress),
-      log: (...args) => console.log(...args),
+      // `warn` (missing thumbnailUrl at finalize) is left ungated: it flags a
+      // real data anomaly rather than routine trace noise. See UP-41.
+      log: uploadManagerDebugLog,
       warn: (...args) => console.warn(...args),
     });
   }

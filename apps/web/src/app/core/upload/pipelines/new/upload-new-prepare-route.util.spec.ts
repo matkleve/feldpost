@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { routePreparedNewJob } from './upload-new-prepare-route.util';
+import { awaitHeicConversionForUpload, routePreparedNewJob } from './upload-new-prepare-route.util';
 import type { ParsedExif } from '../../upload.service';
 import type { PipelineContext, UploadJob } from '../../upload-manager.types';
 
@@ -217,6 +217,49 @@ describe('routePreparedNewJob source precedence (unresolved branches)', () => {
 
     expect(job.issueKind).toBe('document_unresolved');
     expect(job.locationSourceUsed).toBe('none');
+  });
+});
+
+describe('awaitHeicConversionForUpload', () => {
+  // @see docs/audits/upload-process-analysis-2026-09-08/03-branch-matrix.md M3
+  // @see docs/audits/upload-process-analysis-2026-09-08/09-coverage.md § 4 T9
+  it('rejects when convertToJpeg fails, so the pipeline never reaches uploadFile with the original blob', async () => {
+    const job = createJob({ id: 'heic-job', file: new File(['x'], 'IMG_0001.HEIC', { type: 'image/heic' }) });
+    const jobState = {
+      findJob: vi.fn(() => job),
+      updateJob: vi.fn(),
+      setPhase: vi.fn(),
+    };
+    const uploadService = {
+      isHeic: vi.fn().mockReturnValue(true),
+      convertToJpeg: vi.fn().mockRejectedValue(new Error('HEIC_CONVERSION_FAILED')),
+    };
+
+    await expect(
+      awaitHeicConversionForUpload(
+        { jobState, uploadService } as unknown as Parameters<typeof awaitHeicConversionForUpload>[0],
+        job.id,
+      ),
+    ).rejects.toThrow('HEIC_CONVERSION_FAILED');
+
+    // The gate rejected before producing a converted file — nothing downstream
+    // was ever handed a JPEG to upload from the original HEIC blob.
+    expect(uploadService.convertToJpeg).toHaveBeenCalledWith(job.file);
+  });
+
+  it('resolves without error for a non-HEIC file, allowing upload to proceed', async () => {
+    const job = createJob({ id: 'jpeg-job', file: new File(['x'], 'camera_001.jpg', { type: 'image/jpeg' }) });
+    const jobState = { findJob: vi.fn(() => job), updateJob: vi.fn(), setPhase: vi.fn() };
+    const uploadService = { isHeic: vi.fn().mockReturnValue(false), convertToJpeg: vi.fn() };
+
+    await expect(
+      awaitHeicConversionForUpload(
+        { jobState, uploadService } as unknown as Parameters<typeof awaitHeicConversionForUpload>[0],
+        job.id,
+      ),
+    ).resolves.toBeUndefined();
+
+    expect(uploadService.convertToJpeg).not.toHaveBeenCalled();
   });
 });
 
