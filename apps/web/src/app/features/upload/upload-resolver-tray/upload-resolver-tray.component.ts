@@ -22,11 +22,7 @@ import { fromEvent } from 'rxjs';
 import { filter } from 'rxjs';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { UploadManagerService } from '../../../core/upload/upload-manager.service';
-import { UploadService } from '../../../core/upload/upload.service';
-import {
-  areAllJobsReadyForTrayResolution,
-  isJobReadyForTrayResolution,
-} from '../../../core/upload/address-resolution/upload-tray-resolution-gate.helpers';
+import { areAllJobsReadyForTrayResolution } from '../../../core/upload/address-resolution/upload-tray-resolution-gate.helpers';
 import { UploadLocationResolutionService } from '../../../core/upload/location/upload-location-resolution.service';
 import {
   countDialogueUnits,
@@ -78,7 +74,6 @@ export class UploadResolverTrayComponent implements OnInit {
   private readonly i18n = inject(I18nService);
   private readonly orchestrator = inject(UploadResolverTrayOrchestratorService);
   private readonly uploadManager = inject(UploadManagerService);
-  private readonly uploadService = inject(UploadService);
   private readonly locationResolution = inject(UploadLocationResolutionService);
   private readonly panelSignals = inject(UploadPanelSignalsService);
 
@@ -195,10 +190,10 @@ export class UploadResolverTrayComponent implements OnInit {
     if (this.isItemBlocked()) {
       return false;
     }
-    if (this.showTextAnswer()) {
-      return this.cityDraft().trim().length > 0;
+    if (!this._selectedOptionId() && !this.showTextAnswer()) {
+      return false;
     }
-    if (!this._selectedOptionId()) {
+    if (this.showTextAnswer() && this.cityDraft().trim().length === 0) {
       return false;
     }
     const item = this.activeItem();
@@ -212,7 +207,7 @@ export class UploadResolverTrayComponent implements OnInit {
       !areAllJobsReadyForTrayResolution(
         liveIds,
         (id) => this.uploadManager.jobs().find((entry) => entry.id === id),
-        (file) => this.uploadService.isHeic(file),
+        { questionKey: item?.questionKey, answerKind: item?.answerKind },
       )
     ) {
       return false;

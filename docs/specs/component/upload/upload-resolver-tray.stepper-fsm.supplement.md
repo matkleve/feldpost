@@ -40,4 +40,4 @@ Root `[attr.data-state]` binds to this enum. Transition map: `upload-resolver-tr
 
 ## Tray Continue gate — text answer exception
 
-The text-answer city step (`answerKind: text`) bypasses the file-prepare readiness gate intentionally: city names do not depend on HEIC conversion completing. All other answer surfaces require every live `jobId` to pass `areAllJobsReadyForTrayResolution`.
+The tray Continue gate is kind-aware: `answerKind: text` and path-only questions (`layerPackage`, `adminLevelConflict`) do not require `filePrepareComplete`. All other option-list steps require every live `jobId` to pass `areAllJobsReadyForTrayResolution` with `job.filePrepareComplete === true`. HEIC conversion is not part of this gate.
