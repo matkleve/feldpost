@@ -50,6 +50,48 @@ export function insertDedupHashFireAndForget(args: InsertDedupHashArgs): void {
   });
 }
 
+type RetireStaleDedupHashesArgs = {
+  mediaItemId: string;
+  keepContentHash: string | undefined;
+  rpc: (
+    fn: 'retire_dedup_hashes_for_media_item',
+    args: { p_media_item_id: string; p_keep_content_hash: string | null },
+  ) => PromiseLike<{ data: number | null; error: unknown }>;
+  onError?: (error: unknown) => void;
+};
+
+/**
+ * Retires content-hash rows superseded by a replace (bytes changed, row kept).
+ * @see docs/audits/upload-flow-review-2026-09-10/02-new-issues.md NF-01
+ */
+export function retireStaleDedupHashesFireAndForget(args: RetireStaleDedupHashesArgs): void {
+  const { mediaItemId, keepContentHash, rpc, onError } = args;
+  if (!keepContentHash) {
+    return;
+  }
+  rpc('retire_dedup_hashes_for_media_item', {
+    p_media_item_id: mediaItemId,
+    p_keep_content_hash: keepContentHash,
+  }).then(
+    ({ error }) => {
+      if (error) {
+        if (onError) {
+          onError(error);
+        } else {
+          console.error('[upload] dedup hash retire failed:', error);
+        }
+      }
+    },
+    (error: unknown) => {
+      if (onError) {
+        onError(error);
+      } else {
+        console.error('[upload] dedup hash retire failed:', error);
+      }
+    },
+  );
+}
+
 type VerifyStoragePathWriteArgs = {
   expectedStoragePath: string;
   readBack: () => Promise<{ storagePath: string | null | undefined; error: unknown }>;
