@@ -7,7 +7,8 @@ import { describe, expect, it, vi } from 'vitest';
 import type { User } from '@supabase/supabase-js';
 import { persistUploadFile } from '../support/upload-file-persist.util';
 import type { UploadFilePersistDeps } from '../support/upload-file-persist.util';
-import type { UploadAddressPersistContext } from './upload-address-persist-context.helpers';
+import { buildUploadAddressPersistContext } from './upload-address-persist-context.helpers';
+import type { UploadJob } from '../upload-manager.types';
 
 function makeFile(): File {
   return new File([new Uint8Array(4)], 'photo.jpg', { type: 'image/jpeg' });
@@ -60,33 +61,44 @@ function buildDeps(fakeGeocoding: { reverse: ReturnType<typeof vi.fn> }): {
 
 const viennaCoords = { lat: 48.2082, lng: 16.3738 };
 
-const viennaAddressContext: UploadAddressPersistContext = {
-  hasEstablishedTextAddress: true,
-  fields: {
-    country: 'AT',
-    state: null,
-    postcode: null,
-    city: 'Vienna',
-    street: null,
-    houseNumber: null,
-  },
-  precision: 'city',
-  addressLabel: 'Vienna',
-};
+function viennaFolderJob(overrides: Partial<UploadJob> = {}): UploadJob {
+  return {
+    id: 'job-vienna',
+    batchId: 'batch-1',
+    file: makeFile(),
+    phase: 'uploading',
+    progress: 0,
+    statusLabel: '',
+    submittedAt: new Date(),
+    mode: 'new',
+    titleAddress: 'Vienna',
+    titleAddressSource: 'folder',
+    locationSourceUsed: 'folder',
+    groupingKey: 'at|||vienna||',
+    coords: viennaCoords,
+    ...overrides,
+  };
+}
 
-const streetFolderAddressContext: UploadAddressPersistContext = {
-  hasEstablishedTextAddress: true,
-  fields: {
-    country: null,
-    state: null,
-    postcode: null,
-    city: null,
-    street: 'Street Name',
-    houseNumber: '5',
-  },
-  precision: 'houseNumber',
-  addressLabel: 'Street Name 5',
-};
+describe('buildUploadAddressPersistContext — folder vs EXIF gate', () => {
+  it('returns city-only context when folder text established placement', () => {
+    const context = buildUploadAddressPersistContext({ job: viennaFolderJob() });
+    expect(context).not.toBeNull();
+    expect(context!.precision).toBe('city');
+    expect(context!.fields.city).toBe('vienna');
+    expect(context!.fields.street).toBeNull();
+  });
+
+  it('returns null when EXIF won placement — reverse geocode is allowed at persist', () => {
+    const context = buildUploadAddressPersistContext({
+      job: viennaFolderJob({
+        locationSourceUsed: 'exif',
+        parsedExif: { coords: viennaCoords },
+      }),
+    });
+    expect(context).toBeNull();
+  });
+});
 
 describe('NF-40 address persist acceptance', () => {
   it('city-only folder (Vienna/, no EXIF) does not end up with a street address', async () => {
@@ -101,16 +113,21 @@ describe('NF-40 address persist acceptance', () => {
       countryCode: 'at',
     });
     const { deps, rpc } = buildDeps({ reverse });
+    const addressContext = buildUploadAddressPersistContext({ job: viennaFolderJob() });
 
-    await persistUploadFile({
-      file: makeFile(),
-      manualCoords: viennaCoords,
-      addressContext: viennaAddressContext,
-    }, deps);
+    await persistUploadFile(
+      {
+        file: makeFile(),
+        manualCoords: viennaCoords,
+        addressContext,
+      },
+      deps,
+    );
 
     await vi.waitFor(() => expect(rpc).toHaveBeenCalled());
 
     expect(reverse).not.toHaveBeenCalled();
+    expect(addressContext).not.toBeNull();
 
     const resolveCall = rpc.mock.calls.find((c) => c[0] === 'resolve_media_location');
     expect(resolveCall).toBeDefined();
@@ -118,7 +135,7 @@ describe('NF-40 address persist acceptance', () => {
       p_media_item_id: 'media-vienna',
       p_latitude: viennaCoords.lat,
       p_longitude: viennaCoords.lng,
-      p_city: 'Vienna',
+      p_city: 'vienna',
       p_street: null,
       p_house_number: null,
       p_address_precision: 'city',
@@ -126,24 +143,84 @@ describe('NF-40 address persist acceptance', () => {
     expect(resolveCall![1].p_street).toBeNull();
   });
 
+  it('Vienna/ folder hint with EXIF GPS reverse-geocodes the camera position (EXIF wins)', async () => {
+    const reverseResult = {
+      addressLabel: 'Stephansplatz 1, Wien',
+      city: 'Wien',
+      district: 'Innere Stadt',
+      street: 'Stephansplatz 1',
+      streetNumber: '1',
+      zip: '1010',
+      country: 'Austria',
+      countryCode: 'at',
+    };
+    const reverse = vi.fn().mockResolvedValue(reverseResult);
+    const { deps, rpc } = buildDeps({ reverse });
+    const job = viennaFolderJob({
+      locationSourceUsed: 'exif',
+      parsedExif: { coords: viennaCoords },
+    });
+    const addressContext = buildUploadAddressPersistContext({ job });
+
+    expect(addressContext).toBeNull();
+
+    await persistUploadFile(
+      {
+        file: makeFile(),
+        manualCoords: viennaCoords,
+        parsedExif: job.parsedExif,
+        addressContext,
+      },
+      deps,
+    );
+
+    await vi.waitFor(() => expect(reverse).toHaveBeenCalled());
+    expect(reverse).toHaveBeenCalledWith(viennaCoords.lat, viennaCoords.lng);
+
+    await vi.waitFor(() => {
+      const resolveCall = rpc.mock.calls.find((c) => c[0] === 'resolve_media_location');
+      expect(resolveCall?.[1]?.p_street).toBe('Stephansplatz 1');
+    });
+
+    const resolveCall = rpc.mock.calls.find((c) => c[0] === 'resolve_media_location');
+    expect(resolveCall![1]).toMatchObject({
+      p_latitude: viennaCoords.lat,
+      p_longitude: viennaCoords.lng,
+      p_city: 'Wien',
+      p_street: 'Stephansplatz 1',
+      p_address_precision: 'houseNumber',
+    });
+  });
+
   it('folder-derived address (Street Name 5) is persisted even when reverse geocode fails', async () => {
     const reverse = vi.fn().mockResolvedValue(null);
     const { deps, rpc } = buildDeps({ reverse });
+    const job: UploadJob = {
+      ...viennaFolderJob(),
+      titleAddress: 'Street Name 5',
+      groupingKey: '||||street name|5',
+      coords: { lat: 48.2, lng: 16.37 },
+    };
+    const addressContext = buildUploadAddressPersistContext({ job });
 
-    await persistUploadFile({
-      file: makeFile(),
-      manualCoords: { lat: 48.2, lng: 16.37 },
-      addressContext: streetFolderAddressContext,
-    }, deps);
+    await persistUploadFile(
+      {
+        file: makeFile(),
+        manualCoords: job.coords,
+        addressContext,
+      },
+      deps,
+    );
 
     await vi.waitFor(() => expect(rpc).toHaveBeenCalled());
 
     expect(reverse).not.toHaveBeenCalled();
+    expect(addressContext).not.toBeNull();
 
     const resolveCall = rpc.mock.calls.find((c) => c[0] === 'resolve_media_location');
     expect(resolveCall).toBeDefined();
     expect(resolveCall![1]).toMatchObject({
-      p_street: 'Street Name',
+      p_street: 'street name',
       p_house_number: '5',
       p_address_precision: 'houseNumber',
       p_address_label: 'Street Name 5',
@@ -166,6 +243,21 @@ describe('NF-40 address persist acceptance', () => {
     };
     const reverse = vi.fn().mockResolvedValue(reverseResult);
     const { deps, rpc } = buildDeps({ reverse });
+    const addressContext = buildUploadAddressPersistContext({
+      job: {
+        id: 'job-exif',
+        batchId: 'batch-1',
+        file: makeFile(),
+        phase: 'uploading',
+        progress: 0,
+        statusLabel: '',
+        submittedAt: new Date(),
+        mode: 'new',
+        locationSourceUsed: 'exif',
+      },
+    });
+
+    expect(addressContext).toBeNull();
 
     await persistUploadFile({
       file: makeFile(),

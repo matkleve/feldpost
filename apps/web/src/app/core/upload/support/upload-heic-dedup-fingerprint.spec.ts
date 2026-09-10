@@ -3,7 +3,13 @@
  * @see docs/audits/upload-flow-review-2026-09-10/02-new-issues.md § NF-38
  */
 import { describe, expect, it, vi } from 'vitest';
+import { UploadJobStateService } from './upload-job-state.service';
+import { computeUploadContentHash } from './content-hash.util';
 import { runUploadDedupCheck } from './upload-dedup-check.util';
+import {
+  awaitHeicConversionForUpload,
+  clearHeicConversionRegistryForTests,
+} from './upload-heic-prepare.util';
 import type { UploadJob } from '../upload-manager.types';
 import type { ParsedExif } from '../upload.types';
 
@@ -21,47 +27,18 @@ function makeConvertedJpeg(variant: number): File {
   return new File([jpegBytes], 'IMG_0001.jpg', { type: 'image/jpeg' });
 }
 
-function createHeicJob(file: File, sourceFile: File): UploadJob {
+function createHeicJob(sourceFile: File): UploadJob {
   return {
     id: 'job-heic',
     batchId: 'batch-1',
-    file,
-    sourceFile,
-    phase: 'hashing',
+    file: sourceFile,
+    phase: 'parsing_exif',
     progress: 0,
     statusLabel: '',
     submittedAt: new Date(),
     mode: 'new',
+    filePrepareComplete: true,
   };
-}
-
-async function hashViaDedupGate(job: UploadJob, parsedExif: ParsedExif): Promise<string> {
-  const jobState = {
-    setPhase: vi.fn(),
-    updateJob: vi.fn((jobId: string, patch: Partial<UploadJob>) => {
-      Object.assign(job, patch);
-    }),
-  };
-  const outcome = await runUploadDedupCheck(
-    {
-      jobState,
-      queue: { markDone: vi.fn() },
-      uploadService: { resolveMediaType: vi.fn().mockReturnValue('photo') },
-    },
-    job.id,
-    job,
-    parsedExif,
-    {
-      getCurrentUserId: () => 'user-1',
-      checkDedupHash: vi.fn().mockResolvedValue(null),
-      emitDuplicateDetected: vi.fn(),
-      emitBatchProgress: vi.fn(),
-      drainQueue: vi.fn(),
-    },
-  );
-  expect(outcome).toBe('no_match');
-  expect(job.contentHash).toBeTruthy();
-  return job.contentHash!;
 }
 
 describe('NF-38 HEIC dedup fingerprint stability', () => {
@@ -71,17 +48,59 @@ describe('NF-38 HEIC dedup fingerprint stability', () => {
     direction: 180,
   };
 
-  it('same HEIC source yields identical fingerprint after two independent conversions', async () => {
+  it('hashes HEIC source bytes before conversion and keeps fingerprint after JPEG swap', async () => {
+    clearHeicConversionRegistryForTests();
     const sourceHeic = makeHeicSource();
-    const jpeg1 = makeConvertedJpeg(1);
-    const jpeg2 = makeConvertedJpeg(2);
+    const expectedFingerprint = (
+      await computeUploadContentHash(sourceHeic, parsedExif, 'photo')
+    ).contentHash;
 
-    const jobAfterFirstConversion = createHeicJob(jpeg1, sourceHeic);
-    const jobAfterSecondConversion = createHeicJob(jpeg2, sourceHeic);
+    const jobState = new UploadJobStateService();
+    let job = createHeicJob(sourceHeic);
+    jobState.addJobs([job]);
 
-    const fingerprint1 = await hashViaDedupGate(jobAfterFirstConversion, parsedExif);
-    const fingerprint2 = await hashViaDedupGate(jobAfterSecondConversion, parsedExif);
+    const uploadService = {
+      resolveMediaType: vi.fn().mockReturnValue('photo'),
+      isHeic: (file: File) => file.name.toLowerCase().endsWith('.heic'),
+      convertToJpeg: vi.fn().mockImplementation(async () => makeConvertedJpeg(1)),
+    };
 
-    expect(fingerprint1).toBe(fingerprint2);
+    const outcome = await runUploadDedupCheck(
+      {
+        jobState,
+        queue: { markDone: vi.fn() },
+        uploadService,
+      },
+      job.id,
+      job,
+      parsedExif,
+      {
+        getCurrentUserId: () => 'user-1',
+        checkDedupHash: vi.fn().mockResolvedValue(null),
+        emitDuplicateDetected: vi.fn(),
+        emitBatchProgress: vi.fn(),
+        drainQueue: vi.fn(),
+      },
+    );
+
+    expect(outcome).toBe('no_match');
+    job = jobState.findJob(job.id)!;
+    expect(job.contentHash).toBe(expectedFingerprint);
+    expect(job.phase).toBe('dedup_check');
+    expect(uploadService.convertToJpeg).not.toHaveBeenCalled();
+
+    // Simulate post-dedup JPEG swap while sourceFile still points at HEIC bytes.
+    jobState.updateJob(job.id, {
+      file: makeConvertedJpeg(1),
+      sourceFile: sourceHeic,
+    });
+
+    await awaitHeicConversionForUpload({ jobState, uploadService }, job.id);
+
+    const afterConversion = jobState.findJob(job.id)!;
+    expect(afterConversion.contentHash).toBe(expectedFingerprint);
+    expect(afterConversion.file.type).toBe('image/jpeg');
+    expect(afterConversion.sourceFile).toBe(sourceHeic);
+    expect(uploadService.convertToJpeg).toHaveBeenCalledWith(sourceHeic);
   });
 });

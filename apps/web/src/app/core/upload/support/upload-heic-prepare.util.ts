@@ -6,6 +6,7 @@
 
 import { MAX_FILE_SIZE } from './upload-file-types';
 import { validateUploadFile } from './upload.service.util';
+import { resolveUploadSourceFile } from './content-hash.util';
 import type { UploadJobStateService } from './upload-job-state.service';
 import type { UploadService } from '../upload.service';
 
@@ -99,10 +100,14 @@ export async function awaitHeicConversionForUpload(
   jobId: string,
 ): Promise<void> {
   const job = deps.jobState.findJob(jobId);
-  if (!job || !deps.uploadService.isHeic(job.file)) {
+  if (!job) {
     return;
   }
-  await ensureHeicConversionScheduled(deps, jobId, job.file);
+  const sourceFile = resolveUploadSourceFile(job);
+  if (!deps.uploadService.isHeic(sourceFile)) {
+    return;
+  }
+  await ensureHeicConversionScheduled(deps, jobId, sourceFile);
   const after = deps.jobState.findJob(jobId);
   if (after && deps.uploadService.isHeic(after.file)) {
     throw new Error('HEIC conversion did not produce a JPEG file');
