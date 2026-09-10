@@ -1,6 +1,6 @@
 # ADR-0002 — JSON is the source for the design-system registry; prose is generated or secondary
 
-- **Status:** accepted (implemented for the design-system registry; not yet extended to the component registry)
+- **Status:** accepted (design-system registry 2026-03-20; component registry 2026-09-10)
 - **Date:** 2026-03-20
 - **Deciders:** design-system owner
 - **Applies to:** `docs/design/design-system/registry.json`; proposed extension to `docs/specs/component/registry*.md`
@@ -54,13 +54,18 @@ registry has to be readable by scripts that do not (and should not) compile the 
   changes are reviewable as a diff on `registry.schema.json`.
 - **Cost:** JSON is unpleasant to hand-edit, so the value only fully arrives with a generator
   that renders the human-readable views from the source.
-- **Open — the decision has not been carried one folder over.** The **component** registry is
-  still 1,413 lines of hand-maintained prose across `docs/specs/component/registry.md` and its
-  three supplements, with no drift gate, while the reuse gate in `AGENTS.md` treats it as
-  authoritative. That gap is audit item C1 in
-  [`docs/audits/2026-09-08-grundriss-adoption.md`](../audits/2026-09-08-grundriss-adoption.md).
-- **Gate:** `node scripts/validate-design-system-registry.mjs` — schema validity only. It does
-  **not** compare the registry to the components that exist in `apps/web/src/app/shared/`.
+- **Carried one folder over, 2026-09-10.** For eight months this decision applied only to the
+  design-system registry while the **component** registry stayed 1,413 lines of hand-maintained
+  prose with no drift gate — even though the reuse gate in `AGENTS.md` treated it as
+  authoritative. That was audit item C1 in
+  [`docs/audits/2026-09-08-grundriss-adoption.md`](../audits/2026-09-08-grundriss-adoption.md),
+  now closed: `docs/specs/component/registry.json` is the source, the three supplements are
+  generated from it, and `scripts/check-component-registry.mjs` compares the catalog to
+  `apps/web/src`. The delay is the point — a format decision that is not gated does not
+  propagate on its own.
+- **Gate:** `node scripts/validate-design-system-registry.mjs` (schema validity only, design-system
+  registry) and `node scripts/check-component-registry.mjs` (component registry — coverage of
+  `apps/web/src/app/shared/`, dead paths, missing specs, `specId` agreement, stale supplements).
 
 ## Evidence
 
@@ -68,7 +73,9 @@ registry has to be readable by scripts that do not (and should not) compile the 
   "Selected format: JSON", decision date 2026-03-20, status implemented `[A]`.
 - `docs/design/design-system/registry.json`, `registry.schema.json`,
   `scripts/validate-design-system-registry.mjs` all exist `[A]`.
-- Component-registry prose measured 2026-09-10: 1,413 lines across four files `[A]`.
+- Component-registry prose measured 2026-09-10: 1,413 lines across four files `[A]`. Converted
+  the same day; the checker was **red on its first run** with 25 errors — 15 shared components
+  absent from the catalog and 11 entries pointing at paths that no longer exist `[A]`.
 
 ## Superseded by
 

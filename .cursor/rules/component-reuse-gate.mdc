@@ -9,7 +9,7 @@ alwaysApply: true
 
 ## 1. Search (mandatory, before HTML/TS)
 
-1. Read `docs/specs/component/registry.md` and the matching `registry.*.supplement.md` slice.
+1. Read `docs/specs/component/registry.md` and the generated `registry.*.supplement.md` slices. The catalog is checked against the code by `node scripts/check-component-registry.mjs` — if a shared component is missing from it, that is a bug in the registry, not permission to build a second one.
 2. `grep` / semantic-search for the **interaction pattern** (e.g. "inline edit", "rename", "confirm") — not only the feature folder name.
 3. Read 1–2 existing usages in `apps/web/src/app/shared/` or the closest feature.
 
@@ -21,9 +21,9 @@ alwaysApply: true
 | Click-to-edit metadata row | `app-media-detail-inline-section`, `app-metadata-section` |
 | Irreversible / destructive confirm | `app-confirm-dialog`, `app-projects-confirm-dialog` |
 | One-shot name prompt (create flow) | `app-text-input-dialog` |
-| Toast / mutation feedback | `ToastService` + `app-toast-container` |
+| Toast / mutation feedback | `ToastService` + `ss-toast-container` |
 | Status badge | `app-chip` |
-| Filter / sort / grouping toolbar | `app-filter-dropdown`, `app-sorting-controls`, `app-grouping-dropdown` |
+| Filter / sort / grouping toolbar | `app-filter-dropdown`, `app-sort-dropdown`, `app-grouping-dropdown` |
 | Floating details / side panel | Existing feature panel pattern + `docs/design/shell-layout-tokens.md` |
 
 **Default:** Prefer **inline edit** over modal when the same pattern exists elsewhere (rename title, edit field in place).
@@ -34,6 +34,7 @@ Reply with one line:
 
 - **Reuse:** `<selector>` (+ how inputs/outputs map), or
 - **Gap:** `<missing variant>` → ask user before duplicating HTML or inventing a modal.
+- **New shared component:** add the entry to `docs/specs/component/registry.json` (`name`, `selector`, `path`, `spec`, `specId`, `useFor`, `notFor`, `slice`, `section`) and run `node scripts/generate-component-registry.mjs` in the same change.
 
 ## 4. Optional skills (large UI work)
 

@@ -37,7 +37,12 @@ const CHECKS = [
     args: ["scripts/check-spec-code-paths.mjs"],
     soft: true,
     debt:
-      "263 broken code paths outside docs/specs/service/media-upload-service, docs/specs/component/upload, docs/specs/ui/upload (2026-09-10) — those three were the upload-process audit's scope and are now clean; the rest is unrelated pre-existing drift across the wider docs/specs tree.",
+      "262 broken code paths outside docs/specs/service/media-upload-service, docs/specs/component/upload, docs/specs/ui/upload (2026-09-10; down from 263 when the component registry became generated and app-map-shell's moved path was corrected) — those three folders were the upload-process audit's scope and are now clean; the rest is unrelated pre-existing drift across the wider docs/specs tree. Tracked in issue #189.",
+  },
+  {
+    name: "component-registry",
+    cmd: "node",
+    args: ["scripts/check-component-registry.mjs"],
   },
   {
     name: "specs",
