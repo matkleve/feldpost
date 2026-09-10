@@ -1068,6 +1068,16 @@ upload.panel.subtitle,You can upload things here.,apps/web/src/app/features/uplo
 upload.panel.lane.uploading,Queue,apps/web/src/app/features/upload/upload-panel.component.ts computed:laneSwitchOptions option label/title/aria base,Queue,Warteschlange,Coda
 upload.panel.lane.uploaded,Uploaded,apps/web/src/app/features/upload/upload-panel.component.ts computed:laneSwitchOptions option label/title/aria base,Uploaded,Hochgeladen,Caricato
 upload.panel.lane.issues,Issues,apps/web/src/app/features/upload/upload-panel.component.ts computed:laneSwitchOptions option label/title/aria base,Issues,Probleme,Problemi
+upload.panel.queue.aria,Upload queue,aria label for upload panel file list,Upload queue,Upload-Warteschlange,Coda caricamento
+upload.panel.scanning.status,Scanning... {count} file{suffix} found,upload panel batch scanning status line,Scanning... {count} file{suffix} found,Scanne… {count} Datei{suffix} gefunden,Scansione… {count} file{suffix} trovati
+upload.item.fileName.aria,File name,aria label for upload row file name,File name,Dateiname,Nome file
+upload.item.rowAction.placeOnMap,Place {name} on map,upload row main action when placement needed,Place {name} on map,{name} auf der Karte platzieren,Posiziona {name} sulla mappa
+upload.item.rowAction.openInWorkspace,Open {name} in workspace,upload row main action to open workspace detail,Open {name} in workspace,{name} im Arbeitsbereich öffnen,Apri {name} nell'area di lavoro
+upload.item.rowAction.zoomToJob,Zoom map to {name},upload row main action to zoom map,Zoom map to {name},Karte auf {name} zoomen,Zoom mappa su {name}
+upload.item.download.failed,Download failed.,toast when uploaded file download fails,Download failed.,Download fehlgeschlagen.,Download non riuscito.
+upload.projectSelect.confirm,Select,upload panel project assignment dialog confirm button,Select,Auswählen,Seleziona
+upload.projectSelect.cancel,Cancel,upload panel project assignment dialog cancel button,Cancel,Abbrechen,Annulla
+upload.location.editor.close,Close location editor,upload panel location editor close button aria label,Close location editor,Standorteditor schließen,Chiudi editor posizione
 upload.item.menu.uploading.viewProgress,View progress,apps/web/src/app/features/upload/upload-panel-item.component.ts actionLabel menu item,View progress,Fortschritt anzeigen,Visualizza avanzamento
 upload.item.menu.uploading.viewFileDetails,View file details,apps/web/src/app/features/upload/upload-panel-item.component.ts actionLabel menu item,View file details,Dateidetails anzeigen,Visualizza dettagli file
 upload.item.menu.openInMedia,Open in /media,apps/web/src/app/features/upload/upload-panel-item.component.ts actionLabel menu item,Open in /media,In /media öffnen,Apri in /media

@@ -285,7 +285,7 @@
       class="upload-panel__lane-overflow"
       [class.upload-panel__lane-overflow--scrollable]="visibleLaneJobs().length > 5"
     >
-      <ul class="upload-panel__file-list" aria-label="Upload queue">
+      <ul class="upload-panel__file-list" [attr.aria-label]="t('upload.panel.queue.aria', 'Upload queue')">
         @for (job of visibleLaneJobs(); track trackByJobId($index, job)) {
           <app-upload-panel-item
             [job]="job"
@@ -379,6 +379,7 @@
 
   @if (locationAddressDialogOpen()) {
     <section
+      #locationEditorSurface
       class="upload-panel__location-editor option-menu-surface"
       [attr.aria-label]="t('upload.location.editor.aria', 'Change location by address')"
     >
@@ -392,7 +393,7 @@
           size="icon"
           type="button"
           class="upload-panel__location-editor-close"
-          [attr.aria-label]="t('workspace.addressSearch.aria.clear', 'Clear search')"
+          [attr.aria-label]="t('upload.location.editor.close', 'Close location editor')"
           (click)="actionHandlers.onLocationAddressDialogClose()"
         >
           <span class="material-icons" aria-hidden="true">close</span>
@@ -445,6 +446,7 @@
 
   @if (duplicateResolutionDialogOpen()) {
     <section
+      #duplicateDialogSurface
       class="upload-panel__duplicate-dialog-overlay"
       role="dialog"
       aria-modal="true"
@@ -507,8 +509,8 @@
       [message]="projectSelectionDialogMessage()"
       [options]="projectSelectionDialogOptions()"
       [selectedId]="projectSelectionDialogSelectedId()"
-      confirmLabel="Auswaehlen"
-      cancelLabel="Abbrechen"
+      [confirmLabel]="t('upload.projectSelect.confirm', 'Select')"
+      [cancelLabel]="t('upload.projectSelect.cancel', 'Cancel')"
       (selectedIdChange)="actionHandlers.onProjectSelectionDialogSelected($event)"
       (confirmed)="actionHandlers.onProjectSelectionDialogConfirmed($event)"
       (cancelled)="actionHandlers.onProjectSelectionDialogCancelled()"

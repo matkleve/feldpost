@@ -93,7 +93,7 @@ export class UploadPanelSignalsService {
 
   private readonly activeProjectId = computed<string | undefined>(() => {
     const selected = this.workspaceView.selectedProjectIds();
-    return selected.size > 0 ? (Array.from(selected.values())[0] ?? undefined) : undefined;
+    return selected.size === 1 ? (selected.values().next().value ?? undefined) : undefined;
   });
 
   constructor() {
@@ -125,5 +125,10 @@ export class UploadPanelSignalsService {
     }
 
     this._locationRequirementMode.set(mode);
+  }
+
+  /** True when exactly one workspace project filter is active (session override scope). */
+  hasSingleProjectFilter(): boolean {
+    return this.workspaceView.selectedProjectIds().size === 1;
   }
 }

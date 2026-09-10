@@ -133,6 +133,7 @@ export class UploadPanelDialogActionsService {
   }
 
   onLocationAddressDialogClose(): void {
+    this.dialogSignals.clearLocationAddressSearchTimeout();
     this.dialogSignals.setLocationAddressDialogOpen(false);
     this.dialogSignals.setLocationAddressDialogQuery('');
     this.dialogSignals.setLocationAddressDialogSuggestions([]);
@@ -272,7 +273,6 @@ export class UploadPanelDialogActionsService {
         dedupe: true,
       });
       this.dialogSignals.setPendingProjectAssignmentJob(null);
-      this.ctx.setLane('uploading');
       return;
     }
 
@@ -331,7 +331,6 @@ export class UploadPanelDialogActionsService {
       for (const entry of jobs) {
         this.uploadManager.forceDuplicateUpload(entry.id);
       }
-      this.ctx.setLane('uploading');
       this.closeDuplicateResolutionDialog();
       return;
     }

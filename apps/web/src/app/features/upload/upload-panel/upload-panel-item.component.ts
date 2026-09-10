@@ -6,6 +6,7 @@ import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 import { chipVariantForFileType } from '../../../core/media/file-type-chip-variant';
 import { ChipComponent } from '../../../shared/components/chip/chip.component';
 import { getIssueKind, getLaneForJob, phaseToStatusClass } from '../upload-phase.helpers';
+import { resolveUploadRowMenuActions } from './upload-panel-row-action-registry';
 import { statusLabelText, actionLabel, actionIcon } from './upload-panel-item-helpers';
 import { getBoundProjectIds } from './upload-panel-project-bindings.util';
 import { I18nService } from '../../../core/i18n/i18n.service';
@@ -127,7 +128,7 @@ export class UploadPanelItemComponent implements OnDestroy {
       !!job.existingMediaId
     );
   });
-  readonly showThumbnailSpinner = computed(() => this.showsUploadOverlay(this.job().phase));
+  readonly showsActiveUploadProgress = computed(() => this.showsUploadOverlay(this.job().phase));
   /** Location / open hint over thumbnail on interactive rows (workspace detail / placement). */
   readonly showThumbnailLocationHint = computed(() => {
     if (this.showDuplicateExistingMediaShortcut()) {
@@ -173,7 +174,7 @@ export class UploadPanelItemComponent implements OnDestroy {
 
     return {
       progress: job.progress,
-      label: job.statusLabel,
+      label: this.statusLabelText(),
       phase: job.phase,
     };
   };
@@ -209,13 +210,16 @@ export class UploadPanelItemComponent implements OnDestroy {
       this.job().phase === 'missing_data' &&
       getIssueKind(this.job()) !== 'duplicate_file'
     ) {
-      return `Place ${name} on map`;
+      return this.t('upload.item.rowAction.placeOnMap', 'Place {name} on map').replace('{name}', name);
     }
     if (this.canOpenInWorkspacePane() || this.showDuplicateExistingMediaShortcut()) {
-      return `Open ${name} in workspace`;
+      return this.t('upload.item.rowAction.openInWorkspace', 'Open {name} in workspace').replace(
+        '{name}',
+        name,
+      );
     }
     if (this.canZoomToJob()) {
-      return `Zoom map to ${name}`;
+      return this.t('upload.item.rowAction.zoomToJob', 'Zoom map to {name}').replace('{name}', name);
     }
     return null;
   }
@@ -240,73 +244,13 @@ export class UploadPanelItemComponent implements OnDestroy {
 
   availableMenuActions(): UploadItemMenuAction[] {
     const job = this.job();
-    const lane = getLaneForJob(job);
-    const boundProjectIds = getBoundProjectIds(job);
-    let actions: UploadItemMenuAction[] = [];
-
-    if (lane === 'uploading') {
-      actions.push('view_file_details');
-      actions.push('cancel_upload');
-      return actions;
-    }
-
-    if (lane === 'issues') {
-      const issueKind = getIssueKind(job);
-      if (issueKind === 'duplicate_file') {
-        if (job.existingMediaId) {
-          actions.push('open_existing_media');
-        }
-        actions.push('upload_anyway');
-      } else if (issueKind === 'document_unresolved') {
-        actions.push('change_location_map');
-        actions.push('change_location_address');
-        actions.push('assign_to_project');
-      } else if (issueKind === 'conflict_review') {
-        actions.push('retry');
-      } else if (issueKind === 'upload_error') {
-        // A cancelled job is not a failure to retry — it was stopped on purpose.
-        // @see docs/audits/upload-process-analysis-2026-09-08/03-branch-matrix.md Y3
-        if (!job.wasCancelled) {
-          actions.push('retry');
-        }
-      } else if (issueKind === 'address_ambiguous') {
-        if ((job.addressCandidates?.length ?? 0) > 0) {
-          actions.push('candidate_select');
-        }
-        actions.push('manual_location_entry');
-        actions.push('cancel_location_prompt');
-        return actions;
-      } else if (issueKind === 'missing_gps') {
-        actions.push('change_location_map');
-        actions.push('change_location_address');
-        actions.push('retry');
-      }
-      actions.push('dismiss');
-      return actions;
-    } else if (lane === 'uploaded' && job.mediaId) {
-      actions.push('change_location_map');
-      actions.push('change_location_address');
-      actions.push('assign_to_project');
-      if (boundProjectIds.length > 0 && this.showOpenProject()) {
-        actions.push('open_project');
-      }
-      actions.push('open_in_media');
-      if (job.storagePath) {
-        actions.push('download');
-      }
-      if (this.priorityEnabled()) {
-        actions.push('toggle_priority');
-      }
-      if (boundProjectIds.length > 0) {
-        actions.push('remove_from_project');
-      }
-      actions.push('delete_media');
-      return actions;
-    }
-
-    actions.push('dismiss');
-
-    return actions;
+    return resolveUploadRowMenuActions({
+      job,
+      lane: getLaneForJob(job),
+      issueKind: getIssueKind(job),
+      showOpenProject: this.showOpenProject(),
+      priorityEnabled: this.priorityEnabled(),
+    });
   }
 
   isDestructiveAction(action: UploadItemMenuAction): boolean {

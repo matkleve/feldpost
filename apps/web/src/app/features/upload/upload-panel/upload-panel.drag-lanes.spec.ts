@@ -38,14 +38,15 @@ describe('UploadPanelComponent drag-and-drop interactions', () => {
     const event = {
       preventDefault: vi.fn(),
       stopPropagation: vi.fn(),
-      dataTransfer: { files: [file] },
+      dataTransfer: { files: [file], items: [] },
     } as unknown as DragEvent;
 
     component.inputHandlers.onDrop(event);
-
-    expect(fakeManager.submit).toHaveBeenCalledWith([file], {
-      projectId: undefined,
-      locationRequirementMode: 'required',
+    await vi.waitFor(() => {
+      expect(fakeManager.submit).toHaveBeenCalledWith([file], {
+        projectId: undefined,
+        locationRequirementMode: 'required',
+      });
     });
   });
 });
@@ -120,14 +121,20 @@ describe('UploadPanelComponent lanes', () => {
     expect(component.laneCounts().uploading).toBe(1);
   });
 
-  it('routes jobs with missing-location status text to issues lane', async () => {
+  it('routes missing_data jobs to issues lane using structured phase', async () => {
     const { component } = await setupUploadPanel({
-      initialJobs: [makeUploadJob({ phase: 'uploading', statusLabel: 'Missing location' })],
+      initialJobs: [
+        makeUploadJob({
+          phase: 'missing_data',
+          issueKind: 'missing_gps',
+          statusLabel: 'Missing location',
+        }),
+      ],
     });
     component.laneHandlers.setSelectedLane('issues');
 
     expect(component.visibleLaneJobs().length).toBe(1);
-    expect(component.visibleLaneJobs()[0]?.statusLabel).toBe('Missing location');
+    expect(component.visibleLaneJobs()[0]?.phase).toBe('missing_data');
   });
 });
 

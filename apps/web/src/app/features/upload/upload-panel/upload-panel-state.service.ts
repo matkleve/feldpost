@@ -16,12 +16,14 @@
  */
 
 import { Injectable, computed, inject } from '@angular/core';
+import { I18nService } from '../../../core/i18n/i18n.service';
 import { UploadManagerService, type UploadJob } from '../../../core/upload/upload-manager.service';
 import { getLaneForJob as mapJobToLane, type UploadLane } from '../upload-phase.helpers';
 
 @Injectable({ providedIn: 'root' })
 export class UploadPanelStateService {
   private readonly uploadManager = inject(UploadManagerService);
+  private readonly i18n = inject(I18nService);
 
   readonly laneBuckets = computed(() => {
     const buckets: Record<UploadLane, UploadJob[]> = {
@@ -56,9 +58,14 @@ export class UploadPanelStateService {
   readonly scanningLabel = computed(() => {
     const batch = this.uploadManager.activeBatch();
     if (!batch || batch.status !== 'scanning') return null;
-    return (
-      'Scanning... ' + batch.totalFiles + ' file' + (batch.totalFiles === 1 ? '' : 's') + ' found'
-    );
+    const count = batch.totalFiles;
+    const suffix = count === 1 ? '' : 's';
+    return this.i18n.t(
+      'upload.panel.scanning.status',
+      'Scanning... {count} file{suffix} found',
+    )
+      .replace('{count}', String(count))
+      .replace('{suffix}', suffix);
   });
 
   readonly hasAwaitingPlacement = computed(() =>

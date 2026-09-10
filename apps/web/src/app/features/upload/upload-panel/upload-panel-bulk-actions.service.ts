@@ -67,7 +67,6 @@ export class UploadPanelBulkActionsService {
       }
     }
     this.clearSelectedUploads();
-    this.ctx.setLane('uploading');
   }
 
   async downloadSelectedUploads(): Promise<void> {

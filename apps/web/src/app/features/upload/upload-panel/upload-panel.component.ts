@@ -13,12 +13,14 @@ import {
   computed,
   DestroyRef,
   effect,
+  ElementRef,
   HostListener,
   inject,
   input,
   OnDestroy,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UploadPanelItemComponent } from './upload-panel-item.component';
@@ -76,6 +78,7 @@ import type {
   UploadLocationMapPickRequest,
   UploadLocationPreviewEvent,
 } from './upload-panel.types';
+import { trapUploadPanelFocus, type UploadPanelFocusTrap } from './upload-panel-modal-focus.util';
 export type {
   ImageUploadedEvent,
   UploadLocationMapPickRequest,
@@ -241,11 +244,37 @@ export class UploadPanelComponent implements OnDestroy {
   readonly duplicateResolutionApplyToBatch = this.dialogSignals.duplicateResolutionApplyToBatch;
   readonly pendingLocationPickMediaId = signal<string | null>(null);
 
+  private readonly locationEditorSurface = viewChild<ElementRef<HTMLElement>>('locationEditorSurface');
+  private readonly duplicateDialogSurface = viewChild<ElementRef<HTMLElement>>('duplicateDialogSurface');
+  private modalFocusTrap: UploadPanelFocusTrap | null = null;
+
   constructor() {
     effect(() => {
       if (!this.visible()) {
         this.clearPinnedFileTypeGroup();
         this.pendingLocationPickMediaId.set(null);
+      }
+    });
+
+    effect(() => {
+      const locationOpen = this.locationAddressDialogOpen();
+      const duplicateOpen = this.duplicateResolutionDialogOpen();
+      this.modalFocusTrap?.release();
+      this.modalFocusTrap = null;
+
+      if (locationOpen) {
+        const surface = this.locationEditorSurface()?.nativeElement;
+        if (surface) {
+          this.modalFocusTrap = trapUploadPanelFocus(surface);
+        }
+        return;
+      }
+
+      if (duplicateOpen) {
+        const surface = this.duplicateDialogSurface()?.nativeElement;
+        if (surface) {
+          this.modalFocusTrap = trapUploadPanelFocus(surface);
+        }
       }
     });
 
@@ -277,7 +306,10 @@ export class UploadPanelComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.modalFocusTrap?.release();
+    this.modalFocusTrap = null;
     this.setup.clearHostCallbacks();
+    this.dialogSignals.destroy();
   }
 
   // Public API used by map-shell pending-placement flow.
