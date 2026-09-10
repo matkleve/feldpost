@@ -96,14 +96,6 @@ export class UploadLocationResolutionService {
     return this.sourceConflict.getSourceConflictChoice(batchId, groupingKey);
   }
 
-  /**
-   * @deprecated Removed — project location is bias-only (Branch B), not an address fallback.
-   * @see docs/specs/service/media-upload-service/address-resolution-model.md
-   */
-  async registerBatchProjectTrayIfNeeded(batchId: string): Promise<void> {
-    return this.trayFlow.registerBatchProjectTrayIfNeeded(batchId);
-  }
-
   registerLayerPackageGroupsAfterClassify(batchId: string): void {
     this.trayFlow.registerLayerPackageGroupsAfterClassify(batchId);
   }

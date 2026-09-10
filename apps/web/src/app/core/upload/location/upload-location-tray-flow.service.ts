@@ -80,15 +80,6 @@ export class UploadLocationTrayFlowService {
   }
 
   /**
-   * @deprecated Removed — project location is bias-only (Branch B), not an address fallback.
-   * @see docs/specs/service/media-upload-service/address-resolution-model.md
-   */
-  async registerBatchProjectTrayIfNeeded(_batchId: string): Promise<void> {
-    void _batchId;
-    return;
-  }
-
-  /**
    * Register layer_package trays after classifyBatch — before Photon.
    * @see docs/specs/service/media-upload-service/upload-search-object.layer-map.md#tray-registration
    */
