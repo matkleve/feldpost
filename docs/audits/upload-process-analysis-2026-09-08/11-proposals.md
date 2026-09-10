@@ -161,7 +161,7 @@ A ticked-but-false AC is worse than an unticked one: it is the reason nobody has
 
 ### P4 — Delete the dead code
 
-**Status: all of P4 done (2026-09-10).** P4b's `mockResolverTray` decision (below) was made deliberately, not unilaterally: kept as a dev/QA affordance, gated so it is genuinely excluded from production builds (`angular.json` `fileReplacements` swap, verified against the built `dist/web` output) rather than merely runtime-suppressed. P4f's mojibake turned out to be **triple**-encoded, not double (`10-findings.md` UP-40) — re-encoded with a scratchpad script (not committed, per the caveat below), and it incidentally fixed 2 tests this whole audit-and-fix effort had been carrying as "known pre-existing failures" since Phase 0 (garbled "ß" in test-fixture filenames broke a German street-suffix match). Console gating (UP-41, the other half of P4f) was **not** done — the mojibake fix subsumed the "own commit" this proposal asked for, and the console-noise cleanup is a separate, smaller piece of work than the rest of P4f; it remains open.
+**Status: all of P4 done (2026-09-10).** P4b's `mockResolverTray` decision (below) was made deliberately, not unilaterally: kept as a dev/QA affordance, gated so it is genuinely excluded from production builds (`angular.json` `fileReplacements` swap, verified against the built `dist/web` output) rather than merely runtime-suppressed. P4f's mojibake turned out to be **triple**-encoded, not double (`10-findings.md` UP-40) — re-encoded with a scratchpad script (not committed, per the caveat below), and it incidentally fixed 2 tests this whole audit-and-fix effort had been carrying as "known pre-existing failures" since Phase 0 (garbled "ß" in test-fixture filenames broke a German street-suffix match). Console gating (UP-41, the other half of P4f) was **done 2026-09-10 (later the same day)**, in its own commit as this note originally asked for — see the findings-table row.
 
 | | |
 | --- | --- |
@@ -178,7 +178,7 @@ A ticked-but-false AC is worse than an unticked one: it is the reason nobody has
 | P4c | `upload-attach-hash.util.ts`, `upload-timeout.util.ts`, `upload.helpers.ts`, 7 dead exports, `issueKind:'duplicate_photo'` + its 10 readers, `UploadTrayStep '2'` (UP-21, UP-48) | ~120 | **Done**, except `upload.helpers.ts` — kept deliberately, it satisfies the module-symmetry rule |
 | P4d | the project-tray remnant: stub, facade delegation, test-only helper (UP-22) | ~60 | **Done** |
 | P4e | 7 committed refactor scripts under `apps/web/scripts/` (UP-42) | — | **Done** |
-| P4f | mojibake re-encode across 11 files (UP-40) and console gating (UP-41) | — | Not started |
+| P4f | mojibake re-encode across 11 files (UP-40) and console gating (UP-41) | — | **Done** (mojibake 2026-09-10, console gating 2026-09-10 in a separate commit) |
 
 **Caveat on P4b — resolved 2026-09-10.** `mockResolverTray` currently ships in the production bundle and is one constant away from seeding fixture data (`06-health.md` § 4). Decide deliberately whether to keep it as a dev affordance behind a build-time flag or remove it; do not delete it silently. **Decision (asked of the user explicitly): kept as a dev/QA affordance, behind a build-time flag.** `UPLOAD_DEV_FLAGS.mockResolverTray` is now `!environment.production && <raw flag>`, and `upload-resolver-tray.mock-orchestrator.ts` (the fixture data itself) is swapped for an empty stub in production via `angular.json`'s `fileReplacements` — verified by grepping the built `dist/web` output for fixture strings (present in a dev build, absent in production).
 
@@ -269,6 +269,25 @@ Then declare terminal states and idempotency rules in the spec, and assert them 
 
 ### P9 — Fill the test gaps
 
+**Status: Contract + Structural clusters done, minus the FSM tests (2026-09-10).** Re-checked
+against main first: T12 and T13 were already covered by
+`upload-location-resolution.service.spec.ts` ("singleflight: parallel registerSourceConflictGroup
+creates one blocked group", "late job replays EXIF/text choice") as a side effect of prior work —
+no duplication needed. Wrote T3, T9, T15, and (per this section's own "Also:" prose)
+`upload-location-tray-producer.adapter.spec.ts` as real, passing tests. T5, T8, and T16 hit real,
+already-documented, out-of-scope bugs (UP-23's double dedup call, the P0 lane-auto-switch rule,
+and the `issueKind` classifier divergence this section calls out under "two normative rules with
+no test today") — written with Vitest's `it.fails()` so the suite stays green while pinning the
+regression exactly as designed; each is a one-line diff to a normal `it` once its (out-of-scope)
+fix lands. T6/T7 (FSM) skipped — still need P7. UP-31 turns out already fully resolved: its "delete the
+spec for the removed project-tray feature" half was gone before this session (the
+`upload-batch-project-tray.helpers.spec.ts` file no longer exists, apparently removed alongside
+P4d's project-tray-remnant deletion), and its "test the producer" half is the new
+`upload-location-tray-producer.adapter.spec.ts` above — the existing mock-driven
+`upload-resolver-tray.component.spec.ts` was left in place as (now genuinely supplementary)
+component-level coverage rather than deleted. UP-32 (mojibake fixture re-encode) not done in
+this pass. E2E (§ 5) not started.
+
 | | |
 | --- | --- |
 | **Findings** | UP-03, UP-31, UP-32, and coverage for every P2/P6/P7 fix |
@@ -293,6 +312,12 @@ Also: replace the mock-driven tray test with one that exercises `upload-location
 ---
 
 ### P10 — Split the oversized specs
+
+**Status: done, 2026-09-10.** `upload-panel.md` 309 → 158 lines, `upload-manager-pipeline.md`
+280 → 176 lines, `upload-manager.md` 280 → 162 lines — all now under the 180-line `lint:specs`
+error cap, per the section mapping in `09-coverage.md § 6`. The six specs missing required
+sections (content work, not splitting) are unchanged — out of this proposal's scope, as noted
+below.
 
 | | |
 | --- | --- |
@@ -355,6 +380,6 @@ If only three things happen:
 2. **P0** — the suite. Nothing else can be verified until it compiles, and every Sensitive change is formally blocked by `AGENTS.md` § Red-test-first without it. **Done (upload scope) 2026-09-09.**
 3. **P3** — untick the two false acceptance criteria. It takes minutes, and it stops the next reader concluding, as this one nearly did, that the orphaned-storage case is already handled. **Done 2026-09-09.**
 
-**P4 and P5 can run in parallel with all of the above** — they touch nothing the others touch, and together they remove ≈700 LOC of dead code and 60 broken references, which makes every later diff easier to read. **Not started.**
+**P4 and P5 can run in parallel with all of the above** — they touch nothing the others touch, and together they remove ≈700 LOC of dead code and 60 broken references, which makes every later diff easier to read. **Both done 2026-09-10.**
 
-**Beyond the original "this week" list, P2 (all three sub-PRs) also landed 2026-09-09/10** — see § 2 above. **P4–P12 remain open**; P4 and P5 are still independently shippable today.
+**Beyond the original "this week" list, P2 (all three sub-PRs), P4, P5, P6a, P9 (Contract + Structural, minus FSM), and P10 have also landed (2026-09-09/10)** — see § 2 above for each. **P6b, P7, P8, P11, P12 remain open**, all ultimately gated on **P8** (the transition map) not existing yet.

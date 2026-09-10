@@ -1,6 +1,10 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { UploadJob } from '../upload-manager.types';
-import { cancelUploadManagerJob, retryUploadManagerJob } from './upload-manager-actions.util';
+import {
+  attachUploadManagerFile,
+  cancelUploadManagerJob,
+  retryUploadManagerJob,
+} from './upload-manager-actions.util';
 import type { UploadManagerActionsDeps } from './upload-manager-actions.util';
 
 function job(overrides: Partial<UploadJob>): UploadJob {
@@ -32,7 +36,7 @@ function buildDeps(current: UploadJob): {
     addBatch: vi.fn(),
     updateBatch: vi.fn(),
     createImmediatePreviewUrl: vi.fn(),
-    createDeferredPreviewUrl: vi.fn(),
+    createDeferredPreviewUrl: vi.fn().mockResolvedValue(undefined),
     revokeObjectUrl: vi.fn(),
     isTerminalPhase: (phase) => phase === 'complete' || phase === 'error' || phase === 'missing_data' || phase === 'skipped',
     queuedLabel: 'Queued',
@@ -105,6 +109,42 @@ describe('cancelUploadManagerJob', () => {
       'job-1',
       expect.objectContaining({ wasCancelled: true }),
     );
+  });
+});
+
+describe('attachUploadManagerFile', () => {
+  let logSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    logSpy.mockRestore();
+    localStorage.removeItem('feldpost:debug:upload-manager');
+  });
+
+  // @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-41
+  it('does not emit console.log on every attach when the debug flag is disabled', () => {
+    const current = job({ id: 'existing' });
+    const { deps } = buildDeps(current);
+    const file = new File([], 'photo.jpg');
+
+    attachUploadManagerFile('media-1', file, deps);
+
+    expect(logSpy).not.toHaveBeenCalled();
+  });
+
+  it('still queues the job and drains the queue regardless of logging', () => {
+    const current = job({ id: 'existing' });
+    const { deps } = buildDeps(current);
+    const file = new File([], 'photo.jpg');
+
+    const jobId = attachUploadManagerFile('media-1', file, deps);
+
+    expect(jobId).toBeTruthy();
+    expect(deps.addJobs).toHaveBeenCalled();
+    expect(deps.drainQueue).toHaveBeenCalled();
   });
 });
 

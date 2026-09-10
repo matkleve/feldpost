@@ -143,6 +143,28 @@ if (coords && !titleAddress) reverseGeocode();
 else if (titleAddress && !coords) forwardGeocode();
 ```
 
+### Job / Batch State Fields
+
+| Name                          | Type                                                                                                                                     | Default       | Controls                                                                     |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ---------------------------------------------------------------------------- |
+| `batch.status`                | `'scanning' \| 'uploading' \| 'complete' \| 'cancelled'`                                                                                 | `'uploading'` | Batch lifecycle during folder submissions                                    |
+| `batch.folderAddressHint`     | `string \| null`                                                                                                                         | `null`        | Default textual address for folder jobs                                      |
+| `job.titleAddressSource`      | `'file' \| 'folder' \| null`                                                                                                             | `null`        | Provenance of the active textual address                                    |
+| `job.titleAddressCoords`      | `ExifCoords \| undefined`                                                                                                                | `undefined`   | Geocoded coordinates from textual address                                    |
+| `job.addressDisambiguation`   | `{ algorithm:string; probability:number; candidates:{city:string; probability:number}[] } \| undefined`                                  | `undefined`   | Ambiguous city ranking result                                                |
+| `job.addressNotes`            | `string[]`                                                                                                                               | `[]`          | Unmapped parsed fragments preserved                                          |
+| `job.locationMismatch`        | `{ distanceMeters:number } \| undefined`                                                                                                 | `undefined`   | EXIF vs text-derived mismatch payload                                        |
+| `job.contentHash`             | `string \| undefined`                                                                                                                    | `undefined`   | Dedup identity for resume-safe uploads                                       |
+| `job.duplicateState`          | `'none' \| 'duplicate_issue' \| 'resolved'`                                                                                              | `'none'`      | Duplicate detection + modal lifecycle                                        |
+| `job.duplicateDecision`       | `'use_existing' \| 'upload_anyway' \| 'reject' \| undefined`                                                                             | `undefined`   | Final duplicate decision per job                                             |
+| `job.duplicateTargetMediaId`  | `string \| undefined`                                                                                                                    | `undefined`   | Existing image selected via duplicate flow                                   |
+| `job.existingMediaId`         | `string \| undefined`                                                                                                                    | `undefined`   | Existing image match selected via `use_existing` decision                    |
+| `job.issueKind`               | `'duplicate_photo' \| 'missing_gps' \| 'address_ambiguous' \| 'document_unresolved' \| 'conflict_review' \| 'upload_error' \| undefined` | `undefined`   | UI-level issue semantics separate duplicate, GPS, and document-location gaps |
+| `job.availableActions`        | `UploadItemAction[]`                                                                                                                     | `[]`          | Uploaded and issue row actions derived after state settle                    |
+| `job.conflictCandidate`       | `ConflictCandidate \| undefined`                                                                                                         | `undefined`   | Existing photoless row candidate                                             |
+| `job.conflictResolution`      | `ConflictResolution \| undefined`                                                                                                        | `undefined`   | User choice after conflict popup                                             |
+| `job.mode`                    | `'new' \| 'replace' \| 'attach'`                                                                                                         | `'new'`       | Routes pipeline and output events                                            |
+
 ### Data Flow (Mermaid)
 
 ```mermaid
@@ -287,4 +309,15 @@ flowchart TD
 | `skipped` + `duplicate_photo`          | `Already uploaded`            |
 | `error`                                | `Upload failed`               |
 | `complete`                             | `Uploaded`                    |
+
+## Pipeline Service Coverage Addendum (C-01)
+
+The services below are part of upload pipeline behavior and are covered here as partial contracts, referenced from both `upload-manager.md` and `upload-manager-pipeline.md`, pending dedicated mirrored service specs.
+
+| Service | Implementation file | Current coverage scope in this spec |
+| --- | --- | --- |
+| `UploadConflictService` | `core/upload/support/upload-conflict.service.ts` | Conflict detection trigger, paused conflict state (`awaiting_conflict_resolution`), candidate lookup, and resume semantics via manager orchestration. |
+| `UploadEnrichmentService` | `core/upload/support/upload-enrichment.service.ts` | Reverse/forward geocode enrichment path, unresolvable fallback, and non-blocking enrichment semantics after persistence stages. |
+| `UploadStorageService` | `core/upload/support/upload-storage.service.ts` | Storage-path based gating, and storage upload/delete role in pipeline persistence and cleanup behavior. |
+| `UploadNotificationService` | `core/upload/support/upload-notification.service.ts` | Manager failure-event consumption for toast notifications (`uploadFailed$`). |
 
