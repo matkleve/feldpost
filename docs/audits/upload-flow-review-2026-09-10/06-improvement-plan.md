@@ -391,6 +391,8 @@ Violates `upload-manager.md` principle: *"Uploading is a background task — don
 
 **Depends on:** Item 14 precision column + writers (partially landed on `cursor/upload-heic-hash-order-3be6`). Item 15 bbox migration independent but should ship with containment filter. Visual marker treatment blocked until separate PO sign-off.
 
+**⏳ Blocked on pending product-owner decisions.** Two advisory analyses (geo and UX) completed 2026-09-10 **after** the PO signed off on bbox-corner containment. They are recorded, undecided, in [area-extent decisions supplement](../../specs/service/media-upload-service/address-resolution-model.area-extent-decisions.supplement.md) § PENDING PRODUCT-OWNER DECISIONS. Headlines: the geo analysis recommends **superseding bbox-corner containment with an equal-area disc** (~14.6 km vs ~19.7 km for Vienna, at the cost of ~5 km corner under-coverage), and finds disc containment with a circumscribed radius mathematically equivalent to the corner rule; the UX analysis holds that **removing `locationPinEligible` is only safe if it is replaced**, not deleted, since coarse rows already render as ordinary point pins today. Do **not** start step 2 or step 3 above until the PO rules on those and on the five open questions listed there.
+
 ---
 
 ## Dependency ordering

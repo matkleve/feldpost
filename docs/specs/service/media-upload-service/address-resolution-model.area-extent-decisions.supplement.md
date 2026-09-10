@@ -86,6 +86,45 @@ Verified against code on `cursor/upload-heic-hash-order-3be6`:
 
 ---
 
+## ⏳ PENDING PRODUCT-OWNER DECISIONS (2026-09-10 advisory analyses)
+
+**Status: NOT DECIDED.** Two advisory analyses completed after the decisions above were signed off. They are recorded here for the product owner and change nothing yet. Decisions 1–3 and the acceptance criteria below remain in force. Only the product owner may supersede a signed-off decision — in particular, bbox-corner containment (Decision 1) stands until they say otherwise.
+
+### P1 — Geo analysis: bbox-corner containment has a corner artifact (recommends superseding Decision 1)
+
+*Analysis, not a decision.*
+
+- Vienna's Nominatim bbox is 29.4 × 22.8 km = **669 km²**, about **61 % larger** than Vienna's ~415 km² administrative area. Containing all four corners from a central anchor needs a **~19.7 km** selection radius.
+- Disc containment `d + r_item <= r_sel` with `r_item` = circumscribed (half-diagonal) radius is **mathematically equivalent** to bbox-corner containment. It removes the corner tests but not the corner geometry, so it is **no improvement**.
+- **Recommended instead: equal-area disc**, `r_item = sqrt(w_m * h_m / PI)` — **~14.6 km** for Vienna instead of ~19.7 km. Point-in-circle for `street` / `houseNumber`; disc containment for coarser tiers.
+- **Honest cost:** the equal-area disc under-covers bbox corners by up to **~5 km** for Vienna. For selection radii between ~14.6 and ~19.8 km, items may be included that a strict whole-bbox rule would exclude.
+- **Haversine is appropriate** at Austrian latitudes: flat-vs-haversine differs by **< 12 m (< 0.06 %)** on Vienna-scale edges. Use the existing [`haversine.util.ts`](../../../../apps/web/src/app/core/geo/haversine.util.ts) or Leaflet `map.distance` consistently; do **not** mix in flat degrees × 111 km.
+- **Tier-identity inclusion is not viable as the primary rule.** A circle containing only coarse markers yields no areas in play and therefore includes nothing; and a single precise pin in one district would pull in every `city=Wien` item org-wide. Viable only as a narrowly scoped fallback.
+- **Confirmed against SQL:** `viewport_markers` and `cluster_images` have **no `media_type` filter** — neither function body references the column. This is all media with coordinates, not photos only.
+
+> Arithmetic note for the reviewer: the half-diagonal of a 29.4 × 22.8 km rectangle is 18.6 km, so the ~19.7 km figure implies an anchor off the bbox centre. Worth confirming which anchor the ~5 km under-coverage is measured from before any implementation.
+
+### P2 — UX analysis: containment is right; absorb its cost
+
+*Analysis, not a decision.*
+
+- **Containment is the right rule** and its cost should be absorbed, not worked around.
+- **Removing `locationPinEligible` is only safe if it is replaced, not merely deleted.** It was a workaround for the centroid lie. Deleting it without a coarse-area representation makes the map **more** misleading, because city-precision rows with coords already render as ordinary point markers today.
+- Coarse media should **stay visible** but must **not** render as a point pin at a centroid.
+- The **retrieval path for coarse media is non-spatial and already exists**: `app-filter-dropdown` City/Address rules on `/media`, plus `app-grouping-dropdown`. **No new component.**
+- **Disclosure after a circle selection:** one quiet line — "N more in [city]", tap to include. Not silence, not a precision-jargon banner.
+- **No post-upload refinement prompts** — that would violate "uploading is a background task, don't make me think".
+
+**Open questions the product owner must answer:**
+
+1. Area-marker visual treatment (subject to the component styling gate).
+2. Whether cluster click should follow the same containment rule as radius — today `cluster_images` uses grid-snapped centroid cells, so the two diverge.
+3. Multi-city overlap copy.
+4. Whether search commit should populate the workspace.
+5. Rectangle honesty in copy — never imply municipal-boundary precision.
+
+---
+
 ## Acceptance criteria (implementation — item 15)
 
 - [ ] `locations` stores geocoder bbox (or derived geometry) on forward/reverse persist paths
