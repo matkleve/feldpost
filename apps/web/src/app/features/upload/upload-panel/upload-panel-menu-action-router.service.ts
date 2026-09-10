@@ -59,14 +59,12 @@ export class UploadPanelMenuActionRouterService {
     upload_anyway: async (job) => {
       // upload-panel.md § Row Action Registry Shape: upload_anyway directly forces duplicate bypass.
       this.uploadManager.forceDuplicateUpload(job.id);
-      this.ctx.setLane('uploading');
     },
     change_location_address: async (job) => {
       this.dialogActions.openLocationAddressDialog(job);
     },
     candidate_select: async (job) => {
       await this.dialogActions.onAddressAmbiguousCandidateSelect(job);
-      this.ctx.setLane('uploading');
     },
     manual_location_entry: async (job) => {
       this.dialogActions.openLocationAddressDialog(job);
@@ -79,7 +77,6 @@ export class UploadPanelMenuActionRouterService {
     },
     retry: async (job) => {
       this.ctx.retryFile(job.id);
-      this.ctx.setLane('uploading');
     },
     open_project: async (job) => {
       await this.fileActions.openUploadedJobProject(job);
@@ -126,7 +123,7 @@ export class UploadPanelMenuActionRouterService {
 
   private handlePlaceOnMap(job: UploadJob): void {
     const issueKind = getIssueKind(job);
-    if (issueKind === 'missing_gps' || issueKind === 'document_unresolved') {
+    if (issueKind === 'missing_gps' || issueKind === 'address_deferred' || issueKind === 'document_unresolved') {
       // upload-panel.md § Actions 15m: issue rows enter placement workflow via placementRequested.
       this.ctx.placementRequested(job.id);
       return;

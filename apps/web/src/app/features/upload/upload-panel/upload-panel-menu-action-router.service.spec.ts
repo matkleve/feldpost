@@ -128,7 +128,7 @@ describe('UploadPanelMenuActionRouterService lane stability (P0)', () => {
   // resolution-action handlers as other in-flight upload work and is out of
   // this task's scope. This test documents the current (wrong) behavior so
   // the fix, whenever it lands, can flip it from `.fails` to a normal `it`.
-  it.fails('does not call setLane for upload_anyway while Issues lane is selected', async () => {
+  it('does not call setLane for upload_anyway while Issues lane is selected', async () => {
     const { service, options } = setup();
     const job = makeJob({ phase: 'skipped', issueKind: 'duplicate_file' });
 
@@ -141,7 +141,7 @@ describe('UploadPanelMenuActionRouterService lane stability (P0)', () => {
     expect(options.setLane).not.toHaveBeenCalled();
   });
 
-  it.fails('does not call setLane for candidate_select while Issues lane is selected', async () => {
+  it('does not call setLane for candidate_select while Issues lane is selected', async () => {
     const { service, options } = setup();
     const job = makeJob({ phase: 'missing_data', issueKind: 'address_ambiguous' });
 
@@ -154,7 +154,7 @@ describe('UploadPanelMenuActionRouterService lane stability (P0)', () => {
     expect(options.setLane).not.toHaveBeenCalled();
   });
 
-  it.fails('does not call setLane for retry while Issues lane is selected', async () => {
+  it('does not call setLane for retry while Issues lane is selected', async () => {
     const { service, options } = setup();
     const job = makeJob({ phase: 'error', issueKind: 'upload_error' });
 

@@ -45,13 +45,6 @@
           [altText]="job().file.name"
         ></app-universal-media>
       </div>
-      @if (showThumbnailSpinner()) {
-        <div
-          class="upload-panel__thumbnail-spinner"
-          role="status"
-          [attr.aria-label]="t('upload.trigger.status.uploading', 'Uploading...')"
-        ></div>
-      }
       @if (showThumbnailLocationHint()) {
         <span class="upload-panel__thumbnail-action-btn upload-panel__thumbnail-action-btn--hint" aria-hidden="true">
           <span class="material-icons">{{ thumbnailHintIcon() }}</span>
@@ -75,7 +68,7 @@
 
     <div class="upload-panel__file-meta">
       <div class="upload-panel__name-row">
-        <span class="upload-panel__file-name" [title]="job().file.name" aria-label="File name">{{
+        <span class="upload-panel__file-name" [title]="job().file.name" [attr.aria-label]="t('upload.item.fileName.aria', 'File name')">{{
           job().file.name
         }}</span>
         @if (fileTypeBadge(); as fileType) {
@@ -92,7 +85,7 @@
           class="upload-panel__file-status upload-panel__file-status--{{
             phaseToStatusClass(job().phase)
           }}"
-          [attr.aria-live]="showThumbnailSpinner() ? 'polite' : null"
+          [attr.aria-live]="showsActiveUploadProgress() ? 'polite' : null"
         >
           @if (job().phase === 'complete' || job().phase === 'skipped') {
             <span class="material-icons upload-panel__success-indicator">check_circle</span>
