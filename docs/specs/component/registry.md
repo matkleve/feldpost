@@ -23,7 +23,7 @@ One parent index plus three generated bodies (markdown tables and bullet entries
 - **Source:** `docs/specs/component/registry.json`
 - **Bodies (generated — do not hand-edit):** `docs/specs/component/registry.*.supplement.md`
 - **Generator:** `scripts/generate-component-registry.mjs`
-- **Gate:** `scripts/check-component-registry.mjs` — coverage of `shared/`, path and spec existence, `specId` agreement, supplement freshness
+- **Gate:** `scripts/check-component-registry.mjs` — entry shape, coverage of `shared/`, path and spec existence, `specId` agreement, supplement freshness, plus ratcheted counts of stale (10) and duplicated (1) entries awaiting an owner decision
 - **Code:** `apps/web/src/app/shared/` and `apps/web/src/app/features/` (per-entry paths in `registry.json`)
 
 ## Actions

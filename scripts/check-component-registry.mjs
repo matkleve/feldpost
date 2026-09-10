@@ -11,6 +11,7 @@
  * miss a reusable component and be offered a deleted one.
  *
  * Asserted here:
+ *   0. shape         every entry carries the schema fields and a unique selector
  *   1. coverage      every shared component with a selector has a registry entry
  *   2. paths+specs   every entry's `path` and `spec` resolve on disk
  *   3. specId        `specId` agrees with `spec`
@@ -43,6 +44,15 @@ const EXHAUSTIVE_ROOT = "apps/web/src/app/shared";
  */
 const MAX_STALE_ENTRIES = 10;
 
+/**
+ * Selectors catalogued twice. `app-workspace-toolbar` has had one entry under
+ * Chrome and one under Toolbar since before this check existed, and the two
+ * disagree about the spec (`@no-spec` vs. media-toolbar.md). Merging them means
+ * deciding which claim is right, which is an owner call, so the duplicate is
+ * counted rather than guessed away. Measured 2026-09-10; ratchet, not licence.
+ */
+const MAX_DUPLICATE_SELECTORS = 1;
+
 const COL = {
   reset: "\x1b[0m",
   red: "\x1b[31m",
@@ -70,6 +80,42 @@ function walk(dir, out = []) {
 
 const registry = readRegistry();
 const components = registry.components;
+
+// ── 0. entry shape ──────────────────────────────────────────────────────────
+
+const REQUIRED_FIELDS = ["name", "selector", "path", "spec", "specId", "useFor", "notFor", "slice"];
+const NON_NULL_FIELDS = ["name", "selector", "slice", "section"];
+const STATUSES = new Set(["active", "deprecated", "stale"]);
+
+const sections = new Map(
+  registry.slices.flatMap((slice) => slice.sections.map((s) => [`${slice.id}/${s.id}`, s])),
+);
+const seenSelectors = new Map();
+const duplicates = [];
+
+for (const entry of components) {
+  const label = entry.selector ?? entry.name ?? JSON.stringify(entry).slice(0, 40);
+
+  for (const key of REQUIRED_FIELDS) {
+    if (!(key in entry)) fail("registry-shape", `${label}: missing field '${key}'`);
+  }
+  for (const key of NON_NULL_FIELDS) {
+    if (!entry[key]) fail("registry-shape", `${label}: '${key}' must be set`);
+  }
+  if (!STATUSES.has(entry.status)) {
+    fail("registry-shape", `${label}: unknown status '${entry.status}'`);
+  }
+  if (entry.status === "active" && !entry.useFor) {
+    fail("registry-shape", `${label}: a live entry needs 'useFor' — it is what the reuse gate reads`);
+  }
+  if (!sections.has(`${entry.slice}/${entry.section}`)) {
+    fail("registry-shape", `${label}: no section '${entry.section}' in slice '${entry.slice}'`);
+  }
+
+  const previous = seenSelectors.get(entry.selector);
+  if (previous) duplicates.push({ selector: entry.selector, sections: [previous, entry.section] });
+  else seenSelectors.set(entry.selector, entry.section);
+}
 
 // ── 1. coverage ─────────────────────────────────────────────────────────────
 
@@ -155,6 +201,13 @@ if (stale.length > MAX_STALE_ENTRIES) {
   );
 }
 
+if (duplicates.length > MAX_DUPLICATE_SELECTORS) {
+  fail(
+    "registry-duplicate-ratchet",
+    `${duplicates.length} duplicated selectors, ratchet is ${MAX_DUPLICATE_SELECTORS}. One selector, one entry; do not raise the ratchet.`,
+  );
+}
+
 // ── Output ──────────────────────────────────────────────────────────────────
 
 console.log(`\n${COL.bold}Component Registry Check${COL.reset}`);
@@ -170,6 +223,15 @@ if (stale.length) {
   );
   for (const entry of stale) {
     console.log(`${COL.dim}    ${entry.selector} — ${entry.path}${COL.reset}`);
+  }
+}
+
+if (duplicates.length) {
+  console.log(
+    `${COL.yellow}!${COL.reset} ${duplicates.length}/${MAX_DUPLICATE_SELECTORS} selectors catalogued twice — merge needs an owner decision:`,
+  );
+  for (const dup of duplicates) {
+    console.log(`${COL.dim}    ${dup.selector} — ${dup.sections.join(" + ")}${COL.reset}`);
   }
 }
 
