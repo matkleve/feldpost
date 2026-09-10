@@ -2,7 +2,7 @@
 
 **Compiled:** 2026-09-10 · **Branch:** `cursor/upload-fixes-integration-3be6` (PR #128 stacked on `cursor/upload-flow-review-3be6`).
 
-This document records the structural work that remains after the NF-01…NF-37 integration pass. NF-01…NF-37 are treated as **addressed** unless noted open in [`02-new-issues.md`](./02-new-issues.md). New findings from this investigation — **NF-38** (HEIC dedup fingerprint instability) and **NF-39** (unawaited reverse geocode + false `resolving_address` phase) — are recorded there and cross-referenced below.
+This document records the structural work that remains after the NF-01…NF-37 integration pass. NF-01…NF-37 are treated as **addressed** unless noted open in [`02-new-issues.md`](./02-new-issues.md). New findings from this investigation — **NF-38** (HEIC dedup fingerprint instability), **NF-39** (unawaited reverse geocode + false `resolving_address` phase), and **NF-40** (address precision / fabrication) — are recorded there and cross-referenced below.
 
 **Method:** Static reading of `apps/web/src/app/core/upload/**` and related specs. Every `path:line` anchor was re-verified against integration-branch HEAD.
 
@@ -11,11 +11,12 @@ This document records the structural work that remains after the NF-01…NF-37 i
 | Document | Role |
 | --- | --- |
 | [`01-flow-walkthrough.md`](./01-flow-walkthrough.md) | What the flow is trying to do |
-| [`02-new-issues.md`](./02-new-issues.md) | NF-01 … NF-39 findings |
+| [`02-new-issues.md`](./02-new-issues.md) | NF-01 … NF-40 findings |
 | [`03-hard-cases-and-decisions.md`](./03-hard-cases-and-decisions.md) | Decisions expensive to revisit; reversals in § H |
 | [`04-status-of-prior-findings.md`](./04-status-of-prior-findings.md) | UP-xx re-measured status |
 | [`05-address-resolution-and-ui-findings.md`](./05-address-resolution-and-ui-findings.md) | NF-17 … NF-37 (address resolution and UI) |
 | [`07-what-happens-when.md`](./07-what-happens-when.md) | Product-owner phase walkthrough and geocoding directions |
+| [`08-product-intent-vs-code.md`](./08-product-intent-vs-code.md) | Product intent vs code — precision, fabrication, G4 |
 
 ---
 
@@ -343,6 +344,28 @@ Violates `upload-manager.md` principle: *"Uploading is a background task — don
 
 ---
 
+### 14. Address precision — conditional reverse, persist text, precision metadata (NF-40)
+
+**Problem:** Upload persist always reverse-geocodes whenever `finalCoords` exist (`core/upload/support/upload-file-persist.util.ts:232-240`), with no check for an established text address and no precision cap. `titleAddress` / tray-resolved Search Object text is never written to structured `locations` fields — only `address_notes` (low-confidence fragments) and `location_status` on `media_items` (`core/upload/support/upload-file-persist.util.ts:192-207`). Reverse fills `p_street` / `p_city` / `p_district` exclusively via Nominatim (`core/upload/address-resolution/upload-address-resolve.util.ts:27-36`). City-only folders (`metadata_only`) still forward-geocode to a centroid (`core/upload/location/upload-location-placement.service.ts:104-125`), then reverse may fabricate a street at that point (`08-product-intent-vs-code.md` § A). `locations` has no precision/granularity column (`supabase/migrations/20260524120000_locations_nn_junction.sql:53-68`). **Overlaps NF-39** (same code path) but NF-39 is completion timing; this is **wrong or over-precise address content**.
+
+**Proposed change (not implemented in this audit):**
+
+1. **Conditional reverse** — Call `resolveUploadAddress` / `geocoding.reverse` only when coordinates exist **and** no usable text address was established at pre-upload (folder, tray, or forward-geocode label). When text exists, persist text-derived structured fields directly.
+2. **Persist text-derived address** — Pass `titleAddress` / resolved Search Object (`city`, `street`, `houseNumber`, …) into `resolve_media_location` on the text-placement path so `Burgstraße 7` from a folder is not lost if reverse fails or disagrees.
+3. **Precision level** — Add explicit stored precision aligned with Search Object / `groupingKey` vocabulary (`country` | `state` | `postcode` | `city` | `street` | `houseNumber`). Set from the highest tier actually established; reverse geocode must not populate tiers below established precision.
+4. **Post-upload refinement** — Ensure Media Detail / `MediaLocationsService.updateLocation` and upload-panel placement actions remain the supported path for adding detail (statement 7); optional UX copy when precision is city-only.
+5. **RPC + migration (unverified here)** — Extend `public.locations` (e.g. `address_precision text` or enum) and `resolve_media_location` to accept precision + text-first fields; teach `update_location` / `find_or_create_location` dedupe to respect precision. **No database in this environment** — migration shape is design-only until applied and validated on local Supabase.
+
+**Cost:** Medium–large — upload persist path, enrichment service, `GeocodingService` call sites, `resolve_media_location` + RLS validation SQL, Media Detail display rules for partial precision.
+
+**Risk:** High — wrong precision breaks map pins, search, and org dedupe keys (`address_dedupe_key`). City-centroid pins vs `locationPinEligible=false` (spec Step 6) needs explicit product decision. Must not regress EXIF-only paths (reverse still required when no text).
+
+**Change class:** **Sensitive** — upload pipeline + data model + `resolve_media_location` RPC. Red-test-first: `Vienna/` fixture asserts `street` null and `city` only at persist; street folder asserts text wins over reverse.
+
+**Depends on:** Product decision on allowed precision levels (open question in `08-product-intent-vs-code.md`). Item 13 (NF-39) should be coordinated — same `persistUploadFile` block. Cross-ref NF-39, not duplicate.
+
+---
+
 ## Dependency ordering
 
 ```mermaid
@@ -358,6 +381,7 @@ flowchart TD
   HAV[9. Haversine consolidate]
   BACKLOG[10. UP backlog items]
   NF39[13. NF-39 reverse geocode / UP-36]
+  NF40[14. NF-40 address precision]
 
   HEIC --> TRAY
   HEIC --> PIPE
@@ -392,6 +416,7 @@ flowchart TD
 | Commit coordinator (5) | Supabase adapter layer (UP-27) |
 | G5 cross-batch dedup (6) | Phase collapse (12, later) |
 | NF-39 address completion semantics (13) | Spec line-count (UP-38) |
+| NF-40 address precision / no fabrication (14) | G4 deferred lifecycle (11) |
 | Replace/attach/new parity via consolidation (4) | `beforeunload` wiring (UP-05) |
 | Fix mojibake fixtures (UP-32) | Spec line-count (UP-38) |
 

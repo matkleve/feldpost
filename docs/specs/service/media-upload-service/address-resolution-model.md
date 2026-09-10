@@ -32,6 +32,21 @@ Every `locations` row must be complete **upward**:
 
 Gaps are allowed only at **higher** tiers, never below without the parent tier.
 
+## Address precision principle (product intent, 2026-09-10)
+
+Normative rules for upload and persist — audit: [`docs/audits/upload-flow-review-2026-09-10/08-product-intent-vs-code.md`](../../../audits/upload-flow-review-2026-09-10/08-product-intent-vs-code.md).
+
+| Rule | Requirement |
+| --- | --- |
+| **Store established precision** | Persist the address at the tier actually established by folder/filename/tray/EXIF — city-only input may yield city-only stored fields. |
+| **Never fabricate precision** | Do not reverse-geocode a city centroid (or any pin) into a street or house the user did not supply. |
+| **Reverse geocode scope** | Reverse geocoding is **enrichment for the coordinates-only case** (GPS/EXIF pin with no usable text address). When a text address is already established at a given tier, skip reverse or cap output to that tier. |
+| **Persist text-derived address** | Folder/file `titleAddress` and tray-resolved Search Object fields must reach `resolve_media_location` (or equivalent) so text is not lost to a failed or over-precise geocoder round-trip. |
+| **Explicit precision metadata** | Stored locations should carry an explicit precision level (reuse Search Object / `groupingKey` tier vocabulary: `country` / `state` / `postcode` / `city` / `street` / `houseNumber`) — **not implemented**; see NF-40 / improvement-plan item 14. |
+| **Later refinement** | Users may add detail post-upload via Media Detail and upload-panel placement actions; distinct from G4 deferred tray lifecycle. |
+
+**Current implementation gap (do not treat as spec):** `resolveUploadAddress` runs unconditionally whenever upload coords exist (`core/upload/support/upload-file-persist.util.ts:232-240`); structured `locations` fields come from reverse geocode only. Fix tracked as NF-40.
+
 ## Explicit non-goals
 
 - **Project location is not an address fallback.** `project_locations` centroid is **only** Branch B Photon bias — media never inherit project address automatically.

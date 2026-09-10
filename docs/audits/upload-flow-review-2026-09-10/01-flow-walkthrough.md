@@ -15,6 +15,7 @@ the flow is *trying* to do, so the rest of the review has somewhere to attach:
 | [`05-address-resolution-and-ui-findings.md`](./05-address-resolution-and-ui-findings.md) | NF-17 … NF-37 — Branch C / orchestrator, and the panel and tray UI |
 | [`06-improvement-plan.md`](./06-improvement-plan.md) | Post-integration improvement plan — open questions answered, ranked work, dependencies, and what not to do |
 | [`07-what-happens-when.md`](./07-what-happens-when.md) | Product-owner walkthrough — phase-by-phase "what you see vs what runs", branch points, geocoding directions |
+| [`08-product-intent-vs-code.md`](./08-product-intent-vs-code.md) | Product intent vs code — eight PO statements, city-only fabrication trace, G4 vs post-upload refinement |
 
 ---
 
