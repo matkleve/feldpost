@@ -3,7 +3,7 @@ import type { PipelineContext, UploadJob } from '../upload-manager.types';
 import type { UploadQueueService } from './upload-queue.service';
 import type { UploadJobStateService } from './upload-job-state.service';
 import type { UploadService } from '../upload.service';
-import { computeUploadContentHash } from './content-hash.util';
+import { computeUploadContentHash, resolveUploadSourceFile } from './content-hash.util';
 import { isContentHashDedupEligible } from './upload-dedup-eligibility.util';
 import { applyDedupMatch, shouldAutoSkipDedupMatch } from './upload-dedup-match.util';
 import { handleDedupSkip } from './upload-dedup-skip.util';
@@ -79,7 +79,8 @@ export async function runUploadDedupCheck(
   parsedExif: ParsedExif | undefined,
   ctx: PipelineContext,
 ): Promise<UploadDedupCheckOutcome> {
-  const mediaType = deps.uploadService.resolveMediaType(job.file);
+  const sourceFile = resolveUploadSourceFile(job);
+  const mediaType = deps.uploadService.resolveMediaType(sourceFile);
   if (!isContentHashDedupEligible(mediaType) || job.forceDuplicateUpload) {
     return 'ineligible';
   }
@@ -88,7 +89,7 @@ export async function runUploadDedupCheck(
   let hashAlgo = job.contentHashAlgo;
   if (!contentHash) {
     deps.jobState.setPhase(jobId, 'hashing');
-    const computed = await computeUploadContentHash(job.file, parsedExif, mediaType);
+    const computed = await computeUploadContentHash(sourceFile, parsedExif, mediaType);
     contentHash = computed.contentHash;
     hashAlgo = computed.hashAlgo;
     deps.jobState.updateJob(jobId, { contentHash, contentHashAlgo: hashAlgo });

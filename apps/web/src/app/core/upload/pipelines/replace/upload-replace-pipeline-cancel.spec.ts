@@ -57,7 +57,9 @@ describe('finishReplacePipelineJob cancel after row update', () => {
 
     let cancelled = false;
     const deps: ReplacePipelineRunDeps = {
-      uploadService: {} as ReplacePipelineRunDeps['uploadService'],
+      uploadService: {
+        isHeic: vi.fn().mockReturnValue(false),
+      } as ReplacePipelineRunDeps['uploadService'],
       supabaseClient: client as never,
       mediaDownloadService: { setLocalUrl: vi.fn() } as never,
       jobState: jobState as never,

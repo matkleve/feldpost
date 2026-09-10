@@ -40,10 +40,7 @@ import type { PipelineContext } from '../../upload-manager.types';
 import { UploadQueueService } from '../../support/upload-queue.service';
 import { UploadStorageService } from '../../support/upload-storage.service';
 import { UploadService } from '../../upload.service';
-import {
-  ensureHeicConversionScheduled,
-  formatHeicConversionError,
-} from '../../support/upload-heic-prepare.util';
+import { awaitHeicConversionForUpload } from '../../support/upload-heic-prepare.util';
 import {
   DEFAULT_UPLOAD_PHASE_TIMEOUT_MS,
   runStorageUploadWithTimeout,
@@ -77,7 +74,20 @@ export class UploadAttachPipelineService {
     }
     const { job, parsedExif, contentHash } = prepared;
 
-    const storagePath = await this.uploadAttachFile(jobId, job.file, abortSignal, ctx);
+    try {
+      await awaitHeicConversionForUpload(
+        { jobState: this.jobState, uploadService: this.uploadService },
+        jobId,
+      );
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'HEIC conversion failed before upload.';
+      ctx.failJob(jobId, 'converting_format', message);
+      return;
+    }
+
+    const jobForUpload = this.jobState.findJob(jobId)!;
+    const storagePath = await this.uploadAttachFile(jobId, jobForUpload.file, abortSignal, ctx);
     if (!storagePath) {
       return;
     }
@@ -164,21 +174,11 @@ export class UploadAttachPipelineService {
         direction: parsedExif.direction,
       });
     }
-    let currentJob = this.jobState.findJob(jobId)!;
-    if (this.uploadService.isHeic(currentJob.file)) {
-      try {
-        await ensureHeicConversionScheduled(
-          { jobState: this.jobState, uploadService: this.uploadService },
-          jobId,
-          currentJob.file,
-        );
-      } catch (err) {
-        const message = formatHeicConversionError(currentJob.file.name, err);
-        ctx.failJob(jobId, 'converting_format', message);
-        return null;
-      }
-      currentJob = this.jobState.findJob(jobId)!;
-    }
+    const currentJob = this.jobState.findJob(jobId)!;
+    this.jobState.updateJob(jobId, {
+      sourceFile: currentJob.sourceFile ?? currentJob.file,
+      filePrepareComplete: true,
+    });
 
     if (!this.uploadService.isPhotoFile(currentJob.file)) {
       ctx.failJob(

@@ -37,7 +37,9 @@ Implementation: `isContentHashDedupEligible()` in `upload-dedup-eligibility.util
 
 Filename is never in the fingerprint. EXIF edits change `photo_v1` only.
 
-Dispatch: `computeUploadContentHash(file, parsedExif, mediaType)` in `content-hash.util.ts`.
+**Source bytes:** Fingerprints are computed from the user-selected source file (`job.sourceFile`), not from HEIC→JPEG conversion output. HEIC conversion runs after the dedup gate, immediately before storage write.
+
+Dispatch: `resolveUploadSourceFile(job)` → `computeUploadContentHash(sourceFile, parsedExif, mediaType)` in `content-hash.util.ts`.
 
 ## Dedup scope (tenant)
 

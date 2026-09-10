@@ -131,6 +131,10 @@ export interface UploadJob {
   id: string;
   batchId: string;
   file: File;
+  /** Immutable user-selected file for dedup fingerprinting (HEIC stays HEIC until upload gate). */
+  sourceFile?: File;
+  /** Phase 0 complete — EXIF parsed; HEIC conversion is deferred until upload gate. */
+  filePrepareComplete?: boolean;
   phase: UploadPhase;
   progress: number;
   statusLabel: string;

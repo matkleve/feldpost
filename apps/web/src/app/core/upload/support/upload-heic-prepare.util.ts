@@ -30,7 +30,11 @@ export function applyConvertedFileToJob(
     URL.revokeObjectURL(newThumbnailUrl);
   }
   newThumbnailUrl = URL.createObjectURL(convertedFile);
-  deps.jobState.updateJob(jobId, { file: convertedFile, thumbnailUrl: newThumbnailUrl });
+  deps.jobState.updateJob(jobId, {
+    file: convertedFile,
+    thumbnailUrl: newThumbnailUrl,
+    sourceFile: current.sourceFile ?? current.file,
+  });
 }
 
 function validateConvertedFileSize(file: File, originalFileName: string): string | null {

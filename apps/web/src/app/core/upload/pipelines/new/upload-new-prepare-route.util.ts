@@ -7,11 +7,7 @@ import type { UploadQueueService } from '../../support/upload-queue.service';
 import type { UploadService } from '../../upload.service';
 import type { ParsedExif } from '../../upload.service';
 import type { UploadLocationConfigService } from '../../location/upload-location-config.service';
-import {
-  awaitHeicConversionForUpload,
-  ensureHeicConversionScheduled,
-  formatHeicConversionError,
-} from '../../support/upload-heic-prepare.util';
+import { awaitHeicConversionForUpload } from '../../support/upload-heic-prepare.util';
 import { isUploadDocumentFile } from '../../support/upload.service.util';
 
 type NewPrepareRouteDeps = {
@@ -163,56 +159,28 @@ export function routeJobToMissingData(
 }
 
 /**
- * Phase 0 — EXIF parse and HEIC conversion run in parallel (both work on the original file).
- * Upload gate (Phase B) waits for conversion; geocode starts as soon as EXIF + SO are ready.
+ * Phase 0 — EXIF parse on the original file. HEIC→JPEG is deferred until the upload gate.
  * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md § Phase 0 prepareExif
  */
 async function prepareExifAndFile(
   deps: NewPrepareRouteDeps,
   jobId: string,
   job: UploadJob,
-  ctx: PipelineContext,
+  _ctx: PipelineContext,
 ): Promise<{ job: UploadJob; parsedExif: ParsedExif } | null> {
-  const isHeic = deps.uploadService.isHeic(job.file);
-
   deps.jobState.setPhase(jobId, 'parsing_exif');
-  const exifPromise: Promise<ParsedExif> = job.parsedExif
-    ? Promise.resolve(job.parsedExif)
-    : deps.uploadService.parseExif(job.file);
+  const parsedExif = job.parsedExif ?? (await deps.uploadService.parseExif(job.file));
 
-  let convertPromise: Promise<void> | null = null;
-  if (isHeic) {
-    convertPromise = ensureHeicConversionScheduled(deps, jobId, job.file, { setPhase: false }).catch(
-      (err) => {
-        const message = formatHeicConversionError(job.file.name, err);
-        ctx.failJob(jobId, 'converting_format', message);
-        throw err;
-      },
-    );
-  }
-
-  const parsedExif = await exifPromise;
-  if (isHeic) {
-    deps.jobState.setPhase(jobId, 'converting_format');
-  }
-  deps.jobState.updateJob(jobId, { parsedExif });
+  deps.jobState.updateJob(jobId, {
+    parsedExif,
+    sourceFile: job.sourceFile ?? job.file,
+    filePrepareComplete: true,
+  });
   if (parsedExif.direction != null && isAutoLocationEnabled(job)) {
     deps.jobState.updateJob(jobId, { direction: parsedExif.direction });
   }
 
-  if (convertPromise) {
-    try {
-      await convertPromise;
-    } catch {
-      return null;
-    }
-    job = deps.jobState.findJob(jobId)!;
-    if (job.phase === 'error') {
-      return null;
-    }
-    return { job, parsedExif };
-  }
-
+  job = deps.jobState.findJob(jobId)!;
   return { job, parsedExif };
 }
 

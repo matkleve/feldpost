@@ -13,6 +13,7 @@ import {
   DEFAULT_UPLOAD_PHASE_TIMEOUT_MS,
   runStorageUploadWithTimeout,
 } from '../../support/upload-storage-timeout.util';
+import { awaitHeicConversionForUpload } from '../../support/upload-heic-prepare.util';
 import type { PipelineContext } from '../../upload-manager.types';
 import { buildReplaceUpdateData } from './upload-replace-update-data.util';
 import type {
@@ -56,7 +57,20 @@ export async function finishReplacePipelineJob(
   uploadPhaseTimeoutMs: number = DEFAULT_UPLOAD_PHASE_TIMEOUT_MS,
 ): Promise<void> {
   const { targetMediaItemId, parsedExif } = prepared;
-  const job = prepared.job;
+
+  try {
+    await awaitHeicConversionForUpload(
+      { jobState: deps.jobState, uploadService: deps.uploadService },
+      jobId,
+    );
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : 'HEIC conversion failed before upload.';
+    ctx.failJob(jobId, 'converting_format', message);
+    return;
+  }
+
+  const job = deps.jobState.findJob(jobId)!;
 
   deps.jobState.setPhase(jobId, 'uploading');
   deps.jobState.updateJob(jobId, { progress: 0 });

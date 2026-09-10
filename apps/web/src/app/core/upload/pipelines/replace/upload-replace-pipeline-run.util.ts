@@ -14,10 +14,6 @@ import type { UploadQueueService } from '../../support/upload-queue.service';
 import type { UploadStorageService } from '../../support/upload-storage.service';
 import type { UploadService } from '../../upload.service';
 import type { ParsedExif } from '../../upload.types';
-import {
-  ensureHeicConversionScheduled,
-  formatHeicConversionError,
-} from '../../support/upload-heic-prepare.util';
 
 export interface ReplacePipelineRunDeps {
   uploadService: UploadService;
@@ -98,20 +94,10 @@ export async function prepareReplacePipelineJob(
     });
   }
 
-  if (deps.uploadService.isHeic(job.file)) {
-    try {
-      await ensureHeicConversionScheduled(
-        { jobState: deps.jobState, uploadService: deps.uploadService },
-        jobId,
-        job.file,
-      );
-    } catch (err) {
-      const message = formatHeicConversionError(job.file.name, err);
-      ctx.failJob(jobId, 'converting_format', message);
-      return null;
-    }
-    job = deps.jobState.findJob(jobId)!;
-  }
+  deps.jobState.updateJob(jobId, {
+    sourceFile: job.sourceFile ?? job.file,
+    filePrepareComplete: true,
+  });
 
   if (!deps.uploadService.isPhotoFile(job.file)) {
     ctx.failJob(jobId, 'validating', 'Only photo files can replace an existing photo.');
