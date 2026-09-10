@@ -69,6 +69,16 @@ Migration: `20260611120000_dedup_hashes_org_scope.sql`.
 | `upload_anyway` | New media row + storage object; org hash row unchanged |
 | Replace / attach | Same dedup gate (photo-only validation on those flows) |
 
+## Replace hash retirement
+
+When a media item's bytes are replaced, stale `dedup_hashes` rows for that `media_item_id` must be retired server-side before the new hash is inserted. The client calls `retire_dedup_hashes_for_media_item(p_media_item_id, p_keep_content_hash)` (SECURITY DEFINER; org derived from the media row). This prevents re-uploading the replaced file from matching a stale hash row.
+
+Migration: `20260910120000_retire_dedup_hashes_for_media_item.sql`.
+
+## In-flight dedup guard
+
+Between hash computation and successful save, an identical file submitted inside the 3-job concurrency window must not pass dedup twice. `upload-inflight-dedup.registry.ts` reserves `(content_hash → jobId, userId)` after the DB lookup misses; a second job with the same hash auto-skips (same user) or surfaces `duplicate_file` (colleague) before storage write.
+
 ## Acceptance criteria
 
 - [x] `dedup_hashes` uses `UNIQUE(organization_id, content_hash)` with `organization_id` backfill
@@ -77,4 +87,6 @@ Migration: `20260611120000_dedup_hashes_org_scope.sql`.
 - [x] Same-user match auto-skips without modal
 - [x] Cross-user org match surfaces `duplicate_file` issue + modal
 - [x] `photo_v1` + `binary_v1` cover photo, document, and video
+- [x] Replace retires stale `dedup_hashes` rows via `retire_dedup_hashes_for_media_item` before inserting the new hash
+- [x] In-flight hash reservation prevents duplicate storage writes inside the concurrency window
 - [ ] `use_existing` links project context when batch has project filter (parent AC — verify end-to-end)
