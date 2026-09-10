@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { UploadPanelInputHandlersService } from './upload-panel-input-handlers';
-import { setupUploadPanel } from './upload-panel.test-utils.spec';
+import { setupUploadPanel } from './upload-panel.spec-setup';
 
 describe('UploadPanelComponent intake', () => {
   it('onCaptureInputChange submits exactly one captured file', async () => {

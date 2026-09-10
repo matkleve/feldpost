@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { UploadPanelInputHandlersService } from './upload-panel-input-handlers';
-import { makeUploadJob, setupUploadPanel } from './upload-panel.test-utils.spec';
+import { makeUploadJob, setupUploadPanel } from './upload-panel.spec-setup';
 
 describe('UploadPanelComponent creation', () => {
   it('creates', async () => {

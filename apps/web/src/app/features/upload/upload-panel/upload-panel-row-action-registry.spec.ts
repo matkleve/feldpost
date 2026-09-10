@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { makeUploadJob } from './upload-panel.test-utils.spec';
+import { makeUploadJob } from './upload-panel.spec-setup';
 import { resolveUploadRowMenuActions } from './upload-panel-row-action-registry';
 import { getIssueKind } from '../upload-phase.helpers';
 

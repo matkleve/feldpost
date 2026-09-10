@@ -1,4 +1,4 @@
-import { makeUploadJob, setupUploadPanel } from './upload-panel.test-utils.spec';
+import { makeUploadJob, setupUploadPanel } from './upload-panel.spec-setup';
 
 describe('UploadPanelComponent missing_data prompt', () => {
   it('renders compact missing_data status text for missing_data jobs', async () => {

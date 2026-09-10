@@ -1,5 +1,5 @@
 import { By } from '@angular/platform-browser';
-import { makeUploadJob, setupUploadPanel } from './upload-panel.test-utils.spec';
+import { makeUploadJob, setupUploadPanel } from './upload-panel.spec-setup';
 
 describe('UploadPanelComponent drag-and-drop interactions', () => {
   function makeDragEventStub(): DragEvent {
