@@ -244,3 +244,76 @@ Consequences that follow from the model rather than from taste:
 G3's implementation also has a rough edge: its "Enter a different address" option only defers the group, with no address entry behind it (NF-13).
 
 And one contradiction class was specified but never built: **C5, "is this photo in the right project area?"** — `context_distance` exists in the type union and is read in one place, but nothing ever writes it (NF-15).
+
+---
+
+## H. The reversals — decisions that were made twice
+
+The most useful thing in the history is the short list of decisions that were shipped and then taken back. Each one is a place where the obvious answer turned out to be wrong in practice, so each one is a trap for anyone who re-derives it from first principles.
+
+### H1 — Same-user duplicate: attaching the new address to the existing media (shipped, then reverted)
+
+**Case.** A user resumes an interrupted folder upload. The bytes already exist as media item M, filed under address A. The resumed file is filed under address B.
+
+**First decision (2026-06-26).** On a same-user server-side hash match, unconditionally attach address B to M. Rationale: the same photo filed under two site folders should be one media row with two location links, not two rows.
+
+**Reverted (2026-06-29).** Backed out. The client does not know which addresses M already has, so "unconditionally attach" could silently accrete addresses onto an existing item from any resumed upload.
+
+**Where it stands.** Same-user match → **auto-skip only**. The address-union behaviour survives for the *intra-batch* case, where the batch's own classification supplies both addresses and the merge is knowable, with an "address added" toast. The reverted server-side variant is correctly absent from the dedup supplement — the spec was not left describing it.
+
+**Trap.** "One media, many addresses" reads like a settled principle in the media-locations specs. It is settled *there*. It was tried and rejected as an upload-time inference from a server hash match.
+
+### H2 — The project-location tray (specified, built, removed twice)
+
+Removed from the spec on 2026-05-27, and the dead code finally deleted on 2026-09-10. A type comment still referred to its steps until this review (NF-16). The reason it keeps needing removal is A1: once project location is not an address fallback, a tray that asks the user to confirm the project's address has nothing to decide.
+
+### H3 — Collapsing the 20 upload phases (proposed, rejected as premature)
+
+**Case.** An archived playbook recommended collapsing `UploadPhase` from 20 members to about 5.
+
+**Finding that killed it (2026-09-09).** All 20 members are reachable from live code. The collapse is therefore a **behaviour change**, not dead-code deletion: `queued` has 12 writers and `complete` has 8, the paused states deliberately do not hold a concurrency slot, and each phase maps to a distinct user-facing status label.
+
+**Decision.** Rejected until a real transition map exists (UP-11 / proposal P8), because collapsing states without a guard would remove the only thing currently documenting which transitions are legal — the phase names themselves.
+
+### H4 — Source-conflict "Save" applying to the whole folder (behaviour corrected)
+
+**Case (2026-05-27).** Answering a text-vs-EXIF source conflict applied the answer to every job in the folder, including jobs that had only one evidence source and therefore no conflict.
+
+**Correction.** The answer applies to `group.jobIds` only — the jobs that actually have *both* `titleAddressCoords` and `parsedExif.coords`. This is why the affected-media chip count is smaller than the batch size, and it is deliberate: the chip shows true conflicts, not file count.
+
+### H5 — Trays moved off `classifyBatch` for Branch C
+
+**Case (2026-05-27).** Branch C questions were being asked during classification, before any geocoder call — so the user was asked to pick a city before the system knew which cities were candidates.
+
+**Correction.** Geocode-derived trays (city, house, geocode) enqueue only **after** `classifySearchHits`. Only layer-package and admin-level conflicts — which are decidable from the path alone — enqueue during classification. That split is now a hard ordering contract, and it is the reason `classifyBatch` must not set `needsGeocode` while package conflicts are unresolved.
+
+### H6 — Silent binary dedup skip (fixed)
+
+Document duplicates were being auto-skipped without the user seeing it (fixed 2026-07-27). The fix aligns documents with the resume-safety goal without hiding the skip. Recorded here because it is a decision that exists **only** as a commit — no spec states it.
+
+---
+
+## I. Timeline of the corrections
+
+| Date | Event | Area |
+| --- | --- | --- |
+| 2026-05-26 | `parsedExif.coords` split from `job.coords`; EXIF metadata preserved separately from placement | precedence |
+| 2026-05-27 | Project tray removed; Branch C + layer packages introduced; source-conflict Save scope corrected (H4); trays moved off `classifyBatch` (H5) | tray / grouping |
+| 2026-06-11 | Dedup moved **before** address resolution; admin-level conflict detection added | dedup order |
+| 2026-06-13 | Tray reframed as a contradiction resolver, not an address picker; gaps G1–G5 named | philosophy |
+| 2026-06-26 | Intra-batch dedup + "one media, multiple addresses" | dedup |
+| 2026-06-26 → 06-29 | Server-side same-user address union **shipped then reverted** (H1) | dedup |
+| 2026-07-27 | Silent binary dedup skip fixed (H6) | dedup UX |
+| 2026-09-09 | Audit: all 20 phases reachable, collapse rejected (H3); parent-vs-supplement dedup contradiction flagged | FSM / specs |
+| 2026-09-09–10 | Cancel/orphan/timeout fixes (P2); `wasCancelled` flag replaces regex; dead tray code deleted | failure semantics |
+| 2026-09-10 | This review: attach/replace found to have missed the P2 hardening | failure semantics |
+
+---
+
+## J. Two decisions that are only in the code
+
+Both are load-bearing and neither is written down anywhere.
+
+**The forward-geocode retry defaults to Vienna.** When a free-text hint yields no hits and contains no comma, one retry appends a generic locality anchor — `Wien, Österreich`. For an organization working outside Vienna this biases the retry toward the wrong city rather than failing cleanly. There is no typo table and no per-org anchor.
+
+**EXIF beats a weak filename street.** `isExifAuthoritativeOverWeakFilenameStreet` skips the city tray entirely and takes EXIF placement when the filename's street is low-confidence. This is a precedence rule of the same importance as A2 and A3, it is tested, and the Branch C spec does not mention it.
