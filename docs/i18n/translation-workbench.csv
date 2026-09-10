@@ -1561,4 +1561,13 @@ workspace.imageDetail.section.addressNotes,Address fragments,media detail sectio
 workspace.imageDetail.section.addressNotes.aria,Unresolved address fragments,aria label for address notes evidence section in media detail,Unresolved address fragments,Nicht auflösbare Adressfragmente,Frammenti di indirizzo non risolti
 workspace.imageDetail.locationMismatch,GPS and address diverge by,media detail mismatch indicator label prefix (followed by metres value),GPS and address diverge by,GPS und Adresse weichen ab um,GPS e indirizzo divergono di
 workspace.capturedDate.action.removeTime,Remove time,button label at the bottom of the time-field wheel picker; one-click destructive action that clears the selected time value,Remove time,Uhrzeit entfernen,Rimuovi orario
-"
+upload.panel.queue.aria,Upload queue,aria label for upload panel file list,Upload queue,Upload-Warteschlange,Coda caricamento
+upload.panel.scanning.status,Scanning... {count} file{suffix} found,upload panel batch scanning status line,Scanning... {count} file{suffix} found,Scanne… {count} Datei{suffix} gefunden,Scansione… {count} file{suffix} trovati
+upload.item.fileName.aria,File name,aria label for upload row file name,File name,Dateiname,Nome file
+upload.item.rowAction.placeOnMap,Place {name} on map,upload row main action when placement needed,Place {name} on map,{name} auf der Karte platzieren,Posiziona {name} sulla mappa
+upload.item.rowAction.openInWorkspace,Open {name} in workspace,upload row main action to open workspace detail,Open {name} in workspace,{name} im Arbeitsbereich öffnen,Apri {name} nell'area di lavoro
+upload.item.rowAction.zoomToJob,Zoom map to {name},upload row main action to zoom map,Zoom map to {name},Karte auf {name} zoomen,Zoom mappa su {name}
+upload.item.download.failed,Download failed.,toast when uploaded file download fails,Download failed.,Download fehlgeschlagen.,Download non riuscito.
+upload.projectSelect.confirm,Select,upload panel project assignment dialog confirm button,Select,Auswählen,Seleziona
+upload.projectSelect.cancel,Cancel,upload panel project assignment dialog cancel button,Cancel,Abbrechen,Annulla
+upload.location.editor.close,Close location editor,upload panel location editor close button aria label,Close location editor,Standorteditor schließen,Chiudi editor posizione
