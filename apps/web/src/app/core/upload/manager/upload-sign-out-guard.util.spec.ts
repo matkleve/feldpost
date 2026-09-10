@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { installUploadSignOutGuard } from './upload-sign-out-guard.util';
+import { installUploadSignOutGuardSync } from './upload-sign-out-guard.util';
 
 describe('installUploadSignOutGuard', () => {
   it('cancels active uploads before auth.signOut clears the session', async () => {
@@ -8,8 +8,8 @@ describe('installUploadSignOutGuard', () => {
     const auth = { signOut: originalSignOut };
     const supabaseClient = { auth } as never;
 
-    installUploadSignOutGuard({
-      supabaseClient,
+    installUploadSignOutGuardSync({
+      getSupabaseClient: () => supabaseClient,
       hasRunning: () => true,
       cancelAllActive,
     });

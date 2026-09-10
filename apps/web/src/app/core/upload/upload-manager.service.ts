@@ -240,7 +240,7 @@ export class UploadManagerService {
 
   constructor() {
     installUploadSignOutGuard({
-      supabaseClient: this.supabase.client,
+      getSupabaseClient: () => this.supabase.client,
       hasRunning: () => this.queue.hasRunning(),
       cancelAllActive: () => this.pipelineHost.cancelAllActive(),
     });

@@ -8,18 +8,50 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 type SignOutGuardDeps = {
-  supabaseClient: SupabaseClient;
+  /** Lazy — avoids touching SupabaseService.client during UploadManagerService construction. */
+  getSupabaseClient: () => SupabaseClient;
   hasRunning: () => boolean;
   cancelAllActive: () => Promise<void>;
 };
 
 export function installUploadSignOutGuard(deps: SignOutGuardDeps): void {
-  const authClient = deps.supabaseClient.auth;
+  let patched = false;
+
+  const patchSignOutOnce = (): void => {
+    if (patched) {
+      return;
+    }
+    const authClient = deps.getSupabaseClient().auth;
+    if (!authClient?.signOut) {
+      return;
+    }
+    const originalSignOut = authClient.signOut.bind(authClient);
+    authClient.signOut = async (options?) => {
+      if (deps.hasRunning()) {
+        await deps.cancelAllActive();
+      }
+      return originalSignOut(options);
+    };
+    patched = true;
+  };
+
+  // Schedule patching after construction — first sign-out or explicit warm-up.
+  queueMicrotask(() => {
+    try {
+      patchSignOutOnce();
+    } catch {
+      // Supabase runtime config may not be ready in unit tests that never sign out.
+    }
+  });
+}
+
+/** @internal Test hook to patch immediately when Supabase is already initialized. */
+export function installUploadSignOutGuardSync(deps: SignOutGuardDeps): void {
+  const authClient = deps.getSupabaseClient().auth;
   if (!authClient?.signOut) {
     return;
   }
   const originalSignOut = authClient.signOut.bind(authClient);
-
   authClient.signOut = async (options?) => {
     if (deps.hasRunning()) {
       await deps.cancelAllActive();
