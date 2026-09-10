@@ -22,6 +22,7 @@ import {
 } from '../../support/upload-error-messages.util';
 import { resolveUploadPhaseInputs } from '../../location/upload-location-inputs.helpers';
 import { awaitHeicConversionForUpload } from './upload-new-prepare-route.util';
+import { runStorageUploadWithTimeout } from '../../support/upload-storage-timeout.util';
 
 type RunNewUploadPhaseArgs = {
   jobId: string;
@@ -188,7 +189,7 @@ export async function runUploadCall(args: {
     job.addressNotes,
   );
 
-  return withTimeout(uploadPromise, timeoutMs, 'Upload timed out. Please retry.', () => {
+  return runStorageUploadWithTimeout(uploadPromise, timeoutMs, 'Upload timed out. Please retry.', () => {
     // The installed @supabase/storage-js client does not honour AbortSignal for
     // `.upload()` (verified against @supabase/storage-js@2.105.4 — the signal is
     // dropped before it reaches the HTTP layer), so this cannot interrupt an
@@ -326,27 +327,3 @@ function getUploadErrorMessage(error: unknown): string {
   return uploadFailureMessageToToastText(formatUploadFailureMessage(raw));
 }
 
-async function withTimeout<T>(
-  promise: Promise<T>,
-  timeoutMs: number,
-  timeoutMessage: string,
-  onTimeout?: () => void,
-): Promise<T> {
-  let timeoutId: ReturnType<typeof setTimeout> | undefined;
-
-  try {
-    return await Promise.race([
-      promise,
-      new Promise<T>((_resolve, reject) => {
-        timeoutId = setTimeout(() => {
-          onTimeout?.();
-          reject(new Error(timeoutMessage));
-        }, timeoutMs);
-      }),
-    ]);
-  } finally {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-  }
-}
