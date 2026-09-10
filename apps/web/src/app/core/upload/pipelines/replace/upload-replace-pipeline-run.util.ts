@@ -34,7 +34,7 @@ export type ReplacePipelinePrepared = {
 };
 
 /**
- * validating → parsing_exif → converting_format → hashing → dedup_check.
+ * validating → parsing_exif → hashing → dedup_check (HEIC conversion deferred to upload gate).
  * @see upload-replace-pipeline.service.ts run (first half)
  */
 export async function prepareReplacePipelineJob(
