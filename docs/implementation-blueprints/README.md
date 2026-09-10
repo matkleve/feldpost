@@ -1,6 +1,6 @@
 # Implementation blueprints (`docs/implementation-blueprints/`)
 
-> **Closed to new documents (2026-09-10).** This folder holds exactly one file and gains no more. Normative behaviour belongs in a spec under [`docs/specs/`](../specs/README.md); the *reasoning* behind a design — why this shape and not the alternative — belongs in [`docs/study/`](../study/README.md) as a study with `type: proposal` and an evidence grade on every claim.
+> **Closed to new documents (2026-09-10).** This folder holds exactly one blueprint and gains no more. Normative behaviour belongs in a spec under [`docs/specs/`](../specs/README.md); the *reasoning* behind a design — why this shape and not the alternative — belongs in [`docs/study/`](../study/README.md) as a study with `type: proposal` and an evidence grade on every claim.
 
 A blueprint is a hybrid: part contract, part proposal, with nothing marking which sentence is which. That is precisely the ambiguity the study format exists to remove — a `[D]` (a decision someone could change) read as an `[A]` (verified fact) is how an unaccepted plan gets built as though it were signed off ([`STUDY-FORMAT.md`](../study/STUDY-FORMAT.md) § Evidence grades).
 
