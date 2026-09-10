@@ -5,8 +5,14 @@
 This is the plain-language companion to the line-level trace in
 [`../upload-process-analysis-2026-09-08/02-happy-path.md`](../upload-process-analysis-2026-09-08/02-happy-path.md).
 Where that document tables 36 steps with `path:line` anchors, this one explains what
-the flow is *trying* to do, so the issues in [`02-new-issues.md`](./02-new-issues.md) and the
-decisions in [`03-hard-cases-and-decisions.md`](./03-hard-cases-and-decisions.md) have somewhere to attach.
+the flow is *trying* to do, so the rest of the review has somewhere to attach:
+
+| Document | Contents |
+| --- | --- |
+| [`02-new-issues.md`](./02-new-issues.md) | NF-01 … NF-16 — attach/replace pipelines, HEIC, dedup, and the incomplete 2026-09-09/10 fixes |
+| [`03-hard-cases-and-decisions.md`](./03-hard-cases-and-decisions.md) | The decisions that are expensive to revisit, what each gave up, and the ones that were reversed |
+| [`04-status-of-prior-findings.md`](./04-status-of-prior-findings.md) | Every UP-xx finding from 2026-09-08 re-measured against HEAD |
+| [`05-address-resolution-and-ui-findings.md`](./05-address-resolution-and-ui-findings.md) | NF-17 … NF-37 — Branch C / orchestrator, and the panel and tray UI |
 
 ---
 

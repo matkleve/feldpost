@@ -1,6 +1,8 @@
 # 02 — Issues not in the 2026-09-08 audit
 
-**Measured:** 2026-09-10 on branch `cursor/upload-flow-review-3be6` · **Method:** static reading. Nothing here was observed running; there is no live backend in this container and the whole-repo unit suite does not compile. Every row carries a `path:line` anchor so each claim can be checked without re-deriving it.
+**Measured:** 2026-09-10 on branch `cursor/upload-flow-review-3be6` · **Method:** static reading. Nothing here was observed running — there is no live backend in this container. Every row carries a `path:line` anchor so each claim can be checked without re-deriving it.
+
+Findings continue as NF-17 … NF-37 in [`05-address-resolution-and-ui-findings.md`](05-address-resolution-and-ui-findings.md); the status of the previous audit's UP-xx rows is re-measured in [`04-status-of-prior-findings.md`](04-status-of-prior-findings.md).
 
 **Relationship to the previous audit.** [`../upload-process-analysis-2026-09-08/10-findings.md`](../upload-process-analysis-2026-09-08/10-findings.md) holds 50 findings (UP-01 … UP-50), roughly half of which were fixed on 2026-09-09/10. This document does **not** restate those. It covers three things that audit did not:
 
