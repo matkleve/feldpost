@@ -30,6 +30,7 @@ import { spawnSync } from "node:child_process";
 
 const CHECKS = [
   { name: "doc-links", cmd: "node", args: ["scripts/check-doc-links.mjs"] },
+  { name: "skills-source", cmd: "node", args: ["scripts/check-skills-source.mjs"] },
   {
     name: "spec-code-paths",
     cmd: "node",
