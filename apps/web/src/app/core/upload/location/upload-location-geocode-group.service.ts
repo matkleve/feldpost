@@ -9,8 +9,9 @@ import { OrgSearchTuningService } from '../../search/org-search-tuning.service';
 import { UploadAddressResolutionOrchestrator } from '../address-resolution/upload-address-resolution.orchestrator';
 import { UploadJobStateService } from '../support/upload-job-state.service';
 import { UploadLocationConfigService } from './upload-location-config.service';
-import { getExifMetadataCoords, haversineMeters } from './upload-location-precedence.helpers';
+import { getExifMetadataCoords } from './upload-location-precedence.helpers';
 import {
+  buildBranchCCity01Candidates,
   classifySearchHits,
   filterGeocodeHitsByContextDistance,
   shouldForceBranchCCityTray,
@@ -84,7 +85,7 @@ export class UploadLocationGeocodeGroupService {
     }
     const { street, countryCode } = streetCountry;
     const hits = await this.fetchStructuredGeocodeHits(batchId, group, street, countryCode, config);
-    const outcome = this.classifyGeocodeHitsForGroup(group, hits, config);
+    const outcome = await this.classifyGeocodeHitsForGroup(group, hits, config);
     return this.resolveGeocodeClassifyOutcome(batchId, group, outcome, config);
   }
 
@@ -177,11 +178,11 @@ export class UploadLocationGeocodeGroupService {
     return hits;
   }
 
-  private classifyGeocodeHitsForGroup(
+  private async classifyGeocodeHitsForGroup(
     group: UploadGroupResolutionState,
     hits: Awaited<ReturnType<GeocodingService['searchStructuredForward']>>,
     config: ReturnType<UploadLocationConfigService['getConfig']>,
-  ): ReturnType<typeof classifySearchHits> {
+  ): Promise<ReturnType<typeof classifySearchHits>> {
     const sampleJob = this.jobState.findJob(group.jobIds[0]);
     const exifCoords = sampleJob ? getExifMetadataCoords(sampleJob) : undefined;
     const contextDistanceMaxMeters =
@@ -201,21 +202,23 @@ export class UploadLocationGeocodeGroupService {
     }
 
     let outcome = classifySearchHits(filteredHits, config, exifCoords);
-    if (
-      outcome.kind === 'auto' &&
-      shouldForceBranchCCityTray(group, outcome, exifCoords, config.sourceAgreementRadiusMeters)
-    ) {
-      uploadTraceDecision('geocode', 'branch_c CITY-01 — EXIF far from auto, force city_step', {
-        distanceM: exifCoords
-          ? Math.round(
-              haversineMeters(exifCoords, {
-                lat: outcome.candidate.lat,
-                lng: outcome.candidate.lng,
-              }),
-            )
-          : undefined,
-      });
-      outcome = { kind: 'ambiguous', candidates: [outcome.candidate] };
+    if (outcome.kind === 'auto' && exifCoords) {
+      const exifReverse = await this.geocoding.reverse(exifCoords.lat, exifCoords.lng);
+      const exifReverseCity = exifReverse?.city ?? null;
+      if (shouldForceBranchCCityTray(group, outcome, exifReverseCity)) {
+        uploadTraceDecision('geocode', 'branch_c CITY-01 — EXIF city disagrees with Photon auto, force city_step', {
+          autoCity: outcome.candidate.city,
+          exifReverseCity,
+        });
+        outcome = {
+          kind: 'ambiguous',
+          candidates: buildBranchCCity01Candidates(
+            outcome.candidate,
+            exifReverseCity!,
+            exifCoords,
+          ),
+        };
+      }
     }
 
     uploadAddressDebug('geocode', 'classifySearchHits outcome', {
