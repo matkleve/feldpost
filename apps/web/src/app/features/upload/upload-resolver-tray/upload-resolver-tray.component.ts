@@ -27,6 +27,7 @@ import {
   areAllJobsReadyForTrayResolution,
   isJobReadyForTrayResolution,
 } from '../../../core/upload/address-resolution/upload-tray-resolution-gate.helpers';
+import { UploadLocationResolutionService } from '../../../core/upload/location/upload-location-resolution.service';
 import {
   countDialogueUnits,
   formatBundleCarouselIndicator,
@@ -52,6 +53,12 @@ import {
   UPLOAD_RESOLVER_TRAY_MOCK_ORCHESTRATOR_ITEMS,
 } from './upload-resolver-tray.mock-orchestrator';
 import { UploadPanelSignalsService } from '../upload-panel/upload-panel-signals.service';
+import {
+  deriveUploadResolverTrayVisualState,
+  disambiguationGroupIdFromTrayItem,
+  liveTrayJobIds,
+  type UploadResolverTrayVisualState,
+} from './upload-resolver-tray-state';
 
 export interface AffectedMediaRow {
   jobId: string;
@@ -72,6 +79,7 @@ export class UploadResolverTrayComponent implements OnInit {
   private readonly orchestrator = inject(UploadResolverTrayOrchestratorService);
   private readonly uploadManager = inject(UploadManagerService);
   private readonly uploadService = inject(UploadService);
+  private readonly locationResolution = inject(UploadLocationResolutionService);
   private readonly panelSignals = inject(UploadPanelSignalsService);
 
   readonly panelOpen = input(false);
@@ -110,7 +118,15 @@ export class UploadResolverTrayComponent implements OnInit {
     return this.orchestrator.itemStatuses().get(item.id) ?? 'ready';
   });
 
-  readonly isItemBlocked = computed(() => this.activeItemStatus() === 'blocked');
+  readonly isItemBlocked = computed(() => this.trayVisualState() === 'blocked');
+
+  readonly trayVisualState = computed((): UploadResolverTrayVisualState =>
+    deriveUploadResolverTrayVisualState(this.activeItem(), this.activeItemStatus()),
+  );
+
+  readonly showTextAnswer = computed(() => this.trayVisualState() === 'text_answer');
+
+  readonly showHouseNoNumber = computed(() => this.trayVisualState() === 'house_step');
 
   readonly carouselIndicator = computed(() => {
     const items = this.bundleItems();
@@ -156,12 +172,6 @@ export class UploadResolverTrayComponent implements OnInit {
     }));
   });
 
-  readonly showTextAnswer = computed(() => this.activeItem()?.answerKind === 'text');
-
-  readonly showHouseNoNumber = computed(
-    () => this.activeItem()?.trayStepLabel === '1b' && !this.isItemBlocked(),
-  );
-
   readonly affectedMedia = computed((): AffectedMediaRow[] => {
     const item = this.activeItem();
     if (!item) {
@@ -174,9 +184,10 @@ export class UploadResolverTrayComponent implements OnInit {
       }));
     }
     const jobs = this.uploadManager.jobs();
-    return item.jobIds.map((jobId) => {
-      const job = jobs.find((entry) => entry.id === jobId);
-      return { jobId, label: job?.file.name ?? jobId };
+    const findJob = (id: string) => jobs.find((entry) => entry.id === id);
+    return liveTrayJobIds(item.jobIds, findJob).map((jobId) => {
+      const job = findJob(jobId)!;
+      return { jobId, label: job.file.name };
     });
   });
 
@@ -191,20 +202,23 @@ export class UploadResolverTrayComponent implements OnInit {
       return false;
     }
     const item = this.activeItem();
-    if (!item?.jobIds.length) {
-      return true;
+    const liveIds = item
+      ? liveTrayJobIds(item.jobIds, (id) => this.uploadManager.jobs().find((entry) => entry.id === id))
+      : [];
+    if (!liveIds.length) {
+      return false;
     }
     if (
       !areAllJobsReadyForTrayResolution(
-        item.jobIds,
+        liveIds,
         (id) => this.uploadManager.jobs().find((entry) => entry.id === id),
         (file) => this.uploadService.isHeic(file),
       )
     ) {
       return false;
     }
-    if (item.questionKey === 'upload.resolver.question.source') {
-      return item.jobIds.every((jobId) => {
+    if (item?.questionKey === 'upload.resolver.question.source') {
+      return liveIds.every((jobId) => {
         const job = this.uploadManager.jobs().find((entry) => entry.id === jobId);
         return (
           job != null &&
@@ -394,7 +408,15 @@ export class UploadResolverTrayComponent implements OnInit {
   }
 
   onStreetCentroid(): void {
-    this.onDefer();
+    if (this.isItemBlocked()) {
+      return;
+    }
+    const item = this.activeItem();
+    const groupId = disambiguationGroupIdFromTrayItem(item);
+    if (groupId) {
+      this.locationResolution.applyTrayHouseSelection(groupId, null, true);
+    }
+    this.orchestrator.resolveActiveItem({});
   }
 
   onPreviewOption(option: TrayResolveOption): void {
@@ -443,8 +465,13 @@ export class UploadResolverTrayComponent implements OnInit {
     this.mediaMenuOpen.set(false);
   }
 
-  onAskLater(_jobId: string, event: Event): void {
+  onAskLater(jobId: string, event: Event): void {
     event.stopPropagation();
+    const item = this.activeItem();
+    const groupId = disambiguationGroupIdFromTrayItem(item);
+    if (groupId) {
+      this.locationResolution.isolateJobFromGroup(groupId, jobId);
+    }
     this.closeMediaMenu();
   }
 
