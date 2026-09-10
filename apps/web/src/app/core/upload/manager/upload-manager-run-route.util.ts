@@ -5,6 +5,7 @@
  */
 
 import type { UploadJob } from '../upload-manager.types';
+import { uploadManagerDebugLog } from '../support/upload-manager-debug.util';
 
 export interface RunUploadPipelineByModeDeps {
   runReplace: (jobId: string) => Promise<void>;
@@ -19,18 +20,18 @@ export async function runUploadPipelineByMode(
 ): Promise<void> {
   const shortId = job.id.slice(0, deps.logJobIdPrefixLen);
 
-  console.log(
+  uploadManagerDebugLog(
     `[upload-manager] runPipeline: routing job ${shortId} via mode=${job.mode}, targetMediaId=${job.targetMediaId}`,
   );
 
   if (job.mode === 'replace') {
-    console.log('[upload-manager] → replacePipeline.run()');
+    uploadManagerDebugLog('[upload-manager] → replacePipeline.run()');
     await deps.runReplace(job.id);
   } else if (job.mode === 'attach') {
-    console.log('[upload-manager] → attachPipeline.run()');
+    uploadManagerDebugLog('[upload-manager] → attachPipeline.run()');
     await deps.runAttach(job.id);
   } else {
-    console.log('[upload-manager] → newPipeline.run()');
+    uploadManagerDebugLog('[upload-manager] → newPipeline.run()');
     await deps.runNew(job.id);
   }
 }
