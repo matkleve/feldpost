@@ -68,7 +68,7 @@ Merged `cursor/upload-pipeline-integrity-3be6`, `cursor/upload-branch-c-resoluti
 | **NF-14** | **fixed** | Branch C spec/open-gap table synced; G2/G3 marked implemented. |
 | **NF-15** | **open (annotated)** | `context_distance` union member retained with comment — reserved for unbuilt C5 tray; sole reader in tray helpers unchanged. |
 | **NF-16** | **fixed** | Stale `project_address_*` type comment removed. |
-| **NF-38** | **open** | HEIC dedup hashes converted JPEG bytes, not source HEIC — see § 3 and [`06-improvement-plan.md`](./06-improvement-plan.md) item 1. |
+| **NF-38** | **fixed** | Source-byte fingerprint + conversion after dedup gate (`2abf22c7`). Encoder determinism experiment (§ 3) found latent risk only — dedup not silently broken for cases tested. |
 
 ---
 
@@ -125,9 +125,13 @@ The EXIF component of `photo_v1` does not rescue this: GPS, `capturedAt`, and `d
 - **NF-01** (replace hash retirement): `retireStaleDedupHashesFireAndForget` keys off `contentHash` computed at dedup time (`core/upload/support/upload-db-postwrite.util.ts:67-74`; called from `…/upload-replace-pipeline-finish.util.ts:133`). A varying hash leaves orphan rows or fails to retire the right one.
 - **NF-04** (in-flight dedup guard): the registry is keyed by `contentHash` (`core/upload/support/upload-inflight-dedup.registry.ts:15-29`; lookup at `upload-dedup-check.util.ts:100-107`). Two concurrent uploads of the same HEIC that encode to different bytes both miss each other.
 
-**Not yet proven:** Whether `heic2any` output is in fact non-deterministic for a fixed input at quality `0.85`. The defect is that the design **depends on determinism it never verified** — that is a design failure regardless of how the experiment lands. **Experiment to settle it:** convert the same HEIC fixture twice in one browser session via `convertHeicToJpegUploadFile`, byte-compare the two `File` blobs, and compare `computeUploadContentHash` results with the same `parsedExif`. If bytes or hashes differ, dedup is broken for HEIC in practice.
+**Encoder determinism experiment (2026-09-10):** Read-only test via `convertHeicToJpegUploadFile` with production options (`heic2any@0.0.4`, `toType: 'image/jpeg'`, quality `0.85` — matching `core/upload/support/upload.service.util.ts`). Five consecutive conversions in one browser session and two separate Chrome 148 headless processes produced **byte-identical** JPEG output for each input. `photo_v1` fingerprints matched on every run with EXIF held constant.
 
-**Fix:** [`06-improvement-plan.md`](./06-improvement-plan.md) item 1 — hash original source bytes, move conversion after the dedup gate.
+Two input sizes were tested: a 7,837-byte HEIC converting to 8,326 bytes (below the 64 KiB head window, so head hash equals full hash), and a 62,926-byte HEIC converting to 74,370 bytes (above the window, so the head is a strict subset — both the head hash and the full hash were stable).
+
+**Caveat:** No real device HEIC exists in the repository. Inputs were synthetic HEIC containers generated with `pillow-heif` from an existing JPEG sample — valid HEVC HEIF, not renamed JPEGs, but not iPhone exports either. Live Photo bursts, HDR, depth maps, and iOS version differences were not covered.
+
+**Conclusion:** NF-38 is **latent, not firing**. Duplicate detection for HEIC is not silently broken today for the cases tested. The severity is architectural: the design depended on an encoder determinism property that was never pinned, never tested in CI, and never validated against a real device export, and a `heic2any` or browser upgrade could change it without any signal. The fix that shipped on this branch — hashing source bytes and moving conversion behind the dedup gate (`2abf22c7`) — removes the dependency entirely and was the correct change regardless of the measurement outcome.
 
 ---
 
@@ -155,4 +159,4 @@ Same limitation as the previous audit. These are the checks that would settle th
 | NF-04 | Submit a folder containing the same photo twice; count resulting `media_items` rows |
 | NF-08 | Convert a ~20 MB HEIC and check whether the JPEG exceeds 25 MiB on a real device |
 | NF-09 | Instrument `convertToJpeg` with a call counter and submit a batch of HEICs |
-| NF-38 | Convert the same HEIC fixture twice in one session; byte-compare JPEG output and `computeUploadContentHash` results with identical `parsedExif` |
+| NF-38 | **Done (2026-09-10):** byte-identical `heic2any` output and stable `photo_v1` hashes for synthetic fixtures — see § 3. Remaining gap: real device-export HEIC fixture ([`06-improvement-plan.md`](./06-improvement-plan.md) item 7). |

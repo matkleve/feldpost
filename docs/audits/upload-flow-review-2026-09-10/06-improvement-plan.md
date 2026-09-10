@@ -227,9 +227,10 @@ Ordered by value (correctness and regression-prevention first). Each item: probl
 | Action | Value | Cost | Class |
 | --- | --- | --- | --- |
 | Fix UP-32 fixtures in `apps/web/public/vienna_sample_photos/` | Unblocks umlaut tests | Low | **Trivial** |
+| Commit real device-exported HEIC fixture (repo has zero `.heic`/`.heif` files; `vienna_sample_photos/` is JPEG-only) | Exercises primary iPhone input format in CI; closes NF-38 measurement caveat | Low | **Trivial** |
 | Extend `upload-folder-upload.integration.spec.ts` pattern: cancel mid-upload, sign-out before/after storage, replace cancel after row update | High | Medium | **Sensitive** when gating pipeline |
 | Transition map property tests (item 3) | High | Low | **Standard** |
-| NF-38 experiment: convert same HEIC twice, compare bytes + hash | Settles open question | Medium | **Sensitive** |
+| NF-38 experiment: convert same HEIC twice, compare bytes + hash | **Done (2026-09-10):** byte-identical output across 5 runs + 2 Chrome processes; latent risk only — see [`02-new-issues.md`](./02-new-issues.md) § 3 (NF-38) | — | — |
 | Document LIVE VERIFICATION block for replace cancel + sign-out residue | Required for Sensitive merges | Low | **Trivial** |
 | Playwright in CI | Highest fidelity | High env cost | **Not recommended now** |
 
