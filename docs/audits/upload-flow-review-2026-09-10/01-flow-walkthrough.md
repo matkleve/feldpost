@@ -83,7 +83,11 @@ Compressed:
   dropped as unrealistic.
 - **If it has no street** — only a city, or only a state — no pin is placed. The job gets
   an admin centroid and `locationPinEligible = false`. This is a deliberate refusal to
-  fake precision.
+  fake precision. *(Superseded in part 2026-09-10: `locationPinEligible` was a street-text
+  proxy and is retired in favour of stored `address_precision`; known area comes from the
+  geocoder bbox. See [area-extent decisions](../../specs/service/media-upload-service/address-resolution-model.area-extent-decisions.supplement.md)
+  Decisions 2–3 and [`03-hard-cases-and-decisions.md`](./03-hard-cases-and-decisions.md) § A3.
+  Still current in code — item 15 tracks closure.)*
 - **If EXIF GPS lands within `exifAssistRadiusMeters` (default 80 m)** of a geocode hit,
   it is used to pick which of several hits is the right one and to fine-tune the
   placement. The two sources agree, so the more precise one wins.

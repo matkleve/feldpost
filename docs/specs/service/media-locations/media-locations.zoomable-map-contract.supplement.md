@@ -157,8 +157,13 @@ Implementation helper: `MediaLocationsService.syncListCacheAfterPlacement(mediaI
 | --- | --- | --- | --- |
 | Zoomable gate | `address_precision` tier | `locationPinEligible` requires non-empty `street` | `media-locations.helpers.ts:309-314` |
 | `viewport_markers` filter | Zoomable links only (precision-aware) | Filters `latitude`, `longitude`, `geog` only — **no `street` or precision filter** | `20260524120000_locations_nn_junction.sql:816-820` |
+| `count_zoomable_locations_for_media` | Zoomable links only (precision-aware) | Coords-only rule (`latitude`/`longitude` not null), same as `viewport_markers` — **no `street` or precision filter**, despite the name | `20260524120000_locations_nn_junction.sql:467-482` |
 | Radius selection | Full containment of known area | Centroid distance ≤ radius; no pin gate | `radius-selection.service.ts:56-60` |
 | Geocoder extent | Persist `boundingbox` | Parsed types omit bbox; nothing stored | `geocoding.service.ts:873-891` |
+
+**Attach-vs-client parity risk.** `count_zoomable_locations_for_media` and the client helper `countZoomableLinks()` claim to answer the same question and do not. The RPC counts links with coords; `countZoomableLinks` → `locationsWithGps` → `locationPinEligible` additionally requires non-empty `street` (`media-locations.helpers.ts:310-325`). For a city-precision link that has coords but no street, the RPC returns ≥ 1 while the client returns 0.
+
+The attach pipeline consumes the RPC to decide whether the target item already has EXIF coordinates (`upload-attach-record-update-runner.util.ts:65-68` → `hasZoomableLocation`, then coords read from `list_locations_for_media`). So attach treats coarse city coords as an existing pin while the tile map and picker treat the same row as non-zoomable. Whichever rule item 15 settles on, **both** call sites must move together — and the RPC should be renamed to match what it actually counts.
 
 This drift predates the 2026-09-10 decisions. Item 15 in [`06-improvement-plan.md`](../../../audits/upload-flow-review-2026-09-10/06-improvement-plan.md) tracks closure. Until then, city-level coords **do** appear in `viewport_markers` and in radius selection despite spec intent.
 
