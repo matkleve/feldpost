@@ -75,8 +75,9 @@ Compressed:
 - **If it has no street** — only a city, or only a state — no pin is placed. The job gets
   an admin centroid and `locationPinEligible = false`. This is a deliberate refusal to
   fake precision.
-- **If EXIF GPS lands within `exifAssistRadiusMeters` (default 80 m) of the geocoded
-  point**, EXIF refines it. The two sources agree; the more precise one wins.
+- **If EXIF GPS lands within `exifAssistRadiusMeters` (default 80 m)** of a geocode hit,
+  it is used to pick which of several hits is the right one and to fine-tune the
+  placement. The two sources agree, so the more precise one wins.
 - **If EXIF GPS and the text address disagree by more than
   `sourceAgreementRadiusMeters` (150 m)**, nobody wins and the user is asked. This is
   contradiction class C1.
