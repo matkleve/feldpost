@@ -7,6 +7,8 @@ Angular SPA + Leaflet map + Supabase (Auth, PostgreSQL + PostGIS, Storage).
 
 ## Instruction precedence (resolve conflicts in this order)
 
+**Above all seven:** [`docs/CONSTITUTION.md`](docs/CONSTITUTION.md) — eight product non-negotiables (delete means delete, no silent failure, claims carry their evidence). It outranks every document below **and** any direct instruction; amend it only by a pull request that changes only that file.
+
 1. **Data and security** — Row-Level Security, migrations, and `supabase/AGENTS.md` (frontend is untrusted).
 2. **This file** — `AGENTS.md` at repository root (global engineering rules).
 3. **Always-applied rules** — `.cursor/rules/*.mdc` (normative extensions of this file; same authority as #2, must not contradict #1).
@@ -119,6 +121,7 @@ Also normative, and all in [`agent-communication.md`](docs/agent-workflows/agent
 
 - **Gates, commands, soft-check debt, Node pin** — [`docs/agent-workflows/gates-and-commands.md`](docs/agent-workflows/gates-and-commands.md)
 - **Spec system** — [`docs/specs/README.md`](docs/specs/README.md): folder taxonomy, **spec split and organization policy**, component spec coverage, feedback-to-spec sync, settings overlay convention
+- **Architecture decisions (why it is this way, what was rejected)** — [`docs/adr/README.md`](docs/adr/README.md): numbered, never edited, superseded in place
 - **Spec writing template** — [`docs/agent-workflows/element-spec-format.md`](docs/agent-workflows/element-spec-format.md)
 - **Idea → ship pipeline (Definition of Ready / Done)** — [`docs/playbooks/idea-to-ship-pipeline.md`](docs/playbooks/idea-to-ship-pipeline.md)
 - **Post-implementation verification** — [`docs/agent-workflows/implementation-checklist.md`](docs/agent-workflows/implementation-checklist.md)
