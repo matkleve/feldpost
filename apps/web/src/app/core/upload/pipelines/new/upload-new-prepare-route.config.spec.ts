@@ -136,6 +136,7 @@ function createPipelineContextMock() {
     emitBatchProgress: vi.fn(),
     drainQueue: vi.fn(),
     getAbortSignal: vi.fn().mockReturnValue(undefined),
+    abortJobRequest: vi.fn(),
     checkDedupHash: vi.fn().mockResolvedValue(null),
     getCurrentUserId: vi.fn().mockReturnValue('user-1'),
     emitDuplicateDetected: vi.fn(),

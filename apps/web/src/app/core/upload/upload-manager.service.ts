@@ -221,6 +221,7 @@ export class UploadManagerService {
     emitBatchProgress: (batchId) => this.emitBatchProgress(batchId),
     drainQueue: () => this.pipelineHost.drainQueue(this.pipelineCtx),
     getAbortSignal: (jobId) => this.pipelineHost.getAbortSignal(jobId),
+    abortJobRequest: (jobId) => this.pipelineHost.abortJobRequest(jobId),
     checkDedupHash: (hash) => this.checkDedupHash(hash),
     getCurrentUserId: () => this.auth.user()?.id,
     emitUploadSkipped: (event) => this._uploadSkipped$.next(event),

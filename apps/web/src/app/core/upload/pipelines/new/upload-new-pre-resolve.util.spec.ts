@@ -159,6 +159,7 @@ describe('runPreUploadLocationResolve — text before EXIF', () => {
       emitImageAttached: vi.fn(),
       emitLocationConflict: vi.fn(),
       getAbortSignal: vi.fn(),
+      abortJobRequest: vi.fn(),
       checkDedupHash: vi.fn().mockResolvedValue(null),
       getCurrentUserId: vi.fn().mockReturnValue('user-1'),
       emitDuplicateDetected: vi.fn(),
@@ -216,6 +217,7 @@ describe('runPreUploadLocationResolve — text before EXIF', () => {
       emitImageAttached: vi.fn(),
       emitLocationConflict: vi.fn(),
       getAbortSignal: vi.fn(),
+      abortJobRequest: vi.fn(),
       checkDedupHash: vi.fn().mockResolvedValue({
         mediaItemId: 'existing-media-id',
         registeredByUserId: 'user-1',
@@ -286,6 +288,7 @@ describe('runPreUploadLocationResolve — text before EXIF', () => {
       emitImageAttached: vi.fn(),
       emitLocationConflict: vi.fn(),
       getAbortSignal: vi.fn(),
+      abortJobRequest: vi.fn(),
       checkDedupHash: vi.fn().mockResolvedValue({
         mediaItemId: 'existing-media-id',
         registeredByUserId: 'user-1',
@@ -355,6 +358,7 @@ describe('runPreUploadLocationResolve — text before EXIF', () => {
       emitImageAttached: vi.fn(),
       emitLocationConflict: vi.fn(),
       getAbortSignal: vi.fn(),
+      abortJobRequest: vi.fn(),
       checkDedupHash: vi.fn().mockResolvedValue({
         mediaItemId: 'existing-media-id',
         registeredByUserId: 'user-1',

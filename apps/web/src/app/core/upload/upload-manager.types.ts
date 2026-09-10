@@ -384,6 +384,15 @@ export interface PipelineContext {
   emitBatchProgress(batchId: string): void;
   drainQueue(): void;
   getAbortSignal(jobId: string): AbortSignal | undefined;
+  /**
+   * Aborts the in-flight request's AbortController for this job, if any.
+   * Note: the installed @supabase/storage-js client does not honour the
+   * signal for `.upload()` calls, so this cannot interrupt an in-flight
+   * upload's HTTP request — it only narrows the window for the manual
+   * `abortSignal?.aborted` checkpoints inside the upload pipeline.
+   * @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-06
+   */
+  abortJobRequest(jobId: string): void;
   checkDedupHash(contentHash: string): Promise<DedupHashMatch | null>;
   getCurrentUserId(): string | undefined;
   emitUploadSkipped(event: UploadSkippedEvent): void;

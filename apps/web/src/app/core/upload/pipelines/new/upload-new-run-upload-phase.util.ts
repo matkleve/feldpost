@@ -2,6 +2,7 @@ import {
   insertDedupHashFireAndForget,
   organizationIdFromStoragePath,
 } from '../../support/upload-db-postwrite.util';
+import { removeUploadCancelResidue } from '../../support/upload-cancel-residue.util';
 import { finalizeNewUploadPhase } from './upload-new-post-save.util';
 import type { UploadEnrichmentService } from '../../support/upload-enrichment.service';
 import type { UploadJobStateService } from '../../support/upload-job-state.service';
@@ -86,6 +87,7 @@ export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<vo
   });
 
   const result = await runUploadCall({
+    jobId,
     job: jobForUpload,
     coords: locationInputs.coords,
     parsedExif: locationInputs.parsedExif,
@@ -93,6 +95,8 @@ export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<vo
     jobState,
     timeoutMs: uploadPhaseTimeoutMs,
     abortSignal: ctx.getAbortSignal(jobId),
+    ctx,
+    supabaseClient,
   });
 
   const savedJob = await handleUploadResult({
@@ -154,7 +158,8 @@ export function resolveUploadLocationInputs(
   return resolveUploadPhaseInputs({ job, manualCoords: coords, parsedExif });
 }
 
-async function runUploadCall(args: {
+export async function runUploadCall(args: {
+  jobId: string;
   job: UploadJob;
   coords: ExifCoords | undefined;
   parsedExif: ParsedExif | undefined;
@@ -162,26 +167,65 @@ async function runUploadCall(args: {
   jobState: UploadJobStateService;
   timeoutMs: number;
   abortSignal: AbortSignal | undefined;
+  ctx: PipelineContext;
+  supabaseClient: SupabaseService['client'];
 }): Promise<UploadResult> {
-  const { job, coords, parsedExif, uploadService, jobState, timeoutMs, abortSignal } = args;
+  const {
+    jobId,
+    job,
+    coords,
+    parsedExif,
+    uploadService,
+    jobState,
+    timeoutMs,
+    abortSignal,
+    ctx,
+    supabaseClient,
+  } = args;
 
   jobState.setPhase(job.id, 'uploading');
   jobState.updateJob(job.id, { progress: 0 });
 
-  return withTimeout(
-    uploadService.uploadFile(
-      job.file,
-      coords,
-      parsedExif,
-      job.projectId,
-      abortSignal,
-      job.relativePath,
-      { pendingPartialLocation: job.pendingPartialLocation },
-      job.addressNotes,
-    ),
-    timeoutMs,
-    'Upload timed out. Please retry.',
+  const uploadPromise = uploadService.uploadFile(
+    job.file,
+    coords,
+    parsedExif,
+    job.projectId,
+    abortSignal,
+    job.relativePath,
+    { pendingPartialLocation: job.pendingPartialLocation },
+    job.addressNotes,
   );
+
+  return withTimeout(uploadPromise, timeoutMs, 'Upload timed out. Please retry.', () => {
+    // The installed @supabase/storage-js client does not honour AbortSignal for
+    // `.upload()` (verified against @supabase/storage-js@2.105.4 — the signal is
+    // dropped before it reaches the HTTP layer), so this cannot interrupt an
+    // in-flight request; it only narrows the window for the manual
+    // `abortSignal?.aborted` checkpoints inside persistUploadFile. Because the
+    // upload can still succeed after we've already failed the job on timeout,
+    // clean up that late arrival so it doesn't leave an orphaned storage object
+    // and media_items row that nothing ever references.
+    // @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-06
+    ctx.abortJobRequest(jobId);
+    void cleanupLateUploadSuccess(uploadPromise, supabaseClient);
+  });
+}
+
+async function cleanupLateUploadSuccess(
+  uploadPromise: Promise<UploadResult>,
+  supabaseClient: SupabaseService['client'],
+): Promise<void> {
+  let result: UploadResult;
+  try {
+    result = await uploadPromise;
+  } catch {
+    // The upload eventually failed on its own; nothing was persisted to clean up.
+    return;
+  }
+  if (result.error === null) {
+    await removeUploadCancelResidue(result.storagePath, result.id, supabaseClient);
+  }
 }
 
 async function handleUploadResult(args: {
@@ -259,12 +303,7 @@ async function handleCancelledResultBeforeFinalize(args: {
   const { jobId, result, ctx, jobState, queue, supabaseClient } = args;
 
   if (result.error === null) {
-    await supabaseClient.storage.from('media').remove([result.storagePath]);
-    // Delete from primary media_items table by media id or legacy source image id.
-    await supabaseClient
-      .from('media_items')
-      .delete()
-      .or(`id.eq.${result.id},source_image_id.eq.${result.id}`);
+    await removeUploadCancelResidue(result.storagePath, result.id, supabaseClient);
   }
 
   const cancelledJob = jobState.findJob(jobId);
@@ -300,6 +339,7 @@ async function withTimeout<T>(
   promise: Promise<T>,
   timeoutMs: number,
   timeoutMessage: string,
+  onTimeout?: () => void,
 ): Promise<T> {
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
@@ -307,7 +347,10 @@ async function withTimeout<T>(
     return await Promise.race([
       promise,
       new Promise<T>((_resolve, reject) => {
-        timeoutId = setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs);
+        timeoutId = setTimeout(() => {
+          onTimeout?.();
+          reject(new Error(timeoutMessage));
+        }, timeoutMs);
       }),
     ]);
   } finally {

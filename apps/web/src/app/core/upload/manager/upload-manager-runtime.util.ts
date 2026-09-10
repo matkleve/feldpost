@@ -22,6 +22,7 @@ export interface UploadManagerPipelineContextDeps {
   emitBatchProgress: (batchId: string) => void;
   drainQueue: () => void;
   getAbortSignal: (jobId: string) => AbortSignal | undefined;
+  abortJobRequest: (jobId: string) => void;
   checkDedupHash: (hash: string) => Promise<DedupHashMatch | null>;
   getCurrentUserId: () => string | undefined;
   emitUploadSkipped: (event: UploadSkippedEvent) => void;
@@ -41,6 +42,7 @@ export function createUploadManagerPipelineContext(
     emitBatchProgress: (batchId) => deps.emitBatchProgress(batchId),
     drainQueue: () => deps.drainQueue(),
     getAbortSignal: (jobId) => deps.getAbortSignal(jobId),
+    abortJobRequest: (jobId) => deps.abortJobRequest(jobId),
     checkDedupHash: (hash) => deps.checkDedupHash(hash),
     getCurrentUserId: () => deps.getCurrentUserId(),
     emitUploadSkipped: (event) => deps.emitUploadSkipped(event),
