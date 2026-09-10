@@ -7,6 +7,10 @@
 
 A **singleton, application-wide service** that owns the entire upload pipeline: validation, EXIF parsing, folder/title address handling, **org-scoped per-file hash deduplication** (photo / document / video — see [dedup-scope supplement](./upload-manager-pipeline.dedup-scope.supplement.md)), duplicate resolution decisions, storage upload, database insert, and enrichment. Any component in the app can submit files and uploads continue independently of component lifecycle.
 
+## Product principle
+
+**Uploading is a background task — don't make me think.** Expensive work (HEIC conversion, geocoding) and blocking UI gates must not run before the user needs them. Tray questions about folder paths or filenames must not wait on byte conversion; files about to be skipped as duplicates must not pay for conversion.
+
 Queue management and concurrency are implemented inside `UploadManagerService` through `UploadQueueService` and pipeline services under `core/upload/`.
 
 ## Child Specs
