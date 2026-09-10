@@ -15,6 +15,9 @@ export type PresentationBundleStatus = 'collecting' | 'presenting' | 'flushed';
 export interface TrayResolveOption {
   id: string;
   label: string;
+  /** When set, UI resolves copy via t(labelKey, label) with labelParams. */
+  labelKey?: string;
+  labelParams?: Record<string, string>;
   lat?: number;
   lng?: number;
   score?: number;

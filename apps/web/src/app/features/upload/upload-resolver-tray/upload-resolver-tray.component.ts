@@ -167,7 +167,7 @@ export class UploadResolverTrayComponent implements OnInit {
       label:
         item.questionKey === 'upload.resolver.question.source'
           ? this.sourceOptionLabel(option)
-          : option.label,
+          : this.optionDisplayLabel(option),
       option,
     }));
   });
@@ -553,6 +553,19 @@ export class UploadResolverTrayComponent implements OnInit {
     const index = Number.parseInt(key, 10) - 1;
     const item = this.numberedOptions()[index];
     return item ? { option: item.option } : null;
+  }
+
+  private optionDisplayLabel(option: TrayResolveOption): string {
+    if (!option.labelKey) {
+      return option.label;
+    }
+    let text = this.t(option.labelKey, option.label);
+    if (option.labelParams) {
+      for (const [key, value] of Object.entries(option.labelParams)) {
+        text = text.replace(`{${key}}`, value);
+      }
+    }
+    return text;
   }
 
   sourceOptionLabel(option: TrayResolveOption): string {

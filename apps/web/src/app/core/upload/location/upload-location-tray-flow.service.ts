@@ -329,12 +329,80 @@ export class UploadLocationTrayFlowService {
       return;
     }
     if (streetCentroid) {
-      this.resolution().deferGroup(groupId);
+      void this.applyStreetCentroidSelection(group);
       return;
     }
     if (candidateId) {
       this.resolution().applyCandidateToGroup(groupId, candidateId);
     }
+  }
+
+  /** NF-18: "No number needed" resolves to street centroid — not deferGroup. */
+  private async applyStreetCentroidSelection(group: UploadDisambiguationGroup): Promise<void> {
+    const candidate = await this.buildStreetCentroidCandidate(group);
+    if (!candidate) {
+      return;
+    }
+    this.disambiguationStore.patchGroup({
+      ...group,
+      candidates: [...group.candidates, candidate],
+    });
+    this.resolution().applyCandidateToGroup(group.id, candidate.id);
+  }
+
+  private async buildStreetCentroidCandidate(
+    group: UploadDisambiguationGroup,
+  ): Promise<UploadAddressCandidate | null> {
+    const houseCandidates = group.houseNumberCandidates?.length
+      ? group.houseNumberCandidates
+      : group.candidates;
+    const withCoords = houseCandidates.filter(
+      (candidate) =>
+        Number.isFinite(candidate.lat) &&
+        Number.isFinite(candidate.lng) &&
+        (candidate.lat !== 0 || candidate.lng !== 0),
+    );
+    const city = group.confirmedCity?.trim() ?? withCoords[0]?.city?.trim() ?? '';
+    const job = this.jobState.findJob(group.jobIds[0]);
+    const groupState = job?.groupingKey
+      ? this.orchestrator.getGroupState(group.batchId, job.groupingKey)
+      : undefined;
+    const street =
+      groupState?.searchObject.street?.trim() ??
+      group.titleAddress.split(',')[0]?.trim() ??
+      group.titleAddress.trim();
+
+    if (withCoords.length > 0) {
+      const lat = withCoords.reduce((sum, candidate) => sum + candidate.lat, 0) / withCoords.length;
+      const lng = withCoords.reduce((sum, candidate) => sum + candidate.lng, 0) / withCoords.length;
+      return {
+        id: 'street-centroid',
+        addressLabel: [street, city].filter(Boolean).join(', '),
+        lat,
+        lng,
+        city: city || null,
+      };
+    }
+
+    const countryCode = groupState?.searchObject.country?.trim().toLowerCase() ?? 'at';
+    if (!street || !city) {
+      return null;
+    }
+    const hits = await this.geocoding.searchStructuredForward(
+      { street, city, countryCode },
+      { limit: 1, countrycodes: [countryCode] },
+    );
+    const hit = hits[0];
+    if (!hit) {
+      return null;
+    }
+    return {
+      id: 'street-centroid',
+      addressLabel: hit.displayName,
+      lat: hit.lat,
+      lng: hit.lng,
+      city,
+    };
   }
 
   async applyAdminLevelConflictChoice(

@@ -57,6 +57,7 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
     notifyDisambiguationResolved: ReturnType<typeof vi.fn>;
     applyPreResolveFromOrchestrator: ReturnType<typeof vi.fn>;
     deferGroup: ReturnType<typeof vi.fn>;
+    applyCandidateToGroup: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
@@ -65,6 +66,7 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
       notifyDisambiguationResolved: vi.fn(),
       applyPreResolveFromOrchestrator: vi.fn().mockResolvedValue('continue'),
       deferGroup: vi.fn(),
+      applyCandidateToGroup: vi.fn(),
     };
 
     TestBed.configureTestingModule({
@@ -381,5 +383,31 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
         candidates: [],
       }),
     );
+  });
+
+  it('NF-18: applyTrayHouseSelection with streetCentroid applies centroid candidate, not deferGroup', async () => {
+    jobState.addJobs([buildJob({ id: 'job-house' })]);
+    const group = disambiguationStore.createGroup({
+      batchId: 'batch-tray',
+      queryKey: 'house|at|wien|1010|wien|mariahilfer|',
+      folderDisplayPath: 'AT/Wien/Mariahilfer Straße',
+      titleAddress: 'Mariahilfer Straße, Wien',
+      jobIds: ['job-house'],
+      confirmedCity: 'Wien',
+      disambiguationKind: 'house_step',
+      trayStep: '1b',
+      houseNumberCandidates: [
+        { id: 'hn-1', addressLabel: 'Mariahilfer Straße 1', lat: 48.1, lng: 16.1, city: 'Wien' },
+        { id: 'hn-2', addressLabel: 'Mariahilfer Straße 99', lat: 48.3, lng: 16.3, city: 'Wien' },
+      ],
+      candidates: [],
+    });
+    disambiguationStore.patchGroup(group);
+
+    trayFlow.applyTrayHouseSelection(group.id, null, true);
+    await Promise.resolve();
+
+    expect(resolutionMock.deferGroup).not.toHaveBeenCalled();
+    expect(resolutionMock.applyCandidateToGroup).toHaveBeenCalledWith(group.id, 'street-centroid');
   });
 });
