@@ -64,42 +64,7 @@ npm run supabase:ensure-edge
 
 Forward search and `structured-forward` use **Photon** when `GEOCODER_FORWARD_URL` is set on the Edge runtime; otherwise the `geocode` function falls back to public Nominatim. **Reverse** and **`structured-search`** always use Nominatim.
 
-### Default: shared remote Photon (Hetzner)
-
-Team dev uses Austria Photon on a Hetzner Cloud VM, exposed over HTTPS via [sslip.io](https://sslip.io) (no purchased domain). Canonical URL is in `supabase/config.toml` → `[edge_runtime.secrets]` → `GEOCODER_FORWARD_URL` (currently `https://178-105-242-74.sslip.io`).
-
-Full setup, curl gates, hosted secrets, and troubleshooting: [`docs/playbooks/remote-photon.md`](../docs/playbooks/remote-photon.md).
-
-**Curl gate** (from your laptop):
-
-```bash
-curl "https://178-105-242-74.sslip.io/api?q=Fuchsthalergasse+4&lang=de&limit=3"
-```
-
-Expect GeoJSON with **Fuchsthallergasse**, house **4**, **Wien** / **1090**.
-
-After changing `GEOCODER_FORWARD_URL` in `config.toml`, reload local edge secrets:
-
-```bash
-npm run supabase:ensure-edge
-```
-
-(`supabase stop && supabase start` if secrets do not apply.)
-
-**Hosted Supabase:** set the same URL with `supabase secrets set GEOCODER_FORWARD_URL=...` and `supabase functions deploy geocode` when cloud environments should use Photon. Omit the secret to keep Nominatim-only forward geocoding in production.
-
-### Optional: local Photon on the host
-
-For offline or isolated experiments only — loads RAM/CPU on the developer machine:
-
-```bash
-docker compose -f docker-compose.photon.yml up -d
-docker compose -f docker-compose.photon.yml logs -f   # first run: index download ~10–20 min
-```
-
-Set `GEOCODER_FORWARD_URL = "http://host.docker.internal:2322"` in `config.toml`, then `npm run supabase:ensure-edge`. **Linux:** `docker-compose.photon.yml` includes `extra_hosts: host.docker.internal:host-gateway`.
-
-Local curl gate: `curl "http://localhost:2322/api?q=Fuchsthalergasse+4&lang=de&limit=3"`.
+Full setup (shared Hetzner default, curl gates, hosted secrets, local docker option, troubleshooting): [`docs/playbooks/remote-photon.md`](../docs/playbooks/remote-photon.md). After changing `GEOCODER_FORWARD_URL` in `config.toml`, run `npm run supabase:ensure-edge`.
 
 ## References
 
