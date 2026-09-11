@@ -4,7 +4,7 @@
 
 import { Injectable, inject } from '@angular/core';
 import { SupabaseService } from '../../supabase/supabase.service';
-import { cancelAllActiveUploads } from './upload-manager-cancel-active.util';
+import { buildCancelledSignedOutPatch, cancelAllActiveUploads } from './upload-manager-cancel-active.util';
 import { removeUploadCancelResidue } from '../support/upload-cancel-residue.util';
 import { drainUploadManagerQueue } from './upload-manager-drain.util';
 import { uploadManagerDebugLog } from '../support/upload-manager-debug.util';
@@ -155,11 +155,7 @@ export class UploadManagerPipelineHostService {
           channel: 'system',
           statusLabel: 'Cancelled',
         });
-        this.jobState.updateJob(jobId, {
-          error: 'Upload cancelled — user signed out.',
-          failedAt,
-          wasCancelled: true,
-        });
+        this.jobState.updateJob(jobId, buildCancelledSignedOutPatch(failedAt));
       },
     });
   }

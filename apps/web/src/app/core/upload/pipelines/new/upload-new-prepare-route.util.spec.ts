@@ -220,6 +220,36 @@ describe('routePreparedNewJob source precedence (unresolved branches)', () => {
   });
 });
 
+// @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-07
+describe('routePreparedNewJob conflict routing', () => {
+  it('sets issueKind=conflict_review at the point a location conflict is created', async () => {
+    let job = createJob({ coords: { lat: 48.2082, lng: 16.3738 } });
+    const deps = createRouteDeps({
+      getJob: () => job,
+      setJob: (next) => {
+        job = next;
+      },
+      conflictCandidate: { mediaId: 'media-1' },
+    });
+
+    const ctx = createPipelineContext();
+    const runUploadPhase = vi.fn().mockResolvedValue(undefined);
+
+    await routePreparedNewJob(
+      deps as Parameters<typeof routePreparedNewJob>[0],
+      job.id,
+      job,
+      {},
+      ctx,
+      runUploadPhase,
+    );
+
+    expect(deps.jobState.setPhase).toHaveBeenCalledWith(job.id, 'awaiting_conflict_resolution');
+    expect(job.issueKind).toBe('conflict_review');
+    expect(runUploadPhase).not.toHaveBeenCalled();
+  });
+});
+
 describe('awaitHeicConversionForUpload', () => {
   // @see docs/audits/upload-process-analysis-2026-09-08/03-branch-matrix.md M3
   // @see docs/audits/upload-process-analysis-2026-09-08/09-coverage.md § 4 T9
@@ -268,6 +298,7 @@ function createRouteDeps(options: {
   setJob: (job: UploadJob) => void;
   parsedAddress?: { address: string; confidence: 'high' | 'low' };
   mediaType?: 'photo' | 'document';
+  conflictCandidate?: { mediaId: string };
 }): Parameters<typeof routePreparedNewJob>[0] {
   const deps = {
     jobState: {
@@ -293,7 +324,7 @@ function createRouteDeps(options: {
       }),
     },
     conflictService: {
-      findConflict: vi.fn().mockResolvedValue(null),
+      findConflict: vi.fn().mockResolvedValue(options.conflictCandidate ?? null),
     },
     attachPipeline: {
       run: vi.fn(),

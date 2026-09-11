@@ -38,3 +38,17 @@ describe('UploadJobStateService terminal idempotency', () => {
     expect(failed).not.toHaveBeenCalled();
   });
 });
+
+describe('UploadJobStateService.failJob issueKind', () => {
+  // @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-07
+  it('sets issueKind=upload_error on the one guarded failure path so getIssueKind is authoritative', () => {
+    const service = new UploadJobStateService();
+    service.addJobs([createJob({ phase: 'uploading' })]);
+
+    service.failJob('job-1', 'uploading', 'Storage upload failed.');
+
+    const found = service.findJob('job-1');
+    expect(found?.phase).toBe('error');
+    expect(found?.issueKind).toBe('upload_error');
+  });
+});

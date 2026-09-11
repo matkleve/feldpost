@@ -74,6 +74,10 @@ export function retryUploadManagerJob(jobId: string, deps: UploadManagerActionsD
     progress: 0,
     error: undefined,
     failedAt: undefined,
+    // @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-07 —
+    // clear the issueKind the failure producer set, or the retried job stays
+    // in the Issues lane while phase says it's back in the queue.
+    issueKind: undefined,
   });
   deps.drainQueue();
 }
@@ -107,6 +111,8 @@ export async function cancelUploadManagerJob(
     error: 'Upload cancelled by user.',
     failedAt: job.phase,
     wasCancelled: true,
+    // @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-07
+    issueKind: 'upload_error',
   });
 
   deps.drainQueue();
@@ -286,6 +292,10 @@ export function resolveUploadManagerConflict(
 
   deps.updateJob(jobId, {
     conflictResolution: resolution,
+    // @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-07 —
+    // clear the issueKind the conflict producer set, or the resolved job
+    // stays in the Issues lane while phase says it's back in the queue.
+    issueKind: undefined,
   });
   deps.transitionTo(jobId, 'queued', { channel: 'user', statusLabel: deps.queuedLabel });
 

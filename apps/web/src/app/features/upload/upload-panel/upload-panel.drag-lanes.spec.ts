@@ -113,7 +113,7 @@ describe('UploadPanelComponent lanes', () => {
     const { component } = await setupUploadPanel({
       initialJobs: [
         makeUploadJob({ phase: 'uploading', statusLabel: 'Uploading' }),
-        makeUploadJob({ phase: 'missing_data', statusLabel: 'Missing location' }),
+        makeUploadJob({ phase: 'missing_data', statusLabel: 'Missing location', issueKind: 'missing_gps' }),
       ],
     });
 

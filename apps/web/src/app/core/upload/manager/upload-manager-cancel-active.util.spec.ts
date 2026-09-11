@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { UploadJob, UploadPhase } from '../upload-manager.types';
-import { cancelAllActiveUploads } from './upload-manager-cancel-active.util';
+import {
+  buildCancelledSignedOutPatch,
+  cancelAllActiveUploads,
+} from './upload-manager-cancel-active.util';
 import type { CancelAllActiveUploadsDeps } from './upload-manager-cancel-active.util';
 
 function job(overrides: Partial<UploadJob>): UploadJob {
@@ -70,5 +73,15 @@ describe('cancelAllActiveUploads', () => {
 
     expect(abortJobRequest).not.toHaveBeenCalled();
     expect(removeUploadResidue).not.toHaveBeenCalled();
+  });
+});
+
+// @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-07
+describe('buildCancelledSignedOutPatch', () => {
+  it('sets issueKind=upload_error at the point the sign-out cancellation is created', () => {
+    const patch = buildCancelledSignedOutPatch('uploading');
+
+    expect(patch.wasCancelled).toBe(true);
+    expect(patch.issueKind).toBe('upload_error');
   });
 });

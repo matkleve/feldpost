@@ -3,6 +3,7 @@ import type { UploadJob } from '../upload-manager.types';
 import {
   attachUploadManagerFile,
   cancelUploadManagerJob,
+  resolveUploadManagerConflict,
   retryUploadManagerJob,
 } from './upload-manager-actions.util';
 import type { UploadManagerActionsDeps } from './upload-manager-actions.util';
@@ -123,6 +124,19 @@ describe('cancelUploadManagerJob', () => {
       expect.objectContaining({ wasCancelled: true }),
     );
   });
+
+  // @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-07
+  it('sets issueKind=upload_error so getIssueKind is authoritative without reading statusLabel', async () => {
+    const current = job({});
+    const { deps, updateJob } = buildDeps(current);
+
+    await cancelUploadManagerJob('job-1', deps);
+
+    expect(updateJob).toHaveBeenCalledWith(
+      'job-1',
+      expect.objectContaining({ issueKind: 'upload_error' }),
+    );
+  });
 });
 
 describe('attachUploadManagerFile', () => {
@@ -188,5 +202,31 @@ describe('retryUploadManagerJob', () => {
 
     expect(updateJob).not.toHaveBeenCalled();
     expect(transitionTo).not.toHaveBeenCalled();
+  });
+
+  // @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-07
+  it('clears the stale issueKind so a retried job leaves the issues lane', () => {
+    const current = job({ phase: 'error', error: 'Network error', issueKind: 'upload_error' });
+    const { deps, updateJob } = buildDeps(current);
+
+    retryUploadManagerJob('job-1', deps);
+
+    expect(updateJob).toHaveBeenCalledWith('job-1', expect.objectContaining({ issueKind: undefined }));
+  });
+});
+
+describe('resolveUploadManagerConflict', () => {
+  // @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-07
+  it('clears the stale conflict_review issueKind so a resolved job leaves the issues lane', () => {
+    const current = job({
+      phase: 'awaiting_conflict_resolution',
+      issueKind: 'conflict_review',
+      conflictCandidate: { mediaId: 'media-1' },
+    });
+    const { deps, updateJob } = buildDeps(current);
+
+    resolveUploadManagerConflict('job-1', 'create_new', deps);
+
+    expect(updateJob).toHaveBeenCalledWith('job-1', expect.objectContaining({ issueKind: undefined }));
   });
 });

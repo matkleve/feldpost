@@ -95,6 +95,7 @@ describe('UploadPanelComponent workspace detail click interactions', () => {
       phase: 'skipped',
       existingMediaId: 'img-existing-99',
       statusLabel: 'Already uploaded',
+      issueKind: 'duplicate_file',
     });
 
     fakeManager._jobsSignal.set([job]);

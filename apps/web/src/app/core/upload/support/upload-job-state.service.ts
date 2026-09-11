@@ -215,6 +215,11 @@ export class UploadJobStateService {
       statusLabel: phaseLabel('error'),
       error,
       failedAt,
+      // @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-07 —
+      // the one guarded 'error' producer; every failure routed through here is
+      // a genuine upload error (cancellation is a distinct, separately-tagged
+      // write — see wasCancelled / buildCancelledSignedOutPatch).
+      issueKind: 'upload_error',
     });
     this._uploadFailed$.next({
       jobId,
