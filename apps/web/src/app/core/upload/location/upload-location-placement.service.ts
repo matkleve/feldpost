@@ -7,7 +7,8 @@ import { Injectable, Injector, inject } from '@angular/core';
 import { GeocodingService } from '../../geocoding/geocoding.service';
 import { UploadJobStateService } from '../support/upload-job-state.service';
 import { UploadLocationConfigService } from './upload-location-config.service';
-import { UploadLocationResolutionService } from './upload-location-resolution.service';
+import { UploadLocationDisambiguationRegistrationService } from './upload-location-disambiguation-registration.service';
+import { UploadLocationPreResolveOrchestratorService } from './upload-location-pre-resolve-orchestrator.service';
 import { UploadLocationSourceConflictService } from './upload-location-source-conflict.service';
 import {
   buildChosenPlacementPatch,
@@ -45,10 +46,21 @@ export class UploadLocationPlacementService {
   private readonly jobState = inject(UploadJobStateService);
   private readonly locationConfig = inject(UploadLocationConfigService);
   private readonly sourceConflict = inject(UploadLocationSourceConflictService);
+  private readonly disambiguationRegistration = inject(UploadLocationDisambiguationRegistrationService);
   private readonly injector = inject(Injector);
 
-  private resolution(): UploadLocationResolutionService {
-    return this.injector.get(UploadLocationResolutionService);
+  /**
+   * UP-26: `UploadLocationPreResolveOrchestratorService` already injects this
+   * service directly (it calls `placement.tryApplyExifPlacementForWeakBranchC`
+   * / `applyGeocodeCandidateToJob` / `finalizePlacementForJob`), so a
+   * top-level import the other way would recreate a real 2-cycle. This is a
+   * genuine mutual dependency between these two services, not a symptom of
+   * routing through the old `UploadLocationResolutionService` facade — kept
+   * as a documented, targeted `Injector.get()` rather than resolved via the
+   * facade the rest of this file no longer depends on.
+   */
+  private preResolveOrchestrator(): UploadLocationPreResolveOrchestratorService {
+    return this.injector.get(UploadLocationPreResolveOrchestratorService);
   }
 
   applyGeocodeCandidateToJob(
@@ -88,7 +100,7 @@ export class UploadLocationPlacementService {
     }
 
     if (job.groupingKey && !job.titleAddressCoords) {
-      const orchestrated = await this.resolution().applyPreResolveFromOrchestrator(jobId);
+      const orchestrated = await this.preResolveOrchestrator().applyPreResolveFromOrchestrator(jobId);
       if (orchestrated === 'held') {
         return 'held';
       }
@@ -126,7 +138,7 @@ export class UploadLocationPlacementService {
     }
 
     if (outcome.kind === 'ambiguous') {
-      this.resolution().registerDisambiguationGroup({
+      this.disambiguationRegistration.registerDisambiguationGroup({
         batchId: job.batchId,
         queryKey: buildDisambiguationQueryKey(job.titleAddress!, folderDisplayPath),
         folderDisplayPath,

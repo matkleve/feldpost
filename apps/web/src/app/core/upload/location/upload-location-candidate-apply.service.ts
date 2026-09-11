@@ -5,9 +5,9 @@
 
 import { Injectable, Injector, inject } from '@angular/core';
 import { UploadJobStateService } from '../support/upload-job-state.service';
+import { UploadLocationDisambiguationRegistrationService } from './upload-location-disambiguation-registration.service';
 import { UploadLocationDisambiguationStoreService } from './upload-location-disambiguation-store.service';
 import { UploadLocationPlacementService } from './upload-location-placement.service';
-import { UploadLocationResolutionService } from './upload-location-resolution.service';
 import { UploadLocationSourceConflictService } from './upload-location-source-conflict.service';
 import { UploadLocationTrayFlowService } from './upload-location-tray-flow.service';
 import { UploadManagerService } from '../upload-manager.service';
@@ -26,11 +26,8 @@ export class UploadLocationCandidateApplyService {
   private readonly sourceConflict = inject(UploadLocationSourceConflictService);
   private readonly placement = inject(UploadLocationPlacementService);
   private readonly trayFlow = inject(UploadLocationTrayFlowService);
+  private readonly disambiguationRegistration = inject(UploadLocationDisambiguationRegistrationService);
   private readonly injector = inject(Injector);
-
-  private resolution(): UploadLocationResolutionService {
-    return this.injector.get(UploadLocationResolutionService);
-  }
 
   applyCandidateToGroup(groupId: string, candidateId: string): void {
     const group = this.disambiguationStore.groups().find((g) => g.id === groupId);
@@ -57,7 +54,7 @@ export class UploadLocationCandidateApplyService {
         jobIds: [...group.jobIds],
         selectedCandidateId: candidateId,
       };
-      this.resolution().notifyDisambiguationResolved(resolvedEvent);
+      this.disambiguationStore.notifyDisambiguationResolved(resolvedEvent);
       this.disambiguationStore.syncBatchDisambiguationAggregates(group.batchId);
       this.disambiguationStore.pickNextActiveGroup(group.batchId);
       if (candidateId !== SOURCE_CONFLICT_NONE_CANDIDATE_ID) {
@@ -91,7 +88,7 @@ export class UploadLocationCandidateApplyService {
       this.jobState.setPhase(jobId, 'queued');
     }
 
-    this.resolution().notifyDisambiguationResolved({
+    this.disambiguationStore.notifyDisambiguationResolved({
       batchId: group.batchId,
       groupId: group.id,
       jobIds: [...group.jobIds],
@@ -120,7 +117,7 @@ export class UploadLocationCandidateApplyService {
       this.disambiguationStore.removeGroupById(groupId);
     }
 
-    this.resolution().registerDisambiguationGroup(
+    this.disambiguationRegistration.registerDisambiguationGroup(
       {
         batchId: group.batchId,
         queryKey: `${group.queryKey}::isolate:${jobId}`,

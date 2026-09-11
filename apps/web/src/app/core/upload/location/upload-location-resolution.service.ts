@@ -4,7 +4,6 @@
  */
 
 import { Injectable, inject } from '@angular/core';
-import { Subject } from 'rxjs';
 import type { Observable } from 'rxjs';
 import { UploadAddressResolutionOrchestrator } from '../address-resolution/upload-address-resolution.orchestrator';
 import { UploadJobStateService } from '../support/upload-job-state.service';
@@ -38,14 +37,19 @@ export class UploadLocationResolutionService {
 
   private readonly batchProjectTrayRegistered = new Set<string>();
 
-  /** @internal collaborator hook for registration / tray-flow */
+  /**
+   * @internal collaborator hook for registration / tray-flow. Forwards to
+   * the store, which owns these events now (UP-26) — kept here so existing
+   * callers of `resolutionService.notifyDisambiguationRequired(...)` don't
+   * need to change.
+   */
   notifyDisambiguationRequired(event: DisambiguationRequiredEvent): void {
-    this._disambiguationRequired$.next(event);
+    this.disambiguationStore.notifyDisambiguationRequired(event);
   }
 
   /** @internal collaborator hook for tray-flow layer package completion */
   notifyDisambiguationResolved(event: DisambiguationResolvedEvent): void {
-    this._disambiguationResolved$.next(event);
+    this.disambiguationStore.notifyDisambiguationResolved(event);
   }
 
   readonly disambiguationGroups = this.disambiguationStore.disambiguationGroups;
@@ -54,13 +58,10 @@ export class UploadLocationResolutionService {
   readonly pendingGroupCount = this.disambiguationStore.pendingGroupCount;
   readonly activeGroup = this.disambiguationStore.activeGroup;
 
-  private readonly _disambiguationRequired$ = new Subject<DisambiguationRequiredEvent>();
-  private readonly _disambiguationResolved$ = new Subject<DisambiguationResolvedEvent>();
-
   readonly disambiguationRequired$: Observable<DisambiguationRequiredEvent> =
-    this._disambiguationRequired$.asObservable();
+    this.disambiguationStore.disambiguationRequired$;
   readonly disambiguationResolved$: Observable<DisambiguationResolvedEvent> =
-    this._disambiguationResolved$.asObservable();
+    this.disambiguationStore.disambiguationResolved$;
 
   isJobBlockedByGate(job: UploadJob): boolean {
     return isJobBlocked(job, this.groupsById());

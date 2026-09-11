@@ -3,12 +3,12 @@
  * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md § Phase 3
  */
 
-import { Injectable, Injector, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { GeocodingService } from '../../geocoding/geocoding.service';
 import { UploadAddressResolutionOrchestrator } from '../address-resolution/upload-address-resolution.orchestrator';
 import { UploadJobStateService } from '../support/upload-job-state.service';
+import { UploadLocationDisambiguationRegistrationService } from './upload-location-disambiguation-registration.service';
 import { UploadLocationDisambiguationStoreService } from './upload-location-disambiguation-store.service';
-import { UploadLocationResolutionService } from './upload-location-resolution.service';
 import {
   applySourceConflictChoiceToJob,
   buildSourceConflictCandidates,
@@ -35,7 +35,7 @@ export class UploadLocationSourceConflictService {
   private readonly orchestrator = inject(UploadAddressResolutionOrchestrator);
   private readonly jobState = inject(UploadJobStateService);
   private readonly disambiguationStore = inject(UploadLocationDisambiguationStoreService);
-  private readonly injector = inject(Injector);
+  private readonly disambiguationRegistration = inject(UploadLocationDisambiguationRegistrationService);
 
   /**
    * Stored tray choice per `queryKey` (`source|{groupingKey}`) for late-job replay.
@@ -44,10 +44,6 @@ export class UploadLocationSourceConflictService {
   private readonly resolvedSourceChoices = new Map<string, Map<string, string>>();
 
   private readonly sourceConflictInflight = new Map<string, Promise<void>>();
-
-  private resolution(): UploadLocationResolutionService {
-    return this.injector.get(UploadLocationResolutionService);
-  }
 
   clearForBatch(batchId: string): void {
     this.resolvedSourceChoices.delete(batchId);
@@ -230,7 +226,7 @@ export class UploadLocationSourceConflictService {
     if (jobIds.length) {
       const mergeTitle =
         labelFromFolderDisplayPath(folderDisplayPath) ?? job.titleAddress?.trim() ?? '';
-      this.resolution().registerDisambiguationGroup({
+      this.disambiguationRegistration.registerDisambiguationGroup({
         batchId: job.batchId,
         queryKey,
         folderDisplayPath,
@@ -303,7 +299,7 @@ export class UploadLocationSourceConflictService {
     if (!eligibleIds.length) {
       return;
     }
-    this.resolution().registerDisambiguationGroup({
+    this.disambiguationRegistration.registerDisambiguationGroup({
       batchId: job.batchId,
       queryKey,
       folderDisplayPath,

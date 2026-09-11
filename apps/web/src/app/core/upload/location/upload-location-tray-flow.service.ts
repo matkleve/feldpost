@@ -14,9 +14,11 @@ import {
 } from '../../location-path-parser/upload-search-object.layer-map';
 import { UploadAddressResolutionOrchestrator } from '../address-resolution/upload-address-resolution.orchestrator';
 import { UploadJobStateService } from '../support/upload-job-state.service';
+import { UploadLocationCandidateApplyService } from './upload-location-candidate-apply.service';
 import { UploadLocationConfigService } from './upload-location-config.service';
+import { UploadLocationDisambiguationRegistrationService } from './upload-location-disambiguation-registration.service';
 import { UploadLocationDisambiguationStoreService } from './upload-location-disambiguation-store.service';
-import { UploadLocationResolutionService } from './upload-location-resolution.service';
+import { UploadLocationPreResolveOrchestratorService } from './upload-location-pre-resolve-orchestrator.service';
 import { UploadManagerService } from '../upload-manager.service';
 import type {
   UploadGroupResolutionState,
@@ -64,6 +66,7 @@ export class UploadLocationTrayFlowService {
   private readonly geoData = inject(LocalGeoDataAdapter);
   private readonly locationConfig = inject(UploadLocationConfigService);
   private readonly disambiguationStore = inject(UploadLocationDisambiguationStoreService);
+  private readonly disambiguationRegistration = inject(UploadLocationDisambiguationRegistrationService);
   private readonly injector = inject(Injector);
 
   private geoLoaded: Promise<{
@@ -72,8 +75,25 @@ export class UploadLocationTrayFlowService {
     postcodeMap: Awaited<ReturnType<LocalGeoDataAdapter['getPlzMap']>>;
   }> | null = null;
 
-  private resolution(): UploadLocationResolutionService {
-    return this.injector.get(UploadLocationResolutionService);
+  /**
+   * UP-26: `UploadLocationCandidateApplyService` already injects this service
+   * directly (`applyLayerPackageChoice` / `applyAdminLevelConflictChoice`), so
+   * a top-level import back would recreate a real 2-cycle — a genuine mutual
+   * dependency, kept as a documented `Injector.get()` rather than routed
+   * through the old facade.
+   */
+  private candidateApply(): UploadLocationCandidateApplyService {
+    return this.injector.get(UploadLocationCandidateApplyService);
+  }
+
+  /**
+   * UP-26: `UploadLocationPreResolveOrchestratorService` already injects this
+   * service directly (`registerAdminLevelConflictGroup` / `registerLayerPackageGroup`
+   * / `registerContainmentCheckGroup` / `registerTrayStepGroup`), so the same
+   * genuine-mutual-dependency reasoning applies as above.
+   */
+  private preResolveOrchestrator(): UploadLocationPreResolveOrchestratorService {
+    return this.injector.get(UploadLocationPreResolveOrchestratorService);
   }
 
   private loadGeoData(): Promise<{
@@ -140,7 +160,7 @@ export class UploadLocationTrayFlowService {
     if (state.suggestedAreaCandidate) {
       candidates.push({ ...state.suggestedAreaCandidate, lat: 0, lng: 0 });
     }
-    this.resolution().registerDisambiguationGroup({
+    this.disambiguationRegistration.registerDisambiguationGroup({
       batchId,
       queryKey,
       folderDisplayPath: state.folderDisplayPath,
@@ -333,7 +353,7 @@ export class UploadLocationTrayFlowService {
   registerContainmentCheckGroup(batchId: string, state: UploadGroupResolutionState): void {
     const queryKey = `containment|${state.groupingKey}`;
     const candidates = state.candidates ?? [];
-    this.resolution().registerDisambiguationGroup({
+    this.disambiguationRegistration.registerDisambiguationGroup({
       batchId,
       queryKey,
       folderDisplayPath: state.folderDisplayPath,
@@ -395,7 +415,7 @@ export class UploadLocationTrayFlowService {
       jobIds: [...group.jobIds],
       selectedCandidateId: candidateId,
     };
-    this.resolution().notifyDisambiguationResolved(resolvedEvent);
+    this.disambiguationStore.notifyDisambiguationResolved(resolvedEvent);
     this.disambiguationStore.syncBatchDisambiguationAggregates(group.batchId);
     this.disambiguationStore.pickNextActiveGroup(group.batchId);
     this.injector.get(UploadManagerService).kickQueueAfterLocationGate();
@@ -419,7 +439,7 @@ export class UploadLocationTrayFlowService {
       ? this.orchestrator.getGroupState(group.batchId, groupingKey)
       : undefined;
     if (!groupState) {
-      this.resolution().deferGroup(group.id);
+      this.candidateApply().deferGroup(group.id);
       return;
     }
     this.disambiguationStore.patchGroup({
@@ -456,7 +476,7 @@ export class UploadLocationTrayFlowService {
       lat: 0,
       lng: 0,
     }));
-    this.resolution().registerDisambiguationGroup({
+    this.disambiguationRegistration.registerDisambiguationGroup({
       batchId,
       queryKey,
       folderDisplayPath: state.folderDisplayPath,
@@ -474,7 +494,7 @@ export class UploadLocationTrayFlowService {
     const discriminatingField =
       groupState.discriminatingField ??
       (candidates.length ? pickDiscriminatingField(candidates) ?? undefined : undefined);
-    this.resolution().registerDisambiguationGroup({
+    this.disambiguationRegistration.registerDisambiguationGroup({
       batchId,
       queryKey: buildDisambiguationQueryKey(groupState.groupingKey),
       folderDisplayPath: groupState.folderDisplayPath,
@@ -563,7 +583,7 @@ export class UploadLocationTrayFlowService {
       return;
     }
     if (candidateId) {
-      this.resolution().applyCandidateToGroup(groupId, candidateId);
+      this.candidateApply().applyCandidateToGroup(groupId, candidateId);
     }
   }
 
@@ -577,7 +597,7 @@ export class UploadLocationTrayFlowService {
       ...group,
       candidates: [...group.candidates, candidate],
     });
-    this.resolution().applyCandidateToGroup(group.id, candidate.id);
+    this.candidateApply().applyCandidateToGroup(group.id, candidate.id);
   }
 
   private async buildStreetCentroidCandidate(
@@ -786,7 +806,7 @@ export class UploadLocationTrayFlowService {
       jobIds: [...group.jobIds],
       selectedCandidateId: candidateId,
     };
-    this.resolution().notifyDisambiguationResolved(resolvedEvent);
+    this.disambiguationStore.notifyDisambiguationResolved(resolvedEvent);
 
     await this.resumeJobsAfterTrayAnswer(group.jobIds);
 
@@ -837,7 +857,7 @@ export class UploadLocationTrayFlowService {
       jobIds: [...group.jobIds],
       selectedCandidateId: candidateId,
     };
-    this.resolution().notifyDisambiguationResolved(resolvedEvent);
+    this.disambiguationStore.notifyDisambiguationResolved(resolvedEvent);
 
     await this.resumeJobsAfterTrayAnswer(group.jobIds);
 
@@ -856,7 +876,7 @@ export class UploadLocationTrayFlowService {
     let anyQueued = false;
     for (const jobId of jobIds) {
       this.jobState.setPhase(jobId, 'resolving_location');
-      const outcome = await this.resolution().applyPreResolveFromOrchestrator(jobId);
+      const outcome = await this.preResolveOrchestrator().applyPreResolveFromOrchestrator(jobId);
       if (outcome !== 'continue') {
         // 'held' — a further tray opened; 'partial' — routed to Issues. Both own the job now.
         continue;
