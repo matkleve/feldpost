@@ -35,7 +35,6 @@ insert into _expected_authenticated_only (regprocedure) values
   ('public.retire_dedup_hashes_for_media_item(uuid, text)'),
   ('public.add_media_item_location(uuid, text, text, text, text, text, text, text, text, numeric, numeric, text, text, text, text)'),
   ('public.assign_org_member_role(uuid, uuid)'),
-  ('public.bulk_update_image_addresses(uuid[], text, text, text, text, text)'),
   ('public.bulk_update_media_addresses(uuid[], text, text, text, text, text, text)'),
   ('public.check_dedup_hashes(text[])'),
   ('public.cluster_images(numeric, numeric, integer)'),
@@ -57,12 +56,10 @@ insert into _expected_authenticated_only (regprocedure) values
   ('public.list_media_item_locations(uuid, integer, integer)'),
   ('public.process_org_export_job(uuid)'),
   ('public.remove_org_member(uuid)'),
-  ('public.resolve_image_location(uuid, numeric, numeric, text, text, text, text, text)'),
   ('public.resolve_media_location(uuid, numeric, numeric, text, text, text, text, text, text, text, text, text)'),
   ('public.search_locations(text, integer, uuid)'),
   ('public.set_primary_media_item_location(uuid)'),
   ('public.suspend_org_member(uuid)'),
-  ('public.sync_media_items_from_primary_location(uuid)'),
   ('public.unlink_media_from_location(uuid, uuid)'),
   ('public.unsuspend_org_member(uuid)'),
   ('public.update_location(uuid, text, text, text, text, text, text, text, text, text, text, numeric, numeric, text, text)'),
@@ -97,7 +94,12 @@ create temporary table _expected_internal_only (
 ) on commit drop;
 
 insert into _expected_internal_only (regprocedure) values
-  ('public.seed_org_default_roles(uuid)');
+  ('public.seed_org_default_roles(uuid)'),
+  -- dead code: orphaned or legacy, and each raises on the media_items
+  -- location columns dropped in 20260525130000. See 20260911140000.
+  ('public.sync_media_items_from_primary_location(uuid)'),
+  ('public.resolve_image_location(uuid, numeric, numeric, text, text, text, text, text)'),
+  ('public.bulk_update_image_addresses(uuid[], text, text, text, text, text)');
 
 create temporary table _grant_results (
   regprocedure text not null,
