@@ -45,6 +45,7 @@ A file that is merely *read* is not edited. Leave it alone; the old folder's REA
 | STUDY-001 | [Area-selection geometry with variable location precision](./001-area-selection-geometry.md) | analysis | `proposed` | What "the photo's area is inside the circle" should mean geometrically; proposes equal-area discs instead of bbox-corner containment. |
 | STUDY-002 | [UX for coarse-precision media on the map](./002-coarse-precision-map-ux.md) | analysis | `proposed` | What the user sees when a photo's location is known only to city precision; retrieval, disclosure, and what must replace `locationPinEligible`. |
 | STUDY-003 | [Data and contract layer of the upload precision branch](./003-upload-precision-data-contract-review.md) | review | `partially-remediated` | Static review of the `address_precision` migration, RPCs, and spec drift. No database was reachable; nothing was executed. |
+| STUDY-004 | [Organizational redundancy audit](./004-organizational-redundancy-audit.md) | review | `proposed` | Maps duplicated, stale, and conflicting instruction layers (AGENTS.md, rules, Copilot, workflows, guards); phased consolidation proposal. |
 
 ## Related folders
 
