@@ -353,6 +353,47 @@ flowchart TB
 
 ---
 
+## 5.1 RPC Grant Boundary (`SECURITY DEFINER` functions)
+
+Every `SECURITY DEFINER` function bypasses RLS entirely for the duration of
+its execution — its own `REVOKE`/`GRANT` privileges are the *only* boundary
+left. Supabase grants `EXECUTE` on every newly created function to `anon`,
+`authenticated`, and `service_role` automatically (its own per-role default
+privilege, independent of the PUBLIC pseudo-role) at `CREATE FUNCTION` time.
+`REVOKE ALL ON FUNCTION ... FROM PUBLIC` does **not** remove this — the
+per-role grants survive untouched, so a function gated only "FROM PUBLIC"
+stays fully anon-callable. See issue #193 (the anon-callable bug found live)
+and issue #201 (the systematic audit of every other callable, non-trigger
+`SECURITY DEFINER` function).
+
+**Rule:** any new callable (non-trigger) `SECURITY DEFINER` function must
+explicitly state its intended caller and lock the grant to match:
+
+| Intended caller | Required grant |
+| --- | --- |
+| Any authenticated user | `REVOKE ALL ... FROM PUBLIC, anon;` then `GRANT EXECUTE ... TO authenticated;` |
+| Truly public / anonymous (e.g. `resolve_share_set`) | Explicit `GRANT EXECUTE ... TO anon;` — document the reason next to the grant and in this file |
+| Ops / cron / service-only (e.g. storage cleanup) | `REVOKE ALL ... FROM PUBLIC, anon, authenticated;` then `GRANT EXECUTE ... TO service_role;` |
+| Internal helper only (never called directly via RPC, only nested from another `SECURITY DEFINER` function's body) | `REVOKE ALL ... FROM PUBLIC, anon, authenticated;` and no grant at all — nested calls execute as the outer function's owner and are unaffected |
+
+**Exception — RLS policy predicates:** functions referenced inside a
+`CREATE POLICY ... USING (...)` / `WITH CHECK (...)` clause (`user_org_id`,
+`has_permission`, `is_admin`, `is_viewer`, `can_access_chat_channel`,
+`is_chat_channel_member`, `can_self_join_chat_channel`,
+`can_create_qr_invites`) must stay `anon`-executable even though they are
+callable directly as RPCs. Revoking `anon` EXECUTE on a function a policy
+calls does not just deny data — Postgres raises `permission denied for
+function` for the *entire query*, breaking RLS evaluation for any anon-role
+query against tables whose policies reference it. These functions already
+fail closed for an unauthenticated caller (`auth.uid()` is `null`, so they
+return `false`/`null`), so leaving them reachable adds no risk. Before
+revoking `anon` from any function, grep every `CREATE POLICY` in
+`supabase/migrations/` for its name.
+
+Validation: `scripts/validate-authenticated-rpc-grants.sql` (run against a
+live database; asserts `has_function_privilege(...)` per role for every
+function in the table above).
+
 ## 6. Security Checklist for New Features
 
 Before any new table or feature ships:
@@ -364,3 +405,4 @@ Before any new table or feature ships:
 5. No sensitive data is exposed in error messages returned to the client.
 6. Signed URLs are used for all storage access (no public URLs).
 7. Foreign keys with CASCADE or SET NULL are documented in the cascade summary (architecture/database-schema.md §12).
+8. Every new `SECURITY DEFINER` function's grant matches its intended caller (§5.1) — `anon` is revoked unless the function is deliberately public.
