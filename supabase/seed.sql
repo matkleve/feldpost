@@ -84,10 +84,16 @@ BEGIN
 
     -- Skip if user already exists
     IF NOT EXISTS (SELECT 1 FROM auth.users WHERE id = _uid) THEN
+      -- GoTrue cannot scan NULL into string token fields (login → "Database error querying schema").
+      -- @see scripts/promote-local-dev-admin.sql
       INSERT INTO auth.users (
         id, instance_id, aud, role, email, encrypted_password,
         email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
-        created_at, updated_at, confirmation_token, recovery_token
+        created_at, updated_at,
+        confirmation_token, recovery_token,
+        email_change, email_change_token_new, email_change_token_current,
+        phone_change, phone_change_token, reauthentication_token,
+        is_sso_user, is_anonymous
       ) VALUES (
         _uid,
         '00000000-0000-0000-0000-000000000000',
@@ -98,7 +104,9 @@ BEGIN
         now(),
         '{"provider":"email","providers":["email"]}'::jsonb,
         jsonb_build_object('full_name', _u[3]),
-        now(), now(), '', ''
+        now(), now(),
+        '', '', '', '', '', '', '', '',
+        false, false
       );
     END IF;
 
