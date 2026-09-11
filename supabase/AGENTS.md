@@ -40,6 +40,32 @@
 - `supabase db push` with an uncommitted migration, then committing under a **different** timestamp
 - `supabase db pull` as the first fix when only the history table is out of sync (pull creates a new diff migration; rename/repair is usually correct)
 
+## Deploy order (migration before frontend)
+
+**The database half must be applied to hosted before the frontend half ships.**
+Both halves are individually correct; nothing about merging them together
+enforces the order between them. When the frontend sends an RPC parameter the
+deployed function does not have yet, PostgREST cannot resolve the function for
+the parameter set it is given and the call fails — and for location writes it
+fails *silently at the user level*: the upload completes and the address never
+arrives. That is issue #136, which came from `p_address_precision`
+(`20260910140000`, widened by `20260910160000`).
+
+Order for any change that touches both halves:
+
+1. `supabase db push` (after committing the migration — see the history rules above).
+2. `supabase migration list` — every row shows the same version in **Local** and **Remote**.
+3. Only then ship the frontend build.
+4. Verify one real write end to end (for location changes: one upload with coordinates, then confirm the address persisted).
+
+`npm run verify` runs `scripts/check-rpc-param-contract.mjs`, which compares
+every `.rpc('name', {...})` call site in `apps/web` against the function
+signatures parsed from `supabase/migrations/` and fails on a parameter no live
+function accepts. That catches the mismatch **at commit time**, which is the
+only point where a human can still act on it cheaply. It proves the two
+committed halves agree — it cannot know what is applied on hosted, so step 2
+is still yours.
+
 ## Storage
 
 - Private `images/` bucket

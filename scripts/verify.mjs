@@ -46,6 +46,11 @@ const CHECKS = [
   },
   { name: "spec-coverage", cmd: "node", args: ["scripts/check-spec-coverage.mjs"] },
   {
+    name: "rpc-param-contract",
+    cmd: "node",
+    args: ["scripts/check-rpc-param-contract.mjs"],
+  },
+  {
     name: "specs",
     cmd: "npm",
     args: ["run", "--silent", "lint:specs"],
