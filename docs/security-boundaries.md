@@ -390,6 +390,19 @@ return `false`/`null`), so leaving them reachable adds no risk. Before
 revoking `anon` from any function, grep every `CREATE POLICY` in
 `supabase/migrations/` for its name.
 
+**Caveat — org checks and `service_role` callers:** an org check written as
+`... = public.user_org_id()` resolves through `auth.uid()`, a session JWT
+claim, so it survives the role switch inside a `SECURITY DEFINER` call chain
+and correctly identifies the end user even several nested calls deep. But a
+`service_role` caller (an ops script or backfill, which carries no JWT) gets
+`null` from `user_org_id()`, so such a check **silently matches zero rows**
+rather than erroring. `sync_media_items_from_primary_location` is the current
+example. No script writes `media_item_locations` today, so nothing is affected
+— but a future service_role backfill touching that table would find the
+`media_items` projection silently not syncing. Either set the JWT claims for
+the session or call the projection with an explicit org, rather than assuming
+it ran.
+
 Validation: `scripts/validate-authenticated-rpc-grants.sql` (run against a
 live database; asserts `has_function_privilege(...)` per role for every
 function in the table above).

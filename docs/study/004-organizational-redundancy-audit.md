@@ -22,7 +22,7 @@ Measured on branch `main` at commit `870963cb632b78a4537a9e8bbb94410fc512b7e7` (
 
 **Top 3 risks**
 
-1. **Copilot harness bypasses the single-instruction-file decision.** [ADR-0006](adr/0006-one-instruction-file.md) accepts `.cursor/rules/*.mdc` as extensions but forbids restating rules in tool overlays. `.github/copilot-instructions.md` (~113 lines) and nine `.github/instructions/*.md` files (~345 lines combined) still carry normative rules, some with removed token names [A][B].
+1. **Copilot harness bypasses the single-instruction-file decision.** [ADR-0006](../adr/0006-one-instruction-file.md) accepts `.cursor/rules/*.mdc` as extensions but forbids restating rules in tool overlays. `.github/copilot-instructions.md` (~113 lines) and nine `.github/instructions/*.md` files (~345 lines combined) still carry normative rules, some with removed token names [A][B].
 2. **Always-applied rules + `AGENTS.md` index duplicate the same subjects.** Seven `.mdc` files (379 lines) extend root `AGENTS.md` (147 lines) per ADR-0006 — correct by policy, but agents loading both pay ~526 lines before feature specs, with paraphrased overlap on FSM, tokens, i18n, component reuse, and visual behavior [A][C].
 3. **Human-facing gate docs drift from `scripts/verify.mjs`.** `CONTRIBUTING.md` still lists three soft checks and 2026-09-08 debt numbers; `verify.mjs` registers four soft checks with 2026-09-10 counts and adds `spec-code-paths`, `skills-source`, `component-registry` [A].
 
@@ -116,8 +116,8 @@ A Cursor agent touching a new shared component typically loads: root `AGENTS.md`
 
 | ID | Source A | Source B | Disagreement | Precedence winner | Reality matches winner? |
 | --- | --- | --- | --- | --- | --- |
-| C-01 | [ADR-0006](adr/0006-one-instruction-file.md) L24–27 | `.github/copilot-instructions.md` L26–113 | ADR: tool files must not restate rules; Copilot file has coding style, symmetry, i18n, bulk gates | ADR-0006 (item 7 under CONSTITUTION chain) | **No** [A] |
-| C-02 | [ADR-0006](adr/0006-one-instruction-file.md) | `.github/instructions/*.md` | Nine path-scoped instruction files carry rules not in pointer form | ADR-0006 | **No** [A] |
+| C-01 | [ADR-0006](../adr/0006-one-instruction-file.md) L24–27 | `.github/copilot-instructions.md` L26–113 | ADR: tool files must not restate rules; Copilot file has coding style, symmetry, i18n, bulk gates | ADR-0006 (item 7 under CONSTITUTION chain) | **No** [A] |
+| C-02 | [ADR-0006](../adr/0006-one-instruction-file.md) | `.github/instructions/*.md` | Nine path-scoped instruction files carry rules not in pointer form | ADR-0006 | **No** [A] |
 | C-03 | `CONTRIBUTING.md` L26–33 | `scripts/verify.mjs` L32–70 | CONTRIBUTING: 3 soft checks, specs 201, lint 151+1068, test "does not compile"; verify: 4 soft checks, specs 198, lint 145+1038, test 34 runtime failures | `verify.mjs` (CI runs it) | **No** [A] |
 | C-04 | `.github/instructions/styling.instructions.md` L13–16 | `.cursor/rules/token-usage-gate.mdc` §7 | Legacy `--color-*` vs forbidden legacy names | `.cursor/rules` (item 3) + `agent-css-variable-contract.md` | **No** for Copilot-only readers [A] |
 | C-05 | `docs/study/STUDY-FORMAT.md` trust order | `AGENTS.md` § Instruction precedence | Study: owner → spec → code → study; AGENTS: CONSTITUTION → … → study not listed | Different domains; no direct clash | **Yes** (study subordinate) [A] |
