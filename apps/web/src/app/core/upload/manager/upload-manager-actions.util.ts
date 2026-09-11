@@ -60,6 +60,13 @@ export interface UploadManagerActionsDeps {
     storagePath: string | undefined,
     mediaId: string | undefined,
   ) => Promise<{ errors: string[] }>;
+  /**
+   * Releases the just-uploaded blob URL `setLocalUrl`/`injectLocalUrl` cached
+   * for instant preview, resetting that media item's cache entry to 'idle' so
+   * the next read goes through the normal signed-URL path.
+   * @see docs/audits/upload-flow-review-2026-09-10/06-improvement-plan.md item 10 UP-14
+   */
+  revokeLocalMediaUrl: (mediaId: string) => void;
   drainQueue: () => void;
 }
 
@@ -86,13 +93,29 @@ export function dismissUploadManagerJob(jobId: string, deps: UploadManagerAction
   const job = deps.findJob(jobId);
   if (!job || !deps.isTerminalPhase(job.phase)) return;
 
-  if (job.thumbnailUrl && job.phase !== 'complete') {
+  if (job.phase === 'complete' && job.mediaId) {
+    deps.revokeLocalMediaUrl(job.mediaId);
+    if (job.thumbnailUrl) {
+      deps.revokeObjectUrl(job.thumbnailUrl);
+    }
+  } else if (job.thumbnailUrl) {
     deps.revokeObjectUrl(job.thumbnailUrl);
   }
   deps.removeJob(jobId);
 }
 
 export function dismissAllUploadManagerCompleted(deps: UploadManagerActionsDeps): void {
+  // @see docs/audits/upload-flow-review-2026-09-10/06-improvement-plan.md item 10 UP-14 —
+  // removeTerminalJobs() deliberately never revokes a complete job's thumbnailUrl (it may
+  // still be the injected local media preview), so that revocation happens here first.
+  for (const job of deps.snapshotJobs()) {
+    if (job.phase === 'complete' && job.mediaId) {
+      deps.revokeLocalMediaUrl(job.mediaId);
+      if (job.thumbnailUrl) {
+        deps.revokeObjectUrl(job.thumbnailUrl);
+      }
+    }
+  }
   deps.removeTerminalJobs();
 }
 

@@ -3,6 +3,8 @@ import type { UploadJob } from '../upload-manager.types';
 import {
   attachUploadManagerFile,
   cancelUploadManagerJob,
+  dismissAllUploadManagerCompleted,
+  dismissUploadManagerJob,
   resolveUploadManagerConflict,
   retryUploadManagerJob,
 } from './upload-manager-actions.util';
@@ -50,6 +52,7 @@ function buildDeps(current: UploadJob): {
     abortJobRequest: vi.fn(),
     markDone: vi.fn(),
     removeUploadResidue,
+    revokeLocalMediaUrl: vi.fn(),
     drainQueue: vi.fn(),
   };
   return { deps, removeUploadResidue, updateJob, transitionTo };
@@ -228,5 +231,63 @@ describe('resolveUploadManagerConflict', () => {
     resolveUploadManagerConflict('job-1', 'create_new', deps);
 
     expect(updateJob).toHaveBeenCalledWith('job-1', expect.objectContaining({ issueKind: undefined }));
+  });
+});
+
+// @see docs/audits/upload-flow-review-2026-09-10/06-improvement-plan.md item 10 UP-14
+// @see https://github.com/matkleve/feldpost/issues/142
+describe('dismissUploadManagerJob', () => {
+  it('revokes the injected local media URL for a completed job with a mediaId', () => {
+    const current = job({
+      phase: 'complete',
+      mediaId: 'media-1',
+      thumbnailUrl: 'blob:thumb-1',
+    });
+    const { deps } = buildDeps(current);
+
+    dismissUploadManagerJob('job-1', deps);
+
+    expect(deps.revokeLocalMediaUrl).toHaveBeenCalledWith('media-1');
+    expect(deps.revokeObjectUrl).toHaveBeenCalledWith('blob:thumb-1');
+  });
+
+  it('does not revoke a local media URL for a job that never persisted media', () => {
+    const current = job({ phase: 'error' });
+    const { deps } = buildDeps(current);
+
+    dismissUploadManagerJob('job-1', deps);
+
+    expect(deps.revokeLocalMediaUrl).not.toHaveBeenCalled();
+  });
+
+  it('is a no-op for a job still in progress', () => {
+    const current = job({ phase: 'uploading' });
+    const { deps } = buildDeps(current);
+
+    dismissUploadManagerJob('job-1', deps);
+
+    expect(deps.revokeLocalMediaUrl).not.toHaveBeenCalled();
+    expect(deps.removeJob).not.toHaveBeenCalled();
+  });
+});
+
+describe('dismissAllUploadManagerCompleted', () => {
+  it('revokes the injected local media URL for every completed job before clearing them', () => {
+    const completedWithMedia = job({
+      id: 'job-1',
+      phase: 'complete',
+      mediaId: 'media-1',
+      thumbnailUrl: 'blob:thumb-1',
+    });
+    const failedNoMedia = job({ id: 'job-2', phase: 'error' });
+    const { deps } = buildDeps(completedWithMedia);
+    deps.snapshotJobs = () => [completedWithMedia, failedNoMedia];
+
+    dismissAllUploadManagerCompleted(deps);
+
+    expect(deps.revokeLocalMediaUrl).toHaveBeenCalledWith('media-1');
+    expect(deps.revokeLocalMediaUrl).toHaveBeenCalledTimes(1);
+    expect(deps.revokeObjectUrl).toHaveBeenCalledWith('blob:thumb-1');
+    expect(deps.removeTerminalJobs).toHaveBeenCalledOnce();
   });
 });

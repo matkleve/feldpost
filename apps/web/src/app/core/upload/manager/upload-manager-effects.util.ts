@@ -1,3 +1,15 @@
+/**
+ * Warns the user before they close/reload the tab while an upload is in
+ * flight. `event.returnValue` is legacy — modern browsers ignore custom
+ * text and show their own generic prompt, but some engines still gate the
+ * dialog on it being set to a truthy value, so both are set.
+ * @see https://github.com/matkleve/feldpost/issues/141 (UP-05)
+ */
+export function warnBeforeUnload(event: BeforeUnloadEvent): void {
+  event.preventDefault();
+  event.returnValue = '';
+}
+
 export interface UploadManagerEffectsDeps<UserLike> {
   createEffect: (runner: () => void) => void;
   getUser: () => UserLike | null | undefined;

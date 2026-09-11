@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { registerUploadManagerEffects } from './upload-manager-effects.util';
+import { registerUploadManagerEffects, warnBeforeUnload } from './upload-manager-effects.util';
 import type { UploadManagerEffectsDeps } from './upload-manager-effects.util';
 
 /**
@@ -105,5 +105,25 @@ describe('registerUploadManagerEffects', () => {
     registerUploadManagerEffects(deps);
 
     expect(deps.cancelAllActive).not.toHaveBeenCalled();
+  });
+});
+
+// @see docs/audits/upload-flow-review-2026-09-10/06-improvement-plan.md item 10 UP-05
+// @see https://github.com/matkleve/feldpost/issues/141
+describe('warnBeforeUnload', () => {
+  it('prevents the default so the browser shows its leave-site confirmation', () => {
+    const event = { preventDefault: vi.fn() } as unknown as BeforeUnloadEvent;
+
+    warnBeforeUnload(event);
+
+    expect(event.preventDefault).toHaveBeenCalledOnce();
+  });
+
+  it('sets returnValue for the browsers that still require it (legacy Chromium/Firefox)', () => {
+    const event = { preventDefault: vi.fn(), returnValue: undefined } as unknown as BeforeUnloadEvent;
+
+    warnBeforeUnload(event);
+
+    expect(event.returnValue).not.toBeUndefined();
   });
 });

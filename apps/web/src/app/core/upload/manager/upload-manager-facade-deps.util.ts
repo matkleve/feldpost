@@ -39,6 +39,7 @@ export interface UploadManagerFacadeDepsInput {
     mediaId: string | undefined,
   ) => Promise<{ errors: string[] }>;
   hydrateDeferredPreviews: (jobs: ReadonlyArray<UploadJob>) => void;
+  revokeLocalMediaUrl: (mediaId: string) => void;
 }
 
 export function buildUploadManagerActionDeps(
@@ -62,6 +63,7 @@ export function buildUploadManagerActionDeps(
     abortJobRequest: (jobId) => input.pipelineHost.abortJobRequest(jobId),
     markDone: (jobId) => input.queue.markDone(jobId),
     removeUploadResidue: (storagePath, mediaId) => input.removeUploadResidue(storagePath, mediaId),
+    revokeLocalMediaUrl: (mediaId) => input.revokeLocalMediaUrl(mediaId),
     drainQueue: () => input.pipelineHost.drainQueue(input.getPipelineCtx()),
   };
 }

@@ -25,6 +25,7 @@ import type { Observable } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 import { FilenameParserService } from '../filename-parser/filename-parser.service';
 import { FolderScanService } from '../folder-scan/folder-scan.service';
+import { MediaDownloadService } from '../media-download/media-download.service';
 import { MediaPreviewService } from '../media-preview/media-preview.service';
 import { ProjectsService } from '../projects/projects.service';
 import { SupabaseService } from '../supabase/supabase.service';
@@ -48,7 +49,7 @@ import {
 } from './manager/upload-manager-actions.util';
 import { checkUploadDedupHash } from './manager/upload-manager-dedup.util';
 import { selectUploadManagerAddressCandidate } from './manager/upload-manager-select-address.util';
-import { registerUploadManagerEffects } from './manager/upload-manager-effects.util';
+import { registerUploadManagerEffects, warnBeforeUnload } from './manager/upload-manager-effects.util';
 import { installUploadSignOutGuard } from './manager/upload-sign-out-guard.util';
 import { emitUploadManagerBatchProgress } from './manager/upload-manager-lifecycle.util';
 import { UploadManagerMissingDataService } from './manager/upload-manager-missing-data.service';
@@ -138,6 +139,7 @@ export class UploadManagerService {
   private readonly folderScan = inject(FolderScanService);
   private readonly filenameParser = inject(FilenameParserService);
   private readonly mediaPreview = inject(MediaPreviewService);
+  private readonly mediaDownload = inject(MediaDownloadService);
   private readonly projects = inject(ProjectsService);
   private readonly locationConfig = inject(UploadLocationConfigService);
   private readonly locationResolution = inject(UploadLocationResolutionService);
@@ -167,6 +169,7 @@ export class UploadManagerService {
     removeUploadResidue: (storagePath: string | undefined, mediaId: string | undefined) =>
       removeUploadCancelResidue(storagePath, mediaId, this.supabase.client),
     hydrateDeferredPreviews: (jobs: ReadonlyArray<UploadJob>) => this.hydrateDeferredPreviews(jobs),
+    revokeLocalMediaUrl: (mediaId: string) => this.mediaDownload.revokeLocalUrl(mediaId),
   };
 
   private readonly actionDeps: UploadManagerActionsDeps = buildUploadManagerActionDeps(
@@ -236,7 +239,8 @@ export class UploadManagerService {
 
   // ── beforeunload ───────────────────────────────────────────────────────────
 
-  private readonly beforeUnloadHandler = (): void => {};
+  // @see https://github.com/matkleve/feldpost/issues/141 (UP-05)
+  private readonly beforeUnloadHandler = warnBeforeUnload;
 
   constructor() {
     installUploadSignOutGuard({
