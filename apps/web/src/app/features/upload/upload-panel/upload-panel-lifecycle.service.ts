@@ -4,7 +4,7 @@ import {
   UploadManagerService,
   type ImageUploadedEvent as ManagerImageUploadedEvent,
 } from '../../../core/upload/upload-manager.service';
-import type { ImageUploadedEvent } from './upload-panel.component';
+import type { MapMarkerImageUploadedEvent } from './upload-panel.component';
 
 /**
  * UploadPanelLifecycleService — Manage panel lifecycle subscriptions & issue attention pulse.
@@ -32,11 +32,11 @@ export class UploadPanelLifecycleService {
 
   // ── Public API callback for component to emit events ─────────────────────
 
-  private imageUploadedCallback?: (event: ImageUploadedEvent) => void;
+  private imageUploadedCallback?: (event: MapMarkerImageUploadedEvent) => void;
   private placementRequestedCallback?: (jobId: string) => void;
   private autoSwitchCallback?: () => void;
 
-  setImageUploadedCallback(cb: (event: ImageUploadedEvent) => void): void {
+  setImageUploadedCallback(cb: (event: MapMarkerImageUploadedEvent) => void): void {
     this.imageUploadedCallback = cb;
   }
 

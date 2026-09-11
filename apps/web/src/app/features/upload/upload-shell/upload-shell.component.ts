@@ -11,7 +11,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { WORKSPACE_PANE_SHELL_HOST } from '../../../core/workspace-pane/workspace-pane-shell-host.token';
 import type {
-  ImageUploadedEvent,
+  MapMarkerImageUploadedEvent,
   UploadLocationMapPickRequest,
   UploadLocationPreviewEvent,
 } from '../../../core/workspace-pane/workspace-pane-shell-events.types';
@@ -68,7 +68,7 @@ export class UploadShellComponent {
     this.uploadShellUi.toggleUploadPanel();
   }
 
-  onImageUploaded(event: ImageUploadedEvent): void {
+  onImageUploaded(event: MapMarkerImageUploadedEvent): void {
     this.shellHost.onImageUploadedFromWorkspacePane(event);
   }
 

@@ -15,14 +15,14 @@ import { UploadPanelViewModelService } from './upload-panel-view-model.service';
 import { UploadPanelDialogActionsService } from './upload-panel-dialog-actions.service';
 import { UploadPanelSignalsService } from './upload-panel-signals.service';
 import type {
-  ImageUploadedEvent,
+  MapMarkerImageUploadedEvent,
   UploadLocationMapPickRequest,
   UploadLocationPreviewEvent,
 } from './upload-panel.types';
 
 export interface UploadPanelSetupOptions {
   destroyRef: DestroyRef;
-  imageUploaded: (event: ImageUploadedEvent) => void;
+  imageUploaded: (event: MapMarkerImageUploadedEvent) => void;
   placementRequested: (jobId: string) => void;
   detailRequested: UploadPanelRowInteractionsRegisterOptions['detailRequested'];
   zoomToLocationRequested: UploadPanelRowInteractionsRegisterOptions['zoomToLocationRequested'];

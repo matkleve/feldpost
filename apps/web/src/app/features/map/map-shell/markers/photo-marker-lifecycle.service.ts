@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { buildPhotoMarkerHtml } from '../../../../core/map/marker-factory';
-import type { ImageUploadedEvent } from '../../../../core/workspace-pane/workspace-pane-shell-events.types';
+import type { MapMarkerImageUploadedEvent } from '../../../../core/workspace-pane/workspace-pane-shell-events.types';
 import type { ImageReplacedEvent, ImageAttachedEvent } from '../../../../core/upload/upload-manager.service';
 import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-view.service';
 import { WorkspaceSelectionService } from '../../../../core/workspace-selection/workspace-selection.service';
@@ -104,7 +104,7 @@ export class PhotoMarkerLifecycleService {
     this.state.setDraftMediaMarker(null);
   }
 
-  resolveDraftMediaMarkerUpload(event: ImageUploadedEvent): void {
+  resolveDraftMediaMarkerUpload(event: MapMarkerImageUploadedEvent): void {
     const draft = this.state.draftMediaMarker();
     if (!draft) return;
 
@@ -164,7 +164,7 @@ export class PhotoMarkerLifecycleService {
     }
   }
 
-  upsertUploadedPhotoMarker(event: ImageUploadedEvent): void {
+  upsertUploadedPhotoMarker(event: MapMarkerImageUploadedEvent): void {
     if (!this.instance.map) return;
 
     const markerKey = toMarkerKey(event.lat, event.lng);

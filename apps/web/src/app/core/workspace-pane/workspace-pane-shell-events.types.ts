@@ -4,7 +4,7 @@
  */
 
 /** Emitted when a new image is uploaded from the workspace upload tab (map marker refresh). */
-export interface ImageUploadedEvent {
+export interface MapMarkerImageUploadedEvent {
   id: string;
   lat: number;
   lng: number;

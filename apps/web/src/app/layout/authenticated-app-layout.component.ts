@@ -46,7 +46,7 @@ import { WorkspaceSelectionService } from '../core/workspace-selection/workspace
 import { WorkspaceSelectedItemsSyncService } from '../core/workspace-selection/workspace-selected-items-sync.service';
 import type { WorkspacePaneTab } from '../core/workspace-pane/workspace-pane-host.port';
 import type {
-  ImageUploadedEvent,
+  MapMarkerImageUploadedEvent,
   UploadLocationMapPickRequest,
   UploadLocationPreviewEvent,
 } from '../core/workspace-pane/workspace-pane-shell-events.types';
@@ -298,7 +298,7 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
     });
   }
 
-  onImageUploadedFromWorkspacePane(event: ImageUploadedEvent): void {
+  onImageUploadedFromWorkspacePane(event: MapMarkerImageUploadedEvent): void {
     this.mapLayoutEffects.getMapEffects()?.onImageUploaded(event);
   }
 

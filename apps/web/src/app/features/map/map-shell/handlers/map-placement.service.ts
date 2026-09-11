@@ -12,7 +12,7 @@ import { MapShellInstanceService } from '../component/map-shell-instance.service
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import type { ToggleValue } from '@spartan-ng/brain/toggle-group';
 import type {
-  ImageUploadedEvent,
+  MapMarkerImageUploadedEvent,
   UploadLocationMapPickRequest,
   UploadLocationPreviewEvent,
 } from '../../../../core/workspace-pane/workspace-pane-shell-events.types';
@@ -31,7 +31,7 @@ export class MapPlacementService {
   private readonly instance = inject(MapShellInstanceService);
   private readonly i18nService = inject(I18nService);
 
-  onImageUploaded(event: ImageUploadedEvent): void {
+  onImageUploaded(event: MapMarkerImageUploadedEvent): void {
     if (!this.instance.map) return;
     this.photoMarkerLifecycleService.upsertUploadedPhotoMarker(event);
     this.photoMarkerLifecycleService.resolveDraftMediaMarkerUpload(event);

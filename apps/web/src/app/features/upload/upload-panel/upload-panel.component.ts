@@ -74,13 +74,13 @@ import { UploadPanelRegistrationService } from './upload-panel-registration.serv
 import { UploadPanelRowInteractionsService } from './upload-panel-row-interactions.service';
 import { UploadPanelSetupService } from './upload-panel-setup.service';
 import type {
-  ImageUploadedEvent,
+  MapMarkerImageUploadedEvent,
   UploadLocationMapPickRequest,
   UploadLocationPreviewEvent,
 } from './upload-panel.types';
 import { trapUploadPanelFocus, type UploadPanelFocusTrap } from './upload-panel-modal-focus.util';
 export type {
-  ImageUploadedEvent,
+  MapMarkerImageUploadedEvent,
   UploadLocationMapPickRequest,
   UploadLocationPreviewEvent,
 } from './upload-panel.types';
@@ -161,7 +161,7 @@ export class UploadPanelComponent implements OnDestroy {
   // Component I/O
   readonly visible = input<boolean>(false);
   readonly embeddedInPane = input<boolean>(false);
-  readonly imageUploaded = output<ImageUploadedEvent>();
+  readonly imageUploaded = output<MapMarkerImageUploadedEvent>();
   readonly placementRequested = output<string>();
   readonly detailRequested = output<string>();
   readonly zoomToLocationRequested = output<ZoomToLocationEvent>();

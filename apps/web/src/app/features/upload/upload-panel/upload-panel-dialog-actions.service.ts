@@ -38,12 +38,12 @@ import { MapProjectDialogService } from '../../map/map-shell/workspace/map-proje
 import { UploadPanelDialogSignals } from './upload-panel-dialog-signals.service';
 import { mapSearchResultsToForwardSuggestions } from './upload-panel-helpers';
 import { getBoundProjectIds } from './upload-panel-project-bindings.util';
-import type { ImageUploadedEvent, UploadLocationPreviewEvent } from './upload-panel.types';
+import type { MapMarkerImageUploadedEvent, UploadLocationPreviewEvent } from './upload-panel.types';
 
 export type DuplicateResolutionChoice = 'use_existing' | 'upload_anyway' | 'reject';
 
 export interface UploadPanelDialogActionsRegisterOptions {
-  imageUploaded: (e: ImageUploadedEvent) => void;
+  imageUploaded: (e: MapMarkerImageUploadedEvent) => void;
   locationPreviewRequested: (e: UploadLocationPreviewEvent) => void;
   locationPreviewCleared: () => void;
   setLane: (lane: 'uploading' | 'uploaded' | 'issues') => void;

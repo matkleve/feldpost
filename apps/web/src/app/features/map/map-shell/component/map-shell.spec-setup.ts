@@ -16,7 +16,7 @@ import {
 } from '../../../../core/workspace-pane/workspace-pane-shell-host.token';
 import type { WorkspacePaneTab } from '../../../../core/workspace-pane/workspace-pane-host.port';
 import type {
-  ImageUploadedEvent,
+  MapMarkerImageUploadedEvent,
   UploadLocationMapPickRequest,
   UploadLocationPreviewEvent,
 } from '../../../../core/workspace-pane/workspace-pane-shell-events.types';
@@ -92,7 +92,7 @@ function createWorkspacePaneShellHostStub(state: MapShellState): WorkspacePaneSh
       lng: number;
       zoomMode?: 'house' | 'street';
     }): void {},
-    onImageUploadedFromWorkspacePane(_event: ImageUploadedEvent): void {},
+    onImageUploadedFromWorkspacePane(_event: MapMarkerImageUploadedEvent): void {},
     enterPlacementModeFromWorkspacePane(_key: string): void {},
     onUploadLocationPreviewRequestedFromWorkspacePane(_event: UploadLocationPreviewEvent): void {},
     onUploadLocationPreviewClearedFromWorkspacePane(): void {},

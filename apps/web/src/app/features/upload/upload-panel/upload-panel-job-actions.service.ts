@@ -27,13 +27,13 @@ import {
 export type { DuplicateResolutionChoice } from './upload-panel-dialog-actions.service';
 import { UploadPanelMenuActionRouterService } from './upload-panel-menu-action-router.service';
 import type {
-  ImageUploadedEvent,
+  MapMarkerImageUploadedEvent,
   UploadLocationMapPickRequest,
   UploadLocationPreviewEvent,
 } from './upload-panel.types';
 
 export interface UploadPanelJobActionsRegisterOptions {
-  imageUploaded: (e: ImageUploadedEvent) => void;
+  imageUploaded: (e: MapMarkerImageUploadedEvent) => void;
   placementRequested: (id: string) => void;
   locationMapPickRequested: (e: UploadLocationMapPickRequest) => void;
   locationPreviewRequested: (e: UploadLocationPreviewEvent) => void;

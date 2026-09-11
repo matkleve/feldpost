@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import type {
-  ImageUploadedEvent,
+  MapMarkerImageUploadedEvent,
   UploadLocationMapPickRequest,
   UploadLocationPreviewEvent,
 } from './workspace-pane-shell-events.types';
@@ -18,7 +18,7 @@ export interface WorkspacePaneLayoutMapEffects {
     lng: number;
     zoomMode?: 'house' | 'street';
   }): void;
-  onImageUploaded(event: ImageUploadedEvent): void;
+  onImageUploaded(event: MapMarkerImageUploadedEvent): void;
   enterPlacementMode(key: string): void;
   onUploadLocationPreviewRequested(event: UploadLocationPreviewEvent): void;
   onUploadLocationPreviewCleared(): void;
