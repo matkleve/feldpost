@@ -48,7 +48,6 @@ insert into _expected_authenticated_only (regprocedure) values
   ('public.get_chat_unread_counts(uuid)'),
   ('public.get_location_by_address_components(text, text, text, text, text, text, text, text)'),
   ('public.get_media_clusters(uuid, double precision)'),
-  ('public.get_unresolved_images(integer)'),
   ('public.get_unresolved_media(integer)'),
   ('public.invite_chat_channel_member(uuid, uuid)'),
   ('public.link_media_to_location(uuid, uuid)'),
@@ -94,12 +93,10 @@ create temporary table _expected_internal_only (
 ) on commit drop;
 
 insert into _expected_internal_only (regprocedure) values
-  ('public.seed_org_default_roles(uuid)'),
-  -- dead code: orphaned or legacy, and each raises on the media_items
-  -- location columns dropped in 20260525130000. See 20260911140000.
-  ('public.sync_media_items_from_primary_location(uuid)'),
-  ('public.resolve_image_location(uuid, numeric, numeric, text, text, text, text, text)'),
-  ('public.bulk_update_image_addresses(uuid[], text, text, text, text, text)');
+  ('public.seed_org_default_roles(uuid)');
+-- The dead image-era functions that 20260911140000 locked down were dropped
+-- outright in 20260911150000 (#202), so there are no longer any grants to
+-- assert for them.
 
 create temporary table _grant_results (
   regprocedure text not null,
