@@ -23,9 +23,9 @@ Below the rules: "+ Add a filter" ghost button.
 ## Where It Lives
 
 - **Anchored shell + shared menu chrome (normative):** [`dropdown-system.md`](./dropdown-system.md) — toolbar width floors (`toolbar-dropdown--filter`), scroll bands, stacking, and shell vs filter flyout `document:click` scopes.
-- **This component:** `apps/web/src/app/shared/dropdown-trigger/filter-dropdown.component.ts`, `.html`, `.scss` (detail: **File Map** below).
+- **This component:** `apps/web/src/app/shared/dropdown-trigger/filter/filter-dropdown.component.ts`, `.html`, `.scss` (detail: **File Map** below).
 - **Callsite:** opened from `WorkspaceToolbarComponent` when the Filter toolbar panel is active (see **Wiring**).
-- **Filter predicates / query integration:** `apps/web/src/app/core/filter.service.ts` (see **Data** / **Wiring**).
+- **Filter predicates / query integration:** `apps/web/src/app/core/filter/filter.service.ts` (see **Data** / **Wiring**).
 
 ## Visual behavior contract (toolbar-aligned)
 
@@ -149,11 +149,11 @@ Where `FilterRule` = `{ id: string; conjunction: 'and' | 'or'; property: Propert
 
 | File                                                         | Purpose                             |
 | ------------------------------------------------------------ | ----------------------------------- |
-| `apps/web/src/app/shared/dropdown-trigger/filter-dropdown.component.ts`   | Main filter builder                 |
-| `apps/web/src/app/shared/dropdown-trigger/filter-dropdown.component.html` | Template                            |
-| `apps/web/src/app/shared/dropdown-trigger/filter-dropdown.component.scss` | Styles                              |
+| `apps/web/src/app/shared/dropdown-trigger/filter/filter-dropdown.component.ts`   | Main filter builder                 |
+| `apps/web/src/app/shared/dropdown-trigger/filter/filter-dropdown.component.html` | Template                            |
+| `apps/web/src/app/shared/dropdown-trigger/filter/filter-dropdown.component.scss` | Styles                              |
 | *(embedded in `filter-dropdown` template)*   | Single filter rule row              |
-| `core/filter.service.ts`                                     | Filter state + query builder        |
+| `apps/web/src/app/core/filter/filter.service.ts`                                     | Filter state + query builder        |
 
 ## Wiring
 

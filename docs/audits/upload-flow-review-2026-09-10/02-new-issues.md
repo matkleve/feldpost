@@ -42,6 +42,36 @@ So the same defect class the previous audit closed twice already survives in two
 | **NF-14** | medium | spec trust | The **open-gap table understates the code**: G2 and G3 ship, with tests, while the spec lists both as unimplemented and leaves their acceptance criteria unchecked. G4 genuinely is not implemented. | fan-out key `core/upload/address-resolution/upload-address-resolution.orchestrator.ts:231-244`; G3 call site `core/upload/location/upload-location-pre-resolve-orchestrator.service.ts:149`, tests `…/upload-location-tray-flow.service.spec.ts:279,326,350`; no `'deferred'` in `core/upload/upload-manager.types.ts:37` |
 | **NF-15** | low | dead code | **`context_distance` (contradiction class C5) is a dead union member** — read in one place, never written. Same class as `duplicate_photo`, which was deleted in P4c. | `core/upload/upload-manager.types.ts:115`; sole reader `features/upload/upload-resolver-tray/upload-resolver-tray.helpers.ts:70` |
 | **NF-16** | low | change completeness | `project_address_* = Step 2` **still appears in a type comment** — the last surviving reference to the removed project tray, the concept root `AGENTS.md` cites as this repository's canonical Change-Completeness failure. | `core/upload/upload-manager.types.ts:80` (only hit across `apps/web/src` and `docs/specs`) |
+| **NF-38** | high | dedup / HEIC | **HEIC dedup fingerprints the converted JPEG, not the source HEIC.** `applyConvertedFileToJob` swaps `job.file` to `heic2any` output before the dedup gate; `computeUploadContentHash` then hashes whatever `job.file` points at. If encoder output varies across runs, the same photo yields a different fingerprint each upload and duplicate detection silently never fires — no error, no UI signal. See § 3 (NF-38). Fix: [`06-improvement-plan.md`](./06-improvement-plan.md) item 1. | swap `core/upload/support/upload-heic-prepare.util.ts:33`; conversion before dedup `…/upload-new-prepare-route.util.ts:185-213` → `…/upload-new-pre-resolve.util.ts:336` → `core/upload/support/upload-dedup-check.util.ts:91` → `core/upload/support/content-hash.util.ts:121-127`; encoder `core/upload/support/upload.service.util.ts:142-143`; same ordering attach `:170-197`, replace `…/upload-replace-pipeline-run.util.ts:103-127` |
+| **NF-39** | medium | post-save / address | **Reverse geocode runs unawaited during `saving_record`; `resolving_address` is a false signal; upload reaches `complete` before the street address may exist.** `enrichWithReverseGeocode` is an empty stub (since `f6a3be7b`); the real call is `resolveUploadAddress` in `persistUploadFile`, invoked without `await`. Geocoder failure writes `location_status: 'unresolvable'` with no user-visible error while the job still completes. See § 3 (NF-39). Fix: [`06-improvement-plan.md`](./06-improvement-plan.md) item 13. Supersedes UP-36. | stub `core/upload/support/upload-enrichment.service.ts:43-47`; cosmetic phase `…/upload-new-post-save.util.ts:146-147`; unawaited call `core/upload/support/upload-file-persist.util.ts:232-240`; implementation `core/upload/address-resolution/upload-address-resolve.util.ts:20-51`; Step 4 config with no consumer `core/upload/location/upload-location-config.ts:26-27`, `:71` |
+| **NF-40** | high | address precision | **Stored address may be fabricated or coarser-than-known: unconditional reverse geocode on every coord, `titleAddress` not persisted to structured fields, no precision metadata.** City-only folder (e.g. `Vienna/`, no EXIF) → forward search centroid → reverse fills `street` from Nominatim at that point; user never supplied street. Distinct from NF-39 (timing/visibility). Product intent: [`08-product-intent-vs-code.md`](./08-product-intent-vs-code.md). Fix: [`06-improvement-plan.md`](./06-improvement-plan.md) item 14. | unconditional reverse `core/upload/support/upload-file-persist.util.ts:232-240`; text not in RPC `core/upload/address-resolution/upload-address-resolve.util.ts:27-36`; `metadata_only` partial `core/upload/address-resolution/upload-address-resolution.orchestrator.ts:329-341`; forward legacy `core/upload/location/upload-location-placement.service.ts:104-125`; reverse no zoom `supabase/functions/geocode/index.ts:220-221`; no precision column `supabase/migrations/20260524120000_locations_nn_junction.sql:53-68` |
+
+---
+
+## Integration status (branch `cursor/upload-fixes-integration-3be6`, 2026-09-10)
+
+Merged `cursor/upload-pipeline-integrity-3be6`, `cursor/upload-branch-c-resolution-3be6`, and `cursor/upload-panel-tray-ui-3be6` onto `cursor/upload-flow-review-3be6`, then closed cross-boundary items NF-11 (core gate), NF-13 (UI label consumption), and NF-18 (street-centroid core path). Evidence rows above are unchanged; this table records outcome only.
+
+| ID | Status | Notes |
+| --- | --- | --- |
+| **NF-01** | **fixed** | Migration `20260910120000_retire_dedup_hashes_for_media_item.sql` + replace-pipeline hash retirement. **Migration unverified** — no DB in agent environment. |
+| **NF-02** | **fixed** | Replace cancel restores `oldStoragePath` instead of leaving a broken row. |
+| **NF-03** | **fixed** | Sign-out guard runs cancel-residue **before** session loss (`upload-sign-out-guard.util.ts`). |
+| **NF-04** | **fixed** | In-flight dedup registry blocks duplicate submits within the concurrency window. |
+| **NF-05** | **fixed** | Attach/replace upload paths now race storage against 180 s timeout. |
+| **NF-06** | **fixed** | Attach dedup-hash insert logs rejection via shared postwrite helper. |
+| **NF-07** | **fixed** | Replace old-object removal is awaited with error handling. |
+| **NF-08** | **fixed** | HEIC→JPEG re-validated against 25 MiB before swap. |
+| **NF-09** | **fixed** | HEIC conversion registered in singleflight map before decode starts. |
+| **NF-10** | **fixed** | Attach HEIC path uses shared `upload-heic-prepare.util.ts` with actionable errors. |
+| **NF-11** | **fixed** | UI prunes dead jobs in chip list and Continue gate; core `areAllJobsReadyForTrayResolution` now prunes non-`awaiting_disambiguation` jobs (integration reconciliation). |
+| **NF-12** | **open (documented)** | Text-answer path still bypasses file-prepare readiness gate by design — documented in `upload-resolver-tray.stepper-fsm.supplement.md` § Tray Continue gate — text answer exception. Not converted to a hard gate. |
+| **NF-13** | **fixed** | Containment option `labelKey`/`labelParams` flow through tray producer and resolve via `t()` in the tray component (integration reconciliation). |
+| **NF-14** | **fixed** | Branch C spec/open-gap table synced; G2/G3 marked implemented. |
+| **NF-15** | **open (annotated)** | `context_distance` union member retained with comment — reserved for unbuilt C5 tray; sole reader in tray helpers unchanged. |
+| **NF-16** | **fixed** | Stale `project_address_*` type comment removed. |
+| **NF-38** | **fixed** | Source-byte fingerprint + conversion after dedup gate (`2abf22c7`). Encoder determinism experiment (§ 3) found latent risk only — dedup not silently broken for cases tested. |
+| **NF-39** | **open** | Reverse geocode unawaited in `saving_record`; `resolving_address` cosmetic; silent `unresolvable` on failure. See § 3 (NF-39). |
 
 ---
 
@@ -80,6 +110,63 @@ Two things compound it. The util **discards both results** (`upload-cancel-resid
 
 The result is that the one cancellation path where residue is *most* likely — the user closes their session with uploads in flight — is the one that reliably leaves it, silently, while the fix for exactly this class of bug is recorded as landed.
 
+### NF-38 — HEIC dedup fingerprints encoder output, not source bytes
+
+The chain (new pipeline; attach and replace follow the same ordering with conversion before `runUploadDedupCheck`):
+
+1. `prepareExifAndFile` schedules HEIC conversion on the **original** file and **awaits** it before returning (`core/upload/pipelines/new/upload-new-prepare-route.util.ts:185-213`).
+2. `ensureHeicConversionScheduled` calls `heic2any` at quality `0.85` (`core/upload/support/upload.service.util.ts:142-143`), then `applyConvertedFileToJob` replaces `job.file` with the JPEG (`core/upload/support/upload-heic-prepare.util.ts:74-79`, swap at `:33`).
+3. EXIF for the hash is parsed from the **original** file before conversion (`core/upload/pipelines/new/upload-new-prepare-route.util.ts:179-181`) and passed separately — it is **not** re-read from the JPEG.
+4. `finishPreResolveDedup` → `runUploadDedupCheck` passes the **post-swap** `job.file` to `computeUploadContentHash` (`core/upload/pipelines/new/upload-new-pre-resolve.util.ts:161`, `core/upload/support/upload-dedup-check.util.ts:91`).
+5. `computeUploadContentHash` reads the first 64 KiB and `file.size` from whatever `File` it receives (`core/upload/support/content-hash.util.ts:121-127`); for `photo_v1` it combines those byte inputs with the separately supplied EXIF metadata (`:128-132`).
+
+**Consequence:** Duplicate detection for HEIC depends on `heic2any` producing **byte-identical** JPEG output for the same source on every run. Construction-site photos overwhelmingly arrive as HEIC. If encoder output varies, the same photo uploaded twice produces two different `contentHash` values — dedup silently never fires. No error, no UI signal, no Issues-lane row.
+
+The EXIF component of `photo_v1` does not rescue this: GPS, `capturedAt`, and `direction` are stable (parsed from the original), but they are **combined** with a potentially changing 64 KiB head and file size from the JPEG. Two uploads of the same HEIC with identical EXIF still diverge when the encoded bytes differ.
+
+**Undermines today's fixes:** Both assume a stable fingerprint.
+- **NF-01** (replace hash retirement): `retireStaleDedupHashesFireAndForget` keys off `contentHash` computed at dedup time (`core/upload/support/upload-db-postwrite.util.ts:67-74`; called from `…/upload-replace-pipeline-finish.util.ts:133`). A varying hash leaves orphan rows or fails to retire the right one.
+- **NF-04** (in-flight dedup guard): the registry is keyed by `contentHash` (`core/upload/support/upload-inflight-dedup.registry.ts:15-29`; lookup at `upload-dedup-check.util.ts:100-107`). Two concurrent uploads of the same HEIC that encode to different bytes both miss each other.
+
+**Encoder determinism experiment (2026-09-10):** Read-only test via `convertHeicToJpegUploadFile` with production options (`heic2any@0.0.4`, `toType: 'image/jpeg'`, quality `0.85` — matching `core/upload/support/upload.service.util.ts`). Five consecutive conversions in one browser session and two separate Chrome 148 headless processes produced **byte-identical** JPEG output for each input. `photo_v1` fingerprints matched on every run with EXIF held constant.
+
+Two input sizes were tested: a 7,837-byte HEIC converting to 8,326 bytes (below the 64 KiB head window, so head hash equals full hash), and a 62,926-byte HEIC converting to 74,370 bytes (above the window, so the head is a strict subset — both the head hash and the full hash were stable).
+
+**Caveat:** No real device HEIC exists in the repository. Inputs were synthetic HEIC containers generated with `pillow-heif` from an existing JPEG sample — valid HEVC HEIF, not renamed JPEGs, but not iPhone exports either. Live Photo bursts, HDR, depth maps, and iOS version differences were not covered.
+
+**Conclusion:** NF-38 is **latent, not firing**. Duplicate detection for HEIC is not silently broken today for the cases tested. The severity is architectural: the design depended on an encoder determinism property that was never pinned, never tested in CI, and never validated against a real device export, and a `heic2any` or browser upgrade could change it without any signal. The fix that shipped on this branch — hashing source bytes and moving conversion behind the dedup gate (`2abf22c7`) — removes the dependency entirely and was the correct change regardless of the measurement outcome.
+
+### NF-39 — reverse geocode completes after the user is told the upload finished
+
+UP-36 recorded "`enrichWithReverseGeocode` is a no-op — implement or remove the cosmetic phase." That framing is incomplete: the empty method is a symptom; the product defect is **where** reverse geocoding runs, **that it is not awaited**, and **that failure is silent**.
+
+The chain (new pipeline; attach/replace follow the same split between `persistUploadFile` and post-save enrichment):
+
+1. **`enrichWithReverseGeocode` has never contained logic.** Git history shows it was introduced as a stub in `f6a3be7b` (2026-03-11) with the comment that `UploadService.uploadFile` already handles reverse geocoding. At HEAD it is still `void mediaId;` (`core/upload/support/upload-enrichment.service.ts:43-47`).
+
+2. **Reverse geocoding does happen — elsewhere, earlier, without `await`.** During `saving_record`, `persistUploadFile` inserts the `media_items` row, then — if `finalCoords` is set — calls `resolveUploadAddress({ … })` with **no** `await` (`core/upload/support/upload-file-persist.util.ts:232-240`). That function calls `geocoding.reverse(lat, lng)` (Nominatim via the Supabase `/geocode` edge function) and persists through the `resolve_media_location` RPC, which writes the `locations` row and its link (`core/upload/address-resolution/upload-address-resolve.util.ts:20-36`).
+
+3. **Post-save emits a misleading phase.** When the job has GPS coords but no text address, `finalizeNewUploadPhase` sets `resolving_address` and **awaits** the empty stub (`core/upload/pipelines/new/upload-new-post-save.util.ts:145-147`), then immediately sets `complete` (`:170-171`). The user briefly sees "Resolving address…" for work that is not happening there; the real work started one phase earlier under a label that says only "Saving…".
+
+**Three distinct problems:**
+
+| # | Problem | What the user experiences |
+| --- | --- | --- |
+| 1 | **`resolving_address` is a false signal** | "Resolving address…" appears around an empty method; real reverse geocode already started under `saving_record`. |
+| 2 | **`complete` precedes the address** | Upload moves to Uploaded before `geocoding.reverse` finishes — the street line may still be loading, or may never arrive. |
+| 3 | **Geocoder failure is silent** | On null result or network error, `resolveUploadAddress` writes `location_status: 'unresolvable'` and returns (`:22-24`, `:45-47`). The job still reaches `complete` with GPS but no human-readable address — no error, no Issues-lane row, no retry prompt. |
+
+**When a photo ends up with GPS but no street address:**
+
+- Reverse geocoder returns null or errors (network, Nominatim rate limit, unmapped location).
+- No `job.coords` at upload time, so `resolveUploadAddress` is never called — no EXIF GPS, no usable text address, optional-location mode, or a deferred tray answer that forfeits placement.
+
+**Spec/config drift (same family as C5 and G1):** `address-resolution-model.md` Step 4 ("EXIF reverse, `lang=en`, superset vs Search Object") has a config flag `exifContextCheck` in `upload-location-config.ts:26-27` (default `true` at `:71`) but **zero runtime consumers** in upload code — the only references are the type definition and default object.
+
+**Product principle:** `upload-manager.md` states "Uploading is a background task — don't make me think." A user who cares about the address has no way to know it is missing after a green completion.
+
+**Supersedes UP-36:** Do not treat this as "wire the stub or delete the phase" in isolation. Any fix must address await semantics, phase honesty, and failure visibility together — see [`06-improvement-plan.md`](./06-improvement-plan.md) item 13 (product decision open).
+
 ---
 
 ## 4. Verified correct — do not re-audit
@@ -106,3 +193,5 @@ Same limitation as the previous audit. These are the checks that would settle th
 | NF-04 | Submit a folder containing the same photo twice; count resulting `media_items` rows |
 | NF-08 | Convert a ~20 MB HEIC and check whether the JPEG exceeds 25 MiB on a real device |
 | NF-09 | Instrument `convertToJpeg` with a call counter and submit a batch of HEICs |
+| NF-38 | **Done (2026-09-10):** byte-identical `heic2any` output and stable `photo_v1` hashes for synthetic fixtures — see § 3. Remaining gap: real device-export HEIC fixture ([`06-improvement-plan.md`](./06-improvement-plan.md) item 7). |
+| NF-39 | Upload a GPS photo with geocoder stubbed to fail; assert user sees failure or pending state, not silent `complete`. Upload same photo with slow geocoder; assert `complete` does not precede address row. |

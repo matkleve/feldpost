@@ -64,6 +64,7 @@ flowchart TD
 - [ ] Geocoding enrichment `401` performs one silent auth refresh and one retry before failing
 - [ ] Persistent geocoding `401` causes controlled sign-out via `AuthService` (no manual storage-clearing workaround)
 - [x] Orphaned storage files are cleaned up when DB insert fails, and when a job is cancelled or signed out of after storage/DB residue already exists — `upload-file-persist.util.ts`, `upload-cancel-residue.util.ts`; see `docs/audits/upload-process-analysis-2026-09-08/10-findings.md` UP-02, UP-04
-- [x] Auth change (logout) cancels all active jobs
+- [x] Auth change (logout) cancels all active jobs while the session is still valid (`installUploadSignOutGuard` runs cleanup before `auth.signOut()`)
+- [x] `failJob` is idempotent on terminal phases (`complete`, `error`, `missing_data`, `skipped`) — late rejections cannot flip `complete → error`
 - [x] Global progress indicator visible from any page when uploads are active
 - [ ] `beforeunload` warning shown when `isBusy()` is true — **not implemented**: the registered handler is a no-op (`(): void => {}`); see `docs/audits/upload-process-analysis-2026-09-08/10-findings.md` UP-05

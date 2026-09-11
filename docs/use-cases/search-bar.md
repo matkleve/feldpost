@@ -1,3 +1,10 @@
+---
+id: UC-017
+specs:
+  - docs/specs/ui/search-bar/search-bar.md
+  - docs/specs/service/search/search-bar-service.md
+---
+
 # Search Bar — Use Cases
 
 > **Element spec:** [specs/search-bar.md](../specs/ui/search-bar/search-bar.md)

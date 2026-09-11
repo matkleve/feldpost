@@ -1,8 +1,28 @@
 # Backlog (deferred work)
 
+> **Closed to new documents (2026-09-10).** Open work is a **GitHub Issue** (see below); the *reasoning* behind a plan is a study — [`docs/study/`](../study/README.md), `type: proposal`, with an evidence grade on every claim and a status saying whether it still holds. The plans below stay readable where they are; each is reclassified into `docs/study/` **when it is next edited**, not in a bulk pass. Mapping and procedure: [`docs/study/README.md`](../study/README.md) § Where new reasoning goes.
+
 Non-authoritative notes and planned refactors that are **not** implementation contracts. Specs live under `docs/specs/`; this folder holds **do-later** engineering tasks, investigations, and cleanup queues.
 
 When picking something up, promote relevant behavior back into the governing spec in `docs/specs/` in the same change set.
+
+## Where open work lives
+
+**GitHub Issues is the task register.** If something needs doing, it is an issue — not a bullet in a markdown file. The documents in this repository each answer a different question, and merging them is how work gets lost:
+
+| Ask | Look in | Why there |
+| --- | --- | --- |
+| What still needs doing? | **GitHub Issues** | The register. Labelled, assignable, closable. Priority uses the `priority:P0`–`priority:P3` scheme (the bare `P1`/`P2`/`P3` labels are legacy and being retired). |
+| Why this and not the alternative? | [`docs/study/`](../study/README.md) | Reasoning, with an evidence grade (`[A]`–`[D]`) on every claim and a status saying whether it still holds. A `[D]` is a decision and is changeable; reading one as an `[A]` is how an old proposal gets built as though it were a contract. |
+| What was true on a given date? | [`docs/audits/`](../audits/README.md) | Point-in-time findings. Dated, not normative, and expected to drift. |
+| What must the code do? | [`docs/specs/`](../specs/README.md) | The contract. Normative — code follows the spec, not the reverse. |
+| What happened? | [`docs/ai-diary/`](../ai-diary/README.md) | Day-by-day narrative: decisions taken, mistakes made, corrections received. |
+| How does this code mislead me? | [`docs/TRAPS.md`](../TRAPS.md) | The shapes that read correctly and are wrong. Read before your second attempt at a bug. |
+| What is deferred but planned? | this folder (**closed**) | Multi-step engineering plans too large for one issue. Each should still have an issue pointing at it. New plans are a study with `type: proposal`. |
+
+Bulk-file issues from a JSON batch rather than one `gh issue create` at a time: `node scripts/create-github-issues.mjs path/to/issues.json` (schema in `scripts/create-github-issues.example.json`).
+
+The 2026-09-10 batch (`scripts/issues-2026-09-10-upload-and-cleanup.json`, 53 items) was filed as issues **#136–#188**. **#130–#135 are duplicates of #136–#141** from an interrupted first run and still need closing by hand — the agent token can create issues but not update them.
 
 ## Prioritized plans (cross-cutting)
 

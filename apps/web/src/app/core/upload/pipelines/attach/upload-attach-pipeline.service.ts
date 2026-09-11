@@ -2,7 +2,7 @@
  * UploadAttachPipelineService — handles the 'attach' upload pipeline.
  *
  * Pipeline phases (Spec: upload-manager-pipeline.md § Attach Upload Pipeline):
- * validating → converting_format → hashing → dedup_check → uploading → saving_record → enrichment → complete
+ * validating → parsing_exif → hashing → dedup_check → uploading → replacing_record → enrichment → complete
  *
  * Purpose: Add a new photo to an existing photoless image row after conflict resolution.
  * Triggered by: conflict resolution response = 'use_existing' (user chooses to attach to found row)
@@ -34,12 +34,18 @@ import { isCancelledUploadJob } from '../../support/upload-cancelled.util';
 import { handleCancelledStorageCleanup } from '../../support/upload-cancelled-storage-cleanup.util';
 import { runUploadDedupCheck } from '../../support/upload-dedup-check.util';
 import { UploadEnrichmentService } from '../../support/upload-enrichment.service';
+import { buildUploadAddressPersistContext } from '../../address-resolution/upload-address-persist-context.helpers';
 import { UploadJobStateService } from '../../support/upload-job-state.service';
 import type { UploadJob } from '../../upload-manager.types';
 import type { PipelineContext } from '../../upload-manager.types';
 import { UploadQueueService } from '../../support/upload-queue.service';
 import { UploadStorageService } from '../../support/upload-storage.service';
 import { UploadService } from '../../upload.service';
+import { awaitHeicConversionForUpload } from '../../support/upload-heic-prepare.util';
+import {
+  DEFAULT_UPLOAD_PHASE_TIMEOUT_MS,
+  runStorageUploadWithTimeout,
+} from '../../support/upload-storage-timeout.util';
 
 type AttachPreparedJob = {
   job: UploadJob;
@@ -49,6 +55,8 @@ type AttachPreparedJob = {
 
 @Injectable({ providedIn: 'root' })
 export class UploadAttachPipelineService {
+  private static readonly UPLOAD_PHASE_TIMEOUT_MS = DEFAULT_UPLOAD_PHASE_TIMEOUT_MS;
+
   private readonly uploadService = inject(UploadService);
   private readonly auth = inject(AuthService);
   private readonly supabase = inject(SupabaseService);
@@ -67,7 +75,20 @@ export class UploadAttachPipelineService {
     }
     const { job, parsedExif, contentHash } = prepared;
 
-    const storagePath = await this.uploadAttachFile(jobId, job.file, abortSignal, ctx);
+    try {
+      await awaitHeicConversionForUpload(
+        { jobState: this.jobState, uploadService: this.uploadService },
+        jobId,
+      );
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'HEIC conversion failed before upload.';
+      ctx.failJob(jobId, 'converting_format', message);
+      return;
+    }
+
+    const jobForUpload = this.jobState.findJob(jobId)!;
+    const storagePath = await this.uploadAttachFile(jobId, jobForUpload.file, abortSignal, ctx);
     if (!storagePath) {
       return;
     }
@@ -122,8 +143,13 @@ export class UploadAttachPipelineService {
       emitBatchProgress: (batchId) => ctx.emitBatchProgress(batchId),
       drainQueue: () => ctx.drainQueue(),
       enrichWithReverseGeocode: (mediaId) => this.enrichment.enrichWithReverseGeocode(mediaId),
-      enrichWithForwardGeocode: (mediaId, titleAddress) =>
-        this.enrichment.enrichWithForwardGeocode(mediaId, titleAddress),
+      enrichWithForwardGeocode: (mediaId, titleAddress) => {
+        const job = this.jobState.findJob(jobId);
+        const addressContext = job
+          ? buildUploadAddressPersistContext({ job, groupState: null })
+          : null;
+        return this.enrichment.enrichWithForwardGeocode(mediaId, titleAddress, addressContext);
+      },
       // `warn` (missing thumbnailUrl at finalize) is left ungated: it flags a
       // real data anomaly rather than routine trace noise. See UP-41.
       log: uploadManagerDebugLog,
@@ -154,22 +180,11 @@ export class UploadAttachPipelineService {
         direction: parsedExif.direction,
       });
     }
-    let currentJob = this.jobState.findJob(jobId)!;
-    if (this.uploadService.isHeic(currentJob.file)) {
-      this.jobState.setPhase(jobId, 'converting_format');
-      const convertedFile = await this.uploadService.convertToJpeg(currentJob.file);
-      let newThumbnailUrl = currentJob.thumbnailUrl;
-      if (newThumbnailUrl) {
-        URL.revokeObjectURL(newThumbnailUrl);
-      }
-      newThumbnailUrl = URL.createObjectURL(convertedFile);
-
-      this.jobState.updateJob(jobId, {
-        file: convertedFile,
-        thumbnailUrl: newThumbnailUrl,
-      });
-      currentJob = this.jobState.findJob(jobId)!;
-    }
+    const currentJob = this.jobState.findJob(jobId)!;
+    this.jobState.updateJob(jobId, {
+      sourceFile: currentJob.sourceFile ?? currentJob.file,
+      filePrepareComplete: true,
+    });
 
     if (!this.uploadService.isPhotoFile(currentJob.file)) {
       ctx.failJob(
@@ -217,7 +232,20 @@ export class UploadAttachPipelineService {
         drainQueue: () => ctx.drainQueue(),
       });
 
-    const storagePath = await this.storage.upload(file, abortSignal);
+    let storagePath: string | null;
+    try {
+      storagePath = await runStorageUploadWithTimeout(
+        this.storage.upload(file, abortSignal),
+        UploadAttachPipelineService.UPLOAD_PHASE_TIMEOUT_MS,
+        'Upload timed out. Please retry.',
+        () => ctx.abortJobRequest(jobId),
+      );
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Storage upload failed.';
+      ctx.failJob(jobId, 'uploading', message);
+      return null;
+    }
+
     if (!storagePath) {
       console.error('[attach-pipeline] ✗ storage upload returned null');
       ctx.failJob(jobId, 'uploading', 'Storage upload failed.');

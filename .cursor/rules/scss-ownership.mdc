@@ -26,8 +26,11 @@ Wrappers (JS hooks, directives, state layers, ng-content) carry **zero styling**
 
 Only two elements carry geometry: (1) outermost layout owner, (2) innermost content element. Everything between: zero styling.
 
+Do not add wrapper elements to solve CSS architecture problems.
+
 ## CSS Layer Architecture
 
+- Component-local first migration rule: do not require global layer declaration as a prerequisite; each refactored component uses local layers.
 - `@layer components` — geometry, layout, default visuals
 - `@layer states` — state-driven visuals only
 - State selectors must not change geometry. Geometry stays stable in components layer.

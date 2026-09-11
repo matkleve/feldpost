@@ -33,7 +33,8 @@ export function buildAttachUpdateData(args: BuildAttachUpdateDataArgs): {
     updateData['direction'] = parsedExif.direction;
   }
 
-  // Resolved GPS/address is written via resolve_media_location → locations + links (not media_items).
+  // Attach/replace update `media_items` storage metadata only; location rows are
+  // written by `resolveUploadAddress` during new-upload persist or post-save enrichment.
 
   return { updateData, isAttachKeep };
 }

@@ -34,7 +34,7 @@ export type ReplacePipelinePrepared = {
 };
 
 /**
- * validating → parsing_exif → converting_format → hashing → dedup_check.
+ * validating → parsing_exif → hashing → dedup_check (HEIC conversion deferred to upload gate).
  * @see upload-replace-pipeline.service.ts run (first half)
  */
 export async function prepareReplacePipelineJob(
@@ -94,22 +94,10 @@ export async function prepareReplacePipelineJob(
     });
   }
 
-  if (deps.uploadService.isHeic(job.file)) {
-    deps.jobState.setPhase(jobId, 'converting_format');
-    const convertedFile = await deps.uploadService.convertToJpeg(job.file);
-
-    let newThumbnailUrl = job.thumbnailUrl;
-    if (newThumbnailUrl) {
-      URL.revokeObjectURL(newThumbnailUrl);
-    }
-    newThumbnailUrl = URL.createObjectURL(convertedFile);
-
-    deps.jobState.updateJob(jobId, {
-      file: convertedFile,
-      thumbnailUrl: newThumbnailUrl,
-    });
-    job = deps.jobState.findJob(jobId)!;
-  }
+  deps.jobState.updateJob(jobId, {
+    sourceFile: job.sourceFile ?? job.file,
+    filePrepareComplete: true,
+  });
 
   if (!deps.uploadService.isPhotoFile(job.file)) {
     ctx.failJob(jobId, 'validating', 'Only photo files can replace an existing photo.');

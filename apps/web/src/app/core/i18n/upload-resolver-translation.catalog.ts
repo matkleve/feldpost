@@ -141,6 +141,22 @@ export const UPLOAD_RESOLVER_TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry
     it: '{street} non è stato trovato in {city}. Questo indirizzo è corretto?',
   },
   {
+    key: 'upload.resolver.containment.option.keep',
+    original: 'Keep: {street}, {city}',
+    context: 'Containment-check tray — confirm resolved address despite Photon 0-hit.',
+    en: 'Keep: {street}, {city}',
+    de: 'Behalten: {street}, {city}',
+    it: 'Mantieni: {street}, {city}',
+  },
+  {
+    key: 'upload.resolver.containment.option.enterDifferent',
+    original: 'Enter a different address',
+    context: 'Containment-check tray — open text fallback for a new address.',
+    en: 'Enter a different address',
+    de: 'Andere Adresse eingeben',
+    it: 'Inserisci un indirizzo diverso',
+  },
+  {
     key: 'upload.resolver.title.fallbackAddress',
     original: 'this address',
     context: 'Placeholder when group has no titleAddress.',

@@ -52,6 +52,9 @@ export interface UploadAddressCandidate {
   lat: number;
   lng: number;
   displayName?: string;
+  /** When set, UI resolves option copy via t(labelKey, addressLabel) with labelParams. */
+  labelKey?: string;
+  labelParams?: Record<string, string>;
   city?: string | null;
   municipality?: string | null;
   district?: string | null;
@@ -77,7 +80,7 @@ export interface UploadDisambiguationGroup {
   resolutionGateOpen: boolean;
   selectedCandidateId?: string;
   localityHint?: string;
-  /** geocode = Step 3 multi-hit; source = text vs EXIF; city_step/house_step = 1A/1B; project_address_* = Step 2 */
+  /** geocode = Step 3 multi-hit; source = text vs EXIF; city_step/house_step = 1A/1B */
   disambiguationKind?: UploadDisambiguationKind;
   /** Tray stepper position within a group. */
   trayStep?: UploadTrayStep;
@@ -112,7 +115,6 @@ export type UploadJobIssueKind =
 export type UploadDisambiguationKind =
   | 'geocode'
   | 'source'
-  | 'context_distance'
   | 'layer_package'
   | 'admin_level_conflict'
   | 'city_step'
@@ -127,6 +129,10 @@ export interface UploadJob {
   id: string;
   batchId: string;
   file: File;
+  /** Immutable user-selected file for dedup fingerprinting (HEIC stays HEIC until upload gate). */
+  sourceFile?: File;
+  /** Phase 0 complete — EXIF parsed; HEIC conversion is deferred until upload gate. */
+  filePrepareComplete?: boolean;
   phase: UploadPhase;
   progress: number;
   statusLabel: string;

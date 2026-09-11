@@ -15,7 +15,7 @@ Headless adapter. Client sends export payload once, edge function resolves binar
 
 - Spec: `docs/specs/service/media-download-service/adapters/edge-export-orchestrator.adapter.md`
 - Runtime target: `apps/web/src/app/core/media-download/adapters/edge-export-orchestrator.adapter.ts`
-- Edge target: `supabase/functions/media-export-zip/index.ts`
+- Edge export: client adapter attempts `functions.invoke('media-export-zip', …)` when deployed; this repository does not yet ship that edge function under `supabase/functions/` (local ZIP assembly is the current fallback).
 
 ## Actions & Interactions
 
@@ -76,9 +76,7 @@ sequenceDiagram
 | File                                                                                | Purpose                             |
 | ----------------------------------------------------------------------------------- | ----------------------------------- |
 | `docs/specs/service/media-download-service/adapters/edge-export-orchestrator.adapter.md`    | Edge export adapter contract        |
-| `apps/web/src/app/core/media-download/adapters/edge-export-orchestrator.adapter.ts` | New adapter file                    |
-| `supabase/functions/media-export-zip/index.ts`                                      | Edge function implementation target |
-| `apps/web/src/app/core/zip-export/zip-export.service.ts`                            | Previous client ZIP path (retired)  |
+| `apps/web/src/app/core/media-download/adapters/edge-export-orchestrator.adapter.ts` | Adapter implementation (edge-first with local ZIP fallback) |
 
 ## Wiring
 

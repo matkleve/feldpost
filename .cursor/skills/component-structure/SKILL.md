@@ -80,6 +80,101 @@ When the component uses `[attr.data-state]` and **stacked layers** (loading / co
 
 Reference: `.cursor/rules/ui-state-machine.mdc`, `docs/ai-diary/2026-05-25.md`, `media-display.rendering-matrix.supplement.md`.
 
+### Main States vs Transition States
+
+Main states are stable resting states.
+Transition states are explicit in-between states used to run choreography safely.
+
+Use as many transition states as needed by visible choreography.
+Do not collapse visually distinct steps.
+
+Examples:
+
+- empty -> entering -> ready
+- loading -> geometry-morphing -> crossfading -> content
+- loading -> geometry-morphing -> placeholder-leaving -> content-entering -> content
+
+### Searchbar Example (Illustrative — Not a Rule)
+
+Searchbar looks simple but has programmatic state and therefore requires FSM.
+
+```ts
+export type SearchbarState =
+  | "closed"
+  | "opening"
+  | "open-empty"
+  | "open-loading"
+  | "open-results"
+  | "open-no-results"
+  | "closing";
+```
+
+### Multiple Independent State Machines
+
+A component may have multiple independent FSMs when state dimensions are parallel and not causally coupled.
+
+Use two separate signals when:
+
+- dimensions can change independently
+- transitions in one dimension do not redefine valid transitions in the other
+- example: render-state and upload-state on an upload item
+
+Use one combined enum when:
+
+- dimensions are tightly coupled
+- allowed transitions depend on the combined state pair
+- you need one authoritative state driver for a single visual choreography
+
+### Universal Media Boundary Rule
+
+`app-universal-media` remains a shared rendering adapter with a structured `MediaRenderState` input.
+
+Required handling at callsites:
+
+- Keep feature component public visual API as one local enum state input.
+- Map local enum states to `MediaRenderState` in a computed adapter mapping.
+- Do not pass multiple boolean visual-state flags to emulate state at the boundary.
+- Document mapping with `Stable state:` comment blocks and `@see docs/specs/...` references.
+
+### Parent-Child State Coordination
+
+If child transitions depend on settled parent geometry, child transition start must be gated by parent readiness.
+
+Pattern:
+
+- parent exposes readiness signal or stateReached output
+- child transitions only when readiness condition is true
+
+Use this for:
+
+- overlays entering after parent geometry settles
+- child reveal after parent crossfade completes
+- staggered grid-item enters after container stabilization
+
+Document coordination contract in both parent and child element specs.
+
+### Geometry Dependency Contract (Required per Component)
+
+Every component spec must declare its geometry dependency contract before any implementation starts. The contract answers who owns width and who owns height.
+
+Declare it as a table with three columns: Dimension, Owner, Mechanism.
+
+Ownership types:
+
+- self-contained: component sets its own size independently
+- parent-dictated: component fills space provided by parent, never declares own size
+- child-driven: component size is determined by a child via CSS custom property injection
+
+Rules:
+
+- A component may never set both width and height explicitly if one of them is child-driven.
+- Child-driven geometry must always flow via a CSS custom property on the child host; never via `@Output()`, never via `ElementRef` measurement fed back as `@Input()`.
+- The geometry dependency chain must be traceable from the outermost layout owner to the innermost content element without ambiguity.
+- Any component where height is child-driven must document the exact CSS custom property name and fallback value.
+- Geometry Dependency Contract declared in spec before any HTML or CSS written.
+- If height is child-driven: CSS custom property name and fallback documented.
+- No component sets explicit height and reads child-driven height simultaneously.
+
 ### Stacking context rule
 
 Exactly one element per component declares `position: relative`.

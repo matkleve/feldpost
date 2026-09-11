@@ -1,5 +1,7 @@
 import type { UploadJob } from '../../upload-manager.types';
+import { haversineMetersBetween } from '../../../geo/haversine.util';
 import type { ExifCoords } from '../../upload.types';
+import { isUploadDocumentFile } from '../../support/upload.service.util';
 import {
   exifMetadataCoords,
   usesTextPlacementSource,
@@ -215,7 +217,7 @@ async function auditTitleExifMismatch(args: {
   setPhase('resolving_coordinates');
   const titleCoords = await geocodeTitleAddress(titleAddress);
   const compareCoords = titleCoords ?? placedCoords;
-  const distanceMeters = haversineMeters(exifCoords, compareCoords);
+  const distanceMeters = haversineMetersBetween(exifCoords, compareCoords);
   const roundedDistance = Math.round(distanceMeters);
   const isMismatch = distanceMeters > mismatchToleranceMeters;
 
@@ -253,8 +255,7 @@ async function routeUnresolvedAfterFailedGeocode(args: {
 }): Promise<void> {
   const { updatedJob, jobId, setPhase, updateJob, markDone, emitBatchProgress, drainQueue } =
     args;
-  const mimeType = updatedJob.file.type.toLowerCase();
-  const isDocument = mimeType.startsWith('application/') || mimeType.startsWith('text/');
+  const isDocument = isUploadDocumentFile(updatedJob.file);
   updateJob({
     issueKind: isDocument ? 'document_unresolved' : 'missing_gps',
     locationSourceUsed: 'none',
@@ -305,16 +306,3 @@ export function emitCompletion(args: {
   drainQueue();
 }
 
-function haversineMeters(a: ExifCoords, b: ExifCoords): number {
-  const toRad = (deg: number): number => (deg * Math.PI) / 180;
-  const dLat = toRad(b.lat - a.lat);
-  const dLng = toRad(b.lng - a.lng);
-  const lat1 = toRad(a.lat);
-  const lat2 = toRad(b.lat);
-
-  const sinLat = Math.sin(dLat / 2);
-  const sinLng = Math.sin(dLng / 2);
-  const h = sinLat * sinLat + Math.cos(lat1) * Math.cos(lat2) * sinLng * sinLng;
-  const c = 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
-  return 6371000 * c;
-}

@@ -22,7 +22,8 @@ Normative FSM and persistence matrix for **upload location routing**: panel mode
 | Event | Behavior |
 | --- | --- |
 | User toggles mode while workspace has one selected project filter | Store choice in in-memory `sessionLocationModeOverrides[projectId]` |
-| User switches to another filtered project | Restore that project's override, or `required` if none |
+| User toggles mode while workspace has zero or multiple project filters | Update global `locationRequirementMode` only; do **not** write a session override entry |
+| User switches to another filtered project (exactly one selected) | Restore that project's override, or `required` if none |
 | No project filter active | Toggle updates global signal only; no map entry required |
 | Clear project filter | Overrides map is **not** cleared |
 | Upload panel closes | Overrides **remain** in memory |
@@ -64,9 +65,9 @@ When the user resolves `disambiguationKind: 'source'`, the app MUST persist the 
 While `UploadResolverTrayOrchestratorService.hasActivePresentation()` is true, the primary footer control MUST be disabled until **every** `jobId` on `activeItem` satisfies:
 
 1. `job.phase === 'awaiting_disambiguation'`, and
-2. `UploadService.isHeic(job.file) === false` (JPEG replacement applied in Phase 0).
+2. `job.filePrepareComplete === true` (Phase 0 EXIF parse finished), **except** when the active tray question is path/filename-only (`layer_package`, `admin_level_conflict`) or `answerKind: 'text'`.
 
-Exception: `answerKind: 'text'` city step (no file prepare dependency on option list).
+HEIC→JPEG conversion is **not** a tray gate — it runs at the upload gate before storage write.
 
 UI MAY show `upload.resolver.waitingPrepare` while disabled.
 

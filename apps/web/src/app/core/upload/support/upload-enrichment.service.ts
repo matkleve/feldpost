@@ -23,6 +23,12 @@ import { buildForwardGeocodeRetryQueries } from '../../geocoding/geocode-forward
 import { GeocodingService } from '../../geocoding/geocoding.service';
 import { MediaLocationsService } from '../../media-locations/media-locations.service';
 import { SupabaseService } from '../../supabase/supabase.service';
+import {
+  capFieldsToPrecisionTier,
+  deriveAddressPrecisionFromForwardResult,
+  geocodeResultToPrecisionFields,
+} from '../address-resolution/upload-address-precision.helpers';
+import type { UploadAddressPersistContext } from '../address-resolution/upload-address-persist-context.helpers';
 import type { ExifCoords } from '../upload.service';
 
 export interface ForwardGeocodeResult {
@@ -54,7 +60,9 @@ export class UploadEnrichmentService {
   async enrichWithForwardGeocode(
     mediaId: string,
     titleAddress: string,
+    addressContext?: UploadAddressPersistContext | null,
   ): Promise<ForwardGeocodeResult | undefined> {
+    void titleAddress;
     try {
       const result = await this.forwardWithRetries(titleAddress);
       if (!result) {
@@ -62,15 +70,38 @@ export class UploadEnrichmentService {
         return undefined;
       }
 
+      const inputPrecision = addressContext?.precision ?? null;
+      const geocodeFields = geocodeResultToPrecisionFields(result);
+      const mergedFields = addressContext?.hasEstablishedTextAddress
+        ? {
+            country: addressContext.fields.country ?? geocodeFields.country,
+            state: addressContext.fields.state ?? geocodeFields.state,
+            postcode: addressContext.fields.postcode ?? geocodeFields.postcode,
+            city: addressContext.fields.city ?? geocodeFields.city,
+            street: addressContext.fields.street ?? geocodeFields.street,
+            houseNumber: addressContext.fields.houseNumber ?? geocodeFields.houseNumber,
+          }
+        : geocodeFields;
+      const fields =
+        inputPrecision != null
+          ? capFieldsToPrecisionTier(mergedFields, inputPrecision)
+          : mergedFields;
+      const precision =
+        inputPrecision ?? deriveAddressPrecisionFromForwardResult(result);
+      const addressLabel = addressContext?.addressLabel ?? result.addressLabel;
+
       const { error } = await this.supabase.client.rpc('resolve_media_location', {
         p_media_item_id: mediaId,
         p_latitude: result.lat,
         p_longitude: result.lng,
-        p_address_label: result.addressLabel,
-        p_city: result.city,
+        p_address_label: addressLabel,
+        p_city: fields.city,
         p_district: result.district,
-        p_street: result.street,
-        p_country: result.country,
+        p_street: fields.street,
+        p_house_number: fields.houseNumber,
+        p_postcode: fields.postcode,
+        p_country: fields.country,
+        p_address_precision: precision,
       });
 
       if (error) {

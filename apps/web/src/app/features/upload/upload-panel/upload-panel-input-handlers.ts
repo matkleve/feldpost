@@ -13,6 +13,7 @@ import {
 import { ToastService } from '../../../core/toast/toast.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { scanFilesFromWebkitDirectory } from '../../../core/folder-scan/folder-scan-from-file-list.helpers';
+import { parseUploadDropTransfer } from './upload-panel-drop.helpers';
 
 interface DirectoryPickerWindow extends Window {
   showDirectoryPicker?: (options?: {
@@ -47,13 +48,33 @@ export class UploadPanelInputHandlersService {
     event.preventDefault();
     event.stopPropagation();
     this._isDragging.set(false);
-    const files = event.dataTransfer?.files;
-    if (files && files.length > 0) {
-      this.uploadManager.submit(Array.from(files), {
-        projectId: this.activeProjectId(),
-        locationRequirementMode: this.uploadSignals.locationRequirementMode(),
-      });
+    void this.handleDropTransfer(event.dataTransfer);
+  }
+
+  private async handleDropTransfer(dataTransfer: DataTransfer | null): Promise<void> {
+    const payload = await parseUploadDropTransfer(dataTransfer);
+    if (!payload) {
+      return;
     }
+
+    const options = {
+      projectId: this.activeProjectId(),
+      locationRequirementMode: this.uploadSignals.locationRequirementMode(),
+    };
+
+    if (payload.kind === 'folder') {
+      if (payload.entries.length === 0) {
+        return;
+      }
+      await this.uploadManager.submitWebkitFolder(
+        payload.entries,
+        payload.rootFolderLabel,
+        options,
+      );
+      return;
+    }
+
+    this.uploadManager.submit(payload.files, options);
   }
 
   onFileInputChange(event: Event): void {
@@ -197,6 +218,6 @@ export class UploadPanelInputHandlersService {
 
   private activeProjectId(): string | undefined {
     const ids = this.workspaceView.selectedProjectIds();
-    return ids.size > 0 ? (Array.from(ids.values())[0] ?? undefined) : undefined;
+    return ids.size === 1 ? (ids.values().next().value ?? undefined) : undefined;
   }
 }

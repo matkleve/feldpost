@@ -1,4 +1,4 @@
-import { makeUploadJob, setupUploadPanel } from './upload-panel.test-utils.spec';
+import { makeUploadJob, setupUploadPanel } from './upload-panel.spec-setup';
 
 describe('UploadPanelComponent placement API interactions', () => {
   it('placeFile delegates to uploadManager.placeJob', async () => {

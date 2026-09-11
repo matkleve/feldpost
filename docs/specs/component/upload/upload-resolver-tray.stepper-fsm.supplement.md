@@ -21,3 +21,23 @@ Branch B skips 1A when project centroid supplies city context for the first bias
 ## B → C fallback
 
 Bias geocode returns 0 hits → group reopens at Step 1A (not `missing_data`).
+
+## Step 1B — street centroid
+
+"No number needed" on the house step resolves the group to the street centroid via `applyTrayHouseSelection(groupId, null, streetCentroid: true)`. It is **not** a Skip/defer action.
+
+## Tray visual state FSM (component scope)
+
+| State | When | DOM |
+| --- | --- | --- |
+| `idle` | No active item | Tray hidden or passive |
+| `blocked` | `dependsOnItemId` unresolved | Blocked hint visible; choices hidden |
+| `text_answer` | `answerKind: text` | City text input |
+| `choice_list` | Numbered options (not house step) | Option list |
+| `house_step` | `trayStepLabel: 1b` and ready | Option list + "No number needed" |
+
+Root `[attr.data-state]` binds to this enum. Transition map: `upload-resolver-tray-state.ts`.
+
+## Tray Continue gate — text answer exception
+
+The tray Continue gate is kind-aware: `answerKind: text` and path-only questions (`layerPackage`, `adminLevelConflict`) do not require `filePrepareComplete`. All other option-list steps require every live `jobId` to pass `areAllJobsReadyForTrayResolution` with `job.filePrepareComplete === true`. HEIC conversion is not part of this gate.

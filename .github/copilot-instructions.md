@@ -1,5 +1,16 @@
 # Copilot Instructions for Feldpost
 
+## Where the rules actually live
+
+This file is a Copilot-facing shortcut, not the rule set. The primary rule set
+is [`AGENTS.md`](../AGENTS.md) — read it first; where the two disagree,
+`AGENTS.md` wins.
+
+Skills work the same way. The `SKILL.md` files under
+[`.github/skills/`](skills/README.md) are **pointers**; the instructions live in
+[`.cursor/skills/`](../.cursor/skills). When a skill is relevant, open the
+canonical file it names and follow that — the stub carries no rules of its own.
+
 ## Project Overview
 
 Feldpost is a geo-temporal image management system for construction companies. It is an Angular 21 SPA with a Leaflet map and a Supabase backend (Auth, PostgreSQL + PostGIS, Storage).

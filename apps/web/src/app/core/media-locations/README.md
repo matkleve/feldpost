@@ -32,7 +32,8 @@ media-locations/
 ## Database (source of truth)
 
 - Tables: `public.locations`, `public.media_item_location_links`
-- Migrations: `20260524120000_locations_nn_junction.sql`, `20260525130000_drop_media_items_location_columns.sql`
+- Migrations: `20260524120000_locations_nn_junction.sql`, `20260525130000_drop_media_items_location_columns.sql`, `20260910140000_upload_address_precision.sql`, `20260910160000_fix_address_precision_overloads.sql`
+- `locations.address_precision` is written by every location writer and read back through `list_locations_for_media` / `search_locations`. Appending a parameter to these RPCs with `CREATE OR REPLACE` creates a **second overload** rather than replacing them, which makes every shorter call ambiguous — always drop the previous signature in the same migration and re-run `bash scripts/run-verify-locations-nn-migration.sh`.
 - Spec: `docs/specs/service/media-locations/media-locations-service.md`
 
 ## Data flow (detail panel)

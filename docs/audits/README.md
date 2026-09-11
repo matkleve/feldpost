@@ -1,16 +1,20 @@
 # Documentation audits (`docs/audits/`)
 
+> **Closed to new documents (2026-09-10).** New reasoning — an analysis, an investigation, a review, a proposal — goes to [`docs/study/`](../study/README.md), which carries the two axes this folder never had: an evidence grade on every claim and a status saying whether it still holds. **An audit is a study with `type: review` and `status: historical`.** The files below stay where they are and stay readable; each is reclassified into `docs/study/` **when it is next edited**, not in a bulk pass. Mapping and procedure: [`docs/study/README.md`](../study/README.md) § Where new reasoning goes.
+
 **Purpose:** Point-in-time inventories, move passes, and gap analyses. These files are **not** implementation contracts and can drift as the tree changes.
 
 ## How to read this folder
 
-| Kind | Meaning | Action |
-| --- | --- | --- |
-| **Historical** | Dated pass (e.g. `2026-04-15`) recording what moved where | Use for archaeology only; do not drive new behavior from tables alone. |
-| **Reference** | Product or UX investigation that may still inform design | Cross-check against `docs/design/` and current `docs/specs/` before relying on it. |
-| **Superseded** | Entire approach replaced (e.g. old filter panel) | Prefer linked current spec in `docs/specs/`. |
+The three kinds below are how this folder has always been indexed. They map onto study `status` values one-to-one, which is what a reclassified file carries:
 
-**Normative contracts** always live under **`docs/specs/`** (see [`docs/specs/README.md`](../specs/README.md) and [`docs/specs/service/README.md`](../specs/service/README.md)). The removed **`docs/implementation-blueprints/`** folder is not coming back — link to specs instead.
+| Kind | Meaning | Action | Study `status` |
+| --- | --- | --- | --- |
+| **Historical** | Dated pass (e.g. `2026-04-15`) recording what moved where | Use for archaeology only; do not drive new behavior from tables alone. | `historical` |
+| **Reference** | Product or UX investigation that may still inform design | Cross-check against `docs/design/` and current `docs/specs/` before relying on it. | `active`, or `partially-remediated` once part of it has been acted on |
+| **Superseded** | Entire approach replaced (e.g. old filter panel) | Prefer linked current spec in `docs/specs/`. | `superseded` + `corrected-by` |
+
+**Normative contracts** always live under **`docs/specs/`** (see [`docs/specs/README.md`](../specs/README.md) and [`docs/specs/service/README.md`](../specs/service/README.md)). **`docs/implementation-blueprints/`** still exists but is likewise closed to new documents ([its README](../implementation-blueprints/README.md)) — link to specs instead.
 
 ## File index
 
@@ -30,6 +34,7 @@
 | [2026-09-09-ui-primitives-conformance.md](2026-09-09-ui-primitives-conformance.md) | Reference | Per-primitive conformance pass over `shared/ui/` (17 primitives) against the state, motion, token, spec-coverage and dead-code rules. Proposals only. |
 | [2026-09-10-map-shell-test-migration-plan.md](2026-09-10-map-shell-test-migration-plan.md) | Reference | Old-API-to-new-facade mapping table for `MapShellComponent`'s spec files, and the completion note: all 7 spec files rewritten and passing, plus the `window.matchMedia`/`setupFiles` test-infra gap that was masking 3 of them. |
 | [2026-09-10-engagement-summary.md](2026-09-10-engagement-summary.md) | Reference | What the 2026-09-08 → 2026-09-10 pass found, fixed, and deliberately left alone across process, design system, UI primitives, and the test suite — one synthesis linking the four detailed audits above. |
+| [upload-flow-review-2026-09-10/](upload-flow-review-2026-09-10/01-flow-walkthrough.md) | Reference | Flow-level review of the upload path (2026-09-10): walkthrough, new issues, hard cases and PO decisions, status of prior findings, address-resolution and UI findings, improvement plan, product intent vs code. Proposals only. |
 | [2026-09-10-spartan-and-state.md](2026-09-10-spartan-and-state.md) | Reference | Real Spartan (`@spartan-ng`) dependency footprint (2 of 52 "TODO" files actually import it) and a state-architecture check across all 172 `@Injectable` services (1 encapsulation leak found and fixed). Proposals for the rest. |
 
-When adding a new audit, prefix the filename with an ISO date, add one row here, and include the standard banner at the top of the audit file (see existing files after this README lands).
+**Do not add a file to this folder.** Write the study instead: `docs/study/NNN-slug.md`, `type: review`, with a grade on every claim ([`STUDY-FORMAT.md`](../study/STUDY-FORMAT.md)). If you are editing one of the files above, that is the moment to reclassify it — the mapping is in [`docs/study/README.md`](../study/README.md) § Migrating an existing document.

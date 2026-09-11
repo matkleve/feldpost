@@ -1,3 +1,10 @@
+---
+id: UC-018
+specs:
+  - docs/specs/service/media-upload-service/upload-manager.md
+  - docs/specs/component/upload/upload-panel.md
+---
+
 # Upload Manager — Use Cases & Interaction Scenarios
 
 > **Element spec:** [upload-manager.md](../specs/service/media-upload-service/upload-manager.md)

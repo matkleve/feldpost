@@ -117,8 +117,9 @@ Each `disambiguationKind` maps to a **contradiction class** in the [contradictio
 | `source` | C1 | Text coords vs EXIF metadata > `sourceAgreementRadiusMeters` | `upload.resolver.question.source` + **four** placement options (folder address / photo / both / set later) |
 | `layer_package` | C2 | Competing folder vs filename street packages | `upload.resolver.question.layerPackage` — package labels per layer |
 | `admin_level_conflict` | C3/C4 | Admin fields disagree across folder levels or AT gazetteer; cascading after folder-to-folder sibling detection | `upload.resolver.question.adminLevelConflict` — per-field `Level N: {value}` options |
-| `context_distance` | C5 | Placement beyond org `contextDistanceMaxMeters` (Settings km cap) from project GPS anchor | **Prompt B** — confirm; not the same as `exifAssistRadiusMeters` (m) |
-| *(planned)* `containment_check` | V1 | Post-resolution: resolved street not found in resolved city+postcode via Photon probe | Yes/No + text input — see [contradiction model § G3](../../service/media-upload-service/contradiction-resolution-model.md#post-resolution-validation-gate-gap-g3) |
+| `containment_check` | V1 | Post-resolution: resolved street not found in resolved city+postcode via Photon probe | Yes/No + text input — see [contradiction model § G3](../../service/media-upload-service/contradiction-resolution-model.md#post-resolution-validation-gate-gap-g3) |
+
+**Deferred (not in `disambiguationKind` union):** C5 `context_distance` tray — distance filter only; Prompt B confirm UI never built. See [contradiction model deferred backlog](../../service/media-upload-service/contradiction-resolution-model.md#deferred-backlog-not-in-active-acceptance-criteria).
 
 ## Dev QA (local only)
 
@@ -144,4 +145,3 @@ Pre-upload gate only. No tray for `phase === 'complete'` or post-upload correcti
 - [ ] Late source-conflict jobs replay stored `selectedCandidateId`
 - [ ] Dock visible when `hasPresentationBacklog()` even if panel closed
 - [ ] HEIC conversion may appear in queue before first tray when workers start early (concurrency 3) — expected
-- [ ] `context_distance` (Prompt B) — not MVP; numbered list not used

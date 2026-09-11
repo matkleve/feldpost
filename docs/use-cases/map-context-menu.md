@@ -1,3 +1,10 @@
+---
+id: UC-005
+specs:
+  - docs/specs/component/map/map-context-menu.md
+  - docs/specs/system/map-secondary-click-system.md
+---
+
 # Map Context Menu — Use Cases & Interaction Scenarios
 
 > **Element spec:** [specs/component/map/map-context-menu.md](../specs/component/map/map-context-menu.md)

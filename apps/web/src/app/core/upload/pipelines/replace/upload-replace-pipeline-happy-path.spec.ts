@@ -59,9 +59,11 @@ function buildSupabaseClientMock(options: { updateError?: { message: string } | 
     throw new Error(`unexpected table: ${table}`);
   });
 
+  const rpc = vi.fn().mockResolvedValue({ data: 0, error: null });
   const client = {
     from,
     storage: { from: vi.fn().mockReturnValue({ remove: removeStorage }) },
+    rpc,
   };
 
   return { client, removeStorage, insertDedup, update, updateEq };

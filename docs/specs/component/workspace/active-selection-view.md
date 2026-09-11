@@ -91,11 +91,13 @@ ActiveSelectionView                        ← content area within WorkspacePane
 | Field            | Source                                                                             | Type               |
 | ---------------- | ---------------------------------------------------------------------------------- | ------------------ |
 | Cluster media    | `supabase.rpc('cluster_images', {cluster_lat, cluster_lng, zoom})` → media items   | `WorkspaceMedia[]` |
-| Radius media     | `supabase.rpc('viewport_markers', {...})` filtered by radius                       | `WorkspaceMedia[]` |
+| Radius media     | Markers from `supabase.rpc('viewport_markers', {...})`, then media for the matching cells via `supabase.rpc('cluster_images', {...})`. **Target** is a containment filter on known area — see [radius-selection](../../component/map/radius-selection.md) § Area selection semantics | `WorkspaceMedia[]` |
 | Thumbnail URLs   | Supabase Storage signed URLs (batch-signed, 256×256 transform)                     | `string[]`         |
 | Projects list    | `supabase.from('projects').select('id, name').eq('organization_id', org)`          | `Project[]`        |
 | Metadata keys    | `supabase.from('metadata_keys').select('id, key_name').eq('organization_id', org)` | `MetadataKey[]`    |
 | Grouped sections | `WorkspaceViewService.groupedSections()` — computed signal output                  | `GroupedSection[]` |
+
+**Not current behavior (radius media).** `RadiusSelectionService.selectRadiusImages` tests `map.distance(center, cell) <= radiusMeters` on marker cells — centroid distance, with no extent and no precision gate (`radius-selection.service.ts:56-60`). A city-centroid photo is included when circling central Vienna even when the city's extent is not fully contained. Containment requires stored extent ([area-extent decisions](../../service/media-upload-service/address-resolution-model.area-extent-decisions.supplement.md) Decision 3); implementation is improvement-plan item 15.
 
 ## State
 

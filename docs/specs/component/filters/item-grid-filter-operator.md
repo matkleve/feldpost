@@ -76,12 +76,14 @@ flowchart LR
 
 ## File Map
 
+> **Implementation note:** The accordion `FilterPanel` component was removed. Filtering is implemented by [`filter-dropdown`](filter-dropdown.md) (Notion-style rule builder).
+
 | File                                                    | Purpose                                 |
 | ------------------------------------------------------- | --------------------------------------- |
-| `features/map/filter-panel/filter-panel.component.ts`   | Main panel component                    |
-| `features/map/filter-panel/filter-panel.component.html` | Template                                |
-| `features/map/filter-panel/filter-panel.component.scss` | Styles                                  |
-| `core/filter.service.ts`                                | Filter state management, query building |
+| `apps/web/src/app/shared/dropdown-trigger/filter/filter-dropdown.component.ts`   | Current filter UI (replaces filter panel) |
+| `apps/web/src/app/shared/dropdown-trigger/filter/filter-dropdown.component.html` | Template                                |
+| `apps/web/src/app/shared/dropdown-trigger/filter/filter-dropdown.component.scss` | Styles                                  |
+| `apps/web/src/app/core/filter/filter.service.ts`                                | Filter state management, query building |
 
 ## Wiring
 

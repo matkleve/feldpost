@@ -12,6 +12,7 @@ export interface MediaLocationAddressPatch {
   country?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  address_precision?: string | null;
 }
 
 export interface MediaLocationUpdateResult {

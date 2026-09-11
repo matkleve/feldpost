@@ -112,6 +112,11 @@ export async function computeBinaryContentHash(input: {
   ]);
 }
 
+/** File bytes used for dedup — always the user-selected source, never converted JPEG. */
+export function resolveUploadSourceFile(job: { file: File; sourceFile?: File }): File {
+  return job.sourceFile ?? job.file;
+}
+
 /** Dispatch hash algorithm by upload media type. */
 export async function computeUploadContentHash(
   file: File,

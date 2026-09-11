@@ -1,8 +1,10 @@
 # Segmented Switch
 
+> **Status:** `app-segmented-switch` was removed. Callsites use `[hlmPillToggle]` + `[hlmToggleGroup]` + `[hlmToggleGroupItem]` (see **File Map**). This spec remains as a historical behavior contract.
+
 ## What It Is
 
-The `app-segmented-switch` is a stylized, accessible single-choice control that behaves like a radio-group. It is used for compact mode/lane/state switching where exactly one option is active.
+The segmented switch is a stylized, accessible single-choice control that behaves like a radio-group. It is used for compact mode/lane/state switching where exactly one option is active.
 
 ## What It Looks Like
 
@@ -55,10 +57,11 @@ No direct Supabase access is required for this component.
 
 | File                                                                       | Purpose                                          |
 | -------------------------------------------------------------------------- | ------------------------------------------------ |
-| `docs/specs/component/filters/segmented-switch.md`                                 | Segmented-switch behavior contract               |
-| `apps/web/src/app/shared/segmented-switch/segmented-switch.component.ts`   | Inputs/outputs and keyboard interaction logic    |
-| `apps/web/src/app/shared/segmented-switch/segmented-switch.component.html` | Segment structure and bindings                   |
-| `apps/web/src/app/shared/segmented-switch/segmented-switch.component.scss` | Layout variants (`fit`/`fill`) and visual states |
+| `docs/specs/component/filters/segmented-switch.md`                                 | Segmented-switch behavior contract (historical)  |
+| `apps/web/src/app/shared/ui/toggle-group/hlm-pill-toggle.directive.ts`   | Pill shell wrapper (`[hlmPillToggle]`)           |
+| `apps/web/src/app/shared/ui/toggle-group/hlm-toggle-group.directive.ts` | Toggle group brain shim (`[hlmToggleGroup]`)     |
+| `apps/web/src/app/shared/ui/toggle-group/hlm-toggle-group-item.directive.ts` | Segment item shim (`[hlmToggleGroupItem]`)   |
+| `apps/web/src/app/shared/ui/toggle-group/toggle-group-variants.ts` | `fit`/`fill` density + motion variants              |
 
 ## Wiring
 

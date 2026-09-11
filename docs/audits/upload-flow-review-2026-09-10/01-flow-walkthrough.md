@@ -13,6 +13,9 @@ the flow is *trying* to do, so the rest of the review has somewhere to attach:
 | [`03-hard-cases-and-decisions.md`](./03-hard-cases-and-decisions.md) | The decisions that are expensive to revisit, what each gave up, and the ones that were reversed |
 | [`04-status-of-prior-findings.md`](./04-status-of-prior-findings.md) | Every UP-xx finding from 2026-09-08 re-measured against HEAD |
 | [`05-address-resolution-and-ui-findings.md`](./05-address-resolution-and-ui-findings.md) | NF-17 … NF-37 — Branch C / orchestrator, and the panel and tray UI |
+| [`06-improvement-plan.md`](./06-improvement-plan.md) | Post-integration improvement plan — open questions answered, ranked work, dependencies, and what not to do |
+| [`07-what-happens-when.md`](./07-what-happens-when.md) | Product-owner walkthrough — phase-by-phase "what you see vs what runs", branch points, geocoding directions |
+| [`08-product-intent-vs-code.md`](./08-product-intent-vs-code.md) | Product intent vs code — eight PO statements, city-only fabrication trace, G4 vs post-upload refinement |
 
 ---
 
@@ -80,7 +83,11 @@ Compressed:
   dropped as unrealistic.
 - **If it has no street** — only a city, or only a state — no pin is placed. The job gets
   an admin centroid and `locationPinEligible = false`. This is a deliberate refusal to
-  fake precision.
+  fake precision. *(Superseded in part 2026-09-10: `locationPinEligible` was a street-text
+  proxy and is retired in favour of stored `address_precision`; known area comes from the
+  geocoder bbox. See [area-extent decisions](../../specs/service/media-upload-service/address-resolution-model.area-extent-decisions.supplement.md)
+  Decisions 2–3 and [`03-hard-cases-and-decisions.md`](./03-hard-cases-and-decisions.md) § A3.
+  Still current in code — item 15 tracks closure.)*
 - **If EXIF GPS lands within `exifAssistRadiusMeters` (default 80 m)** of a geocode hit,
   it is used to pick which of several hits is the right one and to fine-tune the
   placement. The two sources agree, so the more precise one wins.
@@ -109,6 +116,9 @@ then a reverse geocode fills in the human-readable address label.
 
 Several of those last steps are fire-and-forget by design — the user should not wait for
 an address label — which is also why several of them can fail without anybody noticing.
+See [**NF-39**](./02-new-issues.md) § 3 and the product walkthrough
+[`07-what-happens-when.md`](./07-what-happens-when.md) for how reverse geocode timing
+and phase labels diverge today.
 
 ## 6. What the user sees
 

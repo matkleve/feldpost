@@ -28,6 +28,9 @@ export function resolveUploadMimeType(file: File): string {
       return 'image/png';
     case 'webp':
       return 'image/webp';
+    case 'tif':
+    case 'tiff':
+      return 'image/tiff';
     case 'mp4':
       return 'video/mp4';
     case 'mov':
@@ -221,6 +224,15 @@ export function resolveUploadMediaType(mimeType: string): MediaType {
   if (PHOTO_MIME_TYPES.has(mimeType)) return 'photo';
   if (VIDEO_MIME_TYPES.has(mimeType)) return 'video';
   return 'document';
+}
+
+/** Single predicate for document vs photo routing across prepare and post-save paths. */
+export function isUploadDocumentFile(
+  file: File,
+  resolveMediaType: (file: File) => MediaType = (f) =>
+    resolveUploadMediaType(resolveUploadMimeType(f)),
+): boolean {
+  return resolveMediaType(file) === 'document';
 }
 
 export function resolveUploadLocationStatus(

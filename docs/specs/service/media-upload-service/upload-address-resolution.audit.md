@@ -13,7 +13,7 @@ Normative target architecture is defined in updated child specs under this folde
 | Branch C | single `incomplete_street` | Step 1A (city) → Step 1B (house number) |
 | EXIF routing names | Branch A/B = missing_data / EXIF | Renamed `missing_data_route` / `exif_only_route` in location-routing supplement |
 | Project address | Aggregated from member media | `project_locations` N:N + minimal picker |
-| Zoomable | any valid lat/lng | pin only when `street` present (`locationPinEligible`) |
+| Zoomable | valid lat/lng + `address_precision` at street/house tier | Legacy code: pin only when `street` present (`locationPinEligible`) — remove in item 15 |
 
 ## Affected code (index)
 

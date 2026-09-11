@@ -23,13 +23,19 @@ function buildDeps(current: UploadJob): {
   deps: UploadManagerActionsDeps;
   removeUploadResidue: ReturnType<typeof vi.fn>;
   updateJob: ReturnType<typeof vi.fn>;
+  transitionTo: ReturnType<typeof vi.fn>;
 } {
-  const removeUploadResidue = vi.fn().mockResolvedValue(undefined);
+  const removeUploadResidue = vi.fn().mockResolvedValue({ errors: [] });
   const updateJob = vi.fn();
+  const transitionTo = vi.fn((jobId: string, phase: UploadJob['phase'], options: { statusLabel?: string }) => {
+    updateJob(jobId, { phase, statusLabel: options.statusLabel });
+    return true;
+  });
   const deps: UploadManagerActionsDeps = {
     findJob: () => current,
     snapshotJobs: () => [current],
     updateJob,
+    transitionTo,
     addJobs: vi.fn(),
     removeJob: vi.fn(),
     removeTerminalJobs: vi.fn(),
@@ -45,7 +51,7 @@ function buildDeps(current: UploadJob): {
     removeUploadResidue,
     drainQueue: vi.fn(),
   };
-  return { deps, removeUploadResidue, updateJob };
+  return { deps, removeUploadResidue, updateJob, transitionTo };
 }
 
 describe('cancelUploadManagerJob', () => {
@@ -63,16 +69,22 @@ describe('cancelUploadManagerJob', () => {
     let resolveResidue!: () => void;
     const deps: UploadManagerActionsDeps = {
       ...buildDeps(current).deps,
-      removeUploadResidue: () => new Promise((resolve) => (resolveResidue = resolve as () => void)),
+      removeUploadResidue: () =>
+        new Promise((resolve) => {
+          resolveResidue = () => resolve({ errors: [] });
+        }),
     };
     const updateJob = vi.fn();
+    const transitionTo = vi.fn().mockReturnValue(true);
     deps.updateJob = updateJob;
+    deps.transitionTo = transitionTo;
 
     const pending = cancelUploadManagerJob('job-1', deps);
 
-    expect(updateJob).toHaveBeenCalledWith(
+    expect(transitionTo).toHaveBeenCalledWith(
       'job-1',
-      expect.objectContaining({ phase: 'error' }),
+      'error',
+      expect.objectContaining({ channel: 'user' }),
     );
 
     resolveResidue();
@@ -90,12 +102,13 @@ describe('cancelUploadManagerJob', () => {
 
   it('is a no-op for a job already in a terminal phase', async () => {
     const current = job({ phase: 'complete', storagePath: 'org/user/uuid.jpg', mediaId: 'media-1' });
-    const { deps, removeUploadResidue, updateJob } = buildDeps(current);
+    const { deps, removeUploadResidue, updateJob, transitionTo } = buildDeps(current);
 
     await cancelUploadManagerJob('job-1', deps);
 
     expect(removeUploadResidue).not.toHaveBeenCalled();
     expect(updateJob).not.toHaveBeenCalled();
+    expect(transitionTo).not.toHaveBeenCalled();
   });
 
   // @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-08
@@ -151,20 +164,29 @@ describe('attachUploadManagerFile', () => {
 describe('retryUploadManagerJob', () => {
   it('retries a genuinely failed job', () => {
     const current = job({ phase: 'error', error: 'Network error' });
-    const { deps, updateJob } = buildDeps(current);
+    const { deps, updateJob, transitionTo } = buildDeps(current);
 
     retryUploadManagerJob('job-1', deps);
 
-    expect(updateJob).toHaveBeenCalledWith('job-1', expect.objectContaining({ phase: 'queued' }));
+    expect(transitionTo).toHaveBeenCalledWith(
+      'job-1',
+      'queued',
+      expect.objectContaining({ channel: 'user' }),
+    );
+    expect(updateJob).toHaveBeenCalledWith(
+      'job-1',
+      expect.not.objectContaining({ phase: 'queued' }),
+    );
   });
 
   // @see docs/audits/upload-process-analysis-2026-09-08/03-branch-matrix.md Y3
   it('refuses to retry a job the user cancelled', () => {
     const current = job({ phase: 'error', error: 'Upload cancelled by user.', wasCancelled: true });
-    const { deps, updateJob } = buildDeps(current);
+    const { deps, updateJob, transitionTo } = buildDeps(current);
 
     retryUploadManagerJob('job-1', deps);
 
     expect(updateJob).not.toHaveBeenCalled();
+    expect(transitionTo).not.toHaveBeenCalled();
   });
 });

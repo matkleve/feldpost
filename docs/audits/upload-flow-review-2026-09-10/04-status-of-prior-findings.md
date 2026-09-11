@@ -27,6 +27,38 @@ This matters beyond the finding itself, because root [`AGENTS.md`](../../../AGEN
 
 ---
 
+## 6. Integration pass — UP-xx closed on `cursor/upload-fixes-integration-3be6` (2026-09-10)
+
+Three fix branches merged; measured with `npm run verify` on the integration branch after reconciliation.
+
+| ID | Prior status | Integration outcome | Evidence |
+| --- | --- | --- | --- |
+| **UP-07** | still open | **fixed** | `getIssueKind` prefers persisted `issueKind`; statusLabel heuristic demoted. |
+| **UP-10** | still open | **fixed** | `failJob` terminal guard added in `upload-job-state.service.ts`. |
+| **UP-12** | still open | **fixed** | Issues-lane resolution actions no longer call `setLane('uploading')`; former `it.fails` tests converted to normal assertions. |
+| **UP-23** | still open | **fixed** | Single `finishPreResolveDedup` pass per job in required-location path. |
+| **UP-24** | still open | **fixed** | Document detection unified on `resolveMediaType(file)`. |
+| **UP-33** | still open | **fixed** | Folder drag-drop via `webkitGetAsEntry` in `upload-panel-drop.helpers.ts`. |
+| **UP-43** | still open | **fixed** | Storage extension from resolved MIME mapping, not raw filename. |
+| **UP-44** | still open | **fixed** | Upload timeout uses numeric literal directly. |
+| **UP-45** | still open | **fixed** | DB row MIME aligned with storage via `resolveMimeType`. |
+| **UP-46** | still open | **fixed** | `image/tiff` and `.csv` extension mapping corrected in `upload-file-types.ts`. |
+
+**Re-measured test debt (integration branch, `npm run verify` test step):**
+
+```
+Test Files  15 failed | 186 passed (201)
+     Tests  39 failed | 1264 passed (1303)
+    Errors  34 errors
+```
+
+- Unrelated failure count **unchanged at 39** (same 15 failing files as baseline on `cursor/upload-flow-review-3be6`).
+- Passing tests **increased by 35** (1229 → 1264) from new upload specs added in this pass — not from fixing unrelated suites.
+- **`it.fails` count dropped from 5 to 0** — all five converted to normal tests (UP-12 ×3, UP-23 ×1, UP-24 ×1).
+- Upload scope: **68 spec files, 417 tests, 100% passing** (excluding empty `upload-panel.test-utils.spec.ts` harness).
+
+---
+
 ## 2. Fixed since the audit
 
 | ID | What landed | Evidence |
@@ -63,7 +95,7 @@ This matters beyond the finding itself, because root [`AGENTS.md`](../../../AGEN
 | **UP-32** | Mojibake unchanged — 8 of 20 sample photos carry `├ƒ` where `ß` belongs, so the umlaut path stays untestable | `apps/web/public/vienna_sample_photos/Arsenalstra├ƒe, 03. Bezirk, Wien_0007.jpg` |
 | **UP-33** | `onDrop` reads only `dataTransfer.files`; `webkitGetAsEntry` has **zero** occurrences in `apps/web/src`, so folder drag-drop submits nothing | `features/upload/upload-panel/upload-panel-input-handlers.ts:46-56` |
 | **UP-34** | "Requeue at front" is documented in a comment; the implementation is plain array order | `core/upload/upload-manager.service.ts:414` vs `core/upload/manager/upload-manager-queue.util.ts:14-20` |
-| **UP-36** | `enrichWithReverseGeocode` is still an empty no-op; the `resolving_address` phase is cosmetic | `core/upload/support/upload-enrichment.service.ts:43-47` |
+| **UP-36** | **Superseded by [NF-39](02-new-issues.md) § 3** — stub is a symptom; real reverse geocode runs unawaited in `persistUploadFile` during `saving_record`; `resolving_address` is a false signal; upload reaches `complete` before the street address may exist; geocoder failure is silent (`location_status: 'unresolvable'`) | stub `core/upload/support/upload-enrichment.service.ts:43-47`; unawaited `core/upload/support/upload-file-persist.util.ts:232-240`; false phase `…/upload-new-post-save.util.ts:146-147` |
 | **UP-37** | Content hash still reads the first 64 KiB only | `core/upload/support/content-hash.util.ts:17` |
 | **UP-43** | Storage key extension still taken unsanitized from `file.name.split('.').pop()` | `core/upload/support/upload-file-persist.util.ts:83-84` |
 | **UP-44** | `Number('180000')` literal wrapper unchanged | `core/upload/pipelines/new/upload-new-pipeline.service.ts:63` |

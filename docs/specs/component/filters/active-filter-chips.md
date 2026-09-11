@@ -25,7 +25,7 @@ Horizontal row of small pills. Each pill: `--color-bg-elevated` background, text
 ## Component Hierarchy
 
 ```
-ActiveFilterChips                          ← flex wrap row, gap-2, below search bar
+SearchFilterChips                          ← flex wrap row, gap-2, below search bar
 └── FilterChip × N                         ← pill: label + × button
     ├── ChipLabel                          ← e.g. "Project: Building A" or "Date: Jan–Mar 2026"
     └── RemoveButton (×)                   ← 16px, ghost, removes this filter
@@ -55,7 +55,7 @@ No own state — derived from `FilterService`. Chips appear/disappear reactively
 
 | File                                                         | Purpose              |
 | ------------------------------------------------------------ | -------------------- |
-| `features/map/filter-chips/active-filter-chips.component.ts` | Chip strip component |
+| `apps/web/src/app/features/map/search-bar/search-filter-chips.component.ts` | Chip strip component (inline template) |
 
 ## Wiring
 
@@ -72,7 +72,7 @@ sequenceDiagram
   C-->>P: Emit outputs/events
 ```
 
-- Import `ActiveFilterChipsComponent` in `MapShellComponent`
+- `SearchFilterChipsComponent` is composed inside `SearchBarComponent` (`ss-search-filter-chips`)
 - Inject `FilterService` to read active filters
 - Place below Search Bar in Map Zone template
 

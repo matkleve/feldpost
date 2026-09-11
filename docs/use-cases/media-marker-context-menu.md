@@ -1,3 +1,10 @@
+---
+id: UC-010
+specs:
+  - docs/specs/ui/media-marker/media-marker-context-menu.md
+  - docs/specs/system/map-secondary-click-system.md
+---
+
 # Media Marker Context Menu — Use Cases & Interaction Scenarios
 > **Element spec:** [specs/media-marker-context-menu.md](../specs/ui/media-marker/media-marker-context-menu.md)
 > **Related specs:** [map-secondary-click-system](../specs/system/map-secondary-click-system.md), [map-context-menu](../specs/component/map/map-context-menu.md), [radius-selection](../specs/component/map/radius-selection.md), [workspace-pane](../specs/ui/workspace/workspace-pane.md), [projects-dropdown](../specs/component/project/projects-dropdown.md)

@@ -1,8 +1,28 @@
 # registry.primitives-and-layout.supplement
 
+<!-- GENERATED FILE — do not edit by hand.
+     Source: docs/specs/component/registry.json
+     Regenerate: node scripts/generate-component-registry.mjs -->
+
 > Linked from [`registry.md`](registry.md). Split-out catalog body; excluded from element-spec lint (`.supplement.md`).
 
 ## Page rail composition
+
+### `<app-page-grid>` — Page Grid
+
+- **File**: `apps/web/src/app/shared/page-grid/page-grid.component.ts`
+- **Purpose**: Centered page shell: fixed 52rem center column with `[pageGridLeft]` / `[pageGridRight]` rails in the outer gutters.
+- **Spec**: [`docs/specs/component/page-rail/page-rail.md`](page-rail/page-rail.md)
+- **Variant axes**:
+  | Input | Type | Values | Visual effect |
+  |---|---|---|---|
+  | `leftRail` | `boolean` | `true` (default), `false` | Mounts the left gutter column |
+  | `rightRailOpen` | `boolean` | `false` (default), `true` | Mounts the right gutter column |
+  | `centerExpanded` | `boolean` | `false` (default), `true` | Center spans columns 2–3 when the right rail is closed |
+  | `flushBottom` | `boolean` | `false` (default), `true` | Removes the bottom inset for full-height panes |
+- **Composed of**: standalone (`ng-content` per rail slot)
+- **Used in**: `media.component`, `projects-page`, `colleagues-page`, `organization-page`
+- **Gaps**: none
 
 ### `<app-page-rail>` — Page Rail Shell
 
@@ -10,6 +30,14 @@
 - **Purpose**: Composable left-rail column inside `app-page-grid` (title, nav, search, toolbar, scroll body, footer slots).
 - **Spec**: [`docs/specs/component/page-rail/page-rail.md`](page-rail/page-rail.md)
 - **Slots**: `pageRailTitle`, `pageRailNav`, `pageRailSearch`, `pageRailToolbar`, `pageRailBody`, `pageRailFooter`
+- **Used in**: `projects-sidebar`, `member-list`, `organization-sidebar`
+
+### `<app-page-rail-title>` — Page Rail Title
+
+- **File**: `apps/web/src/app/shared/page-rail-title/page-rail-title.component.ts`
+- **Purpose**: Uppercase rail heading with an optional Material icon; fills the `pageRailTitle` slot.
+- **Spec**: [`docs/specs/component/page-rail/page-rail.md`](page-rail/page-rail.md)
+- **Other inputs**: `title` (required), `icon` (Material ligature)
 - **Used in**: `projects-sidebar`, `member-list`, `organization-sidebar`
 
 ### `<app-rail-nav-button>` — Rail Nav Button
@@ -44,6 +72,15 @@
 - **Purpose**: Uppercase recency bucket label above `app-rail-select-list` groups (inside a `rail-section`).
 - **Spec**: [`docs/specs/component/page-rail/page-rail.md`](page-rail/page-rail.md)
 
+### `<app-rail-search-field>` — Rail Search Field
+
+- **File**: `apps/web/src/app/shared/rail-search-field/rail-search-field.component.ts`
+- **Purpose**: Bordered search input with magnifier and clear affordance; fills the `pageRailSearch` slot and is reused in chat headers and toolbars.
+- **Spec**: [`docs/specs/component/page-rail/page-rail.md`](page-rail/page-rail.md)
+- **Other inputs**: `value`, `placeholder`, `ariaLabel`
+- **Outputs**: `valueChange`, `submitted` (Enter)
+- **Used in**: `projects-sidebar`, `member-list`, `chat-header`, `channel-detail-panel`
+
 ### `<app-rail-status>` — Rail Status
 
 - **File**: `apps/web/src/app/shared/rail-status/`
@@ -70,6 +107,23 @@
 
 ---
 
+### `<app-context-action-bar>` — Context Action Bar
+
+- **File**: `apps/web/src/app/shared/context-action-bar/context-action-bar.component.ts`
+- **Purpose**: Renders resolved `ActionEngineService` actions as either a compact footer row or a labeled section grid, with two-step confirm on destructive rows.
+- **Not for**: Building an ad-hoc action row from raw `hlmBtn` elements — the destructive-confirm behaviour lives here.
+- **Spec**: [`docs/specs/component/context-action-bar.md`](context-action-bar.md)
+- **Variant axes**:
+  | Input | Type | Values | Visual effect |
+  |---|---|---|---|
+  | `variant` | `ContextActionBarVariant` | `footer`, `section` | Horizontal icon buttons vs. two-column labeled grid |
+- **Other inputs**: `actions: ResolvedAction[]`, `pending: boolean`
+- **Outputs**: `actionSelected`
+- **Used in**: `app-detail-actions`, workspace selection footer
+- **Gaps**: none
+
+---
+
 ### `select[hlmSelect]` — Native Select (spartan-style CVA)
 
 - **File**: `apps/web/src/app/shared/ui/select/` (`HlmSelectDirective`, `selectVariants`, `HLM_SELECT_IMPORTS`)
@@ -83,6 +137,34 @@
 - **Composed of**: standalone directive + CVA
 - **Used in**: (opt-in) anywhere a native select uses `hlmSelect`; current callsites still use `[uiSelectControl]` shim
 - **Gaps**: overlay combobox (`BrnSelect`) not covered here
+
+---
+
+### `<hlm-form-field>` — Form Field (spartan-style CVA)
+
+- **File**: `apps/web/src/app/shared/ui/form-field/hlm-form-field.component.ts`
+- **Purpose**: Wraps label + control + optional hint/error in one vertical rhythm.
+- **Spec**: @no-spec
+- **Other inputs**: `class` (merged via `twMerge`)
+- **Composed of**: local CVA (`formFieldVariants`) mirroring the spartan hlm API
+- **Used in**: auth pages, invite editor, member detail, settings sections
+- **Gaps**: published `@spartan-ng/ui-form-field-helm` swap pending Tailwind v4 releases
+
+---
+
+### `<hlm-spinner>` — Spinner (spartan-style CVA)
+
+- **File**: `apps/web/src/app/shared/ui/spinner/hlm-spinner.component.ts`
+- **Purpose**: Decorative loading ring for inline busy affordances.
+- **Not for**: Announcing progress — the ring is `aria-hidden`; the parent must supply the live status text.
+- **Spec**: @no-spec
+- **Variant axes**:
+  | Input | Type | Values | Visual effect |
+  |---|---|---|---|
+  | `size` | `SpinnerSize` | `sm`, `md` (default), `lg` | Ring diameter (0.75 / 1 / 1.25rem) |
+- **Composed of**: local CVA (`spinnerVariants`); no `@spartan-ng/brain/spinner` in the current pin
+- **Used in**: `app-address-search`
+- **Gaps**: published `@spartan-ng/ui-spinner-helm` swap pending Tailwind v4 releases
 
 ---
 
@@ -570,6 +652,19 @@
 
 ---
 
+### `<app-media-picker-dialog>` — Media Picker Dialog
+
+- **File**: `apps/web/src/app/shared/media-picker-dialog/media-picker-dialog.component.ts`
+- **Purpose**: Modal media browser for picking one or more existing media items, with the full toolbar stack (search, filter, group, sort, card variant) and range/additive selection.
+- **Spec**: @no-spec
+- **Other inputs**: `excludeMediaIds: readonly string[]`
+- **Outputs**: `confirmed` (selected ids), `cancelled`
+- **Composed of**: `app-media-item`, `app-pane-toolbar`, `app-toolbar-dropdown-stack`, `app-filter-dropdown`, `app-grouping-dropdown`, `app-sort-dropdown`, `app-projects-dropdown`, spartan dialog
+- **Used in**: `app-project-detail-view`
+- **Gaps**: `@no-spec`
+
+---
+
 ### `<app-share-link-audience-dialog>` — Share Link Audience Dialog
 
 - **File**: `apps/web/src/app/shared/share-link-audience-dialog/share-link-audience-dialog.component.ts`
@@ -649,4 +744,3 @@
 - **Spec**: [`docs/specs/component/project/projects-view-toggle.md`](project/projects-view-toggle.md) (historical reference only)
 
 ---
-

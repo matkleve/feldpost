@@ -39,6 +39,12 @@ export interface MediaItemLocationRow {
   latitude: number | null;
   longitude: number | null;
   address_label: string | null;
+  /**
+   * Optional because the legacy `media_item_locations` rowtype returned by the
+   * `add_media_item_location` / `update_media_item_location` shims has no such
+   * column — only `list_locations_for_media` and `search_locations` supply it.
+   */
+  address_precision?: string | null;
   sort_order: number;
   staircase_sort_key: string;
   door_sort_key: string;
@@ -94,6 +100,7 @@ export interface MediaLocationAddressPatch {
   latitude?: number | null;
   longitude?: number | null;
   address_label?: string | null;
+  address_precision?: string | null;
 }
 
 export interface MediaLocationAddInput extends MediaLocationAddressPatch {

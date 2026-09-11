@@ -60,7 +60,7 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class UploadNewPipelineService {
-  private static readonly UPLOAD_PHASE_TIMEOUT_MS = Number('180000');
+  private static readonly UPLOAD_PHASE_TIMEOUT_MS = 180_000;
 
   private readonly uploadService = inject(UploadService);
   private readonly jobState = inject(UploadJobStateService);
@@ -164,6 +164,7 @@ export class UploadNewPipelineService {
       thumbnailPersistence: this.thumbnailPersistence,
       previewGeneration: this.previewGeneration,
       getUserId: () => this.auth.user()?.id,
+      addressOrchestrator: this.addressOrchestrator,
     });
   }
 

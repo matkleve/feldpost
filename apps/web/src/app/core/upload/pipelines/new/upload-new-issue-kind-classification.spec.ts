@@ -27,11 +27,7 @@ function emptyMimeDocumentFile(): File {
 
 describe('issueKind classification: routeJobToMissingData vs. failed-geocode routing', () => {
   // @see docs/audits/upload-process-analysis-2026-09-08/09-coverage.md § 4 T16
-  // Known divergence, not fixed here — issueKind assignment is P6b territory
-  // (out of this task's scope; being reworked concurrently elsewhere). This
-  // documents the current (diverging) behavior so the eventual P6b fix can
-  // flip it from `.fails` to a normal `it`.
-  it.fails('both classifiers produce the same issueKind for the same empty-MIME document', async () => {
+  it('both classifiers produce the same issueKind for the same empty-MIME document', async () => {
     const file = emptyMimeDocumentFile();
 
     // Sanity check: the file really does resolve to 'document' once MIME

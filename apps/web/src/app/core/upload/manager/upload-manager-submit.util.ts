@@ -288,6 +288,7 @@ function createNewUploadJobs(
       id: crypto.randomUUID(),
       batchId,
       file: entry.file,
+      sourceFile: entry.file,
       phase: 'queued' as UploadPhase,
       progress: 0,
       statusLabel: deps.queuedLabel,

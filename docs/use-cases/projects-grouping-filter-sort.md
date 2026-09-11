@@ -1,3 +1,12 @@
+---
+id: UC-012
+specs:
+  - docs/specs/page/projects-page.md
+  - docs/specs/component/filters/grouping-dropdown.md
+  - docs/specs/component/filters/filter-dropdown.md
+  - docs/specs/component/filters/sort-dropdown.md
+---
+
 # Projects Page Grouping/Filter/Sort — Use Cases
 
 > Related specs: [projects-page](../specs/page/projects-page.md), [grouping-dropdown](../specs/component/filters/grouping-dropdown.md), [filter-dropdown](../specs/component/filters/filter-dropdown.md), [sort-dropdown](../specs/component/filters/sort-dropdown.md)

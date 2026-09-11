@@ -20,8 +20,11 @@ import {
   formatUploadFailureMessage,
   uploadFailureMessageToToastText,
 } from '../../support/upload-error-messages.util';
+import { buildUploadAddressPersistContext } from '../../address-resolution/upload-address-persist-context.helpers';
+import type { UploadAddressResolutionOrchestrator } from '../../address-resolution/upload-address-resolution.orchestrator';
 import { resolveUploadPhaseInputs } from '../../location/upload-location-inputs.helpers';
 import { awaitHeicConversionForUpload } from './upload-new-prepare-route.util';
+import { runStorageUploadWithTimeout } from '../../support/upload-storage-timeout.util';
 
 type RunNewUploadPhaseArgs = {
   jobId: string;
@@ -40,6 +43,7 @@ type RunNewUploadPhaseArgs = {
   thumbnailPersistence: MediaThumbnailPersistenceService;
   previewGeneration: MediaPreviewGenerationService;
   getUserId: () => string | undefined;
+  addressOrchestrator: UploadAddressResolutionOrchestrator;
 };
 
 export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<void> {
@@ -60,6 +64,7 @@ export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<vo
     thumbnailPersistence,
     previewGeneration,
     getUserId,
+    addressOrchestrator,
   } = args;
 
   const job = jobState.findJob(jobId);
@@ -86,11 +91,21 @@ export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<vo
     parsedExif,
   });
 
+  const groupState =
+    jobForUpload.groupingKey != null
+      ? addressOrchestrator.getGroupState(jobForUpload.batchId, jobForUpload.groupingKey)
+      : undefined;
+  const addressContext = buildUploadAddressPersistContext({
+    job: jobForUpload,
+    groupState,
+  });
+
   const result = await runUploadCall({
     jobId,
     job: jobForUpload,
     coords: locationInputs.coords,
     parsedExif: locationInputs.parsedExif,
+    addressContext,
     uploadService,
     jobState,
     timeoutMs: uploadPhaseTimeoutMs,
@@ -121,8 +136,13 @@ export async function runNewUploadPhase(args: RunNewUploadPhaseArgs): Promise<vo
     emitBatchProgress: (batchId) => ctx.emitBatchProgress(batchId),
     drainQueue: () => ctx.drainQueue(),
     enrichWithReverseGeocode: (mediaId) => enrich.enrichWithReverseGeocode(mediaId),
-    enrichWithForwardGeocode: (mediaId, titleAddress) =>
-      enrich.enrichWithForwardGeocode(mediaId, titleAddress),
+    enrichWithForwardGeocode: (mediaId, titleAddress) => {
+      const job = jobState.findJob(jobId);
+      const addressContext = job
+        ? buildUploadAddressPersistContext({ job, groupState: null })
+        : null;
+      return enrich.enrichWithForwardGeocode(mediaId, titleAddress, addressContext);
+    },
     geocodeTitleAddress: (titleAddress) => enrich.forwardGeocodeAddress(titleAddress),
     mismatchToleranceMeters,
     persistMismatch: async (mediaId, distanceMeters) => {
@@ -154,6 +174,7 @@ export async function runUploadCall(args: {
   job: UploadJob;
   coords: ExifCoords | undefined;
   parsedExif: ParsedExif | undefined;
+  addressContext?: ReturnType<typeof buildUploadAddressPersistContext>;
   uploadService: UploadService;
   jobState: UploadJobStateService;
   timeoutMs: number;
@@ -166,6 +187,7 @@ export async function runUploadCall(args: {
     job,
     coords,
     parsedExif,
+    addressContext,
     uploadService,
     jobState,
     timeoutMs,
@@ -186,9 +208,10 @@ export async function runUploadCall(args: {
     job.relativePath,
     { pendingPartialLocation: job.pendingPartialLocation },
     job.addressNotes,
+    addressContext,
   );
 
-  return withTimeout(uploadPromise, timeoutMs, 'Upload timed out. Please retry.', () => {
+  return runStorageUploadWithTimeout(uploadPromise, timeoutMs, 'Upload timed out. Please retry.', () => {
     // The installed @supabase/storage-js client does not honour AbortSignal for
     // `.upload()` (verified against @supabase/storage-js@2.105.4 — the signal is
     // dropped before it reaches the HTTP layer), so this cannot interrupt an
@@ -326,27 +349,3 @@ function getUploadErrorMessage(error: unknown): string {
   return uploadFailureMessageToToastText(formatUploadFailureMessage(raw));
 }
 
-async function withTimeout<T>(
-  promise: Promise<T>,
-  timeoutMs: number,
-  timeoutMessage: string,
-  onTimeout?: () => void,
-): Promise<T> {
-  let timeoutId: ReturnType<typeof setTimeout> | undefined;
-
-  try {
-    return await Promise.race([
-      promise,
-      new Promise<T>((_resolve, reject) => {
-        timeoutId = setTimeout(() => {
-          onTimeout?.();
-          reject(new Error(timeoutMessage));
-        }, timeoutMs);
-      }),
-    ]);
-  } finally {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-  }
-}

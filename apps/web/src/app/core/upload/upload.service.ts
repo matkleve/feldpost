@@ -7,6 +7,7 @@ import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { GeocodingService } from '../geocoding/geocoding.service';
 import { SupabaseService } from '../supabase/supabase.service';
+import type { UploadAddressPersistContext } from './address-resolution/upload-address-persist-context.helpers';
 import { persistUploadFile, type UploadFilePersistDeps } from './support/upload-file-persist.util';
 import {
   convertHeicToJpegUploadFile,
@@ -128,9 +129,20 @@ export class UploadService {
     relativePath?: string,
     options?: { pendingPartialLocation?: boolean },
     addressNotes?: string[],
+    addressContext?: UploadAddressPersistContext | null,
   ): Promise<UploadResult> {
     return persistUploadFile(
-      { file, manualCoords, parsedExif, projectId, abortSignal, relativePath, options, addressNotes },
+      {
+        file,
+        manualCoords,
+        parsedExif,
+        projectId,
+        abortSignal,
+        relativePath,
+        options,
+        addressNotes,
+        addressContext,
+      },
       this.uploadFilePersistDeps(),
     );
   }

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   areAllJobsReadyForTrayResolution,
   isJobReadyForTrayResolution,
+  requiresFilePrepareForTrayQuestion,
 } from './upload-tray-resolution-gate.helpers';
 import type { UploadJob } from '../upload-manager.types';
 
@@ -20,13 +21,20 @@ function job(partial: Partial<UploadJob>): UploadJob {
 }
 
 describe('upload-tray-resolution-gate.helpers', () => {
-  const isHeic = (file: File) => file.name.endsWith('.heic');
+  it('requiresFilePrepareForTrayQuestion is false for path-only question kinds', () => {
+    expect(requiresFilePrepareForTrayQuestion('upload.resolver.question.layerPackage')).toBe(
+      false,
+    );
+    expect(requiresFilePrepareForTrayQuestion('upload.resolver.question.adminLevelConflict')).toBe(
+      false,
+    );
+    expect(requiresFilePrepareForTrayQuestion('upload.resolver.question.cityStep')).toBe(true);
+  });
 
-  it('isJobReadyForTrayResolution requires awaiting_disambiguation and non-HEIC file', () => {
+  it('isJobReadyForTrayResolution requires awaiting_disambiguation and filePrepareComplete', () => {
     expect(
       isJobReadyForTrayResolution(
-        job({ phase: 'parsing_exif', file: new File([], 'x.heic') }),
-        isHeic,
+        job({ phase: 'parsing_exif', filePrepareComplete: false }),
       ),
     ).toBe(false);
     expect(
@@ -34,25 +42,88 @@ describe('upload-tray-resolution-gate.helpers', () => {
         job({
           phase: 'awaiting_disambiguation',
           file: new File([], 'x.heic', { type: 'image/heic' }),
+          filePrepareComplete: false,
         }),
-        isHeic,
       ),
     ).toBe(false);
     expect(
       isJobReadyForTrayResolution(
-        job({ phase: 'awaiting_disambiguation', file: new File([], 'x.jpg') }),
-        isHeic,
+        job({
+          phase: 'awaiting_disambiguation',
+          file: new File([], 'x.heic', { type: 'image/heic' }),
+          filePrepareComplete: true,
+        }),
       ),
     ).toBe(true);
   });
 
-  it('areAllJobsReadyForTrayResolution is false when any job is not ready', () => {
+  it('HEIC file is ready when filePrepareComplete even before conversion', () => {
+    expect(
+      isJobReadyForTrayResolution(
+        job({
+          phase: 'awaiting_disambiguation',
+          file: new File([], 'iphone.heic', { type: 'image/heic' }),
+          filePrepareComplete: true,
+        }),
+        { questionKey: 'upload.resolver.question.cityStep' },
+      ),
+    ).toBe(true);
+  });
+
+  it('path-only questions do not require filePrepareComplete', () => {
+    expect(
+      isJobReadyForTrayResolution(
+        job({
+          phase: 'awaiting_disambiguation',
+          file: new File([], 'x.heic', { type: 'image/heic' }),
+          filePrepareComplete: false,
+        }),
+        { questionKey: 'upload.resolver.question.layerPackage' },
+      ),
+    ).toBe(true);
+  });
+
+  it('text answers do not require filePrepareComplete', () => {
+    expect(
+      isJobReadyForTrayResolution(
+        job({
+          phase: 'awaiting_disambiguation',
+          filePrepareComplete: false,
+        }),
+        { answerKind: 'text' },
+      ),
+    ).toBe(true);
+  });
+
+  it('areAllJobsReadyForTrayResolution is false when any live job is not ready', () => {
     const jobs = new Map([
-      ['a', job({ id: 'a', phase: 'awaiting_disambiguation' })],
-      ['b', job({ id: 'b', phase: 'parsing_exif' })],
+      ['a', job({ id: 'a', phase: 'awaiting_disambiguation', filePrepareComplete: true })],
+      [
+        'b',
+        job({
+          id: 'b',
+          phase: 'awaiting_disambiguation',
+          file: new File([], 'x.heic', { type: 'image/heic' }),
+          filePrepareComplete: false,
+        }),
+      ],
     ]);
     expect(
-      areAllJobsReadyForTrayResolution(['a', 'b'], (id) => jobs.get(id), isHeic),
+      areAllJobsReadyForTrayResolution(['a', 'b'], (id) => jobs.get(id), {
+        questionKey: 'upload.resolver.question.cityStep',
+      }),
     ).toBe(false);
+  });
+
+  it('NF-11: prunes dead jobs so one cancelled job does not block the tray gate', () => {
+    const jobs = new Map([
+      ['a', job({ id: 'a', phase: 'awaiting_disambiguation', filePrepareComplete: true })],
+      ['b', job({ id: 'b', phase: 'missing_data' })],
+    ]);
+    expect(
+      areAllJobsReadyForTrayResolution(['a', 'b'], (id) => jobs.get(id), {
+        questionKey: 'upload.resolver.question.cityStep',
+      }),
+    ).toBe(true);
   });
 });

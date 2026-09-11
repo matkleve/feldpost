@@ -5,7 +5,7 @@
 
 ## Viewport-Driven Marker Lifecycle
 
-`viewport_markers` v2 returns only links where `locations.latitude`, `locations.longitude`, and `geog` are set. Address-visible-only media do not appear until forward geocode or EXIF placement creates a zoomable link.
+`viewport_markers` v2 returns links where `locations.latitude`, `locations.longitude`, and `geog` are set. **Normative:** only **zoomable** links (precision + coords — see [zoomable-map-contract](../../service/media-locations/media-locations.zoomable-map-contract.supplement.md)). **Drift:** SQL does not filter on `street` or `address_precision` (`20260524120000_locations_nn_junction.sql:816-820`); city-centroid rows appear today.
 
 Markers are loaded based on the current map viewport, not once at initialization. This section defines the lifecycle that replaces the current load-once-at-init approach. See `architecture.md` §8 for the canonical viewport query contract.
 

@@ -17,11 +17,17 @@
 
 import type { ConflictResolution, UploadJob, UploadPhase } from '../upload-manager.types';
 import { uploadManagerDebugLog } from '../support/upload-manager-debug.util';
+import type { PhaseTransitionOptions } from '../support/upload-job-state.service';
 
 export interface UploadManagerActionsDeps {
   findJob: (jobId: string) => UploadJob | undefined;
   snapshotJobs: () => ReadonlyArray<UploadJob>;
   updateJob: (jobId: string, patch: Partial<UploadJob>) => void;
+  transitionTo: (
+    jobId: string,
+    phase: UploadPhase,
+    options: PhaseTransitionOptions & { statusLabel?: string },
+  ) => boolean;
   addJobs: (jobs: UploadJob[]) => void;
   removeJob: (jobId: string) => void;
   removeTerminalJobs: () => void;
@@ -50,7 +56,10 @@ export interface UploadManagerActionsDeps {
    * both — either may be absent depending on the phase it was cancelled in).
    * @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-04
    */
-  removeUploadResidue: (storagePath: string | undefined, mediaId: string | undefined) => Promise<void>;
+  removeUploadResidue: (
+    storagePath: string | undefined,
+    mediaId: string | undefined,
+  ) => Promise<{ errors: string[] }>;
   drainQueue: () => void;
 }
 
@@ -60,9 +69,8 @@ export function retryUploadManagerJob(jobId: string, deps: UploadManagerActionsD
   // @see docs/audits/upload-process-analysis-2026-09-08/03-branch-matrix.md Y3
   if (!job || job.phase !== 'error' || job.wasCancelled) return;
 
+  deps.transitionTo(jobId, 'queued', { channel: 'user', statusLabel: deps.queuedLabel });
   deps.updateJob(jobId, {
-    phase: 'queued',
-    statusLabel: deps.queuedLabel,
     progress: 0,
     error: undefined,
     failedAt: undefined,
@@ -94,9 +102,8 @@ export async function cancelUploadManagerJob(
   deps.abortJobRequest(jobId);
   deps.markDone(jobId);
 
+  deps.transitionTo(jobId, 'error', { channel: 'user', statusLabel: 'Cancelled' });
   deps.updateJob(jobId, {
-    phase: 'error',
-    statusLabel: 'Cancelled',
     error: 'Upload cancelled by user.',
     failedAt: job.phase,
     wasCancelled: true,
@@ -105,7 +112,10 @@ export async function cancelUploadManagerJob(
   deps.drainQueue();
 
   if (job.storagePath || job.mediaId) {
-    await deps.removeUploadResidue(job.storagePath, job.mediaId);
+    const { errors } = await deps.removeUploadResidue(job.storagePath, job.mediaId);
+    if (errors.length > 0) {
+      console.error('[upload-manager] cancel residue cleanup failed:', errors);
+    }
   }
 }
 
@@ -131,9 +141,8 @@ export function placeUploadManagerJob(
   const job = deps.findJob(jobId);
   if (!job || job.phase !== 'missing_data') return;
 
+  deps.transitionTo(jobId, 'queued', { channel: 'user', statusLabel: deps.queuedLabel });
   deps.updateJob(jobId, {
-    phase: 'queued',
-    statusLabel: deps.queuedLabel,
     coords,
     issueKind: undefined,
   });
@@ -148,9 +157,8 @@ export function assignUploadManagerJobToProject(
   const job = deps.findJob(jobId);
   if (!job || job.phase !== 'missing_data') return;
 
+  deps.transitionTo(jobId, 'queued', { channel: 'user', statusLabel: deps.queuedLabel });
   deps.updateJob(jobId, {
-    phase: 'queued',
-    statusLabel: deps.queuedLabel,
     projectId,
     issueKind: undefined,
   });
@@ -181,6 +189,7 @@ export function replaceUploadManagerFile(
     id: jobId,
     batchId,
     file,
+    sourceFile: file,
     phase: 'queued',
     progress: 0,
     statusLabel: deps.queuedLabel,
@@ -226,6 +235,7 @@ export function attachUploadManagerFile(
     id: jobId,
     batchId,
     file,
+    sourceFile: file,
     phase: 'queued',
     progress: 0,
     statusLabel: deps.queuedLabel,
@@ -276,9 +286,8 @@ export function resolveUploadManagerConflict(
 
   deps.updateJob(jobId, {
     conflictResolution: resolution,
-    phase: 'queued',
-    statusLabel: deps.queuedLabel,
   });
+  deps.transitionTo(jobId, 'queued', { channel: 'user', statusLabel: deps.queuedLabel });
 
   if (resolution === 'attach_replace' || resolution === 'attach_keep') {
     deps.updateJob(jobId, {
@@ -301,10 +310,9 @@ export function forceUploadManagerDuplicateUpload(
       (job.phase === 'missing_data' && job.issueKind === 'duplicate_file'));
   if (!job || !isDuplicateResume) return;
 
+  deps.transitionTo(jobId, 'queued', { channel: 'user', statusLabel: deps.queuedLabel });
   deps.updateJob(jobId, {
     forceDuplicateUpload: true,
-    phase: 'queued',
-    statusLabel: deps.queuedLabel,
     error: undefined,
     failedAt: undefined,
     existingMediaId: undefined,

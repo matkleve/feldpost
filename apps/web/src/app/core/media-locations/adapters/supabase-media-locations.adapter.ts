@@ -131,5 +131,6 @@ function patchToRpcParams(patch: MediaLocationAddressPatch): Record<string, stri
     p_latitude: patch.latitude ?? null,
     p_longitude: patch.longitude ?? null,
     p_address_label: patch.address_label ?? null,
+    p_address_precision: patch.address_precision ?? null,
   };
 }

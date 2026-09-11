@@ -14,8 +14,9 @@ Normative glossary and cross-pipeline rules for **address-visible**, **display-h
 
 | Term | Definition | Forbidden synonyms |
 | --- | --- | --- |
-| **Address-visible link** | A `media_item_location_links` row whose joined `locations` row has display text (e.g. `address_label`, `street`) whether or not coords exist | “has location”, “resolved”, “on the map” |
-| **Zoomable link** | A link whose `street` is present **and** `latitude`/`longitude` pass `legacyMediaHasGps` (`locationPinEligible`); DB row also has `geog` for viewport_markers | “GPS chip”, “address-visible”, `location_status = resolved` alone |
+| **Address-visible link** | A `media_item_location_links` row whose joined `locations` row has display text (e.g. `address_label`, `street`, `city`) whether or not coords exist | “has location”, “resolved”, “on the map” |
+| **Zoomable link** | A link with valid `latitude`/`longitude`/`geog` and **`address_precision` sufficient for point-level map interaction** (street or houseNumber tier). Coords without adequate precision remain address-visible only | “GPS chip”, `locationPinEligible`, `location_status = resolved` alone |
+| **Known area** | For coarse precision (`city`, `postcode`, …): axis-aligned rectangle from persisted geocoder **`boundingbox`** (see [area-extent decisions](../media-upload-service/address-resolution-model.area-extent-decisions.supplement.md)). For point precision: coords | Centroid-only distance tests |
 | **Display-hydrate row** | The single `MediaItemLocationRow` chosen to fill detail header fields and `mergeLocationDisplayIntoMediaRecord` on `media()` | “primary location”, “the location”, “only location” |
 | **Zoomable location count** | Count of zoomable links for one `media_item_id`; exposed as `zoomable_location_count` on gallery/workspace DTOs and as `locationsWithGps(rows).length` on list reads | `media.latitude != null` alone; address row count |
 
@@ -25,16 +26,18 @@ Normative glossary and cross-pipeline rules for **address-visible**, **display-h
 
 ## 2. Hard invariants
 
-1. **Map affordances** (tile map icon, map picker, `mapZoomRequested`, viewport pins, upload `zoomToLocationRequested`) MUST consider **zoomable links only**.
-2. **Address-visible, non-zoomable** links MAY appear in the detail LOCATION list; they MUST NOT enable the tile map icon, MUST NOT appear in `viewport_markers`, and MUST NOT emit zoom with null coords.
+1. **Map affordances** (tile map icon, map picker, `mapZoomRequested`, upload `zoomToLocationRequested`) MUST consider **zoomable links only** — gated by **`address_precision`**, not by `street` text presence.
+2. **Address-visible, non-zoomable** links MAY appear in the detail LOCATION list; they MUST NOT enable the tile map icon and MUST NOT emit zoom with null coords. Coarse-precision links with coords MAY appear on the map per rendering rules once item 15 lands (**visual treatment not yet approved**).
 3. **`location_status = resolved`** on `media_items` does NOT imply zoomable; forward geocode failure with text-only persist is address-visible only.
-4. **Display-hydrate** MUST NOT be confused with the map picker target list; picker uses **all** zoomable rows via `locationsWithGps`.
+4. **Display-hydrate** MUST NOT be confused with the map picker target list; picker uses **all** zoomable rows via precision-aware helper (replaces `locationsWithGps` / `locationPinEligible`).
 
 ---
 
 ## 3. Tile map affordance table (canonical)
 
 Threshold constant: `MAP_LOCATION_SEARCH_THRESHOLD = 5` in [`media-item-map-action.helpers.ts`](../../../../apps/web/src/app/shared/media-item/media-item-map-action.helpers.ts) — search UI when **target count > 5** (i.e. **6+** zoomable links).
+
+Zoomable = valid coords + `address_precision` at street or houseNumber tier (replaces legacy `locationPinEligible` street-text gate — [area-extent decisions](../media-upload-service/address-resolution-model.area-extent-decisions.supplement.md) Decision 2).
 
 | Zoomable count | Tile map (`app-media-item-map-action`) | Parent gate (`mediaHasZoomableLocation`) |
 | --- | --- | --- |
@@ -52,7 +55,7 @@ Detail **Show on map** (per row): enabled only when **that row** is zoomable; se
 Implemented in `displayLocationFromRows(rows)`:
 
 1. Sort links by `sort_order` ascending (stable tie-break: existing list RPC order).
-2. If any row is zoomable, return the **lowest `sort_order` among zoomable rows**.
+2. If any row is zoomable (precision + coords), return the **lowest `sort_order` among zoomable rows**.
 3. Else return the **lowest `sort_order` row overall** (address-only fallback for header / `media()` text fields only).
 
 Rationale: header and GPS chip projection align with a coord-bearing row when one exists; address-only items still show street text without implying map zoom.
@@ -69,7 +72,7 @@ Fixture: two links, both address-only (null or invalid lat/lng), sort 0 = “The
 | `locationDisplaySnapshotFromRows` | `location_unresolved: true`; `latitude` / `longitude` null on merged `media()` |
 | `mediaHasZoomableLocation` | `false` |
 | Tile map | disabled (`interactive-*-map-disabled`) |
-| `locationsWithGps(rows)` | `[]` |
+| Precision-aware zoomable list | `[]` (legacy helper name: `locationsWithGps`) |
 | LOCATION list UI | Still shows address lines (**address-visible without zoomable**) |
 
 This is the common regression class: user sees a street name; map does nothing.
@@ -145,6 +148,24 @@ Implementation helper: `MediaLocationsService.syncListCacheAfterPlacement(mediaI
 - Duplicating the §3 affordance table in parent specs.
 - Calling a link “primary” in prose — use **display-hydrate row** or **zoomable link**.
 - Stale `mediaToLinks` cache after enrich while gallery shows `zoomableLocationCount: 1` and picker returns 0 targets.
+
+---
+
+## 10. Known implementation drift (2026-09-10)
+
+| Topic | Spec (normative) | Code / SQL today | Anchor |
+| --- | --- | --- | --- |
+| Zoomable gate | `address_precision` tier | `locationPinEligible` requires non-empty `street` | `media-locations.helpers.ts:309-314` |
+| `viewport_markers` filter | Zoomable links only (precision-aware) | Filters `latitude`, `longitude`, `geog` only — **no `street` or precision filter** | `20260524120000_locations_nn_junction.sql:816-820` |
+| `count_zoomable_locations_for_media` | Zoomable links only (precision-aware) | Coords-only rule (`latitude`/`longitude` not null), same as `viewport_markers` — **no `street` or precision filter**, despite the name | `20260524120000_locations_nn_junction.sql:467-482` |
+| Radius selection | Full containment of known area | Centroid distance ≤ radius; no pin gate | `radius-selection.service.ts:56-60` |
+| Geocoder extent | Persist `boundingbox` | Parsed types omit bbox; nothing stored | `geocoding.service.ts:873-891` |
+
+**Attach-vs-client parity risk.** `count_zoomable_locations_for_media` and the client helper `countZoomableLinks()` claim to answer the same question and do not. The RPC counts links with coords; `countZoomableLinks` → `locationsWithGps` → `locationPinEligible` additionally requires non-empty `street` (`media-locations.helpers.ts:310-325`). For a city-precision link that has coords but no street, the RPC returns ≥ 1 while the client returns 0.
+
+The attach pipeline consumes the RPC to decide whether the target item already has EXIF coordinates (`upload-attach-record-update-runner.util.ts:65-68` → `hasZoomableLocation`, then coords read from `list_locations_for_media`). So attach treats coarse city coords as an existing pin while the tile map and picker treat the same row as non-zoomable. Whichever rule item 15 settles on, **both** call sites must move together — and the RPC should be renamed to match what it actually counts.
+
+This drift predates the 2026-09-10 decisions. Item 15 in [`06-improvement-plan.md`](../../../audits/upload-flow-review-2026-09-10/06-improvement-plan.md) tracks closure. Until then, city-level coords **do** appear in `viewport_markers` and in radius selection despite spec intent.
 
 ---
 

@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
+import { vi } from 'vitest';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { UploadResolverTrayOrchestratorService } from '../../../core/upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.service';
 import { UploadManagerService } from '../../../core/upload/upload-manager.service';
@@ -14,8 +15,19 @@ import {
 describe('UploadResolverTrayComponent', () => {
   let fixture: ComponentFixture<UploadResolverTrayComponent>;
   let orchestrator: UploadResolverTrayOrchestratorService;
+  let jobsSignal: ReturnType<typeof signal<{ id: string; file: { name: string } }[]>>;
+  let locationResolution: {
+    isolateJobFromGroup: ReturnType<typeof vi.fn>;
+    applyTrayHouseSelection: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(async () => {
+    jobsSignal = signal([]);
+    locationResolution = {
+      isolateJobFromGroup: vi.fn(),
+      applyTrayHouseSelection: vi.fn(),
+    };
+
     await TestBed.configureTestingModule({
       imports: [UploadResolverTrayComponent],
       providers: [
@@ -25,7 +37,7 @@ describe('UploadResolverTrayComponent', () => {
         },
         {
           provide: UploadManagerService,
-          useValue: { jobs: signal([]) },
+          useValue: { jobs: jobsSignal },
         },
         {
           provide: UploadLocationResolutionService,
@@ -33,6 +45,7 @@ describe('UploadResolverTrayComponent', () => {
             pendingGroupCount: signal(0),
             disambiguationGroups: signal([]),
             activeGroup: signal(null),
+            ...locationResolution,
           },
         },
         {
@@ -105,5 +118,65 @@ describe('UploadResolverTrayComponent', () => {
     expect(
       fixture.nativeElement.querySelector('.upload-resolver-tray__nav-position'),
     ).toBeNull();
+  });
+
+  it('NF-17: Ask later calls isolateJobFromGroup when group payload is present', () => {
+    jobsSignal.set([
+      { id: 'job-a', file: { name: 'a.jpg' } },
+      { id: 'job-b', file: { name: 'b.jpg' } },
+    ]);
+
+    orchestrator.resetAll();
+    orchestrator.presentBundleImmediately(MOCK_ORCHESTRATOR_BATCH_ID, [
+      {
+        dialogueUnitId: 'isolate-test',
+        producerId: 'upload-location-resolution',
+        batchId: MOCK_ORCHESTRATOR_BATCH_ID,
+        questionKey: 'upload.resolver.question.city',
+        questionParams: { street: 'Test', address: 'Test' },
+        jobIds: ['job-a', 'job-b'],
+        options: [{ id: 'city-a', label: 'City A' }],
+        payloadRef: { disambiguationGroupId: 'group-1' },
+      },
+    ]);
+    fixture.detectChanges();
+
+    fixture.componentInstance.onAskLater('job-a', new Event('click'));
+
+    expect(locationResolution.isolateJobFromGroup).toHaveBeenCalledWith('group-1', 'job-a');
+  });
+
+  it('NF-18: No number needed resolves via street centroid, not skip', () => {
+    orchestrator.resetAll();
+    orchestrator.presentBundleImmediately(MOCK_ORCHESTRATOR_BATCH_ID, [
+      {
+        dialogueUnitId: 'house-test',
+        producerId: 'upload-location-resolution',
+        batchId: MOCK_ORCHESTRATOR_BATCH_ID,
+        questionKey: 'upload.resolver.question.houseStep',
+        questionParams: { street: 'Main', address: 'Main' },
+        jobIds: ['job-house'],
+        trayStepLabel: '1b',
+        options: [{ id: 'hn-1', label: 'Main 1' }],
+        payloadRef: { disambiguationGroupId: 'group-house' },
+      },
+    ]);
+    fixture.detectChanges();
+
+    const skipSpy = vi.spyOn(orchestrator, 'skipActiveItem');
+    const resolveSpy = vi.spyOn(orchestrator, 'resolveActiveItem');
+
+    const noNumberButton = fixture.nativeElement.querySelector(
+      '.upload-resolver-tray__street-centroid',
+    ) as HTMLButtonElement;
+    noNumberButton?.click();
+
+    expect(locationResolution.applyTrayHouseSelection).toHaveBeenCalledWith(
+      'group-house',
+      null,
+      true,
+    );
+    expect(resolveSpy).toHaveBeenCalled();
+    expect(skipSpy).not.toHaveBeenCalled();
   });
 });

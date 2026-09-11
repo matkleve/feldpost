@@ -69,7 +69,7 @@
 | docs/security-boundaries.md | PROTECTED | PROTECTED: Governance/control-plane document. |
 | docs/settings-registry.md | PROTECTED | PROTECTED: Governance/control-plane document. |
 | docs/setup-guide.md | PROTECTED | PROTECTED: Default fallback (no deletion decision without clear supersession). |
-| docs/skills/feldpost-component/SKILL.md | PROTECTED | PROTECTED: Path under docs/skills/. |
+| docs/skills/feldpost-component/SKILL.md | REMOVED (2026-09-10) | REMOVED: content promoted to `.cursor/rules/` + component-structure skill. |
 | docs/specs/component/filters/active-filter-chips.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
 | docs/specs/component/workspace/active-selection-view.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |
 | docs/specs/component/map/auth-map-background.md | PROTECTED | PROTECTED: Active specs contract under docs/specs/ (non-archive). |

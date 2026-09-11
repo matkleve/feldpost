@@ -1,3 +1,9 @@
+---
+id: UC-006
+specs:
+  - docs/specs/system/map-secondary-click-system.md
+---
+
 # Map Secondary-Click System — Use Cases
 
 > **Element spec:** [specs/map-secondary-click-system.md](../specs/system/map-secondary-click-system.md)

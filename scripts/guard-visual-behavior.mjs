@@ -65,7 +65,7 @@ function parseZIndex(block) {
 }
 
 function main() {
-  const agents = readText("AGENTS.md");
+  const visualBehaviorRule = readText(".cursor/rules/visual-behavior.mdc");
   const webAgents = readText("apps/web/AGENTS.md");
   const itemGridSpec = readText("docs/specs/component/item-grid/item-grid.md");
   const mediaItemSpec = readText("docs/specs/component/media/media-item.md");
@@ -96,23 +96,32 @@ function main() {
   );
 
   // Governance guards.
+  //
+  // These assert the contract in its *owning* document. Until 2026-09-10 they
+  // asserted a verbatim copy in AGENTS.md and a restatement in apps/web/AGENTS.md,
+  // which made the guard require the duplication that .cursor/rules/*.mdc exists to
+  // remove — the root copy was deleted as pure duplication and this check went red.
+  // A guard that pins a rule to a stale address blocks the cleanup instead of the bug.
   expectContains(
-    "AGENTS.md",
-    agents,
-    "### Ownership Matrix (Mandatory)",
-    "Missing Ownership Matrix section in Visual Behavior Contract.",
+    ".cursor/rules/visual-behavior.mdc",
+    visualBehaviorRule,
+    "## Ownership Matrix columns (fixed)",
+    "Missing Ownership Matrix columns section.",
   );
   expectContains(
-    "AGENTS.md",
-    agents,
+    ".cursor/rules/visual-behavior.mdc",
+    visualBehaviorRule,
     "| Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer (z-index/token) | Test Oracle |",
     "Missing required ownership matrix table columns.",
   );
+  // A pointer satisfies this: the rule file is always-applied, so an apps/web agent
+  // already has the matrix loaded. What must not happen is the package file going
+  // silent about it.
   expectContains(
     "apps/web/AGENTS.md",
     webAgents,
-    "behavior-to-CSS ownership matrix",
-    "apps/web AGENTS must reference behavior-to-CSS ownership matrix.",
+    ".cursor/rules/visual-behavior.mdc",
+    "apps/web AGENTS must point at the Visual Behavior Contract in .cursor/rules/visual-behavior.mdc.",
   );
 
   // Spec guards for the current media/item-grid contract.

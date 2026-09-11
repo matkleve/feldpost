@@ -10,7 +10,7 @@
 @if (trayMode() === 'active' && activeItem(); as item) {
   <section
     class="upload-resolver-tray"
-    [attr.data-state]="'active'"
+    [attr.data-state]="trayVisualState()"
     tabindex="0"
     role="region"
     [attr.aria-label]="t('upload.resolver.tray.aria', 'Address resolver')"

@@ -1,3 +1,4 @@
+import { haversineKm } from '../geo/haversine.util';
 import type {
   DisambiguationAlgorithm,
   DisambiguationCandidate,
@@ -6,8 +7,6 @@ import type {
 } from './disambiguation-strategy';
 
 const MIN_SCORE = 0.0001;
-const KM_EARTH_RADIUS = 6371;
-const DEGREE_DIVISOR = 180;
 const DISTANCE_DECAY = -0.1;
 const DISTANCE_FALLBACK_SCORE = 0.3;
 const CLUSTER_ZIP_WEIGHT = 0.35;
@@ -46,16 +45,6 @@ function normalize(
   return positive
     .map((entry) => ({ city: entry.city, probability: clampProbability(entry.score / total) }))
     .sort((a, b) => b.probability - a.probability);
-}
-
-function haversineKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
-  const toRad = (deg: number): number => (deg * Math.PI) / DEGREE_DIVISOR;
-  const dLat = toRad(b.lat - a.lat);
-  const dLng = toRad(b.lng - a.lng);
-  const s1 = Math.sin(dLat / 2) ** 2;
-  const s2 = Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
-  const c = 2 * Math.atan2(Math.sqrt(s1 + s2), Math.sqrt(1 - s1 - s2));
-  return KM_EARTH_RADIUS * c;
 }
 
 export function rankByClusterMajority(

@@ -32,12 +32,22 @@ Implementation: `isContentHashDedupEligible()` in `upload-dedup-eligibility.util
 
 | Algo | Inputs | Used for |
 | --- | --- | --- |
-| `photo_v1` | First 64 KB + file size + EXIF GPS, `capturedAt`, `direction` | Field photos |
-| `binary_v1` | First 64 KB + file size + `\|algo=binary_v1` | Documents, video |
+| `photo_v1` | First 64 KiB + file size + EXIF GPS, `capturedAt`, `direction` | Field photos |
+| `binary_v1` | First 64 KiB + file size + `\|algo=binary_v1` | Documents, video |
+
+### 64 KiB head truncation (UP-37)
+
+Content fingerprints hash **only the first 65 536 bytes** of the source file (`readFileHead` in `content-hash.util.ts`), plus `file.size` and algorithm-specific metadata. This is load-bearing:
+
+- For typical field photos the 64 KiB head is a **strict subset** of the full file — head hash and full-file SHA-256 **differ**.
+- Dedup is intentionally **not** a whole-file hash; changing the truncation window would change every stored `content_hash` in `dedup_hashes`.
+- EXIF GPS / `capturedAt` / `direction` are mixed into `photo_v1` separately; they do not replace the byte head.
 
 Filename is never in the fingerprint. EXIF edits change `photo_v1` only.
 
-Dispatch: `computeUploadContentHash(file, parsedExif, mediaType)` in `content-hash.util.ts`.
+**Source bytes:** Fingerprints are computed from the user-selected source file (`job.sourceFile`), not from HEIC→JPEG conversion output. HEIC conversion runs after the dedup gate, immediately before storage write.
+
+Dispatch: `resolveUploadSourceFile(job)` → `computeUploadContentHash(sourceFile, parsedExif, mediaType)` in `content-hash.util.ts`.
 
 ## Dedup scope (tenant)
 
@@ -69,6 +79,16 @@ Migration: `20260611120000_dedup_hashes_org_scope.sql`.
 | `upload_anyway` | New media row + storage object; org hash row unchanged |
 | Replace / attach | Same dedup gate (photo-only validation on those flows) |
 
+## Replace hash retirement
+
+When a media item's bytes are replaced, stale `dedup_hashes` rows for that `media_item_id` must be retired server-side before the new hash is inserted. The client calls `retire_dedup_hashes_for_media_item(p_media_item_id, p_keep_content_hash)` (SECURITY DEFINER; org derived from the media row). This prevents re-uploading the replaced file from matching a stale hash row.
+
+Migration: `20260910120000_retire_dedup_hashes_for_media_item.sql`.
+
+## In-flight dedup guard
+
+Between hash computation and successful save, an identical file submitted inside the 3-job concurrency window must not pass dedup twice. `upload-inflight-dedup.registry.ts` reserves `(content_hash → jobId, userId)` after the DB lookup misses; a second job with the same hash auto-skips (same user) or surfaces `duplicate_file` (colleague) before storage write.
+
 ## Acceptance criteria
 
 - [x] `dedup_hashes` uses `UNIQUE(organization_id, content_hash)` with `organization_id` backfill
@@ -77,4 +97,6 @@ Migration: `20260611120000_dedup_hashes_org_scope.sql`.
 - [x] Same-user match auto-skips without modal
 - [x] Cross-user org match surfaces `duplicate_file` issue + modal
 - [x] `photo_v1` + `binary_v1` cover photo, document, and video
+- [x] Replace retires stale `dedup_hashes` rows via `retire_dedup_hashes_for_media_item` before inserting the new hash
+- [x] In-flight hash reservation prevents duplicate storage writes inside the concurrency window
 - [ ] `use_existing` links project context when batch has project filter (parent AC — verify end-to-end)

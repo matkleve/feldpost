@@ -15,6 +15,7 @@ import type {
   UploadDiscriminatingField,
   UploadDisambiguationCollapseStage,
 } from '../upload-manager.types';
+import { haversineMeters } from '../../geo/haversine.util';
 import {
   formatSearchObjectLabel,
 } from '../../location-path-parser/upload-search-object.builder';
@@ -23,6 +24,7 @@ import {
   searchObjectHasLocality,
   type ProjectGeocodeCentroid,
 } from '../../location-path-parser/upload-search-object.completeness.helpers';
+import { normalizeAdminValue } from '../../location-path-parser/upload-address-level-map.helpers';
 import type {
   UploadGroupResolutionState,
   UploadLocationRowHit,
@@ -350,22 +352,6 @@ export function mapGeocoderHitsToCandidates(hits: GeocoderSearchResult[]): Uploa
   });
 }
 
-export function haversineMeters(
-  lat1: number,
-  lng1: number,
-  lat2: number,
-  lng2: number,
-): number {
-  const toRad = (deg: number) => (deg * Math.PI) / 180;
-  const r = 6371000;
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return 2 * r * Math.asin(Math.sqrt(a));
-}
-
 function pickExifAssistCandidate(
   candidates: UploadAddressCandidate[],
   exifCoords: ExifCoords,
@@ -439,26 +425,54 @@ export function shouldSplitGroupByPhotonUnitCoords(
   return maxDist > unitGeocodeSplitMinMeters;
 }
 
+/** Candidate id prefix for CITY-01 EXIF reverse-geocode city option. */
+export const BRANCH_C_EXIF_CITY_CANDIDATE_PREFIX = 'exif-city-';
+
 /**
- * Branch C auto-assign blocked — force city_step when EXIF disagrees with Photon auto city.
+ * Build numbered city options for CITY-01: Photon auto city vs EXIF reverse-geocode city.
+ * @see docs/specs/service/media-upload-service/upload-address-resolution.branch-c-city-tray.md#city-01
+ */
+export function buildBranchCCity01Candidates(
+  autoCandidate: UploadAddressCandidate,
+  exifReverseCity: string,
+  exifCoords: ExifCoords,
+): UploadAddressCandidate[] {
+  const exifCity = exifReverseCity.trim();
+  const exifCandidate: UploadAddressCandidate = {
+    id: `${BRANCH_C_EXIF_CITY_CANDIDATE_PREFIX}${normalizeAdminValue(exifCity)}`,
+    addressLabel: exifCity,
+    lat: exifCoords.lat,
+    lng: exifCoords.lng,
+    city: exifCity,
+  };
+  return [autoCandidate, exifCandidate];
+}
+
+/**
+ * Branch C auto-assign blocked — force city_step when EXIF reverse-geocode city disagrees with Photon auto city.
  * @see docs/specs/service/media-upload-service/upload-address-resolution.branch-c-city-tray.md#city-01
  */
 export function shouldForceBranchCCityTray(
   group: Pick<UploadGroupResolutionState, 'geocodeBranch' | 'searchObject'>,
   outcome: ClassifySearchOutcome,
-  exifCoords: ExifCoords | undefined,
-  sourceAgreementRadiusMeters: number,
+  exifReverseCity: string | null | undefined,
 ): boolean {
-  if (group.geocodeBranch !== 'branch_c' || outcome.kind !== 'auto' || !exifCoords) {
+  if (group.geocodeBranch !== 'branch_c' || outcome.kind !== 'auto') {
     return false;
   }
   const so = group.searchObject;
   if (so.city?.trim() || so.houseNumber?.trim()) {
     return false;
   }
-  const auto = outcome.candidate;
-  const dist = haversineMeters(exifCoords.lat, exifCoords.lng, auto.lat, auto.lng);
-  return dist > sourceAgreementRadiusMeters;
+  const autoCity = outcome.candidate.city?.trim();
+  if (!autoCity) {
+    return false;
+  }
+  const exifCity = exifReverseCity?.trim();
+  if (!exifCity) {
+    return false;
+  }
+  return normalizeAdminValue(autoCity) !== normalizeAdminValue(exifCity);
 }
 
 /**

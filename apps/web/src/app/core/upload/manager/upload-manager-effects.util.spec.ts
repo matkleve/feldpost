@@ -25,7 +25,7 @@ function buildDeps(overrides: Partial<UploadManagerEffectsDeps<{ id: string }>> 
     createEffect: vi.fn<(runner: () => void) => void>(),
     getUser: () => ({ id: 'user-1' }),
     hasRunning: () => false,
-    cancelAllActive: vi.fn<() => void>(),
+    cancelAllActive: vi.fn<() => Promise<void>>().mockResolvedValue(undefined),
     isBusy: () => false,
     addBeforeUnloadListener: vi.fn<(handler: (event: BeforeUnloadEvent) => void) => void>(),
     removeBeforeUnloadListener: vi.fn<(handler: (event: BeforeUnloadEvent) => void) => void>(),

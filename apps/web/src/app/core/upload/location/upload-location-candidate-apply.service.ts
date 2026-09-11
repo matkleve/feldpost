@@ -49,15 +49,6 @@ export class UploadLocationCandidateApplyService {
       void this.trayFlow.applyAdminLevelConflictChoice(group, candidateId);
       return;
     }
-    if (
-      group.disambiguationKind === 'source' &&
-      candidateId === SOURCE_CONFLICT_NONE_CANDIDATE_ID
-    ) {
-      this.sourceConflict.markSourceConflictResolved(group.batchId, group.queryKey, candidateId);
-      this.resolution().deferGroup(groupId);
-      return;
-    }
-
     if (group.disambiguationKind === 'source') {
       this.sourceConflict.applySourceCandidateToGroup(group, candidateId, candidate);
       const resolvedEvent: DisambiguationResolvedEvent = {
@@ -69,7 +60,9 @@ export class UploadLocationCandidateApplyService {
       this.resolution().notifyDisambiguationResolved(resolvedEvent);
       this.disambiguationStore.syncBatchDisambiguationAggregates(group.batchId);
       this.disambiguationStore.pickNextActiveGroup(group.batchId);
-      this.unblockSiblingsAfterSourceConflictSave(group.batchId, group.queryKey);
+      if (candidateId !== SOURCE_CONFLICT_NONE_CANDIDATE_ID) {
+        this.unblockSiblingsAfterSourceConflictSave(group.batchId, group.queryKey);
+      }
       return;
     }
 

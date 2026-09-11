@@ -33,6 +33,12 @@ Use **AskQuestion** when choices are discrete (e.g. project scope: WorkspaceView
 
 **Stop implementing** when you are still unsure about the user’s invariant — even mid-task. A correction after three wrong assumptions means you should have asked more up front.
 
+### Check the sibling repository before inventing a convention
+
+The row above — *do not guess table or tuning names from the prompt* — is the small version of a larger failure. Before inventing **any** convention (a document format, a folder layout, an ID scheme, a status vocabulary), check whether the sibling repository already has one, and adopt it. Generalising from the one repo you happen to be looking at produces a parallel, weaker system whose vocabulary collides with the working one, and the collision surfaces later, when both are in use and neither can be dropped cheaply.
+
+Live instance from this repo: [`docs/study/STUDY-FORMAT.md`](../study/STUDY-FORMAT.md) had to be written from a secondhand description because the Grundriss repository was unreachable from the agent VM. It therefore records Grundriss as authoritative on any divergence — a note that only exists because the check could not be performed. When the sibling repo is genuinely unreachable, say so, name the authority, and mark what you wrote as provisional; do not present an invented convention as settled.
+
 ---
 
 ## Clarification round (before multi-file work)
@@ -124,6 +130,24 @@ Map prompt names to repo truth: `media_items`, `contextDistanceMaxMeters`, `apps
 - Inventing tuning keys or table names from the prompt without grep/schema check.
 - Long architecture essays when **simple fix gate** applies (≤3 lines / one conditional).
 - Implementing while the user is still iterating the **plan document** (unless they say execute).
+
+### Revert the failed attempt before trying the next idea
+
+A fix that did not work is **not neutral** — it is now a confounding variable. Leaving it in place while you try something else means the next result is produced by a system nobody has read: two half-fixes interacting, one of which you already know is wrong. Revert first, confirm the symptom is unchanged, then attempt the next idea.
+
+This repo has a documented instance: [`docs/ai-diary/2026-07-01.md`](../ai-diary/2026-07-01.md) records a bug caused by an escape hatch (an unlayered CSS rule left behind to "beat a third-party class") added during an *earlier* attempt at a *different* problem. It compiled, it looked deliberate, and it silently out-ranked every later `@layer states` rule for the same property.
+
+### After two failed attempts, stop
+
+Do not start a third approach on your own authority. Stop and reply with: what you tried (both attempts, and why each was expected to work), what the user is **actually seeing** now, and **two** options for the next step — with a recommendation and what each would cost. Picking a third approach unilaterally is how a small bug becomes a rewrite: each attempt widens the diff, and by the third the change is too large to review and too entangled to revert.
+
+**When the user says "it works if I turn this off", that is the answer.** Treat it as the lead and investigate that thing first — not as one data point among several to be weighed against your current hypothesis. The user has just handed you a bisect result for free.
+
+---
+
+## Component styling gate (hard)
+
+Do **not** change existing component visual styling — SCSS/Tailwind geometry, colors, borders, sizes, `hlmBtn` variant/size swaps, or replacing design-system primitives with custom CSS — unless the user explicitly approved that visual change in the **current** task. Behavior-only fixes are fine; visual diffs require ask-first. If a spec mandates a visual change the user has not confirmed, emit `⚠ SPEC GAP` and ask before editing styles. Policy: [`.github/agents/README.md`](../../.github/agents/README.md) § Component styling gate.
 
 ---
 

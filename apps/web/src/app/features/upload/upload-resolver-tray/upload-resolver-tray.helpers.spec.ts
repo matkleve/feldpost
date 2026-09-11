@@ -69,12 +69,6 @@ describe('upload-resolver-tray.helpers', () => {
     ).toBe('upload.resolver.question.source');
   });
 
-  it('resolverQuestionKeyForGroup picks context_distance question', () => {
-    expect(
-      resolverQuestionKeyForGroup(group({ disambiguationKind: 'context_distance' })),
-    ).toBe('upload.resolver.question.contextDistance');
-  });
-
   it('resolverQuestionKeyForGroup picks city_step question', () => {
     expect(
       resolverQuestionKeyForGroup(group({ disambiguationKind: 'city_step' })),

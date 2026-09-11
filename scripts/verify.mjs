@@ -30,14 +30,21 @@ import { spawnSync } from "node:child_process";
 
 const CHECKS = [
   { name: "doc-links", cmd: "node", args: ["scripts/check-doc-links.mjs"] },
+  { name: "skills-source", cmd: "node", args: ["scripts/check-skills-source.mjs"] },
   {
     name: "spec-code-paths",
     cmd: "node",
     args: ["scripts/check-spec-code-paths.mjs"],
     soft: true,
     debt:
-      "263 broken code paths outside docs/specs/service/media-upload-service, docs/specs/component/upload, docs/specs/ui/upload (2026-09-10) — those three were the upload-process audit's scope and are now clean; the rest is unrelated pre-existing drift across the wider docs/specs tree.",
+      "204 broken code paths (2026-09-10; 263 → 262 when the component registry became generated, → 204 after clearing component/filters, service/filename-parser and service/media-download-service). Clean so far: the upload folders (media-upload-service, component/upload, ui/upload), filters, filename-parser, media-download-service. Largest remaining: ui/workspace 29, component/media 21, component/workspace 19, page 18, component/project 18, component/ui-primitives 16. Roughly 58% are moved files needing a repoint and 42% describe code that no longer exists. Tracked in issue #189.",
   },
+  {
+    name: "component-registry",
+    cmd: "node",
+    args: ["scripts/check-component-registry.mjs"],
+  },
+  { name: "spec-coverage", cmd: "node", args: ["scripts/check-spec-coverage.mjs"] },
   {
     name: "specs",
     cmd: "npm",
@@ -63,6 +70,16 @@ const CHECKS = [
   },
   { name: "build", cmd: "npm", args: ["run", "--silent", "build"] },
 ];
+
+// `--list` exists so documentation can point at a command instead of copying
+// the check names into prose. The copy in docs/agent-workflows/gates-and-commands.md
+// had already lost `component-registry` by the time `spec-coverage` was added.
+if (process.argv.includes("--list")) {
+  for (const check of CHECKS) {
+    console.log(`${check.name}\t${check.soft ? "soft (known debt)" : "hard"}`);
+  }
+  process.exit(0);
+}
 
 const only = process.argv.slice(2);
 const selected = only.length ? CHECKS.filter((c) => only.includes(c.name)) : CHECKS;

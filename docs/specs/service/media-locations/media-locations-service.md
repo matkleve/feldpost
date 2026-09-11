@@ -140,7 +140,7 @@ See [zoomable-map-contract supplement](./media-locations.zoomable-map-contract.s
 
 | Concern | Source |
 | --- | --- |
-| Viewport markers | `viewport_markers` v2 — **zoomable** links only (`lat`, `lng`, `geog`) |
+| Viewport markers | `viewport_markers` v2 — links with `lat`, `lng`, `geog` (**normative:** zoomable / precision-aware only; see supplement §10 drift) |
 | Grid map affordance | `zoomable_location_count` (batch) — must match `locationsWithGps(listForMedia).length` after invalidate (supplement §7) |
 | Tile map picker | [media-item-map-action.md](../../component/media/media-item-map-action.md) → `locationsWithGps` |
 | Marker preview URL | `MediaDownloadService.resolveMarkerPreview(mediaId, path)` |

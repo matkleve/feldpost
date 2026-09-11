@@ -34,7 +34,10 @@ export interface UploadManagerFacadeDepsInput {
   preResolveWave: UploadPreResolveWaveService;
   pipelineHost: UploadManagerPipelineHostService;
   getPipelineCtx: () => PipelineContext;
-  removeUploadResidue: (storagePath: string | undefined, mediaId: string | undefined) => Promise<void>;
+  removeUploadResidue: (
+    storagePath: string | undefined,
+    mediaId: string | undefined,
+  ) => Promise<{ errors: string[] }>;
   hydrateDeferredPreviews: (jobs: ReadonlyArray<UploadJob>) => void;
 }
 
@@ -45,6 +48,7 @@ export function buildUploadManagerActionDeps(
     findJob: (jobId) => input.jobState.findJob(jobId) ?? undefined,
     snapshotJobs: () => input.jobState.snapshot(),
     updateJob: (jobId, patch) => input.jobState.updateJob(jobId, patch),
+    transitionTo: (jobId, phase, options) => input.jobState.transitionTo(jobId, phase, options),
     addJobs: (jobs) => input.jobState.addJobs(jobs),
     removeJob: (jobId) => input.jobState.removeJob(jobId),
     removeTerminalJobs: () => input.jobState.removeTerminalJobs(),
