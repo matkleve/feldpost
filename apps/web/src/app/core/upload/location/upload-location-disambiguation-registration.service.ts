@@ -10,7 +10,6 @@ import {
   mergeDisambiguationGroupPatch,
   type DisambiguationRegistrationInput,
 } from './upload-location-disambiguation-registration.helpers';
-import { UploadLocationResolutionService } from './upload-location-resolution.service';
 import { isGroupBlocked } from './upload-location-resolution.helpers';
 import { uploadTraceDecision, uploadTraceEnter } from '../address-resolution/upload-address-resolution.debug';
 import { UploadLocationTrayProducerAdapter } from '../../upload-resolver-tray-orchestrator/adapters/upload-location-tray-producer.adapter';
@@ -22,10 +21,6 @@ export class UploadLocationDisambiguationRegistrationService {
   private readonly jobState = inject(UploadJobStateService);
   private readonly disambiguationStore = inject(UploadLocationDisambiguationStoreService);
   private readonly injector = inject(Injector);
-
-  private resolution(): UploadLocationResolutionService {
-    return this.injector.get(UploadLocationResolutionService);
-  }
 
   registerDisambiguationGroup(
     input: DisambiguationRegistrationInput,
@@ -112,7 +107,7 @@ export class UploadLocationDisambiguationRegistrationService {
       jobIds: updated.jobIds,
       candidateCount: input.candidates.length,
     };
-    this.resolution().notifyDisambiguationRequired(requiredEvent);
+    this.disambiguationStore.notifyDisambiguationRequired(requiredEvent);
   }
 
   private syncTrayOrchestratorIfNeeded(

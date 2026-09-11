@@ -4,9 +4,16 @@
  */
 
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { Subject } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { UploadBatchService } from '../support/upload-batch.service';
 import { isGroupBlocked, pickCollapseStage } from './upload-location-resolution.helpers';
-import type { UploadAddressCandidate, UploadDisambiguationGroup } from '../upload-manager.types';
+import type {
+  DisambiguationRequiredEvent,
+  DisambiguationResolvedEvent,
+  UploadAddressCandidate,
+  UploadDisambiguationGroup,
+} from '../upload-manager.types';
 
 @Injectable({ providedIn: 'root' })
 export class UploadLocationDisambiguationStoreService {
@@ -17,6 +24,30 @@ export class UploadLocationDisambiguationStoreService {
 
   readonly disambiguationGroups = this._groups.asReadonly();
   readonly selectedGroupId = this._selectedGroupId.asReadonly();
+
+  /**
+   * Moved here from `UploadLocationResolutionService` (UP-26): these two events
+   * are the only state that facade actually owned, and owning them was the one
+   * real reason siblings needed to reach back into it. This is a leaf service
+   * with no location-sibling imports, so owning them here lets callers depend
+   * on the real thing instead of on a facade that only forwards.
+   * @see docs/audits/upload-flow-review-2026-09-10/04-status-of-prior-findings.md UP-26
+   */
+  private readonly _disambiguationRequired$ = new Subject<DisambiguationRequiredEvent>();
+  private readonly _disambiguationResolved$ = new Subject<DisambiguationResolvedEvent>();
+
+  readonly disambiguationRequired$: Observable<DisambiguationRequiredEvent> =
+    this._disambiguationRequired$.asObservable();
+  readonly disambiguationResolved$: Observable<DisambiguationResolvedEvent> =
+    this._disambiguationResolved$.asObservable();
+
+  notifyDisambiguationRequired(event: DisambiguationRequiredEvent): void {
+    this._disambiguationRequired$.next(event);
+  }
+
+  notifyDisambiguationResolved(event: DisambiguationResolvedEvent): void {
+    this._disambiguationResolved$.next(event);
+  }
 
   readonly groupsById = computed(() => {
     const map = new Map<string, UploadDisambiguationGroup>();

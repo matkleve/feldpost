@@ -3,12 +3,12 @@
  * @see docs/specs/service/media-upload-service/upload-address-resolution-pipeline.md
  */
 
-import { Injectable, Injector, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { UploadAddressResolutionOrchestrator } from '../address-resolution/upload-address-resolution.orchestrator';
 import { UploadJobStateService } from '../support/upload-job-state.service';
+import { UploadLocationDisambiguationRegistrationService } from './upload-location-disambiguation-registration.service';
 import { UploadLocationGeocodeGroupService } from './upload-location-geocode-group.service';
 import { UploadLocationPlacementService } from './upload-location-placement.service';
-import { UploadLocationResolutionService } from './upload-location-resolution.service';
 import { UploadLocationTrayFlowService } from './upload-location-tray-flow.service';
 import type { UploadGroupResolutionState } from '../address-resolution/upload-address-resolution.types';
 import {
@@ -32,11 +32,7 @@ export class UploadLocationPreResolveOrchestratorService {
   private readonly geocodeGroup = inject(UploadLocationGeocodeGroupService);
   private readonly placement = inject(UploadLocationPlacementService);
   private readonly trayFlow = inject(UploadLocationTrayFlowService);
-  private readonly injector = inject(Injector);
-
-  private resolution(): UploadLocationResolutionService {
-    return this.injector.get(UploadLocationResolutionService);
-  }
+  private readonly disambiguationRegistration = inject(UploadLocationDisambiguationRegistrationService);
 
   async applyPreResolveFromOrchestrator(
     jobId: string,
@@ -202,7 +198,7 @@ export class UploadLocationPreResolveOrchestratorService {
         groupState.discriminatingField ??
         pickDiscriminatingField(groupState.candidates!) ??
         undefined;
-      this.resolution().registerDisambiguationGroup({
+      this.disambiguationRegistration.registerDisambiguationGroup({
         batchId: job.batchId,
         queryKey: buildDisambiguationQueryKey(job.groupingKey!),
         folderDisplayPath: groupState.folderDisplayPath,
@@ -221,7 +217,7 @@ export class UploadLocationPreResolveOrchestratorService {
     uploadTraceDecision('ulr', 'held — ambiguous geocode tray step 3', {
       candidateCount: groupState.candidates!.length,
     });
-    this.resolution().registerDisambiguationGroup({
+    this.disambiguationRegistration.registerDisambiguationGroup({
       batchId: job.batchId,
       queryKey: buildDisambiguationQueryKey(job.groupingKey!),
       folderDisplayPath: groupState.folderDisplayPath,

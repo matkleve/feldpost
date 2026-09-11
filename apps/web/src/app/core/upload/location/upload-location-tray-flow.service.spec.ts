@@ -12,8 +12,10 @@ import {
   adminLevelManualCandidateId,
   buildAdminConflictCandidates,
 } from './upload-location-admin-level-choice.util';
+import { UploadLocationCandidateApplyService } from './upload-location-candidate-apply.service';
+import { UploadLocationDisambiguationRegistrationService } from './upload-location-disambiguation-registration.service';
 import { UploadLocationDisambiguationStoreService } from './upload-location-disambiguation-store.service';
-import { UploadLocationResolutionService } from './upload-location-resolution.service';
+import { UploadLocationPreResolveOrchestratorService } from './upload-location-pre-resolve-orchestrator.service';
 import { UploadLocationTrayFlowService } from './upload-location-tray-flow.service';
 import type { UploadJob } from '../upload-manager.types';
 import type { UploadGroupResolutionState } from '../address-resolution/upload-address-resolution.types';
@@ -52,21 +54,23 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
   let orchestrator: UploadAddressResolutionOrchestrator;
   let jobState: UploadJobStateService;
   let disambiguationStore: UploadLocationDisambiguationStoreService;
-  let resolutionMock: {
-    registerDisambiguationGroup: ReturnType<typeof vi.fn>;
-    notifyDisambiguationResolved: ReturnType<typeof vi.fn>;
-    applyPreResolveFromOrchestrator: ReturnType<typeof vi.fn>;
+  // UP-26: UploadLocationTrayFlowService no longer routes through the
+  // UploadLocationResolutionService facade — it injects the real owning
+  // services directly (or, for the two genuine mutual dependencies with
+  // candidate-apply / pre-resolve-orchestrator, via Injector.get). Mock
+  // those directly instead of the old facade.
+  let registrationMock: { registerDisambiguationGroup: ReturnType<typeof vi.fn> };
+  let candidateApplyMock: {
     deferGroup: ReturnType<typeof vi.fn>;
     applyCandidateToGroup: ReturnType<typeof vi.fn>;
   };
+  let preResolveOrchestratorMock: { applyPreResolveFromOrchestrator: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
-    resolutionMock = {
-      registerDisambiguationGroup: vi.fn(),
-      notifyDisambiguationResolved: vi.fn(),
+    registrationMock = { registerDisambiguationGroup: vi.fn() };
+    candidateApplyMock = { deferGroup: vi.fn(), applyCandidateToGroup: vi.fn() };
+    preResolveOrchestratorMock = {
       applyPreResolveFromOrchestrator: vi.fn().mockResolvedValue('continue'),
-      deferGroup: vi.fn(),
-      applyCandidateToGroup: vi.fn(),
     };
 
     TestBed.configureTestingModule({
@@ -76,7 +80,9 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
         UploadJobStateService,
         UploadBatchService,
         UploadLocationDisambiguationStoreService,
-        { provide: UploadLocationResolutionService, useValue: resolutionMock },
+        { provide: UploadLocationDisambiguationRegistrationService, useValue: registrationMock },
+        { provide: UploadLocationCandidateApplyService, useValue: candidateApplyMock },
+        { provide: UploadLocationPreResolveOrchestratorService, useValue: preResolveOrchestratorMock },
         {
           provide: GeocodingService,
           useValue: { searchStreetHouseNumbers: vi.fn().mockResolvedValue([]) },
@@ -107,6 +113,7 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
     orchestrator = TestBed.inject(UploadAddressResolutionOrchestrator);
     jobState = TestBed.inject(UploadJobStateService);
     disambiguationStore = TestBed.inject(UploadLocationDisambiguationStoreService);
+    vi.spyOn(disambiguationStore, 'notifyDisambiguationResolved');
 
     for (const job of [...jobState.jobs()]) {
       jobState.removeJob(job.id);
@@ -124,7 +131,7 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
       .find((s) => s.status === 'needsAdminLevelResolution')!;
     trayFlow.registerAdminLevelConflictGroup('batch-tray', adminState);
 
-    expect(resolutionMock.registerDisambiguationGroup).toHaveBeenCalledWith(
+    expect(registrationMock.registerDisambiguationGroup).toHaveBeenCalledWith(
       expect.objectContaining({
         batchId: 'batch-tray',
         disambiguationKind: 'admin_level_conflict',
@@ -134,7 +141,7 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
         ]),
       }),
     );
-    const input = resolutionMock.registerDisambiguationGroup.mock.calls[0]![0];
+    const input = registrationMock.registerDisambiguationGroup.mock.calls[0]![0];
     expect(input.candidates.length).toBeGreaterThanOrEqual(2);
     expect(input.queryKey).toBe(adminState.adminConflictQueryKey);
   });
@@ -180,8 +187,8 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
     const after = orchestrator.listGroupStates('batch-tray');
     expect(after.some((s) => s.status === 'needsAdminLevelResolution')).toBe(false);
     expect(after.some((s) => s.status === 'needsGeocode' || s.status === 'partial')).toBe(true);
-    expect(resolutionMock.notifyDisambiguationResolved).toHaveBeenCalled();
-    expect(resolutionMock.applyPreResolveFromOrchestrator).toHaveBeenCalledWith('job-1');
+    expect(disambiguationStore.notifyDisambiguationResolved).toHaveBeenCalled();
+    expect(preResolveOrchestratorMock.applyPreResolveFromOrchestrator).toHaveBeenCalledWith('job-1');
   });
 
   it('applyAdminLevelConflictChoice accepts manual city entry on Wien/Innsbruck street path', async () => {
@@ -224,7 +231,7 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
 
     const after = orchestrator.listGroupStates('batch-tray');
     expect(after.some((s) => s.status === 'needsAdminLevelResolution')).toBe(false);
-    expect(resolutionMock.applyPreResolveFromOrchestrator).toHaveBeenCalledWith('job-1');
+    expect(preResolveOrchestratorMock.applyPreResolveFromOrchestrator).toHaveBeenCalledWith('job-1');
   });
 
   it('G2: cascading re-registration uses buildAdminConflictSignature not field names', async () => {
@@ -313,7 +320,7 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
     jobState.addJobs([buildJob({ id: 'job-1' })]);
     trayFlow.registerContainmentCheckGroup('batch-tray', state);
 
-    expect(resolutionMock.registerDisambiguationGroup).toHaveBeenCalledWith(
+    expect(registrationMock.registerDisambiguationGroup).toHaveBeenCalledWith(
       expect.objectContaining({
         batchId: 'batch-tray',
         disambiguationKind: 'containment_check',
@@ -375,8 +382,8 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
 
     trayFlow.applyContainmentCheckChoice(group, 'enter-different');
 
-    expect(resolutionMock.deferGroup).not.toHaveBeenCalled();
-    expect(resolutionMock.registerDisambiguationGroup).toHaveBeenCalledWith(
+    expect(candidateApplyMock.deferGroup).not.toHaveBeenCalled();
+    expect(registrationMock.registerDisambiguationGroup).toHaveBeenCalledWith(
       expect.objectContaining({
         disambiguationKind: 'city_step',
         trayStep: '1a',
@@ -407,7 +414,7 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
     trayFlow.applyTrayHouseSelection(group.id, null, true);
     await Promise.resolve();
 
-    expect(resolutionMock.deferGroup).not.toHaveBeenCalled();
-    expect(resolutionMock.applyCandidateToGroup).toHaveBeenCalledWith(group.id, 'street-centroid');
+    expect(candidateApplyMock.deferGroup).not.toHaveBeenCalled();
+    expect(candidateApplyMock.applyCandidateToGroup).toHaveBeenCalledWith(group.id, 'street-centroid');
   });
 });
