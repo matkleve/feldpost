@@ -11,8 +11,14 @@ trays, storage key and `media_items` payload — with a real-vs-mock legend at t
 npm run trace:upload                                      # 15 curated files
 npm run trace:upload -- --count=150 --seed=7 --detail=5    # generated corpus
 npm run trace:upload -- --answer-trays                     # continue past the user gate
+npm run trace:upload -- --scale=100000                     # database-scale cost measurement
 npm run trace:upload -- --out=trace.txt                    # keep the report
 ```
+
+`--scale=N` answers the company-migration question instead of tracing a batch: it streams N
+generated paths through the real Search Object builder and measures the real job store, then
+projects to 10 000 / 100 000 / 1 000 000 files. The full end-to-end run tops out around 5 000
+files (~3.5 min); the scale tier handles 100 000+ because it materialises nothing.
 
 The harness itself is a Vitest spec (`apps/web/src/app/core/upload/trace/upload-pipeline-trace.spec.ts`)
 so it drives the real Angular services; this wrapper only maps flags to env vars and prints the

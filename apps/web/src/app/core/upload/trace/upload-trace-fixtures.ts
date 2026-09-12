@@ -26,10 +26,11 @@ export interface UploadTraceScenario {
    */
   exifCoords?: { lat: number; lng: number };
   /**
-   * Fill byte for the file body. Two scenarios sharing byte AND size hash identically,
-   * which is how content dedup gets exercised.
+   * Body identity. The synthetic body is derived from this number, so two scenarios sharing a
+   * `contentSeed` and `sizeBytes` hash identically and nothing else collides — which is how
+   * content dedup is exercised without accidental duplicates at scale.
    */
-  contentByte: number;
+  contentSeed: number;
   sizeBytes: number;
 }
 
@@ -47,7 +48,7 @@ export const TRACE_SCENARIOS: readonly UploadTraceScenario[] = [
     intent: 'Full admin chain + street + house number',
     relativePath: 'AT/Wien/1090/Währinger Straße 12/IMG_1274.jpg',
     mimeType: JPEG,
-    contentByte: 1,
+    contentSeed: 1,
     sizeBytes: SIZE,
   },
   {
@@ -55,7 +56,7 @@ export const TRACE_SCENARIOS: readonly UploadTraceScenario[] = [
     intent: 'Same folder as S01 — must share one groupingKey (one geocode for two files)',
     relativePath: 'AT/Wien/1090/Währinger Straße 12/IMG_1275.jpg',
     mimeType: JPEG,
-    contentByte: 2,
+    contentSeed: 2,
     sizeBytes: SIZE,
   },
   {
@@ -63,7 +64,7 @@ export const TRACE_SCENARIOS: readonly UploadTraceScenario[] = [
     intent: 'City + street, no country, no postcode',
     relativePath: 'Graz/Annenstraße 10/DSC_0001.jpg',
     mimeType: JPEG,
-    contentByte: 3,
+    contentSeed: 3,
     sizeBytes: SIZE,
   },
   {
@@ -71,7 +72,7 @@ export const TRACE_SCENARIOS: readonly UploadTraceScenario[] = [
     intent: 'Postcode without city — PLZ expand from at-plz.json',
     relativePath: 'AT/4020/Landstraße 7/foto.jpg',
     mimeType: JPEG,
-    contentByte: 4,
+    contentSeed: 4,
     sizeBytes: SIZE,
   },
   {
@@ -79,7 +80,7 @@ export const TRACE_SCENARIOS: readonly UploadTraceScenario[] = [
     intent: 'Street only, no locality, no project centroid',
     relativePath: 'Hauptstraße 5/IMG_3001.jpg',
     mimeType: JPEG,
-    contentByte: 5,
+    contentSeed: 5,
     sizeBytes: SIZE,
   },
   {
@@ -87,7 +88,7 @@ export const TRACE_SCENARIOS: readonly UploadTraceScenario[] = [
     intent: 'Two city tokens at different folder levels',
     relativePath: 'AT/Wien/Innsbruck/Maria-Theresien-Straße 18/IMG_4001.jpg',
     mimeType: JPEG,
-    contentByte: 6,
+    contentSeed: 6,
     sizeBytes: SIZE,
   },
   {
@@ -95,7 +96,7 @@ export const TRACE_SCENARIOS: readonly UploadTraceScenario[] = [
     intent: 'Filename street contradicts folder street',
     relativePath: 'Graz/Annenstraße 10/Annenstraße 12 Detail.jpg',
     mimeType: JPEG,
-    contentByte: 7,
+    contentSeed: 7,
     sizeBytes: SIZE,
   },
   {
@@ -103,7 +104,7 @@ export const TRACE_SCENARIOS: readonly UploadTraceScenario[] = [
     intent: 'Stiege + Tür — units on the SO, excluded from groupingKey',
     relativePath: 'AT/Graz/8010/Annenstraße 10/Stiege 2/Tür 5/IMG_5001.jpg',
     mimeType: JPEG,
-    contentByte: 8,
+    contentSeed: 8,
     sizeBytes: SIZE,
   },
   {
@@ -111,7 +112,7 @@ export const TRACE_SCENARIOS: readonly UploadTraceScenario[] = [
     intent: 'AT "Top" unit shorthand',
     relativePath: 'AT/Wien/1010/Kärntner Straße 4/Top 3/IMG_6001.jpg',
     mimeType: JPEG,
-    contentByte: 9,
+    contentSeed: 9,
     sizeBytes: SIZE,
   },
   {
@@ -119,7 +120,7 @@ export const TRACE_SCENARIOS: readonly UploadTraceScenario[] = [
     intent: 'Salzburg — state name equals city name',
     relativePath: 'AT/Salzburg/Getreidegasse 9/IMG_7001.jpg',
     mimeType: JPEG,
-    contentByte: 10,
+    contentSeed: 10,
     sizeBytes: SIZE,
   },
   {
@@ -127,7 +128,7 @@ export const TRACE_SCENARIOS: readonly UploadTraceScenario[] = [
     intent: 'No address signal at all',
     relativePath: 'Baustelle Süd/Woche 12/IMG_8001.jpg',
     mimeType: JPEG,
-    contentByte: 11,
+    contentSeed: 11,
     sizeBytes: SIZE,
   },
   {
@@ -136,7 +137,7 @@ export const TRACE_SCENARIOS: readonly UploadTraceScenario[] = [
     relativePath: 'Rohdaten/Kamera A/IMG_9001.jpg',
     mimeType: JPEG,
     exifCoords: { lat: 47.0707, lng: 15.4395 },
-    contentByte: 12,
+    contentSeed: 12,
     sizeBytes: SIZE,
   },
   {
@@ -145,7 +146,7 @@ export const TRACE_SCENARIOS: readonly UploadTraceScenario[] = [
     relativePath: 'AT/Wien/1010/Kärntner Straße 4/IMG_9100.jpg',
     mimeType: JPEG,
     exifCoords: { lat: 47.0707, lng: 15.4395 },
-    contentByte: 13,
+    contentSeed: 13,
     sizeBytes: SIZE,
   },
   {
@@ -153,7 +154,7 @@ export const TRACE_SCENARIOS: readonly UploadTraceScenario[] = [
     intent: 'Byte-identical to S01 — duplicate content inside one batch',
     relativePath: 'AT/Wien/1090/Währinger Straße 12/Kopie von IMG_1274.jpg',
     mimeType: JPEG,
-    contentByte: 1,
+    contentSeed: 1,
     sizeBytes: SIZE,
   },
   {
@@ -161,14 +162,25 @@ export const TRACE_SCENARIOS: readonly UploadTraceScenario[] = [
     intent: 'PDF document under a parseable folder address',
     relativePath: 'AT/Wien/1090/Währinger Straße 12/Abnahmeprotokoll.pdf',
     mimeType: TRACE_DOCUMENT_MIME,
-    contentByte: 15,
+    contentSeed: 15,
     sizeBytes: TRACE_DOCUMENT_SIZE_BYTES,
   },
 ];
 
-/** Synthetic `File` — a single repeated byte, so there are no real image or EXIF bytes. */
+const SEED_HEADER_BYTES = 4;
+const BYTE_MASK = 0xff;
+const BYTE_BITS = 8;
+
+/**
+ * Synthetic `File` — no real image or EXIF bytes. The body is a repeated byte with the
+ * `contentSeed` written into the first four, so equal seeds hash equal and unequal seeds do not.
+ * The hash reads the first 64 KB, so the header is always inside the hashed window.
+ */
 export function scenarioToFile(scenario: UploadTraceScenario): File {
-  const body = new Uint8Array(scenario.sizeBytes).fill(scenario.contentByte);
+  const body = new Uint8Array(scenario.sizeBytes).fill(scenario.contentSeed & BYTE_MASK);
+  for (let offset = 0; offset < SEED_HEADER_BYTES && offset < body.length; offset += 1) {
+    body[offset] = (scenario.contentSeed >>> (offset * BYTE_BITS)) & BYTE_MASK;
+  }
   const leaf = scenario.relativePath.split('/').pop() ?? 'file.bin';
   return new File([body], leaf, { type: scenario.mimeType });
 }

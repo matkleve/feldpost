@@ -1,9 +1,13 @@
 /**
  * Deterministic scale-up corpus for the upload pipeline trace harness.
  *
- * `buildGeneratedScenarios(150, 7)` always produces the same 150 paths, so a trace can be
- * re-run and compared. Shapes are drawn from the same folder conventions as the curated
- * corpus in `upload-trace-fixtures.ts`.
+ * `buildGeneratedScenario(index, seed)` is **index-addressable**: scenario 900_000 can be built
+ * without building the 899_999 before it, and it is always the same path for a given seed. That
+ * is what lets the scale tier stream a million paths without materialising them.
+ * `buildGeneratedScenarios(count, seed)` is the array form for ordinary runs.
+ *
+ * Shapes are drawn from the same folder conventions as the curated corpus in
+ * `upload-trace-fixtures.ts`.
  *
  * @see docs/playbooks/upload-pipeline-trace.md
  */
@@ -93,11 +97,14 @@ const MAX_TOP = 12;
 const MAX_BAULOS = 5;
 const FILENAME_ADDRESS_OFFSET = 2;
 const LEAF_NUMBER_BASE = 2000;
+/**
+ * Six-digit leaf numbers cannot be read as an AT postcode (4 digits) or a house number
+ * (≤ 4 digits), so `neutral` naming isolates folder behaviour from the file-name defect.
+ */
+const NEUTRAL_LEAF_NUMBER_BASE = 100_000;
 const ID_PAD_WIDTH = 3;
 /** Every Nth generated file reuses the previous body, so dedup is exercised at scale. */
 const DUPLICATE_EVERY = 17;
-const CONTENT_BYTE_BASE = 16;
-const CONTENT_BYTE_SPAN = 200;
 const EXIF_SHARE = 0.2;
 
 interface ShapeInput {
@@ -137,39 +144,75 @@ function buildSegments(shape: GeneratedShape, input: ShapeInput): string[] {
   }
 }
 
-export function buildGeneratedScenarios(count: number, seed: number): UploadTraceScenario[] {
-  const rng = createRandom(seed);
-  const scenarios: UploadTraceScenario[] = [];
+/** Per-index seed, so every scenario is reproducible on its own. */
+const INDEX_SEED_STRIDE = 2654435761;
+/**
+ * Content seeds start above the curated corpus's range, so a generated body never collides with
+ * a curated one by accident — only the deliberate every-Nth duplicate collides.
+ */
+const CONTENT_SEED_BASE = 1000;
 
-  for (let index = 0; index < count; index += 1) {
-    const shape = pick(rng, SHAPES);
-    const locality = pick(rng, LOCALITIES);
-    const street = pick(rng, STREETS);
-    const houseNumber = 1 + Math.floor(rng() * MAX_HOUSE_NUMBER);
-    const segments = buildSegments(shape, { rng, ...locality, street, houseNumber });
-    // Every leaf carries IMG_<index> so file names stay unique across the corpus — the flat
-    // multi-file run identifies jobs by file name alone.
-    const leaf = `IMG_${LEAF_NUMBER_BASE + index}`;
-    const fileName =
-      shape === 'filename_address'
-        ? `${street} ${houseNumber + FILENAME_ADDRESS_OFFSET} Detail ${leaf}.jpg`
-        : `${leaf}.jpg`;
+/**
+ * Build scenario `index` (0-based) for `seed`, independent of every other index.
+ *
+ * Every leaf carries `IMG_<index>` so file names stay unique across the corpus — the flat
+ * multi-file run identifies jobs by file name alone.
+ */
+/**
+ * `camera` reproduces what cameras actually write (`IMG_2001.jpg`), whose 4-digit number the
+ * parser reads as a postcode. `neutral` keeps everything else identical but uses a 6-digit
+ * number, so the two can be compared.
+ */
+export type GeneratedNaming = 'camera' | 'neutral';
 
-    const previous = scenarios[scenarios.length - 1];
-    const isDuplicate = index > 0 && index % DUPLICATE_EVERY === 0 && previous !== undefined;
+export function buildGeneratedScenario(
+  index: number,
+  seed: number,
+  naming: GeneratedNaming = 'camera',
+): UploadTraceScenario {
+  const rng = createRandom((seed + index * INDEX_SEED_STRIDE) >>> 0);
+  const shape = pick(rng, SHAPES);
+  const locality = pick(rng, LOCALITIES);
+  const street = pick(rng, STREETS);
+  const houseNumber = 1 + Math.floor(rng() * MAX_HOUSE_NUMBER);
+  const segments = buildSegments(shape, { rng, ...locality, street, houseNumber });
+  const leafBase = naming === 'neutral' ? NEUTRAL_LEAF_NUMBER_BASE : LEAF_NUMBER_BASE;
+  const leaf = `IMG_${leafBase + index}`;
+  const fileName =
+    shape === 'filename_address'
+      ? `${street} ${houseNumber + FILENAME_ADDRESS_OFFSET} Detail ${leaf}.jpg`
+      : `${leaf}.jpg`;
 
-    scenarios.push({
-      id: `G${String(index + 1).padStart(ID_PAD_WIDTH, '0')}`,
-      intent: isDuplicate ? `generated:${shape} (duplicate body)` : `generated:${shape}`,
-      relativePath: [...segments, fileName].join('/'),
-      mimeType: TRACE_PHOTO_MIME,
-      exifCoords: rng() < EXIF_SHARE ? stubCityCoords(locality.city) : undefined,
-      contentByte: isDuplicate
-        ? previous.contentByte
-        : CONTENT_BYTE_BASE + (index % CONTENT_BYTE_SPAN),
-      sizeBytes: TRACE_PHOTO_SIZE_BYTES,
-    });
-  }
+  // Every Nth file reuses the previous file's body, so dedup is exercised at scale.
+  const isDuplicate = index > 0 && index % DUPLICATE_EVERY === 0;
+  // `photo_v1` hashes EXIF GPS alongside the bytes, so a duplicate must copy the EXIF too or it
+  // is not a duplicate to the pipeline. The predecessor is never itself a duplicate, so this
+  // recurses exactly one level.
+  const exifCoords = isDuplicate
+    ? buildGeneratedScenario(index - 1, seed, naming).exifCoords
+    : rng() < EXIF_SHARE
+      ? stubCityCoords(locality.city)
+      : undefined;
 
-  return scenarios;
+  return {
+    id: `G${String(index + 1).padStart(ID_PAD_WIDTH, '0')}`,
+    intent: isDuplicate ? `generated:${shape} (duplicate body)` : `generated:${shape}`,
+    relativePath: [...segments, fileName].join('/'),
+    mimeType: TRACE_PHOTO_MIME,
+    exifCoords,
+    // Unique per index, except where a duplicate is wanted — so dedup counts stay meaningful
+    // at any corpus size instead of colliding by accident.
+    contentSeed: CONTENT_SEED_BASE + (isDuplicate ? index - 1 : index),
+    sizeBytes: TRACE_PHOTO_SIZE_BYTES,
+  };
+}
+
+export function buildGeneratedScenarios(
+  count: number,
+  seed: number,
+  naming: GeneratedNaming = 'camera',
+): UploadTraceScenario[] {
+  return Array.from({ length: count }, (_unused, index) =>
+    buildGeneratedScenario(index, seed, naming),
+  );
 }

@@ -16,6 +16,7 @@
  *   npm run trace:upload                       # 15 curated files
  *   npm run trace:upload -- --count=150        # + generated corpus
  *   npm run trace:upload -- --count=150 --seed=7 --detail=20 --answer-trays
+ *   npm run trace:upload -- --scale=20000      # database-scale cost, classification + job store
  *
  * @see docs/playbooks/upload-pipeline-trace.md
  */
@@ -32,6 +33,13 @@ import { loadRealGeo, runTraceBatch, waitForBatchSettled } from './upload-trace-
 import { autoAnswerTrays } from './upload-trace-tray-answers';
 import { jobsByPath, printPersistReport, printTraceReport } from './upload-trace-report';
 import { renderHeading } from './upload-trace-render';
+import { measureClassifyAtScale, measureJobStoreAtScale } from './upload-trace-scale';
+import {
+  SCALE_CAVEAT,
+  renderClassifyScale,
+  renderJobStoreScale,
+  renderScaleHeading,
+} from './upload-trace-scale-report';
 
 const PRINT = process.env['UPLOAD_TRACE'] === '1';
 const DEFAULT_SEED = 7;
@@ -41,6 +49,17 @@ const DETAIL = Number(process.env['UPLOAD_TRACE_DETAIL'] ?? TRACE_SCENARIOS.leng
 /** Off by default: answering every tray with the first candidate is an exploration, not truth. */
 const ANSWER_TRAYS = process.env['UPLOAD_TRACE_ANSWER_TRAYS'] === '1';
 const TRACE_TIMEOUT_MS = 300_000;
+const SCALE_TIMEOUT_MS = 1_800_000;
+/**
+ * Files classified by the scale tier. Small by default so it stays a cheap regression test —
+ * pass `--scale=N` for a measurement run.
+ */
+const DEFAULT_SCALE_FILES = 500;
+const SCALE_FILES = Number(process.env['UPLOAD_TRACE_SCALE'] ?? DEFAULT_SCALE_FILES);
+/** Batch sizes the job store is measured at. Kept modest — the cost is quadratic. */
+const JOB_STORE_SIZES = [100, 1_000, 5_000, 20_000] as const;
+/** Streaming by index must keep memory flat; a leak would blow past this. */
+const MAX_SCALE_HEAP_MB = 512;
 
 function buildCorpus(): UploadTraceScenario[] {
   if (COUNT <= TRACE_SCENARIOS.length) {
@@ -80,6 +99,11 @@ async function runLocationRequiredTrace(): Promise<void> {
     emit,
     trayAnswers,
   });
+
+  const stillActive = settled.jobs
+    .filter((job) => ACTIVE_PHASES.has(job.phase))
+    .map((job) => `${job.relativePath}=${job.phase}`);
+  emit(`\n  jobs still in an active phase when the settle budget ran out: ${stillActive.length}`);
 
   expect(settled.jobs.length).toBe(scenarios.length);
   expect(jobsByPath(settled).size).toBe(scenarios.length);
@@ -152,6 +176,43 @@ async function runLocationOptionalFolderTrace(): Promise<void> {
   expect(stuck.map((job) => `${job.relativePath}=${job.phase}`)).toEqual([]);
 }
 
+/**
+ * The full pipeline does not reach company scale (see the playbook's measured ceiling), so this
+ * measures the two costs that dominate it, each against real production code.
+ */
+async function runScaleTrace(): Promise<void> {
+  const geo = loadRealGeo();
+  const camera = measureClassifyAtScale(SCALE_FILES, SEED, geo, 'camera');
+  const neutral = measureClassifyAtScale(SCALE_FILES, SEED, geo, 'neutral');
+  const jobStore = measureJobStoreAtScale(JOB_STORE_SIZES);
+
+  emit(renderScaleHeading());
+  emit('  1 · Search Object classification (classifyBatch, synchronous, before any upload)');
+  emit(renderClassifyScale(camera));
+  emit(
+    '\n  Same folders and shapes, but 6-digit leaf numbers that cannot be read as an AT postcode.\n' +
+      '  The difference is what the file-name classification costs, separated from folder shape:',
+  );
+  emit(renderClassifyScale(neutral));
+  emit('\n  2 · Job store (UploadJobStateService.updateJob / findJob)');
+  emit(renderJobStoreScale(jobStore));
+  emit(SCALE_CAVEAT);
+
+  for (const result of [camera, neutral]) {
+    // Every file lands in exactly one group.
+    const grouped = [...result.outcomes.values()].reduce((sum, count) => sum + count, 0);
+    expect(grouped).toBe(SCALE_FILES);
+    expect(result.distinctGroups).toBeGreaterThan(0);
+    expect(result.distinctGroups).toBeLessThanOrEqual(SCALE_FILES);
+  }
+  // Streaming by index must not accumulate per-file state.
+  expect(camera.heapUsedMb).toBeLessThan(MAX_SCALE_HEAP_MB);
+  // The job store's per-write cost must be measurable at every size, or the numbers are noise.
+  for (const sample of jobStore) {
+    expect(sample.updateMs, `no measurable updateJob cost at ${sample.jobs} jobs`).toBeGreaterThan(0);
+  }
+}
+
 describe('upload pipeline trace harness', () => {
   beforeEach(() => {
     clearInflightDedupRegistryForTests();
@@ -174,5 +235,11 @@ describe('upload pipeline trace harness', () => {
     'C \u00b7 folder submit with location optional — what the optional mode actually skips',
     runLocationOptionalFolderTrace,
     TRACE_TIMEOUT_MS,
+  );
+
+  it(
+    'D \u00b7 scale — classification throughput and job-store cost at batch size',
+    runScaleTrace,
+    SCALE_TIMEOUT_MS,
   );
 });

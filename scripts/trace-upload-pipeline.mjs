@@ -11,6 +11,7 @@
  *   npm run trace:upload
  *   npm run trace:upload -- --count=150 --seed=7 --detail=20
  *   npm run trace:upload -- --answer-trays
+ *   npm run trace:upload -- --scale=100000
  *   npm run trace:upload -- --out=trace.txt
  *
  * @see docs/playbooks/upload-pipeline-trace.md
@@ -48,6 +49,8 @@ if (count) env.UPLOAD_TRACE_COUNT = count;
 if (seed) env.UPLOAD_TRACE_SEED = seed;
 if (detail) env.UPLOAD_TRACE_DETAIL = detail;
 if (flag('answer-trays')) env.UPLOAD_TRACE_ANSWER_TRAYS = '1';
+const scale = flag('scale');
+if (scale) env.UPLOAD_TRACE_SCALE = scale;
 
 const result = spawnSync('npx', ['vitest', 'run', SPEC], {
   cwd: WEB_DIR,

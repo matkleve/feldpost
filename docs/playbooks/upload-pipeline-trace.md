@@ -23,6 +23,7 @@ npm run trace:upload                                     # 15 curated files
 npm run trace:upload -- --count=150                      # + generated corpus, seed 7
 npm run trace:upload -- --count=150 --seed=42 --detail=5  # 5 files in full, rest aggregated
 npm run trace:upload -- --answer-trays                   # keep going past the user gate
+npm run trace:upload -- --scale=20000                    # database-scale cost measurement
 npm run trace:upload -- --out=trace.txt                  # keep the report
 ```
 
@@ -34,6 +35,7 @@ npm run trace:upload -- --out=trace.txt                  # keep the report
 | `--seed=N` | Generator seed (default 7). Same seed, same 150 paths. |
 | `--detail=N` | How many files get a full per-file section. The rest appear only in the aggregate tables. |
 | `--answer-trays` | Answer every resolver tray with its first candidate so the trace continues past the gate. Off by default — see [Real vs mock](#real-vs-mock). |
+| `--scale=N` | Files the [database-scale tier](#database-scale) classifies (default 2 000). This tier streams paths, so N can be 100 000+. |
 | `--out=FILE` | Write the report to `FILE` instead of a temp file. |
 
 The harness is also a normal unit test: without `UPLOAD_TRACE=1` it prints nothing and only
@@ -226,11 +228,102 @@ byte-identical pair produces a skip. Run C: nothing stuck. Plus, via
 `src/test/vitest.setup.ts`, any illegal `UploadPhase` transition throws — so a green run is also
 evidence that the FSM held for the whole corpus.
 
+## Database scale
+
+A company uploading its whole archive is a different question from a batch, and the full
+end-to-end run cannot answer it: it does not scale. Measured wall time for one
+`npm run trace:upload` (all three runs, so three passes over the corpus):
+
+| Corpus | Wall time | Notes |
+| --- | --- | --- |
+| 150 | 8 s | |
+| 500 | 18 s | |
+| 1 000 | 35 s | |
+| 2 000 | 72 s | |
+| 5 000 | ~3.5 min | practical ceiling for the full run |
+
+So `--scale=N` measures the two costs that dominate a company-sized upload instead, each against
+real production code, streaming paths by index so nothing is materialised:
+
+1. **Classification** — `resolveLayersForJob` plus the local gate. This is exactly what
+   `classifyBatch` does, **synchronously, on the main thread, before the queue drains** — so its
+   total is time-to-first-byte, not background work.
+2. **The job store** — `UploadJobStateService.updateJob` / `findJob`, whose cost depends on how
+   many jobs the batch is holding.
+
+It also runs the corpus twice, once with `camera` file naming (`IMG_2001.jpg`, what cameras
+actually write) and once with `neutral` naming (a 6-digit leaf number that cannot be read as an AT
+postcode). Everything else is identical, so the difference isolates what file-name classification
+costs from what folder shape costs.
+
+### Measured, 2026-09-12
+
+Classification, 2 000 generated paths, one core:
+
+| | camera naming | neutral naming |
+| --- | --- | --- |
+| per file | 9.1 ms | 8.8 ms |
+| distinct groups (= geocoder calls) | 897 | 1 359 |
+| groups needing a tray | 897 (**100 %**) | 895 (66 %) |
+| outcomes | `layer_conflict` 985, `admin_conflict` 782, `branch_c` 233, **`branch_a` 0** | `layer_conflict` 985, **`branch_a` 549**, `admin_conflict` 233, `branch_c` 233 |
+
+Job store, real `UploadJobStateService`:
+
+| Jobs held | `updateJob` | `findJob` | whole batch at 15 writes/job |
+| --- | --- | --- | --- |
+| 100 | 0.002 ms | 0.001 ms | 3 ms |
+| 1 000 | 0.016 ms | 0.013 ms | 0.25 s |
+| 5 000 | 0.080 ms | 0.064 ms | 6 s |
+| 20 000 | 0.573 ms | 0.383 ms | 2.9 min |
+
+Extrapolated at the measured rates — linear for classification, quadratic for the job store,
+both **optimistic** bounds:
+
+| Files | Classification | Job store | Tray questions |
+| --- | --- | --- | --- |
+| 10 000 | 1.5 min | 43 s | ~4 500 |
+| 100 000 | 15 min | 72 min | ~45 000 |
+| 1 000 000 | 2.5 h | 118 h | ~450 000 |
+
+### What that means, and where the cost is
+
+- **A 100 000-file folder is not viable today.** Roughly **1.5 hours of synchronous main-thread
+  work** before the upload is even done starting, and about **45 000 tray questions** for the user
+  to answer. Neither number is a network limit; both are local CPU and UX.
+- **Classification: ~9 ms per file, and it is the fuzzy gazetteer.**
+  `path-token-classifier.ts:86` constructs `new Fuse(items, …)` **per candidate token**, then
+  searches 2 114 municipalities with `threshold: 0.4` over two keys. Measured separately: building
+  the index costs 1.06 ms, the search itself 2.75 ms. So caching the index buys ~30 %; the rest is
+  the fuzzy search, and a normalized exact-match map consulted before Fuse would remove it for the
+  overwhelming majority of tokens (a folder segment is usually either exactly a municipality or
+  nowhere near one).
+- **Job store: `O(n)` per write, so `O(n²)` per batch.**
+  `upload-job-state.service.ts:126` is `this._jobs.update((prev) => prev.map(...))` — every single
+  field write allocates a fresh array of every job in the batch, and `findJob` at :122 is a linear
+  scan. At 20 000 jobs one write already costs 0.57 ms. An id-keyed `Map` (or a per-job signal)
+  makes both `O(1)` and is the single highest-leverage change for large batches.
+- **Chunk the batch, or move classification off the main thread.** Even with both hot spots fixed,
+  classification is inherently per-file work; a company-scale import wants it batched into chunks
+  that yield to the event loop, or moved to a worker, so the panel stays responsive and uploads
+  start immediately instead of after the whole tree is classified.
+- **The tray count is the harder problem.** 45 000 questions cannot be answered one at a time.
+  The layer/admin trays already merge by conflict signature — at scale the largest group covered
+  549 files with one question — but with camera file names **every** group needs a question. Fixing
+  the file-name postcode classification alone moves 27 % of the corpus to `branch_a` (no question),
+  which is the cheapest available win.
+
+### What the scale tier does not measure
+
+Storage upload, DB inserts, geocoder latency, thumbnailing, rendering the panel with N rows,
+browser memory for N `File` handles, and GC behaviour under real load. A real run adds all of that
+on top. The numbers above are a floor, not an estimate.
+
 ## Adding a scenario
 
 Add an entry to `TRACE_SCENARIOS` in
 `apps/web/src/app/core/upload/trace/upload-trace-fixtures.ts` with an `intent` saying what it is
 meant to exercise. `intent` is a note, not an assertion — when the pipeline disagrees with it, the
-disagreement is the finding. Two scenarios sharing `contentByte` and `sizeBytes` hash identically,
-which is how duplicates are made. For a new geocodable street, add a row to the stub gazetteer in
+disagreement is the finding. Two scenarios sharing `contentSeed` and `sizeBytes` hash
+identically, which is how duplicates are made; different seeds never collide, so dedup counts stay
+meaningful at any corpus size. For a new geocodable street, add a row to the stub gazetteer in
 `upload-trace-geocoder.stub.ts`.

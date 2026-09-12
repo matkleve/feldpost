@@ -42,4 +42,8 @@ NOT COVERED — needs a browser or a live stack
   · HEIC conversion (heic2any), drag-and-drop and File System Access folder pickers
   · Upload panel rendering, tray interaction, lane switching
   · Anything RLS-dependent: org scoping is asserted by the database, not by this run
+
+SCALE — the --scale tier measures classification and the job store only. Storage, DB inserts,
+geocoder latency, thumbnailing, rendering N rows and browser memory for N File handles are all
+on top of its numbers, so they are a floor and not an estimate.
 `;

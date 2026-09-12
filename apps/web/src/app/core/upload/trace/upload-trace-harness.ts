@@ -24,6 +24,8 @@ import { LocalGeoDataAdapter } from '../../location-path-parser/local-geo-data.a
 import type { BundeslandRecord, GemeindeRecord, PlzMap } from '../../location-path-parser/local-geo-data.adapter';
 import { UploadAddressResolutionOrchestrator } from '../address-resolution/upload-address-resolution.orchestrator';
 import { UploadLocationResolutionService } from '../location/upload-location-resolution.service';
+import { UploadJobStateService } from '../support/upload-job-state.service';
+import { countJobStoreWrites } from './upload-trace-job-store-probe';
 import { UploadManagerService } from '../upload-manager.service';
 import { UploadService } from '../upload.service';
 import type { ParsedExif } from '../upload.types';
@@ -102,6 +104,8 @@ export interface TraceHarness {
   locationResolution: UploadLocationResolutionService;
   insertedMediaIds: string[];
   dedupHashCount: () => number;
+  /** How many times the pipeline wrote to the job store — feeds the scale projection. */
+  jobStoreWrites: () => number;
 }
 
 export function configureTraceHarness(recorder: UploadTraceRecorder): TraceHarness {
@@ -140,11 +144,14 @@ export function configureTraceHarness(recorder: UploadTraceRecorder): TraceHarne
     locationResolution: TestBed.inject(UploadLocationResolutionService),
     insertedMediaIds: supabase.insertedMediaIds,
     dedupHashCount: () => supabase.dedupRegistry.size(),
+    jobStoreWrites: countJobStoreWrites(TestBed.inject(UploadJobStateService)),
   };
 }
 
 const SETTLE_POLL_MS = 5;
-const SETTLE_MAX_POLLS = 2000;
+/** Wall-clock budget, not a poll count: a 5 000-file batch needs far longer than a 15-file one. */
+const SETTLE_DEADLINE_MS = 180_000;
+const SETTLE_MAX_POLLS = SETTLE_DEADLINE_MS / SETTLE_POLL_MS;
 
 /** A job is settled when it is terminal or parked in a tray / conflict gate. */
 function isSettled(job: UploadJob): boolean {

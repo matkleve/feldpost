@@ -190,6 +190,10 @@ export function printPersistReport(
   emit(renderSupabaseSummary(recorder));
   emit(`  media_items rows inserted: ${run.harness.insertedMediaIds.length}`);
   emit(`  dedup_hashes registered:   ${run.harness.dedupHashCount()}`);
+  const writes = run.harness.jobStoreWrites();
+  emit(
+    `  job-store writes:          ${writes} for ${run.jobs.length} files (${(writes / Math.max(1, run.jobs.length)).toFixed(1)} per file)`,
+  );
   emit(renderPayloadSamples(recorder));
 
   emit(renderHeading('OUTCOME'));

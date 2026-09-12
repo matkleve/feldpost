@@ -55,7 +55,7 @@ core/upload/
 | `pipelines/replace/` | upload-manager-pipeline (replace lane) | Replace pipeline run/finish |
 | `support/` | — | `UploadQueueService`, `UploadBatchService`, `UploadJobStateService`, `UploadStorageService`, `UploadConflictService`, `UploadEnrichmentService`, `UploadNotificationService`, `UploadPreResolveWaveService`; utils: content-hash, file-persist, thumbnail-persist, db-postwrite, dedup-skip, cancelled, cancelled-storage-cleanup, timeout, file-types, error-messages, batch-project-tray helpers |
 | `adapters/` | `adapters/*.adapter.md` | Location lookup, project locations |
-| `trace/` | [upload-pipeline-trace.md](../../../../../../docs/playbooks/upload-pipeline-trace.md) | Trace harness: synthetic corpus, in-memory Supabase, stub geocoder, step report. Test-only — no production code imports it |
+| `trace/` | [upload-pipeline-trace.md](../../../../../../docs/playbooks/upload-pipeline-trace.md) | Trace harness: synthetic corpus, in-memory Supabase, stub geocoder, step report, and a database-scale cost tier. Test-only — no production code imports it |
 
 ## Conventions
 
