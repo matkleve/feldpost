@@ -396,12 +396,12 @@ claim, so it survives the role switch inside a `SECURITY DEFINER` call chain
 and correctly identifies the end user even several nested calls deep. But a
 `service_role` caller (an ops script or backfill, which carries no JWT) gets
 `null` from `user_org_id()`, so such a check **silently matches zero rows**
-rather than erroring. `sync_media_items_from_primary_location` is the current
-example. No script writes `media_item_locations` today, so nothing is affected
-— but a future service_role backfill touching that table would find the
-`media_items` projection silently not syncing. Either set the JWT claims for
-the session or call the projection with an explicit org, rather than assuming
-it ran.
+rather than erroring. There is no live example today —
+`sync_media_items_from_primary_location`, which was one, turned out to be dead
+code and was dropped in `20260911150000` (#202) — so this is a rule for the
+next such check, not a description of current behaviour. When an ops script or
+backfill needs to run one, either set the request JWT claims for the session or
+pass the organization explicitly, rather than assuming the write landed.
 
 Validation: `scripts/validate-authenticated-rpc-grants.sql` (run against a
 live database; asserts `has_function_privilege(...)` per role for every

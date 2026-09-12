@@ -2,7 +2,7 @@
 
 > **Parent:** [address-resolution-model.md](./address-resolution-model.md) § Address precision principle
 
-Normative inventory of every frontend path that creates or updates a `locations` row via Supabase RPC. Migrations `20260910140000_upload_address_precision.sql` and `20260910160000_fix_address_precision_overloads.sql` are **unverified against hosted** in CI (no database in agent environments); `20260910160000` was verified locally by replaying the full migration chain against PostgreSQL 16.
+Normative inventory of every frontend path that creates or updates a `locations` row via Supabase RPC. Migrations `20260910140000_upload_address_precision.sql` and `20260910160000_fix_address_precision_overloads.sql` are **verified locally, unverified against hosted** (#137). On 2026-09-12 the full chain was applied to PostgreSQL 16 + PostGIS via `scripts/local-verify/`: all three writer signatures carry `p_address_precision` in `pg_proc`, and a `resolve_media_location` round trip persisted `address_precision = 'houseNumber'`. Hosted apply is still outstanding and is #136's deploy-order step.
 
 The inventory below covers **all** RPC writers, including the media-detail and junction-link paths that carry no precision producer yet. A writer with no producer is listed explicitly rather than omitted — an unlisted writer reads as "does not write locations", which is what let the `add_media_item_location` gap survive.
 

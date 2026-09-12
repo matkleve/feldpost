@@ -291,6 +291,14 @@ flowchart TD
 
 ### Status Label Contract
 
+> **`job.statusLabel` is a diagnostic, not display text (UP-29).** The values
+> below are what the pipeline writes, and they remain useful in devtools and in
+> the `uploadFailed$` payload — but nothing renders them. Every user-facing
+> string resolves through `resolveUploadStatusText()` in
+> `core/upload/support/upload-status-text.util.ts`, which returns translated
+> text keyed by phase, `issueKind` and `errorKey`. `scripts/validate-upload-status-text.mjs`
+> fails the build if `statusLabel` or `error` is read outside `core/upload/**`.
+
 | Pipeline state                         | Required statusLabel fallback |
 | -------------------------------------- | ----------------------------- |
 | `queued`                               | `Queued`                      |
