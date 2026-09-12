@@ -216,8 +216,12 @@ Baseline, 2026-09-12, curated 15 + generated 150, seed 7:
   reads the mode.
 
 None of these are fixed by this change — it is a diagnostic, and the upload pipeline is
-**Sensitive** class. Two of them are spec-level, not implementation slips, so they need a spec
+**Sensitive** class. Four of them are spec-level, not implementation slips, so they need a spec
 decision first.
+
+The full register, with an evidence grade and a `path:line` anchor on every claim, is
+[STUDY-005](../study/005-upload-pipeline-trace-findings.md); the decisions those findings need and
+the phased correction plan are [STUDY-006](../study/006-upload-pipeline-correction-plan.md).
 
 ## What the harness asserts
 

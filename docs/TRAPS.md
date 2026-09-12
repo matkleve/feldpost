@@ -40,6 +40,9 @@ Entries are numbered, never renumbered, and never deleted. Order is by cost, not
 | [TRAP-010](#trap-010--dead-code-that-outlives-its-producer) | Dead code that outlives its producer, and the spec that outlives both | `open` |
 | [TRAP-011](#trap-011--a-prior-findings-own-wording-is-a-lead-not-a-fact) | A prior finding's own wording is a lead, not a fact | `pattern open` |
 | [TRAP-012](#trap-012--piping-a-write-side-script-truncates-the-process) | Piping a write-side script truncates the process, not the output | `open` |
+| [TRAP-013](#trap-013--the-file-name-outranks-the-folder-for-admin-fields) | The file name is level 0, so `IMG_1274.jpg` outranks the folder's postcode | `open` |
+| [TRAP-014](#trap-014--a-fuzzy-gazetteer-substitutes-a-name-it-does-not-have) | A fuzzy gazetteer substitutes a name it does not have, at full confidence | `open` |
+| [TRAP-015](#trap-015--a-gate-that-passes-because-nothing-ran) | A gate that passes because nothing ran | `open` |
 
 ---
 
@@ -256,6 +259,54 @@ Better: end the migration with a `DO` block that raises when any touched functio
 **Detect** — never pipe a script that writes to anything through a pager, `head`, or `tail`. Redirect to a file and read the file. For anything with remote side effects, plan the batch to be correct on first write: from inside an agent there is no cleanup path.
 
 **Source** — [`2026-09-10`](./ai-diary/2026-09-10.md) § Mistakes/lessons; consequence recorded in [`docs/backlog/README.md`](./backlog/README.md) § Where open work lives.
+
+**Status** — `open`.
+
+---
+
+## TRAP-013 — The file name outranks the folder for admin fields
+
+**Surface** — `upload-search-object.md` § Admin level map: "Flat fields **MUST** collapse to the entry with the **lowest** level index (most specific folder)", with "`0` = filename; `1` = direct parent folder". Implemented at `apps/web/src/app/core/location-path-parser/upload-address-level-map.helpers.ts:139-156`.
+
+**Assumption** — "most specific" means the deepest folder, and the file name only contributes when the folders say nothing.
+
+**Truth** — the file name is level **0**, which is lower than every folder, so it wins outright. Combined with pass 2's rule that a token matching the country's postcode pattern *is* a postcode (`path-token-classifier.ts:182-183`), `AT/Wien/1090/Währinger Straße 12/IMG_1274.jpg` stores postcode **1274** and `IMG_1275.jpg` in the same folder stores **1275** — so two photos of one building get different `groupingKey`s and are geocoded separately. The street side has a guard for exactly this shape (`isWeakFilenameStreetLevel`, `upload-search-object.layer-map.ts:89-98`, special-casing `^img_\d+$`); the numeric side has none, which is what makes the surface convincing — a reader who finds the street guard concludes camera names are handled.
+
+**Detect** — run one camera-named file through the harness and read the `adminLevelMap` line: `npm run trace:upload -- --count=15` prints `postcode@[L2:1090 L0:1274]` per file. More generally: when a precedence rule is expressed as an index, check what sits at the extreme value before trusting the adjective next to it.
+
+**Source** — [`STUDY-005`](./study/005-upload-pipeline-trace-findings.md) F-01; [`2026-09-12`](./ai-diary/2026-09-12.md). Decision pending as [`STUDY-006`](./study/006-upload-pipeline-correction-plan.md) D-01.
+
+**Status** — `open`.
+
+---
+
+## TRAP-014 — A fuzzy gazetteer substitutes a name it does not have
+
+**Surface** — `classifyWithFuse` (`apps/web/src/app/core/location-path-parser/path-token-classifier.ts:86-109`) searches the AT municipality list with `threshold: 0.4` and accepts any hit at confidence ≥ 0.9; the spec's confidence table treats ≥ 0.98 as a plain write.
+
+**Assumption** — a token that *is* an Austrian city classifies as that city, and the fuzzy threshold only rescues typos.
+
+**Truth** — `at-gemeinden-bev.json` has 2 114 records and **no plain `Wien`** — only `Wien-Alsergrund`, `Wien-Döbling`, … and `Schottwien`. The token `Wien` therefore matches `Schottwien` at **0.992**, above the write threshold, so Austria's largest city is stored as a Semmering village with full confidence. It then disagrees with `state = Wien` and opens an `admin_level_conflict` tray for a path that was never ambiguous. The trap is that the *absence* is invisible at the call site: the lookup looks exhaustive, the score looks excellent, and nothing reports a near-miss.
+
+**Detect** — for any fuzzy lookup, assert the identity case first: does every name the dataset is *about* match itself exactly? `node -e "const g=require('./apps/web/src/assets/geo/at-gemeinden-bev.json');console.log(g.filter(x=>x.n==='Wien'))"` answers it in one line. Exact-match before fuzzy is the structural fix.
+
+**Source** — [`STUDY-005`](./study/005-upload-pipeline-trace-findings.md) F-02; [`2026-09-12`](./ai-diary/2026-09-12.md). Decision pending as [`STUDY-006`](./study/006-upload-pipeline-correction-plan.md) D-02.
+
+**Status** — `open`.
+
+---
+
+## TRAP-015 — A gate that passes because nothing ran
+
+**Surface** — `npm run verify` reports `! test (known debt: 34 failing tests across 14 unrelated pre-existing files … The test bundle now compiles cleanly …)` and the run exits 0.
+
+**Assumption** — the suite ran, 34 known tests failed, and the rest passed — a ratchet holding a known number.
+
+**Truth** — the `ng test` bundle does **not** compile (seven type errors, among them `upload-address-persist.acceptance.spec.ts:248` and `upload-new-pre-resolve-dedup-disambiguation.integration.spec.ts:147-148`), so **zero** specs execute. A soft gate cannot distinguish "ran and N failed" from "did not run at all", and the note's own sentence asserting the opposite is what makes the surface convincing. Reproduced by stashing all local changes and running `node scripts/verify.mjs test` on the base commit.
+
+**Detect** — a soft gate must report a *count*, not only a verdict: grep the gate's output for `Tests ` / `Test Files ` before believing its debt note. Any gate whose failure mode is "produces no output" needs the zero case treated as hard failure.
+
+**Source** — [`STUDY-005`](./study/005-upload-pipeline-trace-findings.md) F-09 and F-10; [`2026-09-12`](./ai-diary/2026-09-12.md). Remedy proposed as [`STUDY-006`](./study/006-upload-pipeline-correction-plan.md) D-06 and Phase 0.
 
 **Status** — `open`.
 

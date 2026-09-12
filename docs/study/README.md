@@ -46,6 +46,8 @@ A file that is merely *read* is not edited. Leave it alone; the old folder's REA
 | STUDY-002 | [UX for coarse-precision media on the map](./002-coarse-precision-map-ux.md) | analysis | `proposed` | What the user sees when a photo's location is known only to city precision; retrieval, disclosure, and what must replace `locationPinEligible`. |
 | STUDY-003 | [Data and contract layer of the upload precision branch](./003-upload-precision-data-contract-review.md) | review | `partially-remediated` | Static review of the `address_precision` migration, RPCs, and spec drift. No database was reachable; nothing was executed. |
 | STUDY-004 | [Organizational redundancy audit](./004-organizational-redundancy-audit.md) | review | `proposed` | Maps duplicated, stale, and conflicting instruction layers (AGENTS.md, rules, Copilot, workflows, guards); phased consolidation proposal. |
+| STUDY-005 | [Upload pipeline — findings from the trace harness](./005-upload-pipeline-trace-findings.md) | review | `active` | F-01 … F-10 found by running the pipeline headlessly: file names writing admin fields, `Wien` → `Schottwien`, city classification needing a country segment, O(n²) job store, ~9 ms/file classification, and a `test` gate that compiles nothing. |
+| STUDY-006 | [Upload pipeline — decisions to take, and the plan to correct it](./006-upload-pipeline-correction-plan.md) | proposal | `proposed` | Six owner decisions (D-01 … D-06) that four of STUDY-005's findings depend on, then a five-phase correction plan with the verification for each step. |
 
 ## Related folders
 
