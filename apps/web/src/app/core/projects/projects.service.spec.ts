@@ -60,6 +60,21 @@ function buildFakeSupabase(data: FakeSupabaseData) {
 
   const mediaProjectsChain = {
     select: vi.fn().mockReturnThis(),
+    // collectTitleAndAddressMatches moved off `images` onto a
+    // media_projects -> media_items join, so the filename/storage_path filter
+    // now lands here. Rows come back join-shaped.
+    or: vi.fn().mockImplementation((): Promise<QueryResult> => {
+      const rows = mediaMembershipRows.map((membership) => ({
+        project_id: membership.project_id,
+        media_item_id: membership.media_item_id,
+        media_items: {
+          source_image_id:
+            mediaItemRows.find((row) => row.id === membership.media_item_id)?.source_image_id ??
+            null,
+        },
+      }));
+      return Promise.resolve({ data: rows, error: null });
+    }),
     in: vi.fn().mockImplementation((column: string, values: string[]): Promise<QueryResult> => {
       if (column !== 'media_item_id') {
         return Promise.resolve({ data: [], error: null });
@@ -134,9 +149,14 @@ describe('ProjectsService', () => {
       ]),
     );
 
-    expect(counts['legacy-project']).toBe(1);
+    // Project membership is canonical in media_projects. The legacy
+    // images.project_id path this used to assert is gone at every level: the
+    // service has no from('images') read left, media_items.primary_project_id
+    // was dropped, and the images table itself no longer exists — so a
+    // title/address match counts only against real memberships.
     expect(counts['project-alpha']).toBe(1);
     expect(counts['project-beta']).toBe(1);
+    expect(counts['legacy-project']).toBeUndefined();
   });
 
   it('includes membership projects for metadata matches without legacy project_id', async () => {

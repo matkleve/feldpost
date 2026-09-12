@@ -22,25 +22,16 @@ import {
   buildFakeFilterService,
   makeImage,
 } from './workspace-view.spec-setup';
+import { createQueryChain } from '../../../test/mocks/supabase-chain.mock';
 
 /** Builds a fakeSupabase client that serves fakeMetadataKeys from the metadata_keys table. */
 function buildMetadataSupabase(fakeMetadataKeys: Array<{ id: string; key_name: string }>) {
   const fakeSupabase = buildFakeSupabase();
-  fakeSupabase.client.from.mockImplementation((table: string) => {
-    if (table === 'metadata_keys') {
-      return {
-        select: vi.fn().mockResolvedValue({ data: fakeMetadataKeys, error: null }),
-      };
-    }
-    return {
-      update: vi.fn().mockReturnValue({
-        in: vi.fn().mockResolvedValue({ error: null }),
-      }),
-      select: vi.fn().mockReturnValue({
-        in: vi.fn().mockResolvedValue({ data: [], error: null }),
-      }),
-    };
-  });
+  fakeSupabase.client.from.mockImplementation((table) =>
+    table === 'metadata_keys'
+      ? createQueryChain({ data: fakeMetadataKeys, error: null })
+      : createQueryChain({ data: [], error: null }),
+  );
   return fakeSupabase;
 }
 

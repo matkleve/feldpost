@@ -32,14 +32,29 @@ describe('MediaDetailViewComponent – saveImageField', () => {
     expect(component.saving()).toBe(false);
   });
 
-  it('calls Supabase media_items.update for a changed field', async () => {
-    const { component, fake } = setup();
+  // Address display fields no longer live on media_items — 20260525130000
+  // dropped those columns, and MediaDetailFieldsHelper routes them through
+  // MediaLocationsService instead (LOCATION_DISPLAY_FIELDS).
+  it('persists a location display field through MediaLocationsService', async () => {
+    const { component, fake, fakeMediaLocations } = setup();
     component.media.set({ ...MOCK_MEDIA });
 
     await component.saveImageField('city', 'Graz');
 
+    expect(fakeMediaLocations.addLocation).toHaveBeenCalledWith(
+      expect.objectContaining({ mediaItemId: MOCK_MEDIA.id, city: 'Graz' }),
+    );
+    expect(fake.client.from).not.toHaveBeenCalledWith('media_items');
+  });
+
+  it('persists a non-location scalar field with a media_items update', async () => {
+    const { component, fake } = setup();
+    component.media.set({ ...MOCK_MEDIA });
+
+    await component.saveImageField('address_notes', 'Ring the bell');
+
     expect(fake.client.from).toHaveBeenCalledWith('media_items');
-    expect(fake.updateFn).toHaveBeenCalledWith({ city: 'Graz' });
+    expect(fake.updateFn).toHaveBeenCalledWith({ address_notes: 'Ring the bell' });
     expect(fake.updateEqFn).toHaveBeenCalledWith(
       `id.eq.${MOCK_MEDIA.id},source_image_id.eq.${MOCK_MEDIA.id}`,
     );
@@ -56,13 +71,12 @@ describe('MediaDetailViewComponent – saveImageField', () => {
   });
 
   it('stores null for empty string values', async () => {
-    const { component, fake } = setup();
-    component.media.set({ ...MOCK_MEDIA });
+    const { component } = setup();
+    component.media.set({ ...MOCK_MEDIA, district: 'Landstrasse' });
 
     await component.saveImageField('district', '');
 
     expect(component.media()!.district).toBeNull();
-    expect(fake.updateFn).toHaveBeenCalledWith({ district: null });
   });
 
   it('does nothing when image is null', async () => {
@@ -75,10 +89,13 @@ describe('MediaDetailViewComponent – saveImageField', () => {
     expect(fake.client.from).not.toHaveBeenCalled();
   });
 
-  it('rolls back on Supabase error', async () => {
-    const { component, fake } = setup();
-    component.media.set({ ...MOCK_MEDIA });
-    fake.updateEqFn.mockResolvedValueOnce({ data: null, error: { message: 'fail' } });
+  it('rolls back the optimistic update when the location write fails', async () => {
+    const { component, fakeMediaLocations } = setup();
+    component.media.set({ ...MOCK_MEDIA, city: 'Wien' });
+    fakeMediaLocations.addLocation.mockResolvedValueOnce({
+      ok: false,
+      error: { message: 'fail' },
+    } as never);
 
     await component.saveImageField('city', 'Graz');
 
@@ -102,8 +119,10 @@ describe('MediaDetailViewComponent – saveMetadata', () => {
     expect(component.metadata()[0].value).toBe('Commercial');
   });
 
-  it('calls upsert on media_metadata table', async () => {
-    const { component, fake, fixture } = setup();
+  // Metadata writes go through MetadataService now, not a direct
+  // media_metadata upsert from the component.
+  it('saves the metadata value through MetadataService', async () => {
+    const { component, fake, fixture, fakeMetadata } = setup();
     setImageId(component, 'img-001');
     fixture.detectChanges();
     component.media.set({ ...MOCK_MEDIA });
@@ -111,15 +130,12 @@ describe('MediaDetailViewComponent – saveMetadata', () => {
 
     await component.saveMetadata(MOCK_METADATA[0], 'Commercial');
 
-    expect(fake.client.from).toHaveBeenCalledWith('media_metadata');
-    expect(fake.upsertFn).toHaveBeenCalledWith(
-      {
-        media_item_id: 'media-001',
-        metadata_key_id: 'mk-001',
-        value_text: 'Commercial',
-      },
-      { onConflict: 'media_item_id,metadata_key_id' },
+    expect(fakeMetadata.saveMetadataValueByLookupId).toHaveBeenCalledWith(
+      'img-001',
+      'mk-001',
+      'Commercial',
     );
+    expect(fake.client.from).not.toHaveBeenCalledWith('media_metadata');
   });
 
   it('skips save when value is unchanged', async () => {
@@ -143,12 +159,13 @@ describe('MediaDetailViewComponent – saveMetadata', () => {
     expect(fake.upsertFn).not.toHaveBeenCalled();
   });
 
-  it('rolls back on upsert error', async () => {
-    const { component, fake } = setup();
+  it('rolls back when the metadata save fails', async () => {
+    const { component, fixture, fakeMetadata } = setup();
     setImageId(component, 'img-001');
+    fixture.detectChanges();
     component.media.set({ ...MOCK_MEDIA });
     component.metadata.set([...MOCK_METADATA]);
-    fake.upsertFn.mockResolvedValueOnce({ data: null, error: { message: 'fail' } });
+    fakeMetadata.saveMetadataValueByLookupId.mockResolvedValueOnce(false);
 
     await component.saveMetadata(MOCK_METADATA[0], 'Commercial');
 
@@ -181,11 +198,13 @@ describe('MediaDetailViewComponent – removeMetadata', () => {
     expect(component.metadata().length).toBe(2);
   });
 
-  it('rolls back on delete error', async () => {
-    const { component, fake } = setup();
+  it('restores the entry when the metadata delete fails', async () => {
+    const { component, fixture, fakeMetadata } = setup();
     setImageId(component, 'img-001');
+    fixture.detectChanges();
+    component.media.set({ ...MOCK_MEDIA });
     component.metadata.set([...MOCK_METADATA]);
-    fake.deleteEq2Fn.mockResolvedValueOnce({ data: null, error: { message: 'fail' } });
+    fakeMetadata.removeMetadataValueByLookupId.mockResolvedValueOnce(false);
 
     await component.removeMetadata(MOCK_METADATA[0]);
 

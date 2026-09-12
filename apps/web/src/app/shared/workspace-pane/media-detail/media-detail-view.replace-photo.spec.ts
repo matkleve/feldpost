@@ -25,6 +25,7 @@ import { UploadService } from '../../../core/upload/upload.service';
 import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
 import { MediaDownloadService } from '../../../core/media-download/media-download.service';
 import { MOCK_MEDIA, setImageId } from './media-detail-view.spec-setup';
+import { createQueryChain, withChainFallback } from '../../../../test/mocks/supabase-chain.mock';
 
 // ── IE-10 dedicated setup ─────────────────────────────────────────────────────
 
@@ -89,7 +90,7 @@ function setupReplace() {
           media_type: 'image',
           gps_assignment_allowed: true,
         };
-        return {
+        return withChainFallback({
           select: vi.fn(() => ({
             or: vi.fn(() => ({
               limit: vi.fn(() => ({
@@ -103,10 +104,10 @@ function setupReplace() {
           delete: vi
             .fn()
             .mockReturnValue({ or: vi.fn().mockResolvedValue({ data: null, error: null }) }),
-        };
+        });
       }
       if (table === 'images') {
-        return {
+        return withChainFallback({
           select: vi.fn().mockReturnValue({
             eq: vi.fn().mockReturnValue({ single: imageSingleFn }),
           }),
@@ -118,22 +119,22 @@ function setupReplace() {
               eq: vi.fn().mockResolvedValue({ data: null, error: null }),
             }),
           }),
-        };
+        });
       }
       if (table === 'media_metadata') {
-        return {
+        return withChainFallback({
           select: vi.fn().mockReturnValue({ eq: metaSelectEqFn }),
-        };
+        });
       }
       if (table === 'projects') {
-        return {
+        return withChainFallback({
           select: vi.fn().mockReturnValue({
             eq: vi.fn().mockReturnValue({ order: projectOrderFn }),
           }),
-        };
+        });
       }
       if (table === 'metadata_keys') {
-        return {
+        return withChainFallback({
           select: vi.fn().mockImplementation((cols: string) => {
             if (cols === 'key_name') {
               return { eq: vi.fn().mockReturnValue({ order: metaKeysOrderFn }) };
@@ -146,14 +147,11 @@ function setupReplace() {
               }),
             };
           }),
-        };
+        });
       }
-      return {
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({ data: null, error: null }),
-        }),
-      };
+      return createQueryChain({ data: null, error: null });
     }),
+    rpc: vi.fn(() => createQueryChain({ data: [], error: null })),
     storage: {
       from: vi.fn().mockReturnValue({
         createSignedUrl: createSignedUrlFn,
