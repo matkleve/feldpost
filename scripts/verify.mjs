@@ -76,7 +76,9 @@ const CHECKS = [
     cmd: "npm",
     args: ["run", "--silent", "test"],
     soft: true,
-    debt: "34 failing tests across 14 unrelated pre-existing files (2026-09-10, after merging in the upload-process-analysis branch) — Supabase query-chain mocks missing .or/.rpc, a frozen crypto.subtle getter, and similar drift; none are in map-shell. The test bundle now compiles cleanly and all 7 map-shell spec files (previously 62 compile errors across 4 files, plus 3 more files that compiled only via unsafe `as unknown as` casts) pass. See docs/audits/2026-09-10-map-shell-test-migration-plan.md.",
+    debt:
+      "30 failing tests across 13 pre-existing files (2026-09-12). This was recorded as 34/14 on 2026-09-10, but a clean-tree measurement on 2026-09-12 found 45/19 — the ratchet only means something if it is re-measured rather than carried forward, so this number was measured, not inherited. Down from 45 after: a chainable Supabase stub (src/test/mocks/supabase-chain.mock.ts) replacing hand-rolled query chains that broke whenever production extended a query; scoping vitest to src/ so it stops running Playwright e2e specs; and correcting tests that asserted the media_items location columns dropped in 20260525130000. The rest is per-file drift, largest first: projects-page 8, nav 6, login 4, media-detail-view.ui 3, then singles.",
+
   },
   { name: "build", cmd: "npm", args: ["run", "--silent", "build"] },
 ];
