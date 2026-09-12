@@ -39,6 +39,7 @@ core/upload/
 │   ├── attach/                    # upload-attach-* pipeline
 │   └── replace/                   # upload-replace-* pipeline
 ├── support/                       # queue, batch, storage, persist, shared utils
+├── trace/                         # headless pipeline trace harness (diagnostic, not production)
 └── adapters/                      # Supabase / project boundary adapters
 ```
 
@@ -54,6 +55,7 @@ core/upload/
 | `pipelines/replace/` | upload-manager-pipeline (replace lane) | Replace pipeline run/finish |
 | `support/` | — | `UploadQueueService`, `UploadBatchService`, `UploadJobStateService`, `UploadStorageService`, `UploadConflictService`, `UploadEnrichmentService`, `UploadNotificationService`, `UploadPreResolveWaveService`; utils: content-hash, file-persist, thumbnail-persist, db-postwrite, dedup-skip, cancelled, cancelled-storage-cleanup, timeout, file-types, error-messages, batch-project-tray helpers |
 | `adapters/` | `adapters/*.adapter.md` | Location lookup, project locations |
+| `trace/` | [upload-pipeline-trace.md](../../../../../../docs/playbooks/upload-pipeline-trace.md) | Trace harness: synthetic corpus, in-memory Supabase, stub geocoder, step report. Test-only — no production code imports it |
 
 ## Conventions
 

@@ -1,5 +1,26 @@
 # Scripts
 
+## Upload pipeline trace
+
+Pushes a synthetic batch through the real upload pipeline (headless, no Supabase, no network) and
+prints every step: intake, Search Object creation and filling, grouping, dedup, geocode, resolver
+trays, storage key and `media_items` payload — with a real-vs-mock legend at the end.
+
+```bash
+# From repo root
+npm run trace:upload                                      # 15 curated files
+npm run trace:upload -- --count=150 --seed=7 --detail=5    # generated corpus
+npm run trace:upload -- --answer-trays                     # continue past the user gate
+npm run trace:upload -- --out=trace.txt                    # keep the report
+```
+
+The harness itself is a Vitest spec (`apps/web/src/app/core/upload/trace/upload-pipeline-trace.spec.ts`)
+so it drives the real Angular services; this wrapper only maps flags to env vars and prints the
+report. Without `UPLOAD_TRACE=1` the same spec prints nothing and only asserts, so it doubles as a
+regression test — see the playbook for why `npm run verify` does not reach it yet.
+
+Full walkthrough, including what is real and what is stubbed: [`docs/playbooks/upload-pipeline-trace.md`](../docs/playbooks/upload-pipeline-trace.md).
+
 ## Geocoder pipeline diagnostic
 
 Traces Internet search for a query: Supabase clusters → direct Nominatim → app filter gates → UI count.
