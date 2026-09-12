@@ -90,7 +90,7 @@ export async function finishReplacePipelineJob(
   }
 
   if (!storagePath) {
-    ctx.failJob(jobId, 'uploading', 'Storage upload failed.');
+    ctx.failJob(jobId, 'uploading', 'Storage upload failed.', 'storage_upload_failed');
     return;
   }
   if (deps.isCancelled(jobId)) {

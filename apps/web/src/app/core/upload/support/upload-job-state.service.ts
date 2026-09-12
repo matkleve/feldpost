@@ -16,7 +16,7 @@
  *  - transitionTo(jobId, phase, { channel }): Guarded phase write
  *  - setPhase(jobId, phase): Pipeline-channel transition + emit jobPhaseChanged$
  *  - updateJob(jobId, patch): Merge partial state without changing phase
- *  - failJob(jobId, failedAt, error): Set phase=error + emit uploadFailed$
+ *  - failJob(jobId, failedAt, error, errorKey?): Set phase=error + emit uploadFailed$
  */
 
 import { Injectable, computed, signal } from '@angular/core';
@@ -30,6 +30,7 @@ import type {
   UploadPhase,
 } from '../upload-manager.types';
 import { unregisterInflightDedupHash } from './upload-inflight-dedup.registry';
+import type { UploadErrorKey } from './upload-status-text.util';
 import {
   ACTIVE_PHASES,
   TERMINAL_PHASES,
@@ -203,7 +204,12 @@ export class UploadJobStateService {
     return this.transitionTo(jobId, phase, { channel: 'pipeline' });
   }
 
-  failJob(jobId: string, failedAt: UploadPhase, error: string): void {
+  failJob(
+    jobId: string,
+    failedAt: UploadPhase,
+    error: string,
+    errorKey?: UploadErrorKey,
+  ): void {
     const job = this.findJob(jobId);
     if (!job || TERMINAL_PHASES.has(job.phase)) {
       return;
@@ -214,6 +220,7 @@ export class UploadJobStateService {
       phase: 'error',
       statusLabel: phaseLabel('error'),
       error,
+      errorKey,
       failedAt,
       // @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-07 —
       // the one guarded 'error' producer; every failure routed through here is

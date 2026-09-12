@@ -51,6 +51,11 @@ const CHECKS = [
     args: ["scripts/check-rpc-param-contract.mjs"],
   },
   {
+    name: "upload-status-text",
+    cmd: "node",
+    args: ["scripts/validate-upload-status-text.mjs"],
+  },
+  {
     name: "specs",
     cmd: "npm",
     args: ["run", "--silent", "lint:specs"],

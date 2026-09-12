@@ -59,7 +59,7 @@ export async function prepareReplacePipelineJob(
     .maybeSingle();
 
   if (targetResolveError || !targetRow?.id) {
-    ctx.failJob(jobId, 'validating', 'Could not find the existing image row.');
+    ctx.failJob(jobId, 'validating', 'Could not find the existing image row.', 'existing_row_missing');
     return null;
   }
 
@@ -73,7 +73,7 @@ export async function prepareReplacePipelineJob(
     .maybeSingle();
 
   if (fetchError || !existingRow) {
-    ctx.failJob(jobId, 'validating', 'Could not find the existing image row.');
+    ctx.failJob(jobId, 'validating', 'Could not find the existing image row.', 'existing_row_missing');
     return null;
   }
 
@@ -100,7 +100,7 @@ export async function prepareReplacePipelineJob(
   });
 
   if (!deps.uploadService.isPhotoFile(job.file)) {
-    ctx.failJob(jobId, 'validating', 'Only photo files can replace an existing photo.');
+    ctx.failJob(jobId, 'validating', 'Only photo files can replace an existing photo.', 'replace_requires_photo');
     return null;
   }
 

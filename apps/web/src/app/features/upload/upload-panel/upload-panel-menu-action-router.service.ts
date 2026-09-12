@@ -21,6 +21,8 @@ import { getIssueKind } from '../upload-phase.helpers';
 import { UploadPanelDialogActionsService } from './upload-panel-dialog-actions.service';
 import { UploadPanelJobFileActionsService } from './upload-panel-job-file-actions.service';
 import { ACTION_CONTEXT_IDS } from '../../../core/action/action-context-ids';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import { statusLabelText } from './upload-panel-item-helpers';
 
 export interface UploadPanelMenuActionRouterOptions {
   placementRequested: (jobId: string) => void;
@@ -32,6 +34,7 @@ export interface UploadPanelMenuActionRouterOptions {
 @Injectable()
 export class UploadPanelMenuActionRouterService {
   private readonly toastService = inject(ToastService);
+  private readonly i18nService = inject(I18nService);
   private readonly uploadManager = inject(UploadManagerService);
   private readonly fileActions = inject(UploadPanelJobFileActionsService);
   private readonly dialogActions = inject(UploadPanelDialogActionsService);
@@ -115,7 +118,9 @@ export class UploadPanelMenuActionRouterService {
 
   private showJobStatusToast(job: UploadJob): void {
     this.toastService.show({
-      message: job.statusLabel,
+      // job.statusLabel is the pipeline's internal English text; the user-facing
+      // string has to come from the i18n resolver (UP-29).
+      message: statusLabelText(job, (key, fallback) => this.i18nService.t(key, fallback)),
       type: 'info',
       dedupe: true,
     });

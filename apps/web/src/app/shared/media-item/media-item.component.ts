@@ -275,7 +275,9 @@ export class MediaItemComponent {
   });
   readonly uploadOverlay = computed<UploadOverlayState | null>(() =>
     this.state() === 'uploading'
-      ? resolveMediaItemUploadOverlay(this.uploadManager.jobs(), this.item())
+      ? resolveMediaItemUploadOverlay(this.uploadManager.jobs(), this.item(), (key, fallback) =>
+          this.i18nService.t(key, fallback),
+        )
       : null,
   );
 

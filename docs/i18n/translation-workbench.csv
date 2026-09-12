@@ -1584,3 +1584,8 @@ upload.projectSelect.confirm,Select,upload panel project assignment dialog confi
 upload.projectSelect.cancel,Cancel,upload panel project assignment dialog cancel button,Cancel,Abbrechen,Annulla
 upload.location.editor.close,Close location editor,upload panel location editor close button aria label,Close location editor,Standorteditor schließen,Chiudi editor posizione
 "
+upload.error.targetRowUnresolved,Could not find the target file,apps/web/src/app/core/upload/support/upload-status-text.util.ts map:ERROR_TEXT,Could not find the target file,Zieldatei nicht gefunden,File di destinazione non trovato
+upload.error.existingRowMissing,Could not find the existing file,apps/web/src/app/core/upload/support/upload-status-text.util.ts map:ERROR_TEXT,Could not find the existing file,Vorhandene Datei nicht gefunden,File esistente non trovato
+upload.error.replaceRequiresPhoto,Only photos can replace a photo,apps/web/src/app/core/upload/support/upload-status-text.util.ts map:ERROR_TEXT,Only photos can replace a photo,Nur Fotos können ein Foto ersetzen,Solo le foto possono sostituire una foto
+upload.error.storageUploadFailed,File could not be stored,apps/web/src/app/core/upload/support/upload-status-text.util.ts map:ERROR_TEXT,File could not be stored,Datei konnte nicht gespeichert werden,Impossibile salvare il file
+upload.status.working,Working...,apps/web/src/app/core/upload/support/upload-status-text.util.ts map:PHASE_TEXT,Working...,Wird verarbeitet...,Elaborazione in corso...

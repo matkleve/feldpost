@@ -8,28 +8,7 @@ import type { UploadJob } from '../../../core/upload/upload-manager.service';
 import type { UploadItemMenuAction } from './upload-panel-item.component';
 import { getBoundProjectIds } from './upload-panel-project-bindings.util';
 import { getIssueKind } from '../upload-phase.helpers';
-
-const STATUS_TEXT_MAP: Record<string, [string, string]> = {
-  queued: ['upload.status.queued', 'Queued'],
-  validating: ['upload.status.validating', 'Validating...'],
-  parsing_exif: ['upload.status.parsingExif', 'Reading metadata...'],
-  converting_format: ['upload.status.convertingFormat', 'Converting format...'],
-  extracting_title: ['upload.status.extractingTitle', 'Checking filename...'],
-  resolving_location: ['upload.status.resolvingLocation', 'Resolving location...'],
-  awaiting_disambiguation: ['upload.status.chooseAddress', 'Choose address'],
-  hashing: ['upload.status.hashing', 'Computing hash...'],
-  dedup_check: ['upload.status.dedupCheck', 'Checking duplicates...'],
-  conflict_check: ['upload.status.conflictCheck', 'Checking conflicts...'],
-  awaiting_conflict_resolution: [
-    'upload.status.awaitingConflictResolution',
-    'Waiting for decision...',
-  ],
-  uploading: ['upload.status.uploading', 'Uploading...'],
-  saving_record: ['upload.status.savingRecord', 'Saving...'],
-  replacing_record: ['upload.status.replacingRecord', 'Updating record...'],
-  resolving_address: ['upload.status.resolvingAddress', 'Resolving address...'],
-  resolving_coordinates: ['upload.status.resolvingCoordinates', 'Resolving location...'],
-};
+import { resolveUploadStatusText } from '../../../core/upload/support/upload-status-text.util';
 
 const STATIC_ACTION_LABELS: Partial<Record<UploadItemMenuAction, [string, string]>> = {
   view_file_details: ['upload.item.menu.uploading.viewFileDetails', 'View file details'],
@@ -73,37 +52,7 @@ export function statusLabelText(
   job: UploadJob,
   t: (key: string, fallback: string) => string,
 ): string {
-  if (job.error) {
-    return job.error;
-  }
-
-  const issueKind = getIssueKind(job);
-  if (job.phase === 'missing_data') {
-    if (issueKind === 'duplicate_file') {
-      return t('upload.status.missingData.duplicate', 'File already in workspace');
-    }
-    if (issueKind === 'document_unresolved') {
-      return t('upload.status.missingData.document', 'Choose location or project');
-    }
-    return t('upload.status.missingData.gps', 'Choose location');
-  }
-
-  if (job.phase === 'error') return t('upload.status.error', 'Upload failed');
-  if (job.phase === 'complete') return t('upload.status.complete', 'Uploaded');
-
-  if (job.phase === 'skipped') {
-    if (issueKind === 'duplicate_file') {
-      return t('upload.status.skipped.duplicate', 'Already uploaded');
-    }
-    return t('upload.status.skipped', 'Skipped');
-  }
-
-  const mappedStatus = STATUS_TEXT_MAP[job.phase];
-  if (mappedStatus) {
-    return t(mappedStatus[0], mappedStatus[1]);
-  }
-
-  return job.statusLabel;
+  return resolveUploadStatusText(job, t, getIssueKind(job));
 }
 
 export function actionLabel(

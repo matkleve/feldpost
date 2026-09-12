@@ -115,7 +115,7 @@ export class UploadAttachPipelineService {
       userId: this.auth.user()?.id,
       supabaseClient: this.supabase.client,
       setPhase: (phase) => this.jobState.setPhase(jobId, phase),
-      failJob: (phase, error) => ctx.failJob(jobId, phase, error),
+      failJob: (phase, error, errorKey) => ctx.failJob(jobId, phase, error, errorKey),
       onCancelled: handleCancelled,
       logInfo: uploadManagerDebugLog,
       logError: (...logArgs) => console.error(...logArgs),
@@ -248,7 +248,7 @@ export class UploadAttachPipelineService {
 
     if (!storagePath) {
       console.error('[attach-pipeline] ✗ storage upload returned null');
-      ctx.failJob(jobId, 'uploading', 'Storage upload failed.');
+      ctx.failJob(jobId, 'uploading', 'Storage upload failed.', 'storage_upload_failed');
       return null;
     }
     if (await handleCancelled(storagePath)) {
