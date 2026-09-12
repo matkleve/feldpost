@@ -244,7 +244,11 @@ end-to-end run cannot answer it: it does not scale. Measured wall time for one
 | 500 | 18 s | |
 | 1 000 | 35 s | |
 | 2 000 | 72 s | |
-| 5 000 | ~3.5 min | practical ceiling for the full run |
+| 5 000 | ~6.7 min | practical ceiling for the full run |
+
+(Measured 2026-09-12 on Node + jsdom, one core, after the corpus fix that made generated bodies
+unique — an earlier 5 000-file figure of ~3.5 min was measured while 82 % of that corpus deduplicated
+away instead of uploading.)
 
 So `--scale=N` measures the two costs that dominate a company-sized upload instead, each against
 real production code, streaming paths by index so nothing is materialised:
