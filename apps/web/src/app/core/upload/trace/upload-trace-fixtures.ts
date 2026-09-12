@@ -158,6 +158,22 @@ export const TRACE_SCENARIOS: readonly UploadTraceScenario[] = [
     sizeBytes: SIZE,
   },
   {
+    id: 'S16',
+    intent: 'Street ONLY in the file name, folder carries no address (owner case: Mühlenstraße)',
+    relativePath: 'Baustelle Nord/Mühlenstraße 12.jpg',
+    mimeType: JPEG,
+    contentSeed: 16,
+    sizeBytes: SIZE,
+  },
+  {
+    id: 'S17',
+    intent: 'Postcode AND street in the file name — the case D-01 option A would give up',
+    relativePath: 'Baustelle Nord/1090 Mühlenstraße 12.jpg',
+    mimeType: JPEG,
+    contentSeed: 17,
+    sizeBytes: SIZE,
+  },
+  {
     id: 'S15',
     intent: 'PDF document under a parseable folder address',
     relativePath: 'AT/Wien/1090/Währinger Straße 12/Abnahmeprotokoll.pdf',

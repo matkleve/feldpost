@@ -11,15 +11,30 @@ corrected-by: none
 **Written:** 2026-09-12 · **Branch:** `claude/uploader-pipeline-test-badges-kktrpg` at `650f495`
 **Findings this answers:** [STUDY-005](./005-upload-pipeline-trace-findings.md) F-01 … F-10.
 
-`status: proposed` means **nobody has accepted this**. Per
-[`STUDY-FORMAT.md`](./STUDY-FORMAT.md), a `[D]` is a decision, not a fact: the six decisions in
-§ 1 are the product owner's to take, and § 2's plan assumes the recommendation in each. Taking a
-different option changes the plan, not just its schedule.
+`status: proposed` means **the study as a whole is not accepted**. Four of its six decisions were
+taken by the owner on 2026-09-12 (§ 0); two are still open, and the spec changes they imply have not
+landed, so the status stays `proposed` until they do. Per [`STUDY-FORMAT.md`](./STUDY-FORMAT.md) a
+`[D]` is a decision, not a fact — including the recommendations in § 1 that nobody has answered yet.
 
 The upload pipeline is **Sensitive** class ([`AGENTS.md`](../../AGENTS.md) § Change Classification):
 every step below needs the full ceremony — ownership matrix, FSM tables where state changes,
 `/security-review` where a boundary moves, red-test-first, live verification, and a fresh-context
 adversarial review by a different agent than the implementer.
+
+---
+
+## 0 · Decisions taken, 2026-09-12
+
+Recorded verbatim in effect, with what each one changed in this document.
+
+| | Owner's answer | Effect |
+| --- | --- | --- |
+| **D-01** | Street names **do** occur in file names (`Mühlenstraße`) and must land on the Search Object. | Clarifies rather than rejects: "admin field" means only `country`, `state`, `city`, `postcode` (`AdminFieldKey`, `upload-address-level-map.types.ts:6`) `[A]` — street-level fields were never in scope. Recommendation tightened to **A′** below, and the requirement is now pinned by two harness scenarios (S16, S17). It also surfaced [F-11](./005-upload-pipeline-trace-findings.md#f-11), which is the real obstacle to that requirement. |
+| **D-02** | Accepted as recommended. | Exact-match-first, bounded fuzzy fallback, **plus** the missing statutory cities in the data. Phase 1.3/1.4 unchanged. |
+| **D-03** | Rejected: an organisation may work in Germany *and* Austria, so a home country is the wrong primitive. A country restriction may exist as an **extra option**, but not as the mechanism. | Recommendation replaced — see **D-03 (re-derived)** below. The replacement needs no org setting at all, and the mechanism it restores is already in the tree. |
+| **D-05** | Accepted: the spec wins, and generally — **spec first, then code**. | Phase ordering unchanged; the "spec first" rule is now explicit in every phase that touches behaviour. |
+| D-04 | *Open.* | Phase 4 stays conditional. |
+| D-06 | *Open.* | Phase 0.2 stays as proposed. |
 
 ---
 
@@ -42,9 +57,36 @@ postcode 1274.
 | C — Folder always outranks file name for admin fields | Keep the parse, change the collapse to prefer the **highest**-confidence folder entry when one exists. | Keeps a bogus value on the SO where no folder entry exists. |
 | D — Leave it; make it a tray | Today's behaviour, which is a tray per file. | This is the status quo, and it is what makes 100 % of groups ask a question. |
 
-**Recommendation: A.** `[D]` It is the only option where a photo named by a camera cannot invent an
-address. B leaves the same defect one rename away. The lost case in A is better served by the folder
-the user already has to choose.
+**Recommendation: A′ — a refinement of A, after the owner's clarification.** `[D]`
+
+> A file name may write an admin field **only when the same file name also yields a street-level
+> token**. A file name that produces no street package produces no admin field either.
+
+Scope, stated explicitly because the first draft of this section was read as wider than it is:
+"admin field" is `country`, `state`, `city`, `postcode` and nothing else — `AdminFieldKey`,
+`upload-address-level-map.types.ts:6`. `[A]` `street`, `houseNumber`, `staircase` and `door` are
+street-level fields, live in the layer packages, and are **not touched by any option here**. `[A]`
+
+What A′ decides, case by case: `[C]` (reasoning from the `[A]` evidence in F-01 and F-11)
+
+| File name under a folder naming a country | Today | Under A′ |
+| --- | --- | --- |
+| `IMG_1274.jpg` | postcode 1274, overriding the folder | no admin field — `^img_\d+$` yields no street package |
+| `1090 Mühlenstraße 12.jpg` | postcode 1090 (correct) | postcode 1090 — street package present |
+| `Mühlenstraße 12.jpg` | street + house number, no admin field | unchanged |
+| `Kopie von IMG_1274.jpg` | postcode 1274 | **still 1274** until the weak-filename guard is widened |
+
+That last row is a real dependency, not a caveat: A′ is exactly as good as
+`isWeakFilenameStreetLevel`, so Phase 1.2 and Phase 2.2 must land together or in that order. `[C]`
+
+Why A′ and not B: B enumerates camera prefixes, and a prefix list is one rename from wrong. A′ asks
+a structural question instead — *is this file name an address at all?* — which is the same question
+the street side already answers. `[D]`
+
+**What A′ gives up is smaller than first stated.** Measured on scenario S17: a file-name postcode
+under a folder that names no country is **already dropped today**
+([F-01 correction](./005-upload-pipeline-trace-findings.md#f-01)). `[A]` The only case A′ removes is a
+camera-shaped name under a country-naming folder — which is the defect.
 
 ### D-02 — What is the confidence floor for a gazetteer substitution? (F-02)
 
@@ -60,18 +102,65 @@ clears the spec's 0.98 "write it" bar.
 **Recommendation: A + B.** `[D]` A closes the class, B closes the instance, and B alone is a trap
 because it looks like a fix.
 
-### D-03 — Does city classification still require an explicit country segment? (F-03)
+### D-03 (re-derived) — How is the country established, without assuming one? {#d-03}
 
-Today the AT gazetteer is only consulted when the path already contains a country token, so
-`Graz/Annenstraße 10` yields nothing.
+**The owner's objection, and why it lands.** The first recommendation was "default the country from
+the organisation". An organisation working in Germany *and* Austria has no single home country, so
+that primitive is wrong — and a wrong default is worse than none, because it is invisible in the
+result. `[D]`
 
-| Option | What it means | Cost |
-| --- | --- | --- |
-| **A — Default the country from the organisation** (recommended) `[D]` | An org has a home country; use it as the classification default when the path names none. The SO records that the country was defaulted, not parsed. | Needs an org-level setting and a provenance field. Wrong for an org working across borders — which is why the provenance matters. |
-| B — Always consult the AT gazetteer | Drop the `useAtGeo` condition. | Silently assumes Austria for everyone; worse than A in exactly the case A is careful about. |
-| C — Leave it | Users must put `AT` at the top of every tree. | Undiscoverable. It is not in any UI copy today. |
+**What the re-derivation found.** The mechanism this needs is already in the repository and the
+Search Object path stopped using it. `[A]`
 
-**Recommendation: A.** `[D]` It is the only option that stays honest when the assumption is wrong.
+- `CITY_REGISTRY` (`city-registry.const.ts:10`) holds city records that each **carry their own
+  country**: `{ name, country, zips, lat, lng, aliases }`, and it contains `Wien` with
+  `country: 'AT'`. `[A]`
+- `findCityBySegment(segment)` (`location-path-parser.util.ts:50-59`) returns
+  `{ city, country }` on an **exact** normalized name-or-alias match — no country needed up front,
+  no fuzziness, and it derives the country from the match. `[A]`
+- Its only callers are in `location-path-parser.service.ts` `[A]`, which the Search Object spec marks
+  **non-normative** ("Legacy narrative parser — **non-normative**; use SO specs above",
+  `upload-search-object.md` § Normative index). `[A]` The normative path instead gates the AT-only
+  fuzzy gazetteer behind `useAtGeo = countryCode === 'AT'` (`path-token-classifier.ts:210`). `[A]`
+
+So `Graz/Annenstraße 10` fails not because the information is missing, but because the new path
+consults a country-scoped dataset that needs the answer as its input. `[C]`
+
+**Recommendation: E — country-carrying exact lookup first, country derived from the match.** `[D]`
+
+1. **Exact match against every country-carrying registry**, before any fuzzy step. A hit sets `city`
+   **and derives `country`**. `Graz` → `{ Graz, AT }` with no `AT` segment in the path; `Wien` →
+   `{ Wien, AT }`, which also closes [F-02](./005-upload-pipeline-trace-findings.md#f-02) as a side
+   effect since the substitution never gets a chance to run.
+2. **A name in two countries is not guessed.** Write `city`, leave `country` null, record the
+   candidate countries. The existing tray machinery asks, or the geocoder settles it. This is the
+   part that makes a DE+AT organisation correct rather than lucky.
+3. **Fuzzy only as a bounded fallback** (D-02's rule), and only within the countries still in play.
+4. **The org-level country list is the "extra option", and it may only narrow.** It filters the
+   candidate set; it never supplies a default and never fills `country` on its own. An org that
+   leaves it empty gets the full set.
+5. **Provenance on the Search Object**: `country` records whether it was `parsed` from a path token,
+   `derived` from a city match, or `narrowed` by the org filter. Without it, step 2 is
+   indistinguishable from a guess three months later.
+
+**What this gives up, stated plainly.** `[A]`/`[C]`
+
+- Only Austria has a municipality dataset today (`at-gemeinden-bev.json`, 2 114 records) `[A]`, and
+  `CITY_REGISTRY` holds **seven** cities `[A]`. A German folder (`Hamburg/Mühlenstraße 12`) matches
+  nothing until DE data is added — honest failure rather than a wrong country, but still a failure.
+  `[C]` Postcode patterns already cover DE, CH, IT, FR, GB and US (`postcode-patterns.ts:7-15`) `[A]`,
+  so the data is the gap, not the structure.
+- **A postcode may never set the country by itself:** AT and CH share `^\d{4}$`
+  (`postcode-patterns.ts:8,10`). `[A]` A 4-digit token is ambiguous between two countries, so step 1
+  must run on names, with postcodes only confirming a country that is already in play.
+
+**Rejected alternatives**, kept so they are not re-proposed: `[D]`
+
+| | Why not |
+| --- | --- |
+| Org home country (the original recommendation) | The owner's case — one org, two countries — has no single answer, and the default would be silent. |
+| Always consult the AT gazetteer | Assumes Austria for everyone; strictly worse than E in exactly the case E is careful about. |
+| Keep requiring `AT` in the path | Undiscoverable; it appears in no UI copy today. `[A]` |
 
 ### D-04 — What is the import mode for a company-sized archive? (F-08, F-06, F-07)
 
@@ -134,16 +223,19 @@ test in the repository runs in CI.
 | 1.2 | Implement 1.1 in `path-token-classifier.ts` / `upload-address-level-map.helpers.ts`. | A red-first test: `AT/Wien/1090/Währinger Straße 12/IMG_1274.jpg` keeps postcode 1090, and `IMG_1274`/`IMG_1275` in one folder share a `groupingKey`. |
 | 1.3 | Amend the spec per **D-02**: exact-match-first, then bounded fuzzy. | Spec lint green. |
 | 1.4 | Implement the normalized exact map in `classifyWithFuse`, and add the 23 statutory cities to `at-gemeinden-bev.json` via `scripts/build-at-gemeinden-bev.mjs` (never by hand). | Red-first: `Wien` classifies as `Wien`; `Schottwien` still classifies as `Schottwien`; a deliberate typo still matches. |
+| 1.6 | **[F-11](./005-upload-pipeline-trace-findings.md#f-11)** — a folder segment that yields only low-confidence street fragments must not form a competing street package. This is what makes the owner's `Mühlenstraße` requirement actually hold. | Red-first: S16 `Baustelle Nord/Mühlenstraße 12.jpg` yields `groupingKey` `\|\|\|\|muhlenstraße\|12` through the **folder** path and opens no tray. |
 | 1.5 | Re-run the harness and record the new baseline in the playbook. | `GROUP-SPLIT-WITHIN-FOLDER` and `SO-CITY-NOT-IN-PATH` report zero findings on the curated corpus. |
 
-**Class:** Sensitive. **Ordering note:** 1.4's exact map is also ~30 % of F-06's cost, so Phase 1
-pays part of Phase 3 forward.
+**Class:** Sensitive. **Ordering notes:** 1.4's exact map is also ~30 % of F-06's cost, so Phase 1
+pays part of Phase 3 forward. `[B]` And D-03's step 1 (exact, country-carrying lookup first) makes the
+`Wien` → `Schottwien` substitution unreachable, so 1.3/1.4 and 2.1 overlap — decide during
+implementation whether they are one change; if they are, the spec amendment covers both. `[C]`
 
 ### Phase 2 — Stop asking avoidable questions (F-03, F-04, F-05)
 
 | Step | Change | Verified by |
 | --- | --- | --- |
-| 2.1 | Org home-country setting + SO country provenance (`parsed` vs `defaulted`), per **D-03**; spec first. | Red-first: `Graz/Annenstraße 10/DSC_0001.jpg` yields city `Graz` and a non-empty `groupingKey`. |
+| 2.1 | Per **D-03 (re-derived)**: put the country-carrying exact lookup in front of the AT-only fuzzy gate, derive `country` from the city match, leave it null on cross-country ambiguity, add `country` provenance (`parsed` / `derived` / `narrowed`). Spec first. The org country list is a **later, optional** narrowing filter — not part of this step. | Red-first: `Graz/Annenstraße 10/DSC_0001.jpg` yields city `Graz`, country `AT` marked `derived`, and a non-empty `groupingKey`; a name present in two registries leaves `country` null instead of picking one. |
 | 2.2 | Widen the weak-filename guard (F-04) so a single-token file name with no house number never forms a street package. | Red-first: `foto.jpg` and `Abnahmeprotokoll.pdf` under an addressed folder open no `layer_package` tray. |
 | 2.3 | Resolve **D-05** — make code and `upload-address-resolution.phases.md` agree, in one change. | Red-first: harness run C parks **0** files in `awaiting_disambiguation`. |
 
@@ -203,3 +295,6 @@ corpus. `[A]`
 - **A different answer to D-01 or D-04.** `[D]` D-01 option D (leave it) deletes Phase 1.2 and makes
   Phase 4 mandatory rather than optional; D-04 option C (cap the batch) deletes Phase 4 and most of
   Phase 3.
+- **Registry data for a second country.** `[D]` D-03's step 2 (cross-country ambiguity is asked, not
+  guessed) has nothing to be ambiguous about while only Austria has data, so it ships untested until
+  DE or CH records exist. Adding them is what turns that branch from designed to verified.

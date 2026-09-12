@@ -46,6 +46,7 @@ spec-level — the spec says what the code does, so a fix needs a contract decis
 | [F-08](#f-08) | Tray volume scales linearly with the file count | High | **Spec** (product) |
 | [F-09](#f-09) | The `test` gate compiles nothing, so it runs no specs | Medium | Repo |
 | [F-10](#f-10) | Two gate debt notes state numbers that no longer match | Low | Repo |
+| [F-11](#f-11) | A meaningless folder segment outranks a valid address in the file name | High | Code |
 
 ---
 
@@ -87,6 +88,16 @@ corpus, real classifier.
 **Note.** There is a guard for exactly this shape on the street side — `isWeakFilenameStreetLevel`
 (`upload-search-object.layer-map.ts:89-98`) special-cases `^img_\d+$` so `IMG_1274` does not form a
 street package. `[A]` No numeric counterpart exists. `[A]`
+
+**Correction, 2026-09-12** (measured after the first version of this study). The "legitimate file-name
+postcode" this defect is entangled with mostly **does not work today anyway**, so barring file names
+from admin fields gives up less than first stated. Scenario S17,
+`Baustelle Nord/1090 Mühlenstraße 12.jpg`: the `1090` is classified as **nothing at all** and is
+dropped — pass 2 only accepts a postcode once a country is known, and no folder segment names one;
+the house-number fallback is capped at three digits without a country. `[A]` A file-name postcode is
+therefore honoured **only** when a folder level supplies the country — which is exactly the situation
+in which a camera name is also honoured. `[A]` Street-level fields from the file name are unaffected
+and do land on the Search Object (see [F-11](#f-11) for the separate reason they can still be lost).
 
 ---
 
@@ -263,6 +274,44 @@ pass." It does not compile. `[A]`
 branch's base, with all local changes stashed: **147 errors, 1064 warnings**. `[A]` The ratchet is
 therefore stated 2 errors and 26 warnings below its real value, which means the gate would accept 26
 new warnings as "no worse than main".
+
+---
+
+### F-11 · A meaningless folder segment outranks a valid address in the file name {#f-11}
+
+**What happens.** `Baustelle Nord/Mühlenstraße 12.jpg` — a real street and house number in the file
+name, a folder that carries no address — produces a flat Search Object with **no street**:
+`groupingKey` is `|||||12`, and the job stops in a `layer_package` tray. `[A]`
+
+```
+  search object fields: hn=12
+    street       = Baustelle                ← folder (conf 0.5)
+    street       = Nord                     ← folder (conf 0.5)
+    street       = Mühlenstraße             ← filename (conf 1)
+    houseNumber  = 12                       ← filename (conf 1)
+    groupingKey: |||||12
+  layer packages: baustelle nord→{"street":"Baustelle Nord",…} | __filename__→{"street":"Mühlenstraße","houseNumber":"12",…}
+  package conflict: layer|baustelle nord|__filename__:filename: muhlenstraße 12|baustelle nord:folder: baustelle nord
+```
+
+**Why.** `Baustelle Nord` has no street keyword and no gazetteer match, so its tokens fall through to
+`street` fragments at confidence 0.5 (`path-token-classifier.ts` pass 1, last rule). `[A]` That makes
+the folder a street-level layer package, which then competes with the file name's package, so
+`detectPackageConflicts` reports a conflict and the flat collapse keeps neither street. `[A]`
+
+**Same file without the folder.** Submitted through the flat multi-file path, where `relativePath` is
+just the leaf, the identical file resolves cleanly: `groupingKey = ||||muhlenstraße|12`, phase
+`complete`. `[A]` So the parse is right; the folder destroys it.
+
+**Consequence.** The owner's stated requirement — a street in the file name must land on the search
+object — holds for the *layer package* but **not for the flat Search Object**, whenever any folder
+segment parses as a street fragment. `Baustelle Nord`, `Rohdaten`, `Woche 12` and `Kamera A` all do.
+`[A]` Recovery exists (the tray offers the file-name package as an option) but costs a question per
+distinct folder/file-name pair. `[A]`
+
+**Relation to [F-04](#f-04).** Same mechanism, worse consequence, and the reason F-04's severity is
+understated: F-04 records the extra question, F-11 records that the correct answer is dropped from
+the object in the meantime.
 
 ---
 

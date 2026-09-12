@@ -205,6 +205,10 @@ Baseline, 2026-09-12, curated 15 + generated 150, seed 7:
 - **Ordinary file names form competing street packages.** `foto.jpg`, `Abnahmeprotokoll.pdf`,
   `Kopie von IMG_1274.jpg` each produce a filename layer package that conflicts with the folder
   package and opens a `layer_package` tray.
+- **And the reverse: a folder with no address beats a file name that has one.**
+  `Baustelle Nord/Mühlenstraße 12.jpg` parses the street and house number correctly from the file
+  name, then loses both in the flat Search Object (`groupingKey` `|||||12`) because `Baustelle Nord`
+  became a competing street package. The same file without the folder resolves and uploads.
 - **Volume.** With plain camera file names, 150 files produced **131 tray questions** and 9
   automatic placements. In run B (no address pipeline) the same 150 files uploaded 144 rows and
   skipped 6 duplicates.

@@ -38,6 +38,7 @@ const STUB_GAZETTEER: readonly StubGazetteerRow[] = [
   { street: 'Landstraße', houseNumber: '7', postcode: '4020', city: 'Linz', lat: 48.3045, lng: 14.2869, importance: 0.96 },
   { street: 'Getreidegasse', houseNumber: '9', postcode: '5020', city: 'Salzburg', lat: 47.7998, lng: 13.0434, importance: 0.97 },
   { street: 'Maria-Theresien-Straße', houseNumber: '18', postcode: '6020', city: 'Innsbruck', lat: 47.2668, lng: 11.3933, importance: 0.96 },
+  { street: 'Mühlenstraße', houseNumber: '12', postcode: '1090', city: 'Wien', lat: 48.2301, lng: 16.3598, importance: 0.96 },
   { street: 'Hauptstraße', houseNumber: '5', postcode: '4020', city: 'Linz', lat: 48.3059, lng: 14.2862, importance: 0.75 },
   { street: 'Hauptstraße', houseNumber: '5', postcode: '5020', city: 'Salzburg', lat: 47.7981, lng: 13.0457, importance: 0.74 },
   { street: 'Hauptstraße', houseNumber: '5', postcode: '9020', city: 'Klagenfurt', lat: 46.6247, lng: 14.3053, importance: 0.72 },
