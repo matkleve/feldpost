@@ -20,6 +20,13 @@ type NewPrepareRouteDeps = {
   attachPipeline: UploadAttachPipelineService;
 };
 
+/** What `routeJobToMissingData` alone needs — narrower than the full prepare/route bag. */
+export type RouteToMissingDataDeps = {
+  jobState: UploadJobStateService;
+  queue: Pick<UploadQueueService, 'markDone'>;
+  uploadService: Pick<UploadService, 'resolveMediaType'>;
+};
+
 export { awaitHeicConversionForUpload };
 
 export async function resumeIfAlreadyRoutedNewJob(
@@ -132,7 +139,7 @@ export async function routePreparedNewJob(
 
 /** Branch A — no text coords and no EXIF metadata after geocode failure. */
 export function routeJobToMissingData(
-  deps: Pick<NewPrepareRouteDeps, 'jobState' | 'queue' | 'uploadService'>,
+  deps: RouteToMissingDataDeps,
   jobId: string,
   job: UploadJob,
   ctx: PipelineContext,

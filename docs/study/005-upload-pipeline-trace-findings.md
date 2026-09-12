@@ -47,6 +47,7 @@ spec-level — the spec says what the code does, so a fix needs a contract decis
 | [F-09](#f-09) | The `test` gate compiles nothing, so it runs no specs | Medium | Repo |
 | [F-10](#f-10) | Two gate debt notes state numbers that no longer match | Low | Repo |
 | [F-11](#f-11) | A meaningless folder segment outranks a valid address in the file name | High | Code |
+| [F-12](#f-12) | The unit suite is order-dependent, so its failure count is not reproducible | Medium | Repo |
 
 ---
 
@@ -263,17 +264,64 @@ Seven type errors, all pre-existing and none in the harness: `[A]`
 **Consequence.** Every unit test in the repository is currently unverified by CI, and the gate's own
 note says the opposite (see [F-10](#f-10)). `[A]`
 
+**Resolved 2026-09-12** on branch `claude/uploader-pipeline-test-badges-kktrpg`: the seven errors are
+fixed without a single `as unknown as` cast, by narrowing four deps types to the members they
+actually call (the idiom `upload-dedup-skip.util.ts:11` and `upload-heic-prepare.util.ts:22` already
+used) and correcting three test fakes. A structural full fake of `UploadService` or
+`UploadQueueService` is impossible without a cast, because their injected fields are private — so
+narrowing was the only cast-free route. `[A]` The suite now runs: **1 364 tests across 210 files**.
+`[A]` The gate also gained an `evidence` hook so that "did not run" is a hard failure and the
+measured counts print on every run. `[A]` What the run then revealed is [F-12](#f-12).
+
 ---
 
 ### F-10 · Two gate debt notes state numbers that no longer match {#f-10}
 
-**`test`.** The note reads "The test bundle now compiles cleanly and all 7 map-shell spec files …
-pass." It does not compile. `[A]`
+**`test`.** The note read "The test bundle now compiles cleanly and all 7 map-shell spec files …
+pass." It did not compile. `[A]` Its *count* was right, though — the first run after the bundle was
+fixed reported exactly the 34 failing tests the note claimed `[A]`, which is what made the false half
+so durable: the number matched, so nobody checked the sentence next to it. Rewritten 2026-09-12 to
+state the measured range and to say outright that the measured line below it, not the note, is the
+number that counts. `[A]`
 
 **`lint`.** The note records "145 errors + 1038 warnings on main (2026-09-10)". Measured on this
 branch's base, with all local changes stashed: **147 errors, 1064 warnings**. `[A]` The ratchet is
 therefore stated 2 errors and 26 warnings below its real value, which means the gate would accept 26
 new warnings as "no worse than main".
+
+---
+
+### F-12 · The unit suite is order-dependent, so its failure count is not reproducible {#f-12}
+
+**Found while fixing [F-09](#f-09).** Once the bundle compiled again, the suite ran — and gave a
+different answer each time.
+
+**Measured**, two identical `npm run --silent test` invocations, unchanged tree, 2026-09-12: `[A]`
+
+| Run | Failing tests | Failing files |
+| --- | --- | --- |
+| 1 | 34 | 13 |
+| 2 | 39 | 14 |
+
+The swing is one file: `core/upload/upload.service.spec.ts`, 5 EXIF assertions
+(`parseExif() returns coordinates when GPS tags are present` → `expected undefined to deeply equal
+{ lat: 37.7749, lng: -122.4194 }` and similar). `[A]` It **passes in isolation**; so does
+`core/supabase/supabase-runtime-config.spec.ts`, which fails in every full run. `[A]` Both are
+cross-file pollution, not product bugs. `[C]`
+
+**Not caused by the new trace harness.** The same 34 → 39 flip reproduces with
+`--exclude='src/app/core/upload/trace/**'`. `[A]`
+
+**Why it matters for the gate.** The soft-check contract is "a debt with a name and a number, and
+the number may only go down" (`scripts/verify.mjs` header). A number that moves by 5 between two
+runs of the same tree cannot carry that contract: a genuine regression of ≤ 5 tests is
+indistinguishable from noise, and any ratchet on it will either block good changes or wave bad ones
+through. Root `AGENTS.md` already states the rule this violates — "A flaky test is not a gate — fix
+isolation first". `[A]`
+
+**Related history.** The 2026-05-27 diary entry recorded cross-file injector pollution in the upload
+specs over a real `LocalGeoDataAdapter` fetch, and `docs/TRAPS.md` § Rejected candidates lists it as
+"Resolved, not a standing trap". `[A]` The shape is back, in a different file.
 
 ---
 

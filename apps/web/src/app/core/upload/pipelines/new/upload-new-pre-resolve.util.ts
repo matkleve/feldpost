@@ -32,8 +32,9 @@ import type { UploadPreResolveWaveService } from '../../support/upload-pre-resol
 
 export type PreResolveDeps = {
   jobState: UploadJobStateService;
-  queue: UploadQueueService;
-  uploadService: UploadService;
+  /** Narrowed to the members this module and its callees use — see `HeicPrepareUploadService`. */
+  queue: Pick<UploadQueueService, 'markDone'>;
+  uploadService: Pick<UploadService, 'resolveMediaType'>;
   filenameParser: FilenameParserService;
   locationConfig: UploadLocationConfigService;
   locationResolution: UploadLocationResolutionService;

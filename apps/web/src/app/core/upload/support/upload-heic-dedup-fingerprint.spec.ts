@@ -77,6 +77,7 @@ describe('NF-38 HEIC dedup fingerprint stability', () => {
       {
         getCurrentUserId: () => 'user-1',
         checkDedupHash: vi.fn().mockResolvedValue(null),
+        emitUploadSkipped: vi.fn(),
         emitDuplicateDetected: vi.fn(),
         emitBatchProgress: vi.fn(),
         drainQueue: vi.fn(),

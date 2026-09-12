@@ -33,8 +33,8 @@ Recorded verbatim in effect, with what each one changed in this document.
 | **D-02** | Accepted as recommended. | Exact-match-first, bounded fuzzy fallback, **plus** the missing statutory cities in the data. Phase 1.3/1.4 unchanged. |
 | **D-03** | Rejected: an organisation may work in Germany *and* Austria, so a home country is the wrong primitive. A country restriction may exist as an **extra option**, but not as the mechanism. | Recommendation replaced — see **D-03 (re-derived)** below. The replacement needs no org setting at all, and the mechanism it restores is already in the tree. |
 | **D-05** | Accepted: the spec wins, and generally — **spec first, then code**. | Phase ordering unchanged; the "spec first" rule is now explicit in every phase that touches behaviour. |
-| D-04 | *Open.* | Phase 4 stays conditional. |
-| D-06 | *Open.* | Phase 0.2 stays as proposed. |
+| **D-04** | A dedicated **archive-import** mode, as recommended. | Phase 4 is no longer conditional. Its two performance prerequisites (F-06, F-07) stay in Phase 3, which now blocks Phase 4 rather than merely preceding it. |
+| **D-06** | Implicit in choosing Phase 0 to start: implemented as recommended. | Done — `verify.mjs` gained the `evidence` hook, a `did not run` result is a hard failure, and the measured counts print every run. |
 
 ---
 
@@ -211,9 +211,16 @@ was **red first**. Sizes are effort, not calendar.
 | 0.1 | Fix the seven type errors that stop the `ng test` bundle compiling (F-09). | `node scripts/verify.mjs test` compiles and reports a real pass/fail count. |
 | 0.2 | Split the `test` gate into "did not run" (hard) and "ran with N failures" (soft), per D-06. | Deleting a random type annotation turns the gate red instead of `known debt`. |
 | 0.3 | Re-measure and correct the `lint` and `test` debt notes (F-10). | The note matches a fresh measurement on `main`. |
+| 0.4 | **[F-12](./005-upload-pipeline-trace-findings.md#f-12)** — fix the suite's cross-file pollution so the count is reproducible. Two identical runs give 34 and 39. Start with the two files that pass in isolation and fail in the full run: `core/upload/upload.service.spec.ts` (5 EXIF assertions) and `core/supabase/supabase-runtime-config.spec.ts` (mutates the shared mocked `environment`). | Ten consecutive full runs give the same count. Until they do, the `test` ratchet is not a ratchet — root `AGENTS.md`: "A flaky test is not a gate — fix isolation first." |
 
 **Class:** Standard. **Why first:** every phase below claims a test proves something, and today no
 test in the repository runs in CI.
+
+**Status, 2026-09-12:** 0.1 and 0.2 are done on branch
+`claude/uploader-pipeline-test-badges-kktrpg` — the suite compiles and runs (1 364 tests, 210 files),
+and a `did not run` result is now a hard gate failure with the measured counts printed every run.
+0.3 is done for `test` and `lint`. **0.4 is open, and it was found by 0.1**: with the suite finally
+running, it turns out the count is not reproducible.
 
 ### Phase 1 — Stop writing wrong data (F-01, F-02)
 
@@ -253,9 +260,10 @@ implementation whether they are one change; if they are, the spec amendment cove
 must be restated). **Note:** 3.1 and 3.2 are independently valuable and independently testable; do
 not bundle them.
 
-### Phase 4 — The archive import mode (D-04)
+### Phase 4 — The archive import mode (D-04, accepted)
 
-Only after Phase 3, and only if **D-04 option A** is accepted. Spec first — a new flow, not a flag:
+Only after Phase 3 — its performance work is a prerequisite, not a nicety. Spec first: a new flow,
+not a flag:
 chunked import, uploads first, no trays during import, everything unresolved to Issues, and
 folder-level bulk resolution in the Issues lane afterwards. Needs its own ownership matrix and FSM
 table, and a decision about what "done" means for an import that leaves 40 000 items in Issues.
@@ -292,9 +300,9 @@ corpus. `[A]`
   how much F-01 and F-03 actually cost, and could reorder Phases 1 and 2.
 - **A measurement in a real browser.** `[D]` The timings are Node + jsdom on one core. If a browser
   is materially slower, Phase 3 moves ahead of Phase 2.
-- **A different answer to D-01 or D-04.** `[D]` D-01 option D (leave it) deletes Phase 1.2 and makes
-  Phase 4 mandatory rather than optional; D-04 option C (cap the batch) deletes Phase 4 and most of
-  Phase 3.
+- **Reversing D-01 or D-04.** `[D]` Both are decided (§ 0) — recorded here because a reversal is what
+  would reshape the plan: D-01 option D (leave it) deletes Phase 1.2; D-04 option C (cap the batch)
+  deletes Phase 4 and most of Phase 3.
 - **Registry data for a second country.** `[D]` D-03's step 2 (cross-country ambiguity is asked, not
   guessed) has nothing to be ambiguous about while only Austria has data, so it ships untested until
   DE or CH records exist. Adding them is what turns that branch from designed to verified.

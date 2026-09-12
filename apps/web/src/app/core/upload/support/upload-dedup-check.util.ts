@@ -14,10 +14,25 @@ import {
 
 export type UploadDedupCheckOutcome = 'ineligible' | 'no_match' | 'skipped' | 'issue';
 
+/**
+ * The `PipelineContext` members the dedup path calls. Narrowing matches
+ * `upload-dedup-skip.util.ts`, which already takes a `Pick<PipelineContext, …>`.
+ */
+export type UploadDedupCheckContext = Pick<
+  PipelineContext,
+  | 'checkDedupHash'
+  | 'getCurrentUserId'
+  | 'emitUploadSkipped'
+  | 'emitDuplicateDetected'
+  | 'emitBatchProgress'
+  | 'drainQueue'
+>;
+
+/** Narrowed to the members this module calls — see `HeicPrepareUploadService` for why. */
 type UploadDedupCheckDeps = {
   jobState: UploadJobStateService;
-  queue: UploadQueueService;
-  uploadService: UploadService;
+  queue: Pick<UploadQueueService, 'markDone'>;
+  uploadService: Pick<UploadService, 'resolveMediaType'>;
 };
 
 function handleInflightDedupMatch(
@@ -26,7 +41,7 @@ function handleInflightDedupMatch(
   job: UploadJob,
   contentHash: string,
   currentUserId: string | undefined,
-  ctx: PipelineContext,
+  ctx: UploadDedupCheckContext,
 ): UploadDedupCheckOutcome | null {
   const inflight = lookupInflightDedupHash(contentHash);
   if (!inflight || inflight.jobId === jobId) {
@@ -77,7 +92,7 @@ export async function runUploadDedupCheck(
   jobId: string,
   job: UploadJob,
   parsedExif: ParsedExif | undefined,
-  ctx: PipelineContext,
+  ctx: UploadDedupCheckContext,
 ): Promise<UploadDedupCheckOutcome> {
   const sourceFile = resolveUploadSourceFile(job);
   const mediaType = deps.uploadService.resolveMediaType(sourceFile);

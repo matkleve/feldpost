@@ -10,9 +10,16 @@ import { resolveUploadSourceFile } from './content-hash.util';
 import type { UploadJobStateService } from './upload-job-state.service';
 import type { UploadService } from '../upload.service';
 
+/**
+ * Only the two `UploadService` members this module calls. Narrow on purpose: a deps bag that
+ * demands the whole class cannot be satisfied in a test without an `as unknown as` cast, because
+ * `UploadService`'s injected fields are private.
+ */
+export type HeicPrepareUploadService = Pick<UploadService, 'isHeic' | 'convertToJpeg'>;
+
 type HeicPrepareDeps = {
   jobState: UploadJobStateService;
-  uploadService: UploadService;
+  uploadService: HeicPrepareUploadService;
 };
 
 const heicConversionByJobId = new Map<string, Promise<void>>();

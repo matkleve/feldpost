@@ -14,6 +14,7 @@ import {
   runStorageUploadWithTimeout,
 } from '../../support/upload-storage-timeout.util';
 import { awaitHeicConversionForUpload } from '../../support/upload-heic-prepare.util';
+import type { HeicPrepareUploadService } from '../../support/upload-heic-prepare.util';
 import type { PipelineContext } from '../../upload-manager.types';
 import { buildReplaceUpdateData } from './upload-replace-update-data.util';
 import type {
@@ -22,7 +23,7 @@ import type {
 } from './upload-replace-pipeline-run.util';
 
 async function restoreReplaceRowAfterCancel(
-  deps: ReplacePipelineRunDeps,
+  deps: Omit<ReplacePipelineRunDeps, 'uploadService'>,
   targetMediaItemId: string,
   job: ReplacePipelinePrepared['job'],
   newStoragePath: string,
@@ -48,12 +49,20 @@ async function restoreReplaceRowAfterCancel(
  * uploading → replacing_record → complete.
  * @see upload-replace-pipeline.service.ts run (second half)
  */
+/**
+ * `finishReplacePipelineJob` touches `uploadService` only by forwarding it to the HEIC prepare
+ * step, so it needs that module's two members rather than the whole service.
+ */
+export type ReplacePipelineFinishDeps = Omit<ReplacePipelineRunDeps, 'uploadService'> & {
+  uploadService: HeicPrepareUploadService;
+};
+
 export async function finishReplacePipelineJob(
   jobId: string,
   ctx: PipelineContext,
   prepared: ReplacePipelinePrepared,
   abortSignal: AbortSignal | undefined,
-  deps: ReplacePipelineRunDeps,
+  deps: ReplacePipelineFinishDeps,
   uploadPhaseTimeoutMs: number = DEFAULT_UPLOAD_PHASE_TIMEOUT_MS,
 ): Promise<void> {
   const { targetMediaItemId, parsedExif } = prepared;

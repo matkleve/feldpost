@@ -245,14 +245,9 @@ describe('NF-40 address persist acceptance', () => {
     const { deps, rpc } = buildDeps({ reverse });
     const addressContext = buildUploadAddressPersistContext({
       job: {
-        id: 'job-exif',
         batchId: 'batch-1',
-        file: makeFile(),
-        phase: 'uploading',
-        progress: 0,
-        statusLabel: '',
-        submittedAt: new Date(),
-        mode: 'new',
+        titleAddress: undefined,
+        groupingKey: undefined,
         locationSourceUsed: 'exif',
       },
     });

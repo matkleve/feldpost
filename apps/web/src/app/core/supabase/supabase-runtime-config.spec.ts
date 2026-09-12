@@ -3,6 +3,7 @@ import {
   getResolvedSupabaseConfig,
   resolveSupabaseRuntimeConfig,
 } from './supabase-runtime-config';
+import type { DevSupabaseEnv } from './supabase-runtime-config';
 
 vi.mock('../../../environments/environment', () => ({
   environment: {
@@ -79,10 +80,11 @@ describe('resolveSupabaseRuntimeConfig', () => {
   });
 
   it('uses cloud when preferLocalWhenAvailable is false', async () => {
-    const env = (await import('../../../environments/environment')).environment as {
-      supabase: { preferLocalWhenAvailable: boolean };
-    };
-    env.supabase.preferLocalWhenAvailable = false;
+    // Same cast the module itself makes (getSupabaseEnv) — the environment shape differs per
+    // build configuration, which is why every member of DevSupabaseEnv is optional.
+    const supabaseEnv = (await import('../../../environments/environment')).environment
+      .supabase as DevSupabaseEnv;
+    supabaseEnv.preferLocalWhenAvailable = false;
     vi.mocked(fetch).mockResolvedValue({ ok: true } as Response);
 
     const resolved = await resolveSupabaseRuntimeConfig();

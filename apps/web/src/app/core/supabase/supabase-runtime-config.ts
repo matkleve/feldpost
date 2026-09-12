@@ -28,7 +28,13 @@ export function isLocalSupabaseTarget(): boolean {
 
 const DEV_TARGET_STORAGE_KEY = 'feldpost.supabase.target';
 
-type DevSupabaseEnv = {
+/**
+ * `environment.supabase` has a different shape per build configuration — the shipped file carries
+ * `{ url, anonKey }`, the dev replacement carries `{ preferLocalWhenAvailable, cloud, local }` — so
+ * every member is optional. Exported because tests need the same contract this module casts to;
+ * re-declaring it there drifts.
+ */
+export type DevSupabaseEnv = {
   preferLocalWhenAvailable?: boolean;
   cloud?: SupabaseEndpoint;
   local?: SupabaseEndpoint;

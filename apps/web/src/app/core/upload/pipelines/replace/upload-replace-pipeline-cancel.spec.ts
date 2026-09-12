@@ -5,7 +5,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import { finishReplacePipelineJob } from './upload-replace-pipeline-finish.util';
 import type { PipelineContext, UploadJob } from '../../upload-manager.types';
-import type { ReplacePipelinePrepared, ReplacePipelineRunDeps } from './upload-replace-pipeline-run.util';
+import type { ReplacePipelineFinishDeps } from './upload-replace-pipeline-finish.util';
+import type { ReplacePipelinePrepared } from './upload-replace-pipeline-run.util';
 
 function createJob(overrides: Partial<UploadJob> = {}): UploadJob {
   return {
@@ -56,10 +57,11 @@ describe('finishReplacePipelineJob cancel after row update', () => {
     };
 
     let cancelled = false;
-    const deps: ReplacePipelineRunDeps = {
+    const deps: ReplacePipelineFinishDeps = {
       uploadService: {
         isHeic: vi.fn().mockReturnValue(false),
-      } as ReplacePipelineRunDeps['uploadService'],
+        convertToJpeg: vi.fn(),
+      },
       supabaseClient: client as never,
       mediaDownloadService: { setLocalUrl: vi.fn() } as never,
       jobState: jobState as never,
