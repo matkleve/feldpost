@@ -26,13 +26,16 @@
  * fails hard. See docs/audits/2026-09-08-grundriss-adoption.md § A5.
  *
  * `clean` removes paths before a check runs. The unit suite needs it: with a
- * warm `apps/web/node_modules/.vite` the failure count is 34 or 39 depending on
- * run history, because the cached dependency metadata changes the order Vitest
- * assigns spec files to workers, and the suite has cross-file pollution that
- * only bites in some orders. CI always starts cold, so cold is the honest
- * measurement — five consecutive cold runs give 39 across 14 files, and it
- * costs nothing (52 s cold vs 54 s warm). Clearing the cache makes the number
- * reproducible; it does not fix the pollution, which is still open.
+ * warm `apps/web/node_modules/.vite` the failure count moves between runs,
+ * because the cached dependency metadata changes the order Vitest assigns
+ * spec files to workers, and the suite has cross-file pollution that only
+ * bites in some orders. CI always starts cold, so cold is the honest
+ * measurement — five consecutive cold runs give the same count every time
+ * (25 across 12 files as of the 2026-09-13 main merge; the exact number
+ * moves as either side's pollution fixes land, but cold-run repeatability
+ * does not), and it costs nothing (52 s cold vs 54 s warm). Clearing the
+ * cache makes the number reproducible; it does not fix the pollution,
+ * which is still open.
  * @see docs/study/005-upload-pipeline-trace-findings.md F-12
  *
  * `evidence` closes the hole that softness opened. A soft check reports a
@@ -125,7 +128,7 @@ const CHECKS = [
     cmd: "npm",
     args: ["run", "--silent", "lint"],
     soft: true,
-    debt: "147 errors + 1064 warnings (re-measured 2026-09-12 on `main` at 568b44b with all local changes stashed; the previous note said 145 + 1038 on 2026-09-10, which had drifted — this is a correction to a stale note, not new debt). `--max-warnings 0` means warnings fail too, so the warning figure is the one that blocks.",
+    debt: "151 errors + 1072 warnings (measured 2026-09-13 on the merge of main into claude/uploader-pipeline-test-badges-kktrpg). The uploader-pipeline branch alone had 147 + 1063; main alone had drifted since the last note (147 + 1064) with its own new file (src/test/mocks/supabase-chain.mock.ts, added 2026-09-12, ships with unused-arg placeholders). All new errors found are in files neither branch's own change touched for upload logic — pre-existing debt from before either branch, not introduced by the merge. `--max-warnings 0` means warnings fail too, so the warning figure is the one that blocks.",
   },
   {
     name: "test",
@@ -145,7 +148,7 @@ const CHECKS = [
     ],
     soft: true,
     debt:
-      "30 failing tests across 13 pre-existing files (2026-09-12, main). This was recorded as 34/14 on 2026-09-10, but a clean-tree measurement on 2026-09-12 found 45/19 — the ratchet only means something if it is re-measured rather than carried forward, so this number was measured, not inherited. Down from 45 after: a chainable Supabase stub (src/test/mocks/supabase-chain.mock.ts) replacing hand-rolled query chains that broke whenever production extended a query; scoping vitest to src/ so it stops running Playwright e2e specs; and correcting tests that asserted the media_items location columns dropped in 20260525130000. The rest is per-file drift, largest first: projects-page 8, nav 6, login 4, media-detail-view.ui 3, then singles. Re-measure after merging the uploader-pipeline branch — its own baseline was 39/14 against a different pre-merge tree, and the two counts are not directly comparable.",
+      "25 failing tests across 12 files (measured 2026-09-13 on the merge of main into claude/uploader-pipeline-test-badges-kktrpg, five cold runs, identical every time). Lower than either parent alone — main was 30/13, the uploader-pipeline branch was 39/14 against its own older base — because main's chainable Supabase stub (src/test/mocks/supabase-chain.mock.ts) fixed some of the same cross-file pollution the branch's own filename-parser and upload fixes did, and the two together clear more than either did apart. All 12 pass in isolation; they fail only in a full run. Fixing the remaining pollution is STUDY-006 Phase 0.4b. See docs/study/005-upload-pipeline-trace-findings.md F-12, F-13.",
   },
   { name: "build", cmd: "npm", args: ["run", "--silent", "build"] },
 ];
