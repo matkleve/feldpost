@@ -276,16 +276,16 @@ Ordered by value (correctness and regression-prevention first). Each item: probl
 
 | Rank | ID | Problem | Action | Class |
 | --- | --- | --- | --- | --- |
-| 1 | UP-32 | Mojibake sample photos | Fix fixtures | **Trivial** |
-| 2 | UP-05 | `beforeUnloadHandler = () => {}` (`upload-manager.service.ts:239`) | Wire `preventDefault` + i18n when busy | **Standard** |
-| 3 | UP-14 | `revokeLocalUrl` never called (`media-download.service.ts:382-383`) | Call on job remove/complete/cancel | **Standard** |
+| 1 | UP-32 | Mojibake sample photos | ~~Fix fixtures~~ — **done**, fixtures were already clean (#197) | **Trivial** |
+| 2 | UP-05 | `beforeUnloadHandler = () => {}` (`upload-manager.service.ts:239`) | ~~Wire `preventDefault`~~ — **done** `0fccb5e` | **Standard** |
+| 3 | UP-14 | `revokeLocalUrl` never called (`media-download.service.ts:382-383`) | ~~Call on job remove/complete/cancel~~ — **done** `0fccb5e` | **Standard** |
 | 4 | UP-09 | Direct `phase:` via `updateJob` in actions | Absorbed by item 3 | **Sensitive** |
 | 5 | UP-36 | Superseded by **NF-39** — see item 13 | **Sensitive** — product decision required |
 | 6 | UP-27 | Scattered `.from()`/`.rpc()` | `UploadDbAdapter` incrementally | **Standard** |
 | 7 | UP-34 | "Requeue at front" documented but not implemented | Implement or delete spec comments | **Standard** |
-| 8 | UP-25 | Duplicate `ImageUploadedEvent` types | Alias consolidation | **Trivial** |
-| 9 | UP-29 | English via `job.error` / raw `statusLabel` | i18n keys for service errors | **Standard** |
-| 10 | UP-37 | 64 KiB truncation undocumented | Spec doc (or revisit with item 1) | **Trivial** |
+| 8 | UP-25 | Duplicate `ImageUploadedEvent` types | ~~Alias consolidation~~ — **done** `68c75d8` | **Trivial** |
+| 9 | UP-29 | English via `job.error` / raw `statusLabel` | ~~i18n keys for service errors~~ — **done** `1d57e12` (#196); both fields are now diagnostics and `resolveUploadStatusText()` owns display text | **Standard** |
+| 10 | UP-37 | 64 KiB truncation undocumented | ~~Spec doc~~ — **done**, already documented in the dedup-scope supplement (#198) | **Trivial** |
 
 ---
 
@@ -482,3 +482,4 @@ flowchart TD
 | Item 15 + area-extent supplement | **Added** | PO decisions: containment selection, remove `locationPinEligible`, capture geocoder bbox |
 | UP-10 `failJob` terminal guard | **Not listed as open** | Fixed in integration pass (`04-status-of-prior-findings.md` § 6) |
 | UP-07, UP-12, UP-23, UP-24, UP-33, UP-43–46 | **Removed from open backlog** | Fixed in integration pass |
+| UP-05, UP-14, UP-25, UP-29, UP-32, UP-37 | **Closed** (2026-09-12) | UP-05/UP-14 `0fccb5e`, UP-25 `68c75d8`, UP-29 `1d57e12`; UP-32/UP-37 were already satisfied and closed with evidence. Remaining open in item 10: UP-09, UP-27 (#195), UP-34 (#145), UP-36/NF-39 (#138) |

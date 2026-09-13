@@ -155,7 +155,8 @@ Injected services, input/output contract, event subscriptions, Supabase calls, a
 - [ ] Resolving one item from Issues does not auto-switch the selected lane/tab.
 - [x] Issue actions are gated strictly by issue kind according to the issue-kind option contract.
 - [x] `missing_data` for `document_unresolved` can be resolved by `assignJobToProject` in addition to location placement.
-- [x] `statusLabel` fallback text matches the status-label contract for every pipeline state transition.
+- [x] `statusLabel` fallback text matches the status-label contract for every pipeline state transition
+      (diagnostic only since UP-29 — user-facing text comes from `resolveUploadStatusText()`).
 - [ ] Duplicate-photo matches are surfaced as issues instead of being auto-skipped.
 - [ ] Duplicate issue row exposes a secondary GPS action that opens the existing placed media.
 - [ ] Duplicate-resolution modal supports `use_existing`, `upload_anyway`, and `reject` decisions.

@@ -99,7 +99,9 @@ Row state rendering requirements:
 - Each lane item uses a white/surface background (`var(--color-bg-surface)`), with status tints for error/warning states.
 - During active upload and retry transitions, the thumbnail area shows an overlaid spinning loading indicator.
 - Rows with preview-capable media always render deterministic thumbnail previews; hover MUST NOT collapse to empty placeholders.
-- Row status text must update live as phase/statusLabel changes (including retry re-queue and upload progression).
+- Row status text must update live as the job's phase and issue kind change (including retry re-queue and
+  upload progression). The text is resolved by `resolveUploadStatusText()`, never read from `job.statusLabel`,
+  which holds untranslated pipeline-internal English (UP-29).
 - `document_unresolved` issue rows show status text `Choose location or project` (or localized equivalent) until resolved.
 
 ### Status Text Contract

@@ -16,9 +16,15 @@ import type {
   UploadPhase,
   UploadSkippedEvent,
 } from '../upload-manager.types';
+import type { UploadErrorKey } from '../support/upload-status-text.util';
 
 export interface UploadManagerPipelineContextDeps {
-  failJob: (jobId: string, failedAt: UploadPhase, error: string) => void;
+  failJob: (
+    jobId: string,
+    failedAt: UploadPhase,
+    error: string,
+    errorKey?: UploadErrorKey,
+  ) => void;
   emitBatchProgress: (batchId: string) => void;
   drainQueue: () => void;
   getAbortSignal: (jobId: string) => AbortSignal | undefined;
@@ -38,7 +44,8 @@ export function createUploadManagerPipelineContext(
   deps: UploadManagerPipelineContextDeps,
 ): PipelineContext {
   return {
-    failJob: (jobId, failedAt, error) => deps.failJob(jobId, failedAt, error),
+    failJob: (jobId, failedAt, error, errorKey) =>
+      deps.failJob(jobId, failedAt, error, errorKey),
     emitBatchProgress: (batchId) => deps.emitBatchProgress(batchId),
     drainQueue: () => deps.drainQueue(),
     getAbortSignal: (jobId) => deps.getAbortSignal(jobId),

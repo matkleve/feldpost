@@ -4,6 +4,7 @@ import { performAttachRecordUpdate } from './upload-attach-record-update.util';
 import type { SupabaseService } from '../../../supabase/supabase.service';
 import type { UploadJob } from '../../upload-manager.types';
 import type { ParsedExif } from '../../upload.service';
+import type { UploadErrorKey } from '../../support/upload-status-text.util';
 
 type RunAttachRecordUpdateArgs = {
   jobId: string;
@@ -14,7 +15,7 @@ type RunAttachRecordUpdateArgs = {
   userId: string | undefined;
   supabaseClient: SupabaseService['client'];
   setPhase: (phase: 'replacing_record') => void;
-  failJob: (phase: 'replacing_record', error: string) => void;
+  failJob: (phase: 'replacing_record', error: string, errorKey?: UploadErrorKey) => void;
   onCancelled: () => Promise<boolean>;
   logInfo: (...args: unknown[]) => void;
   logError: (...args: unknown[]) => void;
@@ -45,7 +46,7 @@ export async function runAttachRecordUpdate(
     .maybeSingle();
 
   if (targetResolveError || !targetRow?.id) {
-    failJob('replacing_record', 'Could not resolve target image row.');
+    failJob('replacing_record', 'Could not resolve target image row.', 'target_row_unresolved');
     return null;
   }
 

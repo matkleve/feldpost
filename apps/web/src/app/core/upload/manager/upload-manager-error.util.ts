@@ -5,13 +5,19 @@
 
 import { isCancelledUploadJob } from '../support/upload-cancelled.util';
 import type { UploadJob, UploadPhase } from '../upload-manager.types';
+import type { UploadErrorKey } from '../support/upload-status-text.util';
 
 export interface HandleUploadPipelineErrorDeps {
   findJob: (jobId: string) => UploadJob | undefined;
   markDone: (jobId: string) => void;
   emitBatchProgress: (batchId: string) => void;
   drainQueue: () => void;
-  failJob: (jobId: string, failedAt: UploadPhase, error: string) => void;
+  failJob: (
+    jobId: string,
+    failedAt: UploadPhase,
+    error: string,
+    errorKey?: UploadErrorKey,
+  ) => void;
   logJobIdPrefixLen: number;
 }
 

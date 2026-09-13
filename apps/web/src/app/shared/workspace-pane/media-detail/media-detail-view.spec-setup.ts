@@ -17,6 +17,10 @@ import {
 } from './media-detail-view.component';
 import { SupabaseService } from '../../../core/supabase/supabase.service';
 import { GeocodingService } from '../../../core/geocoding/geocoding.service';
+import { createQueryChain, withChainFallback } from '../../../../test/mocks/supabase-chain.mock';
+import { MediaLocationsService } from '../../../core/media-locations/media-locations.service';
+import { MetadataService } from '../../../core/metadata/metadata.service';
+import { MediaLocationUpdateService } from '../../../core/media-location-update/media-location-update.service';
 
 // ── Test fixtures ─────────────────────────────────────────────────────────────
 
@@ -60,6 +64,108 @@ export const MOCK_METADATA: MetadataEntry[] = [
  * Builds a chainable fake Supabase client.
  * Each table builder records its calls and returns configurable responses.
  */
+/**
+ * Stub for MediaLocationsService.
+ *
+ * Address display fields (address_label, street, city, district, country) no
+ * longer live on media_items — 20260525130000 dropped those columns and
+ * MediaDetailFieldsHelper routes them through this service instead. Without a
+ * stub the real service runs against the fake client, every location write
+ * fails, and saveImageField rolls its optimistic update back, so tests see the
+ * pre-edit value and fail for a reason unrelated to what they assert.
+ */
+export function buildFakeMediaLocations(mediaItemId = MOCK_MEDIA.id) {
+  const row = (patch: Record<string, unknown> = {}) => ({
+    id: 'loc-001',
+    link_id: 'link-001',
+    media_item_id: mediaItemId,
+    organization_id: MOCK_MEDIA.organization_id,
+    street: null,
+    house_number: null,
+    staircase: null,
+    door: null,
+    floor: null,
+    postcode: null,
+    extra_information: null,
+    city: null,
+    district: null,
+    country: null,
+    latitude: null,
+    longitude: null,
+    address_label: null,
+    ...patch,
+  });
+
+  const ok = vi.fn(async (input: Record<string, unknown> = {}) => {
+    const { locationId, mediaItemId: _ignored, ...patch } = input;
+    return { ok: true as const, row: row({ ...patch, id: locationId ?? 'loc-001' }) };
+  });
+
+  return {
+    addLocation: ok,
+    updateLocation: ok,
+    linkExistingLocation: ok,
+    replaceWithExistingLocation: ok,
+    addFromExifCoordinates: ok,
+    addFromFreeText: ok,
+    addFromGeocodeSuggestion: ok,
+    replaceLocationLinkFromFreeText: ok,
+    replaceLocationLinkFromGeocode: ok,
+    deleteLocation: vi.fn(async () => ({ ok: true as const })),
+    listForMedia: vi.fn(async () => ({ ok: true as const, rows: [] })),
+    invalidateListCache: vi.fn(),
+  };
+}
+
+/**
+ * Stub for MetadataService.
+ *
+ * Metadata writes moved behind this service, so the component no longer calls
+ * media_metadata directly. Unstubbed, the real service runs against the fake
+ * client, every save returns false, and the helper rolls its optimistic update
+ * back — leaving tests asserting the pre-edit value.
+ *
+ * validateMetadataValueForSave delegates to the real pure validator so tests
+ * keep exercising real normalisation rather than a rubber stamp.
+ */
+export function buildFakeMetadataService() {
+  return {
+    validateMetadataValueForSave: vi.fn((_type: string, rawValue: string) => ({
+      valid: true,
+      normalizedValue: rawValue.trim(),
+    })),
+    saveMetadataValueByLookupId: vi.fn(async () => true),
+    addMetadataValueByLookupId: vi.fn(
+      async (
+        _lookupId: string,
+        _orgId: string | null,
+        keyName: string,
+        keyType: 'text' | 'number' | 'date',
+      ) => ({ metadataKeyId: 'mk-new', key: keyName, keyType }),
+    ),
+    removeMetadataValueByLookupId: vi.fn(async () => true),
+  };
+}
+
+/**
+ * Stub for MediaLocationUpdateService.
+ *
+ * applyAddressSuggestion writes the address through this service (which calls
+ * the resolve_media_location RPC) rather than updating media_items columns.
+ * Unstubbed it returns not-ok, and the helper reverts its optimistic update.
+ */
+export function buildFakeMediaLocationUpdate() {
+  return {
+    updateFromAddressSuggestion: vi.fn(
+      async (_mediaId: string, suggestion: { lat?: number; lng?: number }) => ({
+        ok: true,
+        lat: suggestion.lat,
+        lng: suggestion.lng,
+      }),
+    ),
+  };
+}
+
 export function buildFakeClient() {
   const updateEqFn = vi.fn().mockResolvedValue({ data: null, error: null });
   const updateFn = vi.fn().mockReturnValue({ eq: updateEqFn, or: updateEqFn });
@@ -121,7 +227,7 @@ export function buildFakeClient() {
           media_type: 'image',
           gps_assignment_allowed: true,
         };
-        return {
+        return withChainFallback({
           select: vi.fn(() => ({
             or: vi.fn(() => ({
               limit: vi.fn(() => ({
@@ -131,26 +237,26 @@ export function buildFakeClient() {
           })),
           update: updateFn,
           delete: deleteFn,
-        };
+        });
       }
       if (table === 'images') {
-        return {
+        return withChainFallback({
           select: vi.fn().mockReturnValue({
             eq: vi.fn().mockReturnValue({ single: imageSingleFn }),
           }),
           update: updateFn,
           delete: deleteFn,
-        };
+        });
       }
       if (table === 'media_metadata') {
-        return {
+        return withChainFallback({
           select: vi.fn().mockReturnValue({ eq: metaSelectEqFn }),
           upsert: upsertFn,
           delete: deleteFn,
-        };
+        });
       }
       if (table === 'metadata_keys') {
-        return {
+        return withChainFallback({
           select: vi.fn().mockImplementation((cols: string) => {
             if (cols === 'key_name') {
               return {
@@ -159,26 +265,28 @@ export function buildFakeClient() {
             }
             return {
               eq: vi.fn().mockReturnValue({
-                eq: vi.fn().mockReturnValue({ maybeSingle: maybeSingleFn }),
+                eq: vi.fn().mockReturnValue({
+                  eq: vi.fn().mockReturnValue({ maybeSingle: maybeSingleFn }),
+                  maybeSingle: maybeSingleFn,
+                }),
               }),
             };
           }),
           insert: insertFn,
-        };
+        });
       }
       if (table === 'projects') {
-        return {
+        return withChainFallback({
           select: vi.fn().mockReturnValue({
             eq: vi.fn().mockReturnValue({ order: projectOrderFn }),
           }),
-        };
+        });
       }
-      return {
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({ data: null, error: null }),
-        }),
-      };
+      // Unmodelled table: a chain that answers any method, so a query shape
+      // added in production does not crash a test about something else.
+      return createQueryChain({ data: null, error: null });
     }),
+    rpc: vi.fn(() => createQueryChain({ data: [], error: null })),
     storage: {
       from: vi.fn().mockReturnValue({
         createSignedUrl: vi.fn().mockResolvedValue({
@@ -210,6 +318,9 @@ export function buildFakeClient() {
 
 export function setup() {
   const fake = buildFakeClient();
+  const fakeMediaLocations = buildFakeMediaLocations();
+  const fakeMetadata = buildFakeMetadataService();
+  const fakeMediaLocationUpdate = buildFakeMediaLocationUpdate();
   const fakeGeocoding = {
     forward: vi.fn().mockResolvedValue(null),
     reverse: vi.fn().mockResolvedValue(null),
@@ -221,6 +332,9 @@ export function setup() {
     providers: [
       { provide: SupabaseService, useValue: { client: fake.client } },
       { provide: GeocodingService, useValue: fakeGeocoding },
+      { provide: MediaLocationsService, useValue: fakeMediaLocations },
+      { provide: MetadataService, useValue: fakeMetadata },
+      { provide: MediaLocationUpdateService, useValue: fakeMediaLocationUpdate },
     ],
   });
 
@@ -231,11 +345,29 @@ export function setup() {
   // Trigger initial change detection without setting imageId (stays null).
   fixture.detectChanges();
 
-  return { component, fixture, ref, fake, fakeGeocoding };
+  return {
+    component,
+    fixture,
+    ref,
+    fake,
+    fakeGeocoding,
+    fakeMediaLocations,
+    fakeMetadata,
+    fakeMediaLocationUpdate,
+  };
 }
 
+/**
+ * Point the component at a media row.
+ *
+ * The input is `mediaId`; this used to overwrite a property called `imageId`,
+ * which the component no longer has. Assigning it silently did nothing, so
+ * `mediaId()` stayed null and everything gated on it (saveMetadata,
+ * removeMetadata, addMetadata) returned early — tests then failed on the
+ * optimistic update rather than on what they were asserting.
+ */
 export function setImageId(component: MediaDetailViewComponent, id: string | null): void {
-  (component as unknown as { imageId: ReturnType<typeof signal<string | null>> }).imageId = signal<
+  (component as unknown as { mediaId: ReturnType<typeof signal<string | null>> }).mediaId = signal<
     string | null
   >(id);
 }

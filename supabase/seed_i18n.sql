@@ -44301,4 +44301,159 @@ on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.error.targetRowUnresolved', 'Could not find the target file', 'en', 'apps/web/src/app/core/upload/support/upload-status-text.util.ts map:ERROR_TEXT')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Could not find the target file', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.error.targetRowUnresolved'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zieldatei nicht gefunden', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.error.targetRowUnresolved'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'File di destinazione non trovato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.error.targetRowUnresolved'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.error.existingRowMissing', 'Could not find the existing file', 'en', 'apps/web/src/app/core/upload/support/upload-status-text.util.ts map:ERROR_TEXT')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Could not find the existing file', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.error.existingRowMissing'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Vorhandene Datei nicht gefunden', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.error.existingRowMissing'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'File esistente non trovato', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.error.existingRowMissing'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.error.replaceRequiresPhoto', 'Only photos can replace a photo', 'en', 'apps/web/src/app/core/upload/support/upload-status-text.util.ts map:ERROR_TEXT')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Only photos can replace a photo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.error.replaceRequiresPhoto'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Nur Fotos können ein Foto ersetzen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.error.replaceRequiresPhoto'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Solo le foto possono sostituire una foto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.error.replaceRequiresPhoto'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.error.storageUploadFailed', 'File could not be stored', 'en', 'apps/web/src/app/core/upload/support/upload-status-text.util.ts map:ERROR_TEXT')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'File could not be stored', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.error.storageUploadFailed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Datei konnte nicht gespeichert werden', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.error.storageUploadFailed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile salvare il file', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.error.storageUploadFailed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.status.working', 'Working...', 'en', 'apps/web/src/app/core/upload/support/upload-status-text.util.ts map:PHASE_TEXT')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Working...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.working'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Wird verarbeitet...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.working'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Elaborazione in corso...', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.status.working'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
 commit;

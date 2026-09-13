@@ -11,6 +11,8 @@ import type { ExifCoords, ParsedExif } from './upload.service';
 
 // ── Phase & Mode ───────────────────────────────────────────────────────────────
 
+import type { UploadErrorKey } from './support/upload-status-text.util';
+
 export type UploadPhase =
   | 'queued'
   | 'validating'
@@ -135,8 +137,20 @@ export interface UploadJob {
   filePrepareComplete?: boolean;
   phase: UploadPhase;
   progress: number;
+  /**
+   * What the pipeline last wrote, in English. Internal diagnostic only —
+   * never displayed. User-facing text comes from
+   * `resolveUploadStatusText()` in support/upload-status-text.util.ts (UP-29).
+   */
   statusLabel: string;
+  /**
+   * Raw failure text (a Supabase message, a thrown Error, a fixed literal).
+   * Diagnostic only — not displayed, because it is untranslatable and often
+   * technical. `errorKey` carries the user-facing identity where one exists.
+   */
   error?: string;
+  /** Set when the cause is known at the point of failure, so it can be translated. */
+  errorKey?: UploadErrorKey;
   failedAt?: UploadPhase;
   coords?: ExifCoords;
   titleAddress?: string;
@@ -393,7 +407,12 @@ export interface UploadBatch {
  * with the manager's queue, events, and helpers without a circular dependency.
  */
 export interface PipelineContext {
-  failJob(jobId: string, failedAt: UploadPhase, error: string): void;
+  failJob(
+    jobId: string,
+    failedAt: UploadPhase,
+    error: string,
+    errorKey?: UploadErrorKey,
+  ): void;
   emitBatchProgress(batchId: string): void;
   drainQueue(): void;
   getAbortSignal(jobId: string): AbortSignal | undefined;

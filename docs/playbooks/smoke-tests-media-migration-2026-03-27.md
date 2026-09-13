@@ -4,6 +4,16 @@
 **Scope:** Post-`public.images` drop verification  
 **Prerequisites:** Dev server running (`ng serve`), Supabase local/remote connected
 
+> **Partly superseded (2026-09-12).** Two RPCs this playbook exercises no longer
+> exist: `resolve_image_location()` and `bulk_update_image_addresses()` were
+> dropped in `20260911150000` (#202) as dead code — they wrote `media_items`
+> location columns that `20260525130000` had already removed, so every call
+> raised. Their successors are `resolve_media_location()` and
+> `bulk_update_media_addresses()`, which take media-item ids rather than legacy
+> image ids. Tests 2 and the fallback test below will fail as written; the rest
+> of the playbook still applies. Kept as-is rather than rewritten, because it
+> records what was verified at the time.
+
 ---
 
 ## Test 1: Map Cluster Rendering (`viewport_markers()` RPC)

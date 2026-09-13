@@ -88,7 +88,7 @@ sequenceDiagram
     Note over Manager: Phase: resolving_address (non-blocking)
     Manager->>Geocoding: reverse(lat, lng)
     Geocoding-->>Manager: { city, street, country, … }
-    Manager->>DB: bulk_update_image_addresses(imageId, …)
+    Manager->>DB: bulk_update_media_addresses(mediaItemIds, …)
   end
 
   Note over Manager: Phase: complete

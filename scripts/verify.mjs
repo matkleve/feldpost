@@ -107,6 +107,11 @@ const CHECKS = [
     args: ["scripts/check-rpc-param-contract.mjs"],
   },
   {
+    name: "upload-status-text",
+    cmd: "node",
+    args: ["scripts/validate-upload-status-text.mjs"],
+  },
+  {
     name: "specs",
     cmd: "npm",
     args: ["run", "--silent", "lint:specs"],
@@ -139,7 +144,8 @@ const CHECKS = [
       `--output-file=${testResultFile}`,
     ],
     soft: true,
-    debt: "39 failing tests across 14 files, none of them product bugs (measured 2026-09-13 over five consecutive cold runs — identical every time). All 14 pass in isolation; they fail only in a full run, i.e. cross-file pollution: auth, projects, media-detail, nav, settings-overlay, plus core/upload/upload.service.spec.ts (5 EXIF assertions) and core/supabase/supabase-runtime-config.spec.ts. With a warm dependency cache the count drops to 34 because the file-to-worker order changes — hence the `clean` above. The earlier note claimed 34 and that the bundle compiled cleanly; between 2026-09-10 and 2026-09-12 it did not compile at all and this gate ran ZERO specs. Fixing the pollution is STUDY-006 Phase 0.4b. See docs/study/005-upload-pipeline-trace-findings.md F-12, F-13."
+    debt:
+      "30 failing tests across 13 pre-existing files (2026-09-12, main). This was recorded as 34/14 on 2026-09-10, but a clean-tree measurement on 2026-09-12 found 45/19 — the ratchet only means something if it is re-measured rather than carried forward, so this number was measured, not inherited. Down from 45 after: a chainable Supabase stub (src/test/mocks/supabase-chain.mock.ts) replacing hand-rolled query chains that broke whenever production extended a query; scoping vitest to src/ so it stops running Playwright e2e specs; and correcting tests that asserted the media_items location columns dropped in 20260525130000. The rest is per-file drift, largest first: projects-page 8, nav 6, login 4, media-detail-view.ui 3, then singles. Re-measure after merging the uploader-pipeline branch — its own baseline was 39/14 against a different pre-merge tree, and the two counts are not directly comparable.",
   },
   { name: "build", cmd: "npm", args: ["run", "--silent", "build"] },
 ];

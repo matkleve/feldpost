@@ -8,6 +8,11 @@ export default defineConfig({
     },
   },
   test: {
+    // Unit tests live under src/. Without this, vitest's default glob also
+    // picks up e2e/*.spec.ts, which are Playwright tests (playwright.config.ts
+    // testDir: './e2e') and fail on import with "Playwright Test did not
+    // expect test() to be called here."
+    include: ['src/**/*.spec.ts'],
     environment: 'jsdom',
     globals: true,
     css: true,

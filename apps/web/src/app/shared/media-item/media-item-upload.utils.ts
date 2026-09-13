@@ -1,6 +1,8 @@
 import type { UploadOverlayState } from '../../core/media/media-renderer.types';
 import type { UploadJob, UploadPhase } from '../../core/upload/upload-manager.service';
 import type { MediaRecord } from '../../core/media-query/media-query.types';
+import { resolveUploadPhaseText } from '../../core/upload/support/upload-status-text.util';
+import type { TranslateFn } from '../../core/upload/support/upload-status-text.util';
 
 export function isMediaItemUploadOverlayPhase(phase: UploadPhase): boolean {
   return (
@@ -23,6 +25,7 @@ export function isMediaItemUploadOverlayPhase(phase: UploadPhase): boolean {
 export function resolveMediaItemUploadOverlay(
   jobs: ReadonlyArray<UploadJob>,
   item: MediaRecord | null,
+  t: TranslateFn,
 ): UploadOverlayState | null {
   if (!item) {
     return null;
@@ -35,7 +38,9 @@ export function resolveMediaItemUploadOverlay(
 
   return {
     progress: activeJob.progress,
-    label: activeJob.statusLabel,
+    // Not activeJob.statusLabel: that is the pipeline's internal English text
+    // and was reaching the overlay untranslated (UP-29).
+    label: resolveUploadPhaseText(activeJob.phase, t),
     phase: activeJob.phase,
   };
 }

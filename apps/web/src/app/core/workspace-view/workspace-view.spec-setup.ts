@@ -17,6 +17,7 @@ import { FilterService } from '../filter/filter.service';
 import { GeocodingService } from '../geocoding/geocoding.service';
 import { MetadataService } from '../metadata/metadata.service';
 import type { WorkspaceImage } from './workspace-view.types';
+import { createSupabaseClientStub } from '../../../test/mocks/supabase-chain.mock';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -53,27 +54,7 @@ export const ZURICH_RESULT = {
 };
 
 export function buildFakeSupabase() {
-  return {
-    client: {
-      from: vi.fn().mockReturnValue({
-        update: vi.fn().mockReturnValue({
-          in: vi.fn().mockResolvedValue({ error: null }),
-        }),
-        select: vi.fn().mockReturnValue({
-          in: vi.fn().mockResolvedValue({ data: [], error: null }),
-        }),
-      }),
-      rpc: vi.fn().mockResolvedValue({ data: 0, error: null }),
-      storage: {
-        from: vi.fn().mockReturnValue({
-          createSignedUrls: vi.fn().mockResolvedValue({ data: [], error: null }),
-          createSignedUrl: vi
-            .fn()
-            .mockResolvedValue({ data: { signedUrl: 'https://fake.url' }, error: null }),
-        }),
-      },
-    },
-  };
+  return { client: createSupabaseClientStub() };
 }
 
 export function buildFakeGeocoding(result = ZURICH_RESULT) {

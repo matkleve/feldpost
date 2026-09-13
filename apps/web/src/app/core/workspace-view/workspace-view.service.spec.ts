@@ -103,16 +103,17 @@ describe('WorkspaceViewService â€" address resolution', () => {
     // Allow the RPC call to fire.
     await vi.waitFor(() => {
       const rpcCalls = fakeSupabase.client.rpc.mock.calls.filter(
-        (c: string[]) => c[0] === 'bulk_update_media_addresses',
+        (c) => c[0] === 'bulk_update_media_addresses',
       );
       expect(rpcCalls.length).toBeGreaterThan(0);
     });
 
     const rpcCall = fakeSupabase.client.rpc.mock.calls.find(
-      (c: string[]) => c[0] === 'bulk_update_media_addresses',
+      (c) => c[0] === 'bulk_update_media_addresses',
     )!;
-    expect(rpcCall[1].p_media_item_ids).toEqual(expect.arrayContaining(['img-1', 'img-2']));
-    expect(rpcCall[1].p_address_label).toBe(ZURICH_RESULT.addressLabel);
+    const rpcParams = rpcCall[1] ?? {};
+    expect(rpcParams['p_media_item_ids']).toEqual(expect.arrayContaining(['img-1', 'img-2']));
+    expect(rpcParams['p_address_label']).toBe(ZURICH_RESULT.addressLabel);
   });
 
   it('patches the local rawImages signal with resolved address', async () => {

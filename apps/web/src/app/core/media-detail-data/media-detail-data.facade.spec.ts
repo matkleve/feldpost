@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { MediaDetailDataFacade } from './media-detail-data.facade';
 import type { MediaRecord } from '../../shared/workspace-pane/media-detail/media-detail-view.types';
 import type { MetadataValueType } from '../metadata/metadata.types';
+import { createQueryChain } from '../../../test/mocks/supabase-chain.mock';
 
 const MOCK_MEDIA: MediaRecord = {
   id: 'img-1',
@@ -92,8 +93,11 @@ function createFacade(overrides?: { media?: Partial<MediaRecord> }) {
           };
         }
 
-        return { select: vi.fn() };
+        // Chainable fallback: an unmodelled table should not crash a test with
+        // "…is not a function" the moment production extends a query.
+        return createQueryChain({ data: null, error: null });
       }),
+      rpc: vi.fn(() => createQueryChain({ data: [], error: null })),
     },
   } as any;
 
