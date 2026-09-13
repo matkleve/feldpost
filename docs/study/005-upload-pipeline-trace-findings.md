@@ -47,7 +47,8 @@ spec-level — the spec says what the code does, so a fix needs a contract decis
 | [F-09](#f-09) | The `test` gate compiles nothing, so it runs no specs | Medium | Repo |
 | [F-10](#f-10) | Two gate debt notes state numbers that no longer match | Low | Repo |
 | [F-11](#f-11) | A meaningless folder segment outranks a valid address in the file name | High | Code |
-| [F-12](#f-12) | The unit suite is order-dependent, so its failure count is not reproducible | Medium | Repo |
+| [F-12](#f-12) | The unit suite is order-dependent; the count depends on a build cache | Medium | Repo |
+| [F-13](#f-13) | `ng test` never loads `vitest.config.ts`, so its aliases are inert in CI | Medium | Repo |
 
 ---
 
@@ -303,6 +304,29 @@ different answer each time.
 | 1 | 34 | 13 |
 | 2 | 39 | 14 |
 
+**Mechanism, found 2026-09-13.** It is not chance. With `apps/web/node_modules/.vite` **deleted
+before each run**, five consecutive runs gave **39 failures across 14 files, identical every time**.
+`[A]` Warm, the same tree alternates 39 / 34 / 39. `[A]` The cached dependency metadata changes the
+order in which Vitest assigns spec files to workers, and the suite's cross-file pollution only bites
+in some orders. So:
+
+- **CI's number is 39/14**, because a fresh checkout has no cache. `[C]`
+- The **34** that the debt note carried since 2026-09-10 was a warm-cache local artifact. `[A]`
+- Clearing the cache costs nothing: 52 s cold against 54 s warm. `[A]`
+
+`scripts/verify.mjs` now clears that cache before the test check, so the count is reproducible. That
+makes the measurement trustworthy; it does **not** fix the pollution — tracked as
+[STUDY-006](./006-upload-pipeline-correction-plan.md) Phase 0.4b.
+
+**What the polluter is not.** `core/upload/upload.service.spec.ts` fails because its mocked
+`exifr.gps` returns `undefined`, so the 5 assertions that read EXIF values fail. `[A]` Ruled out by
+measurement: all 53 `core/upload` spec files pass together (331 tests) `[A]`; pairing the spec with
+each of the two files that overlap it in the failing run — `media-detail-view.ui.spec.ts` and
+`login.component.spec.ts` — does not reproduce it, nor does pairing it with
+`supabase-runtime-config.spec.ts` or with the six specs that call `vi.restoreAllMocks()` `[A]`; and
+`optimizeDeps.exclude` for the exifr entry point changes nothing `[A]`. It needs a larger set than
+any pair, which is what makes 0.4b a real task rather than a one-line fix.
+
 The swing is one file: `core/upload/upload.service.spec.ts`, 5 EXIF assertions
 (`parseExif() returns coordinates when GPS tags are present` → `expected undefined to deeply equal
 { lat: 37.7749, lng: -122.4194 }` and similar). `[A]` It **passes in isolation**; so does
@@ -322,6 +346,29 @@ isolation first". `[A]`
 **Related history.** The 2026-05-27 diary entry recorded cross-file injector pollution in the upload
 specs over a real `LocalGeoDataAdapter` fetch, and `docs/TRAPS.md` § Rejected candidates lists it as
 "Resolved, not a standing trap". `[A]` The shape is back, in a different file.
+
+---
+
+### F-13 · `ng test` never loads `vitest.config.ts`, so its aliases are inert in CI {#f-13}
+
+**What happens.** `apps/web/vitest.config.ts` sets a jsdom environment, `globals`, `css`,
+`setupFiles`, and — load-bearing — an alias mapping `heic2any` to
+`src/test/mocks/heic2any.mock.ts`. The `@angular/build:unit-test` builder does not read it. `[A]`
+
+**Proof.** Appending `this is not valid typescript at all ((((` to `vitest.config.ts` and running
+`npx ng test --watch=false --include=…/upload.service.spec.ts` gives `Tests 46 passed (46)`. `[A]` A
+config that is loaded cannot be syntactically invalid and silent. The builder's `--runner-config`
+option opts in; `angular.json`'s test block sets only `setupFiles`. `[A]` (The flag takes a path, not
+a boolean, on the command line: `--runner-config=true` is read as a file called `true` and fails.
+`[A]`)
+
+**Consequence.** Two different configurations for the same specs: `npx vitest run <file>` applies the
+alias and `npm run test` does not, so a HEIC spec can exercise the real `heic2any` in CI and the mock
+locally, or the reverse. `[C]` `environment: 'jsdom'` and the setup file happen to match what the
+builder does anyway, which is why nothing looked broken. `[A]`
+
+**Not fixed here.** Passing `--runner-config` would change the configuration for all 210 spec files
+at once; that deserves its own measurement rather than a footnote in a gate fix. `[D]`
 
 ---
 

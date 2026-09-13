@@ -25,6 +25,16 @@
  * end. Everything genuinely green today (doc-links, design-system, i18n, build)
  * fails hard. See docs/audits/2026-09-08-grundriss-adoption.md § A5.
  *
+ * `clean` removes paths before a check runs. The unit suite needs it: with a
+ * warm `apps/web/node_modules/.vite` the failure count is 34 or 39 depending on
+ * run history, because the cached dependency metadata changes the order Vitest
+ * assigns spec files to workers, and the suite has cross-file pollution that
+ * only bites in some orders. CI always starts cold, so cold is the honest
+ * measurement — five consecutive cold runs give 39 across 14 files, and it
+ * costs nothing (52 s cold vs 54 s warm). Clearing the cache makes the number
+ * reproducible; it does not fix the pollution, which is still open.
+ * @see docs/study/005-upload-pipeline-trace-findings.md F-12
+ *
  * `evidence` closes the hole that softness opened. A soft check reports a
  * non-zero exit as "known debt" — which is right for "the suite ran and 34
  * tests failed" and catastrophically wrong for "the suite did not run at all".
@@ -114,6 +124,8 @@ const CHECKS = [
   },
   {
     name: "test",
+    // Cold dependency cache, so the count matches CI and does not move run to run.
+    clean: ["apps/web/node_modules/.vite"],
     resultFile: testResultFile,
     evidence: readTestEvidence,
     cmd: "npm",
@@ -127,7 +139,7 @@ const CHECKS = [
       `--output-file=${testResultFile}`,
     ],
     soft: true,
-    debt: "NOT REPRODUCIBLE — two identical full runs on an unchanged tree gave 34 failing tests across 13 files and 39 across 14 (re-measured 2026-09-12; reproduced with the new trace harness excluded, so it is not that spec). The swing file is core/upload/upload.service.spec.ts (5 EXIF assertions); it and core/supabase/supabase-runtime-config.spec.ts both pass in isolation and fail only in the full run, i.e. cross-file pollution, not product bugs. The rest sit in auth, projects, media-detail, nav and settings-overlay. No earlier count is comparable: between 2026-09-10 and 2026-09-12 the bundle did not compile and this gate executed ZERO specs while reporting known debt. Trust the measured line below, not this note. See docs/study/005-upload-pipeline-trace-findings.md F-09, F-10, F-12."
+    debt: "39 failing tests across 14 files, none of them product bugs (measured 2026-09-13 over five consecutive cold runs — identical every time). All 14 pass in isolation; they fail only in a full run, i.e. cross-file pollution: auth, projects, media-detail, nav, settings-overlay, plus core/upload/upload.service.spec.ts (5 EXIF assertions) and core/supabase/supabase-runtime-config.spec.ts. With a warm dependency cache the count drops to 34 because the file-to-worker order changes — hence the `clean` above. The earlier note claimed 34 and that the bundle compiled cleanly; between 2026-09-10 and 2026-09-12 it did not compile at all and this gate ran ZERO specs. Fixing the pollution is STUDY-006 Phase 0.4b. See docs/study/005-upload-pipeline-trace-findings.md F-12, F-13."
   },
   { name: "build", cmd: "npm", args: ["run", "--silent", "build"] },
 ];
@@ -160,6 +172,7 @@ const didNotRun = new Map();
 
 for (const check of selected) {
   process.stdout.write(`\n\x1b[1m▸ ${check.name}\x1b[0m\n`);
+  for (const path of check.clean ?? []) rmSync(path, { recursive: true, force: true });
   if (check.resultFile) rmSync(check.resultFile, { force: true });
   const { status } = spawnSync(check.cmd, check.args, {
     stdio: "inherit",

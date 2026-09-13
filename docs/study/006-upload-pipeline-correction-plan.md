@@ -211,7 +211,9 @@ was **red first**. Sizes are effort, not calendar.
 | 0.1 | Fix the seven type errors that stop the `ng test` bundle compiling (F-09). | `node scripts/verify.mjs test` compiles and reports a real pass/fail count. |
 | 0.2 | Split the `test` gate into "did not run" (hard) and "ran with N failures" (soft), per D-06. | Deleting a random type annotation turns the gate red instead of `known debt`. |
 | 0.3 | Re-measure and correct the `lint` and `test` debt notes (F-10). | The note matches a fresh measurement on `main`. |
-| 0.4 | **[F-12](./005-upload-pipeline-trace-findings.md#f-12)** — fix the suite's cross-file pollution so the count is reproducible. Two identical runs give 34 and 39. Start with the two files that pass in isolation and fail in the full run: `core/upload/upload.service.spec.ts` (5 EXIF assertions) and `core/supabase/supabase-runtime-config.spec.ts` (mutates the shared mocked `environment`). | Ten consecutive full runs give the same count. Until they do, the `test` ratchet is not a ratchet — root `AGENTS.md`: "A flaky test is not a gate — fix isolation first." |
+| 0.4a | **Make the count reproducible.** Clear `apps/web/node_modules/.vite` before the test check: warm, the count is 34 or 39 depending on run history; cold it is 39 every time, which is also what CI sees. | Five consecutive cold runs give the same count. **Done 2026-09-13.** |
+| 0.4b | **Fix the pollution itself** ([F-12](./005-upload-pipeline-trace-findings.md#f-12)). 14 files pass in isolation and fail in a full run. It reproduces deterministically on a cold cache, so it is now debuggable. Start with `core/upload/upload.service.spec.ts` (mocked `exifr.gps` returns `undefined`) — ruled out already: all 53 upload specs together, each overlapping file pairwise, the `vi.restoreAllMocks()` specs, and `optimizeDeps.exclude`. | The 14 files pass in a full cold run, and the count is 0. |
+| 0.5 | **Decide what to do about [F-13](./005-upload-pipeline-trace-findings.md#f-13)** — `ng test` does not load `vitest.config.ts`, so its `heic2any` alias is inert in CI. Either pass `--runner-config` (and measure the effect on all 210 files) or move what matters into `angular.json`. | Whichever is chosen, the two ways of running a spec apply the same configuration. |
 
 **Class:** Standard. **Why first:** every phase below claims a test proves something, and today no
 test in the repository runs in CI.
@@ -219,8 +221,10 @@ test in the repository runs in CI.
 **Status, 2026-09-12:** 0.1 and 0.2 are done on branch
 `claude/uploader-pipeline-test-badges-kktrpg` — the suite compiles and runs (1 364 tests, 210 files),
 and a `did not run` result is now a hard gate failure with the measured counts printed every run.
-0.3 is done for `test` and `lint`. **0.4 is open, and it was found by 0.1**: with the suite finally
-running, it turns out the count is not reproducible.
+0.3 is done for `test` and `lint`. 0.4a is done — the count is now reproducible at 39/14, and the
+mechanism turned out to be a build cache changing file order, not chance. **0.4b (the pollution
+itself) and 0.5 (F-13) are open**, and both were found by 0.1: they only became visible once the
+suite actually ran.
 
 ### Phase 1 — Stop writing wrong data (F-01, F-02)
 
