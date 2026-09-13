@@ -45,6 +45,7 @@ Admin fields (`country`, `state`, `city`, `postcode`) **MUST** record every writ
 | Rule | Requirement |
 | --- | --- |
 | Level index | `0` = filename; `1` = direct parent folder; higher = ancestors (root = highest) |
+| Filename gate | A **numeric** level-`0` entry (i.e. a postcode) is written **only if** the same filename yields a street-level token at confidence ≥ 0.9. `IMG_1274.jpg` contributes no `postcode`; `1090 Mühlenstraße 12.jpg` does. Named tokens are never gated — a camera writes `IMG_1274.jpg`, never `Graz.jpg`. |
 | Flat fields | **MUST** collapse to the entry with the **lowest** level index (most specific folder) for `groupingKey` |
 | Conflict detect order | PLZ→city lookup (no SO mutation) → AT `GemeindeRecord.b` city∈state → Salzburg (`state` name === `city` name) → same-field value compare |
 | Cross-field | When `city` and `state` are semantically incompatible (e.g. `Wien` + `Innsbruck`), **MUST** populate `adminLevelConflicts` |
@@ -90,7 +91,7 @@ Per path segment, split tokens with `/[\s\-\_\.\,]+/`, then **two passes**:
 
 **Pass 2 — numeric tokens last** (`^\d+[a-zA-Z]?$`):
 
-1. **Postcode** — only if `country` is set (from pass 1 or an earlier path segment) and token matches that country's pattern  
+1. **Postcode** — only if `country` is set (from pass 1 or an earlier path segment), the token matches that country's pattern, and — in a filename segment — the [filename gate](#admin-level-map) is open  
 2. **House number** — if country known: `^\d{1,4}[a-zA-Z]?$`; if country unknown: only `^\d{1,3}[a-zA-Z]?$` (so `1090` is not mistaken for a house number)  
 
 Earlier folder segments run before later ones, so `AT/.../1090` sets `country` before pass 2 on `1090`.

@@ -167,6 +167,71 @@ describe('buildSearchObjectFromRelativePath — admin level map', () => {
   });
 });
 
+describe('buildSearchObjectFromRelativePath — filename admin gate', () => {
+  it('ignores a camera filename number instead of writing it as a postcode', () => {
+    const so = buildSearchObjectFromRelativePath(
+      'AT/Wien/1090/Währinger Straße 12/IMG_1274.jpg',
+      'IMG_1274.jpg',
+      geo,
+    );
+
+    expect(so.postcode).toBe('1090');
+    expect(so.adminLevelMap?.postcode?.some((entry) => entry.value === '1274')).toBe(false);
+    expect(so.adminLevelConflicts ?? []).toEqual([]);
+  });
+
+  it('keeps two camera files in one folder in the same group', () => {
+    const first = buildSearchObjectFromRelativePath(
+      'AT/Wien/1090/Währinger Straße 12/IMG_1274.jpg',
+      'IMG_1274.jpg',
+      geo,
+    );
+    const second = buildSearchObjectFromRelativePath(
+      'AT/Wien/1090/Währinger Straße 12/IMG_1275.jpg',
+      'IMG_1275.jpg',
+      geo,
+    );
+
+    expect(first.groupingKey).toBe(second.groupingKey);
+  });
+
+  it('ignores admin tokens from a filename with no real street, however it is worded', () => {
+    const so = buildSearchObjectFromRelativePath(
+      'AT/Wien/1090/Währinger Straße 12/Kopie von IMG_1274.jpg',
+      'Kopie von IMG_1274.jpg',
+      geo,
+    );
+
+    expect(so.postcode).toBe('1090');
+  });
+
+});
+
+describe('buildSearchObjectFromRelativePath — filename admin gate, still allowed', () => {
+  it('still accepts a postcode from a filename that carries a real street', () => {
+    const so = buildSearchObjectFromRelativePath(
+      'AT/Baustelle Nord/1090 Mühlenstraße 12.jpg',
+      '1090 Mühlenstraße 12.jpg',
+      geo,
+    );
+
+    expect(so.postcode).toBe('1090');
+    expect(so.street).toContain('Mühlenstraße');
+    expect(so.houseNumber).toBe('12');
+  });
+
+  it('keeps street-level fields from the filename untouched', () => {
+    const so = buildSearchObjectFromRelativePath(
+      'Baustelle Nord/Mühlenstraße 12.jpg',
+      'Mühlenstraße 12.jpg',
+      geo,
+    );
+
+    expect(so.sources.some((e) => e.field === 'street' && e.source === 'filename')).toBe(true);
+    expect(so.houseNumber).toBe('12');
+  });
+});
+
 describe('buildGroupingKey', () => {
   it('dedupes identical addresses', () => {
     const a = buildGroupingKey({
@@ -265,4 +330,6 @@ describe('isSearchObjectComplete', () => {
       }),
     ).toBe(true);
   });
+  // ── Filename admin gate (D-01 option A′) ───────────────────────────────────
+  // @see docs/specs/service/media-upload-service/upload-search-object.md § Admin level map
 });

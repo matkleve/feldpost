@@ -36,7 +36,7 @@ spec-level — the spec says what the code does, so a fix needs a contract decis
 
 | id | Finding | Severity | Layer |
 | --- | --- | --- | --- |
-| [F-01](#f-01) | A number in the file name is classified as a postcode and overrides the folder | High | **Spec** |
+| [F-01](#f-01) | ~~A number in the file name is classified as a postcode and overrides the folder~~ **fixed** | High | **Spec** |
 | [F-02](#f-02) | `Wien` resolves to the municipality `Schottwien` | High | Data + code |
 | [F-03](#f-03) | City classification requires an explicit country segment in the path | High | **Spec** |
 | [F-04](#f-04) | Ordinary file names form competing street-level layer packages | Medium | Code |
@@ -86,6 +86,20 @@ path that was never ambiguous. `[A]`
 **Scale.** With camera file naming, **zero** of 2 000 generated paths reached `branch_a`; with
 6-digit leaf numbers that cannot parse as an AT postcode, 549 of 2 000 (27 %) did. `[B]` — synthetic
 corpus, real classifier.
+
+**Fixed 2026-09-13** (Phase 1.1–1.2, D-01 option A′). A **numeric** level-0 admin entry is now
+written only when the same filename also yields a street-level token at confidence ≥ 0.9;
+`upload-search-object.md` § Admin level map carries the rule, and
+`upload-search-object.builder.ts` implements it. Named tokens are not gated, so `Graz.jpg` still
+contributes its city — the gate was narrowed from "all admin fields" to "numeric admin fields"
+during implementation, because an existing test objected and every measured instance of the defect
+is numeric. `[A]`
+
+Measured effect, curated corpus: tray questions **13 → 9**, and `SO-FILENAME-OVERRIDES-FOLDER`
+reports nothing. `[A]` At 500 generated paths the `camera` and `neutral` naming runs are now
+**identical** — 391 groups, 269 needing a tray, same outcome histogram — where before camera naming
+put **100 %** of groups in a tray with `branch_a` at zero, against neutral's 27 %. `[A]` That
+equality is the proof: file naming no longer changes what the pipeline does.
 
 **Note.** There is a guard for exactly this shape on the street side — `isWeakFilenameStreetLevel`
 (`upload-search-object.layer-map.ts:89-98`) special-cases `^img_\d+$` so `IMG_1274` does not form a

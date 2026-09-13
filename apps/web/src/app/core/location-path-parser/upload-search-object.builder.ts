@@ -30,6 +30,7 @@ import {
   collapseAtSlashPathSegments,
   parseAtSegmentUnits,
 } from './upload-search-object.unit-parsing.at';
+import type { AtSegmentUnitParse } from './upload-search-object.unit-parsing.at';
 import { normalizeCountryCode } from './postcode-patterns';
 
 type SoFields = Pick<
@@ -86,6 +87,62 @@ function fieldKeyForKind(kind: ClassifiedToken['kind']): keyof SoFields | null {
 
 const ADMIN_FIELD_KEYS: AdminFieldKey[] = ['country', 'state', 'city', 'postcode'];
 
+/** Street-level kinds — the ones that make a filename an address rather than a camera label. */
+const STREET_LEVEL_KINDS = new Set<ClassifiedToken['kind']>([
+  'street',
+  'houseNumber',
+  'staircase',
+  'door',
+]);
+/** The fallback classifier emits `street` at 0.5 for any leftover word, so 0.5 proves nothing. */
+const STREET_LEVEL_MIN_CONFIDENCE = 0.9;
+
+/** A purely numeric admin token — i.e. a postcode. Names (`Graz`, `AT`) are never gated. */
+const NUMERIC_ADMIN_TOKEN_RE = /^\d+$/;
+
+/**
+ * May a filename segment write a **numeric** admin field — in practice, a postcode?
+ *
+ * Only when that same filename also yields a street-level token at real confidence. Without this,
+ * `IMG_1274.jpg` under `AT/Wien/1090/…` classifies `1274` as a postcode (pass 2: the country is
+ * known and the token matches AT's four-digit pattern) and then wins the flat collapse, because the
+ * filename is level 0 — so the stored postcode is 1274, two photos of one building land in
+ * different groups, and a tray opens for a path that was never ambiguous.
+ *
+ * Named admin tokens are deliberately **not** gated: a camera writes `IMG_1274.jpg`, never
+ * `Graz.jpg`, so `Graz.jpg` under `AT/Wien/` still contributes its city.
+ *
+ * @see docs/specs/service/media-upload-service/upload-search-object.md § Admin level map
+ * @see docs/study/005-upload-pipeline-trace-findings.md F-01
+ */
+/**
+ * A camera label's number contributes nothing — not the flat value, not the source entry, not the
+ * level-0 map entry that would otherwise win the collapse.
+ */
+function isGatedFilenameAdminToken(
+  key: string,
+  token: ClassifiedToken,
+  allowNumericAdminFields: boolean,
+): boolean {
+  if (allowNumericAdminFields || !ADMIN_FIELD_KEYS.includes(key as AdminFieldKey)) {
+    return false;
+  }
+  return NUMERIC_ADMIN_TOKEN_RE.test(token.value);
+}
+
+function filenameMayWriteNumericAdminFields(
+  classified: ClassifiedToken[],
+  units: AtSegmentUnitParse,
+): boolean {
+  if (units.staircase || units.door) {
+    return true;
+  }
+  return classified.some(
+    (token) =>
+      STREET_LEVEL_KINDS.has(token.kind) && token.confidence >= STREET_LEVEL_MIN_CONFIDENCE,
+  );
+}
+
 function applyTokenToFields(
   fields: SoFields,
   token: ClassifiedToken,
@@ -96,6 +153,7 @@ function applyTokenToFields(
   deviations: UploadAddressSourceDeviation[],
   level: number,
   adminLevelMap: Partial<Record<AdminFieldKey, FieldLevelEntry[]>>,
+  allowNumericAdminFields: boolean,
   previousFolderValue?: string,
 ): void {
   const key = fieldKeyForKind(token.kind);
@@ -104,6 +162,10 @@ function applyTokenToFields(
   }
 
   if (token.confidence < 0.9 && token.kind !== 'street') {
+    return;
+  }
+
+  if (isGatedFilenameAdminToken(key, token, allowNumericAdminFields)) {
     return;
   }
 
@@ -194,6 +256,8 @@ function applySegment(
   applyPresetUnits(fields, atUnits, source, sources);
   const tokens = tokenizeSegment(atUnits.workingSegment);
   const classified = classifyTokensInSegment(tokens, geo, context);
+  const allowNumericAdminFields =
+    source === 'folder' || filenameMayWriteNumericAdminFields(classified, atUnits);
   const folderSnapshot = filenameOverride ? { ...fields } : undefined;
 
   for (const token of classified) {
@@ -210,6 +274,7 @@ function applySegment(
       deviations,
       level,
       adminLevelMap,
+      allowNumericAdminFields,
       prev ?? undefined,
     );
     if (token.kind === 'country') {

@@ -59,8 +59,16 @@ postcode 1274.
 
 **Recommendation: A′ — a refinement of A, after the owner's clarification.** `[D]`
 
-> A file name may write an admin field **only when the same file name also yields a street-level
-> token**. A file name that produces no street package produces no admin field either.
+> A file name may write a **numeric** admin field — in practice a postcode — **only when the same
+> file name also yields a street-level token at confidence ≥ 0.9**. Named admin tokens (`Graz`,
+> `Wien`, `AT`) are not gated.
+>
+> **Narrowed 2026-09-13, during implementation.** The first wording gated *all* admin fields, and an
+> existing test objected: `Graz.jpg` under `AT/Wien/` deliberately contributes `city = Graz`
+> (`upload-search-object.builder.spec.ts` § records filename-derived admin tokens at level 0) `[A]`.
+> Every measured instance of the defect is numeric, and a camera writes `IMG_1274.jpg`, never
+> `Graz.jpg` `[C]` — so the narrow gate fixes F-01 without the collateral. The broader wording is
+> still available if a filename city later proves harmful.
 
 Scope, stated explicitly because the first draft of this section was read as wider than it is:
 "admin field" is `country`, `state`, `city`, `postcode` and nothing else — `AdminFieldKey`,
@@ -74,14 +82,14 @@ What A′ decides, case by case: `[C]` (reasoning from the `[A]` evidence in F-0
 | `IMG_1274.jpg` | postcode 1274, overriding the folder | no admin field — `^img_\d+$` yields no street package |
 | `1090 Mühlenstraße 12.jpg` | postcode 1090 (correct) | postcode 1090 — street package present |
 | `Mühlenstraße 12.jpg` | street + house number, no admin field | unchanged |
-| `Kopie von IMG_1274.jpg` | postcode 1274 | **still 1274** until the weak-filename guard is widened |
+| `Kopie von IMG_1274.jpg` | postcode 1274 | no admin field — no high-confidence street either |
+| `Graz.jpg` | city Graz | city Graz — named tokens are not gated |
 
-That last row is a real dependency, not a caveat: A′ is exactly as good as
-`isWeakFilenameStreetLevel`, so Phase 1.2 and Phase 2.2 must land together or in that order. `[C]`
-
-Why A′ and not B: B enumerates camera prefixes, and a prefix list is one rename from wrong. A′ asks
-a structural question instead — *is this file name an address at all?* — which is the same question
-the street side already answers. `[D]`
+Gating on *confidence* rather than on a name pattern is what makes the `Kopie von IMG_1274.jpg` row
+work: it needs no list of camera prefixes, so a new prefix cannot reopen the defect. `[C]` The
+street-fragment half of the problem is untouched — the filename's low-confidence `IMG` is still
+appended to `street`, which is [F-04](./005-upload-pipeline-trace-findings.md#f-04) and stays in
+Phase 2.2. `[A]`
 
 **What A′ gives up is smaller than first stated.** Measured on scenario S17: a file-name postcode
 under a folder that names no country is **already dropped today**

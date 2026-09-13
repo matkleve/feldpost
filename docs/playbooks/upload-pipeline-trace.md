@@ -279,6 +279,11 @@ Classification, 2 000 generated paths, one core:
 | groups needing a tray | 897 (**100 %**) | 895 (66 %) |
 | outcomes | `layer_conflict` 985, `admin_conflict` 782, `branch_c` 233, **`branch_a` 0** | `layer_conflict` 985, **`branch_a` 549**, `admin_conflict` 233, `branch_c` 233 |
 
+**After the 2026-09-13 filename gate**, the two columns are identical — 500 paths, 391 groups, 269
+needing a tray (69 %), `layer_conflict` 261, `branch_a` 129, `branch_c` 57, `admin_conflict` 53. The
+remaining tray load is folder shape (`layer_conflict`, F-04/F-11) and the gazetteer (F-02), not file
+naming. Re-run `--scale=2000` for figures comparable to the table above.
+
 Job store, real `UploadJobStateService`:
 
 | Jobs held | `updateJob` | `findJob` | whole batch at 15 writes/job |

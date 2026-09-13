@@ -109,6 +109,16 @@ async function runLocationRequiredTrace(): Promise<void> {
   expect(jobsByPath(settled).size).toBe(scenarios.length);
   // Every job carried its immutable relativePath into the pipeline.
   expect(settled.jobs.every((job) => !!job.relativePath)).toBe(true);
+
+  // Two camera files in one folder are one building, so they share one grouping key and cost one
+  // geocode. This failed before the filename admin gate landed — the file-name number became the
+  // postcode and split the group.
+  // @see docs/study/005-upload-pipeline-trace-findings.md F-01
+  const byPathForGrouping = jobsByPath(settled);
+  const first = byPathForGrouping.get(TRACE_SCENARIOS[0].relativePath);
+  const second = byPathForGrouping.get(TRACE_SCENARIOS[1].relativePath);
+  expect(first?.groupingKey).toBeTruthy();
+  expect(second?.groupingKey).toBe(first?.groupingKey);
   // Every classified group holds at least one job — an orphan group is a leak.
   for (const group of recorder.groups()) {
     expect(group.jobIds.length, `group ${group.groupingKey} has no jobs`).toBeGreaterThan(0);
