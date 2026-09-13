@@ -297,18 +297,22 @@ first and skip the question when it's clean?
    A1 already asks "which city is `{street}` in?" when a bare street search comes back spanning more
    than one city; this reuses the same query and the same city-extraction, just consulted **before**
    opening the C3 tray instead of only after Branch C fails.
-2. **Auto-resolve only on a clean split.** Compare the distinct cities the hits actually carry against
+2. **Auto-resolve only on a clean split — and when the clean answer is outside the candidate set,
+   suggest it instead of asking blind.** Compare the distinct cities the hits actually carry against
    the C3 candidate set (`{Wien, Innsbruck}`, normalized the same way `detectAreaConflicts` already
-   normalizes admin values). Write the answer only when **exactly one** candidate appears among the
-   hit cities and the others do not appear at all. Two real ways this must still ask, not guess:
-   - **Neither candidate appears** — the hits are all somewhere else entirely (a same-named street in
-     a different city, or the geocoder's coverage doesn't have it). Silence here would mean inventing
-     an answer from evidence about a different place.
-   - **Both candidates appear** — a street name common enough to exist in both (plausible for
-     `Hauptstraße`, unlikely but not provably impossible for `Maria-Theresien-Straße`). Silence here
-     would mean picking one of two genuinely valid answers.
-   Either case falls through to the C3 tray exactly as today — this is a corroboration source added
-   *before* the question, never a replacement for asking when the evidence doesn't clear the bar.
+   normalizes admin values):
+   - **Exactly one candidate present, the other absent** → write it silently, no tray.
+   - **Exactly one city present and it's neither candidate** (the owner's own refinement, e.g. the
+     street turns out to be in Salzburg) → still open the tray, but add that city as an extra option
+     alongside `Wien`/`Innsbruck`, with the reason: *"Salzburg — the street was found here, not in
+     Wien or Innsbruck. Did you mean Salzburg?"* The tray's candidate list is already a plain
+     `{id, addressLabel}` array (`buildAdminConflictCandidates`) with a `"Manual"` free-text entry
+     already in it — a suggested city is one more entry of the same shape, not a new mechanism.
+   - **Both candidates present, more than one non-candidate city, or zero hits/a failed call** → no
+     single clean answer. Ask exactly as today, no addition.
+   A suggestion only ever *adds* an option — it never removes `Wien` or `Innsbruck` from the choices,
+   because real folder evidence (a private road, an informal name, a gazetteer gap) can still outrank
+   a geocoder that has never heard of the street.
 
 **Cost accepted**: `needsAreaResolution` is today a synchronous, local, offline decision — no network
 call happens before a C3 tray opens. This adds one geocoder round-trip on that path. A failed/timed-out
