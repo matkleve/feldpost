@@ -1,5 +1,5 @@
 /**
- * Curated mock corpus for the upload pipeline trace harness — 15 synthetic files in
+ * Curated mock corpus for the upload pipeline trace harness — 18 synthetic files in
  * differently-named subfolders, one per pipeline behaviour worth watching.
  *
  * Everything here is synthetic. Nothing in this file is imported by production code.
@@ -33,6 +33,8 @@ export interface UploadTraceScenario {
   contentSeed: number;
   sizeBytes: number;
 }
+
+import { TRACE_AREA_ONLY_SCENARIOS } from './upload-trace-fixtures.area-only';
 
 export const TRACE_PHOTO_MIME = 'image/jpeg';
 export const TRACE_DOCUMENT_MIME = 'application/pdf';
@@ -189,6 +191,7 @@ export const TRACE_SCENARIOS: readonly UploadTraceScenario[] = [
     contentSeed: 15,
     sizeBytes: TRACE_DOCUMENT_SIZE_BYTES,
   },
+  ...TRACE_AREA_ONLY_SCENARIOS,
 ];
 
 const SEED_HEADER_BYTES = 4;

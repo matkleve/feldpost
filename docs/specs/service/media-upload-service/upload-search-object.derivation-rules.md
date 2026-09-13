@@ -70,6 +70,34 @@ postcode, while `AT/1090/…` does.
 
 A filename postcode additionally needs the [filename gate](./upload-search-object.md#area-evidence).
 
+## Completeness: everything above the precision
+
+The stored location is the point of the whole pipeline, and it must be **complete above its
+precision and empty below it**. `capFieldsToPrecisionTier` already enforces the lower half
+([never fabricate precision](./address-resolution-model.md#address-precision-principle)). The upper
+half is this rule:
+
+> Every tier **above** the established precision **MUST** be filled if it can be established at all.
+> A city without its country, or a street without its postcode, is an incomplete record even though
+> its precision is honest.
+
+So `Wien/` stores `country=AT, state=Wien, city=Wien` at `city` precision — not `city=Wien` alone.
+
+### Where each missing tier may come from, in order
+
+| # | Source | Note |
+| --- | --- | --- |
+| 1 | Path evidence | `origin: 'path'` |
+| 2 | A named derivation above | `city→state`, `postcode→city` |
+| 3 | **The geocode response** | When a group was geocoded, the hit carries the full hierarchy (`address.city`, `address.postcode`, `address.country`). Adopt the tiers **above** the established precision; never below it, and never to raise the precision itself |
+| 4 | Reverse geocode of a coordinates-only pin | Already scoped by the parent spec: enrichment for the EXIF-only case |
+
+A tier no source can establish stays `null`. It does **not** lower the precision — precision records
+what was established, completeness records what is known about the area containing it.
+
+Source 3 is what makes `Hauptstraße 5` (street precision, no locality) into a complete record: the
+forward geocode already returned the city, postcode and country, and today they are dropped.
+
 ## Implementation map
 
 | Symbol | File |

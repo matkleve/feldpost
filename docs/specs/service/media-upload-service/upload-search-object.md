@@ -128,7 +128,7 @@ Other countries: path parsing and geocoding use country code; gazetteer Fuse is 
 | **C** | `street`, no locality, no centroid | `street` + `country=AT` (Photon first) | **5b** numbered discriminating field; **5c** house; 0 hits → 1A text only |
 
 See [address-resolution-model.md § Branch C](./address-resolution-model.md#branch-c--street-only-countryat).
-| **Below street** | area fields only | none (area centroid stored) | none |
+| **Below street** | area fields only | none | none — stored at area precision with **no coordinates** ([F-19](../../../study/005-upload-pipeline-trace-findings.md#f-19)) |
 
 Legacy helper `isSearchObjectComplete()` remains true only for Branch A.
 

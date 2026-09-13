@@ -207,6 +207,22 @@ tests passing is not a ratchet.
 
 ---
 
+### D-09 — May EXIF supply a house number? (open)
+
+The owner asked whether a street without a house number can take one from the photo's GPS. That
+**conflicts with a signed-off principle**: [never fabricate precision](./../specs/service/media-upload-service/address-resolution-model.md#address-precision-principle)
+forbids reverse-geocoding a pin into a house the user did not supply.
+
+**Recommendation: allow it only as confirmation, never as invention.** `[D]` Reverse-geocode the EXIF
+point; adopt its house number **only if** the street it returns is the street we already established
+**and** the point lies within `exifAssistRadiusMeters` (80 m) of the geocoded street position. Then it
+is the same address enriched, marked `origin: 'derived'`, `rule: 'exif→houseNumber'`, and the tray can
+show where the number came from. A different street, a missing street, or a point further away
+changes nothing.
+
+Without that guard the pipeline would put a house number on a photo taken across the road, which is
+precisely the failure the principle exists to prevent.
+
 ## 2 · The plan
 
 Ordered so that each phase is independently shippable and each one is verified by something that

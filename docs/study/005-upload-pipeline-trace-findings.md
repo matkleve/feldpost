@@ -55,6 +55,7 @@ spec-level — the spec says what the code does, so a fix needs a contract decis
 | [F-16](#f-16) | ~~One held job in a resolved group holds every job in it, and stops the rest being placed~~ **fixed** | High | Code |
 | [F-17](#f-17) | A parked job keeps its content-hash reservation, so a later identical file is skipped as a duplicate of a file that was never uploaded | High | Code |
 | [F-18](#f-18) | ~~The shipped postcode table is a 21-row stub, and Wien was missing from the gazetteer~~ **gazetteer fixed; postcode table open** | High | Data |
+| [F-19](#f-19) | A path that names only an area ends in Issues; the spec claims an area centroid is stored, and the code stores nothing | High | **Spec** ↔ code |
 
 ---
 
@@ -700,6 +701,40 @@ verified against the built file. `[A]`
 script of its own, like the gazetteer's. Until then `postcode→city` covers 21 postcodes and the
 [corroboration rules](../specs/service/media-upload-service/upload-search-object.derivation-rules.md)
 carry the rest — a postcode that is a whole folder segment is accepted without the table.
+
+---
+
+### F-19 · A path that names only an area ends in Issues, and the spec says otherwise {#f-19}
+
+**What happens.** `[A]` Three scenarios added on 2026-09-13 to measure the owner's case — a folder that
+names a place and nothing else:
+
+| Scenario | Search Object | Group | Job |
+| --- | --- | --- | --- |
+| S19 `Wien/IMG_1101.jpg` | `country=AT state=Wien city=Wien` | `partial` / `metadata_only` | **`missing_data`**, `missing_gps`, Issues |
+| S20 `Wien/1090/IMG_1102.jpg` | `+ postcode=1090` | `partial` / `metadata_only` | **`missing_data`**, Issues |
+| S21 `AT/Niederösterreich/IMG_1103.jpg` | `country=AT state=Niederösterreich` | **no group at all** (`groupingKey` is empty on the job) | **`missing_data`**, Issues |
+
+No `locations` row, no coordinates, nothing searchable. The photo is parked for a human even though
+the path said, unambiguously, where it is.
+
+**What the spec says.** `upload-search-object.md` § Completeness: "**Below street** | area fields only |
+none (**area centroid stored**) | none". `[A]` The centroid is never stored — and per the owner's
+decision on 2026-09-13 it should not be: an area gets **no coordinates at all**, only its text and
+`address_precision`. So both the code and that spec row are wrong, in opposite directions.
+
+**What already works.** The area side is complete *upward*: `Wien` alone yields
+`country=AT state=Wien city=Wien` because `place→country` and `city→state` fire. `[A]` So the record is
+ready to store at `city` precision; only the persisting and the finding are missing.
+
+**Why `groupingKey` is empty for S21.** A state-only Search Object produces no group, so it never
+reaches the grouping or lookup path at all. That is a second, smaller gap in the same area.
+
+**Consequence.** The Issues lane fills with files nobody needs to look at, and the one case the owner
+raised first — "ein Ordner heißt Wien, die Fotos gehören zu Wien" — is the case that does not work.
+Fixing it is [STUDY-006](./006-upload-pipeline-correction-plan.md) Block A, and it is two changes:
+persisting the area location, and making a coordinate-less location findable
+(`db-address.provider.ts` filters those rows out today).
 
 ---
 
