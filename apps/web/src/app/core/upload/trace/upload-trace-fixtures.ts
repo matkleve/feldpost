@@ -174,6 +174,14 @@ export const TRACE_SCENARIOS: readonly UploadTraceScenario[] = [
     sizeBytes: SIZE,
   },
   {
+    id: 'S18',
+    intent: 'Owner case: folder city, filename repeats the address with a different city + PLZ',
+    relativePath: 'Mödling/Wilhelminenstraße 141/Wilhelminenstr 141, 1160 Wien.jpg',
+    mimeType: JPEG,
+    contentSeed: 18,
+    sizeBytes: SIZE,
+  },
+  {
     id: 'S15',
     intent: 'PDF document under a parseable folder address',
     relativePath: 'AT/Wien/1090/Währinger Straße 12/Abnahmeprotokoll.pdf',

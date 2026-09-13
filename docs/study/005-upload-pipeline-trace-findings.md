@@ -50,6 +50,7 @@ spec-level — the spec says what the code does, so a fix needs a contract decis
 | [F-12](#f-12) | The unit suite is order-dependent; the count depends on a build cache | Medium | Repo |
 | [F-13](#f-13) | `ng test` never loads `vitest.config.ts`, so its aliases are inert in CI | Medium | Repo |
 | [F-14](#f-14) | An async tray gate is overwritten by the hashing step, stranding the job | High | Code |
+| [F-15](#f-15) | A path carrying a complete address **twice** can yield an empty Search Object | High | **Spec** |
 
 ---
 
@@ -377,6 +378,66 @@ isolation first". `[A]`
 **Related history.** The 2026-05-27 diary entry recorded cross-file injector pollution in the upload
 specs over a real `LocalGeoDataAdapter` fetch, and `docs/TRAPS.md` § Rejected candidates lists it as
 "Resolved, not a standing trap". `[A]` The shape is back, in a different file.
+
+---
+
+### F-15 · A path carrying a complete address twice can yield an empty Search Object {#f-15}
+
+**The path**, supplied by the owner as a realistic case and now scenario S18:
+
+```
+Mödling/Wilhelminenstraße 141/Wilhelminenstr 141, 1160 Wien.jpg
+```
+
+Two independent, complete-looking addresses: the folders say *Wilhelminenstraße 141* in *Mödling*,
+the file name says *Wilhelminenstr 141, 1160 Wien*. They contradict each other on the city — which is
+the interesting case, and the one a resolver tray exists for.
+
+**What the pipeline produces.** `[A]` — real builder, real geo assets:
+
+```
+flat:            country=null state=null postcode=null city=null street=null houseNumber=141
+groupingKey:     |||||141
+adminLevelMap:   {}
+adminLevelConflicts: []
+postcodeCandidates:  []
+```
+
+Everything is lost except the house number. Three independent rules compose to that: `[A]`
+
+1. **No country token in the path**, so `useAtGeo` is false and the gazetteer is never consulted
+   ([F-03](#f-03)). `Mödling` and `Wien` are therefore **not cities** — they fall through to `street`
+   fragments at confidence 0.5, and land in `sources` as `street`.
+2. **`1160` is classified as nothing at all.** Pass 2 accepts a postcode only once a country is known;
+   with no country it is not a postcode, and at four digits it is not a house number either (the
+   ≤ 3-digit cap without a country). It is silently dropped — it does not even reach
+   `postcodeCandidates`.
+3. The remaining street fragments form **three competing layer packages** —
+   `Mödling`, `Mödling Wilhelminenstraße` (141), `Wilhelminenstr Wien` (141) — so the package conflict
+   fires and the flat `street` stays null pending a tray.
+
+**Consequence.** A file whose name contains a postal address good enough to geocode verbatim
+produces an empty Search Object, one tray question, and no city, street or postcode. `[A]` The
+`adminLevelMap` machinery built exactly for "two cities at different levels" never engages, because
+nothing was ever classified as a city. `[A]`
+
+**Why it is filed as Spec.** Every one of the three rules is as written in
+`upload-search-object.md`. `[A]` The gap is that they were specified independently and their
+composition was never stated, so the spec cannot be read to predict this outcome. Fixing it is
+[STUDY-006](./006-upload-pipeline-correction-plan.md) D-03 (country derived from a city match rather
+than required as input) plus Phase 2.2; after D-03, `Mödling` and `Wien` both classify, the
+`adminLevelMap` gets its two entries, and the contradiction becomes the tray question it should
+always have been. `[C]`
+
+**Model note, since it is easy to misread.** Only the four admin fields
+(`country`, `state`, `city`, `postcode`) are stored as a per-field map of level-tagged values —
+`adminLevelMap[field] = { level, value, source }[]`, where level 0 is the file name. `[A]` Street-level
+fields are **not** in that map: they live in `AddressLayerEntry[]`, one whole package per folder
+prefix plus one for the file name, and within a package the fragments are **concatenated**
+(`Mödling Wilhelminenstraße`) rather than kept as alternatives. `[A]` `sources[]` logs every write with
+its confidence but carries **no level**. `[A]` So "every property is a map with levels and possibly
+several values" is true for admin fields and false for street-level ones — see `docs/TRAPS.md`
+TRAP-016.
 
 ---
 

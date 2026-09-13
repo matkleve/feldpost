@@ -43,6 +43,7 @@ Entries are numbered, never renumbered, and never deleted. Order is by cost, not
 | [TRAP-013](#trap-013--the-file-name-outranks-the-folder-for-admin-fields) | The file name is level 0, so `IMG_1274.jpg` outranks the folder's postcode | `open` |
 | [TRAP-014](#trap-014--a-fuzzy-gazetteer-substitutes-a-name-it-does-not-have) | A fuzzy gazetteer substitutes a name it does not have, at full confidence | `open` |
 | [TRAP-015](#trap-015--a-gate-that-passes-because-nothing-ran) | A gate that passes because nothing ran | `open` |
+| [TRAP-016](#trap-016--only-half-the-search-object-is-level-mapped) | Only four of the Search Object's fields are level-mapped; street-level ones are concatenated | `open` |
 
 ---
 
@@ -307,6 +308,22 @@ Better: end the migration with a `DO` block that raises when any touched functio
 **Detect** — a soft gate must report a *count*, not only a verdict: grep the gate's output for `Tests ` / `Test Files ` before believing its debt note. Any gate whose failure mode is "produces no output" needs the zero case treated as hard failure.
 
 **Source** — [`STUDY-005`](./study/005-upload-pipeline-trace-findings.md) F-09 and F-10; [`2026-09-12`](./ai-diary/2026-09-12.md). Remedy proposed as [`STUDY-006`](./study/006-upload-pipeline-correction-plan.md) D-06 and Phase 0.
+
+**Status** — `open`.
+
+---
+
+## TRAP-016 — Only half the Search Object is level-mapped
+
+**Surface** — `UploadSearchObject` carries `adminLevelMap: Partial<Record<AdminFieldKey, FieldLevelEntry[]>>`, where each entry is `{ level, value, source, field }` and level 0 is the file name. The spec's § Admin level map describes per-field, multi-value, level-tagged provenance with conflict detection and a tray.
+
+**Assumption** — every address field works that way: `street` and `city` alike are maps from folder level to value, several values are kept, and a contradiction between levels becomes a question. It is the natural reading, and the owner of this repository read it that way.
+
+**Truth** — it applies to **four** fields only: `country`, `state`, `city`, `postcode` (`AdminFieldKey`, `upload-address-level-map.types.ts:6`). Street-level fields are deliberately excluded — the spec says so in one easily-missed row ("Street fields | Layer packages remain normative … **not** in `adminLevelMap`") — and live in a different shape: `AddressLayerEntry[]`, one whole street-level *package* per folder prefix plus one for the file name. Two consequences follow, and neither is visible from the admin-map API: within a package the fragments are **concatenated**, so `Mödling/Wilhelminenstraße 141` yields the street `Mödling Wilhelminenstraße` rather than two candidates; and `sources[]`, which does list every write, carries **no level**, so it is an audit log and not a map. Competing street readings are therefore per-path-prefix, never per-field-per-level.
+
+**Detect** — ask which of the two structures a field lives in before reasoning about its provenance: `AdminFieldKey` answers it in one line. When you want "what did level 2 say about `street`", there is no such query — reach for `AddressLayerEntry.layerKey`, which encodes the prefix. The asymmetry is also what makes filename words pollute `street` by concatenation ([F-04](./study/005-upload-pipeline-trace-findings.md#f-04)) while filename *numbers* are now gated ([F-01](./study/005-upload-pipeline-trace-findings.md#f-01)).
+
+**Source** — [`STUDY-005`](./study/005-upload-pipeline-trace-findings.md) F-15 and its worked path (scenario S18); [`2026-09-12`](./ai-diary/2026-09-12.md). Types at `apps/web/src/app/core/upload/address-resolution/upload-address-level-map.types.ts:6`; packages at `apps/web/src/app/core/location-path-parser/upload-search-object.layer-map.ts`.
 
 **Status** — `open`.
 
