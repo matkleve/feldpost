@@ -56,6 +56,7 @@ spec-level — the spec says what the code does, so a fix needs a contract decis
 | [F-17](#f-17) | A parked job keeps its content-hash reservation, so a later identical file is skipped as a duplicate of a file that was never uploaded | High | Code |
 | [F-18](#f-18) | ~~The shipped postcode table is a 21-row stub, and Wien was missing from the gazetteer~~ **gazetteer fixed; postcode table open** | High | Data |
 | [F-19](#f-19) | ~~A path that names only an area ends in Issues; the spec claims an area centroid is stored, and the code stores nothing~~ **fixed** | High | **Spec** ↔ code |
+| [F-20](#f-20) | Choosing "Keep" on a `containment_check` tray never resumes the job — it sits forever, looking like it's waiting on the user when nothing is | High | Code |
 
 ---
 
@@ -745,6 +746,42 @@ admin_conflict=16`) are identical to the pre-fix baseline in
 [`upload-pipeline-trace.md`](../playbooks/upload-pipeline-trace.md) — the fix is additive; no
 generated path in that seeded set happens to be area-only, so the change only ever touches the three
 curated `metadata_only` scenarios.
+
+---
+
+### F-20 · "Keep" on a `containment_check` tray never resumes the job {#f-20}
+
+**Found while speccing** [D-11](./006-upload-pipeline-correction-plan.md#d-11) (street corroboration
+for `admin_level_conflict`) — the owner asked "what if the street is genuinely new, not in any
+database yet." The answer is that a mechanism for exactly that already exists — the V1
+`containment_check` tray, which offers *"Keep: {street}, {city}"* (accept the folder's text despite
+zero geocoder hits) or *"Enter a different address."* Checking whether "Keep" actually works surfaced
+this.
+
+**What happens.** `applyContainmentCheckChoice`'s "Keep" branch sets `resolutionStatus: 'resolved'`
+and `pendingPartialLocation: true` on every job in the group, then emits `notifyDisambiguationResolved`
+— an RxJS `Subject` (`disambiguationResolved$`). `[A]` Grepped: **nothing in the codebase subscribes to
+it**, anywhere. Separately, the only gate that routes a job into the upload phase
+(`routePreparedNewJob`) checks `job.coords || job.areaOnlyLocation` — a job resolved this way has
+neither, so nothing ever re-evaluates it into either the upload path or `routeJobToMissingData`. The
+job's `phase` never advances past wherever it was parked when the tray opened.
+
+**Measured, not inferred.** Scenario **S06** in the curated trace corpus (`AT/Wien/Innsbruck/
+Maria-Theresien-Straße 18/…`) exercises exactly this path — the trace harness's own auto-answer picks
+the tray's first candidate, which `patchContainmentCheckOutcome` always puts "Keep" first. `[A]` S06's
+recorded final outcome: `phase=awaiting_disambiguation`, `lane=Waiting for user`. Not uploaded. Not in
+Issues. The disambiguation group itself is marked resolved (`resolutionGateOpen: false`), so there is
+no tray left for a real user to answer, either — the file just sits, indistinguishable in the UI from
+one still genuinely waiting on input.
+
+**Consequence.** Every C3-cascade path that ends in a zero-hit Branch A geocode (admin conflict
+resolved → street not found in the resolved city → V1 tray → "Keep") produces a file that silently
+never completes. This predates D-11 entirely — D-11 does not create or touch this path, it only led to
+checking it.
+
+**Not done here**: the fix itself (either give `containment_check`'s "Keep" the same coords-optional
+persist path D-10 built for area-only locations, or wire a real subscriber to
+`disambiguationResolved$` that re-drives routing). Filed as its own item, not folded into D-11.
 
 ---
 

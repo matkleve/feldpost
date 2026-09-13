@@ -18,31 +18,40 @@ non-empty result proves nothing about whether the street is actually in that cit
 trustworthy signal is what the hit's **own** address components say about where the geocoder thinks
 that street is.
 
-## Mechanism — reuses class A1's own tools, run one step earlier
+## Mechanism — one query does city corroboration and the final pin; a second tier covers new construction
 
-1. Query the street **alone**, no `city` param: `geocoding.searchStructuredForward({ street,
-   countryCode })`. (Same call Branch C already makes when no locality is known at all — this is not
-   a new query shape, just an earlier trigger for it.)
-2. Read each hit's own `address.city` / `address.town` / `address.village` — exactly what
-   `mapGeocoderHitsToCandidates` already extracts for class A1's `pickDiscriminatingField`.
-3. Normalize those city names the same way `detectAreaConflicts` normalizes admin values
-   (`normalizeAdminValue`), and collect the distinct set. Call it `hitCities`.
-4. Three outcomes, by how `hitCities` relates to the C3 candidate set (e.g. `{Wien, Innsbruck}`):
+**Tier 1 — with the house number, if the Search Object has one.** Query
+`geocoding.searchStructuredForward({ street: [so.street, so.houseNumber].join(' '), countryCode })` —
+e.g. `"18 Maria-Theresien-Straße"`, no `city`, whole country. Unlike the bare-street version this
+supplement first proposed, this is not merely a corroboration probe: **a clean single hit here already
+carries everything needed** — its `address.city` corroborates which candidate is right, its
+`address.house_number` (checked, not assumed — see below) confirms the number, and its `lat`/`lng` *is*
+the final placement. When Tier 1 succeeds there is no second geocode call for this group at all.
 
-   | `hitCities` | Meaning | Outcome |
-   | --- | --- | --- |
-   | Exactly one candidate, and only that one | The street corroborates one of the folder's own guesses | **Auto-resolve** — write it, no tray |
-   | Exactly one city, and it is **not** a candidate | The street corroborates a *third* place the folder never named | **Suggest it** — open the tray with that city added as an extra option, distinct from the folder-derived ones, plus the reason |
-   | Zero cities, more than one city, or the call fails/times out | No single clean answer | **Ask exactly as today** — plain C3 tray, no addition |
+**Tier 2 — bare street, no house number.** Only tried when Tier 1 comes back with zero hits: a
+brand-new building on an already-mapped street is exactly this product's other common case, and would
+otherwise be mistaken for "the street doesn't exist anywhere." `geocoding.searchStructuredForward({
+street, countryCode })` — the same call Branch C already makes when no locality is known at all, so
+this is not a new query shape, only an earlier trigger for it. A Tier 2 hit corroborates the city only;
+the precise pin still comes from the normal Branch A/B/C geocode that runs once the tray (or
+auto-resolve) settles the city.
 
-   The "suggest" row is the same underlying signal as auto-resolve — one confident answer — just
-   pointed outside the set the path proposed. It must never *replace* the folder's own candidates
-   (a private road, an informal name, or a gazetteer gap can all make real folder evidence outrank a
-   geocoder that's never heard of it) — it only *adds* one, so the user still sees `Wien` and
-   `Innsbruck` alongside it.
-5. A failed or timed-out lookup, or a genuine tie/no-signal result, falls through to the tray exactly
-   as a zero-hit result does today — never to silence, and never to a suggestion built on weak
-   evidence.
+Both tiers read each hit's own `address.city` / `address.town` / `address.village` — exactly what
+`mapGeocoderHitsToCandidates` already extracts for class A1's `pickDiscriminatingField` — never the
+mere presence of a result. Normalize those names the same way `detectAreaConflicts` normalizes admin
+values (`normalizeAdminValue`), collect the distinct set (`hitCities`), and act on it:
+
+| `hitCities` | Meaning | Outcome |
+| --- | --- | --- |
+| Exactly one candidate, and only that one | The street corroborates one of the folder's own guesses | **Auto-resolve** — write it (Tier 1: with coordinates and house number too), no tray |
+| Exactly one city, and it is **not** a candidate | The street corroborates a *third* place the folder never named | **Suggest it** — open the tray with that city added as an extra option, ranked and labelled below the folder's own candidates (see Tray copy) |
+| Zero cities, more than one city, Tier 2 also empty, or the call fails/times out | No single clean answer | **Ask exactly as today** — plain C3 tray, no addition |
+
+A suggestion must never *replace* the folder's own candidates (a private road, an informal name, or a
+gazetteer gap can all make real folder evidence outrank a geocoder that's never heard of it) — it only
+*adds* one. A failed or timed-out lookup, or a genuine tie/no-signal result at both tiers, falls through
+to the tray exactly as a zero-hit result does today — never to silence, and never to a suggestion built
+on weak evidence.
 
 ## Worked example
 
@@ -50,11 +59,25 @@ that street is.
 
 | Query | Hits' `address.city` values | Outcome |
 | --- | --- | --- |
-| `street=Maria-Theresien-Straße, countryCode=at` | `{Innsbruck}` only | Auto-resolve → `city = Innsbruck`, no tray |
-| same | `{Wien, Innsbruck}` | Tie between the two candidates — open C3 tray as today |
-| same | `{Salzburg}` (a single city, but neither candidate) | Open C3 tray with a third option added: *"Salzburg — the street was found here, not in Wien or Innsbruck. Did you mean Salzburg?"*, alongside the original `Wien`/`Innsbruck` choices |
-| same | `{Salzburg, Graz}` (more than one, none a candidate) | No single clean answer — open C3 tray as today, no addition |
-| same | zero hits, or the geocoder call fails/times out | No corroboration — open C3 tray as today |
+| Tier 1: `street="18 Maria-Theresien-Straße", countryCode=at` | `{Innsbruck}` only | Auto-resolve → `city = Innsbruck`, coordinates and house number from this same hit, no tray, no second geocode |
+| Tier 1 empty → Tier 2: `street="Maria-Theresien-Straße", countryCode=at` | `{Innsbruck}` only | Auto-resolve → `city = Innsbruck` (a new building 18, not yet mapped, on a street that is) — precise pin still comes from the normal geocode after |
+| either tier | `{Wien, Innsbruck}` | Tie between the two candidates — open C3 tray as today |
+| either tier | `{Salzburg}` (a single city, but neither candidate) | Open C3 tray with a third option added, ranked below the folder candidates: *"Salzburg — the street was found here, not in Wien or Innsbruck. Did you mean Salzburg?"* |
+| either tier | `{Salzburg, Graz}` (more than one, none a candidate) | No single clean answer — open C3 tray as today, no addition |
+| both tiers | zero hits, or the geocoder call fails/times out | No corroboration — open C3 tray as today |
+
+## Tray copy: a suggestion is not a peer of the folder's own candidates
+
+The added option must read as *evidence found*, not as a third equally-weighted guess — otherwise the
+question gets harder to answer, not easier. Two concrete rules:
+
+- **Order**: folder-derived candidates first (`Wien`, `Innsbruck`), the suggested city last, visually
+  set apart (e.g. a divider or a distinct label style), never alphabetized or score-sorted into the
+  middle of the list.
+- **Copy asymmetry**: `Wien`/`Innsbruck` keep their existing plain labels (the folder said this; the
+  system takes no position on whether it's right). The suggested entry names the evidence directly —
+  *"Salzburg — the street was found here, not in Wien or Innsbruck. Did you mean Salzburg?"* — so the
+  user can tell at a glance which option the system found actual corroboration for.
 
 ## Adding the suggested candidate needs no new tray mechanism
 
@@ -65,6 +88,15 @@ shape, one more entry — no lat/lng needed here either, same as the existing en
 placeholders): picking any candidate in this tray just writes the chosen city string onto the Search
 Object and lets the normal Branch A/B/C geocode run afterward, which is exactly why the pre-check
 already knows this pick will succeed — it just confirmed the street exists there.
+
+## Out of scope: a street that exists nowhere at all
+
+This supplement only covers *which city* a street that the geocoder does know about is in. A street
+the geocoder has never heard of anywhere (new construction on a brand-new street, not merely a new
+house number on an existing one) is a different, already-specced case — **V1 / `containment_check`**
+in the parent spec — and should stay there rather than be folded into this mechanism. See
+[F-20](../../../study/005-upload-pipeline-trace-findings.md#f-20) for a defect found in that path while
+speccing this one.
 
 ## Provenance
 

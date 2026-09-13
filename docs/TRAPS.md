@@ -396,6 +396,44 @@ Better: end the migration with a `DO` block that raises when any touched functio
 
 ---
 
+## TRAP-021 — A resolution event with zero subscribers looks like it resumed the job
+
+**Surface** — `applyContainmentCheckChoice`'s "Keep" branch (the V1 `containment_check` tray, "accept
+this address even though the geocoder found nothing") does everything a resolved tray normally does:
+sets `resolutionStatus: 'resolved'` on the job, marks the disambiguation group's `resolutionGateOpen:
+false`, and calls `notifyDisambiguationResolved(event)`.
+
+**Assumption** — a service method with a name like `notifyDisambiguationResolved`, called at the end of
+every other tray-resolution path in the same file, is doing something — advancing the pipeline,
+draining the queue, whatever the other call sites' effects turn out to be. Reading the call site alone
+gives no reason to doubt it.
+
+**Truth** — `notifyDisambiguationResolved` only pushes onto an RxJS `Subject`
+(`disambiguationResolved$`). Grepping the entire frontend for a subscriber to that Subject finds none.
+Combined with the fact that the only gate into the upload phase (`routePreparedNewJob`) checks
+`job.coords || job.areaOnlyLocation` — and a "Keep" job has neither — the job's `phase` simply never
+moves again. Nothing crashes, nothing logs an error, no test failed before this was found: the group is
+marked resolved, so the tray disappears from the UI, but the file underneath never uploads and never
+routes to Issues either. It reads as "waiting for user" to anyone who checks its phase, indefinitely,
+with no user action pending on it at all ([F-20](./study/005-upload-pipeline-trace-findings.md#f-20)).
+
+**Detect** — before trusting that a `notify*`/`emit*` call site does something, find who's listening.
+`grep` the exact identifier (`someSubject$` or the method name) across the whole app, not just the
+module that defines it — a zero-result grep on an event name is the signature of this trap. Cross-check
+against the one thing that actually decides pipeline progress (here, `routePreparedNewJob`'s own
+condition) rather than assuming the notification is wired into it.
+
+**Source** — found while speccing [STUDY-006 D-11](./study/006-upload-pipeline-correction-plan.md#d-11),
+2026-09-13, by tracing what "Keep" on a `containment_check` tray actually does — confirmed against
+scenario S06's own recorded trace outcome (`phase=awaiting_disambiguation`, never resolved further).
+Code at `apps/web/src/app/core/upload/location/upload-location-tray-flow.service.ts`
+(`applyContainmentCheckChoice`) and `upload-location-resolution.service.ts`
+(`notifyDisambiguationResolved`).
+
+**Status** — `open`.
+
+---
+
 ## Rejected candidates
 
 Kept so they are not re-proposed. Both were real when recorded; neither reproduces now.
