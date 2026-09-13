@@ -118,11 +118,11 @@ describe('applyPreResolveFromOrchestrator — resolved group with one held sibli
 });
 
 /**
- * `metadata_only` is a deliberate area-precision result, not a failure — it must place the job
+ * `area_only` is a deliberate area-precision result, not a failure — it must place the job
  * as a text-only address with no coordinates and no tray, instead of routing to Issues.
  * @see docs/study/005-upload-pipeline-trace-findings.md#f-19
  */
-describe('applyPreResolveFromOrchestrator — metadata_only (area-only) group', () => {
+describe('applyPreResolveFromOrchestrator — area_only group', () => {
   const AREA_GROUPING_KEY = 'at|niederösterreich|||';
 
   function areaJob(id: string): UploadJob {
@@ -147,7 +147,7 @@ describe('applyPreResolveFromOrchestrator — metadata_only (area-only) group', 
     jobIds: ['area-job-1'],
     folderDisplayPath: 'AT/Niederösterreich',
     titleAddressLabel: 'Niederösterreich, AT',
-    geocodeBranch: 'metadata_only',
+    geocodeBranch: 'area_only',
     searchObject: {
       country: 'AT',
       state: 'Niederösterreich',

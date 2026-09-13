@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  buildBranchCCity01Candidates,
+  buildStreetOnlyCity01Candidates,
   buildDisambiguationQueryKey,
   buildSearchQuery,
   classifySearchHits,
@@ -10,7 +10,7 @@ import {
   isExifAuthoritativeOverWeakFilenameStreet,
   normalizeAddressForGrouping,
   pickDiscriminatingField,
-  shouldForceBranchCCityTray,
+  shouldForceStreetOnlyCityTray,
   shouldSplitGroupByPhotonUnitCoords,
 } from './upload-location-resolution.helpers';
 import type { UploadGroupResolutionState } from '../address-resolution/upload-address-resolution.types';
@@ -105,21 +105,21 @@ describe('upload-location-resolution.helpers', () => {
     expect(outcome.kind).toBe('ambiguous');
   });
 
-  it('evaluateLocalResolution Branch A with street + city', () => {
-    expect(evaluateLocalResolution(so({ street: 'Thaliastraße', city: 'Wien' }))).toBe('branch_a');
+  it('evaluateLocalResolution street_locality with street + city', () => {
+    expect(evaluateLocalResolution(so({ street: 'Thaliastraße', city: 'Wien' }))).toBe('street_locality');
   });
 
-  it('evaluateLocalResolution Branch B with project centroid', () => {
+  it('evaluateLocalResolution street_project_bias with project centroid', () => {
     expect(
       evaluateLocalResolution(so({ street: 'Thaliastraße', houseNumber: '4' }), {
         lat: 48.2,
         lng: 16.3,
       }),
-    ).toBe('branch_b');
+    ).toBe('street_project_bias');
   });
 
-  it('evaluateLocalResolution Branch C without centroid', () => {
-    expect(evaluateLocalResolution(so({ street: 'Thaliastraße' }))).toBe('branch_c');
+  it('evaluateLocalResolution street_only without centroid', () => {
+    expect(evaluateLocalResolution(so({ street: 'Thaliastraße' }))).toBe('street_only');
   });
 
   it('shouldSplitGroupByPhotonUnitCoords when units on SO and hits far apart', () => {
@@ -175,7 +175,7 @@ describe('upload-location-resolution.helpers', () => {
       }),
       folderDisplayPath: '',
       titleAddressLabel: 'IMG',
-      geocodeBranch: 'branch_c',
+      geocodeBranch: 'street_only',
       trayStep: '1a',
     };
     const job = {
@@ -187,9 +187,9 @@ describe('upload-location-resolution.helpers', () => {
     ).toBe(true);
   });
 
-  describe('shouldForceBranchCCityTray (CITY-01)', () => {
-    const branchCGroup: Pick<UploadGroupResolutionState, 'geocodeBranch' | 'searchObject'> = {
-      geocodeBranch: 'branch_c',
+  describe('shouldForceStreetOnlyCityTray (CITY-01)', () => {
+    const streetOnlyGroup: Pick<UploadGroupResolutionState, 'geocodeBranch' | 'searchObject'> = {
+      geocodeBranch: 'street_only',
       searchObject: so({ street: 'Neustiftgasse', city: null, houseNumber: null }),
     };
 
@@ -206,20 +206,20 @@ describe('upload-location-resolution.helpers', () => {
 
     it('forces city tray when Photon city differs from EXIF reverse-geocode city (name, not distance)', () => {
       expect(
-        shouldForceBranchCCityTray(branchCGroup, autoOutcome, 'Wien'),
+        shouldForceStreetOnlyCityTray(streetOnlyGroup, autoOutcome, 'Wien'),
       ).toBe(true);
     });
 
     it('does not force when cities match even if pins are far apart', () => {
       expect(
-        shouldForceBranchCCityTray(branchCGroup, autoOutcome, 'St. Pölten'),
+        shouldForceStreetOnlyCityTray(streetOnlyGroup, autoOutcome, 'St. Pölten'),
       ).toBe(false);
     });
 
     it('does not force when auto candidate city is null (CITY-02 path)', () => {
       expect(
-        shouldForceBranchCCityTray(
-          branchCGroup,
+        shouldForceStreetOnlyCityTray(
+          streetOnlyGroup,
           {
             kind: 'auto',
             candidate: {
@@ -236,29 +236,29 @@ describe('upload-location-resolution.helpers', () => {
     });
 
     it('does not force when EXIF reverse city is missing', () => {
-      expect(shouldForceBranchCCityTray(branchCGroup, autoOutcome, null)).toBe(false);
-      expect(shouldForceBranchCCityTray(branchCGroup, autoOutcome, '')).toBe(false);
+      expect(shouldForceStreetOnlyCityTray(streetOnlyGroup, autoOutcome, null)).toBe(false);
+      expect(shouldForceStreetOnlyCityTray(streetOnlyGroup, autoOutcome, '')).toBe(false);
     });
 
     it('does not force when Search Object already has city or house number', () => {
       expect(
-        shouldForceBranchCCityTray(
-          { ...branchCGroup, searchObject: so({ street: 'Neustiftgasse', city: 'Wien' }) },
+        shouldForceStreetOnlyCityTray(
+          { ...streetOnlyGroup, searchObject: so({ street: 'Neustiftgasse', city: 'Wien' }) },
           autoOutcome,
           'Graz',
         ),
       ).toBe(false);
       expect(
-        shouldForceBranchCCityTray(
-          { ...branchCGroup, searchObject: so({ street: 'Neustiftgasse', houseNumber: '12' }) },
+        shouldForceStreetOnlyCityTray(
+          { ...streetOnlyGroup, searchObject: so({ street: 'Neustiftgasse', houseNumber: '12' }) },
           autoOutcome,
           'Graz',
         ),
       ).toBe(false);
     });
 
-    it('buildBranchCCity01Candidates yields two cities for pickDiscriminatingField', () => {
-      const candidates = buildBranchCCity01Candidates(
+    it('buildStreetOnlyCity01Candidates yields two cities for pickDiscriminatingField', () => {
+      const candidates = buildStreetOnlyCity01Candidates(
         autoOutcome.candidate,
         'Wien',
         { lat: 48.17, lng: 16.37 },
@@ -280,7 +280,7 @@ describe('upload-location-resolution.helpers', () => {
       }),
       folderDisplayPath: 'Baustelle',
       titleAddressLabel: 'Musterstrasse',
-      geocodeBranch: 'branch_c',
+      geocodeBranch: 'street_only',
       trayStep: '1a',
     };
     const job = {

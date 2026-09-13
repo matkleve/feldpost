@@ -36,16 +36,16 @@ doesn't discriminate.
 **Writing the auto-resolve without a redundant second geocode.** A Tier 1 (or Tier 2) auto-resolve must
 write the group directly into the same `resolved` shape `runGeocodeForGroup` produces — `status:
 'resolved'`, `candidate` built from the corroborating hit — not merely patch `so.city` and fall through
-to `needsGeocode`, which would silently re-run Branch A from scratch and throw away the coordinates
+to `needsGeocode`, which would silently re-run `street_locality` from scratch and throw away the coordinates
 already in hand. "No second call needed" is a property of the state transition, not just of having
 made one good query; get this wrong and the call still happens twice.
 
 **Tier 2 — bare street, no house number.** Only tried when Tier 1 comes back with zero hits: a
 brand-new building on an already-mapped street is exactly this product's other common case, and would
 otherwise be mistaken for "the street doesn't exist anywhere." `geocoding.searchStructuredForward({
-street, countryCode })` — the same call Branch C already makes when no locality is known at all, so
+street, countryCode })` — the same call `street_only` already makes when no locality is known at all, so
 this is not a new query shape, only an earlier trigger for it. A Tier 2 hit corroborates the city only;
-the precise pin still comes from the normal Branch A/B/C geocode that runs once the tray (or
+the precise pin still comes from the normal `street_locality`/`street_project_bias`/`street_only` geocode that runs once the tray (or
 auto-resolve) settles the city.
 
 Both tiers read each hit's own `address.city` / `address.town` / `address.village` — exactly what
@@ -98,7 +98,7 @@ question gets harder to answer, not easier. Two concrete rules:
 plus an existing `"Manual: {field}"` free-text-override entry). A suggested outside city is the same
 shape, one more entry — no lat/lng needed here either, same as the existing entries (`lat: 0, lng: 0`
 placeholders): picking any candidate in this tray just writes the chosen city string onto the Search
-Object and lets the normal Branch A/B/C geocode run afterward, which is exactly why the pre-check
+Object and lets the normal `street_locality`/`street_project_bias`/`street_only` geocode run afterward, which is exactly why the pre-check
 already knows this pick will succeed — it just confirmed the street exists there.
 
 ## Out of scope: a street that exists nowhere at all

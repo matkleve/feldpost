@@ -118,15 +118,15 @@ export function buildGroupPresentation(so: UploadSearchObject): {
 }
 
 export type LocalResolutionGate =
-  | 'branch_a'
-  | 'branch_b'
-  | 'branch_c'
-  | 'metadata_only'
+  | 'street_locality'
+  | 'street_project_bias'
+  | 'street_only'
+  | 'area_only'
   | 'postcode_blocked'
   | 'incomplete';
 
 /**
- * EXIF GPS wins over Branch C tray when "street" is only a weak filename token (e.g. IMG from IMG_1121.jpg).
+ * EXIF GPS wins over `street_only` tray when "street" is only a weak filename token (e.g. IMG from IMG_1121.jpg).
  * @see docs/specs/service/media-upload-service/upload-manager-pipeline.location-routing.supplement.md
  */
 export function isExifAuthoritativeOverWeakFilenameStreet(
@@ -143,8 +143,8 @@ export function isExifAuthoritativeOverWeakFilenameStreet(
     folderDisplayPath: groupState.folderDisplayPath,
     jobIds: groupState.jobIds,
   });
-  if (groupState.geocodeBranch !== 'branch_c' || groupState.trayStep !== '1a') {
-    uploadTraceDecision('weak-exif', 'skip EXIF override — need branch_c and trayStep 1a', {
+  if (groupState.geocodeBranch !== 'street_only' || groupState.trayStep !== '1a') {
+    uploadTraceDecision('weak-exif', 'skip EXIF override — need street_only and trayStep 1a', {
       geocodeBranch: groupState.geocodeBranch,
       trayStep: groupState.trayStep,
     });
@@ -208,8 +208,9 @@ export function isExifAuthoritativeOverWeakFilenameStreet(
 }
 
 /**
- * Classify SO completeness into a local resolution gate (branch_a/b/c, incomplete, postcode_blocked, metadata_only).
- * @see docs/specs/service/media-upload-service/upload-search-object.md § Completeness gates (Branch A/B/C)
+ * Classify SO completeness into a local resolution gate (street_locality/project_bias/only,
+ * incomplete, postcode_blocked, area_only).
+ * @see docs/specs/service/media-upload-service/upload-search-object.md § Completeness gates
  */
 export function evaluateLocalResolution(
   so: UploadSearchObject,
@@ -310,7 +311,7 @@ export function discriminatingFieldValue(
   }
 }
 
-/** Branch C 5a: first ranked field that differs between Photon candidates. */
+/** `street_only` 5a: first ranked field that differs between Photon candidates. */
 export function pickDiscriminatingField(
   candidates: UploadAddressCandidate[],
 ): UploadDiscriminatingField | null {
@@ -426,20 +427,20 @@ export function shouldSplitGroupByPhotonUnitCoords(
 }
 
 /** Candidate id prefix for CITY-01 EXIF reverse-geocode city option. */
-export const BRANCH_C_EXIF_CITY_CANDIDATE_PREFIX = 'exif-city-';
+export const STREET_ONLY_EXIF_CITY_CANDIDATE_PREFIX = 'exif-city-';
 
 /**
  * Build numbered city options for CITY-01: Photon auto city vs EXIF reverse-geocode city.
  * @see docs/specs/service/media-upload-service/upload-address-resolution.branch-c-city-tray.md#city-01
  */
-export function buildBranchCCity01Candidates(
+export function buildStreetOnlyCity01Candidates(
   autoCandidate: UploadAddressCandidate,
   exifReverseCity: string,
   exifCoords: ExifCoords,
 ): UploadAddressCandidate[] {
   const exifCity = exifReverseCity.trim();
   const exifCandidate: UploadAddressCandidate = {
-    id: `${BRANCH_C_EXIF_CITY_CANDIDATE_PREFIX}${normalizeAdminValue(exifCity)}`,
+    id: `${STREET_ONLY_EXIF_CITY_CANDIDATE_PREFIX}${normalizeAdminValue(exifCity)}`,
     addressLabel: exifCity,
     lat: exifCoords.lat,
     lng: exifCoords.lng,
@@ -449,15 +450,15 @@ export function buildBranchCCity01Candidates(
 }
 
 /**
- * Branch C auto-assign blocked — force city_step when EXIF reverse-geocode city disagrees with Photon auto city.
+ * `street_only` auto-assign blocked — force city_step when EXIF reverse-geocode city disagrees with Photon auto city.
  * @see docs/specs/service/media-upload-service/upload-address-resolution.branch-c-city-tray.md#city-01
  */
-export function shouldForceBranchCCityTray(
+export function shouldForceStreetOnlyCityTray(
   group: Pick<UploadGroupResolutionState, 'geocodeBranch' | 'searchObject'>,
   outcome: ClassifySearchOutcome,
   exifReverseCity: string | null | undefined,
 ): boolean {
-  if (group.geocodeBranch !== 'branch_c' || outcome.kind !== 'auto') {
+  if (group.geocodeBranch !== 'street_only' || outcome.kind !== 'auto') {
     return false;
   }
   const so = group.searchObject;
@@ -584,7 +585,7 @@ export function classifySearchHits(
   return { kind: 'auto', candidate: top };
 }
 
-/** Pick UI collapse stage from candidate spread (Branch C 5a ranking). */
+/** Pick UI collapse stage from candidate spread (`street_only` 5a ranking). */
 export function pickCollapseStage(
   candidates: UploadAddressCandidate[],
   jobCount: number,

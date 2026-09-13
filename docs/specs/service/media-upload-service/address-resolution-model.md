@@ -5,7 +5,7 @@
 
 ## Purpose
 
-Defines the **8-step** upload address resolution flow, hierarchical completeness for stored locations, explicit non-goals, Branch C tray semantics (5a–5c), and the **tray enqueue contract**.
+Defines the **8-step** upload address resolution flow, hierarchical completeness for stored locations, explicit non-goals, `street_only` tray semantics (5a–5c), and the **tray enqueue contract**.
 
 Child specs hold detail; this document is the index and cross-cutting rules.
 
@@ -52,7 +52,7 @@ Normative rules for upload and persist — audit: [`docs/audits/upload-flow-revi
 
 ## Explicit non-goals
 
-- **Project location is not an address fallback.** `project_locations` centroid is **only** Branch B Photon bias — media never inherit project address automatically.
+- **Project location is not an address fallback.** `project_locations` centroid is **only** `street_project_bias` Photon bias — media never inherit project address automatically.
 - **Nominatim removal** — deferred until Photon-only path is validated (last migration step).
 
 ## Eight-step flow
@@ -63,7 +63,7 @@ Normative rules for upload and persist — audit: [`docs/audits/upload-flow-revi
 | 2 | EXIF lat/lon/date locally → `exifCoords`; not sent to Photon | — |
 | 3 | Content hash → tag duplicate; **job continues** | — |
 | 4 | EXIF reverse `lang=en`; superset vs SO or EXIF-only | — |
-| 5 | Photon when `street`; branches A/B/C; drop hits **> `contextDistanceMaxMeters`** from job anchor (org Search Tuning km cap) | See Branch C + enqueue contract |
+| 5 | Photon when `street`; `street_locality`/`street_project_bias`/`street_only`; drop hits **> `contextDistanceMaxMeters`** from job anchor (org Search Tuning km cap) | See `street_only` + enqueue contract |
 | 6 | No street or tier-only SO → admin centroid; persist at established precision (map rendering per [area-extent decisions](./address-resolution-model.area-extent-decisions.supplement.md) — not street-text gating) | — |
 | 7 | Placement + EXIF within `exifAssistRadiusMeters` (default **80 m**) → EXIF refines | — |
 | 8 | `placementResolvedBy` → upload bytes | — |
@@ -92,12 +92,12 @@ Disambiguation dedup (`groupingKey` → tray group) is currently scoped **per `b
 
 **Required (not yet implemented):**
 
-- Before registering a Branch B/C tray (`needsTray` / `ambiguous` / `city_step`) or a `layer_package` tray, `classifyBatch` / `runGeocodeForGroup` MUST check **other active batches** for an existing group with the same `groupingKey` (or `layerConflictQueryKey`).
+- Before registering a `street_project_bias`/`street_only` tray (`needsTray` / `ambiguous` / `city_step`) or a `layer_package` tray, `classifyBatch` / `runGeocodeForGroup` MUST check **other active batches** for an existing group with the same `groupingKey` (or `layerConflictQueryKey`).
 - If found and **resolved** → reuse the resolved candidate/placement directly (no second Photon call, no tray).
 - If found and **still open** (`needsLayerResolution` / `needsTray` / `ambiguous`) → merge the new `jobIds` into that existing group instead of opening a second tray; the existing tray's `candidates`/`discriminatingField`/title text apply to both batches.
 - Implementation note: requires a session-scoped index `groupingKey → groupState` in addition to (or instead of) the per-`batchId` `batchCaches` map.
 
-## Branch C — street only (`country=AT`)
+## `street_only` — street only (`country=AT`)
 
 Photon input: `street` + `country=AT` (no city in SO).
 
@@ -158,9 +158,9 @@ Recorded in [area-extent-decisions supplement](./address-resolution-model.area-e
 
 ## Acceptance criteria
 
-- [x] Branch C never opens tray from `classifyBatch` without Photon — `classifyBatch` only sets `needsGeocode`/`needsLayerResolution`/`partial`/`resolved`; tray registration happens only in `runGeocodeForGroup` (`upload-location-geocode-group.service.ts`).
+- [x] `street_only` never opens tray from `classifyBatch` without Photon — `classifyBatch` only sets `needsGeocode`/`needsLayerResolution`/`partial`/`resolved`; tray registration happens only in `runGeocodeForGroup` (`upload-location-geocode-group.service.ts`).
 - [x] Wolzeile-style folder: numbered city (or discriminating field) options after Photon — `pickDiscriminatingField` + `trayStep: '1a'` in `patchAmbiguousGeocodeOutcome` (`upload-location-geocode-outcome.util.ts`).
-- [x] Project tray Step 2 removed; centroid bias only on Branch B — `classifyBatch` passes `projectCentroid` only when `local === 'branch_b'` (`upload-address-resolution.orchestrator.ts`).
+- [x] Project tray Step 2 removed; centroid bias only on `street_project_bias` — `classifyBatch` passes `projectCentroid` only when `local === 'street_project_bias'` (`upload-address-resolution.orchestrator.ts`).
 - [x] `notifyScanIdle` after pre-resolve wave, not immediately after `classifyBatch` — `classifyBatch` is followed by `preResolveWave.resetWave(...)`; `notifyScanIdle` fires only via `notifyFirstTrayReady`/`completeJob` (`upload-pre-resolve-wave.service.ts`). See corrected wording in [upload-location-resolution.md](./upload-location-resolution.md).
 - [x] Bundle caps: 5 s max window, 5 dialogue units max; 1A+1B = one unit — `PRESENTATION_BUNDLE_WINDOW_MS=5000`, `PRESENTATION_BUNDLE_MAX_DIALOGUE_UNITS=5`, shared `dialogueUnitId` via `dialogueUnitIdForGroup` (`upload-location-tray-producer.adapter.ts`).
 - [ ] Same `groupingKey` across concurrent batches reuses one disambiguation group/result instead of opening a second tray (see "Cross-batch same-address dedup" above).

@@ -123,14 +123,14 @@ Other countries: path parsing and geocoding use country code; gazetteer Fuse is 
 
 | Branch | Gate | Geocode | Tray |
 | --- | --- | --- | --- |
-| **A** | `street` AND (`city` OR `postcode`) | structured-forward | Step 3 if multiple hits |
-| **B** | `street`, no locality, project centroid | structured-forward-bias | Step 3 if multiple; 0 hits → Branch C (Step 1A) |
-| **C** | `street`, no locality, no centroid | `street` + `country=AT` (Photon first) | **5b** numbered discriminating field; **5c** house; 0 hits → 1A text only |
+| **`street_locality`** | `street` AND (`city` OR `postcode`) | structured-forward | Step 3 if multiple hits |
+| **`street_project_bias`** | `street`, no locality, project centroid | structured-forward-bias | Step 3 if multiple; 0 hits → `street_only` (Step 1A) |
+| **`street_only`** | `street`, no locality, no centroid | `street` + `country=AT` (Photon first) | **5b** numbered discriminating field; **5c** house; 0 hits → 1A text only |
 
-See [address-resolution-model.md § Branch C](./address-resolution-model.md#branch-c--street-only-countryat).
-| **Below street** | area fields only | none | none — stored at area precision with **no coordinates** ([F-19](../../../study/005-upload-pipeline-trace-findings.md#f-19)) |
+See [address-resolution-model.md § street_only](./address-resolution-model.md#street_only--street-only-countryat).
+| **`area_only`** (below street) | area fields only | none | none — stored at area precision with **no coordinates** ([F-19](../../../study/005-upload-pipeline-trace-findings.md#f-19)) |
 
-Legacy helper `isSearchObjectComplete()` remains true only for Branch A.
+Legacy helper `isSearchObjectComplete()` remains true only for `street_locality`.
 
 Implementation: [`upload-search-object.completeness.helpers.ts`](../../../../apps/web/src/app/core/location-path-parser/upload-search-object.completeness.helpers.ts).
 

@@ -29,9 +29,9 @@ function baseSo(overrides: Partial<UploadSearchObject> = {}): UploadSearchObject
 }
 
 describe('classifySearchObjectCompleteness', () => {
-  it('Branch A: street + city', () => {
+  it('street_locality: street + city', () => {
     expect(classifySearchObjectCompleteness(baseSo({ street: 'Thaliastraße', city: 'Wien' }))).toBe(
-      'branch_a',
+      'street_locality',
     );
   });
 
@@ -42,27 +42,27 @@ describe('classifySearchObjectCompleteness', () => {
     ).toBe('incomplete');
   });
 
-  it('Branch B: street + project centroid', () => {
+  it('street_project_bias: street + project centroid', () => {
     expect(
       classifySearchObjectCompleteness(baseSo({ street: 'Thaliastraße', houseNumber: '4' }), {
         lat: 48.2,
         lng: 16.3,
         city: 'Wien',
       }),
-    ).toBe('branch_b');
+    ).toBe('street_project_bias');
   });
 
-  it('Branch C: street without city or centroid', () => {
-    expect(classifySearchObjectCompleteness(baseSo({ street: 'Thaliastraße' }))).toBe('branch_c');
+  it('street_only: street without city or centroid', () => {
+    expect(classifySearchObjectCompleteness(baseSo({ street: 'Thaliastraße' }))).toBe('street_only');
   });
 
-  it('metadata_only: city without street', () => {
+  it('area_only: city without street', () => {
     expect(classifySearchObjectCompleteness(baseSo({ city: 'Wien' }))).toBe(
-      'metadata_only',
+      'area_only',
     );
   });
 
-  it('isSearchObjectComplete matches branch_a only', () => {
+  it('isSearchObjectComplete matches street_locality only', () => {
     expect(isSearchObjectComplete(baseSo({ street: 'X', city: 'Wien' }))).toBe(true);
     expect(isSearchObjectComplete(baseSo({ street: 'X' }))).toBe(false);
   });

@@ -112,7 +112,7 @@ Each `disambiguationKind` maps to a **contradiction class** in the [contradictio
 | Kind | Class | When | UI |
 | --- | --- | --- | --- |
 | `geocode` (default) | A1 | Multiple forward-geocode hits (Step 3) | Question + options per [question-copy](./upload-resolver-tray.question-copy.md) |
-| `city_step` | A1 | Branch C / B→C fallback (Step 1A) | City input + Continue |
+| `city_step` | A1 | `street_only` / `street_project_bias`→`street_only` fallback (Step 1A) | City input + Continue |
 | `house_step` | A2 | Step 1B after city confirmed | House number list + “No number needed” |
 | `source` | C1 | Text coords vs EXIF metadata > `sourceAgreementRadiusMeters` | `upload.resolver.question.source` + **four** placement options (folder address / photo / both / set later) |
 | `layer_package` | C2 | Competing folder vs filename street packages | `upload.resolver.question.layerPackage` — package labels per layer |

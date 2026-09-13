@@ -13,7 +13,7 @@ REAL — production code, unmodified, exactly what the browser runs
   · UploadAddressResolutionOrchestrator.classifyBatch → Search Object build, grouping, trays
   · resolveLayersForJob / buildSearchObjectFromRelativePath → token classification, layer packages
   · AT geo assets (at-bundeslaender.json, at-gemeinden-bev.json, at-plz.json) — the shipped files
-  · evaluateLocalResolution / classifySearchObjectCompleteness → branch A/B/C, metadata_only
+  · evaluateLocalResolution / classifySearchObjectCompleteness → street_locality/project_bias/only, area_only
   · classifySearchHits → auto / ambiguous / failed, EXIF-assist radius, score thresholds
   · content-hash (photo_v1 / binary_v1), in-flight dedup registry, dedup skip + issue routing
   · UploadQueueService concurrency, UploadJobStateService phase FSM, terminality guard
@@ -30,7 +30,7 @@ MOCK — substituted here; a real run can diverge at exactly these points
     address_dedupe_key uniqueness — any of those can reject a write that succeeds here.
   · get_location_by_address_components always misses, so every group reaches the geocoder.
     In production an existing locations row short-circuits the geocode.
-  · list_project_locations returns nothing, so there is no project centroid and Branch B
+  · list_project_locations returns nothing, so there is no project centroid and street_project_bias
     (street + centroid bias) is never taken.
   · Storage: upload/remove are acknowledged without transferring bytes. No 180s timeout,
     no partial-upload rollback under real latency.

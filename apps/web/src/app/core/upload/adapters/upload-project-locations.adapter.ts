@@ -1,5 +1,5 @@
 /**
- * Load project linked locations for upload Branch B bias + Step 2 trays.
+ * Load project linked locations for upload `street_project_bias` bias + Step 2 trays.
  * @see docs/specs/service/media-upload-service/upload-address-resolution-pipeline.md
  */
 
@@ -49,7 +49,7 @@ export class UploadProjectLocationsAdapter {
     }));
   }
 
-  /** Lowest sort_order row with valid coords — Branch B bias. */
+  /** Lowest sort_order row with valid coords — `street_project_bias` bias. */
   pickCentroid(rows: readonly ProjectLocationRow[]): UploadProjectCentroid | null {
     const sorted = [...rows].sort((a, b) => a.sortOrder - b.sortOrder);
     for (const row of sorted) {

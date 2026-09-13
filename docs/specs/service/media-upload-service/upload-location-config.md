@@ -60,7 +60,7 @@ Source of truth: `apps/web/src/app/core/upload/location/upload-location-config.t
 | `exifAssistRadiusMeters` | `number` | `80` | **Meters.** Among multiple geocode hits, prefer candidate within this distance of EXIF; Step 7 pin nudge. Not the org km realism cap — see [search-tuning.distance-radii-contract.md](../search/search-tuning.distance-radii-contract.md). |
 | `unitGeocodeSplitMinMeters` | `number` | `25` | **Meters.** Photon multi-hit gate when SO has `staircase`/`door` — see [upload-search-object.md](./upload-search-object.md#photon-multi-hit-gate). |
 | `exifContextCheck` | `boolean` | `true` | Enable step 4 EXIF reverse superset check (`lang=en`). |
-| `defaultGeocodeCountry` | `string` | `AT` | Branch C Photon default country code. |
+| `defaultGeocodeCountry` | `string` | `AT` | `street_only` Photon default country code. |
 | `tokenNormalizerFuzzyThreshold` | `number` | `0.85` | Minimum confidence for fuzzy token-normalizer matches. |
 | `presentationBundleMaxDialogueUnits` | `number` | `5` | Max dialogue units per resolver tray bundle. |
 | `minMeaningfulScore` | `number` | `0.55` | Minimum geocode score for a candidate to be considered meaningful. |

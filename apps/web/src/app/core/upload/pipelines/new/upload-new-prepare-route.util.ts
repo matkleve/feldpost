@@ -141,7 +141,7 @@ export async function routePreparedNewJob(
   routeJobToMissingData(deps, jobId, routedJob, ctx);
 }
 
-/** Branch A — no text coords and no EXIF metadata after geocode failure. */
+/** No placement — no text coords and no EXIF metadata after geocode failure. */
 export function routeJobToMissingData(
   deps: RouteToMissingDataDeps,
   jobId: string,

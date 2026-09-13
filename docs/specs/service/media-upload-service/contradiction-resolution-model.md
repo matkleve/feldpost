@@ -67,7 +67,7 @@ query can resolve it without asking — see
 | ID | Phenomenon | Source | Detector | `disambiguationKind` | Question | Impl |
 | --- | --- | --- | --- | --- | --- | --- |
 | **A1** | Street exists in N cities | Photon multi-hit, discriminating field differs | `pickDiscriminatingField` | `city_step` / `geocode` | "Which city is {street} in?" | **Done** |
-| **A2** | Street found, house number missing | Incomplete Search Object (no `houseNumber`) | Branch C step 5c | `house_step` | "What's the door number for {street}?" | **Done** |
+| **A2** | Street found, house number missing | Incomplete Search Object (no `houseNumber`) | `street_only` step 5c | `house_step` | "What's the door number for {street}?" | **Done** |
 
 ### Class V — Validation failure (post-resolution inconsistency)
 

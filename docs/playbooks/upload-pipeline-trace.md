@@ -114,10 +114,10 @@ Jobs with the same `groupingKey` become one group. Per group,
 
 | Branch | Condition | Consequence |
 | --- | --- | --- |
-| `branch_a` | street AND (city OR postcode) | structured forward geocode |
-| `branch_b` | street, no locality, project centroid exists | biased forward geocode |
-| `branch_c` | street, no locality, no centroid | street + country geocode, then a city/house tray |
-| `metadata_only` | admin fields only, no street | no geocode, admin centroid |
+| `street_locality` | street AND (city OR postcode) | structured forward geocode |
+| `street_project_bias` | street, no locality, project centroid exists | biased forward geocode |
+| `street_only` | street, no locality, no centroid | street + country geocode, then a city/house tray |
+| `area_only` | admin fields only, no street | no geocode, admin centroid |
 | `postcode_blocked` / `incomplete` | ambiguous postcode without city, or nothing usable | `partial` |
 
 `houseNumber` is never a gate — it only sharpens a geocode that already has a street.
@@ -183,7 +183,7 @@ all three pipelines, `persistUploadFile`, and the tuning defaults.
 | Photon / Nominatim | 12-row stub gazetteer, fixed `importance` | real ranking is fuzzy; a path that auto-resolves here can open a tray in production, and the reverse |
 | Supabase | in memory | no RLS, no triggers, no constraints, no PostGIS, no `address_dedupe_key` uniqueness |
 | `get_location_by_address_components` | always misses | in production an existing `locations` row skips the geocode |
-| `list_project_locations` | empty | no project centroid, so **Branch B is never taken** |
+| `list_project_locations` | empty | no project centroid, so **`street_project_bias` is never taken** |
 | Storage | acknowledged without bytes | no latency, no 180 s timeout, no partial-upload rollback |
 | Org search tuning | defaults | an org's saved tuning changes distance gates |
 | `--answer-trays` | picks the **first** candidate every time | a real user picks the right one; coordinates past a tray are arbitrary |
@@ -294,14 +294,14 @@ Classification, 2 000 generated paths, one core:
 | per file | 9.1 ms | 8.8 ms |
 | distinct groups (= geocoder calls) | 897 | 1 359 |
 | groups needing a tray | 897 (**100 %**) | 895 (66 %) |
-| outcomes | `layer_conflict` 985, `admin_conflict` 782, `branch_c` 233, **`branch_a` 0** | `layer_conflict` 985, **`branch_a` 549**, `admin_conflict` 233, `branch_c` 233 |
+| outcomes | `layer_conflict` 985, `admin_conflict` 782, `street_only` 233, **`street_locality` 0** | `layer_conflict` 985, **`street_locality` 549**, `admin_conflict` 233, `street_only` 233 |
 
 **After the 2026-09-13 fixes**, the two columns are identical — 500 paths, 442 groups, 237 needing a
-tray (54 %), `layer_conflict` 229, `branch_a` 214, `branch_c` 57, `admin_conflict` 0, and 5.5-6.6 ms
+tray (54 %), `layer_conflict` 229, `street_locality` 214, `street_only` 57, `admin_conflict` 0, and 5.5-6.6 ms
 per file across two runs (the exact index answers before a Fuse index is built). It took three steps,
 each measured on the same 500 paths:
 
-| After | groups | trays | `branch_a` | `admin_conflict` | `layer_conflict` |
+| After | groups | trays | `street_locality` | `admin_conflict` | `layer_conflict` |
 | --- | --- | --- | --- | --- | --- |
 | filename gate (F-01) | 391 | 269 (69 %) | 129 | 53 | 261 |
 | exact before fuzzy (F-02) | 391 | 269 (69 %) | 166 | 0 | 277 |
@@ -357,7 +357,7 @@ both **optimistic** bounds:
 - **The tray count is the harder problem.** 45 000 questions cannot be answered one at a time.
   The layer/admin trays already merge by conflict signature — at scale the largest group covered
   549 files with one question — but with camera file names **every** group needs a question. Fixing
-  the file-name postcode classification alone moves 27 % of the corpus to `branch_a` (no question),
+  the file-name postcode classification alone moves 27 % of the corpus to `street_locality` (no question),
   which is the cheapest available win.
 
 ### What the scale tier does not measure

@@ -75,7 +75,11 @@ export type UploadGroupResolutionStatus =
   | 'needsTray'
   | 'ambiguous';
 
-export type UploadGeocodeBranch = 'branch_a' | 'branch_b' | 'branch_c' | 'metadata_only';
+export type UploadGeocodeBranch =
+  | 'street_locality'
+  | 'street_project_bias'
+  | 'street_only'
+  | 'area_only';
 
 export interface UploadProjectCentroid {
   lat: number;

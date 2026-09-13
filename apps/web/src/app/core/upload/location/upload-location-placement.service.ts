@@ -1,5 +1,5 @@
 /**
- * Job placement after geocode: title-address resolve, Phase 3–4 coords, weak Branch C EXIF.
+ * Job placement after geocode: title-address resolve, Phase 3–4 coords, weak `street_only` EXIF.
  * @see docs/specs/service/media-upload-service/upload-location-resolution.md
  */
 
@@ -237,10 +237,10 @@ export class UploadLocationPlacementService {
   }
 
   /**
-   * Branch C from filename-only street (e.g. IMG_1121 → "IMG") must not open city tray when EXIF exists.
+   * `street_only` from filename-only street (e.g. IMG_1121 → "IMG") must not open city tray when EXIF exists.
    * @see upload-manager-pipeline.location-routing.supplement.md — EXIF before weak text
    */
-  tryApplyExifPlacementForWeakBranchC(groupState: UploadGroupResolutionState): boolean {
+  tryApplyExifPlacementForWeakStreetOnly(groupState: UploadGroupResolutionState): boolean {
     if (
       !isExifAuthoritativeOverWeakFilenameStreet(groupState, (id) =>
         this.jobState.findJob(id),
@@ -256,7 +256,7 @@ export class UploadLocationPlacementService {
       }
       this.jobState.updateJob(jobId, buildChosenPlacementPatch(job, 'exif', exif));
     }
-    uploadAddressDebug('pre-resolve', 'EXIF overrides weak Branch C tray', {
+    uploadAddressDebug('pre-resolve', 'EXIF overrides weak `street_only` tray', {
       groupingKey: groupState.groupingKey,
       jobIds: groupState.jobIds,
     });

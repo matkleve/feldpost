@@ -3,8 +3,8 @@
  * photos: Search Object (SO) creation → dedup (content-hash) → DB lookup
  * (findBySearchObject) → tray / disambiguation registration.
  *
- * Uses the REAL AT geo data (assets/geo/*.json) so SO branch classification
- * (branch_a / branch_c / packageConflict) reflects production behavior.
+ * Uses the REAL AT geo data (assets/geo/*.json) so SO resolution-path classification
+ * (street_locality / street_only / packageConflict) reflects production behavior.
  */
 
 import { TestBed } from '@angular/core/testing';

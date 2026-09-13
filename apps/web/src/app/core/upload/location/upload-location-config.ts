@@ -25,7 +25,7 @@ export interface UploadLocationConfig {
   unitGeocodeSplitMinMeters: number;
   /** Step 4: EXIF reverse superset check enabled. */
   exifContextCheck: boolean;
-  /** Branch C default country code (ISO). */
+  /** `street_only` default country code (ISO). */
   defaultGeocodeCountry: string;
   /** Token normalizer fuzzy match minimum score. */
   tokenNormalizerFuzzyThreshold: number;

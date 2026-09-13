@@ -5,7 +5,7 @@
 
 ## Purpose
 
-Load a project's linked locations for Branch B bias-only placement and Step 2 disambiguation
+Load a project's linked locations for `street_project_bias` bias-only placement and Step 2 disambiguation
 trays. Project location is never an authoritative coordinate source for an upload — only a
 bias/centroid hint (`06-health.md` § 2 in the 2026-09-08 upload-process audit records that the
 stronger "project location as fallback placement" behaviour was deliberately removed; this
@@ -45,7 +45,7 @@ export interface ProjectLocationRow {
 
 | Consumer | When |
 | --- | --- |
-| `UploadAddressResolutionOrchestrator` (`address-resolution/upload-address-resolution.orchestrator.ts`) | Branch B bias centroid and Step 2 candidate list, when a job's project has linked locations |
+| `UploadAddressResolutionOrchestrator` (`address-resolution/upload-address-resolution.orchestrator.ts`) | `street_project_bias` centroid and Step 2 candidate list, when a job's project has linked locations |
 
 ## Acceptance criteria
 

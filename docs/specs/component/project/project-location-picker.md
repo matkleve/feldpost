@@ -5,7 +5,7 @@
 
 ## What it is
 
-Minimal UI on `/projects/:id` to link org `locations` to a project via `project_locations` (tier-3 upload address + Branch B geocode bias).
+Minimal UI on `/projects/:id` to link org `locations` to a project via `project_locations` (tier-3 upload address + `street_project_bias` geocode bias).
 
 ## MVP actions
 
@@ -22,4 +22,4 @@ Minimal UI on `/projects/:id` to link org `locations` to a project via `project_
 ## Acceptance criteria
 
 - [ ] User can link at least one location without SQL
-- [ ] Upload batch with project filter can use Branch B when linked location has coords
+- [ ] Upload batch with project filter can use `street_project_bias` when linked location has coords

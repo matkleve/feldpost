@@ -188,7 +188,7 @@ Repeat the Phase 2 trace, more coarsely (step list, not line-by-line, but still 
 - `locationRequirementMode` `required` vs `optional`, incl. the session override map keyed by project filter.
 - Phases 0–5 of the pre-upload resolution table in the location-routing supplement.
 - Source agreement inside `sourceAgreementRadiusMeters`; `disambiguationKind: 'source'` tray with candidate ids `source-text` / `source-exif` / `source-both` / `source-none`; the idempotency rule (at most one open group per `(batchId, queryKey)`); late-joining jobs and the `held_source_conflict` replay hook; the explicit **forbidden** default-to-text shortcut.
-- City ambiguity / Branch C tray; Branch A and Branch B semantics; EXIF-only placement; project location as bias-only (note the two `@deprecated Removed` markers at `upload-location-resolution.service.ts:100` and `upload-location-tray-flow.service.ts:83` — is the removal complete?).
+- City ambiguity / `street_only` tray; `street_locality` and `street_project_bias` semantics; EXIF-only placement; project location as bias-only (note the two `@deprecated Removed` markers at `upload-location-resolution.service.ts:100` and `upload-location-tray-flow.service.ts:83` — is the removal complete?).
 - Geocode far-hit filter against org `contextDistanceMaxMeters`; geocode failure and timeout; `addressNotes[]` retention; low-confidence parse → Issues rather than resolved.
 - Tray Continue gate (footer disabled until every job on the active item is `awaiting_disambiguation` and non-HEIC).
 

@@ -28,7 +28,7 @@ describe('patchContainmentCheckOutcome', () => {
       },
       folderDisplayPath: 'AT/Wien/1200/Hauptstraße',
       titleAddressLabel: 'Hauptstraße, Wien',
-      geocodeBranch: 'branch_a',
+      geocodeBranch: 'street_locality',
       resolvedFromAdminConflict: true,
       ...overrides,
     };
@@ -117,12 +117,12 @@ describe('patchContainmentCheckOutcome', () => {
 
   it('preserves original group fields like geocodeBranch and jobIds', () => {
     const orchestrator = { patchGroupState: vi.fn() };
-    const group = makeGroup({ jobIds: ['j1', 'j2', 'j3'], geocodeBranch: 'branch_a' });
+    const group = makeGroup({ jobIds: ['j1', 'j2', 'j3'], geocodeBranch: 'street_locality' });
 
     const result = patchContainmentCheckOutcome(orchestrator as never, 'b', group);
 
     expect(result.jobIds).toEqual(['j1', 'j2', 'j3']);
-    expect(result.geocodeBranch).toBe('branch_a');
+    expect(result.geocodeBranch).toBe('street_locality');
   });
 
   it('sets trayStep to 3', () => {

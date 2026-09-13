@@ -90,13 +90,13 @@ export interface UploadDisambiguationGroup {
   confirmedCity?: string | null;
   /** Gate for Step 1B until city confirmed. */
   step1bGate?: 'disabled' | 'active';
-  /** Branch B bias centroid from project_locations. */
+  /** `street_project_bias` bias centroid from project_locations. */
   projectCentroid?: { lat: number; lng: number; city?: string | null };
   /** Suggested cities for Step 1A autocomplete. */
   citySuggestions?: string[];
   /** House number candidates for Step 1B. */
   houseNumberCandidates?: UploadAddressCandidate[];
-  /** Branch C 5a: which field differs between Photon candidates. */
+  /** `street_only` 5a: which field differs between Photon candidates. */
   discriminatingField?: UploadDiscriminatingField;
   /** Admin level-map conflicts for admin_level_conflict tray. */
   areaConflicts?: AreaConflict[];
