@@ -55,7 +55,7 @@ spec-level — the spec says what the code does, so a fix needs a contract decis
 | [F-16](#f-16) | ~~One held job in a resolved group holds every job in it, and stops the rest being placed~~ **fixed** | High | Code |
 | [F-17](#f-17) | A parked job keeps its content-hash reservation, so a later identical file is skipped as a duplicate of a file that was never uploaded | High | Code |
 | [F-18](#f-18) | ~~The shipped postcode table is a 21-row stub, and Wien was missing from the gazetteer~~ **gazetteer fixed; postcode table open** | High | Data |
-| [F-19](#f-19) | A path that names only an area ends in Issues; the spec claims an area centroid is stored, and the code stores nothing | High | **Spec** ↔ code |
+| [F-19](#f-19) | ~~A path that names only an area ends in Issues; the spec claims an area centroid is stored, and the code stores nothing~~ **fixed** | High | **Spec** ↔ code |
 
 ---
 
@@ -706,35 +706,45 @@ carry the rest — a postcode that is a whole folder segment is accepted without
 
 ### F-19 · A path that names only an area ends in Issues, and the spec says otherwise {#f-19}
 
-**What happens.** `[A]` Three scenarios added on 2026-09-13 to measure the owner's case — a folder that
-names a place and nothing else:
+**What happened.** `[A]` Three scenarios added on 2026-09-13 to measure the owner's case — a folder
+that names a place and nothing else — all ended the same way before the fix:
 
-| Scenario | Search Object | Group | Job |
+| Scenario | Search Object | Group | Job (before) |
 | --- | --- | --- | --- |
 | S19 `Wien/IMG_1101.jpg` | `country=AT state=Wien city=Wien` | `partial` / `metadata_only` | **`missing_data`**, `missing_gps`, Issues |
 | S20 `Wien/1090/IMG_1102.jpg` | `+ postcode=1090` | `partial` / `metadata_only` | **`missing_data`**, Issues |
-| S21 `AT/Niederösterreich/IMG_1103.jpg` | `country=AT state=Niederösterreich` | **no group at all** (`groupingKey` is empty on the job) | **`missing_data`**, Issues |
+| S21 `AT/Niederösterreich/IMG_1103.jpg` | `country=AT state=Niederösterreich` | never reached grouping — `isSearchObjectMeaningless` dropped it | **`missing_data`**, Issues |
 
-No `locations` row, no coordinates, nothing searchable. The photo is parked for a human even though
-the path said, unambiguously, where it is.
+No `locations` row, no coordinates, nothing searchable, even though the path said unambiguously
+where the photo is.
 
-**What the spec says.** `upload-search-object.md` § Completeness: "**Below street** | area fields only |
-none (**area centroid stored**) | none". `[A]` The centroid is never stored — and per the owner's
-decision on 2026-09-13 it should not be: an area gets **no coordinates at all**, only its text and
-`address_precision`. So both the code and that spec row are wrong, in opposite directions.
+**What the spec said.** `upload-search-object.md` § Completeness used to say: "**Below street** | area
+fields only | none (**area centroid stored**) | none". `[A]` The centroid was never stored — and per
+the owner's decision on 2026-09-12 it should not be: an area gets **no coordinates at all**, only its
+text and `address_precision`. Both the code and that spec row were wrong, in opposite directions; the
+row now reads "no coordinates" and matches the code.
 
-**What already works.** The area side is complete *upward*: `Wien` alone yields
-`country=AT state=Wien city=Wien` because `place→country` and `city→state` fire. `[A]` So the record is
-ready to store at `city` precision; only the persisting and the finding are missing.
+**Fixed 2026-09-13 — [STUDY-006 D-10](./006-upload-pipeline-correction-plan.md#d-10).** Three
+coords-only gates opened for a text-only, no-coordinates placement (`handlePartialPreResolve`'s
+`metadata_only` branch, `routePreparedNewJob`'s route-to-upload check, `finalizeNewUploadPhase`'s
+post-save enrichment), plus two supporting fixes found only by running the scenarios rather than by
+reasoning about the code: `isSearchObjectMeaningless` didn't anchor on `state` (S21's actual root
+cause — not a missing `groupingKey`, which was fine all along), and `formatSearchObjectLabel` fell
+back to the raw filename below city precision.
 
-**Why `groupingKey` is empty for S21.** A state-only Search Object produces no group, so it never
-reaches the grouping or lookup path at all. That is a second, smaller gap in the same area.
+| Scenario | Job (after) |
+| --- | --- |
+| S19 | `complete`, lane `Uploaded`, `coords=—`, `titleAddress=Wien` |
+| S20 | `complete`, lane `Uploaded`, `coords=—`, `titleAddress=1090 Wien` |
+| S21 | `complete`, lane `Uploaded`, `coords=—`, `titleAddress=Niederösterreich, AT` |
 
-**Consequence.** The Issues lane fills with files nobody needs to look at, and the one case the owner
-raised first — "ein Ordner heißt Wien, die Fotos gehören zu Wien" — is the case that does not work.
-Fixing it is [STUDY-006](./006-upload-pipeline-correction-plan.md) Block A, and it is two changes:
-persisting the area location, and making a coordinate-less location findable
-(`db-address.provider.ts` filters those rows out today).
+Verified with `npm run trace:upload` (curated set) — no other scenario's outcome changed — and
+against a 500-file corpus (21 curated + 479 generated, seed 7): `distinct groups`, `groups needing a
+tray`, and every completeness outcome (`branch_a=224 layer_conflict=128 incomplete=75 branch_c=57
+admin_conflict=16`) are identical to the pre-fix baseline in
+[`upload-pipeline-trace.md`](../playbooks/upload-pipeline-trace.md) — the fix is additive; no
+generated path in that seeded set happens to be area-only, so the change only ever touches the three
+curated `metadata_only` scenarios.
 
 ---
 

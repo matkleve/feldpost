@@ -223,6 +223,58 @@ changes nothing.
 Without that guard the pipeline would put a house number on a photo taken across the road, which is
 precisely the failure the principle exists to prevent.
 
+---
+
+### D-10 (decided, done) — Persist an area-only path, with no coordinates {#d-10}
+
+The owner's own case — "ein Ordner heißt Wien, die Fotos gehören zu Wien" — a folder naming only a
+place, ended in Issues ([F-19](./005-upload-pipeline-trace-findings.md#f-19)), even though the SO
+already had everything the path gave it (`place→country`, `city→state`). **Decided 2026-09-12**: an
+area-only result gets **no coordinates, ever** — it is resolved via its text and precision tier, not
+a geocoder guess at a building somewhere in a city.
+
+**Done 2026-09-13.** Three gates were coords-only and had to open for a text-only, no-coordinates
+placement, each found by tracing one curated scenario through to its actual outcome rather than
+assuming the first fix was enough:
+
+1. `handlePartialPreResolve` treated every `'partial'` group status the same (routed to Issues).
+   Split on `geocodeBranch === 'metadata_only'`: that branch places the job (`areaOnlyLocation: true`,
+   `titleAddress` = the area label, no `coords`) and returns `continue` instead of `partial`.
+2. `routePreparedNewJob`'s only route to the upload phase was `if (job.coords)`. Widened to
+   `job.coords || job.areaOnlyLocation`.
+3. `finalizeNewUploadPhase` (post-save enrichment) forward-geocoded any text placement lacking
+   `coords`/`titleAddressCoords` — which every area-only job lacks by design, so it tried to geocode
+   "Wien" and, finding nothing usable, routed to `missing_gps` anyway. Given its own early exit for
+   `locationRequirementMode: 'optional'`.
+
+Two supporting fixes surfaced only by running the curated scenarios, not by reasoning about the code:
+
+- `isSearchObjectMeaningless` anchored only on `city`/`postcode`/high-confidence `street` — a
+  state-only path (`AT/Niederösterreich/…`) never even reached `classifyBatch`'s grouping. Added
+  `state` as an anchor. **Not** `country` alone: a real run turned up `country: 'DE'` parsed from
+  `"CV Matthias Kleveta ERP DE.pdf"` — the exact false positive this function exists to catch — so a
+  bare country code stays insufficient on its own.
+- `formatSearchObjectLabel` fell back to the raw filename when nothing at city level or below was
+  set — the state/country label was never built. Added a state+country fallback.
+
+`resolveUploadAddress`/`resolve_media_location` already accepted `p_latitude`/`p_longitude` as
+optional — that half of the real infrastructure (added 2026-09-10 for pin-drop persist) needed no
+schema change, only threading `lat`/`lng` through as optional on the client.
+
+**Verified**: `npm run trace:upload` — all three scenarios (S19 city-only, S20 city+postcode, S21
+state-only) now reach `phase=complete`, `lane=Uploaded`, `coords=—`, each with its own `mediaId` and a
+`resolve_media_location` call carrying `p_latitude: null, p_longitude: null` and the area label.
+
+**Not done**: `locations.state` has no column and `resolve_media_location` has no `p_state` parameter
+— a `state`-precision area-only row persists its label as text (e.g. `"Niederösterreich, AT"`) with
+`address_precision: 'state'`, but the state name is not queryable as a structured column. That is a
+schema migration of its own (mirroring `20260910140000_upload_address_precision.sql`'s
+five-function-plus-overload-drop pattern) and is out of scope here. Finding a coordinate-less
+location by its area text already works today: `search_locations` (used by the org address picker in
+media detail) filters on nothing but organization — `db-address.provider.ts` (the map top-bar search)
+still requires coordinates, which is correct for that search's purpose (navigating a map to a point),
+not a gap this decision needs to close.
+
 ## 2 · The plan
 
 Ordered so that each phase is independently shippable and each one is verified by something that

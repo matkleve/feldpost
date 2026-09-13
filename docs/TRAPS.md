@@ -380,6 +380,22 @@ Better: end the migration with a `DO` block that raises when any touched functio
 
 ---
 
+## TRAP-020 — A circular import between two trace-fixture modules silently zeroed three files
+
+**Surface** — `upload-trace-fixtures.ts` defines `TRACE_PHOTO_MIME`/`TRACE_PHOTO_SIZE_BYTES` and, further down the same file, imports `TRACE_AREA_ONLY_SCENARIOS` from `upload-trace-fixtures.area-only.ts` to append to the curated array. That file imported the two constants back from `upload-trace-fixtures.ts` to build its own scenario objects, instead of inlining the literals the way the rest of `upload-trace-fixtures.ts` does (`const JPEG = TRACE_PHOTO_MIME`).
+
+**Assumption** — importing a named export from a sibling module and using it in a top-level object literal is safe as long as both files export what they claim to; a two-file import cycle "just works" the way it does for functions called later.
+
+**Truth** — ES module evaluation order is fixed by the import graph, not by where an `import` statement sits in the file text. Because `upload-trace-fixtures.ts` imports `upload-trace-fixtures.area-only.ts` (to get the array) and that file imports back (to get the constants), the second file's `TRACE_AREA_ONLY_SCENARIOS` array literal evaluates **before** `upload-trace-fixtures.ts` has assigned `TRACE_PHOTO_MIME`/`TRACE_PHOTO_SIZE_BYTES` — Vite/esbuild's transform resolves the cycle by handing back `undefined` rather than throwing. The three scenario objects were built with `mimeType: undefined, sizeBytes: undefined` baked in permanently (object literals capture the value at construction, not a live binding), so every file `scenarioToFile` built for them ended up **zero bytes**, all three synthetic photos hashed identically, and the trace report printed `mime: undefined bytes: undefined` — no error anywhere, no red test, `npm run trace:upload` simply lied by omission (dedup silently ate two of the three scenarios it was supposed to exercise).
+
+**Detect** — when two trace-fixture files import from each other and a scenario/object built from an imported constant renders as `undefined` (or a fake file's content-hash collides with an unrelated scenario's), suspect a cycle before suspecting the constant's value: check whether the module holding the constant also imports something from the module using it. The fix is to inline the literal (or move the shared constant to a third, leaf module both sides import) — never import a same-package sibling's export into a module that sibling itself imports from.
+
+**Source** — found while implementing area-only location persistence ([`STUDY-005`](./study/005-upload-pipeline-trace-findings.md) F-19), 2026-09-13. Code at `apps/web/src/app/core/upload/trace/upload-trace-fixtures.area-only.ts` and `upload-trace-fixtures.ts`.
+
+**Status** — `fixed` 2026-09-13 — constants inlined in `upload-trace-fixtures.area-only.ts`; no import cycle remains between the two files.
+
+---
+
 ## Rejected candidates
 
 Kept so they are not re-proposed. Both were real when recorded; neither reproduces now.

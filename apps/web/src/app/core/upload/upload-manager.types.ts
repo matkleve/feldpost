@@ -231,6 +231,13 @@ export interface UploadJob {
   groupingKey?: string;
   /** When true, save should set media_items.location_status = partial (L11). */
   pendingPartialLocation?: boolean;
+  /**
+   * Set when the group resolved to area precision only (country/state/postcode/city, no
+   * street) — a deliberate result, not a failure. Persist a text-only location, no
+   * coordinates, no geocode attempt.
+   * @see docs/study/005-upload-pipeline-trace-findings.md#f-19
+   */
+  areaOnlyLocation?: boolean;
 }
 
 // ── Options ────────────────────────────────────────────────────────────────────

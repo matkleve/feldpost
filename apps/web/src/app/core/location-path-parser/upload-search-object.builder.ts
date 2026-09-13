@@ -356,13 +356,21 @@ function applySegment(
 }
 
 /**
- * True when the SO has no anchor fields (city, zip, postcode, high-confidence street).
- * Prevents garbage filenames (e.g. "CV Matthias Kleveta ERP DE.pdf") from
- * being wired onto jobs as if they were real addresses.
+ * True when the SO has no anchor fields (state, city, zip, postcode, high-confidence street).
+ * Prevents garbage filenames (e.g. "CV Matthias Kleveta ERP DE.pdf") from being wired onto jobs
+ * as if they were real addresses.
+ *
+ * `state` counts as an anchor even alone — a folder naming only a state (`AT/Niederösterreich/…`)
+ * is real area evidence and must reach classifyBatch's grouping, not be dropped here before it
+ * ever gets a chance at area-only precision. A bare `country` does NOT count alone: a two-letter
+ * alias is exactly the kind of token that turns up by accident in an ordinary filename (an "ERP
+ * DE" business-unit suffix, a language code) — that is the false positive this function exists to
+ * catch, and country only ever gates state/postcode/city sub-token classification besides.
  * @see path-token-classifier.ts — fallback classifier emits street at 0.5
+ * @see docs/study/005-upload-pipeline-trace-findings.md#f-19
  */
 export function isSearchObjectMeaningless(so: UploadSearchObject): boolean {
-  if (so.city || so.postcode) {
+  if (so.city || so.postcode || so.state) {
     return false;
   }
   if (!so.street) {
@@ -474,7 +482,14 @@ export function formatSearchObjectLabel(so: UploadSearchObject): string {
   if (streetPart && cityPart) {
     return `${streetPart}, ${cityPart}`;
   }
-  return streetPart || cityPart || so.fileName;
+  if (streetPart || cityPart) {
+    return streetPart || cityPart;
+  }
+  // Below city/postcode (a folder names only a state or a country, e.g. `AT/Niederösterreich`):
+  // fall back to the coarsest area evidence rather than the filename, which is not an address.
+  // @see docs/study/005-upload-pipeline-trace-findings.md#f-19
+  const areaAbovePart = [so.state, so.country].filter(Boolean).join(', ');
+  return areaAbovePart || so.fileName;
 }
 
 export interface BuildSearchObjectGeo {

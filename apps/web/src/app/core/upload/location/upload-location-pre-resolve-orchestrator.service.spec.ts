@@ -116,3 +116,90 @@ describe('applyPreResolveFromOrchestrator — resolved group with one held sibli
     ]);
   });
 });
+
+/**
+ * `metadata_only` is a deliberate area-precision result, not a failure — it must place the job
+ * as a text-only address with no coordinates and no tray, instead of routing to Issues.
+ * @see docs/study/005-upload-pipeline-trace-findings.md#f-19
+ */
+describe('applyPreResolveFromOrchestrator — metadata_only (area-only) group', () => {
+  const AREA_GROUPING_KEY = 'at|niederösterreich|||';
+
+  function areaJob(id: string): UploadJob {
+    return {
+      id,
+      batchId: 'batch-1',
+      file: new File(['bytes'], `${id}.jpg`, { type: 'image/jpeg' }),
+      phase: 'dedup_check',
+      progress: 0,
+      statusLabel: 'Checking for duplicates…',
+      submittedAt: new Date(),
+      mode: 'new',
+      groupingKey: AREA_GROUPING_KEY,
+      titleAddress: 'IMG_1103.jpg',
+      relativePath: `AT/Niederösterreich/${id}.jpg`,
+    };
+  }
+
+  const areaGroupState = {
+    status: 'partial',
+    groupingKey: AREA_GROUPING_KEY,
+    jobIds: ['area-job-1'],
+    folderDisplayPath: 'AT/Niederösterreich',
+    titleAddressLabel: 'Niederösterreich, AT',
+    geocodeBranch: 'metadata_only',
+    searchObject: {
+      country: 'AT',
+      state: 'Niederösterreich',
+      city: null,
+      postcode: null,
+      street: null,
+      houseNumber: null,
+      groupingKey: AREA_GROUPING_KEY,
+      sources: [],
+      sourceDeviations: [],
+      postcodeCandidates: [],
+      uncertainFields: [],
+    },
+  } as unknown as UploadGroupResolutionState;
+
+  function setupArea(): { service: UploadLocationPreResolveOrchestratorService } {
+    TestBed.configureTestingModule({
+      providers: [
+        UploadJobStateService,
+        UploadLocationPreResolveOrchestratorService,
+        {
+          provide: UploadAddressResolutionOrchestrator,
+          useValue: { getGroupState: vi.fn().mockReturnValue(areaGroupState) },
+        },
+        { provide: UploadLocationPlacementService, useValue: {} },
+        { provide: UploadLocationGeocodeGroupService, useValue: { ensureGeocodedGroup: vi.fn() } },
+        { provide: UploadLocationTrayFlowService, useValue: {} },
+        { provide: UploadLocationResolutionService, useValue: {} },
+      ],
+    });
+    TestBed.inject(UploadJobStateService).addJobs([areaJob('area-job-1')]);
+    return { service: TestBed.inject(UploadLocationPreResolveOrchestratorService) };
+  }
+
+  it('reports continue rather than partial', async () => {
+    const { service } = setupArea();
+
+    await expect(service.applyPreResolveFromOrchestrator('area-job-1')).resolves.toBe('continue');
+  });
+
+  it('places the job at area precision with no coordinates and no open tray', async () => {
+    const { service } = setupArea();
+    await service.applyPreResolveFromOrchestrator('area-job-1');
+
+    const jobState = TestBed.inject(UploadJobStateService);
+    const job = jobState.findJob('area-job-1')!;
+    expect(job.coords).toBeUndefined();
+    expect(job.areaOnlyLocation).toBe(true);
+    expect(job.titleAddress).toBe('Niederösterreich, AT');
+    expect(job.locationSourceUsed).toBe('folder');
+    expect(job.resolutionStatus).toBe('resolved');
+    expect(job.pendingPartialLocation).toBe(false);
+    expect(job.disambiguationGroupId).toBeUndefined();
+  });
+});

@@ -230,6 +230,42 @@ describe('NF-40 address persist acceptance', () => {
     });
   });
 
+  it('area-only precision (city, no street, no coords, no EXIF) persists text with null lat/lng', async () => {
+    // @see docs/study/005-upload-pipeline-trace-findings.md#f-19
+    const reverse = vi.fn();
+    const { deps, rpc } = buildDeps({ reverse });
+    const job = viennaFolderJob({ coords: undefined, areaOnlyLocation: true });
+    const addressContext = buildUploadAddressPersistContext({ job });
+
+    expect(addressContext).not.toBeNull();
+    expect(addressContext!.precision).toBe('city');
+
+    await persistUploadFile(
+      {
+        file: makeFile(),
+        // No manualCoords — an area-only job never has a placement pin, by design.
+        addressContext,
+      },
+      deps,
+    );
+
+    await vi.waitFor(() => expect(rpc).toHaveBeenCalled());
+
+    expect(reverse).not.toHaveBeenCalled();
+
+    const resolveCall = rpc.mock.calls.find((c) => c[0] === 'resolve_media_location');
+    expect(resolveCall).toBeDefined();
+    expect(resolveCall![1]).toMatchObject({
+      p_media_item_id: 'media-vienna',
+      p_latitude: null,
+      p_longitude: null,
+      p_city: 'vienna',
+      p_street: null,
+      p_house_number: null,
+      p_address_precision: 'city',
+    });
+  });
+
   it('coordinates-only case (EXIF GPS, no text address) still reverse-geocodes and persists', async () => {
     const reverseResult = {
       addressLabel: 'Burgstraße 7, 8001 Zürich, Switzerland',

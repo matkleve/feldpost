@@ -3,7 +3,9 @@ import {
   buildGroupingKey,
   buildSearchObjectFromRelativePath,
   expandPostcodeOnSearchObject,
+  formatSearchObjectLabel,
   isSearchObjectComplete,
+  isSearchObjectMeaningless,
 } from './upload-search-object.builder';
 
 const geo = {
@@ -567,5 +569,70 @@ describe('buildSearchObjectFromRelativePath — postcode plausibility against th
     );
 
     expect(so.areaConflicts ?? []).toEqual([]);
+  });
+});
+
+// ── Area-only precision: state/country alone is real evidence, not noise (F-19) ──────────────
+// @see docs/study/005-upload-pipeline-trace-findings.md#f-19
+describe('isSearchObjectMeaningless — area-only evidence', () => {
+  it('is not meaningless for a state-only path, even with no city/postcode/street', () => {
+    const so = buildSearchObjectFromRelativePath(
+      'AT/Niederösterreich/IMG_1.jpg',
+      'IMG_1.jpg',
+      geoCorroboration,
+    );
+
+    expect(so.city).toBeNull();
+    expect(so.postcode).toBeNull();
+    expect(so.street).toBeNull();
+    expect(so.state).toBe('Niederösterreich');
+    expect(isSearchObjectMeaningless(so)).toBe(false);
+  });
+
+  it('is still meaningless for a bare country with nothing else — too coarse, too collision-prone', () => {
+    // A two-letter alias alone (no state/city/postcode/street) stays meaningless: it is exactly
+    // the kind of token that turns up by accident in an unrelated filename (see the next test).
+    const so = buildSearchObjectFromRelativePath('AT/IMG_1.jpg', 'IMG_1.jpg', geoCorroboration);
+
+    expect(so.country).toBe('AT');
+    expect(isSearchObjectMeaningless(so)).toBe(true);
+  });
+
+  it('is still meaningless for a plain filename with no area or street evidence', () => {
+    const so = buildSearchObjectFromRelativePath(
+      'CV Matthias Kleveta ERP DE.pdf',
+      'CV Matthias Kleveta ERP DE.pdf',
+      geoCorroboration,
+    );
+
+    expect(isSearchObjectMeaningless(so)).toBe(true);
+  });
+});
+
+describe('formatSearchObjectLabel — area-only fallback', () => {
+  it('falls back to state + country when nothing below city is known', () => {
+    const so = buildSearchObjectFromRelativePath(
+      'AT/Niederösterreich/IMG_1.jpg',
+      'IMG_1.jpg',
+      geoCorroboration,
+    );
+
+    expect(formatSearchObjectLabel(so)).toBe('Niederösterreich, AT');
+  });
+
+  it('still prefers city over the area-only fallback', () => {
+    const so = buildSearchObjectFromRelativePath('Wien/IMG_1.jpg', 'IMG_1.jpg', geoCorroboration);
+
+    expect(formatSearchObjectLabel(so)).toBe('Wien');
+  });
+
+  it('falls back to the filename only when there is no evidence at all', () => {
+    const so = buildSearchObjectFromRelativePath(
+      'random.jpg',
+      'random.jpg',
+      geoCorroboration,
+    );
+
+    expect(formatSearchObjectLabel(so)).toBe('random.jpg');
   });
 });

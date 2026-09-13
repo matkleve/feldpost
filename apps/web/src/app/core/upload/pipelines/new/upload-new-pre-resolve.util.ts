@@ -225,6 +225,13 @@ async function completePlacementAfterLocationResolve(
     ...summarizeJobPlacement(current),
   });
 
+  if (current.areaOnlyLocation) {
+    uploadPlacementLog('P0', jobId, current.file.name, 'skip — area-only precision, no geocode', {
+      titleAddress: current.titleAddress,
+    });
+    return null;
+  }
+
   if (current.coords) {
     uploadPlacementLog('P6', jobId, current.file.name, 'skip — placement already set', {
       locationSourceUsed: current.locationSourceUsed,

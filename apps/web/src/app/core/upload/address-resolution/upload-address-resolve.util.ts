@@ -14,8 +14,9 @@ type PersistErrorDescriptor = (error: unknown) => {
 
 export async function resolveUploadAddress(args: {
   mediaItemId: string;
-  lat: number;
-  lng: number;
+  /** Undefined for an area-only precision result — no coordinates by design (F-19). */
+  lat?: number;
+  lng?: number;
   geocoding: GeocodingService;
   supabaseClient: SupabaseService['client'];
   describePersistError: PersistErrorDescriptor;
@@ -41,6 +42,13 @@ export async function resolveUploadAddress(args: {
       describePersistError,
       addressContext,
     });
+    return;
+  }
+
+  if (lat == null || lng == null) {
+    // Reverse geocode needs coordinates; without them and without a text address there is
+    // nothing to resolve from.
+    await markUploadLocationUnresolvable(mediaItemId, supabaseClient, describePersistError);
     return;
   }
 
@@ -84,8 +92,8 @@ export async function resolveUploadAddress(args: {
 
 async function persistTextDerivedUploadAddress(args: {
   mediaItemId: string;
-  lat: number;
-  lng: number;
+  lat?: number;
+  lng?: number;
   supabaseClient: SupabaseService['client'];
   describePersistError: PersistErrorDescriptor;
   addressContext: UploadAddressPersistContext;
@@ -95,8 +103,8 @@ async function persistTextDerivedUploadAddress(args: {
 
   const { error } = await supabaseClient.rpc('resolve_media_location', {
     p_media_item_id: mediaItemId,
-    p_latitude: lat,
-    p_longitude: lng,
+    p_latitude: lat ?? null,
+    p_longitude: lng ?? null,
     p_address_label: addressLabel,
     p_city: fields.city,
     p_street: fields.street,
