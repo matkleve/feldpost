@@ -47,15 +47,32 @@ export function detectCountryCode(segment: string): string | null {
   return null;
 }
 
-export function findCityBySegment(segment: string): { city: string; country: string } | null {
+export interface RegistryCityMatch {
+  city: string;
+  country: string;
+}
+
+/**
+ * Every registry row whose name or alias matches the segment exactly.
+ *
+ * Plural because the country is derived from this match: two rows in different countries sharing a
+ * name is an ambiguity the caller must see, not silently resolve to the first row.
+ * @see docs/specs/service/media-upload-service/upload-search-object.country-derivation.md
+ */
+export function findCitiesBySegment(segment: string): RegistryCityMatch[] {
   const normalized = normalizeSegment(segment);
+  const matches: RegistryCityMatch[] = [];
   for (const city of CITY_REGISTRY) {
     const names = [city.name, ...(city.aliases ?? [])].map((entry) => normalizeSegment(entry));
     if (names.includes(normalized)) {
-      return { city: city.name, country: city.country };
+      matches.push({ city: city.name, country: city.country });
     }
   }
-  return null;
+  return matches;
+}
+
+export function findCityBySegment(segment: string): RegistryCityMatch | null {
+  return findCitiesBySegment(segment)[0] ?? null;
 }
 
 export function findCityByZip(zip: string): { city: string; country: string } | null {

@@ -10,6 +10,7 @@ All **field names are English** (internal model). **Values** use locale-appropri
 | --- | --- |
 | Fields, tokens, keys | **This file** |
 | Layer packages (folder vs filename) | [upload-search-object.layer-map.md](./upload-search-object.layer-map.md) |
+| Country derived from the place | [upload-search-object.country-derivation.md](./upload-search-object.country-derivation.md) |
 | AT unit / slash / Tür / Top | [upload-search-object.unit-parsing.at.md](./upload-search-object.unit-parsing.at.md) |
 | Worked layer examples | [upload-search-object.layer-map.examples.md](./upload-search-object.layer-map.examples.md) |
 | Pipeline keys + trays | [upload-address-resolution-pipeline.md](./upload-address-resolution-pipeline.md) |
@@ -20,6 +21,7 @@ All **field names are English** (internal model). **Values** use locale-appropri
 | Field | Type | Notes |
 | --- | --- | --- |
 | `country` | string \| null | ISO country code (e.g. `AT`) |
+| `countryProvenance` | `'parsed' \| 'derived' \| null` | `parsed` = a country token in the path; `derived` = inferred from an exact place match ([country derivation](./upload-search-object.country-derivation.md)) |
 | `state` | string \| null | First-level region (e.g. AT federal state) |
 | `postcode` | string \| null | Format depends on `country` — not classified without country |
 | `city` | string \| null | Municipality / city |
@@ -86,7 +88,7 @@ Per path segment, split tokens with `/[\s\-\_\.\,]+/`, then **two passes**:
 2. Door `^(tür\|top)/i` → `door`  
 3. Staircase `^(stiege?\|stg)/i` → `staircase` (**not** `top`)  
 4. **Country** — alias list (`COUNTRY_NAMES`)  
-5. State / city — **exact** normalized name/alias match first; Fuse only as fallback, and a fuzzy hit whose length differs from the token by more than `max(2, ⌈len × 0.25⌉)` is rejected (**AT gazetteer only when `country === 'AT'`**)  
+5. State / city — **exact** normalized name/alias match first (city registry, then AT gazetteers); an exact hit with no country yet **derives** one, see [country derivation](./upload-search-object.country-derivation.md). Fuse only as fallback, and a fuzzy hit whose length differs from the token by more than `max(2, ⌈len × 0.25⌉)` is rejected (**AT gazetteer Fuse only when `country === 'AT'`**)  
 6. Remaining text → `street` fragments  
 
 **Pass 2 — numeric tokens last** (`^\d+[a-zA-Z]?$`):

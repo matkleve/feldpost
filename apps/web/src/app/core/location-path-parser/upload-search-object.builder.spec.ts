@@ -40,17 +40,6 @@ describe('buildSearchObjectFromRelativePath', () => {
     expect(so.groupingKey).toContain('neustiftgasse');
   });
 
-  it('does not treat 4-digit token as postcode or house number without country', () => {
-    const so = buildSearchObjectFromRelativePath(
-      'Wien/1090/Neustiftgasse-43/photo.jpg',
-      'photo.jpg',
-      geo,
-    );
-    expect(so.country).toBeNull();
-    expect(so.postcode).toBeNull();
-    expect(so.houseNumber).toBe('43');
-  });
-
   it('classifies house number after city in same segment when country unknown', () => {
     const so = buildSearchObjectFromRelativePath(
       'Neustiftgasse-43.pdf',
@@ -332,4 +321,61 @@ describe('isSearchObjectComplete', () => {
   });
   // ── Filename admin gate (D-01 option A′) ───────────────────────────────────
   // @see docs/specs/service/media-upload-service/upload-search-object.md § Admin level map
+});
+
+// ── Country derived from the place (D-03) ─────────────────────────────────────
+// @see docs/specs/service/media-upload-service/upload-search-object.country-derivation.md
+describe('buildSearchObjectFromRelativePath — derived country', () => {
+  const moedlingGeo = {
+    states: [{ n: 'Niederösterreich', a: [] }],
+    municipalities: [
+      { n: 'Mödling', b: 'Niederösterreich', a: [] },
+      { n: 'Schottwien', b: 'Niederösterreich', a: [] },
+    ],
+    postcodeMap: { '1160': ['Wien'] },
+  };
+
+  // `Wien` names a country even though the path never does, so 1090 IS a postcode here.
+  // @see docs/specs/service/media-upload-service/upload-search-object.country-derivation.md
+  it('derives the country from the city, which then admits the postcode', () => {
+    const so = buildSearchObjectFromRelativePath(
+      'Wien/1090/Neustiftgasse-43/photo.jpg',
+      'photo.jpg',
+      geo,
+    );
+    expect(so.country).toBe('AT');
+    expect(so.countryProvenance).toBe('derived');
+    expect(so.postcode).toBe('1090');
+    expect(so.houseNumber).toBe('43');
+  });
+
+  it('does not treat a 4-digit token as postcode or house number when no place names a country', () => {
+    const so = buildSearchObjectFromRelativePath(
+      'Baustelle/1090/Neustiftgasse-43/photo.jpg',
+      'photo.jpg',
+      geo,
+    );
+    expect(so.country).toBeNull();
+    expect(so.postcode).toBeNull();
+    expect(so.houseNumber).toBe('43');
+  });
+
+  it('marks a country read from the path as parsed', () => {
+    const so = buildSearchObjectFromRelativePath('AT/Wien/photo.jpg', 'photo.jpg', geo);
+    expect(so.countryProvenance).toBe('parsed');
+  });
+
+  it('keeps both cities of a path that states the address twice, and flags the conflict', () => {
+    const so = buildSearchObjectFromRelativePath(
+      'Mödling/Wilhelminenstraße 141/Wilhelminenstr 141, 1160 Wien.jpg',
+      'Wilhelminenstr 141, 1160 Wien.jpg',
+      moedlingGeo,
+    );
+
+    const cityLevels = (so.adminLevelMap?.city ?? []).map((e) => `${e.level}:${e.value}`).sort();
+    expect(cityLevels).toEqual(['0:Wien', '2:Mödling']);
+    expect(so.postcode).toBe('1160');
+    expect(so.country).toBe('AT');
+    expect(so.adminLevelConflicts?.some((c) => c.field === 'city')).toBe(true);
+  });
 });

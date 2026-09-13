@@ -110,3 +110,66 @@ describe('classifyTokensInSegment — gazetteer matching', () => {
     expect(tokens.find((t) => t.kind === 'city')).toBeUndefined();
   });
 });
+
+// ── Country derived from an exact place match (D-03) ──────────────────────────
+// @see docs/study/006-upload-pipeline-correction-plan.md D-03 (re-derived)
+describe('classifyTokensInSegment — country derived from the place', () => {
+  const atGeo = {
+    states: [{ n: 'Niederösterreich', a: [] }],
+    municipalities: [
+      { n: 'Mödling', b: 'Niederösterreich', a: [] },
+      { n: 'Schottwien', b: 'Niederösterreich', a: [] },
+    ],
+  };
+
+  it('classifies a municipality with no country token in the path', () => {
+    const tokens = classifyTokensInSegment(['Mödling'], atGeo, { country: null });
+
+    expect(tokens.find((t) => t.kind === 'city')?.value).toBe('Mödling');
+  });
+
+  it('derives the country from that match', () => {
+    const context = { country: null as string | null };
+    const tokens = classifyTokensInSegment(['Mödling'], atGeo, context);
+
+    expect(tokens.find((t) => t.kind === 'country')?.value).toBe('AT');
+    expect(context.country).toBe('AT');
+  });
+
+  it('resolves Wien from the country-carrying registry, not the municipality list', () => {
+    const tokens = classifyTokensInSegment(['Wien'], atGeo, { country: null });
+
+    expect(tokens.find((t) => t.kind === 'city')?.value).toBe('Wien');
+  });
+
+  it('derives a non-Austrian country from the registry', () => {
+    const tokens = classifyTokensInSegment(['Berlin'], atGeo, { country: null });
+
+    expect(tokens.find((t) => t.kind === 'city')?.value).toBe('Berlin');
+    expect(tokens.find((t) => t.kind === 'country')?.value).toBe('DE');
+  });
+
+  it('does not re-derive a country the path already stated', () => {
+    const tokens = classifyTokensInSegment(['Mödling'], atGeo, { country: 'AT' });
+
+    expect(tokens.filter((t) => t.kind === 'country')).toEqual([]);
+  });
+
+  it('keeps both places but derives nothing when two countries claim the name', () => {
+    const ambiguous = {
+      states: atGeo.states,
+      municipalities: [...atGeo.municipalities, { n: 'Berlin', b: 'Niederösterreich', a: [] }],
+    };
+
+    const tokens = classifyTokensInSegment(['Berlin'], ambiguous, { country: null });
+
+    expect(tokens.filter((t) => t.kind === 'city')).toHaveLength(1);
+    expect(tokens.filter((t) => t.kind === 'country')).toEqual([]);
+  });
+
+  it('ignores a registry city from a country the path already excluded', () => {
+    const tokens = classifyTokensInSegment(['Berlin'], atGeo, { country: 'AT' });
+
+    expect(tokens.find((t) => t.kind === 'city')).toBeUndefined();
+  });
+});

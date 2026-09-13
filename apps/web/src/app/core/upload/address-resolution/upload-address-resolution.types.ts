@@ -31,9 +31,17 @@ export interface UploadAddressSourceDeviation {
   filenameValue: string;
 }
 
+/**
+ * How a Search Object's `country` got its value: read from a path token, or inferred from an exact
+ * place match. Advisory — it gates no branch.
+ * @see docs/specs/service/media-upload-service/upload-search-object.country-derivation.md
+ */
+export type CountryProvenance = 'parsed' | 'derived';
+
 /** Leaf-level address extracted from relativePath + fileName (English field names). */
 export interface UploadSearchObject {
   country: string | null;
+  countryProvenance?: CountryProvenance | null;
   state: string | null;
   postcode: string | null;
   city: string | null;

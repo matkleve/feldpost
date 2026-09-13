@@ -439,6 +439,7 @@ export function buildSearchObjectFromRelativePath(
 
   return {
     ...fields,
+    countryProvenance: context.countryProvenance ?? null,
     sources,
     sourceDeviations: deviations,
     postcodeCandidates: [],

@@ -259,7 +259,30 @@ implementation whether they are one change; if they are, the spec amendment cove
 | 2.2 | Widen the weak-filename guard (F-04) so a single-token file name with no house number never forms a street package. | Red-first: `foto.jpg` and `Abnahmeprotokoll.pdf` under an addressed folder open no `layer_package` tray. |
 | 2.3 | Resolve **D-05** — make code and `upload-address-resolution.phases.md` agree, in one change. | Red-first: harness run C parks **0** files in `awaiting_disambiguation`. |
 
-**Class:** Sensitive (2.1 touches org-scoped settings — `/security-review` applies).
+**Class:** Sensitive. 2.1 does **not** touch org-scoped settings after all — the org country list
+stayed out of it, which is why it needed no security review.
+
+**Status, 2026-09-13:** 2.1 is **done**. Contract first, as decided:
+[`upload-search-object.country-derivation.md`](../specs/service/media-upload-service/upload-search-object.country-derivation.md),
+then `path-token-classifier.ts` (`exactPlaceHits` / `classifyPlaceToken`),
+`findCitiesBySegment` in `location-path-parser.util.ts`, and `countryProvenance` on the Search
+Object. Two deviations from the recommendation above, both deliberate:
+
+- **Ambiguity keeps the places.** Step 2 said "write `city`, leave `country` null, record the
+  candidate countries". There is no field for candidate countries, and there is already machinery
+  for two values of one admin field: every exact hit is written, so a contested name lands as two
+  `adminLevelMap` entries and `adminLevelConflicts` opens the tray. Identical values collapse to
+  one city with no country — which is also correct, and asks nothing it cannot answer.
+- **`narrowed` is not a provenance value yet.** Only `parsed` and `derived` exist. The narrowing
+  filter adds its own when it lands; an unused enum member would have been a claim the code does
+  not keep.
+
+Measured effect is in [F-03](./005-upload-pipeline-trace-findings.md#f-03) and
+[F-15](./005-upload-pipeline-trace-findings.md#f-15). **1.7 is now the blocking step**: a curated run
+still strands one job in `dedup_check` and the suite exits non-zero on the illegal
+`hashing → awaiting_disambiguation` transition. That was already true after 1.3/1.4 — 2.1 neither
+caused nor fixed it — but with classification correct it is the last thing between a curated run and
+a clean one.
 
 ### Phase 3 — Make the size work (F-06, F-07)
 

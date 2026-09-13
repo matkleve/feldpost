@@ -8,7 +8,8 @@ import Fuse from 'fuse.js';
 import type { BundeslandRecord, GemeindeRecord } from './local-geo-data.adapter';
 import { COUNTRY_NAMES } from './city-registry.const';
 import { isPostcodeToken, normalizeCountryCode } from './postcode-patterns';
-import { normalizeSegment } from './location-path-parser.util';
+import { findCitiesBySegment, normalizeSegment } from './location-path-parser.util';
+import type { CountryProvenance } from '../upload/address-resolution/upload-address-resolution.types';
 
 export type ClassifiedTokenKind =
   | 'postcode'
@@ -26,10 +27,14 @@ export interface ClassifiedToken {
   kind: ClassifiedTokenKind;
   value: string;
   confidence: number;
+  /** Only on a `country` token: the code was inferred from a place, not read from the path. */
+  derived?: boolean;
 }
 
 export interface TokenClassificationContext {
   country: string | null;
+  /** How `country` got its value. Set by this classifier; read by the SO builder. */
+  countryProvenance?: CountryProvenance | null;
 }
 
 const HOUSE_NUMBER_RE = /^\d{1,4}[a-zA-Z]?$/;
@@ -161,11 +166,112 @@ function classifyWithFuse<T extends { n: string; a?: string[] }>(
   };
 }
 
+/** The only country whose state / municipality gazetteers ship with the app. */
+const AT_COUNTRY = 'AT';
+
+interface ExactPlaceHits {
+  tokens: ClassifiedToken[];
+  /** The country each hit implies. More than one entry means the token is ambiguous. */
+  countries: Set<string>;
+}
+
+/**
+ * Exact name/alias hits for one token, across the country-carrying city registry and — when the
+ * country is unset or AT — the AT gazetteers.
+ * @see docs/specs/service/media-upload-service/upload-search-object.country-derivation.md
+ */
+function exactPlaceHits(
+  token: string,
+  geo: { states: BundeslandRecord[]; municipalities: GemeindeRecord[] },
+  currentCountry: string | null,
+): ExactPlaceHits {
+  const tokens: ClassifiedToken[] = [];
+  const countries = new Set<string>();
+  const seen = new Set<string>();
+  const push = (kind: 'state' | 'city', value: string, country: string): void => {
+    // Count the country even when the value repeats: two registries spelling one place identically
+    // still disagree about where it is, and that disagreement is what suppresses derivation.
+    countries.add(country);
+    const key = `${kind}:${value}`;
+    if (seen.has(key)) {
+      return;
+    }
+    seen.add(key);
+    tokens.push({ raw: token, kind, value, confidence: 1 });
+  };
+
+  for (const hit of findCitiesBySegment(token)) {
+    // A registry row from another country is not this path's place; leave it to street text.
+    if (!currentCountry || hit.country === currentCountry) {
+      push('city', hit.city, hit.country);
+    }
+  }
+
+  if (!currentCountry || currentCountry === AT_COUNTRY) {
+    const normalized = normalizeSegment(token);
+    const state = exactIndexFor(geo.states).get(normalized);
+    if (state) {
+      push('state', state, AT_COUNTRY);
+    }
+    const city = exactIndexFor(geo.municipalities).get(normalized);
+    if (city) {
+      push('city', city, AT_COUNTRY);
+    }
+  }
+
+  return { tokens, countries };
+}
+
+/**
+ * State / city for one token, deriving the country from an exact match when the path never said it.
+ *
+ * Folder paths rarely name the country (`Mödling/Wilhelminenstraße 141/…`), so requiring one before
+ * consulting a gazetteer left every such address as street text. Fuzzy matching stays gated on AT:
+ * a near miss in one country's gazetteer is not evidence of that country.
+ */
+function classifyPlaceToken(
+  token: string,
+  geo: { states: BundeslandRecord[]; municipalities: GemeindeRecord[] },
+  context: TokenClassificationContext,
+): ClassifiedToken[] {
+  const currentCountry = normalizeCountryCode(context.country);
+  const exact = exactPlaceHits(token, geo, currentCountry);
+
+  if (exact.tokens.length) {
+    // Two countries claim the same name: keep both places so the level map carries both values and
+    // the admin-level tray asks, but derive nothing. Ambiguity is surfaced, never guessed.
+    if (currentCountry || exact.countries.size > 1) {
+      return exact.tokens;
+    }
+    const [derivedCountry] = [...exact.countries];
+    context.country = derivedCountry;
+    context.countryProvenance = 'derived';
+    return [
+      ...exact.tokens,
+      { raw: token, kind: 'country', value: derivedCountry, confidence: 1, derived: true },
+    ];
+  }
+
+  if (currentCountry !== AT_COUNTRY) {
+    return [];
+  }
+
+  const fuzzy: ClassifiedToken[] = [];
+  const state = classifyWithFuse(token, geo.states, 'state');
+  if (state) {
+    fuzzy.push(state);
+  }
+  const city = classifyWithFuse(token, geo.municipalities, 'city');
+  if (city) {
+    fuzzy.push(city);
+  }
+  return fuzzy;
+}
+
 function classifyNonNumericToken(
   token: string,
   geo: { states: BundeslandRecord[]; municipalities: GemeindeRecord[] },
   context: TokenClassificationContext,
-  useAtGeo: boolean,
 ): ClassifiedToken[] {
   if (PROJEKT_RE.test(token)) {
     return [{ raw: token, kind: 'project', value: token, confidence: 1 }];
@@ -184,22 +290,13 @@ function classifyNonNumericToken(
   const country = classifyCountry(token);
   if (country) {
     context.country = country.value;
+    context.countryProvenance = 'parsed';
     return [country];
   }
 
-  if (useAtGeo) {
-    const results: ClassifiedToken[] = [];
-    const state = classifyWithFuse(token, geo.states, 'state');
-    if (state) {
-      results.push(state);
-    }
-    const city = classifyWithFuse(token, geo.municipalities, 'city');
-    if (city) {
-      results.push(city);
-    }
-    if (results.length) {
-      return results;
-    }
+  const places = classifyPlaceToken(token, geo, context);
+  if (places.length) {
+    return places;
   }
 
   if (token.length >= 2) {
@@ -258,8 +355,6 @@ export function classifyTokensInSegment(
   context: TokenClassificationContext,
 ): ClassifiedToken[] {
   const classified: ClassifiedToken[] = [];
-  const countryCode = normalizeCountryCode(context.country);
-  const useAtGeo = countryCode === 'AT';
 
   const deferredNumeric: string[] = [];
   const nonNumeric: string[] = [];
@@ -287,7 +382,7 @@ export function classifyTokensInSegment(
   }
 
   for (const token of mergedNonNumeric) {
-    const hits = classifyNonNumericToken(token, geo, context, useAtGeo);
+    const hits = classifyNonNumericToken(token, geo, context);
     classified.push(...hits);
   }
 

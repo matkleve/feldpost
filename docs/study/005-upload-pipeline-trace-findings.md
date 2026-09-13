@@ -20,7 +20,8 @@ Supabase and a stub geocoder. What is real and what is substituted is listed in 
 itself.
 
 **Companion:** decisions and the correction plan are [STUDY-006](./006-upload-pipeline-correction-plan.md).
-Nothing here has been fixed. The upload pipeline is **Sensitive** class
+Findings struck through in the register carry a dated **Fix** block with the measurement that proves
+it; the rest are open. The upload pipeline is **Sensitive** class
 ([`AGENTS.md`](../../AGENTS.md) § Change Classification), and four of these findings are
 spec-level — the spec says what the code does, so a fix needs a contract decision first.
 
@@ -38,7 +39,7 @@ spec-level — the spec says what the code does, so a fix needs a contract decis
 | --- | --- | --- | --- |
 | [F-01](#f-01) | ~~A number in the file name is classified as a postcode and overrides the folder~~ **fixed** | High | **Spec** |
 | [F-02](#f-02) | ~~`Wien` resolves to the municipality `Schottwien`~~ **fixed** | High | Data + code |
-| [F-03](#f-03) | City classification requires an explicit country segment in the path | High | **Spec** |
+| [F-03](#f-03) | ~~City classification requires an explicit country segment in the path~~ **fixed** | High | **Spec** |
 | [F-04](#f-04) | Ordinary file names form competing street-level layer packages | Medium | Code |
 | [F-05](#f-05) | `locationRequirementMode: 'optional'` does not skip the address pipeline | Medium | **Spec** ↔ code |
 | [F-06](#f-06) | Classification costs ~9 ms/file and blocks the first upload | High | Code |
@@ -50,7 +51,7 @@ spec-level — the spec says what the code does, so a fix needs a contract decis
 | [F-12](#f-12) | The unit suite is order-dependent; the count depends on a build cache | Medium | Repo |
 | [F-13](#f-13) | `ng test` never loads `vitest.config.ts`, so its aliases are inert in CI | Medium | Repo |
 | [F-14](#f-14) | An async tray gate is overwritten by the hashing step, stranding the job | High | Code |
-| [F-15](#f-15) | A path carrying a complete address **twice** can yield an empty Search Object | High | **Spec** |
+| [F-15](#f-15) | ~~A path carrying a complete address **twice** can yield an empty Search Object~~ **fixed** | High | **Spec** |
 
 ---
 
@@ -177,6 +178,30 @@ no country, so neither state nor city is ever attempted. Specified: `upload-sear
 shape, and the one a user would expect to work — gets no address at all, and the file lands in a
 tray or in Issues. `[A]` Combined with [F-04](#f-04) the folder's own street is offered back to the
 user as one option among several. `[A]`
+
+**Fix, 2026-09-13** ([STUDY-006](./006-upload-pipeline-correction-plan.md#d-03) D-03, Phase 2.1).
+The country is now **derived from the place** instead of being required before one can be looked up:
+an exact name/alias match against the country-carrying `CITY_REGISTRY` and the AT gazetteers sets
+`city` / `state` and emits the country it implies, marked `countryProvenance: 'derived'`. Fuzzy
+matching stays gated on `country === 'AT'`, because a near miss in one country's gazetteer is no
+evidence of that country. Contract:
+[`upload-search-object.country-derivation.md`](../specs/service/media-upload-service/upload-search-object.country-derivation.md).
+
+Measured. `Graz/Annenstraße 10/DSC_0001.jpg` now yields `country=AT city=Graz street=Annenstraße
+houseNumber=10`, `groupingKey at|||graz||10` — it was `|||||` `[A]`. At 500 generated paths: groups
+**391 → 442** (the 51 that were empty Search Objects now are addresses), `branch_a` **166 → 214**,
+`layer_conflict` **277 → 229**, tray questions **269 → 237**, and camera vs neutral naming stay
+identical, so [F-01](#f-01)'s parity survives. `[A]` Classification also got *faster*, 9.1 →
+5.5-6.6 ms per file over two runs, because the exact index answers before a Fuse index is built.
+`[A]`
+
+On the curated corpus tray questions went **9 → 12** — the right direction even though the number
+rose: three paths that used to classify to nothing now carry a real address whose folder and file
+name contradict each other, and being asked is the correct outcome. `[A]` Two classes remain open.
+[F-04](#f-04): a file name still forms a competing street package, which is now the whole of the
+remaining tray load. And [F-14](#f-14): run A still strands one job in `dedup_check`, which is why
+the harness waits out its full 180 s settle deadline — that became reachable at curated size with
+[F-02](#f-02)'s fix, not with this one, and it is unchanged here. `[A]`
 
 ---
 
@@ -428,6 +453,23 @@ composition was never stated, so the spec cannot be read to predict this outcome
 than required as input) plus Phase 2.2; after D-03, `Mödling` and `Wien` both classify, the
 `adminLevelMap` gets its two entries, and the contradiction becomes the tray question it should
 always have been. `[C]`
+
+**Fix, 2026-09-13** (D-03, Phase 2.1 — see [F-03](#f-03)). The same path now produces `[A]`:
+
+```
+flat:            country=AT state=Wien postcode=1160 city=Wien houseNumber=141
+groupingKey:     adminConflict|city|modling,wien
+adminLevelMap:   city@[L2:Mödling L0:Wien] country@[L2:AT] state@[L0:Wien] postcode@[L0:1160]
+adminLevelConflicts: city
+```
+
+`Mödling` derives `AT` at level 2; with a country in hand the file name's `1160` is a postcode and
+its `Wien` a city, so the level map holds **both** cities with their levels, the city conflict fires,
+and the group goes to `needsAdminLevelResolution` before any geocode — the tray question the owner
+expected. The flat `city` is `Wien` because flat fields collapse to the lowest level; that value is
+not trusted while the conflict stands. What is still open is the `street`: `Wilhelminenstr` (file
+name, confidence 0.5) and `Wilhelminenstraße` (folder, confidence 1) remain two competing layer
+packages, which is [F-04](#f-04) / [F-11](#f-11) and Phase 2.2, not this finding. `[A]`
 
 **Model note, since it is easy to misread.** Only the four admin fields
 (`country`, `state`, `city`, `postcode`) are stored as a per-field map of level-tagged values —

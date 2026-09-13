@@ -9,6 +9,7 @@
  */
 
 import type { UploadSearchObject } from '../address-resolution/upload-address-resolution.types';
+import type { AdminFieldKey } from '../address-resolution/upload-address-level-map.types';
 import type { UploadJob } from '../upload-manager.types';
 import type { UploadTraceScenario } from './upload-trace-fixtures';
 
@@ -38,11 +39,20 @@ export interface FindingInput {
   job: UploadJob | undefined;
 }
 
-/** A filename number outranked a folder value for the same admin field (level 0 wins). */
+/**
+ * A file-name value outranked a folder value for the same admin field (level 0 wins) **and nobody
+ * was asked**. A field listed in `adminLevelConflicts` is excluded: there the contradiction is
+ * recorded and a tray resolves it before geocode, which is the level map working as specified.
+ * Only a silent override is a finding.
+ */
 function findFilenameOverrides(inputs: readonly FindingInput[]): TraceFinding | null {
   const hits: string[] = [];
   for (const { scenario, searchObject } of inputs) {
+    const asked = new Set((searchObject.adminLevelConflicts ?? []).map((conflict) => conflict.field));
     for (const [field, entries] of Object.entries(searchObject.adminLevelMap ?? {})) {
+      if (asked.has(field as AdminFieldKey)) {
+        continue;
+      }
       const list = entries ?? [];
       const fromFilename = list.find((entry) => entry.level === FILENAME_LEVEL);
       const fromFolder = list.find((entry) => entry.level > FILENAME_LEVEL);
@@ -56,8 +66,9 @@ function findFilenameOverrides(inputs: readonly FindingInput[]): TraceFinding | 
         code: 'SO-FILENAME-OVERRIDES-FOLDER',
         severity: 'high',
         message:
-          'A number in the file name was classified as an admin field and, being at level 0, ' +
-          'replaced the folder value in the flat Search Object and the groupingKey.',
+          'A file-name value was classified as an admin field and, being at level 0, replaced the ' +
+          'folder value in the flat Search Object and the groupingKey — with no conflict recorded, ' +
+          'so no tray asks.',
         examples: hits.slice(0, MAX_EXAMPLES),
       }
     : null;

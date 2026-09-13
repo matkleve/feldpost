@@ -289,10 +289,19 @@ Classification, 2 000 generated paths, one core:
 | groups needing a tray | 897 (**100 %**) | 895 (66 %) |
 | outcomes | `layer_conflict` 985, `admin_conflict` 782, `branch_c` 233, **`branch_a` 0** | `layer_conflict` 985, **`branch_a` 549**, `admin_conflict` 233, `branch_c` 233 |
 
-**After the 2026-09-13 filename gate**, the two columns are identical — 500 paths, 391 groups, 269
-needing a tray (69 %), `layer_conflict` 261, `branch_a` 129, `branch_c` 57, `admin_conflict` 53. The
-remaining tray load is folder shape (`layer_conflict`, F-04/F-11) and the gazetteer (F-02), not file
-naming. Re-run `--scale=2000` for figures comparable to the table above.
+**After the 2026-09-13 fixes**, the two columns are identical — 500 paths, 442 groups, 237 needing a
+tray (54 %), `layer_conflict` 229, `branch_a` 214, `branch_c` 57, `admin_conflict` 0, and 5.5-6.6 ms
+per file across two runs (the exact index answers before a Fuse index is built). It took three steps,
+each measured on the same 500 paths:
+
+| After | groups | trays | `branch_a` | `admin_conflict` | `layer_conflict` |
+| --- | --- | --- | --- | --- | --- |
+| filename gate (F-01) | 391 | 269 (69 %) | 129 | 53 | 261 |
+| exact before fuzzy (F-02) | 391 | 269 (69 %) | 166 | 0 | 277 |
+| country derived from the place (F-03) | 442 | 237 (54 %) | 214 | 0 | 229 |
+
+The remaining tray load is folder shape (`layer_conflict`, F-04/F-11), not file naming. Re-run
+`--scale=2000` for figures comparable to the table above.
 
 Job store, real `UploadJobStateService`:
 

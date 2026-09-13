@@ -44,6 +44,7 @@ Entries are numbered, never renumbered, and never deleted. Order is by cost, not
 | [TRAP-014](#trap-014--a-fuzzy-gazetteer-substitutes-a-name-it-does-not-have) | A fuzzy gazetteer substitutes a name it does not have, at full confidence | `open` |
 | [TRAP-015](#trap-015--a-gate-that-passes-because-nothing-ran) | A gate that passes because nothing ran | `open` |
 | [TRAP-016](#trap-016--only-half-the-search-object-is-level-mapped) | Only four of the Search Object's fields are level-mapped; street-level ones are concatenated | `open` |
+| [TRAP-017](#trap-017--a-country-can-appear-in-the-search-object-that-never-appears-in-the-path) | A country can appear in the Search Object that never appears in the path | `open` |
 
 ---
 
@@ -324,6 +325,22 @@ Better: end the migration with a `DO` block that raises when any touched functio
 **Detect** — ask which of the two structures a field lives in before reasoning about its provenance: `AdminFieldKey` answers it in one line. When you want "what did level 2 say about `street`", there is no such query — reach for `AddressLayerEntry.layerKey`, which encodes the prefix. The asymmetry is also what makes filename words pollute `street` by concatenation ([F-04](./study/005-upload-pipeline-trace-findings.md#f-04)) while filename *numbers* are now gated ([F-01](./study/005-upload-pipeline-trace-findings.md#f-01)).
 
 **Source** — [`STUDY-005`](./study/005-upload-pipeline-trace-findings.md) F-15 and its worked path (scenario S18); [`2026-09-12`](./ai-diary/2026-09-12.md). Types at `apps/web/src/app/core/upload/address-resolution/upload-address-level-map.types.ts:6`; packages at `apps/web/src/app/core/location-path-parser/upload-search-object.layer-map.ts`.
+
+**Status** — `open`.
+
+---
+
+## TRAP-017 — A country can appear in the Search Object that never appears in the path
+
+**Surface** — `upload-search-object.md` § Token classification order reads as two passes over the text: pass 1 finds a country from `COUNTRY_NAMES`, pass 2 accepts a postcode "only if `country` is set (from pass 1 or an earlier path segment)". `TokenClassificationContext` is `{ country }`, and it is the same object for the whole path.
+
+**Assumption** — `country` is only ever a token somebody wrote. So `Mödling/…/1160 Wien.jpg` cannot have a postcode, because no segment says `AT`; and a debugging session that wants to know where a country came from can grep the path for it.
+
+**Truth** — since 2026-09-13 a **place** sets it. An exact name/alias hit in `CITY_REGISTRY` (which carries a country per row) or in the AT state / municipality gazetteers writes `country` into the shared context, marked `countryProvenance: 'derived'`, and every later token in the same segment and every later segment sees it. Two things follow that surprise: a four-digit token becomes a postcode *because a city name was recognised three segments earlier*, and `country` can hold a value that occurs nowhere in `relativePath`. The provenance field is the only way to tell the two apart — `parsed` means a token said it, `derived` means a place implied it — and it is optional, so a Search Object built before this change has neither.
+
+**Detect** — read `countryProvenance` before reasoning about `country`, and remember the order dependency: derivation only fires while `country` is unset, so `AT/Mödling/…` marks it `parsed` and `Mödling/AT/…` also ends `parsed` (the token overwrites the derivation within the segment it appears in). When a postcode appears "out of nowhere", look for a city name, not a country token. Contract: [`upload-search-object.country-derivation.md`](./specs/service/media-upload-service/upload-search-object.country-derivation.md).
+
+**Source** — [`STUDY-005`](./study/005-upload-pipeline-trace-findings.md) F-03 and F-15; [`STUDY-006`](./study/006-upload-pipeline-correction-plan.md) D-03 and Phase 2.1; [`2026-09-12`](./ai-diary/2026-09-12.md). Code at `apps/web/src/app/core/location-path-parser/path-token-classifier.ts` (`classifyPlaceToken`).
 
 **Status** — `open`.
 
