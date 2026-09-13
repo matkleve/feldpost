@@ -75,6 +75,49 @@ function classifyCountry(token: string): ClassifiedToken | null {
   return null;
 }
 
+/**
+ * Exact name/alias index per dataset, keyed by the array itself so it is built once rather than
+ * once per token. Memoizing matters twice: correctness (an exact hit must beat a fuzzy one) and
+ * cost (classification is ~9 ms/file, dominated by this lookup).
+ * @see docs/study/005-upload-pipeline-trace-findings.md F-02, F-06
+ */
+const exactIndexCache = new WeakMap<object, Map<string, string>>();
+
+function exactIndexFor<T extends { n: string; a?: string[] }>(items: T[]): Map<string, string> {
+  const cached = exactIndexCache.get(items);
+  if (cached) {
+    return cached;
+  }
+  const index = new Map<string, string>();
+  for (const item of items) {
+    for (const name of [item.n, ...(item.a ?? [])]) {
+      const key = normalizeSegment(name);
+      if (key && !index.has(key)) {
+        index.set(key, item.n);
+      }
+    }
+  }
+  exactIndexCache.set(items, index);
+  return index;
+}
+
+/** Minimum length difference tolerated before a fuzzy hit is treated as a different place. */
+const FUZZY_LENGTH_SLACK = 2;
+/** Above that, allow a quarter of the token's length. */
+const FUZZY_LENGTH_RATIO = 0.25;
+
+/**
+ * Is a fuzzy candidate close enough in length to be the same place?
+ *
+ * A token the gazetteer does not contain otherwise substitutes a longer entry that contains it:
+ * `Wien` matches `Schottwien` at 0.992, above the write threshold, so Austria's largest city was
+ * stored as a Semmering village. A gap must fail visibly instead of resolving to a neighbour.
+ */
+function isPlausibleFuzzyLength(token: string, candidate: string): boolean {
+  const bound = Math.max(FUZZY_LENGTH_SLACK, Math.ceil(token.length * FUZZY_LENGTH_RATIO));
+  return Math.abs(candidate.length - token.length) <= bound;
+}
+
 function classifyWithFuse<T extends { n: string; a?: string[] }>(
   token: string,
   items: T[],
@@ -83,6 +126,12 @@ function classifyWithFuse<T extends { n: string; a?: string[] }>(
   if (!items.length) {
     return null;
   }
+
+  const exact = exactIndexFor(items).get(normalizeSegment(token));
+  if (exact) {
+    return { raw: token, kind, value: exact, confidence: 1 };
+  }
+
   const fuse = new Fuse(items, {
     keys: [
       { name: 'n', weight: 0.7 },
@@ -99,6 +148,9 @@ function classifyWithFuse<T extends { n: string; a?: string[] }>(
   }
   const confidence = fuseConfidence(top.score);
   if (confidence < UNCERTAIN_LOW) {
+    return null;
+  }
+  if (!isPlausibleFuzzyLength(token, top.item.n)) {
     return null;
   }
   return {

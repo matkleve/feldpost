@@ -29,6 +29,10 @@ npm run trace:upload -- --out=trace.txt                  # keep the report
 
 150 files take about 8 seconds. No network, no Supabase, no browser.
 
+**A non-zero exit with every test passing** means an unhandled rejection during the run, not a failed
+assertion. Today that is F-14: an async tray registration writes a phase while the job is hashing, the
+FSM assertion fires, and one job strands in `dedup_check`. The report above it is still valid.
+
 | Flag | Meaning |
 | --- | --- |
 | `--count=N` | Corpus size. Up to 15 uses the curated scenarios; beyond that the generator fills the rest. |
@@ -192,13 +196,19 @@ Baseline, 2026-09-12, curated 15 + generated 150, seed 7:
   `AT/Wien/1090/Währinger Straße 12/IMG_1274.jpg` resolves as postcode **1274**, not 1090 —
   and `IMG_1275.jpg` in the same folder gets 1275, which puts two photos of one building in two
   groups. The street-level guard `isWeakFilenameStreetLevel` has no numeric counterpart.
-- **`SO-CITY-NOT-IN-PATH`** — `at-gemeinden-bev.json` contains `Wien-Alsergrund` … and
-  `Schottwien`, but no plain **`Wien`**. The Fuse match for the token `Wien` therefore lands on
-  `Schottwien` at score 0.992, above the 0.98 write threshold. Every Vienna folder gets
-  `city = Schottwien`, which then disagrees with `state = Wien` and opens an
-  `admin_level_conflict` tray for a path that was never ambiguous.
-- **`GROUP-SPLIT-WITHIN-FOLDER`** — the two effects above split folders that should be one group,
-  so the batch geocodes per file instead of once per building.
+- ~~**`SO-CITY-NOT-IN-PATH`**~~ — **fixed 2026-09-13.** `at-gemeinden-bev.json` contains
+  `Wien-Alsergrund` … and `Schottwien`, but no plain **`Wien`**, so the fuzzy match landed on
+  `Schottwien` at 0.992 — above the 0.98 write threshold — and every Vienna folder got
+  `city = Schottwien`, which then disagreed with `state = Wien` and opened a tray. The gazetteer is
+  now consulted **exactly first**, and a fuzzy hit whose length differs from the token by more than
+  `max(2, ⌈len × 0.25⌉)` is rejected. Curated corpus: 6 instances → 0; at 500 generated paths
+  `admin_conflict` 53 → 0.
+- **`GROUP-SPLIT-WITHIN-FOLDER`** — still reported, and after the two fixes above it reports *more*
+  rather than less. That is the check getting sharper, not a regression: while admin conflicts
+  existed, four files in one folder shared a single conflict-signature group, which hid the fact that
+  their `street` values already differed. With the conflicts gone, the real cause shows — filename
+  words (`Kopie von IMG`, `Abnahmeprotokoll`) are appended to `street` as low-confidence fragments.
+  That is F-04/F-11, Phase 2.2.
 - **City classification needs an explicit country segment.** `Graz/Annenstraße 10/DSC_0001.jpg`
   has no `AT` segment, so the gazetteer is skipped, `Graz` becomes a street fragment, and the
   Search Object ends up **empty** (`groupingKey` `|||||`).

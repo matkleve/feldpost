@@ -86,7 +86,7 @@ Per path segment, split tokens with `/[\s\-\_\.\,]+/`, then **two passes**:
 2. Door `^(tür\|top)/i` → `door`  
 3. Staircase `^(stiege?\|stg)/i` → `staircase` (**not** `top`)  
 4. **Country** — alias list (`COUNTRY_NAMES`)  
-5. State / city — Fuse (**AT gazetteer only when `country === 'AT'`**)  
+5. State / city — **exact** normalized name/alias match first; Fuse only as fallback, and a fuzzy hit whose length differs from the token by more than `max(2, ⌈len × 0.25⌉)` is rejected (**AT gazetteer only when `country === 'AT'`**)  
 6. Remaining text → `street` fragments  
 
 **Pass 2 — numeric tokens last** (`^\d+[a-zA-Z]?$`):
@@ -140,3 +140,8 @@ Implementation: [`upload-search-object.completeness.helpers.ts`](../../../../app
 | < 0.90 | Omit field |
 
 Fuse: `score = 1 - fuseResult.score` (0 = perfect match).
+
+An exact name/alias match scores `1` without consulting Fuse. The length bound in pass 1 step 5
+exists because a token that is **absent** from the gazetteer otherwise substitutes a longer entry
+containing it at a passing score — `Wien` → `Schottwien` at 0.992. A gazetteer gap must fail
+visibly, not resolve to a neighbour.

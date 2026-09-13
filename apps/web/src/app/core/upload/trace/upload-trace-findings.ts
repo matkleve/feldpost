@@ -100,6 +100,14 @@ function findFuzzyCities(inputs: readonly FindingInput[]): TraceFinding | null {
     if (!city) {
       continue;
     }
+    // A city looked up from a postcode is not a fuzzy match — the message says so, and until now
+    // the check did not, which reported every PLZ expansion as a finding.
+    const fromPostcodeExpansion = searchObject.sources.some(
+      (entry) => entry.field === 'city' && searchObject.postcode != null && entry.value === city,
+    );
+    if (fromPostcodeExpansion && !fold(scenario.relativePath).includes(fold(city))) {
+      continue;
+    }
     if (!fold(scenario.relativePath).includes(fold(city))) {
       hits.push(`${scenario.id} city="${city}" is not a token in ${scenario.relativePath}`);
     }

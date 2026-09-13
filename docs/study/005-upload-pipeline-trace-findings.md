@@ -37,7 +37,7 @@ spec-level — the spec says what the code does, so a fix needs a contract decis
 | id | Finding | Severity | Layer |
 | --- | --- | --- | --- |
 | [F-01](#f-01) | ~~A number in the file name is classified as a postcode and overrides the folder~~ **fixed** | High | **Spec** |
-| [F-02](#f-02) | `Wien` resolves to the municipality `Schottwien` | High | Data + code |
+| [F-02](#f-02) | ~~`Wien` resolves to the municipality `Schottwien`~~ **fixed** | High | Data + code |
 | [F-03](#f-03) | City classification requires an explicit country segment in the path | High | **Spec** |
 | [F-04](#f-04) | Ordinary file names form competing street-level layer packages | Medium | Code |
 | [F-05](#f-05) | `locationRequirementMode: 'optional'` does not skip the address pipeline | Medium | **Spec** ↔ code |
@@ -49,6 +49,7 @@ spec-level — the spec says what the code does, so a fix needs a contract decis
 | [F-11](#f-11) | A meaningless folder segment outranks a valid address in the file name | High | Code |
 | [F-12](#f-12) | The unit suite is order-dependent; the count depends on a build cache | Medium | Repo |
 | [F-13](#f-13) | `ng test` never loads `vitest.config.ts`, so its aliases are inert in CI | Medium | Repo |
+| [F-14](#f-14) | An async tray gate is overwritten by the hashing step, stranding the job | High | Code |
 
 ---
 
@@ -137,6 +138,22 @@ plain write, not even an uncertain one (`upload-search-object.md` § Confidence 
 **Consequence.** Vienna is Austria's largest city and the wrong city is written with full
 confidence. It then disagrees with `state = Wien`, which raises an `adminLevelConflicts` entry and
 opens a tray. `[A]` Six of the 15 curated scenarios hit it. `[A]`
+
+**Fixed 2026-09-13** (Phase 1.3–1.4, D-02). `classifyWithFuse` now consults an **exact** normalized
+name/alias index before Fuse, and rejects a fuzzy hit whose length differs from the token by more
+than `max(2, ⌈len × 0.25⌉)`. `Wien` (4) against `Schottwien` (10) exceeds the bound, so the gap now
+fails visibly instead of resolving to a neighbour; the Vienna postcodes in `at-plz.json` supply
+`city = Wien` through the expansion step instead. The index is memoized per dataset, which also
+removes one per-token rebuild from [F-06](#f-06). `[A]`
+
+Measured on the curated corpus: `SO-CITY-NOT-IN-PATH` **6 instances → 0** `[A]`, and at 500 generated
+paths `admin_conflict` went **53 → 0** with `branch_a` 129 → 166. `[A]` `layer_conflict` rose 261 →
+277, because a path that no longer gets a wrong city falls through to street fragments instead —
+which is [F-04](#f-04)/[F-11](#f-11), not a regression of this fix. `[C]`
+
+**Typo tolerance was already zero** and is unchanged: `Klagenfurth` matched nothing before the length
+bound either, because the 0.9 confidence floor rejects near misses. `[A]` Recorded so the bound is
+not blamed for it later.
 
 **Wider risk.** `[C]` This is a class, not one row: any token that is not itself in the gazetteer but
 is a substring of an entry can be substituted at ≥ 0.9 confidence. The harness reports the class as
@@ -360,6 +377,37 @@ isolation first". `[A]`
 **Related history.** The 2026-05-27 diary entry recorded cross-file injector pollution in the upload
 specs over a real `LocalGeoDataAdapter` fetch, and `docs/TRAPS.md` § Rejected candidates lists it as
 "Resolved, not a standing trap". `[A]` The shape is back, in a different file.
+
+---
+
+### F-14 · An async tray gate is overwritten by the hashing step, stranding the job {#f-14}
+
+**What happens.** A job ends up parked in `dedup_check` forever, with a resolver tray open for its
+group and nothing left to advance it. `[A]`
+
+**Mechanism.** `UploadLocationSourceConflictService.registerSourceConflictGroupAsync` registers the
+group **asynchronously**; by the time it calls `markJobsAwaitingDisambiguation` →
+`setPhase(jobId, 'awaiting_disambiguation')`, the job has already moved on to `hashing`. The FSM
+reports the edge as illegal and applies it anyway (the documented guard policy), so the job is
+briefly `awaiting_disambiguation` — and then hashing's own completion sets `dedup_check`, **erasing
+the gate**. The tray still waits for an answer; the job no longer waits for anything. `[C]` — the
+mechanism is inferred from the stack (`upload-location-source-conflict.service.ts:183` → `:200` →
+`:306` → `upload-location-disambiguation-registration.service.ts:69` → `:93`) plus the resulting
+phase; it has not been stepped through.
+
+**Pre-existing, not introduced by Phase 1.** The 5 000-file run on 2026-09-12, before any fix in this
+study, ended with `phases: awaiting_disambiguation=4636 complete=350 dedup_check=13 missing_data=1` —
+**13 stranded jobs**. `[A]` [F-02](#f-02)'s fix made it reachable in the 17-file curated corpus (one
+stranded job), which is how it was finally characterised. `[A]`
+
+**Related.** The same map gap was already visible for a sibling edge before any of this work:
+`illegal transition hashing → conflict_check` appears in a full suite run on the unmodified tree.
+`[A]` So the family is "an async location step writes a phase while the job is mid-hashing".
+
+**Why the map edge was not simply added.** Adding `hashing → awaiting_disambiguation` to
+`PIPELINE_TRANSITIONS` would silence the assertion without stopping the overwrite — the job would
+still strand, and the one signal that found this would be gone. The assertion is telling the truth.
+`[D]`
 
 ---
 
