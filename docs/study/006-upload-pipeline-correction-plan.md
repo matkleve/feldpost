@@ -275,6 +275,62 @@ media detail) filters on nothing but organization — `db-address.provider.ts` (
 still requires coordinates, which is correct for that search's purpose (navigating a map to a point),
 not a gap this decision needs to close.
 
+---
+
+### D-11 (decided) — Corroborate a `city` admin-level conflict with the street before asking {#d-11}
+
+The owner's question: `AT/Wien/Innsbruck/Maria-Theresien-Straße 18/` opens a **C3** tray
+(`admin_level_conflict` — two folder levels both look like a city) and asks every time, even when the
+street named in the path only exists in one of the two candidates. Could the pipeline check that
+first and skip the question when it's clean?
+
+**Decided: yes, with two conditions that keep it from ever guessing.**
+
+1. **It must actually verify, not just query.** A structured geocoder query (Photon's `/structured`,
+   Nominatim's structured `/search`) is a ranked search, not a strict filter — sending `street=X,
+   city=Y` and getting a non-empty result back is **not** proof `X` is in `Y`; both engines can return
+   their best-effort nearest match rather than nothing. The only trustworthy signal is what the hit's
+   **own** address components say. So the check queries the street **once, without a city constraint**
+   (`searchStructuredForward({ street, countryCode })` — no `city` param), and reads the `city`/`town`/
+   `village` field the geocoder put on each hit itself. This is exactly [class A1](../specs/service/media-upload-service/contradiction-resolution-model.md#class-a--ambiguity-one-source-multiple-valid-interpretations)'s
+   own mechanism (`pickDiscriminatingField`, `mapGeocoderHitsToCandidates`), run one step earlier —
+   A1 already asks "which city is `{street}` in?" when a bare street search comes back spanning more
+   than one city; this reuses the same query and the same city-extraction, just consulted **before**
+   opening the C3 tray instead of only after Branch C fails.
+2. **Auto-resolve only on a clean split.** Compare the distinct cities the hits actually carry against
+   the C3 candidate set (`{Wien, Innsbruck}`, normalized the same way `detectAreaConflicts` already
+   normalizes admin values). Write the answer only when **exactly one** candidate appears among the
+   hit cities and the others do not appear at all. Two real ways this must still ask, not guess:
+   - **Neither candidate appears** — the hits are all somewhere else entirely (a same-named street in
+     a different city, or the geocoder's coverage doesn't have it). Silence here would mean inventing
+     an answer from evidence about a different place.
+   - **Both candidates appear** — a street name common enough to exist in both (plausible for
+     `Hauptstraße`, unlikely but not provably impossible for `Maria-Theresien-Straße`). Silence here
+     would mean picking one of two genuinely valid answers.
+   Either case falls through to the C3 tray exactly as today — this is a corroboration source added
+   *before* the question, never a replacement for asking when the evidence doesn't clear the bar.
+
+**Cost accepted**: `needsAreaResolution` is today a synchronous, local, offline decision — no network
+call happens before a C3 tray opens. This adds one geocoder round-trip on that path. A failed/timed-out
+lookup must fall back to asking (today's behavior), never to silence.
+
+**The second half of the ask — show why**: every derived field already carries `origin: 'derived'` +
+`rule` + `derivedFrom` (`FieldLevelEntry`, built during the derivation-rules work this week) and
+**nothing in the UI reads any of it today** — confirmed by grep, zero consumers. This decision adds
+its own named rule (`street→city (corroboration)`) to that same mechanism, and the visible "why" line
+the owner asked for (*"Maria-Theresien-Straße only in Innsbruck → city set."*) is the first real
+consumer of provenance that already exists for every other derived field, not a one-off for this case.
+Where exactly that line renders (tray copy at question time vs. a persistent note against the
+resolved item) is a UI decision, not specified here.
+
+**Not decided here**: whether this also applies to the symmetric `state` conflict (two folder levels
+naming different Bundesländer) — plausible, since states don't corroborate against a street any less
+than cities do, but not measured against a real scenario yet. Scoped to `city` conflicts for the first
+implementation; extending to `state` is a follow-up once this is proven.
+
+See [contradiction-resolution-model.c3-street-corroboration.supplement.md](../specs/service/media-upload-service/contradiction-resolution-model.c3-street-corroboration.supplement.md)
+for the mechanism spec.
+
 ## 2 · The plan
 
 Ordered so that each phase is independently shippable and each one is verified by something that
