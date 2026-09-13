@@ -23,9 +23,11 @@ a folder name the user typed or a postcode expansion, and nothing said which.
 | **Derivation** (`origin: 'derived'`) | A value computed from evidence by a **named rule**, carrying `rule` and `from` | Fills gaps only. May never replace path evidence for the same field |
 | **Flat view** | `country`…`door` on `UploadSearchObject` | Computed from the two layers above by the precedence below — a projection, not a separate truth |
 
-Named derivation rules today: `postcode→city` (`at-plz.json`), `place→country`
-([country derivation](./upload-search-object.country-derivation.md)). A rule that cannot be named
-is not a derivation — it is a guess, and guesses are not written.
+Every named rule, its data source and its confidence live in
+[derivation rules](./upload-search-object.derivation-rules.md) — including the one rule that may only
+raise a question (`postcode⊥state`) and the corroboration a number needs before it counts as a
+postcode. A rule that cannot be named is not a derivation — it is a guess, and guesses are not
+written.
 
 ## Vocabulary: area vs address
 

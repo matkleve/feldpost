@@ -27,6 +27,12 @@ export interface FieldLevelEntry {
   rule?: string;
   /** Only on a derived entry: the value it was derived from, e.g. the postcode `4020`. */
   derivedFrom?: string;
+  /**
+   * Recorded as evidence but **not** eligible for the flat view: a number that matches a postcode
+   * pattern without any corroboration. Corroborating it clears the flag.
+   * @see docs/specs/service/media-upload-service/upload-search-object.derivation-rules.md
+   */
+  weak?: boolean;
 }
 
 export interface AreaConflict {

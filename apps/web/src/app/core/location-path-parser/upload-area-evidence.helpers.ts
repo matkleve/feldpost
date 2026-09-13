@@ -4,6 +4,7 @@
  */
 
 import type { GemeindeRecord, PlzMap } from './local-geo-data.adapter';
+import { isPostcodePlausibleForState } from './postcode-patterns';
 import type {
   AreaFieldKey,
   AreaConflict,
@@ -136,6 +137,9 @@ function entriesHaveDistinctValues(
   return false;
 }
 
+/** Named in [derivation rules](../../../../../docs/specs/service/media-upload-service/upload-search-object.derivation-rules.md). */
+const CITY_TO_STATE_RULE = 'city→state';
+
 export function collapseAreaFlatFields(
   fields: {
     country: string | null;
@@ -146,13 +150,87 @@ export function collapseAreaFlatFields(
   areaEvidence: Partial<Record<AreaFieldKey, FieldLevelEntry[]>>,
 ): void {
   for (const field of ADMIN_FIELDS) {
-    const entries = areaEvidence[field];
+    // A weak entry is evidence only — an uncorroborated number never becomes the flat postcode.
+    const entries = areaEvidence[field]?.filter((entry) => !entry.weak);
     if (!entries?.length) {
       continue;
     }
     const winner = [...entries].sort((a, b) => a.level - b.level)[0];
     fields[field] = winner.value;
   }
+}
+
+/** `postcode→city` and a path city are the two ways a bare number earns its place. */
+function corroboratePostcodeEvidence(
+  areaEvidence: Partial<Record<AreaFieldKey, FieldLevelEntry[]>>,
+  postcodeMap: PlzMap | undefined,
+): void {
+  const weakEntries = (areaEvidence.postcode ?? []).filter((entry) => entry.weak);
+  if (!weakEntries.length) {
+    return;
+  }
+  const cityValues = new Set(
+    (areaEvidence.city ?? []).map((entry) => normalizeAdminValue(entry.value)),
+  );
+  for (const entry of weakEntries) {
+    const expanded = postcodeMap?.[entry.value] ?? [];
+    const tableKnowsIt = expanded.length > 0;
+    const cityAgrees = expanded.some((city) => cityValues.has(normalizeAdminValue(city)));
+    if (tableKnowsIt || cityAgrees) {
+      entry.weak = false;
+    }
+  }
+}
+
+/**
+ * `city→state`: every municipality in the gazetteer carries its federal state, so a path that names
+ * a city names a state too. Fills only a field with no path evidence of its own.
+ * @see docs/specs/service/media-upload-service/upload-search-object.derivation-rules.md
+ */
+function deriveStateFromCity(
+  areaEvidence: Partial<Record<AreaFieldKey, FieldLevelEntry[]>>,
+  municipalities: GemeindeRecord[],
+): void {
+  if (areaEvidence.state?.length) {
+    return;
+  }
+  const cityEntries = (areaEvidence.city ?? []).filter((entry) => !entry.weak);
+  const lowest = [...cityEntries].sort((a, b) => a.level - b.level)[0];
+  if (!lowest) {
+    return;
+  }
+  const normalized = normalizeAdminValue(lowest.value);
+  const match = municipalities.find(
+    (record) =>
+      normalizeAdminValue(record.n) === normalized ||
+      (record.a ?? []).some((alias) => normalizeAdminValue(alias) === normalized),
+  );
+  if (!match?.b) {
+    return;
+  }
+  areaEvidence.state = [
+    {
+      level: lowest.level,
+      value: match.b,
+      source: lowest.source,
+      field: 'state',
+      origin: 'derived',
+      rule: CITY_TO_STATE_RULE,
+      derivedFrom: lowest.value,
+    },
+  ];
+}
+
+/**
+ * The derivation pass between evidence and the flat view: corroborate bare numbers, then fill a
+ * state the path implies. Runs before conflict detection, so a derived state can be contradicted.
+ */
+export function corroborateAreaEvidence(
+  areaEvidence: Partial<Record<AreaFieldKey, FieldLevelEntry[]>>,
+  geo: { municipalities: GemeindeRecord[]; postcodeMap?: PlzMap },
+): void {
+  corroboratePostcodeEvidence(areaEvidence, geo.postcodeMap);
+  deriveStateFromCity(areaEvidence, geo.municipalities);
 }
 
 export function buildAdminConflictSignature(conflicts: AreaConflict[]): string {
@@ -167,6 +245,29 @@ export function buildAdminConflictSignature(conflicts: AreaConflict[]): string {
 
 export function buildAdminConflictQueryKey(signature: string): string {
   return `adminConflict|${signature}`;
+}
+
+/**
+ * `postcode⊥state`: the one check that may raise a question and never write. A postcode whose first
+ * digit cannot belong to the state the path names is a contradiction worth one tray question — the
+ * `Tirol/1090` case. Border postcodes (`5280` Braunau in Oberösterreich) stay quiet by design.
+ * @see docs/specs/service/media-upload-service/upload-search-object.derivation-rules.md
+ */
+function detectPostcodeStateImplausibility(
+  areaEvidence: Partial<Record<AreaFieldKey, FieldLevelEntry[]>>,
+  country: string | null | undefined,
+): AreaConflict | null {
+  const postcodes = (areaEvidence.postcode ?? []).filter((entry) => !entry.weak);
+  const states = (areaEvidence.state ?? []).filter((entry) => !entry.weak);
+  const incompatible: FieldLevelEntry[] = [];
+  for (const postcode of postcodes) {
+    for (const state of states) {
+      if (!isPostcodePlausibleForState(postcode.value, state.value, country)) {
+        incompatible.push(postcode, state);
+      }
+    }
+  }
+  return incompatible.length ? { field: 'postcode', entries: uniqueEntries(incompatible) } : null;
 }
 
 export function detectAreaConflicts(
@@ -260,6 +361,11 @@ export function detectAreaConflicts(
         }
       }
     }
+  }
+
+  const implausiblePostcode = detectPostcodeStateImplausibility(areaEvidence, options.country);
+  if (implausiblePostcode) {
+    conflicts.push(implausiblePostcode);
   }
 
   return conflicts.filter((c) => c.entries.length >= 2);

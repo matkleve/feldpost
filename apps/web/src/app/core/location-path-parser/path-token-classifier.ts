@@ -55,6 +55,13 @@ const WEAK_STREET_CONFIDENCE = 0.5;
 const ADJACENT_STREET_CONFIDENCE = 0.95;
 
 /**
+ * A number matching the country's postcode pattern, with nothing in its segment to corroborate it.
+ * Below the write floor, so it stays evidence until the path or the PLZ table confirms it.
+ * @see docs/specs/service/media-upload-service/upload-search-object.derivation-rules.md
+ */
+const UNCORROBORATED_POSTCODE_CONFIDENCE = 0.5;
+
+/**
  * Words a camera or a file manager puts in front of a counter. `IMG_1` has a number beside a word
  * and is still not an address, so these are never promoted by adjacency.
  */
@@ -429,6 +436,7 @@ export function classifyTokensInSegment(
   }
 
   promoteStreetBesideHouseNumber(classified, segmentText);
+  weakenUncorroboratedPostcode(classified, segmentText);
 
   return classified;
 }
@@ -453,6 +461,38 @@ function promoteStreetBesideHouseNumber(classified: ClassifiedToken[], segmentTe
     return;
   }
   weak[0].confidence = ADJACENT_STREET_CONFIDENCE;
+}
+
+/**
+ * Is this number a postcode, or just a number? Within one segment two things say yes: the segment is
+ * nothing but the number (`AT/4780/…`), or a city stands next to it (`1160 Wien`). Everything else
+ * stays a candidate for the builder to corroborate against the PLZ table and the rest of the path.
+ * @see docs/specs/service/media-upload-service/upload-search-object.derivation-rules.md
+ */
+function weakenUncorroboratedPostcode(classified: ClassifiedToken[], segmentText: string): void {
+  const postcodes = classified.filter((token) => token.kind === 'postcode');
+  if (!postcodes.length) {
+    return;
+  }
+  const trimmedSegment = segmentText.trim();
+  const hasCityBeside = classified.some((token) => token.kind === 'city');
+  const hasStreetBeside = classified.some(
+    (token) => token.kind === 'street' && token.confidence >= UNCERTAIN_LOW,
+  );
+  for (const token of postcodes) {
+    const raw = token.raw.trim();
+    // `1160 Wien` reads as an address line from the city alone. With only a street, **position**
+    // decides: `1090 Mühlenstraße 12` opens with its postcode, while `Mühlenstraße 12 IMG_2137`
+    // ends with a camera counter. Without that distinction every camera number in an addressed
+    // file name became a postcode.
+    const corroborated =
+      trimmedSegment === raw ||
+      hasCityBeside ||
+      (hasStreetBeside && trimmedSegment.startsWith(raw));
+    if (!corroborated) {
+      token.confidence = UNCORROBORATED_POSTCODE_CONFIDENCE;
+    }
+  }
 }
 
 export function isAcceptedConfidence(confidence: number): boolean {

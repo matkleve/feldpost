@@ -54,6 +54,7 @@ spec-level — the spec says what the code does, so a fix needs a contract decis
 | [F-15](#f-15) | ~~A path carrying a complete address **twice** can yield an empty Search Object~~ **fixed** | High | **Spec** |
 | [F-16](#f-16) | ~~One held job in a resolved group holds every job in it, and stops the rest being placed~~ **fixed** | High | Code |
 | [F-17](#f-17) | A parked job keeps its content-hash reservation, so a later identical file is skipped as a duplicate of a file that was never uploaded | High | Code |
+| [F-18](#f-18) | ~~The shipped postcode table is a 21-row stub, and Wien was missing from the gazetteer~~ **gazetteer fixed; postcode table open** | High | Data |
 
 ---
 
@@ -673,6 +674,32 @@ settle check does not wait for (it watches phases, and a parked job looks settle
 its own change: decide whether parking releases the reservation, or whether the reservation is what
 resumes the duplicate later. Until then, **read run B's second skip as this artifact**, not as a second
 duplicate in the corpus.
+
+---
+
+### F-18 · The shipped postcode table is a 21-row stub, and Wien was missing from the gazetteer {#f-18}
+
+**What happens.** `at-plz.json` ships **21** postcodes. Austria has roughly 2 000. So every rule that
+depends on `postcode→city` — the expansion, the city corroboration, the conflict cross-check — works
+for a handful of cities and silently does nothing for the rest. `[A]` A folder named `1160` resolved to
+no city at all, not because the logic was missing but because the datum was.
+
+Separately, `at-gemeinden-bev.json` was built without **Wien** and **Klagenfurt** — statutory cities
+that the municipality register carries but the older build dropped. `[A]` `city→state` therefore failed
+for the largest city in the country, and `CITY_REGISTRY` masked it for `Wien` only.
+
+**Fix (gazetteer), 2026-09-13.** Re-running `scripts/build-at-gemeinden-bev.mjs --source=github` yields
+**2 118** municipalities, each carrying its federal state, including `Wien → Wien` and
+`Klagenfurt am Wörthersee → Kärnten`. `[A]` The script also now derives a **short-form alias** for names
+like `Klagenfurt am Wörthersee` → `Klagenfurt`, but only where the short form is unique across the
+whole list: `Zell` is a municipality in its own right and `Krems` is ambiguous between
+`Krems an der Donau` and `Krems in Kärnten`, so neither gets an alias. 202 aliases, zero collisions,
+verified against the built file. `[A]`
+
+**Open: the postcode table.** Still 21 rows. Austria Post publishes the full list; it needs a build
+script of its own, like the gazetteer's. Until then `postcode→city` covers 21 postcodes and the
+[corroboration rules](../specs/service/media-upload-service/upload-search-object.derivation-rules.md)
+carry the rest — a postcode that is a whole folder segment is accepted without the table.
 
 ---
 

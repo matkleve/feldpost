@@ -307,6 +307,7 @@ each measured on the same 500 paths:
 | exact before fuzzy (F-02) | 391 | 269 (69 %) | 166 | 0 | 277 |
 | country derived from the place (F-03) | 442 | 237 (54 %) | 214 | 0 | 229 |
 | evidence model (F-04, F-11) | 410 | 191 (47 %) | 230 | 0 | 128 |
+| derivation rules (F-18) | 402 | 183 (46 %) | 224 | 16 | 128 |
 
 The last row also reports `incomplete=75`: groups whose path contains no address at all. They used to
 open a `layer_package` tray asking which meaningless string was the street.

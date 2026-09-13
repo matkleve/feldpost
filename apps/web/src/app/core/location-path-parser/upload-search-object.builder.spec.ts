@@ -474,3 +474,98 @@ describe('buildSearchObjectFromRelativePath — value origin', () => {
     expect(so.sources.find((entry) => entry.field === 'city')?.rule).toBe('postcode→city');
   });
 });
+
+// ── Is that number a postcode? · derived state · implausible postcode ─────────
+// @see docs/specs/service/media-upload-service/upload-search-object.derivation-rules.md
+const geoCorroboration = {
+  states: [
+    { n: 'Tirol', a: [] },
+    { n: 'Niederösterreich', a: [] },
+    { n: 'Wien', a: [] },
+  ],
+  municipalities: [
+    { n: 'Wien', b: 'Wien', a: [] },
+    { n: 'Mödling', b: 'Niederösterreich', a: [] },
+    { n: 'Innsbruck', b: 'Tirol', a: [] },
+  ],
+  postcodeMap: { '1090': ['Wien'] },
+};
+
+describe('buildSearchObjectFromRelativePath — postcode corroboration and derivation', () => {
+  it('takes a postcode that is a whole folder segment', () => {
+    const so = buildSearchObjectFromRelativePath(
+      'AT/4780/Passauer Straße 5/IMG_1.jpg',
+      'IMG_1.jpg',
+      geoCorroboration,
+    );
+
+    expect(so.postcode).toBe('4780');
+  });
+
+  it('ignores a number buried in a folder segment with other words', () => {
+    const so = buildSearchObjectFromRelativePath(
+      'AT/Baustelle 4780/Passauer Straße 5/IMG_1.jpg',
+      'IMG_1.jpg',
+      geoCorroboration,
+    );
+
+    expect(so.postcode).toBeNull();
+    expect(so.sources.some((entry) => entry.field === 'postcode')).toBe(true);
+  });
+
+  it('takes a postcode that stands next to its city in one segment', () => {
+    const so = buildSearchObjectFromRelativePath(
+      'Mödling/Wilhelminenstraße 141/Wilhelminenstr 141, 1160 Wien.jpg',
+      'Wilhelminenstr 141, 1160 Wien.jpg',
+      geoCorroboration,
+    );
+
+    expect(so.postcode).toBe('1160');
+  });
+
+  it('derives the state from the city', () => {
+    const so = buildSearchObjectFromRelativePath(
+      'Mödling/Wilhelminenstraße 141/IMG_1.jpg',
+      'IMG_1.jpg',
+      geoCorroboration,
+    );
+
+    expect(so.state).toBe('Niederösterreich');
+    const state = so.areaEvidence?.state?.[0];
+    expect(state?.origin).toBe('derived');
+    expect(state?.rule).toBe('city→state');
+    expect(state?.derivedFrom).toBe('Mödling');
+  });
+
+});
+
+describe('buildSearchObjectFromRelativePath — postcode plausibility against the state', () => {
+  const geoAt = {
+    states: [
+      { n: 'Tirol', a: [] },
+      { n: 'Oberösterreich', a: [] },
+    ],
+    municipalities: [{ n: 'Innsbruck', b: 'Tirol', a: [] }],
+    postcodeMap: { '1090': ['Wien'] },
+  };
+
+  it('asks when a postcode cannot belong to the state in the path', () => {
+    const so = buildSearchObjectFromRelativePath(
+      'AT/Tirol/1090/Museumstraße 1/IMG_1.jpg',
+      'IMG_1.jpg',
+      geoAt,
+    );
+
+    expect(so.areaConflicts?.some((conflict) => conflict.field === 'postcode')).toBe(true);
+  });
+
+  it('stays quiet for a border postcode that looks wrong but is not', () => {
+    const so = buildSearchObjectFromRelativePath(
+      'AT/Oberösterreich/5280/Stadtplatz 1/IMG_1.jpg',
+      'IMG_1.jpg',
+      geoAt,
+    );
+
+    expect(so.areaConflicts ?? []).toEqual([]);
+  });
+});

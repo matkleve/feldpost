@@ -180,11 +180,44 @@ function dedupeRecords(records) {
   return [...byKey.values()].sort((a, b) => a.n.localeCompare(b.n, 'de'));
 }
 
+/**
+ * Short-form alias for names like `Klagenfurt am Wörthersee` → `Klagenfurt`.
+ *
+ * Folder names use the everyday short form, but the official register carries the long one, so
+ * `Klagenfurt/IMG_1.jpg` matched nothing. The alias is added **only when the short form is unique**
+ * across the whole list: `Zell am See`, `Zell am Ziller` and `Zell an der Pram` all shorten to
+ * `Zell`, and `Krems an der Donau` collides with `Krems in Kärnten`, so those keep the long name
+ * only. An ambiguous alias would be a wrong answer instead of no answer.
+ */
+const SHORT_FORM_RE = /\s+(?:an der|an dem|am|im|in der|in dem|in|bei|ob der|auf der|vor der)\s+\S.*$/u;
+
+function addUniqueShortFormAliases(records) {
+  const fullNames = new Set(records.map((record) => record.n.toLowerCase()));
+  const shortCounts = new Map();
+  for (const record of records) {
+    const short = record.n.replace(SHORT_FORM_RE, '').trim();
+    if (short && short !== record.n) {
+      shortCounts.set(short.toLowerCase(), (shortCounts.get(short.toLowerCase()) ?? 0) + 1);
+    }
+  }
+  let added = 0;
+  for (const record of records) {
+    const short = record.n.replace(SHORT_FORM_RE, '').trim();
+    const key = short.toLowerCase();
+    if (!short || short === record.n) continue;
+    if (shortCounts.get(key) !== 1 || fullNames.has(key)) continue;
+    record.a = [...new Set([...(record.a ?? []), short])];
+    added += 1;
+  }
+  return added;
+}
+
 async function main() {
   const records =
     source === 'github' ? await fetchFromGithub() : await fetchFromStatistik(vintage);
 
   const slim = dedupeRecords(records);
+  const aliasCount = addUniqueShortFormAliases(slim);
   const json = JSON.stringify(slim);
   const bytes = Buffer.byteLength(json, 'utf8');
 
@@ -198,7 +231,9 @@ async function main() {
   }
 
   writeFileSync(OUT_PATH, json);
-  console.log(`Wrote ${slim.length} municipalities → ${OUT_PATH} (${bytes} bytes)`);
+  console.log(
+    `Wrote ${slim.length} municipalities → ${OUT_PATH} (${bytes} bytes, ${aliasCount} short-form aliases)`,
+  );
 }
 
 main().catch((error) => {

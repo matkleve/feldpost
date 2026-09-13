@@ -14,6 +14,7 @@ import type {
 } from '../upload/address-resolution/upload-area-evidence.types';
 import {
   collapseAreaFlatFields,
+  corroborateAreaEvidence,
   detectAreaConflicts,
 } from './upload-area-evidence.helpers';
 import type { GemeindeRecord, PlzMap } from './local-geo-data.adapter';
@@ -182,8 +183,12 @@ function applyTokenToFields(
   // A leftover word scores 0.5 as a street candidate. It stays in `sources` as evidence — a tray may
   // still show it — but it never becomes the flat street, and so never concatenates onto a real one.
   // @see docs/specs/service/media-upload-service/upload-search-object.evidence-model.md
-  const weakStreet = key === 'street' && token.confidence < STREET_LEVEL_MIN_CONFIDENCE;
-  if (!mayTokenWriteField(key, token, weakStreet, allowAddressFields, allowNumericAreaFields)) {
+  // Street and postcode both have a below-floor form that is still evidence: a leftover word, and a
+  // number nothing corroborates. Both are recorded and neither reaches the flat view.
+  // @see docs/specs/service/media-upload-service/upload-search-object.derivation-rules.md
+  const weakValue =
+    (key === 'street' || key === 'postcode') && token.confidence < STREET_LEVEL_MIN_CONFIDENCE;
+  if (!mayTokenWriteField(key, token, weakValue, allowAddressFields, allowNumericAreaFields)) {
     return;
   }
 
@@ -195,7 +200,7 @@ function applyTokenToFields(
     });
   }
 
-  if (!weakStreet) {
+  if (!weakValue) {
     writeFieldValue(fields, key, token.value);
   }
 
@@ -212,7 +217,7 @@ function applyTokenToFields(
     uncertainFields.add(key);
   }
 
-  recordAreaEvidence(areaEvidence, key, token, level, source);
+  recordAreaEvidence(areaEvidence, key, token, level, source, weakValue);
 }
 
 /** Street fragments of one real street join; every other field is replaced. */
@@ -231,6 +236,7 @@ function recordAreaEvidence(
   token: ClassifiedToken,
   level: number,
   source: 'folder' | 'filename',
+  weak: boolean,
 ): void {
   if (!AREA_FIELD_KEYS.includes(key as AreaFieldKey) || !token.value) {
     return;
@@ -242,6 +248,7 @@ function recordAreaEvidence(
     value: token.value,
     source,
     field: areaKey,
+    ...(weak ? { weak: true } : {}),
     ...(token.derived
       ? { origin: 'derived' as const, rule: PLACE_TO_COUNTRY_RULE, derivedFrom: token.raw }
       : { origin: 'path' as const }),
@@ -253,11 +260,11 @@ function recordAreaEvidence(
 function mayTokenWriteField(
   key: keyof SoFields,
   token: ClassifiedToken,
-  weakStreet: boolean,
+  weakValue: boolean,
   allowAddressFields: boolean,
   allowNumericAreaFields: boolean,
 ): boolean {
-  if (token.confidence < STREET_LEVEL_MIN_CONFIDENCE && !weakStreet) {
+  if (token.confidence < STREET_LEVEL_MIN_CONFIDENCE && !weakValue) {
     return false;
   }
   if (!allowAddressFields && STREET_LEVEL_KINDS.has(token.kind)) {
@@ -528,6 +535,11 @@ export function buildSearchObjectFromRelativePath(
       areaEvidence,
     );
   }
+
+  corroborateAreaEvidence(areaEvidence, {
+    municipalities: geo.municipalities,
+    postcodeMap: geo.postcodeMap,
+  });
 
   const areaConflicts = detectAreaConflicts(areaEvidence, {
     municipalities: geo.municipalities,
