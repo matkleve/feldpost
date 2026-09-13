@@ -28,6 +28,18 @@ carries everything needed** — its `address.city` corroborates which candidate 
 `address.house_number` (checked, not assumed — see below) confirms the number, and its `lat`/`lng` *is*
 the final placement. When Tier 1 succeeds there is no second geocode call for this group at all.
 
+This also resolves strictly *more* ties than Tier 2 alone could — not just faster. A bare street name
+common to both candidates (`Hauptstraße`) would still tie in Tier 2; the specific house number can
+break that tie (`Hauptstraße 18` exists only in one of them) even when the street name by itself
+doesn't discriminate.
+
+**Writing the auto-resolve without a redundant second geocode.** A Tier 1 (or Tier 2) auto-resolve must
+write the group directly into the same `resolved` shape `runGeocodeForGroup` produces — `status:
+'resolved'`, `candidate` built from the corroborating hit — not merely patch `so.city` and fall through
+to `needsGeocode`, which would silently re-run Branch A from scratch and throw away the coordinates
+already in hand. "No second call needed" is a property of the state transition, not just of having
+made one good query; get this wrong and the call still happens twice.
+
 **Tier 2 — bare street, no house number.** Only tried when Tier 1 comes back with zero hits: a
 brand-new building on an already-mapped street is exactly this product's other common case, and would
 otherwise be mistaken for "the street doesn't exist anywhere." `geocoding.searchStructuredForward({
@@ -116,8 +128,23 @@ not make.
 ## Cost
 
 `needsAreaResolution` is a synchronous, local, offline decision today — this is the first network
-call on that path. One geocoder round-trip per C3 group (not per candidate), cached the same way
-`searchStructuredForward` already caches everything else.
+call on that path. One geocoder round-trip per C3 group (not per candidate; up to two on the Tier
+1→2 fallback), cached the same way `searchStructuredForward` already caches everything else.
+
+Two costs that need a number, not just an acknowledgement, before this is built:
+
+- **The result cap can hide a real tie.** `searchStructuredForward`'s default `limit` is **10**
+  (`geocodeSearchDefaultLimit`). A street common enough to exist in more than 10 towns could have both
+  C3 candidates fall outside the first page, producing a false "clean single match" from whichever
+  unrelated city happened to rank in the top 10. This corroboration query must pass an explicit,
+  higher `limit` of its own — the shared default is tuned for a normal geocode, not for "enumerate
+  every place this street exists."
+- **Without Photon configured, this serializes on Nominatim's rate limit.** `usePhotonForward` is
+  conditional on `GEOCODER_FORWARD_URL`; without it, every `structured-forward`/`structured-search`
+  call — this one included — falls back to Nominatim, capped at one request per **1.1 s**, serialized
+  across the whole batch (`rateLimitNominatim`). A re-import with many folder-naming inconsistencies
+  (many C3 groups in one batch) would add real, serial seconds-to-minutes of latency in that
+  configuration, not "one extra call."
 
 ## Scope
 
