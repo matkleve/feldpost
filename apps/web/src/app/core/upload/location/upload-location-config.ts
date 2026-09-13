@@ -61,6 +61,13 @@ export interface UploadLocationConfig {
   filenameTrailingArtifactMinDigits: number;
   filenameTrailingArtifactMaxDigits: number;
   geocodeSearchDefaultLimit: number;
+  /**
+   * D-11 street corroboration pre-check (admin_level_conflict/C3): explicit, higher-than-default
+   * result cap so a street common enough to exist in many towns doesn't have both C3 candidates
+   * fall outside the page and produce a false single-match.
+   * @see docs/specs/service/media-upload-service/contradiction-resolution-model.c3-street-corroboration.supplement.md#cost
+   */
+  streetCorroborationSearchLimit: number;
 }
 
 export const DEFAULT_UPLOAD_LOCATION_CONFIG: UploadLocationConfig = {
@@ -102,4 +109,5 @@ export const DEFAULT_UPLOAD_LOCATION_CONFIG: UploadLocationConfig = {
   filenameTrailingArtifactMinDigits: 3,
   filenameTrailingArtifactMaxDigits: 6,
   geocodeSearchDefaultLimit: 10,
+  streetCorroborationSearchLimit: 50,
 };

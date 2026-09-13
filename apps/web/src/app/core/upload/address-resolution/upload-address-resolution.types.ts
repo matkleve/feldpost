@@ -127,4 +127,10 @@ export interface UploadGroupResolutionState {
   resolvedFromAdminConflict?: boolean;
   /** Photon 0-hit after admin resolution — open validation tray instead of silent partial. */
   containmentCheck?: boolean;
+  /**
+   * D-11 street corroboration found a single, non-candidate city the street exists in — added as
+   * an extra `admin_level_conflict` tray option, ranked below the folder's own candidates.
+   * @see docs/specs/service/media-upload-service/contradiction-resolution-model.c3-street-corroboration.supplement.md
+   */
+  suggestedAreaCandidate?: { id: string; addressLabel: string };
 }

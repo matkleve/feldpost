@@ -5,6 +5,7 @@
 
 import { Injectable, Injector, inject } from '@angular/core';
 import { GeocodingService } from '../../geocoding/geocoding.service';
+import type { GeocoderSearchResult } from '../../geocoding/geocoding.service';
 import { LocalGeoDataAdapter } from '../../location-path-parser/local-geo-data.adapter';
 import {
   detectPackageConflicts,
@@ -13,11 +14,16 @@ import {
 } from '../../location-path-parser/upload-search-object.layer-map';
 import { UploadAddressResolutionOrchestrator } from '../address-resolution/upload-address-resolution.orchestrator';
 import { UploadJobStateService } from '../support/upload-job-state.service';
+import { UploadLocationConfigService } from './upload-location-config.service';
 import { UploadLocationDisambiguationStoreService } from './upload-location-disambiguation-store.service';
 import { UploadLocationResolutionService } from './upload-location-resolution.service';
-import type { UploadGroupResolutionState } from '../address-resolution/upload-address-resolution.types';
+import type {
+  UploadGroupResolutionState,
+  UploadSearchObject,
+} from '../address-resolution/upload-address-resolution.types';
 import {
   buildDisambiguationQueryKey,
+  mapGeocoderHitsToCandidates,
   pickCollapseStage,
   pickDiscriminatingField,
 } from './upload-location-resolution.helpers';
@@ -30,6 +36,12 @@ import {
   buildAdminConflictCandidates,
   parseAdminLevelCandidateId,
 } from './upload-location-area-choice.util';
+import {
+  analyzeStreetCorroborationHits,
+  buildSuggestedCityCandidate,
+  pickStreetCorroborationPinHit,
+  writeStreetCorroboratedCity,
+} from './upload-location-street-corroboration.helpers';
 import {
   bucketLayerPackageJobsByGroupingKey,
   resolveLayerPackageJobs,
@@ -48,6 +60,7 @@ export class UploadLocationTrayFlowService {
   private readonly orchestrator = inject(UploadAddressResolutionOrchestrator);
   private readonly jobState = inject(UploadJobStateService);
   private readonly geoData = inject(LocalGeoDataAdapter);
+  private readonly locationConfig = inject(UploadLocationConfigService);
   private readonly disambiguationStore = inject(UploadLocationDisambiguationStoreService);
   private readonly injector = inject(Injector);
 
@@ -84,8 +97,8 @@ export class UploadLocationTrayFlowService {
    * Register layer_package trays after classifyBatch — before Photon.
    * @see docs/specs/service/media-upload-service/upload-search-object.layer-map.md#tray-registration
    */
-  registerLayerPackageGroupsAfterClassify(batchId: string): void {
-    this.registerAreaConflictGroupsAfterClassify(batchId);
+  async registerLayerPackageGroupsAfterClassify(batchId: string): Promise<void> {
+    await this.registerAreaConflictGroupsAfterClassify(batchId);
     const states = this.orchestrator
       .listGroupStates(batchId)
       .filter((s) => s.status === 'needsLayerResolution');
@@ -94,12 +107,22 @@ export class UploadLocationTrayFlowService {
     }
   }
 
-  registerAreaConflictGroupsAfterClassify(batchId: string): void {
+  /**
+   * D-11: before each `needsAreaResolution` group opens its tray, check whether the street named
+   * in the path corroborates one of the candidate cities — auto-resolving or adding a suggested
+   * option when it does.
+   * @see docs/specs/service/media-upload-service/contradiction-resolution-model.c3-street-corroboration.supplement.md
+   */
+  async registerAreaConflictGroupsAfterClassify(batchId: string): Promise<void> {
     const states = this.orchestrator
       .listGroupStates(batchId)
       .filter((s) => s.status === 'needsAreaResolution');
     for (const state of states) {
-      this.registerAreaConflictGroup(batchId, state);
+      await this.corroborateStreetBeforeAreaTray(batchId, state);
+      const current = this.orchestrator.getGroupState(batchId, state.groupingKey);
+      if (current?.status === 'needsAreaResolution') {
+        this.registerAreaConflictGroup(batchId, current);
+      }
     }
   }
 
@@ -112,6 +135,9 @@ export class UploadLocationTrayFlowService {
       lat: 0,
       lng: 0,
     }));
+    if (state.suggestedAreaCandidate) {
+      candidates.push({ ...state.suggestedAreaCandidate, lat: 0, lng: 0 });
+    }
     this.resolution().registerDisambiguationGroup({
       batchId,
       queryKey,
@@ -122,6 +148,184 @@ export class UploadLocationTrayFlowService {
       disambiguationKind: 'admin_level_conflict',
       areaConflicts: conflicts,
     });
+  }
+
+  /**
+   * "A hit is not corroboration": run the two-tier street query and act only on what the hits'
+   * own address components say. Tier 1 embeds the house number when the Search Object has one —
+   * a clean single-city result there already carries the final coordinates, so this writes
+   * `resolved` directly and skips a second geocode. Tier 2 (bare street) only runs when Tier 1
+   * came back empty, and only corroborates the city — the precise pin still comes from the normal
+   * geocode that runs afterward.
+   */
+  private async corroborateStreetBeforeAreaTray(
+    batchId: string,
+    state: UploadGroupResolutionState,
+  ): Promise<void> {
+    const so = state.searchObject;
+    const street = so.street?.trim();
+    if (!street) {
+      return;
+    }
+    const conflicts = state.areaConflicts ?? so.areaConflicts ?? [];
+    const cityConflict = conflicts.length === 1 ? conflicts.find((c) => c.field === 'city') : undefined;
+    if (!cityConflict) {
+      return;
+    }
+    // `detectAreaConflicts` can merge a cross-field entry (e.g. a derived `state` value) into a
+    // `city` conflict's own entries for tray display — those aren't city-name candidates to ask
+    // the geocoder about, so only the entries that are themselves city evidence count here.
+    const candidateCities = [
+      ...new Set(
+        cityConflict.entries
+          .filter((e) => e.field === 'city')
+          .map((e) => e.value.trim())
+          .filter(Boolean),
+      ),
+    ];
+    if (candidateCities.length < 2) {
+      return;
+    }
+
+    const config = this.locationConfig.getConfig();
+    const countryCode = (
+      so.country?.trim() ||
+      config.defaultGeocodeCountry ||
+      'AT'
+    ).toLowerCase();
+    const limit = config.streetCorroborationSearchLimit;
+    const hasHouseNumber = !!so.houseNumber?.trim();
+
+    const tier1Street = hasHouseNumber ? `${street} ${so.houseNumber!.trim()}` : street;
+    let hits = await this.geocoding.searchStructuredForward(
+      { street: tier1Street, countryCode },
+      { limit, countrycodes: [countryCode] },
+    );
+    let corroboratesPinToo = hasHouseNumber;
+
+    if (!hits.length && hasHouseNumber) {
+      hits = await this.geocoding.searchStructuredForward(
+        { street, countryCode },
+        { limit, countrycodes: [countryCode] },
+      );
+      corroboratesPinToo = false;
+    }
+    if (!hits.length) {
+      return;
+    }
+
+    const outcome = analyzeStreetCorroborationHits(hits, candidateCities);
+    if (outcome.kind === 'none') {
+      return;
+    }
+    if (outcome.kind === 'suggest') {
+      this.orchestrator.patchGroupState(batchId, {
+        ...state,
+        suggestedAreaCandidate: buildSuggestedCityCandidate(outcome.city, candidateCities),
+      });
+      return;
+    }
+
+    if (corroboratesPinToo) {
+      const pin = pickStreetCorroborationPinHit(outcome.matchingHits, so.houseNumber);
+      await this.autoResolveAreaConflictWithPin(batchId, state, outcome.city, street, pin);
+    } else {
+      await this.autoResolveAreaConflictCityOnly(batchId, state, outcome.city, street);
+    }
+  }
+
+  /** Tier 1 auto-resolve: the corroborating hit already carries coordinates and house number. */
+  private async autoResolveAreaConflictWithPin(
+    batchId: string,
+    state: UploadGroupResolutionState,
+    city: string,
+    street: string,
+    hit: GeocoderSearchResult,
+  ): Promise<void> {
+    const geoFull = await this.loadGeoData();
+    const resolvedSo = writeStreetCorroboratedCity(state.searchObject, city, street, geoFull);
+    if (resolvedSo.areaConflicts?.length) {
+      this.cascadeAreaConflict(batchId, state, resolvedSo);
+      return;
+    }
+    const candidate = mapGeocoderHitsToCandidates([hit])[0];
+    this.applyAreaCorroborationResolution(batchId, state, {
+      status: 'resolved',
+      groupingKey: resolvedSo.groupingKey,
+      jobIds: state.jobIds,
+      searchObject: resolvedSo,
+      folderDisplayPath: state.folderDisplayPath,
+      titleAddressLabel: state.titleAddressLabel,
+      geocodeBranch: 'street_locality',
+      candidate,
+      resolvedFromAdminConflict: true,
+    });
+  }
+
+  /** Tier 2 (or Tier 1 without a house number) auto-resolve: city only — geocode runs after. */
+  private async autoResolveAreaConflictCityOnly(
+    batchId: string,
+    state: UploadGroupResolutionState,
+    city: string,
+    street: string,
+  ): Promise<void> {
+    const geoFull = await this.loadGeoData();
+    const resolvedSo = writeStreetCorroboratedCity(state.searchObject, city, street, geoFull);
+    if (resolvedSo.areaConflicts?.length) {
+      this.cascadeAreaConflict(batchId, state, resolvedSo);
+      return;
+    }
+    this.applyAreaCorroborationResolution(batchId, state, {
+      status: 'needsGeocode',
+      groupingKey: resolvedSo.groupingKey,
+      jobIds: state.jobIds,
+      searchObject: resolvedSo,
+      folderDisplayPath: state.folderDisplayPath,
+      titleAddressLabel: state.titleAddressLabel,
+      geocodeBranch: 'street_locality',
+      resolvedFromAdminConflict: true,
+    });
+  }
+
+  /**
+   * Settling the city can surface a different, previously-masked conflict (typically a stale
+   * cross-field `state` derivation from the rejected candidate city) — the same thing a manual
+   * tray answer already cascades into (`applyAreaConflictChoice`'s `stillConflicted` branch).
+   * That residual conflict is out of D-11's own scope (city-vs-city only, for now), so it opens
+   * as a plain tray rather than attempting a second round of corroboration.
+   */
+  private cascadeAreaConflict(
+    batchId: string,
+    oldState: UploadGroupResolutionState,
+    resolvedSo: UploadSearchObject,
+  ): void {
+    const nextConflicts = resolvedSo.areaConflicts ?? [];
+    const nextKey = buildAdminConflictQueryKey(buildAdminConflictSignature(nextConflicts));
+    const cascadedState: UploadGroupResolutionState = {
+      status: 'needsAreaResolution',
+      groupingKey: nextKey,
+      jobIds: oldState.jobIds,
+      searchObject: resolvedSo,
+      folderDisplayPath: oldState.folderDisplayPath,
+      titleAddressLabel: oldState.titleAddressLabel,
+      areaConflictQueryKey: nextKey,
+      areaConflicts: nextConflicts,
+    };
+    this.applyAreaCorroborationResolution(batchId, oldState, cascadedState);
+    this.registerAreaConflictGroup(batchId, cascadedState);
+  }
+
+  private applyAreaCorroborationResolution(
+    batchId: string,
+    oldState: UploadGroupResolutionState,
+    newState: UploadGroupResolutionState,
+  ): void {
+    const oldKey = oldState.areaConflictQueryKey ?? oldState.groupingKey;
+    this.orchestrator.removeGroupState(batchId, oldKey);
+    this.orchestrator.patchGroupState(batchId, newState);
+    for (const jobId of newState.jobIds) {
+      this.jobState.updateJob(jobId, { groupingKey: newState.groupingKey });
+    }
   }
 
   registerContainmentCheckGroup(batchId: string, state: UploadGroupResolutionState): void {

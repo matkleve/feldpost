@@ -2,6 +2,10 @@
 
 > **Parent:** [contradiction-resolution-model.md](./contradiction-resolution-model.md) § Class C, gap **G6**
 > **Decision:** [STUDY-006 D-11](../../../study/006-upload-pipeline-correction-plan.md#d-11)
+> **Status:** built — `UploadLocationTrayFlowService.registerAreaConflictGroupsAfterClassify`
+> (`corroborateStreetBeforeAreaTray` and its helpers) in
+> `apps/web/src/app/core/upload/location/upload-location-tray-flow.service.ts`, decision logic in
+> `upload-location-street-corroboration.helpers.ts`.
 
 ## What It Is
 

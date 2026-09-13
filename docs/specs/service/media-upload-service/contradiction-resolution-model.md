@@ -161,7 +161,7 @@ This gate prevents the system from silently pushing a user's city choice through
 | **G3** | Post-resolution validation gate | After admin conflict resolution, Photon 0-hit on resolved `(street, city)` opens `containment_check` tray (`patchContainmentCheckOutcome`) instead of silent `partial`. | V1 | **Done** |
 | **G4** | Deferred resolution lifecycle | Skip must set an explicit `deferred` status that persists through upload and is actionable in Media Detail | Deferred contract | Medium |
 | **G5** | Cross-batch dedup for admin conflicts | Same `(field, conflicting-value-set)` across batches must reuse/merge, not open duplicate trays | Already documented in `address-resolution-model.md` | Medium |
-| **G6** | C3 pre-check: street corroboration | Query the conflicting street bare before opening a `city`-vs-`city` C3 tray; auto-resolve on a clean one-city split, still ask otherwise. [D-11](../../../study/006-upload-pipeline-correction-plan.md#d-11) | [C3 street-corroboration supplement](./contradiction-resolution-model.c3-street-corroboration.supplement.md) | **Open — decided, not built** |
+| **G6** | C3 pre-check: street corroboration | Query the conflicting street bare before opening a `city`-vs-`city` C3 tray; auto-resolve on a clean one-city split, still ask otherwise. [D-11](../../../study/006-upload-pipeline-correction-plan.md#d-11) | [C3 street-corroboration supplement](./contradiction-resolution-model.c3-street-corroboration.supplement.md) | **Done** |
 
 ---
 

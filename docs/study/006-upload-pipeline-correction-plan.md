@@ -23,7 +23,7 @@ corrected-by: none
 | [D-06](#d-06----is-the-test-gate-allowed-to-pass-while-compiling-nothing-f-09-f-10) | Can the `test` gate pass while compiling nothing? | Decided — built (`verify.mjs` evidence hook) |
 | [D-09](#d-09----may-exif-supply-a-house-number-open) | May EXIF supply a house number? | **Open** — recommendation given, no owner answer yet |
 | [D-10](#d-10) | Persist an area-only path, with no coordinates | Decided — **built and verified** ([F-19](./005-upload-pipeline-trace-findings.md#f-19)) |
-| [D-11](#d-11) | Corroborate a `city` conflict with the street before asking | Decided — **spec'd, not built** ([F-20](./005-upload-pipeline-trace-findings.md#f-20) found in passing) |
+| [D-11](#d-11) | Corroborate a `city` conflict with the street before asking | Decided — **built and verified** ([F-20](./005-upload-pipeline-trace-findings.md#f-20) found in passing, still open) |
 
 `status: proposed` means the study as a whole is not fully closed — D-09 is still open, and build
 status varies by row (table above). Per [`STUDY-FORMAT.md`](./STUDY-FORMAT.md) a `[D]` marks a
@@ -290,27 +290,40 @@ not a gap this decision needs to close.
 
 ---
 
-### D-11 (decided, not built) — Corroborate a `city` admin-level conflict with the street before asking {#d-11}
+### D-11 (decided, built) — Corroborate a `city` admin-level conflict with the street before asking {#d-11}
 
 The owner's question: `AT/Wien/Innsbruck/Maria-Theresien-Straße 18/` opens a **C3** tray
 (`admin_level_conflict` — two folder levels both look like a city) and asks every time, even when the
 street named in the path only exists in one of the two candidates. Could the pipeline check that
 first and skip the question when it's clean?
 
-**Decided: yes** — one geocoder query the pipeline already knows how to make (Branch C's own bare
-`{street, countryCode}` call, reused a step earlier), read the same way class A1 already reads it
-(the hit's own `address.city`, never just "did we get a result"), gated so it can only ever *add*
-information: write silently on a clean single match, **suggest** a match outside the candidate set
-without removing the folder's own guesses, and fall through to today's plain question on any tie,
-miss, or failed call. Never invents an answer from weak evidence.
+**Decided: yes, and built** — one geocoder query the pipeline already knew how to make (`street_only`'s
+own bare `{street, countryCode}` call, reused a step earlier via
+`UploadLocationTrayFlowService.registerAreaConflictGroupsAfterClassify`), read the same way class A1
+already reads it (the hit's own `address.city`, never just "did we get a result"), gated so it can
+only ever *add* information: write silently on a clean single match (`resolved` directly with the
+hit's own pin when the Search Object has a house number, `needsGeocode` when it doesn't — see the
+[supplement](../specs/service/media-upload-service/contradiction-resolution-model.c3-street-corroboration.supplement.md)),
+**suggest** a match outside the candidate set without removing the folder's own guesses
+(`suggestedAreaCandidate`), and fall through to today's plain question on any tie, miss, or failed
+call. Never invents an answer from weak evidence. Verified: unit tests on the pure decision logic
+(`upload-location-street-corroboration.helpers.spec.ts`), an integration suite exercising all six
+outcomes against the real `classifyBatch` pipeline (`upload-location-tray-flow.service.spec.ts`), and
+a clean run through the trace harness (both tiers correctly return zero hits and fall through to the
+plain tray for the synthetic stub gazetteer's hyphenated street name — see the trace playbook's
+"real vs mock" caveat on fuzzy matching).
 
 Two things worth flagging without re-deriving the whole mechanism here:
 - The **provenance** half of the ask (a visible "why" line) reuses infrastructure that already exists
   and nothing renders today — every derived field already carries `origin`/`rule`/`derivedFrom`, with
   zero UI consumers (verified by grep). This decision's rule (`street→city (corroboration)`) is simply
-  the first thing that needs it.
+  the first thing that needs it — still no UI consumer after this build, by design (out of scope here).
 - **Not decided**: whether this also applies to the symmetric `state` conflict (two folder levels
-  naming different Bundesländer) — plausible, not measured. Scoped to `city` for the first build.
+  naming different Bundesländer) — plausible, not measured. Scoped to `city` for this build. When
+  settling the city surfaces a *different*, residual conflict (typically a stale cross-field `state`
+  derivation from the rejected candidate city — the same thing a manual tray answer already cascades
+  into), the pre-check cascades to a plain tray for that new conflict rather than attempting a second
+  round of corroboration.
 
 Full mechanism, the two-tier query (house number embedded first, bare street as fallback for new
 construction), the tray-copy rules, and the worked examples all live in

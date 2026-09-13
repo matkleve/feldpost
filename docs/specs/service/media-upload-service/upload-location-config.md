@@ -91,6 +91,7 @@ Source of truth: `apps/web/src/app/core/upload/location/upload-location-config.t
 | `filenameTrailingArtifactMinDigits` | `number` | `3` | Lower bound for numeric trailing artifact stripping in filenames. |
 | `filenameTrailingArtifactMaxDigits` | `number` | `6` | Upper bound for numeric trailing artifact stripping in filenames. |
 | `geocodeSearchDefaultLimit` | `number` | `10` | Default forward-geocode result limit. |
+| `streetCorroborationSearchLimit` | `number` | `50` | D-11 street-corroboration pre-check result limit — higher than the default so a common street's C3 candidate cities don't fall off the first page. |
 
 ## State
 

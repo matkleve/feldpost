@@ -59,6 +59,10 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
     deferGroup: ReturnType<typeof vi.fn>;
     applyCandidateToGroup: ReturnType<typeof vi.fn>;
   };
+  let geocodingMock: {
+    searchStreetHouseNumbers: ReturnType<typeof vi.fn>;
+    searchStructuredForward: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     resolutionMock = {
@@ -67,6 +71,10 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
       applyPreResolveFromOrchestrator: vi.fn().mockResolvedValue('continue'),
       deferGroup: vi.fn(),
       applyCandidateToGroup: vi.fn(),
+    };
+    geocodingMock = {
+      searchStreetHouseNumbers: vi.fn().mockResolvedValue([]),
+      searchStructuredForward: vi.fn().mockResolvedValue([]),
     };
 
     TestBed.configureTestingModule({
@@ -77,10 +85,7 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
         UploadBatchService,
         UploadLocationDisambiguationStoreService,
         { provide: UploadLocationResolutionService, useValue: resolutionMock },
-        {
-          provide: GeocodingService,
-          useValue: { searchStreetHouseNumbers: vi.fn().mockResolvedValue([]) },
-        },
+        { provide: GeocodingService, useValue: geocodingMock },
         {
           provide: LocalGeoDataAdapter,
           useValue: {
@@ -276,6 +281,140 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
       expect(cascaded.areaConflictQueryKey).toContain('adminConflict|');
       expect(cascaded.areaConflictQueryKey).not.toMatch(/^adminConflict\|[a-z_]+(,[a-z_]+)*$/);
     }
+  });
+
+  describe('D-11: street corroboration pre-check', () => {
+    function hit(city: string, houseNumber?: string): {
+      lat: number;
+      lng: number;
+      displayName: string;
+      name: string | null;
+      importance: number;
+      address: { road?: string; house_number?: string; city?: string };
+    } {
+      return {
+        lat: 47.26,
+        lng: 11.39,
+        displayName: `Hauptstraße${houseNumber ? ` ${houseNumber}` : ''}, ${city}`,
+        name: 'Hauptstraße',
+        importance: 0.5,
+        address: { road: 'Hauptstraße', house_number: houseNumber, city },
+      };
+    }
+
+    it('Tier 1 (house number embedded) auto-resolves with the hit\'s own pin, no second geocode', async () => {
+      jobState.addJobs([buildJob({ relativePath: 'AT/Graz/Innsbruck/Hauptstraße 5/photo.jpg' })]);
+      await orchestrator.classifyBatch('batch-tray');
+      geocodingMock.searchStructuredForward.mockResolvedValueOnce([hit('Innsbruck', '5')]);
+
+      await trayFlow.registerAreaConflictGroupsAfterClassify('batch-tray');
+
+      expect(geocodingMock.searchStructuredForward).toHaveBeenCalledTimes(1);
+      const states = orchestrator.listGroupStates('batch-tray');
+      expect(states.some((s) => s.status === 'needsAreaResolution')).toBe(false);
+      const resolved = states.find((s) => s.status === 'resolved');
+      expect(resolved?.searchObject.city).toBe('Innsbruck');
+      expect(resolved?.candidate?.city).toBe('Innsbruck');
+      expect(resolved?.searchObject.areaEvidence?.city?.[0]?.origin).toBe('derived');
+      expect(resolutionMock.registerDisambiguationGroup).not.toHaveBeenCalled();
+    });
+
+    it('Tier 2 (bare street, no house number) corroborates the city only — geocode runs after', async () => {
+      jobState.addJobs([buildJob({ relativePath: 'AT/Graz/Innsbruck/Hauptstraße/photo.jpg' })]);
+      await orchestrator.classifyBatch('batch-tray');
+      geocodingMock.searchStructuredForward.mockResolvedValueOnce([hit('Innsbruck')]);
+
+      await trayFlow.registerAreaConflictGroupsAfterClassify('batch-tray');
+
+      expect(geocodingMock.searchStructuredForward).toHaveBeenCalledTimes(1);
+      const states = orchestrator.listGroupStates('batch-tray');
+      expect(states.some((s) => s.status === 'needsAreaResolution')).toBe(false);
+      const needsGeocode = states.find((s) => s.status === 'needsGeocode');
+      expect(needsGeocode?.searchObject.city).toBe('Innsbruck');
+      expect(needsGeocode?.geocodeBranch).toBe('street_locality');
+      expect(resolutionMock.registerDisambiguationGroup).not.toHaveBeenCalled();
+    });
+
+    it('falls back to Tier 2 when Tier 1 (with house number) comes back with zero hits', async () => {
+      jobState.addJobs([buildJob({ relativePath: 'AT/Graz/Innsbruck/Hauptstraße 5/photo.jpg' })]);
+      await orchestrator.classifyBatch('batch-tray');
+      geocodingMock.searchStructuredForward
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([hit('Innsbruck')]);
+
+      await trayFlow.registerAreaConflictGroupsAfterClassify('batch-tray');
+
+      expect(geocodingMock.searchStructuredForward).toHaveBeenCalledTimes(2);
+      const needsGeocode = orchestrator
+        .listGroupStates('batch-tray')
+        .find((s) => s.status === 'needsGeocode');
+      expect(needsGeocode?.searchObject.city).toBe('Innsbruck');
+    });
+
+    it('suggests a non-candidate city as an extra tray option, ranked below the folder candidates', async () => {
+      jobState.addJobs([buildJob({ relativePath: 'AT/Graz/Innsbruck/Hauptstraße 5/photo.jpg' })]);
+      await orchestrator.classifyBatch('batch-tray');
+      geocodingMock.searchStructuredForward.mockResolvedValueOnce([hit('Salzburg', '5')]);
+
+      await trayFlow.registerAreaConflictGroupsAfterClassify('batch-tray');
+
+      const adminState = orchestrator
+        .listGroupStates('batch-tray')
+        .find((s) => s.status === 'needsAreaResolution');
+      expect(adminState?.suggestedAreaCandidate?.addressLabel).toContain('Salzburg');
+      expect(resolutionMock.registerDisambiguationGroup).toHaveBeenCalled();
+      const input = resolutionMock.registerDisambiguationGroup.mock.calls.at(-1)![0];
+      const suggested = input.candidates.at(-1);
+      expect(suggested.addressLabel).toBe(
+        'Salzburg — the street was found here, not in Graz or Innsbruck. Did you mean Salzburg?',
+      );
+      expect(
+        input.candidates
+          .slice(0, -1)
+          .every((c: { addressLabel: string }) => !c.addressLabel.includes('Did you mean')),
+      ).toBe(true);
+    });
+
+    it('a tie between both candidate cities changes nothing — plain tray as today', async () => {
+      jobState.addJobs([buildJob({ relativePath: 'AT/Graz/Innsbruck/Hauptstraße 5/photo.jpg' })]);
+      await orchestrator.classifyBatch('batch-tray');
+      geocodingMock.searchStructuredForward.mockResolvedValueOnce([
+        hit('Graz', '5'),
+        hit('Innsbruck', '5'),
+      ]);
+
+      await trayFlow.registerAreaConflictGroupsAfterClassify('batch-tray');
+
+      const adminState = orchestrator
+        .listGroupStates('batch-tray')
+        .find((s) => s.status === 'needsAreaResolution');
+      expect(adminState).toBeTruthy();
+      expect(adminState?.suggestedAreaCandidate).toBeUndefined();
+      expect(resolutionMock.registerDisambiguationGroup).toHaveBeenCalled();
+    });
+
+    it('zero hits at both tiers leaves the tray open, unchanged', async () => {
+      jobState.addJobs([buildJob({ relativePath: 'AT/Graz/Innsbruck/Hauptstraße 5/photo.jpg' })]);
+      await orchestrator.classifyBatch('batch-tray');
+      geocodingMock.searchStructuredForward.mockResolvedValue([]);
+
+      await trayFlow.registerAreaConflictGroupsAfterClassify('batch-tray');
+
+      expect(geocodingMock.searchStructuredForward).toHaveBeenCalledTimes(2);
+      expect(
+        orchestrator.listGroupStates('batch-tray').some((s) => s.status === 'needsAreaResolution'),
+      ).toBe(true);
+    });
+
+    it('a group with no street at all is left for the plain tray — nothing to corroborate', async () => {
+      jobState.addJobs([buildJob({ relativePath: 'AT/Graz/Innsbruck/photo.jpg' })]);
+      await orchestrator.classifyBatch('batch-tray');
+
+      await trayFlow.registerAreaConflictGroupsAfterClassify('batch-tray');
+
+      expect(geocodingMock.searchStructuredForward).not.toHaveBeenCalled();
+      expect(resolutionMock.registerDisambiguationGroup).toHaveBeenCalled();
+    });
   });
 
   it('G3: registerContainmentCheckGroup registers containment_check disambiguation', async () => {

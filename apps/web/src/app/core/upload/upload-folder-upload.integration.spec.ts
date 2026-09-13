@@ -394,23 +394,30 @@ describe('UploadManagerService — folder upload integration (SO → dedup → D
       await setup();
     const preResolve = TestBed.inject(UploadLocationPreResolveOrchestratorService);
 
-    fakeGeocoding.searchStructuredForward.mockResolvedValue([
-      {
-        lat: 47.2692,
-        lng: 11.4041,
-        displayName: 'Hauptstraße 5, Wien, Österreich',
-        name: 'Hauptstraße 5',
-        importance: 0.9,
-        address: {
-          road: 'Hauptstraße',
-          house_number: '5',
-          postcode: '1010',
-          city: 'Wien',
-          country: 'Österreich',
-          country_code: 'at',
+    // D-11's street-corroboration pre-check runs first (Tier 1 with house number, then Tier 2
+    // bare street): both return empty here so the admin_level_conflict tray still opens for a
+    // manual choice, exactly as it did before D-11 existed. Once the user resolves the conflict
+    // below, every later call (the real post-resolution geocode) gets the Wien hit.
+    fakeGeocoding.searchStructuredForward
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValue([
+        {
+          lat: 47.2692,
+          lng: 11.4041,
+          displayName: 'Hauptstraße 5, Wien, Österreich',
+          name: 'Hauptstraße 5',
+          importance: 0.9,
+          address: {
+            road: 'Hauptstraße',
+            house_number: '5',
+            postcode: '1010',
+            city: 'Wien',
+            country: 'Österreich',
+            country_code: 'at',
+          },
         },
-      },
-    ]);
+      ]);
 
     const entries: ScannedFileEntry[] = [
       {
@@ -429,7 +436,7 @@ describe('UploadManagerService — folder upload integration (SO → dedup → D
       expect(groups.length).toBe(1);
     });
 
-    expect(fakeGeocoding.searchStructuredForward).not.toHaveBeenCalled();
+    expect(fakeGeocoding.searchStructuredForward).toHaveBeenCalledTimes(2);
     expect(fakeGeocoding.searchStructuredForwardBias).not.toHaveBeenCalled();
 
     const group = locationResolution

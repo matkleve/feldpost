@@ -115,7 +115,7 @@ export function buildUploadManagerSubmitDeps(
     queuedLabel: phaseLabel('queued'),
     classifyBatch: async (batchId) => {
       await input.addressOrchestrator.classifyBatch(batchId);
-      input.locationResolution.registerLayerPackageGroupsAfterClassify(batchId);
+      await input.locationResolution.registerLayerPackageGroupsAfterClassify(batchId);
       const jobCount = input.jobState.jobs().filter((j) => j.batchId === batchId).length;
       input.preResolveWave.resetWave(batchId, jobCount);
     },
