@@ -8,13 +8,26 @@ corrected-by: none
 
 # Upload pipeline — decisions to take, and the plan to correct it
 
-**Written:** 2026-09-12 · **Branch:** `claude/uploader-pipeline-test-badges-kktrpg` at `650f495`
-**Findings this answers:** [STUDY-005](./005-upload-pipeline-trace-findings.md) F-01 … F-10.
+**Written:** 2026-09-12, updated 2026-09-13 · **Branch:** `claude/uploader-pipeline-test-badges-kktrpg`
+**Findings this answers:** [STUDY-005](./005-upload-pipeline-trace-findings.md) F-01 … F-20.
 
-`status: proposed` means **the study as a whole is not accepted**. Four of its six decisions were
-taken by the owner on 2026-09-12 (§ 0); two are still open, and the spec changes they imply have not
-landed, so the status stays `proposed` until they do. Per [`STUDY-FORMAT.md`](./STUDY-FORMAT.md) a
-`[D]` is a decision, not a fact — including the recommendations in § 1 that nobody has answered yet.
+## Status at a glance
+
+| | Question | Status |
+| --- | --- | --- |
+| [D-01](#d-01----may-a-file-name-write-an-admin-field-at-all-f-01) | May a filename write an admin field at all? | Decided (Option A′) — built |
+| [D-02](#d-02----what-is-the-confidence-floor-for-a-gazetteer-substitution-f-02) | Confidence floor for a gazetteer substitution | Decided as recommended — built |
+| [D-03](#d-03) | How is `country` established, without assuming one? | Re-derived, decided — built (`place→country`) |
+| [D-04](#d-04----what-is-the-import-mode-for-a-company-sized-archive-f-08-f-06-f-07) | Import mode for a company-sized archive | Decided (dedicated archive-import mode) — Phase 4, gated on Phase 3 |
+| [D-05](#d-05----should-locationrequirementmode-optional-skip-classification-entirely-f-05) | Does `optional` skip classification entirely? | Decided (spec wins) |
+| [D-06](#d-06----is-the-test-gate-allowed-to-pass-while-compiling-nothing-f-09-f-10) | Can the `test` gate pass while compiling nothing? | Decided — built (`verify.mjs` evidence hook) |
+| [D-09](#d-09----may-exif-supply-a-house-number-open) | May EXIF supply a house number? | **Open** — recommendation given, no owner answer yet |
+| [D-10](#d-10) | Persist an area-only path, with no coordinates | Decided — **built and verified** ([F-19](./005-upload-pipeline-trace-findings.md#f-19)) |
+| [D-11](#d-11) | Corroborate a `city` conflict with the street before asking | Decided — **spec'd, not built** ([F-20](./005-upload-pipeline-trace-findings.md#f-20) found in passing) |
+
+`status: proposed` means the study as a whole is not fully closed — D-09 is still open, and build
+status varies by row (table above). Per [`STUDY-FORMAT.md`](./STUDY-FORMAT.md) a `[D]` marks a
+decision, not a fact — including any recommendation nobody has answered yet.
 
 The upload pipeline is **Sensitive** class ([`AGENTS.md`](../../AGENTS.md) § Change Classification):
 every step below needs the full ceremony — ownership matrix, FSM tables where state changes,
@@ -277,63 +290,32 @@ not a gap this decision needs to close.
 
 ---
 
-### D-11 (decided) — Corroborate a `city` admin-level conflict with the street before asking {#d-11}
+### D-11 (decided, not built) — Corroborate a `city` admin-level conflict with the street before asking {#d-11}
 
 The owner's question: `AT/Wien/Innsbruck/Maria-Theresien-Straße 18/` opens a **C3** tray
 (`admin_level_conflict` — two folder levels both look like a city) and asks every time, even when the
 street named in the path only exists in one of the two candidates. Could the pipeline check that
 first and skip the question when it's clean?
 
-**Decided: yes, with two conditions that keep it from ever guessing.**
+**Decided: yes** — one geocoder query the pipeline already knows how to make (Branch C's own bare
+`{street, countryCode}` call, reused a step earlier), read the same way class A1 already reads it
+(the hit's own `address.city`, never just "did we get a result"), gated so it can only ever *add*
+information: write silently on a clean single match, **suggest** a match outside the candidate set
+without removing the folder's own guesses, and fall through to today's plain question on any tie,
+miss, or failed call. Never invents an answer from weak evidence.
 
-1. **It must actually verify, not just query.** A structured geocoder query (Photon's `/structured`,
-   Nominatim's structured `/search`) is a ranked search, not a strict filter — sending `street=X,
-   city=Y` and getting a non-empty result back is **not** proof `X` is in `Y`; both engines can return
-   their best-effort nearest match rather than nothing. The only trustworthy signal is what the hit's
-   **own** address components say. So the check queries the street **once, without a city constraint**
-   (`searchStructuredForward({ street, countryCode })` — no `city` param), and reads the `city`/`town`/
-   `village` field the geocoder put on each hit itself. This is exactly [class A1](../specs/service/media-upload-service/contradiction-resolution-model.md#class-a--ambiguity-one-source-multiple-valid-interpretations)'s
-   own mechanism (`pickDiscriminatingField`, `mapGeocoderHitsToCandidates`), run one step earlier —
-   A1 already asks "which city is `{street}` in?" when a bare street search comes back spanning more
-   than one city; this reuses the same query and the same city-extraction, just consulted **before**
-   opening the C3 tray instead of only after Branch C fails.
-2. **Auto-resolve only on a clean split — and when the clean answer is outside the candidate set,
-   suggest it instead of asking blind.** Compare the distinct cities the hits actually carry against
-   the C3 candidate set (`{Wien, Innsbruck}`, normalized the same way `detectAreaConflicts` already
-   normalizes admin values):
-   - **Exactly one candidate present, the other absent** → write it silently, no tray.
-   - **Exactly one city present and it's neither candidate** (the owner's own refinement, e.g. the
-     street turns out to be in Salzburg) → still open the tray, but add that city as an extra option
-     alongside `Wien`/`Innsbruck`, with the reason: *"Salzburg — the street was found here, not in
-     Wien or Innsbruck. Did you mean Salzburg?"* The tray's candidate list is already a plain
-     `{id, addressLabel}` array (`buildAdminConflictCandidates`) with a `"Manual"` free-text entry
-     already in it — a suggested city is one more entry of the same shape, not a new mechanism.
-   - **Both candidates present, more than one non-candidate city, or zero hits/a failed call** → no
-     single clean answer. Ask exactly as today, no addition.
-   A suggestion only ever *adds* an option — it never removes `Wien` or `Innsbruck` from the choices,
-   because real folder evidence (a private road, an informal name, a gazetteer gap) can still outrank
-   a geocoder that has never heard of the street.
+Two things worth flagging without re-deriving the whole mechanism here:
+- The **provenance** half of the ask (a visible "why" line) reuses infrastructure that already exists
+  and nothing renders today — every derived field already carries `origin`/`rule`/`derivedFrom`, with
+  zero UI consumers (verified by grep). This decision's rule (`street→city (corroboration)`) is simply
+  the first thing that needs it.
+- **Not decided**: whether this also applies to the symmetric `state` conflict (two folder levels
+  naming different Bundesländer) — plausible, not measured. Scoped to `city` for the first build.
 
-**Cost accepted**: `needsAreaResolution` is today a synchronous, local, offline decision — no network
-call happens before a C3 tray opens. This adds one geocoder round-trip on that path. A failed/timed-out
-lookup must fall back to asking (today's behavior), never to silence.
-
-**The second half of the ask — show why**: every derived field already carries `origin: 'derived'` +
-`rule` + `derivedFrom` (`FieldLevelEntry`, built during the derivation-rules work this week) and
-**nothing in the UI reads any of it today** — confirmed by grep, zero consumers. This decision adds
-its own named rule (`street→city (corroboration)`) to that same mechanism, and the visible "why" line
-the owner asked for (*"Maria-Theresien-Straße only in Innsbruck → city set."*) is the first real
-consumer of provenance that already exists for every other derived field, not a one-off for this case.
-Where exactly that line renders (tray copy at question time vs. a persistent note against the
-resolved item) is a UI decision, not specified here.
-
-**Not decided here**: whether this also applies to the symmetric `state` conflict (two folder levels
-naming different Bundesländer) — plausible, since states don't corroborate against a street any less
-than cities do, but not measured against a real scenario yet. Scoped to `city` conflicts for the first
-implementation; extending to `state` is a follow-up once this is proven.
-
-See [contradiction-resolution-model.c3-street-corroboration.supplement.md](../specs/service/media-upload-service/contradiction-resolution-model.c3-street-corroboration.supplement.md)
-for the mechanism spec.
+Full mechanism, the two-tier query (house number embedded first, bare street as fallback for new
+construction), the tray-copy rules, and the worked examples all live in
+[contradiction-resolution-model.c3-street-corroboration.supplement.md](../specs/service/media-upload-service/contradiction-resolution-model.c3-street-corroboration.supplement.md)
+— that file is the one to keep current; this entry should not repeat it.
 
 ## 2 · The plan
 
