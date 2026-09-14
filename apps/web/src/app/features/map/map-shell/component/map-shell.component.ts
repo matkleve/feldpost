@@ -2075,6 +2075,10 @@ export class MapShellComponent implements OnDestroy {
     }
   }
 
+  onSearchProjectFilterIdsChanged(projectIds: string[]): void {
+    this.workspaceViewService.setSelectedProjectIds(new Set(projectIds));
+  }
+
   onSearchMapCenterRequested(event: { lat: number; lng: number; label: string }): void {
     if (!this.map) return;
 

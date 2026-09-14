@@ -202,6 +202,20 @@ describe('MapShellComponent – search bar', () => {
     expect(fixture.componentInstance.searchPlacementActive()).toBe(true);
   });
 
+  it('onSearchProjectFilterIdsChanged() updates workspace project filters', () => {
+    const fixture = TestBed.createComponent(MapShellComponent);
+    fixture.detectChanges();
+
+    const workspaceView = TestBed.inject(WorkspaceViewService);
+    fixture.componentInstance.onSearchProjectFilterIdsChanged(['project-a', 'project-b']);
+
+    expect(Array.from(workspaceView.selectedProjectIds().values())).toEqual([
+      'project-a',
+      'project-b',
+    ]);
+    expect(fixture.componentInstance.searchQueryContext().activeProjectId).toBe('project-a');
+  });
+
   it('map click in search placement mode drops a search marker and exits the mode', () => {
     const fixture = TestBed.createComponent(MapShellComponent);
     fixture.detectChanges();
