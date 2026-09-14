@@ -21,6 +21,7 @@ import { ToastService } from '../../../core/toast/toast.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import type { ProjectListItem, ProjectColorKey } from '../../../core/projects/projects.types';
 import { ProjectColorPickerComponent } from '../../../features/projects/cards/project-color-picker.component';
+import { ProjectsConfirmDialogComponent } from '../../../features/projects/dialogs/projects-confirm-dialog.component';
 import { DropdownShellComponent } from '../../dropdown-trigger/shell/dropdown-shell.component';
 import { HlmMenuItemDirective } from '../../ui/menu';
 
@@ -37,6 +38,7 @@ export const DRAG_MEDIA_IDS_MIME = 'application/x-feldpost-media-ids';
     FormsModule,
     SlicePipe,
     ProjectColorPickerComponent,
+    ProjectsConfirmDialogComponent,
     DropdownShellComponent,
     HlmMenuItemDirective,
   ],
@@ -74,6 +76,8 @@ export class WorkspaceProjectsPanelComponent {
   readonly contextMenuOpen = signal(false);
   readonly contextMenuPosition = signal<{ x: number; y: number } | null>(null);
   readonly contextMenuProjectId = signal<string | null>(null);
+  readonly pendingDeleteProjectId = signal<string | null>(null);
+  readonly pendingDeleteBusy = signal(false);
 
   // Rename flow state for detail view
   readonly renameValue = signal('');
@@ -101,6 +105,9 @@ export class WorkspaceProjectsPanelComponent {
 
   readonly openProject = computed(() =>
     this.projects().find((p) => p.id === this.openProjectId()) ?? null,
+  );
+  readonly pendingDeleteProject = computed(() =>
+    this.projects().find((p) => p.id === this.pendingDeleteProjectId()) ?? null,
   );
 
   // Colour preview helper — kept in TS to stay consistent with ProjectColorPickerComponent
@@ -269,12 +276,56 @@ export class WorkspaceProjectsPanelComponent {
         this.backToList();
       }
     } else if (action === 'delete') {
-      const ok = await this.projectsService.deleteProject(projectId);
-      if (ok) {
-        this.projects.update((prev) => prev.filter((p) => p.id !== projectId));
-        this.backToList();
+      const project = this.projects().find((p) => p.id === projectId);
+      if (project?.status === 'archived') {
+        this.pendingDeleteProjectId.set(projectId);
       }
     }
+  }
+
+  cancelPendingDelete(): void {
+    if (this.pendingDeleteBusy()) return;
+    this.pendingDeleteProjectId.set(null);
+  }
+
+  async confirmPendingDelete(): Promise<void> {
+    const projectId = this.pendingDeleteProjectId();
+    if (!projectId) return;
+
+    this.pendingDeleteBusy.set(true);
+    const ok = await this.projectsService.deleteProject(projectId);
+    this.pendingDeleteBusy.set(false);
+
+    if (ok) {
+      this.projects.update((prev) => prev.filter((p) => p.id !== projectId));
+      this.pendingDeleteProjectId.set(null);
+      this.backToList();
+      return;
+    }
+
+    this.toastService.show({
+      message: this.t(
+        'projects.page.toast.deleteError',
+        'Could not delete archived project. Please try again.',
+      ),
+      type: 'error',
+    });
+  }
+
+  pendingDeleteTitle(): string {
+    return this.t('projects.page.pending.title.deleteArchived', 'Delete archived project?');
+  }
+
+  pendingDeleteMessage(): string {
+    const name = this.pendingDeleteProject()?.name ?? this.t('projects.page.pending.subject.thisProject', 'this project');
+    return this.t(
+      'projects.page.pending.message.delete',
+      '"{name}" will be permanently deleted for your organization.',
+    ).replace('{name}', name);
+  }
+
+  pendingDeleteConfirmLabel(): string {
+    return this.t('projects.page.pending.confirm.delete', 'Delete now');
   }
 
   // --- Context menu (right-click on project row) ---

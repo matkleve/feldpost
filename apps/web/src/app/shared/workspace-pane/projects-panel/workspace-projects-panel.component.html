@@ -244,19 +244,31 @@
             <span class="material-icons" aria-hidden="true">unarchive</span>
             {{ t('workspace.projects.panel.restore', 'Restore') }}
           </button>
+          <button
+            class="projects-panel-detail__action-btn projects-panel-detail__action-btn--danger"
+            type="button"
+            (click)="onDangerAction(project.id, 'delete')"
+          >
+            <span class="material-icons" aria-hidden="true">delete</span>
+            {{ t('workspace.projects.panel.delete', 'Delete') }}
+          </button>
         }
-        <button
-          class="projects-panel-detail__action-btn projects-panel-detail__action-btn--danger"
-          type="button"
-          (click)="onDangerAction(project.id, 'delete')"
-        >
-          <span class="material-icons" aria-hidden="true">delete</span>
-          {{ t('workspace.projects.panel.delete', 'Delete') }}
-        </button>
       </div>
     </div>
   }
 }
+
+<app-projects-confirm-dialog
+  [open]="pendingDeleteProjectId() !== null"
+  [title]="pendingDeleteTitle()"
+  [message]="pendingDeleteMessage()"
+  [confirmLabel]="pendingDeleteConfirmLabel()"
+  [cancelLabel]="t('common.cancel', 'Cancel')"
+  [busy]="pendingDeleteBusy()"
+  [danger]="true"
+  (cancel)="cancelPendingDelete()"
+  (confirm)="confirmPendingDelete()"
+/>
 
 <!-- Context menu for project row right-click -->
 @if (contextMenuOpen() && contextMenuPosition(); as pos) {
