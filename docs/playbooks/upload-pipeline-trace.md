@@ -315,6 +315,18 @@ open a `layer_package` tray asking which meaningless string was the street.
 The remaining tray load is folder shape (`layer_conflict`, F-04/F-11), not file naming. Re-run
 `--scale=2000` for figures comparable to the table above.
 
+**After Phase 3.2, 2026-09-15** (Fuse index cached per dataset), 2 000 paths, both naming modes:
+
+| | camera naming | neutral naming |
+| --- | --- | --- |
+| per file, before | 6.967 ms | 6.860 ms |
+| per file, after | **4.886 ms** | **4.912 ms** |
+| distinct groups | 1 483 (unchanged) | 1 483 (unchanged) |
+| groups needing a tray | 634 / 43 % (unchanged) | 634 / 43 % (unchanged) |
+
+A cost change only — the group and tray columns are identical on both sides, which is the check that
+the cache did not alter an answer.
+
 Job store, real `UploadJobStateService` — **before Phase 3.1** (`prev.map` per write):
 
 | Jobs held | `updateJob` | `findJob` | whole batch at 15 writes/job |
@@ -350,13 +362,17 @@ both **optimistic** bounds:
 - **A 100 000-file folder is not viable today.** Roughly **1.5 hours of synchronous main-thread
   work** before the upload is even done starting, and about **45 000 tray questions** for the user
   to answer. Neither number is a network limit; both are local CPU and UX.
-- **Classification: ~9 ms per file, and it is the fuzzy gazetteer.**
-  `path-token-classifier.ts:86` constructs `new Fuse(items, …)` **per candidate token**, then
-  searches 2 114 municipalities with `threshold: 0.4` over two keys. Measured separately: building
-  the index costs 1.06 ms, the search itself 2.75 ms. So caching the index buys ~30 %; the rest is
-  the fuzzy search, and a normalized exact-match map consulted before Fuse would remove it for the
-  overwhelming majority of tokens (a folder segment is usually either exactly a municipality or
-  nowhere near one).
+- **Classification: the fuzzy gazetteer — was ~9 ms per file, now ~4.9 ms.**
+  `classifyWithFuse` used to construct `new Fuse(items, …)` **per candidate token**, then search
+  2 114 municipalities with `threshold: 0.4` over two keys. Measured separately: building the index
+  cost 1.06 ms, the search itself 2.75 ms, so the prediction was that caching the index buys ~30 %.
+  Both halves have since landed — the normalized exact-match map consulted **before** Fuse (F-02,
+  which is a correctness rule first: `Wien` fuzzy-matched `Schottwien` at 0.992) and, in Phase 3.2,
+  the Fuse index memoized per dataset. Measured effect of the latter: **−29 %**, as predicted.
+  Contract in the
+  [gazetteer lookup supplement](../specs/service/media-upload-service/upload-search-object.gazetteer-lookup.supplement.md).
+  What is left is the fuzzy search itself, which is inherent; only a narrower candidate set removes
+  it.
 - **Job store: ~~`O(n)` per write, so `O(n²)` per batch~~ — fixed 2026-09-15.**
   `upload-job-state.service.ts` used to be `this._jobs.update((prev) => prev.map(...))`, so every
   single field write allocated a fresh array of every job in the batch, and `findJob` was a linear

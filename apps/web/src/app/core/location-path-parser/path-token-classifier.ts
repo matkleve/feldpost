@@ -146,6 +146,43 @@ function exactIndexFor<T extends { n: string; a?: string[] }>(items: T[]): Map<s
   return index;
 }
 
+/**
+ * Fuzzy index per dataset, keyed by the array itself — the same memoization as
+ * {@link exactIndexFor} and for the same reason. A `new Fuse(items, …)` per candidate token
+ * rebuilt the whole 2 114-entry index on every miss; construction alone measured 1.06 ms against
+ * 2.75 ms for the search it precedes.
+ *
+ * Correctness rests on the datasets being immutable once observed, which holds: they are imported
+ * JSON constants. Building here never changes an answer — the exact stage runs first and wins
+ * (F-02), and Fuse is deterministic for a given dataset and options.
+ * @see docs/specs/service/media-upload-service/upload-search-object.gazetteer-lookup.supplement.md
+ * @see docs/study/005-upload-pipeline-trace-findings.md F-06
+ */
+const fuseIndexCache = new WeakMap<object, Fuse<{ n: string; a?: string[] }>>();
+
+/**
+ * Exported for the guarantee test: "built once per dataset" is observable as "the same dataset
+ * returns the identical index object". Mocking the `fuse.js` module cannot show it — the Angular
+ * test builder bundles the dependency, so `vi.mock` does not intercept it and the count reads zero.
+ */
+export function fuseIndexFor<T extends { n: string; a?: string[] }>(items: T[]): Fuse<T> {
+  const cached = fuseIndexCache.get(items);
+  if (cached) {
+    return cached as Fuse<T>;
+  }
+  const fuse = new Fuse(items, {
+    keys: [
+      { name: 'n', weight: 0.7 },
+      { name: 'a', weight: 0.3 },
+    ],
+    threshold: 0.4,
+    includeScore: true,
+    ignoreLocation: true,
+  });
+  fuseIndexCache.set(items, fuse as Fuse<{ n: string; a?: string[] }>);
+  return fuse;
+}
+
 /** Minimum length difference tolerated before a fuzzy hit is treated as a different place. */
 const FUZZY_LENGTH_SLACK = 2;
 /** Above that, allow a quarter of the token's length. */
@@ -177,16 +214,7 @@ function classifyWithFuse<T extends { n: string; a?: string[] }>(
     return { raw: token, kind, value: exact, confidence: 1 };
   }
 
-  const fuse = new Fuse(items, {
-    keys: [
-      { name: 'n', weight: 0.7 },
-      { name: 'a', weight: 0.3 },
-    ],
-    threshold: 0.4,
-    includeScore: true,
-    ignoreLocation: true,
-  });
-  const results = fuse.search(token);
+  const results = fuseIndexFor(items).search(token);
   const top = results[0];
   if (!top?.item) {
     return null;

@@ -482,9 +482,24 @@ minutes. Full table in [F-07](./005-upload-pipeline-trace-findings.md#f-07). Lan
 before and after on both corpora, so this is a cost change only. Upload suite: 402 tests over 59
 files, up from 391.
 
-**3.2 is the next step.** Phase 4 stays blocked on 3.2 and 3.3 — 3.1 removed the per-write cost, but
-classification (F-06, ~9 ms/file) still blocks the first upload, and that is what an archive import
-would feel first.
+**3.2 is also done, 2026-09-15**, as a separate change — the note above says not to bundle them, and
+keeping them apart is what makes the 29 % attributable to one cause. Spec first again
+([gazetteer lookup supplement](../specs/service/media-upload-service/upload-search-object.gazetteer-lookup.supplement.md)),
+which states the two-stage lookup (exact wins, fuzzy only on a miss) and the five guarantees a cache
+must not break, then the red test, then the cache.
+
+`classifyWithFuse` built `new Fuse(items, …)` — the whole 2 114-entry municipality index — on **every
+token that missed the exact stage**. It is now memoized in a `WeakMap` keyed by the dataset array,
+exactly as the exact index already was. Measured on 2 000 generated paths, both naming modes:
+**6.97 / 6.86 → 4.89 / 4.91 ms per file (−29 %)**, with groups (1 483) and trays (634) unchanged.
+That is close to the ~30 % the earlier build-vs-search split predicted, which is the useful part: the
+prediction was testable and it held.
+
+**3.3 is the next step, and it is the one that matters most for an import.** 3.1 and 3.2 both reduced
+*cost*; neither touched *when* the cost is paid. `submitUploadManagerWebkitFolder` still awaits the
+whole `runClassifyBatchGuarded` before `drainQueue()`, so classification remains
+time-to-first-byte — at 4.9 ms/file that is still ~8 minutes of frozen main thread before a
+100 000-file import uploads anything. Phase 4 stays blocked on it.
 
 ### Phase 4 — The archive import mode (D-04, accepted)
 

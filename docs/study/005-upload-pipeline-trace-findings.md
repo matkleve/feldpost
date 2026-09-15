@@ -42,7 +42,7 @@ spec-level — the spec says what the code does, so a fix needs a contract decis
 | [F-03](#f-03) | ~~City classification requires an explicit country segment in the path~~ **fixed** | High | **Spec** |
 | [F-04](#f-04) | ~~Ordinary file names form competing street-level layer packages~~ **fixed** | Medium | Code |
 | [F-05](#f-05) | `locationRequirementMode: 'optional'` does not skip the address pipeline | Medium | **Spec** ↔ code |
-| [F-06](#f-06) | Classification costs ~9 ms/file and blocks the first upload | High | Code |
+| [F-06](#f-06) | Classification costs ~9 ms/file and blocks the first upload — **cost partly fixed**, blocking still open | High | Code |
 | [F-07](#f-07) | ~~The job store is `O(n)` per write, so a batch is `O(n²)`~~ **fixed** | High | Code |
 | [F-08](#f-08) | Tray volume scales linearly with the file count | High | **Spec** (product) |
 | [F-09](#f-09) | The `test` gate compiles nothing, so it runs no specs | Medium | Repo |
@@ -287,6 +287,20 @@ work is synchronous on the main thread.
 
 **Extrapolated** at the measured rate, linear, the optimistic bound: 1.5 min at 10 000 files,
 **15 min at 100 000**, 2.5 h at 1 000 000. `[C]`
+
+**Partial fix, 2026-09-15** (STUDY-006 Phase 3.2, spec:
+[gazetteer lookup supplement](../specs/service/media-upload-service/upload-search-object.gazetteer-lookup.supplement.md)).
+The Fuse index is now built **once per dataset** in a `WeakMap` keyed by the array, the same
+memoization the exact index already had, instead of once per candidate token. Measured on 2 000
+generated paths, both naming modes: **6.97 / 6.86 → 4.89 / 4.91 ms per file**, a **29 %** drop — the
+share the separate 1.06 ms-build / 2.75 ms-search measurement above predicted. Groups (1 483) and
+tray count (634) are identical before and after. `[B]`
+
+**Still open.** The fuzzy search itself is the remaining cost and is inherent to the lookup; only a
+narrower candidate set would remove it. And the finding's *other* half is untouched — classification
+still runs synchronously and in full before `drainQueue()`, so it is still time-to-first-byte.
+That is STUDY-006 Phase 3.3 (chunk `classifyBatch`, start the queue after the first chunk), and it
+is what a 100 000-file import would feel first.
 
 ---
 
