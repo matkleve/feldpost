@@ -21,7 +21,7 @@ corrected-by: none
 | [D-04](#d-04----what-is-the-import-mode-for-a-company-sized-archive-f-08-f-06-f-07) | Import mode for a company-sized archive | Decided (dedicated archive-import mode) — Phase 4, gated on Phase 3 |
 | [D-05](#d-05----should-locationrequirementmode-optional-skip-classification-entirely-f-05) | Does `optional` skip classification entirely? | Decided (spec wins) |
 | [D-06](#d-06----is-the-test-gate-allowed-to-pass-while-compiling-nothing-f-09-f-10) | Can the `test` gate pass while compiling nothing? | Decided — built (`verify.mjs` evidence hook) |
-| [D-09](#d-09----may-exif-supply-a-house-number-open) | May EXIF supply a house number? | **Open** — recommendation given, no owner answer yet |
+| [D-09](#d-09----may-exif-supply-a-house-number-open) | May EXIF supply a house number? | **Decided 2026-09-15** — yes, confirm-only. Reasoning in [STUDY-007](./007-exif-coordinates-as-address-evidence.md) |
 | [D-10](#d-10) | Persist an area-only path, with no coordinates | Decided — **built and verified** ([F-19](./005-upload-pipeline-trace-findings.md#f-19)) |
 | [D-11](#d-11) | Corroborate a `city` conflict with the street before asking | Decided — **built and verified** |
 | [D-12](#d-12) | What should answering a **cross-field** admin conflict do? | Decided (**C + D**) — **built and verified** ([F-21](./005-upload-pipeline-trace-findings.md#f-21), [F-22](./005-upload-pipeline-trace-findings.md#f-22)) |
@@ -236,6 +236,20 @@ changes nothing.
 
 Without that guard the pipeline would put a house number on a photo taken across the road, which is
 precisely the failure the principle exists to prevent.
+
+**Owner decision, 2026-09-15:** yes — when EXIF is the only source, adopt the number **and ask**,
+keeping tray volume low but decisive. Asking is what reconciles this with the precision principle:
+the principle forbids presenting a fabricated number as fact, and a confirmation tray presents it as
+a proposal with its provenance shown.
+
+The owner also asked whether nearby EXIF points could be clustered into one address. That question
+turned out to constrain this one, so both are worked through in
+**[STUDY-007](./007-exif-coordinates-as-address-evidence.md)**. Its two load-bearing conclusions:
+ask **once per proposed address, not once per file** (per-file is the highest-volume, least
+answerable question in the system), and **do not cluster on distance** — a GPS tag records the
+camera, not the subject, so walking around one building spreads points *further* apart than
+photographing a row of separate houses. D-09 also gets its own radius rather than reusing
+`exifAssistRadiusMeters: 80`, which is "same block" and contains a whole terrace.
 
 ---
 

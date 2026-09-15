@@ -48,6 +48,7 @@ A file that is merely *read* is not edited. Leave it alone; the old folder's REA
 | STUDY-004 | [Organizational redundancy audit](./004-organizational-redundancy-audit.md) | review | `proposed` | Maps duplicated, stale, and conflicting instruction layers (AGENTS.md, rules, Copilot, workflows, guards); phased consolidation proposal. |
 | STUDY-005 | [Upload pipeline — findings from the trace harness](./005-upload-pipeline-trace-findings.md) | review | `active` | F-01 … F-10 found by running the pipeline headlessly: file names writing admin fields, `Wien` → `Schottwien`, city classification needing a country segment, O(n²) job store, ~9 ms/file classification, and a `test` gate that compiles nothing. |
 | STUDY-006 | [Upload pipeline — decisions to take, and the plan to correct it](./006-upload-pipeline-correction-plan.md) | proposal | `proposed` | Six owner decisions (D-01 … D-06) that four of STUDY-005's findings depend on, then a five-phase correction plan with the verification for each step. |
+| STUDY-007 | [EXIF coordinates as address evidence](./007-exif-coordinates-as-address-evidence.md) | investigation | `proposed` | Whether GPS may supply a house number (D-09), and whether nearby EXIF points may be clustered into one address. Argues that a GPS tag records the camera, not the subject — so proximity of camera positions anti-correlates with identity of address in the common construction case — and recommends confirm-only adoption asked once per address, corroboration and outlier alarms instead of distance clustering. |
 
 ## Related folders
 
