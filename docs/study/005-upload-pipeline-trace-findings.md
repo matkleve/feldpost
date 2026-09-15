@@ -58,6 +58,7 @@ spec-level — the spec says what the code does, so a fix needs a contract decis
 | [F-19](#f-19) | ~~A path that names only an area ends in Issues; the spec claims an area centroid is stored, and the code stores nothing~~ **fixed** | High | **Spec** ↔ code |
 | [F-20](#f-20) | ~~Choosing "Keep" on a `containment_check` tray never resumes the job — it sits forever, looking like it's waiting on the user when nothing is~~ **fixed** | High | Code |
 | [F-21](#f-21) | An `admin_level_conflict` between **two different fields** (`city` ⊥ `state`) can never be answered: every option re-opens the same question, forever | High | Code |
+| [F-22](#f-22) | Answering a `layer_package` or `admin_level_conflict` tray places the job but never returns it to the queue — it stays "Active" forever | High | Code |
 
 ---
 
@@ -849,6 +850,50 @@ fields at once ("Mödling in Niederösterreich, or Wien 1160?"), or (c) re-deriv
 from the answer (`city → state` via the gazetteer, the same rule the derivation pass already owns).
 Option (c) matches the existing derivation rules and is the smallest change; (b) is the most honest
 question. Needs an owner answer before implementation.
+
+---
+
+### F-22 · A `layer_package` / `admin_level_conflict` answer places the job but never re-queues it {#f-22}
+
+**Found while measuring the [F-20](#f-20) fix**, 2026-09-15 — the same run that surfaced
+[F-21](#f-21). Scenario **S07** (`Graz/Annenstraße 10/Annenstraße 12 Detail.jpg`, filename street
+contradicts folder street) answers its `layer_package` tray, gets a placement, and then stops: `[A]`
+
+```
+[ 278] tray  answer layer_package → Folder: Annenstraße 10
+outcome: phase=resolving_location  lane=Active  coords=47.0707, 15.4395 via folder  mediaId=—
+```
+
+Coordinates resolved, nothing wrong with the address — and the file never uploads. In the UI it sits
+in the **Active** lane, indistinguishable from one genuinely in flight.
+
+**Why.** `applyLayerPackageChoice` and `applyAreaConflictChoice` both end the same way:
+
+```ts
+this.jobState.setPhase(jobId, 'resolving_location');
+void this.resolution().applyPreResolveFromOrchestrator(jobId);
+```
+
+`applyPreResolveFromOrchestrator` applies the candidate and returns `'continue'` — it does not move
+the phase on. And the queue drain only ever selects `job.phase === 'queued'`
+(`selectQueuedJobsForStart`, `upload-manager-queue.util.ts:15`). `[A]` So the job is left in a phase
+the queue cannot see. Grepped: the only paths that put a job back to `queued` after a tray are the
+plain candidate path (`upload-location-candidate-apply.service.ts:91`), the two source-conflict paths,
+and — since 2026-09-15 — `containment_check`'s "Keep". The layer and admin paths are the two that
+never do. `[A]`
+
+**Same shape as F-20**, one layer up: a tray answer that changes job state but not the one thing that
+decides whether the pipeline can pick the job up again. [TRAP-021](../TRAPS.md#trap-021--a-resolution-event-with-zero-subscribers-looks-like-it-resumed-the-job)
+is the reading habit that catches it.
+
+**Caveat worth checking before fixing** `[C]`: the trace harness drives the services with no UI
+attached. If some component effect re-queues these jobs in the real app, production would be less
+broken than the harness shows — but nothing in `core/` does it, and the three paths that *do* re-queue
+do it explicitly rather than relying on a listener, which is evidence against that hope.
+
+**Not fixed here.** The fix is the same two lines the "Keep" path now uses (`setPhase('queued')` plus
+a drain) — but for the admin path it is masked by [F-21](#f-21), which prevents that path from ever
+reaching a resolved state at all. Fix F-21 first, or fix both together and verify with one run.
 
 ---
 

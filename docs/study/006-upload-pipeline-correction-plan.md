@@ -9,7 +9,7 @@ corrected-by: none
 # Upload pipeline — decisions to take, and the plan to correct it
 
 **Written:** 2026-09-12, updated 2026-09-13 · **Branch:** `claude/uploader-pipeline-test-badges-kktrpg`
-**Findings this answers:** [STUDY-005](./005-upload-pipeline-trace-findings.md) F-01 … F-21.
+**Findings this answers:** [STUDY-005](./005-upload-pipeline-trace-findings.md) F-01 … F-22.
 
 ## Status at a glance
 
