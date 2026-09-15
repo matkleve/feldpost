@@ -234,7 +234,7 @@ describe('NF-40 address persist acceptance', () => {
     // @see docs/study/005-upload-pipeline-trace-findings.md#f-19
     const reverse = vi.fn();
     const { deps, rpc } = buildDeps({ reverse });
-    const job = viennaFolderJob({ coords: undefined, areaOnlyLocation: true });
+    const job = viennaFolderJob({ coords: undefined, textOnlyLocation: true });
     const addressContext = buildUploadAddressPersistContext({ job });
 
     expect(addressContext).not.toBeNull();

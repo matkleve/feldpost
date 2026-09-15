@@ -225,7 +225,7 @@ async function completePlacementAfterLocationResolve(
     ...summarizeJobPlacement(current),
   });
 
-  if (current.areaOnlyLocation) {
+  if (current.textOnlyLocation) {
     uploadPlacementLog('P0', jobId, current.file.name, 'skip — area-only precision, no geocode', {
       titleAddress: current.titleAddress,
     });

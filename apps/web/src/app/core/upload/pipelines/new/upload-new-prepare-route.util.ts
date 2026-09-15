@@ -43,7 +43,7 @@ export async function resumeIfAlreadyRoutedNewJob(
   const job = deps.jobState.findJob(jobId)!;
 
   if (
-    (job.coords || job.areaOnlyLocation) &&
+    (job.coords || job.textOnlyLocation) &&
     !job.conflictResolution &&
     isAutoLocationEnabled(job)
   ) {
@@ -125,7 +125,7 @@ export async function routePreparedNewJob(
   }
 
   const routedJob = deps.jobState.findJob(jobId)!;
-  if (routedJob.coords || routedJob.areaOnlyLocation) {
+  if (routedJob.coords || routedJob.textOnlyLocation) {
     const conflicted = await runConflictCheck(deps, jobId, ctx);
     if (conflicted) {
       return;

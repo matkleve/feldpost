@@ -195,7 +195,7 @@ describe('applyPreResolveFromOrchestrator — area_only group', () => {
     const jobState = TestBed.inject(UploadJobStateService);
     const job = jobState.findJob('area-job-1')!;
     expect(job.coords).toBeUndefined();
-    expect(job.areaOnlyLocation).toBe(true);
+    expect(job.textOnlyLocation).toBe(true);
     expect(job.titleAddress).toBe('Niederösterreich, AT');
     expect(job.locationSourceUsed).toBe('folder');
     expect(job.resolutionStatus).toBe('resolved');

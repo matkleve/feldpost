@@ -275,7 +275,7 @@ export class UploadLocationPreResolveOrchestratorService {
 
   /**
    * Text-only placement for an `area_only` group: the highest area tier the folder path
-   * established (country/state/postcode/city), no coordinates, no geocode. `areaOnlyLocation`
+   * established (country/state/postcode/city), no coordinates, no geocode. `textOnlyLocation`
    * tells later placement/routing steps this job is already done and must not attempt to
    * geocode the area label.
    */
@@ -285,7 +285,7 @@ export class UploadLocationPreResolveOrchestratorService {
       const source = job?.titleAddressSource ?? 'folder';
       this.jobState.updateJob(jobId, {
         resolutionStatus: 'resolved',
-        areaOnlyLocation: true,
+        textOnlyLocation: true,
         pendingPartialLocation: false,
         disambiguationGroupId: undefined,
         issueKind: undefined,

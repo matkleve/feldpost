@@ -47,6 +47,8 @@ Entries are numbered, never renumbered, and never deleted. Order is by cost, not
 | [TRAP-017](#trap-017--a-country-can-appear-in-the-search-object-that-never-appears-in-the-path) | A country can appear in the Search Object that never appears in the path | `open` |
 | [TRAP-018](#trap-018--a-group-level-loop-returns-one-jobs-verdict) | A group-level loop returns one job's verdict | `open` |
 | [TRAP-019](#trap-019--the-flat-street-was-a-concatenation-of-leftovers) | The flat `street` was a concatenation of leftovers | `open` |
+| [TRAP-020](#trap-020--a-circular-import-between-two-trace-fixture-modules-silently-zeroed-three-files) | A circular import between two modules silently zeroed three fixture files | `pattern open` |
+| [TRAP-021](#trap-021--a-resolution-event-with-zero-subscribers-looks-like-it-resumed-the-job) | A resolution event with zero subscribers looks like it resumed the job | `pattern open` |
 
 ---
 
@@ -411,7 +413,7 @@ gives no reason to doubt it.
 **Truth** — `notifyDisambiguationResolved` only pushes onto an RxJS `Subject`
 (`disambiguationResolved$`). Grepping the entire frontend for a subscriber to that Subject finds none.
 Combined with the fact that the only gate into the upload phase (`routePreparedNewJob`) checks
-`job.coords || job.areaOnlyLocation` — and a "Keep" job has neither — the job's `phase` simply never
+`job.coords || job.textOnlyLocation` — and a "Keep" job had neither — the job's `phase` simply never
 moves again. Nothing crashes, nothing logs an error, no test failed before this was found: the group is
 marked resolved, so the tray disappears from the UI, but the file underneath never uploads and never
 routes to Issues either. It reads as "waiting for user" to anyone who checks its phase, indefinitely,
@@ -430,7 +432,11 @@ Code at `apps/web/src/app/core/upload/location/upload-location-tray-flow.service
 (`applyContainmentCheckChoice`) and `upload-location-resolution.service.ts`
 (`notifyDisambiguationResolved`).
 
-**Status** — `open`.
+**Status** — `pattern open`. The instance is fixed (2026-09-15): "Keep" now places the job
+(`textOnlyLocation`, no coordinates) and re-queues it, and the trace harness shows S06 reaching
+`complete`. The shape stays open because `disambiguationResolved$` still has **zero subscribers** and
+is still called from five paths — the next reader of any of those call sites faces the same misleading
+surface.
 
 ---
 

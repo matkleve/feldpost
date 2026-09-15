@@ -25,6 +25,7 @@ import { UploadLocationResolutionService } from './location/upload-location-reso
 import {
   adminLevelManualCandidateId,
 } from './location/upload-location-area-choice.util';
+import { CONTAINMENT_CHECK_KEEP_CANDIDATE_ID } from './location/upload-location-geocode-outcome.util';
 import { UploadLocationPreResolveOrchestratorService } from './location/upload-location-pre-resolve-orchestrator.service';
 import { UploadLocationTrayFlowService } from './location/upload-location-tray-flow.service';
 import type { ScannedFileEntry } from '../folder-scan/folder-scan.service';
@@ -476,6 +477,86 @@ describe('UploadManagerService — folder upload integration (SO → dedup → D
         ['needsGeocode', 'needsTray', 'resolved', 'partial'].includes(s.status),
       ),
     ).toBe(true);
+    },
+    15_000,
+  );
+
+  it(
+    '(d4) F-20: "Keep" on a containment_check tray resumes the job and persists the text address',
+    async () => {
+      const { service, fakeUpload, fakeGeocoding, locationResolution, trayFlow } = await setup();
+
+      // Every geocode comes back empty: D-11's two corroboration tiers before the admin tray,
+      // and the real post-resolution geocode that then opens the containment_check tray.
+      fakeGeocoding.searchStructuredForward.mockResolvedValue([]);
+
+      const entries: ScannedFileEntry[] = [
+        {
+          file: makeFile('photo.jpg'),
+          relativePath: 'AT/Wien/Innsbruck/Hauptstraße 5/photo.jpg',
+          directorySegments: ['AT', 'Wien', 'Innsbruck', 'Hauptstraße 5'],
+        },
+      ];
+      await service.submitWebkitFolder(entries, 'Hauptstraße 5');
+
+      // 1 · the admin conflict tray, answered by hand.
+      await vi.waitFor(() => {
+        const groups = locationResolution
+          .disambiguationGroups()
+          .filter((g) => g.disambiguationKind === 'admin_level_conflict');
+        expect(groups.length).toBe(1);
+      });
+      const adminGroup = locationResolution
+        .disambiguationGroups()
+        .find((g) => g.disambiguationKind === 'admin_level_conflict')!;
+      await trayFlow.applyAreaConflictChoice(adminGroup, adminLevelManualCandidateId('city'), 'Wien');
+
+      // 2 · the geocode finds nothing, so the V1 containment_check tray opens.
+      await vi.waitFor(
+        () => {
+          const groups = locationResolution
+            .disambiguationGroups()
+            .filter((g) => g.disambiguationKind === 'containment_check');
+          expect(groups.length).toBe(1);
+        },
+        { timeout: 5000 },
+      );
+      const containmentGroup = locationResolution
+        .disambiguationGroups()
+        .find((g) => g.disambiguationKind === 'containment_check')!;
+
+      // 3 · "Keep" must actually resume the job, not only close the tray.
+      locationResolution.applyContainmentCheckChoice(
+        containmentGroup.id,
+        CONTAINMENT_CHECK_KEEP_CANDIDATE_ID,
+      );
+
+      await vi.waitFor(
+        () => {
+          expect(service.jobs()[0]?.phase).toBe('complete');
+        },
+        { timeout: 5000 },
+      );
+
+      const job = service.jobs()[0]!;
+      expect(job.coords).toBeUndefined();
+      expect(job.mediaId).toBeTruthy();
+      expect(job.issueKind).toBeUndefined();
+
+      // The kept text address reaches the persist layer, with no coordinates beside it.
+      // (`uploadFile` args: file, manualCoords, …, addressContext — see UploadService.uploadFile.)
+      const uploadArgs = fakeUpload.uploadFile.mock.calls.at(-1)!;
+      expect(uploadArgs[1]).toBeUndefined();
+      const addressContext = uploadArgs[8] as {
+        hasEstablishedTextAddress: boolean;
+        precision: string | null;
+        fields: { street: string | null; city: string | null; houseNumber: string | null };
+      };
+      expect(addressContext.hasEstablishedTextAddress).toBe(true);
+      expect(addressContext.fields.street).toBe('Hauptstraße');
+      expect(addressContext.fields.city).toBe('Wien');
+      expect(addressContext.fields.houseNumber).toBe('5');
+      expect(addressContext.precision).toBe('houseNumber');
     },
     15_000,
   );

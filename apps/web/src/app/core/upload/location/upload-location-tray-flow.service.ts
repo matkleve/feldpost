@@ -17,6 +17,7 @@ import { UploadJobStateService } from '../support/upload-job-state.service';
 import { UploadLocationConfigService } from './upload-location-config.service';
 import { UploadLocationDisambiguationStoreService } from './upload-location-disambiguation-store.service';
 import { UploadLocationResolutionService } from './upload-location-resolution.service';
+import { UploadManagerService } from '../upload-manager.service';
 import type {
   UploadGroupResolutionState,
   UploadSearchObject,
@@ -343,6 +344,16 @@ export class UploadLocationTrayFlowService {
     });
   }
 
+  /**
+   * "Keep" means: the geocoder found nothing, and the user says the folder's text is right anyway.
+   * That is a placement decision, so it must place the job — a text-established address with no
+   * coordinates (the same shape `area_only` uses, at whatever precision the path established) — and
+   * hand it back to the queue. Marking the group resolved and emitting an event is not enough:
+   * `disambiguationResolved$` has no subscriber, and `routePreparedNewJob` only lets a job through
+   * on `coords || textOnlyLocation`, so without this the job sits in `awaiting_disambiguation`
+   * forever with no question left to answer.
+   * @see docs/study/005-upload-pipeline-trace-findings.md#f-20
+   */
   applyContainmentCheckChoice(group: UploadDisambiguationGroup, candidateId: string): void {
     if (candidateId === CONTAINMENT_CHECK_ENTER_DIFFERENT_CANDIDATE_ID) {
       this.openContainmentFallbackTray(group);
@@ -350,11 +361,24 @@ export class UploadLocationTrayFlowService {
     }
 
     for (const jobId of group.jobIds) {
+      const job = this.jobState.findJob(jobId);
+      if (!job || job.mediaId) {
+        continue;
+      }
+      const source = job.titleAddressSource ?? 'folder';
       this.jobState.updateJob(jobId, {
         resolutionStatus: 'resolved',
-        pendingPartialLocation: true,
+        textOnlyLocation: true,
+        pendingPartialLocation: false,
         disambiguationGroupId: undefined,
+        issueKind: undefined,
+        addressCandidates: undefined,
+        statusLabel: '',
+        titleAddress: job.titleAddress ?? group.titleAddress,
+        titleAddressSource: source,
+        locationSourceUsed: source,
       });
+      this.jobState.setPhase(jobId, 'queued');
     }
 
     this.disambiguationStore.patchGroup({
@@ -373,6 +397,7 @@ export class UploadLocationTrayFlowService {
     this.resolution().notifyDisambiguationResolved(resolvedEvent);
     this.disambiguationStore.syncBatchDisambiguationAggregates(group.batchId);
     this.disambiguationStore.pickNextActiveGroup(group.batchId);
+    this.injector.get(UploadManagerService).kickQueueAfterLocationGate();
   }
 
   private resolveContainmentGroupingKey(

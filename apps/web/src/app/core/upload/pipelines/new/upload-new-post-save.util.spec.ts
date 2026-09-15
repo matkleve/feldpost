@@ -105,7 +105,7 @@ describe('finalizeNewUploadPhase', () => {
     let job = createJob({
       titleAddress: 'Niederösterreich, AT',
       locationSourceUsed: 'folder',
-      areaOnlyLocation: true,
+      textOnlyLocation: true,
       coords: undefined,
     });
 

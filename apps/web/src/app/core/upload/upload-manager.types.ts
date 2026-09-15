@@ -237,7 +237,7 @@ export interface UploadJob {
    * coordinates, no geocode attempt.
    * @see docs/study/005-upload-pipeline-trace-findings.md#f-19
    */
-  areaOnlyLocation?: boolean;
+  textOnlyLocation?: boolean;
 }
 
 // ── Options ────────────────────────────────────────────────────────────────────

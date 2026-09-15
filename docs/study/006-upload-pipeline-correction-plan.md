@@ -9,7 +9,7 @@ corrected-by: none
 # Upload pipeline — decisions to take, and the plan to correct it
 
 **Written:** 2026-09-12, updated 2026-09-13 · **Branch:** `claude/uploader-pipeline-test-badges-kktrpg`
-**Findings this answers:** [STUDY-005](./005-upload-pipeline-trace-findings.md) F-01 … F-20.
+**Findings this answers:** [STUDY-005](./005-upload-pipeline-trace-findings.md) F-01 … F-21.
 
 ## Status at a glance
 
@@ -23,7 +23,8 @@ corrected-by: none
 | [D-06](#d-06----is-the-test-gate-allowed-to-pass-while-compiling-nothing-f-09-f-10) | Can the `test` gate pass while compiling nothing? | Decided — built (`verify.mjs` evidence hook) |
 | [D-09](#d-09----may-exif-supply-a-house-number-open) | May EXIF supply a house number? | **Open** — recommendation given, no owner answer yet |
 | [D-10](#d-10) | Persist an area-only path, with no coordinates | Decided — **built and verified** ([F-19](./005-upload-pipeline-trace-findings.md#f-19)) |
-| [D-11](#d-11) | Corroborate a `city` conflict with the street before asking | Decided — **built and verified** ([F-20](./005-upload-pipeline-trace-findings.md#f-20) found in passing, still open) |
+| [D-11](#d-11) | Corroborate a `city` conflict with the street before asking | Decided — **built and verified** |
+| [D-12](#d-12) | What should answering a **cross-field** admin conflict do? | **Open** — options given, no owner answer yet ([F-21](./005-upload-pipeline-trace-findings.md#f-21)) |
 
 `status: proposed` means the study as a whole is not fully closed — D-09 is still open, and build
 status varies by row (table above). Per [`STUDY-FORMAT.md`](./STUDY-FORMAT.md) a `[D]` marks a
@@ -251,10 +252,10 @@ placement, each found by tracing one curated scenario through to its actual outc
 assuming the first fix was enough:
 
 1. `handlePartialPreResolve` treated every `'partial'` group status the same (routed to Issues).
-   Split on `geocodeBranch === 'metadata_only'`: that branch places the job (`areaOnlyLocation: true`,
+   Split on `geocodeBranch === 'metadata_only'`: that branch places the job (`textOnlyLocation: true`,
    `titleAddress` = the area label, no `coords`) and returns `continue` instead of `partial`.
 2. `routePreparedNewJob`'s only route to the upload phase was `if (job.coords)`. Widened to
-   `job.coords || job.areaOnlyLocation`.
+   `job.coords || job.textOnlyLocation`.
 3. `finalizeNewUploadPhase` (post-save enrichment) forward-geocoded any text placement lacking
    `coords`/`titleAddressCoords` — which every area-only job lacks by design, so it tried to geocode
    "Wien" and, finding nothing usable, routed to `missing_gps` anyway. Given its own early exit for
@@ -329,6 +330,34 @@ Full mechanism, the two-tier query (house number embedded first, bare street as 
 construction), the tray-copy rules, and the worked examples all live in
 [contradiction-resolution-model.c3-street-corroboration.supplement.md](../specs/service/media-upload-service/contradiction-resolution-model.c3-street-corroboration.supplement.md)
 — that file is the one to keep current; this entry should not repeat it.
+
+---
+
+### D-12 (open) — What should answering a *cross-field* admin conflict do? {#d-12}
+
+[F-21](./005-upload-pipeline-trace-findings.md#f-21): when an `admin_level_conflict` spans two
+fields — `city: Mödling` against `state: Wien`, the owner's own S18 case — answering it is
+impossible. `applyAdminLevelSelectionsToSearchObject` writes only the chosen field, the other side of
+the contradiction survives untouched, `detectAreaConflicts` re-raises the identical conflict, and the
+tray re-opens. Measured: **55 answers to one question in a single run**, still unresolved. Both
+offered options loop; only "Manual: city" typed as a Wien city escapes, which means the tray lists the
+folder's own value while being structurally unable to accept it.
+
+| Option | What it means | Cost |
+| --- | --- | --- |
+| **C — Re-derive the dependent field from the answer** (recommended) `[D]` | Choosing `city = Mödling` re-runs the existing `city→state` derivation and replaces the stale `state` evidence with `Niederösterreich`. The answer becomes authoritative for everything it implies. | Silently overwrites a value the path really did assert (`1160 Wien` in the filename). Cheapest change: the rule already exists (`deriveStateFromCity`, used by `corroborateAreaEvidence`), it is simply not re-run after a tray answer. |
+| B — Ask for the whole area package at once | One question: *"Mödling, Niederösterreich"* or *"Wien 1160"* — the two coherent readings of the path, not one field at a time. | The most honest question and the most work: the tray's candidate model is per-field (`admin-level\|{field}\|…`), so this needs a new candidate shape and new copy. Converges by construction. |
+| A — Clear the other field's contradicting evidence | Choosing `city` drops any evidence that contradicts it, leaving the field empty rather than re-derived. | Loses information without replacing it — an emptied `state` then has to be re-derived or asked for anyway, so this is B or C with an extra step. |
+| D — Loop guard only | Detect the re-registration of an identical conflict signature and route to Issues instead. | Stops the infinite loop without making the question answerable; the file still cannot be placed. A safety net under whichever of A–C is chosen, not a substitute. |
+
+**Recommendation: C, with D as a guard.** `[D]` C matches how every other derived field already
+works (`postcode→city`, `place→country`, `city→state`) and re-uses the rule that is already in the
+tree — the gap is only that the derivation pass never runs again after a tray answer. D belongs in
+regardless: no answer path should be able to re-register a conflict signature it has already been
+asked, and today nothing checks.
+
+**Needs an owner answer**, because C decides that a tray answer outranks a path token the user did
+not touch — that is a product rule about whose word wins, not an implementation detail.
 
 ## 2 · The plan
 

@@ -58,6 +58,7 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
     applyPreResolveFromOrchestrator: ReturnType<typeof vi.fn>;
     deferGroup: ReturnType<typeof vi.fn>;
     applyCandidateToGroup: ReturnType<typeof vi.fn>;
+    isJobBlockedByGate: ReturnType<typeof vi.fn>;
   };
   let geocodingMock: {
     searchStreetHouseNumbers: ReturnType<typeof vi.fn>;
@@ -71,6 +72,8 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
       applyPreResolveFromOrchestrator: vi.fn().mockResolvedValue('continue'),
       deferGroup: vi.fn(),
       applyCandidateToGroup: vi.fn(),
+      // "Keep" re-queues its jobs and kicks the queue drain, which asks this.
+      isJobBlockedByGate: vi.fn().mockReturnValue(false),
     };
     geocodingMock = {
       searchStreetHouseNumbers: vi.fn().mockResolvedValue([]),
@@ -464,7 +467,13 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
     );
   });
 
-  it('G3: applyContainmentCheckChoice with keep-address marks jobs partial', () => {
+  /**
+   * F-20: "Keep" is a placement decision, not just a tray dismissal — the job must carry a
+   * text-established address with no coordinates and go back to the queue, or it parks in
+   * `awaiting_disambiguation` with nothing left to ask.
+   * @see docs/study/005-upload-pipeline-trace-findings.md#f-20
+   */
+  it('G3/F-20: applyContainmentCheckChoice with keep-address places the job and re-queues it', () => {
     jobState.addJobs([buildJob({ id: 'job-cc' })]);
     const group = disambiguationStore.createGroup({
       batchId: 'batch-tray',
@@ -483,7 +492,15 @@ describe('UploadLocationTrayFlowService — admin_level_conflict', () => {
 
     const updatedJob = jobState.findJob('job-cc');
     expect(updatedJob?.resolutionStatus).toBe('resolved');
-    expect(updatedJob?.pendingPartialLocation).toBe(true);
+    // The address is established, it just has no coordinates — same shape as `area_only`.
+    expect(updatedJob?.textOnlyLocation).toBe(true);
+    expect(updatedJob?.pendingPartialLocation).toBe(false);
+    expect(updatedJob?.coords).toBeUndefined();
+    expect(updatedJob?.titleAddress).toBe('Hauptstraße, Wien');
+    expect(updatedJob?.locationSourceUsed).toBe('folder');
+    expect(updatedJob?.disambiguationGroupId).toBeUndefined();
+    // Back in the queue — otherwise nothing ever moves this job again.
+    expect(updatedJob?.phase).toBe('queued');
     const updatedGroup = disambiguationStore.groups().find((g) => g.id === group.id)!;
     expect(updatedGroup.resolutionStatus).toBe('resolved');
     expect(updatedGroup.selectedCandidateId).toBe('keep-address');

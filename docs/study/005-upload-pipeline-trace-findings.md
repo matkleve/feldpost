@@ -56,7 +56,8 @@ spec-level — the spec says what the code does, so a fix needs a contract decis
 | [F-17](#f-17) | A parked job keeps its content-hash reservation, so a later identical file is skipped as a duplicate of a file that was never uploaded | High | Code |
 | [F-18](#f-18) | ~~The shipped postcode table is a 21-row stub, and Wien was missing from the gazetteer~~ **gazetteer fixed; postcode table open** | High | Data |
 | [F-19](#f-19) | ~~A path that names only an area ends in Issues; the spec claims an area centroid is stored, and the code stores nothing~~ **fixed** | High | **Spec** ↔ code |
-| [F-20](#f-20) | Choosing "Keep" on a `containment_check` tray never resumes the job — it sits forever, looking like it's waiting on the user when nothing is | High | Code |
+| [F-20](#f-20) | ~~Choosing "Keep" on a `containment_check` tray never resumes the job — it sits forever, looking like it's waiting on the user when nothing is~~ **fixed** | High | Code |
+| [F-21](#f-21) | An `admin_level_conflict` between **two different fields** (`city` ⊥ `state`) can never be answered: every option re-opens the same question, forever | High | Code |
 
 ---
 
@@ -758,13 +759,13 @@ database yet." The answer is that a mechanism for exactly that already exists �
 zero geocoder hits) or *"Enter a different address."* Checking whether "Keep" actually works surfaced
 this.
 
-**What happens.** `applyContainmentCheckChoice`'s "Keep" branch sets `resolutionStatus: 'resolved'`
-and `pendingPartialLocation: true` on every job in the group, then emits `notifyDisambiguationResolved`
+**What happened.** `applyContainmentCheckChoice`'s "Keep" branch set `resolutionStatus: 'resolved'`
+and `pendingPartialLocation: true` on every job in the group, then emitted `notifyDisambiguationResolved`
 — an RxJS `Subject` (`disambiguationResolved$`). `[A]` Grepped: **nothing in the codebase subscribes to
 it**, anywhere. Separately, the only gate that routes a job into the upload phase
-(`routePreparedNewJob`) checks `job.coords || job.areaOnlyLocation` — a job resolved this way has
-neither, so nothing ever re-evaluates it into either the upload path or `routeJobToMissingData`. The
-job's `phase` never advances past wherever it was parked when the tray opened.
+(`routePreparedNewJob`) checks `job.coords || job.textOnlyLocation` — a job resolved this way had
+neither, so nothing ever re-evaluated it into either the upload path or `routeJobToMissingData`. The
+job's `phase` never advanced past wherever it was parked when the tray opened.
 
 **Measured, not inferred.** Scenario **S06** in the curated trace corpus (`AT/Wien/Innsbruck/
 Maria-Theresien-Straße 18/…`) exercises exactly this path — the trace harness's own auto-answer picks
@@ -779,9 +780,75 @@ resolved → street not found in the resolved city → V1 tray → "Keep") produ
 never completes. This predates D-11 entirely — D-11 does not create or touch this path, it only led to
 checking it.
 
-**Not done here**: the fix itself (either give `containment_check`'s "Keep" the same coords-optional
-persist path D-10 built for area-only locations, or wire a real subscriber to
-`disambiguationResolved$` that re-drives routing). Filed as its own item, not folded into D-11.
+**Fixed** (2026-09-15, after D-11 shipped). "Keep" is a placement decision, so it now places: every
+job in the group gets the text-established address with no coordinates — the same shape `area_only`
+uses, at whatever precision the path established (street or house number here, not area) — and goes
+back to `queued`, followed by a queue drain. The flag that carries this through the coordinate gates
+was renamed `areaOnlyLocation` → **`textOnlyLocation`**, because it never meant "area precision"; it
+means "the address came from text and has no coordinates", which is exactly as true for a kept street
+address as for a `Niederösterreich`-only folder. `disambiguationResolved$` still has no subscriber —
+that was never the mechanism doing the work, and wiring one would have hidden the real gap rather
+than closing it.
+
+**Measured after the fix.** The same `--answer-trays` trace run: S06 now reaches `phase=complete`,
+`lane=Uploaded`, with `coords=—` and a `resolve_media_location` call carrying the text address and
+null coordinates. Batch totals moved from `complete=16 awaiting_disambiguation=3` to
+`complete=17 awaiting_disambiguation=2` — the two remaining holds are S05 and S18, which are waiting
+on genuinely unanswered trays, not on a dead event.
+
+---
+
+### F-21 · A cross-field admin conflict can never be answered — the same tray re-opens forever {#f-21}
+
+**Found while verifying the [F-20](#f-20) fix**, 2026-09-15, in the same `--answer-trays` trace run.
+Scenario **S18** — `Mödling/Wilhelminenstraße 141/Wilhelminenstr 141, 1160 Wien.jpg`, the owner's own
+documented case (folder names one city, the filename repeats the address with a different city and
+postcode) — had its `admin_level_conflict` tray answered **55 times** in one run and still ended
+`phase=awaiting_disambiguation`. `[A]` 55 of the batch's 60 total tray answers went to this one
+question.
+
+**Why it never converges.** The conflict is not city-vs-city. `detectAreaConflicts`'s AT-gazetteer
+cross-check merges the contradicting **`state`** entry into the `city` conflict's own entry list, so
+the conflict reads `[city:Mödling@L2, city:Wien@L0, state:Wien@L0]` — Mödling is in Niederösterreich,
+so it cannot sit under `state: Wien`. `applyAdminLevelSelectionsToSearchObject` then writes **only the
+chosen field's** evidence and leaves every other field alone. Picking `city = Mödling` therefore
+yields `city=Mödling, state=Wien` — which `detectAreaConflicts` immediately re-raises as the *same*
+contradiction, `applyAreaConflictChoice`'s `stillConflicted` branch re-registers an identical tray,
+and the loop closes. `[A]` Measured directly against the real classifier and the shipped AT assets:
+
+```
+INITIAL  city=Wien postcode=1160 state=Wien
+         conflicts=[city: [city:Mödling@L2, city:Wien@L0, state:Wien@L0]]
+round 1: picked city=Mödling@L2 → city=Mödling state=Wien
+         conflicts=[city: [city:Mödling@L0, state:Wien@L0]]
+round 2: picked city=Mödling@L0 → city=Mödling state=Wien   (identical)
+round 3: picked city=Mödling@L0 → city=Mödling state=Wien   (identical)
+…
+```
+
+A fixed point, not a resolution. Picking the `state:Wien` entry instead is no better: it sets `state`
+to the value it already has and leaves `city=Mödling` standing, so the same conflict re-forms. The
+only escape the tray offers is *"Manual: city"* typed as a city that happens to sit in Wien — i.e. the
+tray lists options it structurally **cannot honour**, and the folder's own value is one of them.
+
+**Consequence.** For a real user this is an endless question: click "Mödling", the same question
+reappears, forever, with no way to accept the folder's own reading of its own path. It is not
+throttled, not counted, and not detectable from the UI. The trace harness only escaped because it has
+a fixed answer budget.
+
+**Shape, not a one-off.** Any admin conflict whose entries span two fields has this property — the
+`city ⊥ state` gazetteer check and the `postcode ⊥ state` / `postcode ⊥ city` cross-checks all merge a
+foreign-field entry into one conflict, while the answer path only ever writes one field. The same
+mechanism forced [D-11](./006-upload-pipeline-correction-plan.md#d-11)'s corroboration pre-check to
+cascade rather than auto-resolve when a residual `state` entry survived; that was treated then as
+accepted product behaviour. It is not — it is this bug, seen from the other side.
+
+**Not fixed here.** The fix needs a product decision, not just code: whether answering a cross-field
+conflict should (a) clear the *other* field's contradicting evidence as collateral, (b) ask for both
+fields at once ("Mödling in Niederösterreich, or Wien 1160?"), or (c) re-derive the dependent field
+from the answer (`city → state` via the gazetteer, the same rule the derivation pass already owns).
+Option (c) matches the existing derivation rules and is the smallest change; (b) is the most honest
+question. Needs an owner answer before implementation.
 
 ---
 
