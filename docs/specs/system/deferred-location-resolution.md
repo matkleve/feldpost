@@ -10,12 +10,11 @@ that arrived with it, and resolving that location later — for one item or for 
 
 ## What It Looks Like
 
-Three surfaces, one behaviour. In the upload panel, the location switch off means the batch runs
-straight through with no questions. In media detail, an item with no location shows its **Original
-folder** and **Original file name** rows with an *Add as location* affordance in the row's action
-slot. In a selection context (for example, filter by upload time and select the results), a batch
-action offers to resolve the selection from folder path, file name, or EXIF, and reports what
-happened to each item.
+Three surfaces, one behaviour. The upload panel's location switch, off, runs the batch straight
+through with no questions. In media detail, an item with no location shows *Add as location* in the
+action slot of its **Original folder** and **Original file name** rows. In a selection context
+(filter by upload time, select the results), a batch action resolves the selection from folder path,
+file name or EXIF and reports the outcome per item.
 
 ## The promise the toggle already makes
 
@@ -43,13 +42,18 @@ is immutable afterwards — this part exists and is not being changed, only reli
 | `exif_raw` | the full EXIF payload as JSON | written |
 | `captured_at` | capture timestamp, when present | written |
 
-Immutability is enforced by `prevent_media_items_raw_source_overwrite`
-(`20260412123000_media_items_raw_columns_immutability.sql`). Resolution therefore never rewrites raw
+Immutability is enforced by `prevent_media_items_raw_source_overwrite`. Resolution never rewrites raw
 evidence; it writes a *location* alongside it, and the evidence stays as the audit trail.
 
-**Gap to close:** the read model does not select `relative_path` or `exif_raw`, so the UI cannot show
-what the database already stores. Exposing them is a prerequisite here, as it is for
+**Read model, done 2026-09-15.** `relative_path` and `exif_raw` are selected on the single-row detail
+read; `relative_path` alone in the list reads. `exif_raw` is deliberately **not** in list selects — a
+jsonb blob per row across a large workspace is the cost Phase 3 removed. Shared prerequisite with
 [files-page](../page/files-page.md).
+
+**What that surfaced.** *Original folder* was derived by splitting `original_filename`, a **leaf
+name** — for a directory upload it is `IMG_001.jpg` with no folder at all, so the row showed a folder
+only when a name happened to contain a slash. It now reads `relative_path`, filename kept as fallback
+for older rows (`resolveOriginalFilePathParts`).
 
 ## Where It Lives
 
@@ -75,7 +79,7 @@ read-only rows, each with four empty action slots (`detail-row-action--l1/l2/r1/
 | 2 | Clicks **Add as location** on the folder row | The folder path is fed to the normal resolution pipeline as if it had just been uploaded | runs classify + resolve for one item |
 | 3 | Resolution succeeds unambiguously | Location is written; rows return to read-only | item gains a location |
 | 4 | Resolution is ambiguous | The normal tray opens, for this item only | one question |
-| 5 | Item has EXIF coordinates | A third action offers **Use photo GPS** | see STUDY-007 |
+| 5 | Item has EXIF coordinates | A third action offers **Use photo GPS** | **already exists** — `exifToLocationRequested` / `hasExifCoordinates` |
 | 6 | Item already has a location | No add action is offered; the rows stay read-only | avoids silent overwrite |
 
 The action reuses the existing resolution services. It MUST NOT introduce a second way to write a
@@ -85,19 +89,13 @@ location — same evidence model, same derivation, same trays.
 
 ```
 MediaDetailInlineSection
-├── DetailRow "Original folder"        [read-only value]
-│   └── [AddAsLocationAction]          when item has no location
-├── DetailRow "Original file name"     [read-only value]
-│   └── [AddAsLocationAction]          when item has no location
-└── DetailRow "Photo GPS"              [when exif coordinates present]
-    └── [UsePhotoGpsAction]            when item has no location
+├── DetailRow "Original folder"        [+ AddAsLocationAction when unlocated]
+├── DetailRow "Original file name"     [+ AddAsLocationAction when unlocated]
+└── DetailRow "Photo GPS"              [+ UsePhotoGpsAction, exists today]
 
 SelectionActionBar (media / workspace contexts)
 └── [ResolveLocationAction]            when selection contains unlocated items
-    └── ResolveLocationDialog
-        ├── source choice (folder | filename | exif)
-        ├── eligible-count summary
-        └── per-item outcome report
+    └── ResolveLocationDialog          source choice, eligible count, outcome report
 ```
 
 ## Data
@@ -131,6 +129,8 @@ SelectionActionBar (media / workspace contexts)
 - [ ] With the toggle off, a 15-file folder uploads **15 rows and asks zero questions**, and no job enters `awaiting_disambiguation`.
 - [ ] Those rows still carry `relative_path`, `original_filename`, `exif_raw` and EXIF coordinates where present.
 - [ ] The spec/code divergence in `upload-address-resolution.phases.md` § Trigger matrix is gone — the matrix and the code agree.
+- [x] The read model exposes `relative_path` (detail + list) and `exif_raw` (detail only).
+- [x] *Original folder* shows the folder the file arrived with, and shows none when there was none.
 - [ ] Detail view of an unlocated item offers **Add as location** on the folder and file-name rows.
 - [ ] Using it on an unambiguous folder path writes a location without opening a tray.
 - [ ] An item that already has a location offers no add action.

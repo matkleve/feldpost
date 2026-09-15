@@ -13,7 +13,7 @@ import type { DateSaveEvent } from '../../../calendar-dropdown/calendar-dropdown
 import { CalendarDropdownComponent } from '../../../calendar-dropdown/calendar-dropdown.component';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import type { DetailEditingField, MediaRecord, SelectOption } from '../media-detail-view.types';
-import { formatCoordinate, splitOriginalFilePath } from '../media-detail-view.utils';
+import { formatCoordinate, resolveOriginalFilePathParts } from '../media-detail-view.utils';
 import type { ExifLocationAddState } from '../media-detail-exif-location-add.state';
 import { DropdownShellComponent } from '../../../dropdown-trigger/shell/dropdown-shell.component';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
@@ -85,8 +85,15 @@ export class MediaDetailInlineSectionComponent {
       this.media().exif_longitude != null,
   );
 
+  /**
+   * "Original folder" comes from `relative_path` — the folder path the file actually arrived with.
+   * `original_filename` is a leaf name: for a directory upload it is `IMG_001.jpg` and carries no
+   * folder at all, so splitting it showed a folder only when the name happened to contain a slash.
+   * It stays as the fallback for uploads that predate `relative_path` being read here.
+   * @see docs/specs/system/deferred-location-resolution.md
+   */
   readonly originalFilePathParts = computed(() =>
-    splitOriginalFilePath(this.media().original_filename),
+    resolveOriginalFilePathParts(this.media().relative_path, this.media().original_filename),
   );
 
   readonly originalFolderLabel = computed(() => this.originalFilePathParts().folder);

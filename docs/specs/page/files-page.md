@@ -86,9 +86,9 @@ FilesComponent (/files)
 | new RPC | `list_media_folder_children(prefix)` | returns child segments + file/unresolved counts |
 | new RPC | `list_media_in_folder(prefix, recursive)` | paginated file rows |
 
-**Prerequisite (blocking).** `relative_path` is stored but **not selected anywhere in the read
-model** — `workspace-view.service.ts` selects a fixed column list that omits it. Nothing can be
-grouped by folder until that column is exposed. This is the first implementation step.
+**Prerequisite — done 2026-09-15.** `relative_path` was stored but selected nowhere, so nothing could
+be grouped by folder. It is now selected in the media list reads (`media-query.service.ts`) and on
+the detail read, and carried on `MediaRecord`. What remains here is the tree and its aggregate RPCs.
 
 **Aggregation belongs in SQL.** Counting a subtree client-side means fetching every row; at 100 000
 items that repeats the mistake Phase 3 just removed. The two RPCs above MUST aggregate server-side

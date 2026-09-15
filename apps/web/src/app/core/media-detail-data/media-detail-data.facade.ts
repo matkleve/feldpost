@@ -28,6 +28,10 @@ interface MediaDetailRow {
   storage_path: string | null;
   thumbnail_path: string | null;
   original_filename: string | null;
+  /** Folder path the file arrived with. Immutable after insert; the source of truth for "original folder". */
+  relative_path: string | null;
+  /** Full EXIF payload captured at ingest. Immutable after insert. */
+  exif_raw: Record<string, unknown> | null;
   latitude: number | null;
   longitude: number | null;
   exif_latitude: number | null;
@@ -273,6 +277,8 @@ export class MediaDetailDataFacade {
       storage_path: media.storage_path,
       thumbnail_path: media.thumbnail_path,
       original_filename: media.original_filename,
+      relative_path: media.relative_path ?? null,
+      exif_raw: media.exif_raw ?? null,
       latitude: media.latitude,
       longitude: media.longitude,
       exif_latitude: media.exif_latitude,
