@@ -315,7 +315,7 @@ open a `layer_package` tray asking which meaningless string was the street.
 The remaining tray load is folder shape (`layer_conflict`, F-04/F-11), not file naming. Re-run
 `--scale=2000` for figures comparable to the table above.
 
-Job store, real `UploadJobStateService`:
+Job store, real `UploadJobStateService` — **before Phase 3.1** (`prev.map` per write):
 
 | Jobs held | `updateJob` | `findJob` | whole batch at 15 writes/job |
 | --- | --- | --- | --- |
@@ -323,6 +323,18 @@ Job store, real `UploadJobStateService`:
 | 1 000 | 0.016 ms | 0.013 ms | 0.25 s |
 | 5 000 | 0.080 ms | 0.064 ms | 6 s |
 | 20 000 | 0.573 ms | 0.383 ms | 2.9 min |
+
+**After Phase 3.1, 2026-09-15** (id-keyed `Map` + `revision` signal, same tier, same machine):
+
+| Jobs held | `updateJob` | `findJob` | whole batch at 15 writes/job |
+| --- | --- | --- | --- |
+| 100 | 0.0007 ms | 0.0001 ms | 1 ms |
+| 1 000 | 0.0007 ms | 0.0001 ms | 11 ms |
+| 5 000 | 0.0014 ms | 0.0001 ms | 106 ms |
+| 20 000 | 0.0010 ms | 0.0002 ms | 315 ms |
+
+Both operations are flat across the whole range; the job-store row of the extrapolation below is
+historical. Re-run `--scale=20000` to reproduce.
 
 Extrapolated at the measured rates — linear for classification, quadratic for the job store,
 both **optimistic** bounds:
@@ -345,11 +357,16 @@ both **optimistic** bounds:
   the fuzzy search, and a normalized exact-match map consulted before Fuse would remove it for the
   overwhelming majority of tokens (a folder segment is usually either exactly a municipality or
   nowhere near one).
-- **Job store: `O(n)` per write, so `O(n²)` per batch.**
-  `upload-job-state.service.ts:126` is `this._jobs.update((prev) => prev.map(...))` — every single
-  field write allocates a fresh array of every job in the batch, and `findJob` at :122 is a linear
-  scan. At 20 000 jobs one write already costs 0.57 ms. An id-keyed `Map` (or a per-job signal)
-  makes both `O(1)` and is the single highest-leverage change for large batches.
+- **Job store: ~~`O(n)` per write, so `O(n²)` per batch~~ — fixed 2026-09-15.**
+  `upload-job-state.service.ts` used to be `this._jobs.update((prev) => prev.map(...))`, so every
+  single field write allocated a fresh array of every job in the batch, and `findJob` was a linear
+  scan; at 20 000 jobs one write cost 0.57 ms. It is now an id-keyed `Map` behind a `revision`
+  signal, with `jobs` as a `computed` projection — both operations `O(1)`, the array built once per
+  notified read instead of once per write. Guarantees in the
+  [job store supplement](../specs/service/media-upload-service/upload-manager.job-store.supplement.md);
+  measured effect in the table above and in
+  [F-07](../study/005-upload-pipeline-trace-findings.md#f-07). The extrapolation table's job-store
+  column predates this and is left as the historical record.
 - **Chunk the batch, or move classification off the main thread.** Even with both hot spots fixed,
   classification is inherently per-file work; a company-scale import wants it batched into chunks
   that yield to the event loop, or moved to a worker, so the panel stays responsive and uploads

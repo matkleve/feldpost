@@ -43,7 +43,7 @@ spec-level — the spec says what the code does, so a fix needs a contract decis
 | [F-04](#f-04) | ~~Ordinary file names form competing street-level layer packages~~ **fixed** | Medium | Code |
 | [F-05](#f-05) | `locationRequirementMode: 'optional'` does not skip the address pipeline | Medium | **Spec** ↔ code |
 | [F-06](#f-06) | Classification costs ~9 ms/file and blocks the first upload | High | Code |
-| [F-07](#f-07) | The job store is `O(n)` per write, so a batch is `O(n²)` | High | Code |
+| [F-07](#f-07) | ~~The job store is `O(n)` per write, so a batch is `O(n²)`~~ **fixed** | High | Code |
 | [F-08](#f-08) | Tray volume scales linearly with the file count | High | **Spec** (product) |
 | [F-09](#f-09) | The `test` gate compiles nothing, so it runs no specs | Medium | Repo |
 | [F-10](#f-10) | Two gate debt notes state numbers that no longer match | Low | Repo |
@@ -311,6 +311,27 @@ complete new-upload run. `[A]`
 
 **Extrapolated:** ~43 s of pure job-store work for 10 000 files, **~72 min for 100 000**. `[C]`
 Superlinear in practice (allocation and GC), so linear extrapolation understates it.
+
+**Fix, 2026-09-15** (STUDY-006 Phase 3.1, spec:
+[job store supplement](../specs/service/media-upload-service/upload-manager.job-store.supplement.md)).
+The store is an id-keyed `Map` plus a `revision` signal; the public `jobs` array is a `computed` over
+it, so reads and writes are `O(1)` and only the array projection is `O(n)`, once per notified read
+rather than once per write. Insertion order is preserved (`Map` iteration order), so every existing
+consumer that treats `jobs()` as batch order is unaffected.
+
+**Measured on the same harness tier, before and after:** `[B]`
+
+| Jobs held | `updateJob` before → after | `findJob` before → after | whole batch (15 writes/job) |
+| --- | --- | --- | --- |
+| 100 | 0.0029 → **0.0007 ms** | 0.0023 → **0.0001 ms** | 4 ms → **1 ms** |
+| 1 000 | 0.0148 → **0.0007 ms** | 0.0154 → **0.0001 ms** | 222 ms → **11 ms** |
+| 5 000 | 0.0972 → **0.0014 ms** | 0.0666 → **0.0001 ms** | 7.3 s → **106 ms** |
+| 20 000 | 0.9448 → **0.0010 ms** | 0.3569 → **0.0002 ms** | 4.7 min → **315 ms** |
+
+Both operations are now flat across a 200× range in batch size, which is the acceptance criterion
+STUDY-006 Phase 3.1 set. The trace harness reports identical lanes before and after
+(`Issues=1 Uploaded=16 Waiting for user=4` on the curated corpus, `Skipped=1 Uploaded=20` on the
+generated one), so the rewrite is a cost change and not a behaviour change. `[B]`
 
 ---
 

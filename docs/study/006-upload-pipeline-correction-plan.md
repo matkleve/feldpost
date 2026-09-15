@@ -463,6 +463,29 @@ a clean one.
 must be restated). **Note:** 3.1 and 3.2 are independently valuable and independently testable; do
 not bundle them.
 
+**Status, 2026-09-15:** 3.1 is **done**. Spec first, as the Sensitive class requires:
+[`upload-manager.job-store.supplement.md`](../specs/service/media-upload-service/upload-manager.job-store.supplement.md)
+restates the store's guarantees (G1 identity, G2 insertion order, G3 immutable snapshots, G4 a write
+for an unknown id is a no-op that notifies nobody, G5 one notification per real change, G6 terminal
+removal) before the rewrite, so the invariants are the acceptance criteria rather than a description
+of whatever the new code happens to do.
+
+The store is now an id-keyed `Map` with a `revision` signal; `jobs` is a `computed` projection over
+it. `updateJob`/`findJob` are `O(1)`; the `O(n)` array build happens once per notified read instead
+of once per write. `revision` only advances on a real change, which is what makes G4 and G5
+testable — and G4 was proven red by stashing only the service (`× G4: a write for an unknown id
+changes nothing and notifies nobody`).
+
+The acceptance criterion is met with room to spare — `updateJob` is flat at ~0.001 ms from 100 to
+20 000 jobs (was 0.0029 → 0.9448 ms), and a full 20 000-job batch costs 315 ms instead of 4.7
+minutes. Full table in [F-07](./005-upload-pipeline-trace-findings.md#f-07). Lanes are identical
+before and after on both corpora, so this is a cost change only. Upload suite: 402 tests over 59
+files, up from 391.
+
+**3.2 is the next step.** Phase 4 stays blocked on 3.2 and 3.3 — 3.1 removed the per-write cost, but
+classification (F-06, ~9 ms/file) still blocks the first upload, and that is what an archive import
+would feel first.
+
 ### Phase 4 — The archive import mode (D-04, accepted)
 
 Only after Phase 3 — its performance work is a prerequisite, not a nicety. Spec first: a new flow,

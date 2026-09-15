@@ -1,7 +1,10 @@
 /**
  * UploadJobStateService — job CRUD, phase transitions, and event emission.
  *
- * Owns the jobs signal and provides atomic operations for job state management.
+ * Owns the job store and provides atomic operations for job state management. The store is
+ * id-keyed (`Map`), so a write costs O(1) rather than rebuilding the whole list; the rendered
+ * array is derived from it. Contract and guarantees:
+ * docs/specs/service/media-upload-service/upload-manager.job-store.supplement.md
  * Emits domain events when jobs change phase, fail, skip, or complete.
  *
  * Ground rules (Spec: upload-manager-pipeline.md):
@@ -90,9 +93,23 @@ export type { TransitionChannel, PhaseTransitionOptions };
 
 @Injectable({ providedIn: 'root' })
 export class UploadJobStateService {
-  private readonly _jobs = signal<UploadJob[]>([]);
+  /**
+   * Id-keyed source of truth. A batch writes ~15 times per job, so a write must not touch every
+   * other job: the array the UI renders is derived from this map, not the other way round.
+   * @see docs/specs/service/media-upload-service/upload-manager.job-store.supplement.md
+   */
+  private readonly index = new Map<string, UploadJob>();
 
-  readonly jobs: Signal<ReadonlyArray<UploadJob>> = this._jobs.asReadonly();
+  /** Bumped by every mutation that actually changed something; drives the derived signals. */
+  private readonly revision = signal(0);
+
+  private readonly _jobs: Signal<ReadonlyArray<UploadJob>> = computed(() => {
+    this.revision();
+    // Map iteration is insertion-ordered, which is the order the panel renders (G2).
+    return [...this.index.values()];
+  });
+
+  readonly jobs: Signal<ReadonlyArray<UploadJob>> = this._jobs;
 
   readonly activeJobs: Signal<ReadonlyArray<UploadJob>> = computed(() =>
     this._jobs().filter((j) => !TERMINAL_PHASES.has(j.phase)),
@@ -116,32 +133,54 @@ export class UploadJobStateService {
   // ── Mutations ──────────────────────────────────────────────────────────────
 
   addJobs(jobs: UploadJob[]): void {
-    this._jobs.update((prev) => [...prev, ...jobs]);
+    if (!jobs.length) {
+      return;
+    }
+    for (const job of jobs) {
+      this.index.set(job.id, job);
+    }
+    this.revision.update((n) => n + 1);
   }
 
   findJob(jobId: string): UploadJob | undefined {
-    return this._jobs().find((j) => j.id === jobId);
+    return this.index.get(jobId);
   }
 
+  /**
+   * Replaces only the patched job's object; every other job keeps its identity (G3). A write for
+   * an id the store does not hold changes nothing and notifies nobody (G4).
+   */
   updateJob(jobId: string, patch: Partial<UploadJob>): void {
-    this._jobs.update((prev) => prev.map((j) => (j.id === jobId ? { ...j, ...patch } : j)));
+    const job = this.index.get(jobId);
+    if (!job) {
+      return;
+    }
+    this.index.set(jobId, { ...job, ...patch });
+    this.revision.update((n) => n + 1);
   }
 
   removeJob(jobId: string): void {
-    const job = this.findJob(jobId);
+    const job = this.index.get(jobId);
     unregisterInflightDedupHash(job?.contentHash, jobId);
-    this._jobs.update((prev) => prev.filter((j) => j.id !== jobId));
+    if (!this.index.delete(jobId)) {
+      return;
+    }
+    this.revision.update((n) => n + 1);
   }
 
   removeTerminalJobs(): void {
-    const terminal = this._jobs().filter((j) => TERMINAL_PHASES.has(j.phase));
+    const terminal = [...this.index.values()].filter((j) => TERMINAL_PHASES.has(j.phase));
+    if (!terminal.length) {
+      return;
+    }
     for (const j of terminal) {
       unregisterInflightDedupHash(j.contentHash, j.id);
       if (j.thumbnailUrl && j.phase !== 'complete') {
         URL.revokeObjectURL(j.thumbnailUrl);
       }
+      this.index.delete(j.id);
     }
-    this._jobs.update((prev) => prev.filter((j) => !TERMINAL_PHASES.has(j.phase)));
+    this.revision.update((n) => n + 1);
   }
 
   /**
@@ -236,7 +275,7 @@ export class UploadJobStateService {
     });
   }
 
-  /** Get current snapshot of all jobs (for batch computations). */
+  /** Get current snapshot of all jobs (for batch computations). Insertion-ordered, like `jobs()`. */
   snapshot(): ReadonlyArray<UploadJob> {
     return this._jobs();
   }
