@@ -267,6 +267,18 @@ Only the per-job geocode step reads the mode, at `upload-new-pre-resolve.util.ts
 listed as Medium because the flat multi-file path (`submit`) does behave as intended — 150 files
 uploaded 142 rows and skipped 8 duplicates with no questions. `[A]`
 
+**Owner decision, 2026-09-15 — the toggle wins.** *"clearly if the button says Upload without
+Location it should be entered."* `optional` must skip the address pipeline outright, and the raw
+evidence must stay on the item so a person can resolve it afterwards. Contract:
+[deferred-location-resolution](../specs/system/deferred-location-resolution.md).
+
+Worth recording, because it shrinks the work: **the retention half already exists.** `relative_path`,
+`original_filename`, `exif_latitude`/`exif_longitude`, `exif_raw` and `captured_at` are all written
+at insert (`upload-file-persist.util.ts:199-213`) and made immutable by
+`prevent_media_items_raw_source_overwrite`. `[A]` What is missing is (a) honouring the skip,
+(b) selecting `relative_path` / `exif_raw` in the read model — the same gap that blocks
+[files-page](../specs/page/files-page.md) — and (c) the resolve-later actions, single and batch.
+
 ---
 
 ### F-06 · Classification costs ~9 ms per file and blocks the first upload {#f-06}
