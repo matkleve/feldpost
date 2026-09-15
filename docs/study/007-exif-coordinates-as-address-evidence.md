@@ -160,6 +160,63 @@ distance rules must not be conflated. `[A]`
 | **R5** | Do build the outlier alarm — highest value per question asked | `[D]` |
 | **R6** | Give D-09 its own radius constant; do not reuse `exifAssistRadiusMeters` | `[D]` |
 | **R7** | Store the reverse-geocode result as evidence with its own origin, so a wrong adoption is traceable afterwards | `[D]` |
+| **R8** | Show the photo's bearing on the map; do **not** project a subject position from it (§ 6b) | `[D]` |
+| **R9** | Treat every EXIF field as independently optional; no rule may require one (§ 6c) | `[D]` |
+
+## 6b · Direction — the owner's case, and what it changes
+
+**Owner, 2026-09-15:** *"I stand on a building and photograph around. The photo might have the GPS
+and the directionality. My solution is to just show the direction the photo was taken in."*
+
+This is the right instinct, and it follows directly from § 1. If the problem is that a GPS tag
+records the camera rather than the subject, then a **bearing is the missing half of the
+observation**: position plus direction describes a ray from the camera toward the subject, which is
+much closer to what we actually want to know.
+
+**The field exists and is readable here.** Probing the 20 shipped sample photos with the app's own
+`exifr` build: **15 of 20 carry `GPSLatitude`/`GPSLongitude`, and the same 15 carry
+`GPSImgDirection`.** `[B]` (Sample fixtures, not device exports — this proves the field is readable
+by the shipped library, not that cameras reliably write it.)
+
+### Why "just show the direction" is the right first move
+
+Showing a bearing is a **display** decision, not an inference. It adds no claim the data does not
+support: the photo says it was taken facing 47°, and the UI says so. Compare that with the tempting
+next step — projecting along the bearing to guess *which building* was photographed — which
+multiplies three uncertainties (position error, bearing error, unknown distance to subject) into a
+guess that would then be written as an address. The first is honest disclosure; the second is
+exactly the fabricated precision the principle forbids. `[D]`
+
+**Recommendation R8:** render the bearing on the map as a direction indicator on the photo's marker,
+and stop there. Do not project a subject position from it. `[D]`
+
+It also makes the owner's own scenario legible: standing on one building photographing around
+produces a fan of identical positions with *different* bearings — which is visible at a glance as a
+fan, and is precisely the case § 4 says must never be merged into one address.
+
+## 6c · How much can EXIF be trusted?
+
+**Owner's question: "how sure can we be about the exif data of a media?"** Honestly: less than the
+number of decimal places suggests, and the doubt should be structural rather than a fudge factor.
+
+| Source of doubt | Effect | Grade |
+| --- | --- | --- |
+| **Absent entirely** | 5 of 20 sample files had no GPS at all; stripped by messaging apps, exports and privacy settings | `[B]` |
+| **Consumer GPS error** | 3–5 m open sky, materially worse beside a facade or in an urban canyon — where construction photos are taken | `[C]` |
+| **Camera ≠ subject** | The dominant error, unbounded by GPS quality (§ 1) | `[A]` |
+| **Bearing reference unknown** | The samples carry `GPSImgDirection` but **no `GPSImgDirectionRef`**, so true vs magnetic north is unstated. Vienna's declination is ~5°, i.e. ~4 m sideways at 50 m | `[B]` |
+| **Capture time absent** | **0 of 20** samples carry `DateTimeOriginal` — so the time signal § 4 recommends for clustering is not guaranteed either | `[B]` |
+| **Clock and datum** | Wrong device clock; `GPSMapDatum` present in the samples but unvalidated | `[C]` |
+
+The last two are new findings from this probe and both cut against earlier optimism: § 4 proposed
+capture time as a better clustering key than distance, and in this corpus **capture time is not
+there at all**. That does not sink the idea — real device photos normally carry it — but it does
+mean any design must treat every EXIF field as **optional evidence, never a required input**. `[C]`
+
+**Recommendation R9:** treat EXIF fields as independently optional. Every rule that consumes one
+must state what it does when the field is missing, and the answer must never be "guess". `[D]`
+This is the same shape as the evidence model already in use: EXIF is one more origin with one more
+confidence, not a privileged channel.
 
 ## 7 · What would change this study
 
@@ -169,6 +226,9 @@ distance rules must not be conflated. `[A]`
 - **Evidence that operators photograph from inside.** If the typical shot is taken within the
   property rather than from the street, the across-the-road failure is rarer than assumed and the
   radius can widen.
-- **A measurement of how often EXIF is present at all.** If most uploads have no GPS, D-09 is a
-  smaller prize than it looks. The harness can inject EXIF (`upload-trace-harness.ts:205`) `[A]`
-  but says nothing about real files.
+- **A measurement of how often EXIF is present at all.** Partially answered on 2026-09-15 by probing
+  the shipped samples: 15/20 had GPS, 15/20 had a bearing, **0/20 had capture time** `[B]`. These are
+  fixtures, not device exports, so the figures bound nothing about production — but they were enough
+  to show that capture time cannot be assumed (§ 6c). A real device sample would settle it.
+- **A device export carrying `GPSImgDirectionRef`.** `[D]` Without it, bearings cannot be stated as
+  true north, which caps how precisely § 6b's indicator may be drawn.
