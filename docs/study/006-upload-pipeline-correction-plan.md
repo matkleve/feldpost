@@ -493,8 +493,17 @@ changes nothing and notifies nobody`).
 The acceptance criterion is met with room to spare — `updateJob` is flat at ~0.001 ms from 100 to
 20 000 jobs (was 0.0029 → 0.9448 ms), and a full 20 000-job batch costs 315 ms instead of 4.7
 minutes. Full table in [F-07](./005-upload-pipeline-trace-findings.md#f-07). Lanes are identical
-before and after on both corpora, so this is a cost change only. Upload suite: 402 tests over 59
-files, up from 391.
+before and after on both corpora, so this is a cost change only.
+
+Upload suite: **402 tests over 59 files** (`npx vitest run src/app/core/upload`), up from 391.
+
+**Note on that command, 2026-09-15.** The figure is reproducible, but only with the exact argument:
+`src/app/core/upload` is a **substring** filter, so it also matches
+`upload-resolver-tray-orchestrator*.spec.ts` alongside the `upload/` directory. Adding a trailing
+slash (`src/app/core/upload/`) narrows it to the directory and yields **387 over 56** instead. Both
+numbers are right; they count different sets. Recorded because a first attempt to re-derive 402 used
+the trailing-slash form, concluded the figure was unreproducible, and "corrected" a number that was
+in fact correct — the missing thing was never the measurement, only the command beside it.
 
 **3.2 is also done, 2026-09-15**, as a separate change — the note above says not to bundle them, and
 keeping them apart is what makes the 29 % attributable to one cause. Spec first again
@@ -509,7 +518,42 @@ exactly as the exact index already was. Measured on 2 000 generated paths, both 
 That is close to the ~30 % the earlier build-vs-search split predicted, which is the useful part: the
 prediction was testable and it held.
 
-**3.3 is the next step, and it is the one that matters most for an import.** 3.1 and 3.2 both reduced
+**Status, 2026-09-15: 3.3 is done.** Spec first
+([chunked classification supplement](../specs/service/media-upload-service/upload-manager-pipeline.chunked-classification.supplement.md)),
+then the red tests, then the code. The three submit paths shared an identical four-line tail, so the
+change is one shared `enqueueAndClassifyInChunks` rather than three edits: add a chunk's jobs,
+classify only those jobs, drain, yield, repeat.
+
+Two things made it correct rather than merely chunked, both from
+[STUDY-008](./008-classification-chunking-strategy.md):
+
+- **Tray *presentation* is held until the whole batch is classified**, via the pre-resolve wave —
+  armed once with the full batch count before the first chunk. That closes the race STUDY-008 § 2
+  identified (a group can only gain members while its tray is unanswered), which is what makes chunk
+  size a tuning constant rather than a correctness parameter.
+- **The group cache merges across chunks** instead of being replaced: a grouping key seen twice
+  unions its job ids. This is the cache-level form of the owner's "the 301st file belongs to the
+  first 300".
+
+**What the FSM caught.** The first attempt deferred tray *registration* to the end of the batch, not
+just presentation. The transition assertion in `vitest.setup.ts` failed immediately: by the time
+registration ran, jobs had already drained past the phase from which they can be marked
+`awaiting_disambiguation`. Registration must stay per chunk, before that chunk drains; only
+presentation waits. The distinction is now stated in the supplement because it is not obvious and
+the cost of getting it wrong is silent misrouting.
+
+**Verified.** Six guarantee tests, three of them red without the change (chunking happens, uploading
+starts before classification ends, a thrown chunk does not stop the rest). The harness shows the
+outcome is unchanged, which is the point: identical lanes (`Issues=1 Uploaded=19 Waiting for user=1`
+curated, `Skipped=1 Uploaded=20` generated), identical group count (402), and identical tray answers
+by kind (2 `admin_level_conflict`, 2 `containment_check`, 1 `layer_package`).
+
+**Not measured: wall-clock time to first upload.** The ordering is proven by test, but the harness's
+`--scale` tier measures classification and the job store only, not a full pipeline drain, so no
+figure is claimed for how much sooner the first byte moves in a browser. That measurement needs a
+browser and a real tree; it is the honest gap in this phase.
+
+**3.3 was the one that mattered most for an import.** 3.1 and 3.2 both reduced
 *cost*; neither touched *when* the cost is paid. `submitUploadManagerWebkitFolder` still awaits the
 whole `runClassifyBatchGuarded` before `drainQueue()`, so classification remains
 time-to-first-byte — at 4.9 ms/file that is still ~8 minutes of frozen main thread before a

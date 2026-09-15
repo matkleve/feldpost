@@ -79,9 +79,27 @@ export class UploadAddressResolutionOrchestrator {
     return this.jobState.findJob(jobId)?.groupingKey;
   }
 
-  async classifyBatch(batchId: string): Promise<void> {
-    uploadTraceEnter('orchestrator', 'classifyBatch', { batchId });
-    const jobs = this.jobState.jobs().filter((j) => j.batchId === batchId);
+  /**
+   * Build Search Objects and group states for a batch, or for one chunk of it.
+   *
+   * `options.jobIds` restricts the pass to those jobs; the resulting group states are **merged**
+   * into the batch cache rather than replacing it, so a grouping key that spans two chunks ends up
+   * as one group holding all its jobs (G5).
+   * @see docs/specs/service/media-upload-service/upload-manager-pipeline.chunked-classification.supplement.md
+   */
+  async classifyBatch(
+    batchId: string,
+    options?: { jobIds?: ReadonlySet<string> },
+  ): Promise<void> {
+    uploadTraceEnter('orchestrator', 'classifyBatch', {
+      batchId,
+      chunkSize: options?.jobIds?.size,
+    });
+    const jobIdFilter = options?.jobIds;
+    const jobs = this.jobState
+      .jobs()
+      .filter((j) => j.batchId === batchId)
+      .filter((j) => !jobIdFilter || jobIdFilter.has(j.id));
     if (!jobs.length) {
       uploadTraceDecision('orchestrator', 'classifyBatch — no jobs in batch');
       uploadTraceExit('orchestrator', 'classifyBatch', 'empty');
@@ -382,7 +400,7 @@ export class UploadAddressResolutionOrchestrator {
       uploadAddressDebug('orchestrator', 'group → needsGeocode', summarizeGroupState(needsGeocodeState));
     }
 
-    this.batchCaches.set(batchId, cache);
+    this.mergeBatchCache(batchId, cache);
     uploadTraceExit('orchestrator', 'classifyBatch', `groups=${cache.size}`);
     uploadAddressDebug('orchestrator', 'classifyBatch done', {
       batchId,
@@ -393,6 +411,34 @@ export class UploadAddressResolutionOrchestrator {
         jobCount: state.jobIds.length,
       })),
     });
+  }
+
+  /**
+   * Merge one chunk's group states into the batch cache.
+   *
+   * A grouping key already present keeps its existing state and gains the chunk's job ids — the
+   * cache-level form of "the 301st file belongs to the group the first 300 formed". Job ids are
+   * de-duplicated because a re-classify of the same job must not double-count it.
+   * @see docs/specs/service/media-upload-service/upload-manager-pipeline.chunked-classification.supplement.md G5
+   */
+  private mergeBatchCache(
+    batchId: string,
+    incoming: Map<string, UploadGroupResolutionState>,
+  ): void {
+    const existing = this.batchCaches.get(batchId);
+    if (!existing) {
+      this.batchCaches.set(batchId, incoming);
+      return;
+    }
+    for (const [groupingKey, state] of incoming) {
+      const prior = existing.get(groupingKey);
+      if (!prior) {
+        existing.set(groupingKey, state);
+        continue;
+      }
+      const jobIds = [...new Set([...prior.jobIds, ...state.jobIds])];
+      existing.set(groupingKey, { ...prior, jobIds });
+    }
   }
 
   patchGroupState(batchId: string, state: UploadGroupResolutionState): void {

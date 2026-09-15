@@ -13,6 +13,10 @@ export class UploadPreResolveWaveService {
   private readonly pendingByBatch = new Map<string, number>();
   /** Batches that already received early tray presentation (first disambiguation). */
   private readonly earlyTrayPresented = new Set<string>();
+  /** Batches still being classified in chunks — tray presentation is held until they finish. */
+  private readonly classifying = new Set<string>();
+  /** Batches that wanted to present a tray while classification was still running. */
+  private readonly trayHeldWhileClassifying = new Set<string>();
 
   /** Call after classifyBatch with the number of jobs that will pre-resolve. */
   resetWave(batchId: string, jobCount: number): void {
@@ -33,12 +37,43 @@ export class UploadPreResolveWaveService {
     if (this.earlyTrayPresented.has(batchId)) {
       return;
     }
+    // G4: while the batch is still being classified in chunks, a group can still gain members.
+    // Presenting now would let the user answer a question whose remaining files have not arrived,
+    // and those files would then open a second, identical tray.
+    // @see docs/specs/service/media-upload-service/upload-manager-pipeline.chunked-classification.supplement.md
+    if (this.classifying.has(batchId)) {
+      this.trayHeldWhileClassifying.add(batchId);
+      uploadTraceDecision('wave', 'tray held — batch still classifying', { batchId, ...detail });
+      return;
+    }
     this.earlyTrayPresented.add(batchId);
     uploadTraceDecision('wave', 'early tray — first disambiguation registered', {
       batchId,
       ...detail,
     });
     this.trayOrchestrator.notifyScanIdle(batchId);
+  }
+
+  /**
+   * Mark a batch as being classified in chunks. Tray presentation is held until
+   * {@link endClassification} runs (G4).
+   */
+  beginClassification(batchId: string): void {
+    this.classifying.add(batchId);
+    this.trayHeldWhileClassifying.delete(batchId);
+  }
+
+  /**
+   * Classification of the whole batch is done. Release any tray presentation that was held, so a
+   * question the user could not safely be asked mid-classification is asked now.
+   */
+  endClassification(batchId: string): void {
+    if (!this.classifying.delete(batchId)) {
+      return;
+    }
+    if (this.trayHeldWhileClassifying.delete(batchId)) {
+      this.notifyFirstTrayReady(batchId, { released: 'after classification' });
+    }
   }
 
   /**

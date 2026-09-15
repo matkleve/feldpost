@@ -24,7 +24,11 @@ export interface UploadManagerSubmitDeps {
   createProject: (name: string) => Promise<string | undefined>;
   queuedLabel: string;
   /** Runs Search Object pipeline after jobs are enqueued. */
-  classifyBatch?: (batchId: string) => Promise<void>;
+  classifyBatch?: (batchId: string, options?: { jobIds?: ReadonlySet<string> }) => Promise<void>;
+  /** Arm the pre-resolve wave for the whole batch and hold tray presentation (G4). */
+  beginBatchClassification?: (batchId: string, totalJobCount: number) => void;
+  /** Register trays for the finished batch and release tray presentation (G4). */
+  finalizeBatchClassification?: (batchId: string) => Promise<void>;
 }
 
 export async function submitUploadManagerFiles(
@@ -62,10 +66,7 @@ export async function submitUploadManagerFiles(
     options?.locationRequirementMode,
   );
 
-  deps.addJobs(newJobs);
-  deps.hydrateDeferredPreviews(newJobs);
-  await runClassifyBatchGuarded(batchId, deps);
-  deps.drainQueue();
+  await enqueueAndClassifyInChunks(batchId, newJobs, deps);
 
   return batchId;
 }
@@ -137,10 +138,7 @@ export async function submitUploadManagerFolder(
     options?.locationRequirementMode,
   );
 
-  deps.addJobs(newJobs);
-  deps.hydrateDeferredPreviews(newJobs);
-  await runClassifyBatchGuarded(batchId, deps);
-  deps.drainQueue();
+  await enqueueAndClassifyInChunks(batchId, newJobs, deps);
 
   return batchId;
 }
@@ -190,10 +188,7 @@ export async function submitUploadManagerWebkitFolder(
     options?.locationRequirementMode,
   );
 
-  deps.addJobs(newJobs);
-  deps.hydrateDeferredPreviews(newJobs);
-  await runClassifyBatchGuarded(batchId, deps);
-  deps.drainQueue();
+  await enqueueAndClassifyInChunks(batchId, newJobs, deps);
 
   return batchId;
 }
@@ -208,15 +203,65 @@ export async function submitUploadManagerWebkitFolder(
 async function runClassifyBatchGuarded(
   batchId: string,
   deps: Pick<UploadManagerSubmitDeps, 'classifyBatch'>,
+  jobIds?: ReadonlySet<string>,
 ): Promise<void> {
   if (!deps.classifyBatch) {
     return;
   }
   try {
-    await deps.classifyBatch(batchId);
+    await deps.classifyBatch(batchId, jobIds ? { jobIds } : undefined);
   } catch (err) {
     console.error('[upload-manager] classifyBatch failed; draining queue without it:', err);
   }
+}
+
+/**
+ * How many files one classification chunk covers.
+ *
+ * A tuning constant, deliberately **not** a correctness parameter: tray presentation is held until
+ * the whole batch is classified, so a group split across two chunks still asks one question.
+ * @see docs/specs/service/media-upload-service/upload-manager-pipeline.chunked-classification.supplement.md
+ */
+const CLASSIFY_CHUNK_SIZE = 250;
+
+/** Hand the main thread back so the panel can paint between chunks. */
+function yieldToEventLoop(): Promise<void> {
+  return new Promise<void>((resolve) => setTimeout(resolve, 0));
+}
+
+/**
+ * Add, classify and drain a batch in chunks that yield to the event loop, so uploading starts after
+ * the first chunk instead of after the whole tree.
+ *
+ * A job is added only once its own chunk is about to be classified, which is what keeps G1 — a job
+ * can never drain before its group is in the batch cache.
+ * @see docs/specs/service/media-upload-service/upload-manager-pipeline.chunked-classification.supplement.md
+ */
+async function enqueueAndClassifyInChunks(
+  batchId: string,
+  newJobs: ReadonlyArray<UploadJob>,
+  deps: UploadManagerSubmitDeps,
+): Promise<void> {
+  if (!newJobs.length) {
+    deps.drainQueue();
+    return;
+  }
+
+  deps.beginBatchClassification?.(batchId, newJobs.length);
+
+  for (let start = 0; start < newJobs.length; start += CLASSIFY_CHUNK_SIZE) {
+    const chunk = newJobs.slice(start, start + CLASSIFY_CHUNK_SIZE);
+    deps.addJobs([...chunk]);
+    deps.hydrateDeferredPreviews([...chunk]);
+    await runClassifyBatchGuarded(batchId, deps, new Set(chunk.map((job) => job.id)));
+    deps.drainQueue();
+    if (start + CLASSIFY_CHUNK_SIZE < newJobs.length) {
+      await yieldToEventLoop();
+    }
+  }
+
+  await deps.finalizeBatchClassification?.(batchId);
+  deps.drainQueue();
 }
 
 async function resolveUploadProjectIdFromFolderName(

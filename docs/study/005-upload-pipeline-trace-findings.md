@@ -42,7 +42,7 @@ spec-level — the spec says what the code does, so a fix needs a contract decis
 | [F-03](#f-03) | ~~City classification requires an explicit country segment in the path~~ **fixed** | High | **Spec** |
 | [F-04](#f-04) | ~~Ordinary file names form competing street-level layer packages~~ **fixed** | Medium | Code |
 | [F-05](#f-05) | `locationRequirementMode: 'optional'` does not skip the address pipeline | Medium | **Spec** ↔ code |
-| [F-06](#f-06) | Classification costs ~9 ms/file and blocks the first upload — **cost partly fixed**, blocking still open | High | Code |
+| [F-06](#f-06) | ~~Classification costs ~9 ms/file and blocks the first upload~~ — cost cut 29 %, blocking **fixed** (chunked) | High | Code |
 | [F-07](#f-07) | ~~The job store is `O(n)` per write, so a batch is `O(n²)`~~ **fixed** | High | Code |
 | [F-08](#f-08) | Tray volume scales linearly with the file count | High | **Spec** (product) |
 | [F-09](#f-09) | The `test` gate compiles nothing, so it runs no specs | Medium | Repo |
@@ -308,11 +308,23 @@ generated paths, both naming modes: **6.97 / 6.86 → 4.89 / 4.91 ms per file**,
 share the separate 1.06 ms-build / 2.75 ms-search measurement above predicted. Groups (1 483) and
 tray count (634) are identical before and after. `[B]`
 
-**Still open.** The fuzzy search itself is the remaining cost and is inherent to the lookup; only a
-narrower candidate set would remove it. And the finding's *other* half is untouched — classification
-still runs synchronously and in full before `drainQueue()`, so it is still time-to-first-byte.
-That is STUDY-006 Phase 3.3 (chunk `classifyBatch`, start the queue after the first chunk), and it
-is what a 100 000-file import would feel first.
+**Second fix, 2026-09-15** (Phase 3.3, spec:
+[chunked classification supplement](../specs/service/media-upload-service/upload-manager-pipeline.chunked-classification.supplement.md)).
+The finding's *other* half — that the cost is paid before anything uploads — is now addressed.
+Classification runs in chunks that yield to the event loop; each chunk's jobs are added, classified
+and drained before the next begins, so uploading starts after the first chunk instead of after the
+whole tree. Tray *presentation* is held until the batch finishes classifying, which is what stops a
+split group from asking its question twice
+([STUDY-008](./008-classification-chunking-strategy.md)). `[A]`
+
+Outcome is unchanged, which is the acceptance criterion: identical lanes, identical group count
+(402) and identical tray answers by kind, chunked versus not. `[B]`
+
+**Still open.** The fuzzy search itself is the remaining per-file cost and is inherent to the lookup;
+only a narrower candidate set would remove it. And **no wall-clock time-to-first-upload figure is
+claimed**: the ordering is proven by test, but the harness's `--scale` tier measures classification
+and the job store, not a full pipeline drain, so how much sooner the first byte moves in a browser
+is unmeasured. `[D]`
 
 ---
 

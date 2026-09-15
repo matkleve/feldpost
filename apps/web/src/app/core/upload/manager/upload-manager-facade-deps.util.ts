@@ -113,11 +113,24 @@ export function buildUploadManagerSubmitDeps(
       return renamed ? draftProject.id : undefined;
     },
     queuedLabel: phaseLabel('queued'),
-    classifyBatch: async (batchId) => {
-      await input.addressOrchestrator.classifyBatch(batchId);
+    // Per chunk: build Search Objects, then register that chunk's trays **before** its jobs drain.
+    // Registration must stay here — a job that reaches the queue before its group is registered has
+    // already left the phase from which it can be marked `awaiting_disambiguation`. Only tray
+    // *presentation* is deferred to the end of the batch (G4), by the wave service.
+    // @see docs/specs/service/media-upload-service/upload-manager-pipeline.chunked-classification.supplement.md
+    classifyBatch: async (batchId, options) => {
+      await input.addressOrchestrator.classifyBatch(batchId, options);
       await input.locationResolution.registerLayerPackageGroupsAfterClassify(batchId);
-      const jobCount = input.jobState.jobs().filter((j) => j.batchId === batchId).length;
-      input.preResolveWave.resetWave(batchId, jobCount);
+    },
+    beginBatchClassification: (batchId, totalJobCount) => {
+      // Armed with the FULL batch count before any chunk runs, so the wave cannot complete while
+      // later chunks are still arriving.
+      input.preResolveWave.resetWave(batchId, totalJobCount);
+      input.preResolveWave.beginClassification(batchId);
+    },
+    finalizeBatchClassification: async (batchId) => {
+      input.preResolveWave.endClassification(batchId);
+      return Promise.resolve();
     },
   };
 }
