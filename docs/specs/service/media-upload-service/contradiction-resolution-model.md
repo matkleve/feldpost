@@ -162,6 +162,7 @@ This gate prevents the system from silently pushing a user's city choice through
 | **G4** | Deferred resolution lifecycle | Skip must set an explicit `deferred` status that persists through upload and is actionable in Media Detail | Deferred contract | Medium |
 | **G5** | Cross-batch dedup for admin conflicts | Same `(field, conflicting-value-set)` across batches must reuse/merge, not open duplicate trays | Already documented in `address-resolution-model.md` | Medium |
 | **G6** | C3 pre-check: street corroboration | Query the conflicting street bare before opening a `city`-vs-`city` C3 tray; auto-resolve on a clean one-city split, still ask otherwise. [D-11](../../../study/006-upload-pipeline-correction-plan.md#d-11) | [C3 street-corroboration supplement](./contradiction-resolution-model.c3-street-corroboration.supplement.md) | **Done** |
+| **G7** | Answering a cross-field conflict | A tray answer must be authoritative for the fields it implies (drop contradicting evidence, re-derive via `city→state`), and a signature already asked must never be asked again. Answering must also re-queue the job. [D-12](../../../study/006-upload-pipeline-correction-plan.md#d-12) | [cross-field answers supplement](./contradiction-resolution-model.cross-field-answers.supplement.md) | **Done** |
 
 ---
 

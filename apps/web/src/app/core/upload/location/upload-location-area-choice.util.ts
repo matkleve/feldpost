@@ -13,7 +13,12 @@ import type {
   AreaConflict,
   FieldLevelEntry,
 } from '../address-resolution/upload-area-evidence.types';
-import { detectAreaConflicts } from '../../location-path-parser/upload-area-evidence.helpers';
+import {
+  collapseAreaFlatFields,
+  corroborateAreaEvidence,
+  detectAreaConflicts,
+  dropAreaEvidenceContradictingAnswer,
+} from '../../location-path-parser/upload-area-evidence.helpers';
 import type { UploadSearchObject } from '../address-resolution/upload-address-resolution.types';
 
 const ADMIN_CANDIDATE_PREFIX = 'admin-level|';
@@ -76,6 +81,24 @@ export function applyAdminLevelSelectionsToSearchObject(
       [field]: [{ level: 0, value: value.trim(), source: 'filename', field }],
     };
   }
+
+  // The answer wins over path evidence it contradicts, and the derivation pass then refills the
+  // fields that depend on it (`city→state`). Without this the contradicting field survives, the
+  // detector re-raises the same conflict, and the identical tray re-opens forever.
+  // @see docs/study/005-upload-pipeline-trace-findings.md#f-21
+  const emptied = dropAreaEvidenceContradictingAnswer(next.areaEvidence ?? {}, selections, {
+    municipalities: geo.municipalities,
+    postcodeMap: geo.postcodeMap,
+    country: next.country,
+  });
+  for (const field of emptied) {
+    next[field] = null;
+  }
+  corroborateAreaEvidence(next.areaEvidence ?? {}, {
+    municipalities: geo.municipalities,
+    postcodeMap: geo.postcodeMap,
+  });
+  collapseAreaFlatFields(next, next.areaEvidence ?? {});
 
   const rechecked = detectAreaConflicts(next.areaEvidence ?? {}, {
     municipalities: geo.municipalities,

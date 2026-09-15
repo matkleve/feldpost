@@ -222,6 +222,69 @@ function deriveStateFromCity(
 }
 
 /**
+ * A tray answer is authoritative for the fields it implies: remove the evidence on *other* fields
+ * that the answer contradicts, so the derivation pass can refill them from the answer instead of
+ * `detectAreaConflicts` re-raising the same conflict forever (F-21).
+ *
+ * The drop set is exactly the three contradictions the detector itself checks, in the same
+ * direction and with the same predicates — nothing new is judged here.
+ *
+ * Returns the fields left with no evidence at all, so the caller can clear their flat values too.
+ * @see docs/specs/service/media-upload-service/contradiction-resolution-model.cross-field-answers.supplement.md
+ */
+export function dropAreaEvidenceContradictingAnswer(
+  areaEvidence: Partial<Record<AreaFieldKey, FieldLevelEntry[]>>,
+  answers: Partial<Record<AreaFieldKey, string>>,
+  options: { municipalities: GemeindeRecord[]; postcodeMap?: PlzMap; country?: string | null },
+): AreaFieldKey[] {
+  const useAtGazetteer = (options.country ?? 'AT').toUpperCase() === 'AT';
+  if (!useAtGazetteer) {
+    return [];
+  }
+  const emptied: AreaFieldKey[] = [];
+
+  const drop = (field: AreaFieldKey, keep: (entry: FieldLevelEntry) => boolean): void => {
+    const entries = areaEvidence[field];
+    if (!entries?.length) {
+      return;
+    }
+    const kept = entries.filter(keep);
+    if (kept.length === entries.length) {
+      return;
+    }
+    areaEvidence[field] = kept;
+    if (!kept.length) {
+      emptied.push(field);
+    }
+  };
+
+  const postcodeFits = (postcode: string, city: string): boolean => {
+    const expanded = expandPostcodeCities(postcode, options.postcodeMap);
+    // An unknown postcode contradicts nothing — the same rule detectAreaConflicts applies.
+    return !expanded.length || expanded.some((c) => normalizeAdminValue(c) === normalizeAdminValue(city));
+  };
+
+  const city = answers.city?.trim();
+  if (city) {
+    drop('state', (entry) => cityBelongsToState(city, entry.value, options.municipalities));
+    drop('postcode', (entry) => postcodeFits(entry.value, city));
+  }
+
+  const state = answers.state?.trim();
+  if (state) {
+    drop('city', (entry) => cityBelongsToState(entry.value, state, options.municipalities));
+    drop('postcode', (entry) => isPostcodePlausibleForState(entry.value, state, options.country));
+  }
+
+  const postcode = answers.postcode?.trim();
+  if (postcode) {
+    drop('city', (entry) => postcodeFits(postcode, entry.value));
+  }
+
+  return emptied;
+}
+
+/**
  * The derivation pass between evidence and the flat view: corroborate bare numbers, then fill a
  * state the path implies. Runs before conflict detection, so a derived state can be contradicted.
  */

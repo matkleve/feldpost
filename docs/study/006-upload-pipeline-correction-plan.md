@@ -24,7 +24,7 @@ corrected-by: none
 | [D-09](#d-09----may-exif-supply-a-house-number-open) | May EXIF supply a house number? | **Open** — recommendation given, no owner answer yet |
 | [D-10](#d-10) | Persist an area-only path, with no coordinates | Decided — **built and verified** ([F-19](./005-upload-pipeline-trace-findings.md#f-19)) |
 | [D-11](#d-11) | Corroborate a `city` conflict with the street before asking | Decided — **built and verified** |
-| [D-12](#d-12) | What should answering a **cross-field** admin conflict do? | **Open** — options given, no owner answer yet ([F-21](./005-upload-pipeline-trace-findings.md#f-21)) |
+| [D-12](#d-12) | What should answering a **cross-field** admin conflict do? | Decided (**C + D**) — **built and verified** ([F-21](./005-upload-pipeline-trace-findings.md#f-21), [F-22](./005-upload-pipeline-trace-findings.md#f-22)) |
 
 `status: proposed` means the study as a whole is not fully closed — D-09 is still open, and build
 status varies by row (table above). Per [`STUDY-FORMAT.md`](./STUDY-FORMAT.md) a `[D]` marks a
@@ -333,7 +333,7 @@ construction), the tray-copy rules, and the worked examples all live in
 
 ---
 
-### D-12 (open) — What should answering a *cross-field* admin conflict do? {#d-12}
+### D-12 (decided, built) — What should answering a *cross-field* admin conflict do? {#d-12}
 
 [F-21](./005-upload-pipeline-trace-findings.md#f-21): when an `admin_level_conflict` spans two
 fields — `city: Mödling` against `state: Wien`, the owner's own S18 case — answering it is
@@ -356,8 +356,14 @@ tree — the gap is only that the derivation pass never runs again after a tray 
 regardless: no answer path should be able to re-register a conflict signature it has already been
 asked, and today nothing checks.
 
-**Needs an owner answer**, because C decides that a tray answer outranks a path token the user did
-not touch — that is a product rule about whose word wins, not an implementation detail.
+**Owner's answer, 2026-09-15: C with the D guard, and fix F-22 in the same pass.** `[A]`
+
+So a tray answer now outranks a path token the user did not touch. Built as specified in
+[cross-field answers supplement](../specs/service/media-upload-service/contradiction-resolution-model.cross-field-answers.supplement.md):
+the answer drops exactly the evidence the detector would have contradicted it with, the existing
+`city→state` derivation refills the dependent field (`Mödling` → `Niederösterreich`, `origin:
+'derived'`), a signature already asked in this batch can never be asked again (it goes to Issues
+instead), and both the layer and admin answer paths return their jobs to the queue.
 
 ## 2 · The plan
 

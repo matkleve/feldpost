@@ -47,6 +47,7 @@ import {
   bucketLayerPackageJobsByGroupingKey,
   resolveLayerPackageJobs,
 } from './upload-location-layer-package-choice.util';
+import { uploadTraceDecision } from '../address-resolution/upload-address-resolution.debug';
 import type { AreaFieldKey } from '../address-resolution/upload-area-evidence.types';
 import { CONTAINMENT_CHECK_ENTER_DIFFERENT_CANDIDATE_ID } from './upload-location-geocode-outcome.util';
 import type {
@@ -650,6 +651,9 @@ export class UploadLocationTrayFlowService {
     const geoFull = { ...geo, postcodeMap: geo.postcodeMap };
     const oldKey = group.queryKey;
     const selections: Partial<Record<AreaFieldKey, string>> = { [field]: value };
+    const areaFieldsBefore = areaFieldsTuple(
+      this.orchestrator.getGroupStateForJob(group.batchId, group.jobIds[0])?.searchObject,
+    );
 
     const resolvedJobs: Array<{
       jobId: string;
@@ -694,6 +698,17 @@ export class UploadLocationTrayFlowService {
 
     if (stillConflicted) {
       const sample = resolvedJobs[0];
+      // D-12 Rule 2 — a tray may only re-open if the answer moved the Search Object. An answer
+      // that leaves all four area fields exactly as they were cannot be answered any better by
+      // asking it again; that is F-21's loop, and Issues is the honest destination.
+      if (sample && areaFieldsTuple(sample.searchObject) === areaFieldsBefore) {
+        uploadTraceDecision('ulr', 'area conflict made no progress — routing to Issues', {
+          queryKey: oldKey,
+          areaFields: areaFieldsBefore,
+        });
+        this.routeUnansweredAreaConflictToIssues(group);
+        return;
+      }
       if (sample) {
         const nextConflicts = sample.searchObject.areaConflicts ?? [];
         const nextKey = buildAdminConflictQueryKey(buildAdminConflictSignature(nextConflicts));
@@ -773,10 +788,7 @@ export class UploadLocationTrayFlowService {
     };
     this.resolution().notifyDisambiguationResolved(resolvedEvent);
 
-    for (const jobId of group.jobIds) {
-      this.jobState.setPhase(jobId, 'resolving_location');
-      void this.resolution().applyPreResolveFromOrchestrator(jobId);
-    }
+    await this.resumeJobsAfterTrayAnswer(group.jobIds);
 
     this.disambiguationStore.syncBatchDisambiguationAggregates(group.batchId);
     this.disambiguationStore.pickNextActiveGroup(group.batchId);
@@ -827,12 +839,64 @@ export class UploadLocationTrayFlowService {
     };
     this.resolution().notifyDisambiguationResolved(resolvedEvent);
 
-    for (const jobId of group.jobIds) {
-      this.jobState.setPhase(jobId, 'resolving_location');
-      void this.resolution().applyPreResolveFromOrchestrator(jobId);
-    }
+    await this.resumeJobsAfterTrayAnswer(group.jobIds);
 
     this.disambiguationStore.syncBatchDisambiguationAggregates(group.batchId);
     this.disambiguationStore.pickNextActiveGroup(group.batchId);
   }
+
+  /**
+   * F-22 / D-12 Rule 3 — a tray answer that places a job must hand it back to the queue.
+   * `applyPreResolveFromOrchestrator` decides the placement but never moves the phase on, and the
+   * drain only ever selects `phase === 'queued'`, so without this the job sits in
+   * `resolving_location` — shown as "Active", never uploading.
+   * @see docs/study/005-upload-pipeline-trace-findings.md#f-22
+   */
+  private async resumeJobsAfterTrayAnswer(jobIds: readonly string[]): Promise<void> {
+    let anyQueued = false;
+    for (const jobId of jobIds) {
+      this.jobState.setPhase(jobId, 'resolving_location');
+      const outcome = await this.resolution().applyPreResolveFromOrchestrator(jobId);
+      if (outcome !== 'continue') {
+        // 'held' — a further tray opened; 'partial' — routed to Issues. Both own the job now.
+        continue;
+      }
+      const job = this.jobState.findJob(jobId);
+      if (!job || job.mediaId || job.phase !== 'resolving_location') {
+        continue;
+      }
+      this.jobState.setPhase(jobId, 'queued');
+      anyQueued = true;
+    }
+    if (anyQueued) {
+      this.injector.get(UploadManagerService).kickQueueAfterLocationGate();
+    }
+  }
+
+  /**
+   * D-12 Rule 2 — the answer changed nothing, so asking again cannot help. Issues is where a human
+   * can set the address directly.
+   */
+  private routeUnansweredAreaConflictToIssues(group: UploadDisambiguationGroup): void {
+    this.disambiguationStore.patchGroup({
+      ...group,
+      resolutionStatus: 'failed',
+      resolutionGateOpen: false,
+    });
+    for (const jobId of group.jobIds) {
+      this.jobState.updateJob(jobId, {
+        resolutionStatus: 'failed',
+        issueKind: 'address_deferred',
+        disambiguationGroupId: undefined,
+      });
+      this.jobState.setPhase(jobId, 'missing_data');
+    }
+    this.disambiguationStore.syncBatchDisambiguationAggregates(group.batchId);
+    this.disambiguationStore.pickNextActiveGroup(group.batchId);
+  }
+}
+
+/** The four area fields a tray answer can move — D-12 Rule 2's progress check. */
+function areaFieldsTuple(so: UploadSearchObject | undefined): string {
+  return [so?.country, so?.state, so?.postcode, so?.city].join('|');
 }

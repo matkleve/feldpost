@@ -57,8 +57,8 @@ spec-level — the spec says what the code does, so a fix needs a contract decis
 | [F-18](#f-18) | ~~The shipped postcode table is a 21-row stub, and Wien was missing from the gazetteer~~ **gazetteer fixed; postcode table open** | High | Data |
 | [F-19](#f-19) | ~~A path that names only an area ends in Issues; the spec claims an area centroid is stored, and the code stores nothing~~ **fixed** | High | **Spec** ↔ code |
 | [F-20](#f-20) | ~~Choosing "Keep" on a `containment_check` tray never resumes the job — it sits forever, looking like it's waiting on the user when nothing is~~ **fixed** | High | Code |
-| [F-21](#f-21) | An `admin_level_conflict` between **two different fields** (`city` ⊥ `state`) can never be answered: every option re-opens the same question, forever | High | Code |
-| [F-22](#f-22) | Answering a `layer_package` or `admin_level_conflict` tray places the job but never returns it to the queue — it stays "Active" forever | High | Code |
+| [F-21](#f-21) | ~~An `admin_level_conflict` between **two different fields** (`city` ⊥ `state`) can never be answered: every option re-opens the same question, forever~~ **fixed** | High | Code |
+| [F-22](#f-22) | ~~Answering a `layer_package` or `admin_level_conflict` tray places the job but never returns it to the queue — it stays "Active" forever~~ **fixed** | High | Code |
 
 ---
 
@@ -844,12 +844,20 @@ mechanism forced [D-11](./006-upload-pipeline-correction-plan.md#d-11)'s corrobo
 cascade rather than auto-resolve when a residual `state` entry survived; that was treated then as
 accepted product behaviour. It is not — it is this bug, seen from the other side.
 
-**Not fixed here.** The fix needs a product decision, not just code: whether answering a cross-field
-conflict should (a) clear the *other* field's contradicting evidence as collateral, (b) ask for both
-fields at once ("Mödling in Niederösterreich, or Wien 1160?"), or (c) re-derive the dependent field
-from the answer (`city → state` via the gazetteer, the same rule the derivation pass already owns).
-Option (c) matches the existing derivation rules and is the smallest change; (b) is the most honest
-question. Needs an owner answer before implementation.
+**Fixed** (2026-09-15) — owner chose **option C with the loop guard**, built as
+[D-12](./006-upload-pipeline-correction-plan.md#d-12) and specified in the
+[cross-field answers supplement](../specs/service/media-upload-service/contradiction-resolution-model.cross-field-answers.supplement.md).
+An answer now drops exactly the evidence `detectAreaConflicts` would have contradicted it with, and
+the existing `city→state` derivation refills the dependent field — `Mödling` →
+`Niederösterreich`, written as a normal derived entry. The guard keys on **progress** (did the
+answer move any of the four area fields?), not on the conflict signature: pass 3 synthesizes a
+`city` entry for every city a contradicting postcode expands to, so a legitimate follow-up question
+carries the *same* signature as the one just answered. `[A]` Measured in
+`upload-location-area-choice.util.spec.ts`.
+
+**Measured after the fix.** Same `--answer-trays` run: S18 is answered **once**, resolves to
+`Mödling`/`Niederösterreich`, and reaches `complete` (`media-0019`). Batch tray answers fell from
+**60 to 7**.
 
 ---
 
@@ -891,9 +899,11 @@ attached. If some component effect re-queues these jobs in the real app, product
 broken than the harness shows — but nothing in `core/` does it, and the three paths that *do* re-queue
 do it explicitly rather than relying on a listener, which is evidence against that hope.
 
-**Not fixed here.** The fix is the same two lines the "Keep" path now uses (`setPhase('queued')` plus
-a drain) — but for the admin path it is masked by [F-21](#f-21), which prevents that path from ever
-reaching a resolved state at all. Fix F-21 first, or fix both together and verify with one run.
+**Fixed** (2026-09-15, together with [F-21](#f-21)). Both answer paths now go through one helper
+that awaits `applyPreResolveFromOrchestrator` and acts on its verdict: `'continue'` re-queues the job
+and drains, `'held'` and `'partial'` leave it to whatever now owns it. `[A]` S07 reaches `complete`
+with its coordinates in the same trace run; an end-to-end regression test `(d5)` in
+`upload-folder-upload.integration.spec.ts` fails by timeout without the fix.
 
 ---
 

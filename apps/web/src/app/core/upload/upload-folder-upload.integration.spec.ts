@@ -561,6 +561,67 @@ describe('UploadManagerService — folder upload integration (SO → dedup → D
     15_000,
   );
 
+  it(
+    '(d5) F-22: answering a layer_package tray uploads the job instead of parking it as "Active"',
+    async () => {
+      const { service, fakeGeocoding, locationResolution } = await setup();
+
+      fakeGeocoding.searchStructuredForward.mockResolvedValue([
+        {
+          lat: 47.0707,
+          lng: 15.4395,
+          displayName: 'Kirchengasse 11, Graz, Österreich',
+          name: 'Kirchengasse 11',
+          importance: 0.97,
+          address: {
+            road: 'Kirchengasse',
+            house_number: '11',
+            postcode: '8010',
+            city: 'Graz',
+            country: 'Österreich',
+            country_code: 'at',
+          },
+        },
+      ]);
+
+      const entries: ScannedFileEntry[] = [
+        {
+          file: makeFile('Schmiedgasse_5.jpg'),
+          relativePath: 'AT/Graz/Kirchengasse 11/Schmiedgasse_5.jpg',
+          directorySegments: ['AT', 'Graz', 'Kirchengasse 11'],
+        },
+      ];
+      await service.submitWebkitFolder(entries, 'Kirchengasse 11');
+
+      await vi.waitFor(() => {
+        const groups = locationResolution
+          .disambiguationGroups()
+          .filter((g) => g.disambiguationKind === 'layer_package');
+        expect(groups.length).toBe(1);
+      });
+
+      const group = locationResolution
+        .disambiguationGroups()
+        .find((g) => g.disambiguationKind === 'layer_package')!;
+      const folderCandidate = group.candidates.find((c) => c.addressLabel.includes('Kirchengasse'))!;
+      locationResolution.applyCandidateToGroup(group.id, folderCandidate.id);
+
+      // Before F-22 the job stopped at `resolving_location` here — placed, but invisible to the
+      // queue drain, sitting in the Active lane forever.
+      await vi.waitFor(
+        () => {
+          expect(service.jobs()[0]?.phase).toBe('complete');
+        },
+        { timeout: 5000 },
+      );
+
+      const job = service.jobs()[0]!;
+      expect(job.mediaId).toBeTruthy();
+      expect(job.coords).toEqual({ lat: 47.0707, lng: 15.4395 });
+    },
+    15_000,
+  );
+
   it('(d2) two files with same admin conflict merge into one tray group', async () => {
     const { service, locationResolution } = await setup();
 
