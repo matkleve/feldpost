@@ -14,6 +14,7 @@ import {
   type ClassifyScaleResult,
   type JobStoreScaleSample,
 } from './upload-trace-scale';
+import type { CorpusProfile } from './upload-trace-generator';
 
 const MS_PER_MINUTE = 60_000;
 const MS_PER_S = 1000;
@@ -21,6 +22,7 @@ const KEY_COL = 60;
 const SIZE_COL = 9;
 const MS_COL = 11;
 const COUNT_COL = 7;
+const PROFILE_COL = 16;
 const MS_DECIMALS = 4;
 const MS_PER_FILE_DECIMALS = 3;
 const PERCENT = 100;
@@ -46,15 +48,27 @@ function shorten(value: string): string {
   return value.length > KEY_COL ? `${value.slice(0, KEY_COL)}…` : value;
 }
 
+function topOutcome(result: ClassifyScaleResult): string {
+  const ranked = [...result.outcomes.entries()].sort((a, b) => b[1] - a[1]);
+  if (!ranked.length) {
+    return '—';
+  }
+  const [outcome, count] = ranked[0];
+  return `${outcome}=${count}`;
+}
+
 export function renderClassifyScale(result: ClassifyScaleResult): string {
   const outcomes = [...result.outcomes.entries()]
     .sort((a, b) => b[1] - a[1])
     .map(([outcome, count]) => `${outcome}=${count}`)
     .join('  ');
 
-  const trayShare = ((result.trayGroups / result.distinctGroups) * PERCENT).toFixed(0);
+  const trayShare =
+    result.distinctGroups === 0
+      ? '0'
+      : ((result.trayGroups / result.distinctGroups) * PERCENT).toFixed(0);
   const lines = [
-    `  measured on ${result.files.toLocaleString('en-US')} generated paths, ${result.naming} file naming`,
+    `  measured on ${result.files.toLocaleString('en-US')} generated paths, profile=${result.profile}, filesPerLocation=${result.filesPerLocation}, ${result.naming} naming`,
     `    classification total: ${duration(result.totalMs)}  (${result.msPerFile.toFixed(MS_PER_FILE_DECIMALS)} ms/file)`,
     `    heap after run:       ${result.heapUsedMb.toFixed(0)} MB (counters only — no jobs, no File handles)`,
     `    distinct groups:      ${result.distinctGroups.toLocaleString('en-US')}  → geocoder calls, one per group`,
@@ -72,6 +86,22 @@ export function renderClassifyScale(result: ClassifyScaleResult): string {
     }),
   ];
   return lines.join('\n');
+}
+
+/** Side-by-side profile table — folder shape dominates tray count more than file count. */
+export function renderProfileComparison(results: readonly ClassifyScaleResult[]): string {
+  const header = [
+    `  ${'profile'.padEnd(PROFILE_COL)} ${'groups'.padStart(SIZE_COL)} ${'trays'.padStart(SIZE_COL)} ${'ms/file'.padStart(MS_COL)}  top outcome`,
+  ];
+  const rows = results.map((result) => {
+    return `  ${result.profile.padEnd(PROFILE_COL)} ${String(result.distinctGroups).padStart(SIZE_COL)} ${String(result.trayGroups).padStart(SIZE_COL)} ${result.msPerFile.toFixed(MS_PER_FILE_DECIMALS).padStart(MS_COL)}  ${topOutcome(result)}`;
+  });
+  return [
+    '  Profile comparison (same N / seed / naming — only folder packing changes):',
+    ...header,
+    ...rows,
+    '  Read this before extrapolating tray volume: adversarial ≈ 1 file/address; company_area ≈ City/PLZ with many files per place.',
+  ].join('\n');
 }
 
 export function renderJobStoreScale(samples: readonly JobStoreScaleSample[]): string {
@@ -112,4 +142,8 @@ export const SCALE_CAVEAT = `
       A real run adds all of those on top of the numbers above.
     · Both measured costs are main-thread and synchronous. Classification runs in full before
       the queue drains, so its total is time-to-first-byte, not background work.
+    · Tray extrapolations are profile-dependent. Do not quote adversarial tray counts as the
+      company-archive cost — use company_area / company_street / mixed for that claim.
 `;
+
+export type { CorpusProfile };

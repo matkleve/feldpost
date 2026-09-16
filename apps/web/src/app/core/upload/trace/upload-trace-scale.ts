@@ -25,7 +25,13 @@ import {
 } from '../location/upload-location-resolution.helpers';
 import { UploadJobStateService } from '../support/upload-job-state.service';
 import type { UploadJob } from '../upload-manager.types';
-import { buildGeneratedScenario, type GeneratedNaming } from './upload-trace-generator';
+import {
+  buildGeneratedScenario,
+  DEFAULT_FILES_PER_LOCATION,
+  type CorpusGenerateOptions,
+  type CorpusProfile,
+  type GeneratedNaming,
+} from './upload-trace-generator';
 import type { RealGeoData } from './upload-trace-harness';
 
 const BYTES_PER_MB = 1024 * 1024;
@@ -36,6 +42,8 @@ export type ClassifyOutcome = LocalResolutionGate | 'layer_conflict' | 'admin_co
 
 export interface ClassifyScaleResult {
   naming: GeneratedNaming;
+  profile: CorpusProfile;
+  filesPerLocation: number;
   files: number;
   totalMs: number;
   msPerFile: number;
@@ -70,15 +78,22 @@ export function measureClassifyAtScale(
   files: number,
   seed: number,
   geo: RealGeoData,
-  naming: GeneratedNaming = 'camera',
+  namingOrOptions: GeneratedNaming | CorpusGenerateOptions = 'camera',
 ): ClassifyScaleResult {
+  const options: CorpusGenerateOptions =
+    typeof namingOrOptions === 'string' ? { naming: namingOrOptions } : namingOrOptions;
+  const naming: GeneratedNaming = options.naming ?? 'camera';
+  const profile: CorpusProfile = options.profile ?? 'adversarial';
+  const filesPerLocation = options.filesPerLocation ?? DEFAULT_FILES_PER_LOCATION;
+  const generateOptions: CorpusGenerateOptions = { ...options, naming, profile, filesPerLocation };
+
   const groupSizes = new Map<string, number>();
   const outcomes = new Map<ClassifyOutcome, number>();
   const trayKeys = new Set<string>();
 
   const started = performance.now();
   for (let index = 0; index < files; index += 1) {
-    const scenario = buildGeneratedScenario(index, seed, naming);
+    const scenario = buildGeneratedScenario(index, seed, generateOptions);
     const leaf = scenario.relativePath.split('/').pop() ?? '';
     const layers = resolveLayersForJob(
       scenario.relativePath,
@@ -116,6 +131,8 @@ export function measureClassifyAtScale(
 
   return {
     naming,
+    profile,
+    filesPerLocation,
     files,
     totalMs,
     msPerFile: totalMs / files,

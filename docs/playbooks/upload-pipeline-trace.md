@@ -23,7 +23,8 @@ npm run trace:upload                                     # 15 curated files
 npm run trace:upload -- --count=150                      # + generated corpus, seed 7
 npm run trace:upload -- --count=150 --seed=42 --detail=5  # 5 files in full, rest aggregated
 npm run trace:upload -- --answer-trays                   # keep going past the user gate
-npm run trace:upload -- --scale=20000                    # database-scale cost measurement
+npm run trace:upload -- --scale=1000 --compare-profiles  # classify cost across folder shapes
+npm run trace:upload -- --scale=1000 --profile=company_area --files-per-location=30
 npm run trace:upload -- --out=trace.txt                  # keep the report
 ```
 
@@ -46,8 +47,48 @@ run A parked in a tray — not a second duplicate in the corpus.
 | `--seed=N` | Generator seed (default 7). Same seed, same 150 paths. |
 | `--detail=N` | How many files get a full per-file section. The rest appear only in the aggregate tables. |
 | `--answer-trays` | Answer every resolver tray with its first candidate so the trace continues past the gate. Off by default — see [Real vs mock](#real-vs-mock). |
-| `--scale=N` | Files the [database-scale tier](#database-scale) classifies (default 2 000). This tier streams paths, so N can be 100 000+. |
+| `--scale=N` | Files the [database-scale tier](#database-scale) classifies (default 500). This tier streams paths, so N can be 100 000+. |
+| `--profile=NAME` | Corpus packing profile for generated paths and the scale detail block. Default `adversarial`. See [Corpus profiles](#corpus-profiles). |
+| `--files-per-location=N` | Medias sharing one location folder for dense profiles (default **30**). |
+| `--compare-profiles` | Force the profile comparison table (on by default for scale; set `UPLOAD_TRACE_COMPARE_PROFILES=0` to skip). |
 | `--out=FILE` | Write the report to `FILE` instead of a temp file. |
+
+## Corpus profiles
+
+Companies do not upload 1 000 files with 1 000 different addresses. A common layout is
+`/Wien/1020/` (or `/City/PLZ/Street N/`) with **~30 medias per location** — so 1 000 files is
+**~30–40 groups**, not ~800. Tray volume is **per group**, not per file: the old generator's
+random-per-file packing (`adversarial`) maximises questions and is the wrong corpus for a
+company-scale cost claim.
+
+| Profile | Folder shape | Files / location | What it is for |
+| --- | --- | --- | --- |
+| `adversarial` | Random mix of curated shapes (`full_chain`, `filename_address`, `project_token`, …) | ~1 | Defect hunting / worst-case tray surface. **Default** for regression E2E. |
+| `company_area` | `/City/PLZ/IMG_*.jpg` | 30 (configurable) | Typical construction archive. Uses the 21 rows in `at-plz.json`, so distinct places **cap at 21** for pure area paths — extra location slots merge into the same City/PLZ (one group, correctly). For ~30–40 distinct places at 1 000 files use `company_street` or `mixed`. |
+| `company_street` | `/City/PLZ/Street N/IMG_*.jpg` | 30 | Address-complete folders; expects `street_locality` auto-resolve when the gazetteer hits. |
+| `flat` | `Rohdaten/IMG_*.jpg` | all | Camera-roll / USB dump — no address, `incomplete`. |
+| `shallow_many` | Many `/City/PLZ/` folders | 3 | Sparse tree (many places, few medias each). |
+| `mixed` | 70 % area / 20 % street / 10 % noise | 30 | Blended archive closer to a real drop. |
+
+**Measured tray clusters (adversarial, 1 000 files, 2026-09-16):** of groups that need a pre-upload
+question, ~**95 % are `layer_package`** (filename street contradicts folder, or project-token
+layer fights), ~**5 % are `admin_level_conflict`**. Most adversarial groups are **1 file**, so
+each conflict is its own question. Under `company_area` the same 1 000 files collapse to ≤21
+groups and land mostly on `area_only` (no pre-upload tray — area placement, F-19).
+
+**Ways to reduce trays further (product, not just tests):**
+
+1. **Pack by place** — one question covers N medias when they share a `groupingKey` (already true;
+   dense folders are how companies get it).
+2. **Archive import mode** — classify, never open a tray, defer leftovers to Issues (Phase 5 /
+   F-08 import path).
+3. **Kill remaining `layer_package` sources** — filename-vs-folder street fights and project-token
+   packages (F-04/F-11 mostly fixed; adversarial still synthesises them on purpose).
+4. **Do not quote adversarial tray extrapolations as company cost** — use `--profile=company_area`
+   (or `mixed`) for that claim; the scale report prints a profile comparison table so the two
+   cannot be confused.
+
+Generator: `apps/web/src/app/core/upload/trace/upload-trace-generator.ts`.
 
 The harness is also a normal unit test: without `UPLOAD_TRACE=1` it prints nothing and only
 asserts. That is deliberate — a diagnostic that nothing keeps honest rots. Run it as a test with:

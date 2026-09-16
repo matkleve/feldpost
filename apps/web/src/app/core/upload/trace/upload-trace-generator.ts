@@ -6,16 +6,46 @@
  * is what lets the scale tier stream a million paths without materialising them.
  * `buildGeneratedScenarios(count, seed)` is the array form for ordinary runs.
  *
- * Shapes are drawn from the same folder conventions as the curated corpus in
- * `upload-trace-fixtures.ts`.
+ * **Profiles** model how companies actually lay out folders. The historical default
+ * (`adversarial`) draws a random shape per file and averages ~1 file per address — that
+ * maximises tray surface for defect hunting, but it overstates tray volume for a typical
+ * archive where ~30 medias share one `/City/PLZ/` (or street) folder.
  *
- * @see docs/playbooks/upload-pipeline-trace.md
+ * @see docs/playbooks/upload-pipeline-trace.md § Corpus profiles
  */
 
 import { TRACE_PHOTO_MIME, TRACE_PHOTO_SIZE_BYTES, type UploadTraceScenario } from './upload-trace-fixtures';
 import { stubCityCoords } from './upload-trace-geocoder.stub';
 
-/** Localities that exist in `at-plz.json`, so PLZ expand has something to hit. */
+/**
+ * Localities that exist in the shipped `at-plz.json` stub (21 rows). Company-area uniqueness
+ * therefore caps at 21 distinct City/PLZ groups unless a street segment is added.
+ */
+const AREA_LOCALITIES: readonly { city: string; postcode: string }[] = [
+  { city: 'Wien', postcode: '1010' },
+  { city: 'Wien', postcode: '1020' },
+  { city: 'Wien', postcode: '1030' },
+  { city: 'Wien', postcode: '1040' },
+  { city: 'Wien', postcode: '1050' },
+  { city: 'Wien', postcode: '1060' },
+  { city: 'Wien', postcode: '1070' },
+  { city: 'Wien', postcode: '1080' },
+  { city: 'Wien', postcode: '1090' },
+  { city: 'Wiener Neustadt', postcode: '2700' },
+  { city: 'St. Pölten', postcode: '3100' },
+  { city: 'Krems an der Donau', postcode: '3500' },
+  { city: 'Linz', postcode: '4020' },
+  { city: 'Steyr', postcode: '4400' },
+  { city: 'Gmunden', postcode: '4810' },
+  { city: 'Salzburg', postcode: '5020' },
+  { city: 'Innsbruck', postcode: '6020' },
+  { city: 'Bregenz', postcode: '6900' },
+  { city: 'Graz', postcode: '8010' },
+  { city: 'Klagenfurt', postcode: '9020' },
+  { city: 'Villach', postcode: '9500' },
+];
+
+/** Smaller set used by the adversarial mixer (curated-corpus parity). */
 const LOCALITIES: readonly { city: string; postcode: string }[] = [
   { city: 'Wien', postcode: '1090' },
   { city: 'Graz', postcode: '8010' },
@@ -45,7 +75,7 @@ const NOISE_FOLDERS: readonly string[] = [
   'Export final',
 ];
 
-/** Folder shapes the generator picks from — the "different names" part of the corpus. */
+/** Folder shapes the adversarial generator picks from — the "different names" part of the corpus. */
 export type GeneratedShape =
   | 'full_chain'
   | 'city_street'
@@ -66,6 +96,38 @@ const SHAPES: readonly GeneratedShape[] = [
   'no_address',
   'filename_address',
 ];
+
+/**
+ * How the generated corpus packs files into folders.
+ *
+ * - `adversarial` — random shape per file (~1 file/address). Defect hunting / worst-case trays.
+ * - `company_area` — `/City/PLZ/` with N files per folder. Typical construction archive.
+ * - `company_street` — `/City/PLZ/Street N/` with N files per folder. Address-complete folders.
+ * - `flat` — one dump folder, no address. USB / camera roll import.
+ * - `shallow_many` — many City/PLZ folders, few files each (sparse tree).
+ * - `mixed` — 70 % area-dense, 20 % street-dense, 10 % noise locations.
+ */
+export type CorpusProfile =
+  | 'adversarial'
+  | 'company_area'
+  | 'company_street'
+  | 'flat'
+  | 'shallow_many'
+  | 'mixed';
+
+export const CORPUS_PROFILES: readonly CorpusProfile[] = [
+  'adversarial',
+  'company_area',
+  'company_street',
+  'flat',
+  'shallow_many',
+  'mixed',
+] as const;
+
+/** Default medias per location — matches the company layout described in STUDY-005 follow-ups. */
+export const DEFAULT_FILES_PER_LOCATION = 30;
+/** Sparse tree: a handful of files per City/PLZ. */
+export const SHALLOW_FILES_PER_LOCATION = 3;
 
 const MULBERRY_INCREMENT = 0x6d2b79f5;
 const MULBERRY_SHIFT_A = 15;
@@ -115,7 +177,7 @@ interface ShapeInput {
   houseNumber: number;
 }
 
-function buildSegments(shape: GeneratedShape, input: ShapeInput): string[] {
+function buildAdversarialSegments(shape: GeneratedShape, input: ShapeInput): string[] {
   const { rng, city, postcode, street, houseNumber } = input;
   const streetSegment = `${street} ${houseNumber}`;
   switch (shape) {
@@ -153,34 +215,145 @@ const INDEX_SEED_STRIDE = 2654435761;
 const CONTENT_SEED_BASE = 1000;
 
 /**
- * Build scenario `index` (0-based) for `seed`, independent of every other index.
- *
- * Every leaf carries `IMG_<index>` so file names stay unique across the corpus — the flat
- * multi-file run identifies jobs by file name alone.
- */
-/**
  * `camera` reproduces what cameras actually write (`IMG_2001.jpg`), whose 4-digit number the
  * parser reads as a postcode. `neutral` keeps everything else identical but uses a 6-digit
  * number, so the two can be compared.
  */
 export type GeneratedNaming = 'camera' | 'neutral';
 
+export interface CorpusGenerateOptions {
+  naming?: GeneratedNaming;
+  profile?: CorpusProfile;
+  /**
+   * Files that share one location folder. Default 30 for dense company profiles; `shallow_many`
+   * defaults to 3 when this is omitted.
+   */
+  filesPerLocation?: number;
+}
+
+function resolveFilesPerLocation(profile: CorpusProfile, override?: number): number {
+  if (override !== undefined && override > 0) {
+    return override;
+  }
+  return profile === 'shallow_many' ? SHALLOW_FILES_PER_LOCATION : DEFAULT_FILES_PER_LOCATION;
+}
+
+function localityForIndex(locationIndex: number): { city: string; postcode: string } {
+  return AREA_LOCALITIES[locationIndex % AREA_LOCALITIES.length];
+}
+
+function streetForLocation(locationIndex: number): { street: string; houseNumber: number } {
+  return {
+    street: STREETS[locationIndex % STREETS.length],
+    houseNumber: 1 + (locationIndex % MAX_HOUSE_NUMBER),
+  };
+}
+
+type DenseKind = 'area' | 'street' | 'noise';
+
+function denseKindForProfile(profile: CorpusProfile, locationIndex: number): DenseKind {
+  if (profile === 'company_area') {
+    return 'area';
+  }
+  if (profile === 'company_street' || profile === 'shallow_many') {
+    return profile === 'shallow_many' ? 'area' : 'street';
+  }
+  if (profile === 'flat') {
+    return 'noise';
+  }
+  // mixed: 7 area / 2 street / 1 noise per 10 locations
+  const bucket = locationIndex % 10;
+  if (bucket < 7) {
+    return 'area';
+  }
+  if (bucket < 9) {
+    return 'street';
+  }
+  return 'noise';
+}
+
+function buildProfileSegments(
+  profile: CorpusProfile,
+  locationIndex: number,
+  filesPerLocation: number,
+): { segments: string[]; shapeLabel: string; city: string } {
+  if (profile === 'flat') {
+    return { segments: ['Rohdaten'], shapeLabel: 'flat', city: 'Wien' };
+  }
+
+  const kind = denseKindForProfile(profile, locationIndex);
+  const locality = localityForIndex(locationIndex);
+  if (kind === 'noise') {
+    return {
+      segments: [NOISE_FOLDERS[locationIndex % NOISE_FOLDERS.length], `Export ${locationIndex}`],
+      shapeLabel: 'no_address',
+      city: locality.city,
+    };
+  }
+  if (kind === 'area') {
+    return {
+      segments: [locality.city, locality.postcode],
+      shapeLabel: `company_area@${filesPerLocation}`,
+      city: locality.city,
+    };
+  }
+  const { street, houseNumber } = streetForLocation(locationIndex);
+  return {
+    segments: [locality.city, locality.postcode, `${street} ${houseNumber}`],
+    shapeLabel: `company_street@${filesPerLocation}`,
+    city: locality.city,
+  };
+}
+
+/**
+ * Build scenario `index` (0-based) for `seed`, independent of every other index.
+ *
+ * Every leaf carries `IMG_<index>` so file names stay unique across the corpus — the flat
+ * multi-file run identifies jobs by file name alone.
+ */
 export function buildGeneratedScenario(
   index: number,
   seed: number,
-  naming: GeneratedNaming = 'camera',
+  options: CorpusGenerateOptions | GeneratedNaming = {},
 ): UploadTraceScenario {
+  const opts: CorpusGenerateOptions =
+    typeof options === 'string' ? { naming: options } : (options ?? {});
+  const naming: GeneratedNaming = opts.naming ?? 'camera';
+  const profile: CorpusProfile = opts.profile ?? 'adversarial';
+  const filesPerLocation = resolveFilesPerLocation(profile, opts.filesPerLocation);
+
   const rng = createRandom((seed + index * INDEX_SEED_STRIDE) >>> 0);
-  const shape = pick(rng, SHAPES);
-  const locality = pick(rng, LOCALITIES);
-  const street = pick(rng, STREETS);
-  const houseNumber = 1 + Math.floor(rng() * MAX_HOUSE_NUMBER);
-  const segments = buildSegments(shape, { rng, ...locality, street, houseNumber });
+  let segments: string[];
+  let shapeLabel: string;
+  let localityCity: string;
+  let fileNameStreet: string | undefined;
+  let fileNameHouse: number | undefined;
+
+  if (profile === 'adversarial') {
+    const shape = pick(rng, SHAPES);
+    const locality = pick(rng, LOCALITIES);
+    const street = pick(rng, STREETS);
+    const houseNumber = 1 + Math.floor(rng() * MAX_HOUSE_NUMBER);
+    segments = buildAdversarialSegments(shape, { rng, ...locality, street, houseNumber });
+    shapeLabel = shape;
+    localityCity = locality.city;
+    if (shape === 'filename_address') {
+      fileNameStreet = street;
+      fileNameHouse = houseNumber + FILENAME_ADDRESS_OFFSET;
+    }
+  } else {
+    const locationIndex = profile === 'flat' ? 0 : Math.floor(index / filesPerLocation);
+    const built = buildProfileSegments(profile, locationIndex, filesPerLocation);
+    segments = built.segments;
+    shapeLabel = built.shapeLabel;
+    localityCity = built.city;
+  }
+
   const leafBase = naming === 'neutral' ? NEUTRAL_LEAF_NUMBER_BASE : LEAF_NUMBER_BASE;
   const leaf = `IMG_${leafBase + index}`;
   const fileName =
-    shape === 'filename_address'
-      ? `${street} ${houseNumber + FILENAME_ADDRESS_OFFSET} Detail ${leaf}.jpg`
+    fileNameStreet !== undefined && fileNameHouse !== undefined
+      ? `${fileNameStreet} ${fileNameHouse} Detail ${leaf}.jpg`
       : `${leaf}.jpg`;
 
   // Every Nth file reuses the previous file's body, so dedup is exercised at scale.
@@ -189,14 +362,14 @@ export function buildGeneratedScenario(
   // is not a duplicate to the pipeline. The predecessor is never itself a duplicate, so this
   // recurses exactly one level.
   const exifCoords = isDuplicate
-    ? buildGeneratedScenario(index - 1, seed, naming).exifCoords
+    ? buildGeneratedScenario(index - 1, seed, opts).exifCoords
     : rng() < EXIF_SHARE
-      ? stubCityCoords(locality.city)
+      ? stubCityCoords(localityCity)
       : undefined;
 
   return {
     id: `G${String(index + 1).padStart(ID_PAD_WIDTH, '0')}`,
-    intent: isDuplicate ? `generated:${shape} (duplicate body)` : `generated:${shape}`,
+    intent: isDuplicate ? `generated:${shapeLabel} (duplicate body)` : `generated:${shapeLabel}`,
     relativePath: [...segments, fileName].join('/'),
     mimeType: TRACE_PHOTO_MIME,
     exifCoords,
@@ -210,9 +383,11 @@ export function buildGeneratedScenario(
 export function buildGeneratedScenarios(
   count: number,
   seed: number,
-  naming: GeneratedNaming = 'camera',
+  options: CorpusGenerateOptions | GeneratedNaming = {},
 ): UploadTraceScenario[] {
+  const opts: CorpusGenerateOptions =
+    typeof options === 'string' ? { naming: options } : (options ?? {});
   return Array.from({ length: count }, (_unused, index) =>
-    buildGeneratedScenario(index, seed, naming),
+    buildGeneratedScenario(index, seed, opts),
   );
 }

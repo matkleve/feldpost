@@ -422,6 +422,15 @@ cheaper, it stops asking them.
 **Still open:** the tray volume of the *interactive* mode is what it was. This finding is addressed
 for imports, not removed for batches.
 
+**Corpus caveat, 2026-09-16.** The original "scales linearly with file count" arithmetic was measured
+on the **adversarial** generator (~1 file per address). Real company drops often pack ~30 medias
+under one `/City/PLZ/` (or street) folder, so group count — and therefore tray count — tracks
+**places**, not files. Re-measure with
+`--scale=N --profile=company_area --files-per-location=30` (and the profile comparison table in
+[upload-pipeline-trace.md](../playbooks/upload-pipeline-trace.md#corpus-profiles)) before quoting
+interactive tray volume as a company-archive cost. Adversarial remains the right corpus for defect
+hunting; it is the wrong corpus for that cost claim.
+
 ---
 
 ### F-09 · The `test` gate compiles nothing, so it runs no specs {#f-09}
@@ -1051,6 +1060,9 @@ with its coordinates in the same trace run; an end-to-end regression test `(d5)`
 - **Branch B (street + project centroid bias) was never exercised**, because the harness returns no
   project locations. `[A]`
 - **No user research backs [F-08](#f-08)'s claim that 45 000 questions is unusable.** `[C]`
-- **File-name and folder conventions in the corpus are invented.** `[A]` What real customer archives
-  look like — how many files, how deep, how they are named — is unmeasured, and it decides how much
-  [F-01](#f-01) and [F-03](#f-03) actually cost. Settling it needs one real exported folder tree.
+- **File-name and folder conventions in the corpus used to be a single invented mix.** `[A]` What
+  real customer archives look like — how many files, how deep, how they are named — still needs
+  one real exported folder tree to calibrate weights. Until then, measure with the named
+  [corpus profiles](../playbooks/upload-pipeline-trace.md#corpus-profiles)
+  (`company_area`, `company_street`, `flat`, `shallow_many`, `mixed`) instead of quoting only
+  `adversarial`.
