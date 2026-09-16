@@ -636,3 +636,95 @@ describe('formatSearchObjectLabel — area-only fallback', () => {
     expect(formatSearchObjectLabel(so)).toBe('random.jpg');
   });
 });
+
+const geoCopySuffix = {
+  states: [{ n: 'Wien', a: ['vienna'] }],
+  municipalities: [{ n: 'Wien', b: 'Wien', a: ['vienna'] }],
+  postcodeMap: { '1010': ['Wien'] },
+};
+
+/**
+ * Windows Explorer copy folders — `(N)` must not enter street / groupingKey.
+ * @see docs/specs/service/media-upload-service/upload-search-object.copy-suffix.supplement.md
+ */
+describe('buildSearchObjectFromRelativePath — Windows copy suffix (CS-*)', () => {
+  it('CS-01/02: Wasagasse 4 (1) shares street, houseNumber and groupingKey with bare', () => {
+    const bare = buildSearchObjectFromRelativePath(
+      'Wien/1010/Wasagasse 4/IMG_1.jpg',
+      'IMG_1.jpg',
+      geoCopySuffix,
+    );
+    const copy = buildSearchObjectFromRelativePath(
+      'Wien/1010/Wasagasse 4 (1)/IMG_1.jpg',
+      'IMG_1.jpg',
+      geoCopySuffix,
+    );
+
+    expect(bare.street).toBe('Wasagasse');
+    expect(bare.houseNumber).toBe('4');
+    expect(copy.street).toBe('Wasagasse');
+    expect(copy.houseNumber).toBe('4');
+    expect(copy.street).not.toContain('(');
+    expect(copy.groupingKey).toBe(bare.groupingKey);
+  });
+
+  it('CS-03: Wasagasse 4 (12) matches bare', () => {
+    const bare = buildSearchObjectFromRelativePath(
+      'Wien/1010/Wasagasse 4/IMG_1.jpg',
+      'IMG_1.jpg',
+      geoCopySuffix,
+    );
+    const copy = buildSearchObjectFromRelativePath(
+      'Wien/1010/Wasagasse 4 (12)/IMG_1.jpg',
+      'IMG_1.jpg',
+      geoCopySuffix,
+    );
+    expect(copy.groupingKey).toBe(bare.groupingKey);
+  });
+
+  it('CS-04: Wasagasse 4A (2) matches bare Wasagasse 4A', () => {
+    const bare = buildSearchObjectFromRelativePath(
+      'Wien/1010/Wasagasse 4A/IMG_1.jpg',
+      'IMG_1.jpg',
+      geoCopySuffix,
+    );
+    const copy = buildSearchObjectFromRelativePath(
+      'Wien/1010/Wasagasse 4A (2)/IMG_1.jpg',
+      'IMG_1.jpg',
+      geoCopySuffix,
+    );
+    expect(copy.houseNumber).toBe('4A');
+    expect(copy.groupingKey).toBe(bare.groupingKey);
+  });
+
+  it('CS-05: Stephansplatz (1) matches bare Stephansplatz', () => {
+    const bare = buildSearchObjectFromRelativePath(
+      'Wien/1010/Stephansplatz/IMG_1.jpg',
+      'IMG_1.jpg',
+      geoCopySuffix,
+    );
+    const copy = buildSearchObjectFromRelativePath(
+      'Wien/1010/Stephansplatz (1)/IMG_1.jpg',
+      'IMG_1.jpg',
+      geoCopySuffix,
+    );
+    expect(copy.groupingKey).toBe(bare.groupingKey);
+    expect(copy.street ?? copy.city).toBeTruthy();
+  });
+
+  it('strips (N) from a filename stem before the extension', () => {
+    const bare = buildSearchObjectFromRelativePath(
+      'Wasagasse 4.jpg',
+      'Wasagasse 4.jpg',
+      geoCopySuffix,
+    );
+    const copy = buildSearchObjectFromRelativePath(
+      'Wasagasse 4 (1).jpg',
+      'Wasagasse 4 (1).jpg',
+      geoCopySuffix,
+    );
+    expect(copy.street).toBe('Wasagasse');
+    expect(copy.houseNumber).toBe('4');
+    expect(copy.groupingKey).toBe(bare.groupingKey);
+  });
+});

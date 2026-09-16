@@ -63,5 +63,6 @@ Red-first: CS-02 fails on current `main` (`street === "Wasagasse (1)"`).
 
 ## Status
 
-**Spec only (2026-09-16).** Implementation not started. Sensitive-class when coded (upload pipeline /
-Search Object); red-test-first on CS-02.
+**Implemented 2026-09-16** — `stripWindowsCopySuffix` in `path-token-classifier.ts`, applied at the
+start of `applySegment` in `upload-search-object.builder.ts` (before AT unit parse / tokenize).
+Acceptance CS-01…CS-05 in `upload-search-object.builder.spec.ts`.

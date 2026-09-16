@@ -21,6 +21,7 @@ import type { GemeindeRecord, PlzMap } from './local-geo-data.adapter';
 import {
   classifyTokensInSegment,
   isUncertainConfidence,
+  stripWindowsCopySuffix,
   tokenizeSegment,
   type ClassifiedToken,
   type TokenClassificationContext,
@@ -322,7 +323,9 @@ function applySegment(
   areaEvidence: Partial<Record<AreaFieldKey, FieldLevelEntry[]>>,
 ): void {
   const countryCode = normalizeCountryCode(context.country);
-  const atUnits = parseAtSegmentUnits(segment, countryCode);
+  // @see docs/specs/service/media-upload-service/upload-search-object.copy-suffix.supplement.md
+  const withoutCopySuffix = stripWindowsCopySuffix(segment);
+  const atUnits = parseAtSegmentUnits(withoutCopySuffix, countryCode);
   applyPresetUnits(fields, atUnits, source, sources);
   const tokens = tokenizeSegment(atUnits.workingSegment);
   const classified = classifyTokensInSegment(tokens, geo, context, atUnits.workingSegment);
