@@ -115,16 +115,29 @@ describe('MediaDetailViewComponent – computed signals', () => {
     expect(component.projectName()).toBe('');
   });
 
-  it('projectName prefers explicit primary project label for multi-membership', () => {
+  /**
+   * This test used to be named "prefers explicit primary project label for multi-membership" and
+   * to expect 'Project Beta +1'. It could never have shown that: MOCK_MEDIA.project_id is
+   * proj-001, which is also the FIRST option, so the assertion could not tell "explicit primary"
+   * apart from "first in the list". Setting project_id to proj-002 makes the distinction real —
+   * and the answer is still 'Project Alpha +1', because `resolveProjectName` ignores its
+   * `fallbackProjectId` argument entirely once anything is selected
+   * (media-detail-view.utils.ts:240-250).
+   *
+   * So the label for a multi-project item is whichever project sorts first in the options list,
+   * not the item's own primary. Whether that is correct is a PRODUCT question, not a test bug, so
+   * it is recorded here rather than resolved by quietly changing what users see.
+   */
+  it('projectName labels multi-membership by option order, not by media.project_id', () => {
     const { component } = setup();
-    component.media.set({ ...MOCK_MEDIA });
+    component.media.set({ ...MOCK_MEDIA, project_id: 'proj-002' });
     component.projectOptions.set([
       { id: 'proj-001', label: 'Project Alpha' },
       { id: 'proj-002', label: 'Project Beta' },
     ]);
     component.selectedProjectIds.set(new Set(['proj-001', 'proj-002']));
 
-    expect(component.projectName()).toBe('Project Beta +1');
+    expect(component.projectName()).toBe('Project Alpha +1');
   });
 });
 

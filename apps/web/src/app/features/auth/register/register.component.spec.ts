@@ -25,10 +25,21 @@ function buildFakeAuth(signUpError: Error | null = null) {
 function setup(signUpError: Error | null = null, inviteFromQuery?: string | null) {
   const fakeAuth = buildFakeAuth(signUpError);
 
+  // Each setup() installs its own ActivatedRoute. Without resetting first, the module configured
+  // by the previous test is already instantiated and this configuration is discarded — so the
+  // invite-code case silently got the no-invite route and read back an empty control.
+  TestBed.resetTestingModule();
   TestBed.configureTestingModule({
     imports: [RegisterComponent],
     providers: [
       { provide: AuthService, useValue: fakeAuth },
+      provideRouter(
+        [],
+        withNavigationErrorHandler(() => {}),
+      ),
+      // Must come AFTER provideRouter: that call provides its own ActivatedRoute, and in Angular
+      // DI the later provider wins — so listing the stub first meant the component read the
+      // router's empty query map and the invite never arrived.
       {
         provide: ActivatedRoute,
         useValue: {
@@ -37,10 +48,6 @@ function setup(signUpError: Error | null = null, inviteFromQuery?: string | null
           },
         },
       },
-      provideRouter(
-        [],
-        withNavigationErrorHandler(() => {}),
-      ),
     ],
   });
 
