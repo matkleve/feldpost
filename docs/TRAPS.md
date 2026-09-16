@@ -49,6 +49,7 @@ Entries are numbered, never renumbered, and never deleted. Order is by cost, not
 | [TRAP-019](#trap-019--the-flat-street-was-a-concatenation-of-leftovers) | The flat `street` was a concatenation of leftovers | `open` |
 | [TRAP-020](#trap-020--a-circular-import-between-two-trace-fixture-modules-silently-zeroed-three-files) | A circular import between two modules silently zeroed three fixture files | `pattern open` |
 | [TRAP-021](#trap-021--a-resolution-event-with-zero-subscribers-looks-like-it-resumed-the-job) | A resolution event with zero subscribers looks like it resumed the job | `pattern open` |
+| [TRAP-022](#trap-022--an-rls-perf-wrap-that-reintroduces-pre-hardening-policies) | An RLS “perf wrap” that reintroduces pre-hardening policies | `pattern open` |
 
 ---
 
