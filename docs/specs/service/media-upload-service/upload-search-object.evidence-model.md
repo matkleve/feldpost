@@ -66,7 +66,10 @@ Everything else is **weak**: it stays in the evidence layer, and it
 
 When comparing street values (package conflicts, grouping), fold the abbreviations first:
 `str`/`str.` ≡ `straße`, `g.` ≡ `gasse`, `pl.` ≡ `platz`. `Wilhelminenstr 141` and
-`Wilhelminenstraße 141` are therefore one address, not a question.
+`Wilhelminenstraße 141` are therefore one address, not a question. For **`groupingKey`** (and
+layer street compare), also collapse consecutive duplicate letters so `Wasagasse` ≡ `Wasagase` —
+see [street-fold supplement](./upload-search-object.street-fold.supplement.md). That fold is
+deterministic orthography, not Fuse fuzzy substitution.
 
 ## The address side is all or nothing
 

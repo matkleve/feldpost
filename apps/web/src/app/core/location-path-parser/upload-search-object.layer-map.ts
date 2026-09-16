@@ -12,7 +12,7 @@ import {
   expandPostcodeOnSearchObject,
 } from './upload-search-object.builder';
 import { collapseAtSlashPathSegments } from './upload-search-object.unit-parsing.at';
-import { foldStreetSpelling, splitPathSegments, stripFileExtension } from './location-path-parser.util';
+import { normalizeStreetForGroupingKey, splitPathSegments, stripFileExtension } from './location-path-parser.util';
 import type { UploadSearchObject } from '../upload/address-resolution/upload-address-resolution.types';
 
 /** Same normalization as grouping keys — kept local to avoid parser → upload cycle. */
@@ -76,7 +76,7 @@ export function normalizeStreetLevelValue(value: string | null | undefined): str
   if (value == null) {
     return '';
   }
-  return foldStreetSpelling(normalizeKeyPart(value));
+  return normalizeStreetForGroupingKey(value);
 }
 
 /**

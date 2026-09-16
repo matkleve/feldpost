@@ -26,7 +26,7 @@ import {
   type ClassifiedToken,
   type TokenClassificationContext,
 } from './path-token-classifier';
-import { splitPathSegments, stripFileExtension } from './location-path-parser.util';
+import { splitPathSegments, stripFileExtension, normalizeStreetForGroupingKey } from './location-path-parser.util';
 import type { BundeslandRecord } from './local-geo-data.adapter';
 import {
   collapseAtSlashPathSegments,
@@ -409,12 +409,13 @@ export function buildGroupingKey(fields: SoFields): string {
       .toLowerCase()
       .normalize('NFKD')
       .replace(/[\u0300-\u036f]/g, '');
+  // @see docs/specs/service/media-upload-service/upload-search-object.street-fold.supplement.md
   return [
     norm(fields.country),
     norm(fields.state),
     norm(fields.postcode),
     norm(fields.city),
-    norm(fields.street),
+    normalizeStreetForGroupingKey(fields.street),
     norm(fields.houseNumber),
   ].join('|');
 }

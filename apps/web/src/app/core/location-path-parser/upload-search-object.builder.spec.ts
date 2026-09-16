@@ -728,3 +728,53 @@ describe('buildSearchObjectFromRelativePath — Windows copy suffix (CS-*)', () 
     expect(copy.groupingKey).toBe(bare.groupingKey);
   });
 });
+
+/**
+ * Spelling twins — groupingKey fold collapses doubled letters.
+ * @see docs/specs/service/media-upload-service/upload-search-object.street-fold.supplement.md
+ */
+describe('buildSearchObjectFromRelativePath — street spelling fold (SF-*)', () => {
+  it('SF-01: Wasagasse 4 and Wasagase 4 share groupingKey; flat street keeps path spelling', () => {
+    const correct = buildSearchObjectFromRelativePath(
+      'Wien/1010/Wasagasse 4/IMG_1.jpg',
+      'IMG_1.jpg',
+      geoCopySuffix,
+    );
+    const typo = buildSearchObjectFromRelativePath(
+      'Wien/1010/Wasagase 4/IMG_1.jpg',
+      'IMG_1.jpg',
+      geoCopySuffix,
+    );
+    expect(correct.street).toBe('Wasagasse');
+    expect(typo.street).toBe('Wasagase');
+    expect(typo.groupingKey).toBe(correct.groupingKey);
+  });
+
+  it('SF-02: copy-suffix + typo chain still one key', () => {
+    const a = buildSearchObjectFromRelativePath(
+      'Wien/1010/Wasagasse 4 (1)/IMG_1.jpg',
+      'IMG_1.jpg',
+      geoCopySuffix,
+    );
+    const b = buildSearchObjectFromRelativePath(
+      'Wien/1010/Wasagase 4 (2)/IMG_1.jpg',
+      'IMG_1.jpg',
+      geoCopySuffix,
+    );
+    expect(a.groupingKey).toBe(b.groupingKey);
+  });
+
+  it('SF-03: different streets do not merge', () => {
+    const a = buildSearchObjectFromRelativePath(
+      'Wien/1010/Wasagasse 4/IMG_1.jpg',
+      'IMG_1.jpg',
+      geoCopySuffix,
+    );
+    const b = buildSearchObjectFromRelativePath(
+      'Wien/1010/Neubaugasse 4/IMG_1.jpg',
+      'IMG_1.jpg',
+      geoCopySuffix,
+    );
+    expect(a.groupingKey).not.toBe(b.groupingKey);
+  });
+});

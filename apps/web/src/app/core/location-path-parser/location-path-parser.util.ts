@@ -49,6 +49,21 @@ export function foldStreetSpelling(value: string): string {
     .replace(/([a-z]*)str\.?(?=\s|$)/g, (_match, prefix: string) => `${prefix}strasse`);
 }
 
+/**
+ * Street component of `groupingKey` / layer street compare — abbreviation fold plus collapse of
+ * consecutive duplicate letters (`Wasagasse` ≡ `Wasagase`).
+ * @see docs/specs/service/media-upload-service/upload-search-object.street-fold.supplement.md
+ */
+export function normalizeStreetForGroupingKey(value: string | null | undefined): string {
+  if (value == null || !value.trim()) {
+    return '';
+  }
+  return foldStreetSpelling(value)
+    .replace(/(.)\1+/gu, '$1')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 export function splitPathSegments(fullPath: string): string[] {
   return fullPath
     .split(/[\\/]+/)

@@ -37,7 +37,7 @@ the same building.
 
 | Topic | Why |
 | --- | --- |
-| Spelling twins (`Wasagasse` vs `Wasagase`) | Different strings after suffix strip; needs a separate near-duplicate / fuzzy-street decision — not solved by C1–C5. |
+| Spelling twins (`Wasagasse` vs `Wasagase`) | Handled by [street-fold supplement](./upload-search-object.street-fold.supplement.md) (deterministic letter-run collapse on the key). |
 | Camera counters inside the name (`IMG_1274`, `_0012` mid-token) | Already gated elsewhere ([filename postcode gate](./upload-search-object.md#area-evidence)); do not confuse with a trailing `(N)`. |
 | Chunk-stem heuristics in [STUDY-008](../../../study/008-classification-chunking-strategy.md) § 4 | Those stems only order classification chunks. **This** contract is about Search Object fields and `groupingKey`. Both MUST agree on trailing `(N)`, but SO is the authority for address identity. |
 

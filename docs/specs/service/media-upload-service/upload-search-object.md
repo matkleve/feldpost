@@ -14,6 +14,7 @@ All **field names are English** (internal model). **Values** use locale-appropri
 | Country derived from the place | [upload-search-object.country-derivation.md](./upload-search-object.country-derivation.md) |
 | AT unit / slash / Tür / Top | [upload-search-object.unit-parsing.at.md](./upload-search-object.unit-parsing.at.md) |
 | Windows copy suffix `(N)` on folder/file names | [upload-search-object.copy-suffix.supplement.md](./upload-search-object.copy-suffix.supplement.md) |
+| Street spelling fold for `groupingKey` | [upload-search-object.street-fold.supplement.md](./upload-search-object.street-fold.supplement.md) |
 | Worked layer examples | [upload-search-object.layer-map.examples.md](./upload-search-object.layer-map.examples.md) |
 | Pipeline keys + trays | [upload-address-resolution-pipeline.md](./upload-address-resolution-pipeline.md) |
 | Legacy narrative parser | [location-path-parser.md](../location-path-parser/location-path-parser.md) — **non-normative**; use SO specs above |
