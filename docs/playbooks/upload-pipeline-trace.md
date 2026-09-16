@@ -87,13 +87,18 @@ groups and land mostly on `area_only` (no pre-upload tray — area placement, F-
 | `flat` | 1 | 0 | 0.03 | `incomplete` |
 | `shallow_many` | 19 | 1 | 2.0 | `area_only` |
 | `mixed` | 20 | 0 | 1.9 | `area_only` |
-| **`firma_at_archive`** | **22** | **1** | 8.9 | `street_locality` |
+| **`firma_at_archive`** | **20** | **1** | 8.6 | `street_locality` |
 
-`firma_at_archive` after Windows `(N)` strip (2026-09-16): **32 → 22 groups** — increment chains
-(`Neubaugasse 6` / `(1)` / `(2)`) now share one `groupingKey`. Typo twins remain separate
-(`wasagasse` vs `wasagase` in largest groups) until a spelling-merge contract exists.
-Adversarial tray count remains ~50× higher for the same file count — packing, not product
-regression. For efficiency work, quote **`firma_at_archive`**, not `adversarial`.
+`firma_at_archive` progression @ 1 000 files (2026-09-16):
+
+| Step | Groups | Notes |
+| --- | ---: | --- |
+| Baseline (before `(N)` / fold) | 32 | Increment + typo chains split |
+| After Windows `(N)` strip | 22 | `Wasagasse 4 (1)` ≡ `Wasagasse 4` |
+| After street letter-run fold | **20** | `Wasagasse` ≡ `Wasagase` on `groupingKey` |
+
+Arbitrary typos (`Stephansplatz` vs `Stehansplatz`) stay out of scope. Adversarial remains ~791 / 354.
+For efficiency work, quote **`firma_at_archive`**, not `adversarial`.
 
 Note: scale-tier “trays” = local-gate questions (`layer_conflict` / `admin_conflict` /
 `street_only`) before upload. Geocode ambiguity trays can still appear in a full interactive run.
