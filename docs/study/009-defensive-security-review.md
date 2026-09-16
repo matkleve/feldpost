@@ -11,7 +11,29 @@ corrected-by: none
 **Measured:** 2026-09-16 on branch `cursor/defensive-security-audit-chat-rls-43ea`, commit base `60cdbb41` (main at measurement start).  
 **Method:** Static read of `docs/security-boundaries.md`, `supabase/migrations/**`, Edge Function sources, `scripts/validate-*.sql`, and selected `apps/web` call sites. **No live database, no hosted project, no offensive probing.** Supabase MCP was unauthenticated in this environment. Grades below are therefore at most `[A]` for repository text and `[B]`/`[C]` for runtime effect.
 
-**Remediation in this change:** F-01 and F-02 → migration `20260916162935_restore_chat_rls_membership_isolation.sql` + extended `scripts/validate-chat-rls.sql`. Remaining findings stay open.
+### How this study is marked
+
+Frontmatter `status: partially-remediated` is the correct label while **any** finding remains open. Do **not** flip the whole study to “fixed” / `active` / `historical` until F-03…F-07 are closed (or explicitly rejected). Per [`STUDY-FORMAT.md`](./STUDY-FORMAT.md):
+
+| When | Status to use |
+| --- | --- |
+| Some findings fixed, some still open | `partially-remediated` (this file) — ledger below names where each fix landed |
+| Every finding closed and owner signed off | keep this file as `partially-remediated` → then `historical` **or** leave it and open a short follow-up study that says “all STUDY-009 findings closed”; do not rewrite findings away |
+| A later study replaces the reasoning | new study gets a new id; set this file’s `corrected-by` and `status: superseded` |
+
+`corrected-by` in frontmatter is for **superseding studies**, not for listing migrations. Migrations and commits belong in the ledger.
+
+### Remediation ledger
+
+| Finding | Status | Where it landed |
+| --- | --- | --- |
+| F-01 chat private/DM isolation | **remediated** (code) — live DB proof still owner-side | `supabase/migrations/20260916162935_restore_chat_rls_membership_isolation.sql`; checks in `scripts/validate-chat-rls.sql`; commit on PR #207 |
+| F-02 `user_roles` org scope | **remediated** (code) — same | same migration |
+| F-03 CI live RLS validators | **open** | — |
+| F-04 public branding + SVG | **open** | — |
+| F-05 `org_api_keys` list breadth | **open** | — |
+| F-06 stale DSGVO orphan script | **open** | — |
+| F-07 drop dead DEFINER RPCs | **open** | — |
 
 ## Trust model (already sound)
 
