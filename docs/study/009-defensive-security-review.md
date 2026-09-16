@@ -9,104 +9,84 @@ corrected-by: none
 # Defensive security review (static) — September 2026
 
 **Measured:** 2026-09-16 on branch `cursor/defensive-security-audit-chat-rls-43ea`, commit base `60cdbb41` (main at measurement start).  
-**Method:** Static read of `docs/security-boundaries.md`, `supabase/migrations/**`, Edge Function sources, `scripts/validate-*.sql`, and selected `apps/web` call sites. **No live database, no hosted project, no offensive probing.** Supabase MCP was unauthenticated in this environment. Grades below are therefore at most `[A]` for repository text and `[B]`/`[C]` for runtime effect.
+**Method:** Static read of `docs/security-boundaries.md`, `supabase/migrations/**`, Edge Function sources, `scripts/validate-*.sql`, and selected `apps/web` call sites. **No offensive probing.** Live proof of F-01–F-03 via `scripts/local-verify/run.sh` on PostgreSQL 16 + PostGIS in this environment (2026-09-16). Supabase MCP / hosted `db push` were not available (auth skipped). Grades: `[A]` for repo text and commands actually run here; `[B]`/`[C]` otherwise.
 
 ### How this study is marked
 
-Frontmatter `status: partially-remediated` is the correct label while **any** finding remains open. Do **not** flip the whole study to “fixed” / `active` / `historical` until F-03…F-07 are closed (or explicitly rejected). Per [`STUDY-FORMAT.md`](./STUDY-FORMAT.md):
+Frontmatter stays `partially-remediated` until **hosted** has applied the restore/hardening migrations (`supabase migration list` Local=Remote) — that last step is operator-side, not a missing code fix. Per [`STUDY-FORMAT.md`](./STUDY-FORMAT.md): do not rewrite findings away; use the ledger. `corrected-by` is for superseding studies only.
 
-| When | Status to use |
-| --- | --- |
-| Some findings fixed, some still open | `partially-remediated` (this file) — ledger below names where each fix landed |
-| Every finding closed and owner signed off | keep this file as `partially-remediated` → then `historical` **or** leave it and open a short follow-up study that says “all STUDY-009 findings closed”; do not rewrite findings away |
-| A later study replaces the reasoning | new study gets a new id; set this file’s `corrected-by` and `status: superseded` |
-
-`corrected-by` in frontmatter is for **superseding studies**, not for listing migrations. Migrations and commits belong in the ledger.
+When hosted is confirmed green, flip this file to `historical` (or leave the ledger and stop opening F-01…F-07 work).
 
 ### Remediation ledger
 
 | Finding | Status | Where it landed |
 | --- | --- | --- |
-| F-01 chat private/DM isolation | **remediated** (code) — live DB proof still owner-side | `supabase/migrations/20260916162935_restore_chat_rls_membership_isolation.sql`; checks in `scripts/validate-chat-rls.sql`; commit on PR #207 |
-| F-02 `user_roles` org scope | **remediated** (code) — same | same migration |
-| F-03 CI live RLS validators | **open** | — |
-| F-04 public branding + SVG | **open** | — |
-| F-05 `org_api_keys` list breadth | **open** | — |
-| F-06 stale DSGVO orphan script | **open** | — |
-| F-07 drop dead DEFINER RPCs | **open** | — |
+| F-01 chat private/DM isolation | **remediated** + local live PASS | `20260916162935_restore_chat_rls_membership_isolation.sql`; `scripts/validate-chat-rls.sql` (9/9 PASS in local-verify) |
+| F-02 `user_roles` org scope | **remediated** | same migration |
+| F-03 CI live RLS validators | **remediated** | `scripts/local-verify/run.sh`, `seed-rls-actors.sql`, `.github/workflows/local-rls-verify.yml`, `npm run supabase:local-verify` |
+| F-04 public branding + SVG | **remediated** | `20260916165450_harden_branding_and_api_key_read.sql`; client accept-list + i18n |
+| F-05 `org_api_keys` list breadth | **remediated** | same migration (drop broad SELECT; manage policy remains) |
+| F-06 stale DSGVO orphan script | **remediated** | `scripts/validate-dsgvo-security.sql` → `media` / `media_items` |
+| F-07 drop dead DEFINER RPCs | **remediated** (already on main) | `20260911150000_drop_dead_image_era_functions.sql` — no new work |
 
-### Agent handoff (do not redo F-01 / F-02)
+### Agent handoff (do not redo F-01…F-07)
 
-Before any security/RLS work on chat or `user_roles`:
+Before any security/RLS work on chat, `user_roles`, branding, API keys, or grant validators:
 
-1. Read this study’s remediation ledger.
+1. Read this ledger.
 2. Read [TRAP-022](../TRAPS.md#trap-022--an-rls-perf-wrap-that-reintroduces-pre-hardening-policies).
-3. Confirm `20260916162935_restore_chat_rls_membership_isolation.sql` is present and applied on the target DB.
+3. Run `npm run supabase:local-verify` (or wait for `local-rls-verify` CI).
 
-**Do not** open a second fix for F-01 or F-02 unless live `validate-chat-rls.sql` fails after that migration is applied. Open work is only F-03…F-07 (and hosted apply of the restore migration).
+**Do not** re-implement F-01…F-07 unless local-verify fails after a rebase. Remaining operator work: `supabase db push` on hosted, then `supabase migration list`.
 
 ## Trust model (already sound)
 
 - RLS is the security boundary; the Angular client is untrusted. `[A]` — `docs/adr/0003-rls-is-the-security-boundary.md`, `docs/security-boundaries.md` §1–2.
 - Media/images storage paths require `{org_id}/{user_id}/…` and private buckets. `[A]` — `20260304000001_storage_images.sql`, `20260327121000_storage_media_bucket_init.sql`.
 - Chat attachments were flipped private with org-scoped SELECT. `[A]` — `20260622080000_chat_attachments_private_bucket.sql`.
-- Anon EXECUTE on authenticated-only SECURITY DEFINER RPCs was systematically revoked (issues #193 / #201 lineage). `[A]` — `20260911120000`, `20260911130000`, `20260911140000`; gate `scripts/validate-authenticated-rpc-grants.sql`.
+- Anon EXECUTE on authenticated-only SECURITY DEFINER RPCs was systematically revoked (issues #193 / #201 lineage). `[A]` — `20260911120000`, `20260911130000`, `20260911140000`; gate `scripts/validate-authenticated-rpc-grants.sql` (85/85 PASS local-verify). `[A]`
 - Edge Functions `geocode` and `generate-media-preview` set `verify_jwt = true`; preview uses user JWT for the row check before service-role storage I/O. `[A]` — `supabase/config.toml`, `generate-media-preview/index.ts`.
 
-## Findings
+## Findings (detail)
 
-### F-01 — Chat private/DM message isolation regressed (HIGH) — **remediated in this change**
+### F-01 — Chat private/DM message isolation regressed (HIGH) — remediated
 
-`20260621090100_chat_rls_initplan_perf_wrap.sql` says it reproduces “current” policies but cites `20260615180000` and re-creates weak bodies. `[A]` — migration header lines 14–18 and policy bodies at lines 24–82.
+`20260621090100_chat_rls_initplan_perf_wrap.sql` re-copied pre-hardening bodies and re-created weak `chat_channels: org read` beside `accessible read` (Postgres ORs permissive policies). Message read/insert dropped `can_access_chat_channel`. `[A]`
 
-After that migration, `chat_messages: channel read` / `member insert` only require `organization_id = user_org_id()`, not `can_access_chat_channel`. `[A]` — same file.
+**Fix:** `20260916162935_…`. **Live:** local-verify chat script 9/9 PASS. `[A]`
 
-Postgres ORs multiple permissive SELECT policies. Recreating `chat_channels: org read` while leaving `accessible read` in place re-opens private/DM channel rows to every org member. `[A]`+`[C]` — policy names across `20260615200000` (drops org read, adds accessible read), `20260615202043` (keeps accessible read), `20260621090100` (re-adds org read without dropping accessible read); OR semantics are PostgreSQL RLS default `[C]` from docs knowledge, not re-measured here.
+### F-02 — `user_roles` not org-scoped for admins (HIGH) — remediated
 
-**Fix shipped:** drop weak `org read`; restore `accessible read`, membership-scoped member read, and `can_access_chat_channel` on message read/insert. Live proof: extended checks in `scripts/validate-chat-rls.sql` (must be run against a real DB — not executable in this sandbox). `[D]` owner should apply migration to hosted before treating production as closed.
+Admin/`members.view` SELECT (and legacy admin write/delete) lacked `profiles.organization_id`. `[A]` Fixed in `20260916162935_…`.
 
-### F-02 — `user_roles` SELECT/write not org-scoped for admins (HIGH) — **remediated in this change**
+### F-03 — Live RLS/grant validators not in CI (MEDIUM) — remediated
 
-Policy `user_roles: org read` allows `is_admin()` or `has_permission('members.view')` with **no** `profiles.organization_id` predicate. `[A]` — `20260615180000` lines 756–762. An admin JWT therefore satisfies SELECT for every `user_roles` row in the catalog. `[C]` — runtime cross-org read not executed here.
+Added ephemeral Postgres workflow + `scripts/local-verify/run.sh` covering grants, chat, and upload-role matrices. `[A]`
 
-Legacy `user_roles: admin write` / `admin delete` only checked `is_admin()`. `[A]` — `20260303000005_rls.sql`. Product role changes use DEFINER `assign_org_member_role` (org-checked), but direct PostgREST inserts were under-gated. `[A]`+`[C]`.
+### F-04 — `org-branding` SVG MIME (LOW–MEDIUM) — remediated
 
-**Fix shipped:** org-scoped SELECT/INSERT/DELETE policies in `20260916162935_…`.
+Bucket allowlist and client upload accept-list are PNG/JPEG/WebP only. `[A]`
 
-### F-03 — Live RLS/grant validators not in `npm run verify` (MEDIUM) — open
+### F-05 — `org_api_keys` readable by every org member (LOW) — remediated
 
-`scripts/verify.mjs` runs `check-rpc-param-contract.mjs` but not `validate-chat-rls.sql`, `validate-upload-role-rls.sql`, or `validate-authenticated-rpc-grants.sql`. `[A]` — `scripts/verify.mjs`. Those scripts require a live DB (`scripts/local-verify/README.md`). `[A]`. The F-01 regression could merge without a red gate. `[C]`.
+Dropped `org_api_keys: org read`; manage permission policy covers access. `[A]`
 
-**Proposal `[D]`:** add a CI job (or local-verify step) that applies migrations to ephemeral Postgres and runs the validate-*.sql suite on every migration PR.
+### F-06 — `validate-dsgvo-security.sql` targeted legacy `images` (LOW) — remediated
 
-### F-04 — `org-branding` public bucket + SVG MIME (LOW–MEDIUM) — open
+Orphan counts now use `media` / `media_items` (legacy images bucket kept as a secondary cleanup metric). `[A]`
 
-Bucket `public = true` and allowlist includes `image/svg+xml`. `[A]` — `20260616160000_org_branding_storage.sql`. UI renders logos via `<img [src]>`. `[A]` — `organization-branding-section.component.html`. Script execution inside `<img>` SVG is generally blocked by browsers, but a public SVG still expands the stored-XSS / content-sniff surface for any consumer that inlines the file. `[C]`.
+### F-07 — Dead SECURITY DEFINER functions (LOW) — remediated
 
-**Proposal `[D]`:** drop SVG from the allowlist (PNG/WebP/JPEG only) unless a product requirement forces it; keep the bucket public only if marketing needs hotlinkable logos.
-
-### F-05 — `org_api_keys` readable by every org member (LOW) — open
-
-SELECT policy is org-wide with no `org.api_keys.manage` check; hashes are SHA-256 of the raw key (client-side). `[A]` — table + policy in `20260615180000`; `organization.service.ts` `sha256`. Metadata leak (names, prefixes, last_used) to viewers/workers. `[C]` severity depends on product intent.
-
-**Proposal `[D]`:** gate SELECT on `org.api_keys.manage` (or a dedicated view permission).
-
-### F-06 — `validate-dsgvo-security.sql` still targets legacy `images` (LOW) — open
-
-Orphan check joins `public.images`. `[A]` — `scripts/validate-dsgvo-security.sql`. Media cutover moved storage to `media_items` / `media` bucket. `[A]` — media migrations. Script is stale as an operational gate. `[C]`.
-
-### F-07 — Dead SECURITY DEFINER functions still present (LOW) — open
-
-`20260911140000` revoked client EXECUTE on dead location RPCs but deferred DROP. `[A]` — migration comments. Residual attack surface if grants regress. `[C]`.
+Already dropped in `20260911150000` (#202). STUDY-009 initially flagged revoke-only; drop had already landed. `[A]`
 
 ## What this review did **not** do
 
-- No exploit payloads, no unauthenticated probing of hosted APIs, no credential harvesting.
-- No confirmation that hosted migration history matches git (requires `supabase migration list` on the linked project).
-- No pen test of share-link token entropy or invite QR flows beyond noting tokens are SHA-256 hashed at rest. `[A]` hash usage in share-set migrations; entropy not measured `[C]`.
+- No exploit payloads or hosted probing.
+- No confirmation that **hosted** migration history matches git (requires `supabase migration list` on the linked project). `[D]` owner.
+- No pen test of share-link / invite entropy beyond noting SHA-256 at rest. `[A]`/`[C]`
 
 ## Recommended owner sequence
 
-1. Apply `20260916162935_restore_chat_rls_membership_isolation.sql` to hosted; run `psql "$DATABASE_URL" -f scripts/validate-chat-rls.sql` — expect PASS. `[D]`
-2. Decide F-03 (CI live RLS) and F-04 (SVG/public branding). `[D]`
-3. Schedule external authorized pen test for share links, invites, and export — outside agent scope. `[D]`
+1. Merge PR #207; `supabase db push`; `supabase migration list` — Local=Remote. `[D]`
+2. Optionally mark this study `historical` once hosted is confirmed. `[D]`
+3. External authorized pen test for share links / invites / export remains worthwhile and is outside this study. `[D]`
