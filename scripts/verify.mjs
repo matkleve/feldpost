@@ -148,7 +148,7 @@ const CHECKS = [
     ],
     soft: true,
     debt:
-      "25 failing tests across 12 files (measured 2026-09-13 on the merge of main into claude/uploader-pipeline-test-badges-kktrpg, five cold runs, identical every time). Lower than either parent alone — main was 30/13, the uploader-pipeline branch was 39/14 against its own older base — because main's chainable Supabase stub (src/test/mocks/supabase-chain.mock.ts) fixed some of the same cross-file pollution the branch's own filename-parser and upload fixes did, and the two together clear more than either did apart. All 12 pass in isolation; they fail only in a full run. Fixing the remaining pollution is STUDY-006 Phase 0.4b. See docs/study/005-upload-pipeline-trace-findings.md F-12, F-13.",
+      "22 failing tests across 8 files (measured 2026-09-16 on claude/uploader-pipeline-test-badges-kktrpg; was 25/12 on 2026-09-13). The 2026-09-13 note said 'all 12 pass in isolation; they fail only in a full run' — that was checked on 2026-09-16 and is wrong: 8 of the 9 files failing then fail on their own under both ng test and plain vitest, several with zero commits on this branch (nav.component.spec.ts asserts 4 nav items against a component that has shipped 5 since before it). They are stale or broken tests, not pollution; only upload.service.spec.ts is genuinely order-dependent. Fixed since: supabase-runtime-config (vi.mock on a relative import, unloadable under ng test), settings-overlay (incomplete I18nService/AuthService stubs), auth.service (Object.assign on a getter-only crypto.subtle). Remaining work is per-file repair, STUDY-006 Phase 0.4b. See docs/study/005-upload-pipeline-trace-findings.md F-12, F-13.",
   },
   { name: "build", cmd: "npm", args: ["run", "--silent", "build"] },
 ];

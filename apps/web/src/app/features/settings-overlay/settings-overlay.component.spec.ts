@@ -25,12 +25,23 @@ describe('SettingsOverlayComponent', () => {
               user_metadata: { full_name: 'Matthias' },
             }),
             signOut: signOutMock,
+            // AccountComponent's ngOnInit loads security state; without these the promise rejects
+            // unhandled, which Vitest reports as an error that can surface in a later file.
+            mfaListFactors: async () => ({ factors: [], error: null }),
+            getAuthenticatorAssuranceLevel: async () => ({
+              currentLevel: null,
+              nextLevel: null,
+              error: null,
+            }),
           },
         },
         {
           provide: I18nService,
           useValue: {
             t: (_key: string, fallback = '') => fallback,
+            // AccountComponent renders inside this overlay and calls translateOriginal; without it
+            // the template throws during change detection before any assertion runs.
+            translateOriginal: (original: string, fallback = '') => original || fallback,
             language: signal<'de' | 'en'>('de'),
             setLanguage: vi.fn(),
           },

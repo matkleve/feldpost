@@ -458,6 +458,45 @@ in some orders. So:
 makes the measurement trustworthy; it does **not** fix the pollution — tracked as
 [STUDY-006](./006-upload-pipeline-correction-plan.md) Phase 0.4b.
 
+---
+
+**Correction, 2026-09-16 — most of these are not pollution at all.** `[A]`
+
+Phase 0.4b began from this finding's premise, that "14 files pass in isolation and fail in a full
+run". Checking it file by file under `ng test` shows the premise is wrong for almost all of them.
+Of the nine files failing at the time of writing, **eight fail on their own**, with no other spec in
+the run:
+
+| File | Alone | Verdict |
+| --- | --- | --- |
+| `nav.component.spec.ts` | 6 failed | asserts 4 nav items; the component has had **5** since before this branch |
+| `login.component.spec.ts` | 4 failed | always fails |
+| `register.component.spec.ts` | 1 failed | always fails |
+| `media-detail-view.ui.spec.ts` | 3 failed | always fails |
+| `media-detail-view.component.spec.ts` | 1 failed | always fails |
+| `media-detail-view.replace-photo.spec.ts` | 1 failed | always fails |
+| `media-detail-delete.helper.spec.ts` | 1 failed | always fails |
+| `settings-overlay.component.spec.ts` | 1 failed | incomplete stubs — **fixed 2026-09-16** |
+| `supabase-runtime-config.spec.ts` | whole suite | `vi.mock` on a relative import — **fixed 2026-09-16** |
+| `upload.service.spec.ts` | **passes** (46) | the one genuine order-dependent case |
+
+`nav.component.spec.ts` and `media-detail-view.component.spec.ts` carry **zero commits on this
+branch**, and `origin/main` already ships five nav routes against the test's four `[A]` — so these
+are stale tests that predate this work entirely.
+
+Two runners give the same answer, too: `nav` and `login` fail with identical counts under plain
+`npx vitest run` and under `ng test` `[A]`, so this is not [F-13](#f-13)'s configuration split
+either.
+
+**What this means.** The "order-dependent pollution" framing has been acting as a bucket that
+ordinary broken tests fell into and stopped being read. The order-dependence in the table above is
+real — it decides *which* subset is reported on a given run — but the failures themselves are mostly
+static. Only `upload.service.spec.ts` (≈5 assertions, mocked `exifr.gps` returning `undefined`)
+behaves the way the whole group was assumed to.
+
+The likely origin of the wrong premise is that "passes in isolation" was measured with
+`npx vitest run <file>` at a time when that did differ, and never re-checked as the specs drifted.
+
 **What the polluter is not.** `core/upload/upload.service.spec.ts` fails because its mocked
 `exifr.gps` returns `undefined`, so the 5 assertions that read EXIF values fail. `[A]` Ruled out by
 measurement: all 53 `core/upload` spec files pass together (331 tests) `[A]`; pairing the spec with

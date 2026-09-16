@@ -2,11 +2,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   getResolvedSupabaseConfig,
   resolveSupabaseRuntimeConfig,
+  setSupabaseEnvironmentOverrideForTests,
 } from './supabase-runtime-config';
 import type { DevSupabaseEnv } from './supabase-runtime-config';
 
-vi.mock('../../../environments/environment', () => ({
-  environment: {
+// `vi.mock()` on a relative import is rejected outright by the Angular unit-test system, which
+// made this whole suite unloadable there. The module exposes an explicit override instead.
+// Built fresh per test: one case mutates `preferLocalWhenAvailable`, and a shared object would
+// carry that into the next test — which is precisely what the old version did to the real
+// environment singleton, for every file that ran after it in the same worker.
+function makeTestEnvironment() {
+  return {
     production: false,
     i18n: { enableLegacyDomFallback: true },
     supabase: {
@@ -20,15 +26,20 @@ vi.mock('../../../environments/environment', () => ({
         anonKey: 'local-key',
       },
     },
-  },
-}));
+  } as unknown as NonNullable<Parameters<typeof setSupabaseEnvironmentOverrideForTests>[0]>;
+}
+
+let testEnvironment = makeTestEnvironment();
 
 describe('resolveSupabaseRuntimeConfig', () => {
   beforeEach(() => {
+    testEnvironment = makeTestEnvironment();
+    setSupabaseEnvironmentOverrideForTests(testEnvironment);
     vi.stubGlobal('fetch', vi.fn());
   });
 
   afterEach(() => {
+    setSupabaseEnvironmentOverrideForTests(null);
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
@@ -81,9 +92,9 @@ describe('resolveSupabaseRuntimeConfig', () => {
 
   it('uses cloud when preferLocalWhenAvailable is false', async () => {
     // Same cast the module itself makes (getSupabaseEnv) — the environment shape differs per
-    // build configuration, which is why every member of DevSupabaseEnv is optional.
-    const supabaseEnv = (await import('../../../environments/environment')).environment
-      .supabase as DevSupabaseEnv;
+    // build configuration, which is why every member of DevSupabaseEnv is optional. Mutate the
+    // per-test override, never the real environment module.
+    const supabaseEnv = testEnvironment.supabase as DevSupabaseEnv;
     supabaseEnv.preferLocalWhenAvailable = false;
     vi.mocked(fetch).mockResolvedValue({ ok: true } as Response);
 
