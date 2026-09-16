@@ -76,6 +76,22 @@ layer fights), ~**5 % are `admin_level_conflict`**. Most adversarial groups are 
 each conflict is its own question. Under `company_area` the same 1 000 files collapse to ≤21
 groups and land mostly on `area_only` (no pre-upload tray — area placement, F-19).
 
+**Measured profile comparison, 1 000 files, seed 7, `filesPerLocation=30`, camera naming
+(2026-09-16):**
+
+| Profile | Groups | Pre-upload trays | ms/file | Top outcome |
+| --- | ---: | ---: | ---: | --- |
+| `adversarial` | 791 | 354 | 3.6 | `street_locality` |
+| `company_area` | 19 | 1 | 2.2 | `area_only` |
+| `company_street` | 34 | 7 | 2.9 | `street_locality` |
+| `flat` | 1 | 0 | 0.03 | `incomplete` |
+| `shallow_many` | 19 | 1 | 2.1 | `area_only` |
+| `mixed` | 20 | 0 | 2.0 | `area_only` |
+
+`company_street` at ~34 groups matches a “~30 medias per location → 30–40 places” archive.
+Adversarial tray count is ~50× higher for the same file count — that is packing, not product
+regression.
+
 **Ways to reduce trays further (product, not just tests):**
 
 1. **Pack by place** — one question covers N medias when they share a `groupingKey` (already true;
