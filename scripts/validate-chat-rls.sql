@@ -1,8 +1,9 @@
 -- Chat RLS Validation Script
--- Purpose: prove the chat membership/message hardening in
---          supabase/migrations/20260620100000_chat_and_branding_rls_hardening.sql
+-- Purpose: prove chat membership/message isolation after
+--          20260620100000_chat_and_branding_rls_hardening.sql and the restore in
+--          20260916162935_restore_chat_rls_membership_isolation.sql
 -- Scope:   chat_channel_members (self-join), chat_channels (private read),
---          chat_channel_members role escalation.
+--          chat_channel_members role escalation, private message read/write.
 -- Safety:  runs inside a transaction and ends with ROLLBACK.
 --
 -- Run against a live database (cannot run in the offline sandbox):
@@ -12,6 +13,9 @@
 --   - non-member self-insert into a PRIVATE channel  -> DENY
 --   - self-insert into a PUBLIC channel              -> ALLOW
 --   - member self-elevation to role 'owner'          -> DENY
+--   - non-member SELECT private channel row          -> DENY (0 rows)
+--   - non-member SELECT private channel messages     -> DENY (0 rows)
+--   - non-member INSERT into private channel         -> DENY
 
 begin;
 
@@ -144,6 +148,48 @@ begin
     'member cannot self-elevate to owner',
     format('update public.chat_channel_members set role = %L where channel_id = %L and user_id = %L',
            'owner', public_channel, intruder_id),
+    false
+  );
+
+  -- Owner posts a private message (membership already seeded above).
+  perform pg_temp.act_as(owner_id);
+  perform pg_temp.run_check(
+    'owner can insert private channel message',
+    format(
+      'insert into public.chat_messages (channel_id, user_id, content) values (%L, %L, %L)',
+      private_channel, owner_id, 'rls-private-body'
+    ),
+    true
+  );
+
+  -- Intruder must not see the private channel row (perf-wrap regression).
+  perform pg_temp.act_as(intruder_id);
+  perform pg_temp.run_check(
+    'intruder cannot select private channel row',
+    format(
+      'select (case when exists (select 1 from public.chat_channels where id = %L) then 1/0 else 1 end)',
+      private_channel
+    ),
+    true
+  );
+
+  -- Intruder must not see private message bodies.
+  perform pg_temp.run_check(
+    'intruder cannot select private channel messages',
+    format(
+      'select (case when exists (select 1 from public.chat_messages where channel_id = %L) then 1/0 else 1 end)',
+      private_channel
+    ),
+    true
+  );
+
+  -- Intruder must not write into the private channel.
+  perform pg_temp.run_check(
+    'intruder cannot insert private channel message',
+    format(
+      'insert into public.chat_messages (channel_id, user_id, content) values (%L, %L, %L)',
+      private_channel, intruder_id, 'intruder-should-fail'
+    ),
     false
   );
 end;
