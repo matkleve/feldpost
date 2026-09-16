@@ -27,6 +27,9 @@ create temporary table if not exists _chat_rls_results (
   details text
 ) on commit drop;
 
+-- act_as() switches to authenticated; that role must write results rows.
+grant all on table _chat_rls_results to authenticated;
+
 create or replace function pg_temp.run_check(
   p_check_name text,
   p_sql text,
@@ -63,13 +66,24 @@ returns void
 language plpgsql
 as $$
 begin
-  perform set_config('role', 'authenticated', true);
+  -- JWT claims consumed by auth.uid() / user_org_id().
   perform set_config('request.jwt.claim.sub', p_user_id::text, true);
   perform set_config(
     'request.jwt.claims',
     json_build_object('role', 'authenticated', 'sub', p_user_id::text)::text,
     true
   );
+  -- Actually become the authenticated role so RLS applies (superuser bypasses it).
+  execute 'set local role authenticated';
+end;
+$$;
+
+create or replace function pg_temp.act_as_postgres()
+returns void
+language plpgsql
+as $$
+begin
+  execute 'reset role';
 end;
 $$;
 
@@ -81,12 +95,23 @@ declare
   public_channel uuid;
   private_channel uuid;
 begin
-  -- Two distinct members of the same organization.
+  -- Prefer an admin as the channel owner when available.
   select p.organization_id, p.id
     into org_id, owner_id
   from public.profiles p
+  join public.user_roles ur on ur.user_id = p.id
+  join public.org_roles orole on orole.id = ur.org_role_id
   where p.removed_at is null
+    and orole.name = 'admin'
   limit 1;
+
+  if owner_id is null then
+    select p.organization_id, p.id
+      into org_id, owner_id
+    from public.profiles p
+    where p.removed_at is null
+    limit 1;
+  end if;
 
   select p.id into intruder_id
   from public.profiles p
@@ -99,9 +124,9 @@ begin
     raise exception 'Need two members in one organization to run chat RLS checks';
   end if;
 
-  -- Seed channels as the owner (created_by = owner).
-  perform pg_temp.act_as(owner_id);
-
+  -- Seed channels as table owner (postgres). INSERT … RETURNING on a private
+  -- channel fails under authenticated RLS because SELECT requires membership
+  -- and the creator is not a member yet.
   insert into public.chat_channels (organization_id, name, type, created_by)
   values (org_id, 'rls-validation-public', 'public', owner_id)
   returning id into public_channel;
@@ -111,6 +136,7 @@ begin
   returning id into private_channel;
 
   -- Owner self-joins their private channel (created_by path) -> ALLOW.
+  perform pg_temp.act_as(owner_id);
   perform pg_temp.run_check(
     'owner self-join own private channel',
     format('insert into public.chat_channel_members (channel_id, user_id, role) values (%L, %L, %L)',
@@ -131,7 +157,7 @@ begin
   -- (1/0) if access is wrongly granted, so ALLOW == access correctly denied.
   perform pg_temp.run_check(
     'intruder cannot access private channel',
-    format('select (case when public.can_access_chat_channel(%L) then 1/0 else 1 end)', private_channel),
+    format('select (case when public.can_access_chat_channel(%L) then (1 / nullif(0, 0)) else 1 end)', private_channel),
     true
   );
 
@@ -167,7 +193,7 @@ begin
   perform pg_temp.run_check(
     'intruder cannot select private channel row',
     format(
-      'select (case when exists (select 1 from public.chat_channels where id = %L) then 1/0 else 1 end)',
+      'select (case when exists (select 1 from public.chat_channels where id = %L) then (1 / nullif(0, 0)) else 1 end)',
       private_channel
     ),
     true
@@ -177,7 +203,7 @@ begin
   perform pg_temp.run_check(
     'intruder cannot select private channel messages',
     format(
-      'select (case when exists (select 1 from public.chat_messages where channel_id = %L) then 1/0 else 1 end)',
+      'select (case when exists (select 1 from public.chat_messages where channel_id = %L) then (1 / nullif(0, 0)) else 1 end)',
       private_channel
     ),
     true
@@ -192,6 +218,9 @@ begin
     ),
     false
   );
+
+  -- Return to postgres so the result SELECT outside this block can read the temp table.
+  perform pg_temp.act_as_postgres();
 end;
 $$;
 

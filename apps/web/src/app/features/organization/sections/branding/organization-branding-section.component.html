@@ -45,7 +45,7 @@
       <div class="org-branding__controls">
         <section class="org-branding__group">
           <h3 class="org-branding__group-title">{{ t('organization.branding.logo_title', 'Logo') }}</h3>
-          <p class="org-branding__group-lead">{{ t('organization.branding.logo_hint', 'PNG, JPG, WebP, or SVG. Max 2 MB. Shown in navigation and exports.') }}</p>
+          <p class="org-branding__group-lead">{{ t('organization.branding.logo_hint', 'PNG, JPG, or WebP. Max 2 MB. Shown in navigation and exports.') }}</p>
 
           <div class="org-branding__logo-row">
             <div class="org-branding__logo-thumb" [class.org-branding__logo-thumb--empty]="!logoUrl()">
@@ -59,7 +59,7 @@
             @if (canEdit()) {
               <div class="org-branding__logo-actions">
                 <label class="org-branding__upload-btn" [class.org-branding__upload-btn--busy]="logoUploading()">
-                  <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden (change)="onLogoSelected($event)" [disabled]="logoUploading()" />
+                  <input type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="onLogoSelected($event)" [disabled]="logoUploading()" />
                   {{ logoUploading() ? t('organization.branding.logo_uploading', 'Uploading…') : t('organization.branding.logo_upload', 'Upload logo') }}
                 </label>
                 @if (logoUrl()) {

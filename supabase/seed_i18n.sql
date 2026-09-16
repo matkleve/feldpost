@@ -26686,7 +26686,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'WebP', 'published'
+select t.id, 'it', 'or WebP. Max 2 MB. Shown in navigation and exports.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'organization.branding.logo_hint'
 on conflict (app_text_id, lang) do update set

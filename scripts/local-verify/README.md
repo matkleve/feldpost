@@ -28,14 +28,24 @@ vacuously.
 apt-get install -y postgresql-16 postgresql-16-postgis-3   # once
 pg_ctlcluster 16 main start
 
-psql -d postgres -c 'DROP DATABASE IF EXISTS feldpost; CREATE DATABASE feldpost;'
-psql -v ON_ERROR_STOP=1 -d feldpost -f scripts/local-verify/supabase-harness.sql
-for f in supabase/migrations/*.sql; do
-  psql -q -v ON_ERROR_STOP=1 -d feldpost -f "$f" || { echo "FAILED: $f"; break; }
-done
-
-psql -v ON_ERROR_STOP=1 -d feldpost -f scripts/validate-authenticated-rpc-grants.sql
+bash scripts/local-verify/run.sh
 ```
+
+Or step-by-step:
+
+```bash
+psql -d postgres -c 'DROP DATABASE IF EXISTS feldpost_verify; CREATE DATABASE feldpost_verify;'
+psql -v ON_ERROR_STOP=1 -d feldpost_verify -f scripts/local-verify/supabase-harness.sql
+for f in supabase/migrations/*.sql; do
+  psql -q -v ON_ERROR_STOP=1 -d feldpost_verify -f "$f" || { echo "FAILED: $f"; break; }
+done
+psql -v ON_ERROR_STOP=1 -d feldpost_verify -f scripts/local-verify/seed-rls-actors.sql
+psql -v ON_ERROR_STOP=1 -d feldpost_verify -f scripts/validate-authenticated-rpc-grants.sql
+psql -v ON_ERROR_STOP=1 -d feldpost_verify -f scripts/validate-chat-rls.sql
+psql -v ON_ERROR_STOP=1 -d feldpost_verify -f scripts/validate-upload-role-rls.sql
+```
+
+CI: `.github/workflows/local-rls-verify.yml` (STUDY-009 F-03).
 
 To confirm a validation script still *detects* its bug, re-run the chain while
 skipping the fix migration and check that it fails. Omitting

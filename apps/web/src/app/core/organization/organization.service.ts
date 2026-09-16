@@ -56,7 +56,7 @@ export class OrganizationService {
   }
 
   async uploadOrganizationLogo(file: File): Promise<{ data: string | null; error: Error | null }> {
-    const allowed = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml']);
+    const allowed = new Set(['image/jpeg', 'image/png', 'image/webp']);
     if (!allowed.has(file.type)) {
       return { data: null, error: new Error('Unsupported logo file type.') };
     }
@@ -70,7 +70,7 @@ export class OrganizationService {
     }
 
     const orgId = profile.data.id;
-    const ext = file.type === 'image/jpeg' ? 'jpg' : file.type === 'image/svg+xml' ? 'svg' : file.type.split('/')[1] ?? 'png';
+    const ext = file.type === 'image/jpeg' ? 'jpg' : file.type.split('/')[1] ?? 'png';
     const path = `${orgId}/logo.${ext}`;
 
     const { error: uploadError } = await this.supabase.client.storage
