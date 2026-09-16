@@ -28,6 +28,17 @@ time), select the results, and trigger resolution for all of them.
 - It does not mutate `relative_path`, `original_filename` or `exif_raw`, which are immutable.
 - It does not resolve items that already have a location unless overwrite mode was chosen.
 
+## Implementation status, 2026-09-16
+
+**B8 is honoured by construction:** there is one engine, `core/media-location-bulk/`, and it takes a
+plain list of media ids. A folder subtree and a filter selection are two ways of producing that list,
+not two engines — which was the rule most at risk of quietly being broken by building the folder case
+first.
+
+B1, B2, B3, B5 and the R5 one-geocode-per-address rule are implemented and tested. B7 (RLS scoping)
+depends on the adapters, which are not wired yet. See the
+[sibling supplement](../page/files-page.bulk-resolution.supplement.md) for the file-level breakdown.
+
 ## Acceptance Criteria
 
 - [ ] 100 selected items resolving to one address ask **one** question (B4).
