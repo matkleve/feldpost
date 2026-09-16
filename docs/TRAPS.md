@@ -441,6 +441,22 @@ surface.
 
 ---
 
+## TRAP-022 — An RLS “perf wrap” that reintroduces pre-hardening policies
+
+**Surface** — a migration that claims to InitPlan-wrap “current” chat (or other) RLS policies “verbatim,” with a header citing an older schema migration as the source of the policy bodies.
+
+**Assumption** — the rewrite is behaviour-identical: only `(select helper())` wrapping changes; private/DM isolation still holds.
+
+**Truth** — the cited source was the *pre-hardening* policy set. Recreating a weak permissive SELECT (e.g. `chat_channels: org read`) alongside a later hardened policy (`accessible read`) **ORs** in Postgres and reopens private channel rows; replacing message policies with org-only checks drops `can_access_chat_channel` entirely. Same-org non-members can read/write private/DM messages. Fixed by `20260916162935_restore_chat_rls_membership_isolation.sql` — **do not re-implement F-01/F-02**; see STUDY-009 ledger.
+
+**Detect** — before any “perf-only” RLS rewrite: (1) `grep` the policy **name** across all later migrations to find the latest body; (2) confirm private-channel denial still exists in `scripts/validate-chat-rls.sql`; (3) never recreate a dropped weak policy name without dropping the hardened one first.
+
+**Source** — [STUDY-009](./study/009-defensive-security-review.md) F-01; bad wrap `supabase/migrations/20260621090100_chat_rls_initplan_perf_wrap.sql`; restore `20260916162935_restore_chat_rls_membership_isolation.sql`.
+
+**Status** — `pattern open`. This instance is remediated in git (PR #207); the shape recurs whenever a wrap migration copies from the wrong ancestor.
+
+---
+
 ## Rejected candidates
 
 Kept so they are not re-proposed. Both were real when recorded; neither reproduces now.

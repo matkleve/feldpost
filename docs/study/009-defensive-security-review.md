@@ -35,6 +35,16 @@ Frontmatter `status: partially-remediated` is the correct label while **any** fi
 | F-06 stale DSGVO orphan script | **open** | — |
 | F-07 drop dead DEFINER RPCs | **open** | — |
 
+### Agent handoff (do not redo F-01 / F-02)
+
+Before any security/RLS work on chat or `user_roles`:
+
+1. Read this study’s remediation ledger.
+2. Read [TRAP-022](../TRAPS.md#trap-022--an-rls-perf-wrap-that-reintroduces-pre-hardening-policies).
+3. Confirm `20260916162935_restore_chat_rls_membership_isolation.sql` is present and applied on the target DB.
+
+**Do not** open a second fix for F-01 or F-02 unless live `validate-chat-rls.sql` fails after that migration is applied. Open work is only F-03…F-07 (and hosted apply of the restore migration).
+
 ## Trust model (already sound)
 
 - RLS is the security boundary; the Angular client is untrusted. `[A]` — `docs/adr/0003-rls-is-the-security-boundary.md`, `docs/security-boundaries.md` §1–2.
