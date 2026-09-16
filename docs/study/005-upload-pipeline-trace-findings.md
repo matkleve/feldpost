@@ -1,7 +1,7 @@
 ---
 id: STUDY-005
 type: review
-status: active
+status: partially-remediated
 supersedes: none
 corrected-by: none
 ---
@@ -10,6 +10,12 @@ corrected-by: none
 
 **Measured:** 2026-09-12 · **Branch:** `claude/uploader-pipeline-test-badges-kktrpg` at `650f495`
 (based on `main` at `568b44b`) · **How:** by running the pipeline, not by reading it.
+
+**Status `partially-remediated`, 2026-09-16:** 17 of 22 findings are fixed, each struck through in the
+index below with its fix and its measurement recorded in place. Still open: F-08 (addressed for
+imports only), F-12/F-13 remainder (two spec files), F-17 and F-18 (both need an owner decision
+first). The correction work is [STUDY-006](./006-upload-pipeline-correction-plan.md); what is left is
+its § Phase 5.
 
 Every finding below came out of
 [`npm run trace:upload`](../playbooks/upload-pipeline-trace.md) — a headless harness that pushes a

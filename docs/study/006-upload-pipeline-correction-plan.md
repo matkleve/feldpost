@@ -1,14 +1,17 @@
 ---
 id: STUDY-006
 type: proposal
-status: proposed
+status: accepted
 supersedes: none
 corrected-by: none
 ---
 
 # Upload pipeline — decisions to take, and the plan to correct it
 
-**Written:** 2026-09-12, updated 2026-09-13 · **Branch:** `claude/uploader-pipeline-test-badges-kktrpg`
+**Written:** 2026-09-12 · **Last updated:** 2026-09-16 · **Merged to `main`** 2026-09-16 (the work is
+no longer branch-only). **Status `accepted`:** the owner signed off on D-01 … D-12 and Phases 0–4 are
+built and measured; the normative halves live in specs, and this file keeps the reasoning and the
+plan. **Start at § Phase 5** for what is still open.
 **Findings this answers:** [STUDY-005](./005-upload-pipeline-trace-findings.md) F-01 … F-22.
 
 ## Status at a glance
