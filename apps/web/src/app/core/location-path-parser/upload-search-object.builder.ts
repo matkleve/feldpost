@@ -508,12 +508,19 @@ export function buildSearchObjectFromRelativePath(
   geo: BuildSearchObjectGeo,
 ): UploadSearchObject {
   const normalizedPath = relativePath.replace(/\\/g, '/');
-  const segments = collapseAtSlashPathSegments(splitPathSegments(normalizedPath));
+  const rawSegments = splitPathSegments(normalizedPath);
+  const rawFolderSegments =
+    rawSegments.length > 0 && rawSegments[rawSegments.length - 1] === fileName
+      ? rawSegments.slice(0, -1)
+      : rawSegments.filter((segment) => segment !== fileName);
+  // Strip `(N)` per folder *before* the unit collapse joins `Lange Gasse 6` + `3` + `5`. The strip
+  // is anchored to the end of a segment, so on the joined string the suffix sits mid-text and
+  // survives into street and groupingKey.
+  // @see docs/specs/service/media-upload-service/upload-search-object.copy-suffix.supplement.md
+  const folderSegments = collapseAtSlashPathSegments(
+    rawFolderSegments.map(stripWindowsCopySuffix),
+  );
   const fileBase = stripFileExtension(fileName);
-  const folderSegments =
-    segments.length > 0 && segments[segments.length - 1] === fileName
-      ? segments.slice(0, -1)
-      : segments.filter((s) => s !== fileName);
 
   const fields = emptyFields();
   const sources: UploadAddressSourceEntry[] = [];

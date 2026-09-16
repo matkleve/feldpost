@@ -29,6 +29,7 @@ the same building.
 | --- | --- |
 | **C1** | Before tokenization of a path segment (folder or filename stem), strip a trailing Windows copy suffix matching `\s*\(\d+\)$` (optional space, `(`, digits, `)`). |
 | **C2** | Stripping applies to the **segment string**, not only to a later street fragment — so `Wasagasse 4 (1)` becomes `Wasagasse 4` before house/street split. |
+| **C2a** | Stripping runs **per raw folder segment, before** nested unit folders are collapsed (`Lange Gasse 6` + `3` + `5`). The pattern is anchored to the end of a segment, so after the collapse the suffix sits mid-string and survives into `street` and `groupingKey`. |
 | **C3** | After C1–C2, `Wasagasse 4`, `Wasagasse 4 (1)`, and `Wasagasse 4 (2)` under the same locality **MUST** share one `groupingKey` (same `street` + `houseNumber` + area fields). |
 | **C4** | The stripped `(N)` **MUST NOT** appear in flat `street`, `houseNumber`, `groupingKey`, or layer-package `parsed.street`. |
 | **C5** | Evidence may record that a copy suffix was present (optional `sources` note); it **MUST NOT** change address fields. |
@@ -50,8 +51,10 @@ the same building.
 | CS-03 | `Wasagasse 4 (12)` | `Wasagasse` | `4` | **Yes** vs CS-01 |
 | CS-04 | `Wasagasse 4A (2)` | `Wasagasse` | `4A` | **Yes** vs bare `Wasagasse 4A` |
 | CS-05 | `Stephansplatz (1)` | `Stephansplatz` (or landmark handling unchanged aside from suffix) | — | **Yes** vs bare `Stephansplatz` |
+| CS-06 | `Wasagasse 4 (1)/3/5` (nested unit folders) | `Wasagasse` | `4` (+ staircase `3`, door `5`) | **Yes** vs bare `Wasagasse 4/3/5` |
 
-Red-first: CS-02 fails on current `main` (`street === "Wasagasse (1)"`).
+Red-first: CS-02 failed before the first implementation (`street === "Wasagasse (1)"`); CS-06 failed
+after it (`street === "Wasagasse (1)/3/5"`, units lost).
 
 ## Code touchpoints (implementation follow-up)
 
@@ -63,6 +66,9 @@ Red-first: CS-02 fails on current `main` (`street === "Wasagasse (1)"`).
 
 ## Status
 
-**Implemented 2026-09-16** — `stripWindowsCopySuffix` in `path-token-classifier.ts`, applied at the
-start of `applySegment` in `upload-search-object.builder.ts` (before AT unit parse / tokenize).
+**Implemented 2026-09-16, extended 2026-09-16 (C2a)** — `stripWindowsCopySuffix` in
+`path-token-classifier.ts`, applied at the start of `applySegment` in
+`upload-search-object.builder.ts` (before AT unit parse / tokenize) **and** per raw folder segment
+before `collapseAtSlashPathSegments`, in both `buildSearchObjectFromRelativePath` and the layer
+map's `folderSegmentsFromPath` (so copies of one address share a layerKey).
 Acceptance CS-01…CS-05 in `upload-search-object.builder.spec.ts`.

@@ -9,6 +9,7 @@ import type { BundeslandRecord, GemeindeRecord } from './local-geo-data.adapter'
 import { COUNTRY_NAMES } from './city-registry.const';
 import { isPostcodeToken, normalizeCountryCode } from './postcode-patterns';
 import { findCitiesBySegment, isNoiseSegment, normalizeSegment } from './location-path-parser.util';
+import { STREET_KEYWORDS } from './street-keywords.const';
 import type { CountryProvenance } from '../upload/address-resolution/upload-address-resolution.types';
 
 export type ClassifiedTokenKind =
@@ -86,17 +87,6 @@ const CAMERA_LABELS = new Set([
 /** `str`/`str.` is the everyday abbreviation of `straße` and appears in real folder names. */
 const STREET_SUFFIX_RE = /(?:straße|strasse|str\.?|gasse|weg|platz|ring|allee|gürtel|zeile|steig)$/i;
 
-const STREET_KEYWORDS = new Set([
-  'straße',
-  'gasse',
-  'weg',
-  'platz',
-  'ring',
-  'allee',
-  'gürtel',
-  'zeile',
-  'steig',
-]);
 
 /** Numeric tokens are classified after country/city/street tokens in the same segment. */
 function isDeferredNumericToken(token: string): boolean {

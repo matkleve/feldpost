@@ -717,6 +717,31 @@ describe('buildSearchObjectFromRelativePath — Windows copy suffix (CS-*)', () 
     expect(copy.street ?? copy.city).toBeTruthy();
   });
 
+  // `Lange Gasse 6/3/5` is nested folders, and Windows puts the `(N)` on the one that was copied.
+  // The strip has to run per folder: after the unit collapse the suffix is mid-string and anchored
+  // patterns miss it, which left `Straße (1)/3/5` sitting in the street.
+  it('CS-06: copy suffix on an address folder with nested unit folders below it', () => {
+    const bare = buildSearchObjectFromRelativePath(
+      'Wien/1010/Wasagasse 4/3/5/IMG_1.jpg',
+      'IMG_1.jpg',
+      geoCopySuffix,
+    );
+    const copy = buildSearchObjectFromRelativePath(
+      'Wien/1010/Wasagasse 4 (1)/3/5/IMG_1.jpg',
+      'IMG_1.jpg',
+      geoCopySuffix,
+    );
+
+    expect(bare.street).toBe('Wasagasse');
+    expect(bare.staircase).toBe('3');
+    expect(bare.door).toBe('5');
+    expect(copy.street).toBe('Wasagasse');
+    expect(copy.houseNumber).toBe('4');
+    expect(copy.staircase).toBe('3');
+    expect(copy.door).toBe('5');
+    expect(copy.groupingKey).toBe(bare.groupingKey);
+  });
+
   it('strips (N) from a filename stem before the extension', () => {
     const bare = buildSearchObjectFromRelativePath(
       'Wasagasse 4.jpg',
@@ -819,6 +844,31 @@ describe('buildSearchObjectFromRelativePath — street spelling fold (SF-*)', ()
       geoCopySuffix,
     );
     expect(a.groupingKey).not.toBe(b.groupingKey);
+  });
+
+  // The classifier kept its own shorter copy of STREET_KEYWORDS with no `strasse`, so the word
+  // before it never joined the street name and every `… Strasse` collapsed to `Strasse`.
+  it('SF-08: a two-word street keeps its first word when Straße is written ss', () => {
+    const sharp = buildSearchObjectFromRelativePath(
+      'Wien/1010/Lerchenfelder Straße 3/IMG_1.jpg',
+      'IMG_1.jpg',
+      geoCopySuffix,
+    );
+    const doubleS = buildSearchObjectFromRelativePath(
+      'Wien/1010/Lerchenfelder Strasse 3/3/5/IMG_1.jpg',
+      'IMG_1.jpg',
+      geoCopySuffix,
+    );
+    const other = buildSearchObjectFromRelativePath(
+      'Wien/1010/Wiener Strasse 3/IMG_1.jpg',
+      'IMG_1.jpg',
+      geoCopySuffix,
+    );
+
+    expect(doubleS.street).toBe('Lerchenfelder Strasse');
+    expect(doubleS.groupingKey).toBe(sharp.groupingKey);
+    expect(other.street).toBe('Wiener Strasse');
+    expect(other.groupingKey).not.toBe(sharp.groupingKey);
   });
 
   it('SF-07: different streets do not merge', () => {
