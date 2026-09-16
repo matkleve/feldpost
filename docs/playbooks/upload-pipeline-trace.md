@@ -81,7 +81,7 @@ groups and land mostly on `area_only` (no pre-upload tray — area placement, F-
 
 | Profile | Groups | Pre-upload trays | ms/file | Top outcome |
 | --- | ---: | ---: | ---: | --- |
-| `adversarial` | 791 | 354 | 3.3 | `street_locality` |
+| `adversarial` | 823 | 386 | 3.4 | `street_locality` |
 | `company_area` | 19 | 1 | 2.0 | `area_only` |
 | `company_street` | 34 | 7 | 2.7 | `street_locality` |
 | `flat` | 1 | 0 | 0.03 | `incomplete` |
@@ -102,11 +102,18 @@ step and re-running):
 Typos that are not orthographic variants (`Wasagasse` vs `Wasagase`, `Stephansplatz` vs
 `Stehansplatz`) stay out of scope and remain separate groups — see
 [street-fold supplement](../specs/service/media-upload-service/upload-search-object.street-fold.supplement.md)
-§ Rejected. Adversarial remains ~791 / 354.
+§ Rejected. Adversarial remains ~823 / 386.
 
 The corpus also exposes a classifier weakness worth naming: the typo street `…gase` fuzzy-matches
-the Styrian municipality **Gasen**, so 121 of the 1 000 files land in `admin_conflict|city` instead
-of a street group. That is the gazetteer lookup, not the fold.
+the Styrian municipality **Gasen**, so 121 of the 1 000 files classify as
+`at|wien|1020|gasen|lange|2a` — the suffix eaten as a city, the remaining word left as the street —
+and land in `admin_conflict` instead of a street group. That is the gazetteer lookup, not the fold.
+
+Tray keying: an `admin_conflict` group is keyed by its **address plus** the disagreeing field. It
+used to be keyed by the field name alone, which collapsed every city conflict in a corpus into one
+group and one tray — the number this report exists to state. Correcting it moved `adversarial` from
+791/354 to 823/386; `firma_at_archive` was unaffected because its 121 conflicting files genuinely
+are one address.
 For efficiency work, quote **`firma_at_archive`**, not `adversarial`.
 
 Note: scale-tier “trays” = local-gate questions (`layer_conflict` / `admin_conflict` /
@@ -138,11 +145,9 @@ asserts. That is deliberate — a diagnostic that nothing keeps honest rots. Run
 cd apps/web && npx vitest run src/app/core/upload/trace/upload-pipeline-trace.spec.ts
 ```
 
-It is **not** yet exercised by `npm run verify`: the `test` gate's bundle does not compile on
-`main` (type errors in `upload-address-persist.acceptance.spec.ts` and
-`upload-new-pre-resolve-dedup-disambiguation.integration.spec.ts`, part of the gate's recorded
-debt), so `ng test` runs no specs at all today. Once that bundle compiles, this harness runs with
-the rest.
+It **is** exercised by `npm run verify` — the `test` gate compiles and runs it with the rest
+(1 556 specs on 2026-09-16). An earlier note here said the gate's bundle did not compile and ran no
+specs at all; that stopped being true and the note was not re-measured.
 
 ## Three runs, because the pipeline has three shapes
 
