@@ -13,6 +13,7 @@ All **field names are English** (internal model). **Values** use locale-appropri
 | Evidence, derivation, flat view | [upload-search-object.evidence-model.md](./upload-search-object.evidence-model.md) |
 | Country derived from the place | [upload-search-object.country-derivation.md](./upload-search-object.country-derivation.md) |
 | AT unit / slash / Tür / Top | [upload-search-object.unit-parsing.at.md](./upload-search-object.unit-parsing.at.md) |
+| Windows copy suffix `(N)` on folder/file names | [upload-search-object.copy-suffix.supplement.md](./upload-search-object.copy-suffix.supplement.md) |
 | Worked layer examples | [upload-search-object.layer-map.examples.md](./upload-search-object.layer-map.examples.md) |
 | Pipeline keys + trays | [upload-address-resolution-pipeline.md](./upload-address-resolution-pipeline.md) |
 | Legacy narrative parser | [location-path-parser.md](../location-path-parser/location-path-parser.md) — **non-normative**; use SO specs above |
@@ -79,9 +80,11 @@ See [upload-search-object.unit-parsing.at.md](./upload-search-object.unit-parsin
 
 ## Token classification order
 
-Per [upload-search-object.unit-parsing.at.md](./upload-search-object.unit-parsing.at.md): apply AT slash expansion on a segment **before** tokenization when `country === 'AT'`.
-
-Per path segment, split tokens with `/[\s\-\_\.\,]+/`, then **two passes**:
+Per path segment, **first** strip a trailing Windows copy suffix (`\s*\(\d+\)$`) — see
+[copy-suffix supplement](./upload-search-object.copy-suffix.supplement.md) — then apply AT slash
+expansion when `country === 'AT'`
+([unit parsing](./upload-search-object.unit-parsing.at.md)), then split tokens with
+`/[\s\-\_\.\,]+/`, then **two passes**:
 
 **Pass 1 — non-numeric tokens (in path order):**
 

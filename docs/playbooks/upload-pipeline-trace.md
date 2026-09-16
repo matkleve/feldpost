@@ -87,14 +87,14 @@ groups and land mostly on `area_only` (no pre-upload tray — area placement, F-
 | `flat` | 1 | 0 | 0.03 | `incomplete` |
 | `shallow_many` | 19 | 1 | 2.0 | `area_only` |
 | `mixed` | 20 | 0 | 1.9 | `area_only` |
-| **`firma_at_archive`** | **39** | **0** | 4.0 | `street_locality` |
+| **`firma_at_archive`** | **32** | **1** | 11.1 | `street_locality` |
 
-`firma_at_archive` lands ~39 places for 1 000 files (≈25 medias/place on average) with **zero**
-pre-upload layer/admin trays under the local gate — most paths classify as `street_locality` or
-`area_only`. Near-duplicate folders (`Mariahilfer Straße 5A` vs `… (1)`) still become **separate
-groups** today (see largest-group keys containing `(2)`), which is the next product lever.
-Adversarial tray count remains ~50× higher for the same file count — packing, not product
-regression. For efficiency work, quote **`firma_at_archive`**, not `adversarial`.
+`firma_at_archive` packs ~32 groups for 1 000 files. Pre-upload local-gate trays stay near zero,
+but **increment + typo chains do not merge**: largest groups include both `Stephansplatz` and
+`Stehansplatz`, and `Neubaugasse (1)` separate from the bare name — exactly the Windows-copy
+pattern. That merge is the next product lever. Adversarial tray count remains ~50× higher for
+the same file count — packing, not product regression. For efficiency work, quote
+**`firma_at_archive`**, not `adversarial`.
 
 Note: scale-tier “trays” = local-gate questions (`layer_conflict` / `admin_conflict` /
 `street_only`) before upload. Geocode ambiguity trays can still appear in a full interactive run.
@@ -107,10 +107,10 @@ Note: scale-tier “trays” = local-gate questions (`layer_conflict` / `admin_c
    F-08 import path).
 3. **Kill remaining `layer_package` sources** — filename-vs-folder street fights and project-token
    packages (F-04/F-11 mostly fixed; adversarial still synthesises them on purpose).
-4. **Merge near-duplicate building folders** — one place often appears as
-   `Wasagasse 4` / `Wasagasse 4 (1)` / `Wasagasse 4 (2)` **and** a spelling twin
-   `Wasagase 4` / `Wasagase 4 (1)` / … (Windows copy counter restarts). Today each folder is its
-   own group (`firma_at_archive` synthesises both chains).
+4. **Strip Windows copy suffixes `(N)` on folder/file segments** — so `Wasagasse 4 (1)` shares a
+   `groupingKey` with `Wasagasse 4`. Spec:
+   [upload-search-object.copy-suffix.supplement.md](../specs/service/media-upload-service/upload-search-object.copy-suffix.supplement.md).
+   Spelling twins (`Wasagasse` vs `Wasagase`) are a **separate** problem after the suffix is gone.
 5. **Do not quote adversarial tray extrapolations as company cost** — use `--profile=firma_at_archive`
    (or `company_area` / `mixed`) for that claim; the scale report prints a profile comparison table
    so the two cannot be confused.
