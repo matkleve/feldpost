@@ -16,6 +16,7 @@
 
 import { TRACE_PHOTO_MIME, TRACE_PHOTO_SIZE_BYTES, type UploadTraceScenario } from './upload-trace-fixtures';
 import { stubCityCoords } from './upload-trace-geocoder.stub';
+import { placeFirmaArchiveFile } from './upload-trace-firma-archive';
 
 /**
  * Localities that exist in the shipped `at-plz.json` stub (21 rows). Company-area uniqueness
@@ -106,6 +107,7 @@ const SHAPES: readonly GeneratedShape[] = [
  * - `flat` — one dump folder, no address. USB / camera roll import.
  * - `shallow_many` — many City/PLZ folders, few files each (sparse tree).
  * - `mixed` — 70 % area-dense, 20 % street-dense, 10 % noise locations.
+ * - `firma_at_archive` — Wien/NÖ bundesland → PLZ → building-folder tree (owner-described).
  */
 export type CorpusProfile =
   | 'adversarial'
@@ -113,7 +115,8 @@ export type CorpusProfile =
   | 'company_street'
   | 'flat'
   | 'shallow_many'
-  | 'mixed';
+  | 'mixed'
+  | 'firma_at_archive';
 
 export const CORPUS_PROFILES: readonly CorpusProfile[] = [
   'adversarial',
@@ -122,6 +125,7 @@ export const CORPUS_PROFILES: readonly CorpusProfile[] = [
   'flat',
   'shallow_many',
   'mixed',
+  'firma_at_archive',
 ] as const;
 
 /** Default medias per location — matches the company layout described in STUDY-005 follow-ups. */
@@ -341,6 +345,11 @@ export function buildGeneratedScenario(
       fileNameStreet = street;
       fileNameHouse = houseNumber + FILENAME_ADDRESS_OFFSET;
     }
+  } else if (profile === 'firma_at_archive') {
+    const placed = placeFirmaArchiveFile(index, seed);
+    segments = placed.segments;
+    shapeLabel = placed.shapeLabel;
+    localityCity = placed.city;
   } else {
     const locationIndex = profile === 'flat' ? 0 : Math.floor(index / filesPerLocation);
     const built = buildProfileSegments(profile, locationIndex, filesPerLocation);

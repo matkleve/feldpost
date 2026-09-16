@@ -69,6 +69,7 @@ company-scale cost claim.
 | `flat` | `Rohdaten/IMG_*.jpg` | all | Camera-roll / USB dump — no address, `incomplete`. |
 | `shallow_many` | Many `/City/PLZ/` folders | 3 | Sparse tree (many places, few medias each). |
 | `mixed` | 70 % area / 20 % street / 10 % noise | 30 | Blended archive closer to a real drop. |
+| `firma_at_archive` | `/Wien\|Niederösterreich/{PLZ}/{building}/` — street+nr, units, letters, full-address strings, landmarks, Windows `(1)` near-dups; ~5 % loose under PLZ, ~2 % under Bundesland | mostly 10–50, occasional 100+ | **Owner-described company archive** (2026-09-16). Prefer this for tray-efficiency claims. Recalibrate weights from a path-only export when available. |
 
 **Measured tray clusters (adversarial, 1 000 files, 2026-09-16):** of groups that need a pre-upload
 question, ~**95 % are `layer_package`** (filename street contradicts folder, or project-token
@@ -76,8 +77,8 @@ layer fights), ~**5 % are `admin_level_conflict`**. Most adversarial groups are 
 each conflict is its own question. Under `company_area` the same 1 000 files collapse to ≤21
 groups and land mostly on `area_only` (no pre-upload tray — area placement, F-19).
 
-**Measured profile comparison, 1 000 files, seed 7, `filesPerLocation=30`, camera naming
-(2026-09-16):**
+**Measured profile comparison, 1 000 files, seed 7, camera naming (2026-09-16; `firma_at_archive`
+added same day — re-run `--scale=1000 --compare-profiles` to refresh):**
 
 | Profile | Groups | Pre-upload trays | ms/file | Top outcome |
 | --- | ---: | ---: | ---: | --- |
@@ -87,10 +88,12 @@ groups and land mostly on `area_only` (no pre-upload tray — area placement, F-
 | `flat` | 1 | 0 | 0.03 | `incomplete` |
 | `shallow_many` | 19 | 1 | 2.1 | `area_only` |
 | `mixed` | 20 | 0 | 2.0 | `area_only` |
+| `firma_at_archive` | *(measure on next scale run)* |  |  |  |
 
 `company_street` at ~34 groups matches a “~30 medias per location → 30–40 places” archive.
 Adversarial tray count is ~50× higher for the same file count — that is packing, not product
-regression.
+regression. For efficiency work, quote **`firma_at_archive`** (or a real path export), not
+`adversarial`.
 
 **Ways to reduce trays further (product, not just tests):**
 
@@ -100,11 +103,14 @@ regression.
    F-08 import path).
 3. **Kill remaining `layer_package` sources** — filename-vs-folder street fights and project-token
    packages (F-04/F-11 mostly fixed; adversarial still synthesises them on purpose).
-4. **Do not quote adversarial tray extrapolations as company cost** — use `--profile=company_area`
-   (or `mixed`) for that claim; the scale report prints a profile comparison table so the two
-   cannot be confused.
+4. **Merge near-duplicate building folders** — `Wasagasse 56` vs `Wasagasse 56 (1)` are the same
+   place to a human; today they are separate groups / questions (`firma_at_archive` synthesises this).
+5. **Do not quote adversarial tray extrapolations as company cost** — use `--profile=firma_at_archive`
+   (or `company_area` / `mixed`) for that claim; the scale report prints a profile comparison table
+   so the two cannot be confused.
 
-Generator: `apps/web/src/app/core/upload/trace/upload-trace-generator.ts`.
+Generator: `apps/web/src/app/core/upload/trace/upload-trace-generator.ts` ·
+`upload-trace-firma-archive.ts`.
 
 The harness is also a normal unit test: without `UPLOAD_TRACE=1` it prints nothing and only
 asserts. That is deliberate — a diagnostic that nothing keeps honest rots. Run it as a test with:
