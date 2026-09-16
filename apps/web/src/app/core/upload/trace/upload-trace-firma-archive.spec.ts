@@ -1,13 +1,17 @@
 /**
- * `firma_at_archive` packing contracts.
+ * `firma_at_archive` packing contracts — including Windows increment + typo chains.
  *
  * @see docs/playbooks/upload-pipeline-trace.md § Corpus profiles
  */
 import { describe, expect, it } from 'vitest';
 import {
+  FIRMA_COPIES_PER_SPELLING,
   FIRMA_FOLDER_SIZE_PATTERN,
+  FIRMA_FOLDERS_PER_PLACE,
+  buildingFolderName,
   firmaLocationForFileIndex,
   placeFirmaArchiveFile,
+  typoStreetName,
 } from './upload-trace-firma-archive';
 import { buildGeneratedScenarios } from './upload-trace-generator';
 
@@ -54,18 +58,27 @@ describe('upload-trace-firma-archive', () => {
     expect([...roots].sort()).toEqual(['Niederösterreich', 'Wien']);
   });
 
-  it('emits Windows-style copy suffixes and unit/letter building names', () => {
-    const names = new Set<string>();
-    for (let index = 0; index < 400; index += 1) {
-      const placed = placeFirmaArchiveFile(index, SEED);
-      if (placed.segments.length >= 3) {
-        names.add(placed.segments[2]);
-      }
-    }
-    const joined = [...names].join('\n');
-    expect(joined).toMatch(/\(\d+\)/);
-    expect(joined).toMatch(/\/\d+\/\d+/);
-    expect(joined).toMatch(/\dA\b/);
+  it('emits a Windows increment chain and a typo chain that restarts the counter', () => {
+    // Place 0 occupies locationIndex 0..5 → Wasagasse 1, (1), (2), Wasagase 1, (1), (2)
+    const chain = Array.from({ length: FIRMA_FOLDERS_PER_PLACE }, (_unused, slot) =>
+      buildingFolderName(slot),
+    );
+    expect(chain[0]).toBe('Wasagasse 1');
+    expect(chain[1]).toBe('Wasagasse 1 (1)');
+    expect(chain[2]).toBe('Wasagasse 1 (2)');
+    expect(chain[3]).toBe('Wasagase 1');
+    expect(chain[4]).toBe('Wasagase 1 (1)');
+    expect(chain[5]).toBe('Wasagase 1 (2)');
+    expect(typoStreetName('Wasagasse')).toBe('Wasagase');
+    expect(FIRMA_COPIES_PER_SPELLING).toBe(3);
+  });
+
+  it('also emits unit and letter building forms somewhere in the tree', () => {
+    const names = Array.from({ length: 60 }, (_unused, locationIndex) =>
+      buildingFolderName(locationIndex),
+    ).join('\n');
+    expect(names).toMatch(/\d-\d-\d/);
+    expect(names).toMatch(/\dA\b/);
   });
 
   it('varies folder sizes across the 10–50 band and includes a 100+ folder', () => {
@@ -73,5 +86,11 @@ describe('upload-trace-firma-archive', () => {
     expect(Math.max(...FIRMA_FOLDER_SIZE_PATTERN)).toBeGreaterThanOrEqual(100);
     const mid = FIRMA_FOLDER_SIZE_PATTERN.filter((size) => size >= 10 && size <= 50);
     expect(mid.length).toBeGreaterThan(FIRMA_FOLDER_SIZE_PATTERN.length / 2);
+  });
+
+  it('labels building placements with spelling + copy slot', () => {
+    const placed = placeFirmaArchiveFile(0, SEED);
+    expect(placed.shapeLabel).toContain('canonical:copy0');
+    expect(placed.segments[2]).toBe('Wasagasse 1');
   });
 });

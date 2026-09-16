@@ -69,7 +69,7 @@ company-scale cost claim.
 | `flat` | `Rohdaten/IMG_*.jpg` | all | Camera-roll / USB dump — no address, `incomplete`. |
 | `shallow_many` | Many `/City/PLZ/` folders | 3 | Sparse tree (many places, few medias each). |
 | `mixed` | 70 % area / 20 % street / 10 % noise | 30 | Blended archive closer to a real drop. |
-| `firma_at_archive` | `/Wien\|Niederösterreich/{PLZ}/{building}/` — street+nr, units, letters, full-address strings, landmarks, Windows `(1)` near-dups; ~5 % loose under PLZ, ~2 % under Bundesland | mostly 10–50, occasional 100+ | **Owner-described company archive** (2026-09-16). Prefer this for tray-efficiency claims. Recalibrate weights from a path-only export when available. |
+| `firma_at_archive` | `/Wien\|Niederösterreich/{PLZ}/{building}/` — per place: `Wasagasse 4` / `(1)` / `(2)` **and** typo twin `Wasagase 4` / `(1)` / `(2)` (counter restarts); also units, letters, full address, landmarks; ~5 % loose under PLZ, ~2 % under Bundesland | mostly 10–50, occasional 100+ | **Owner-described company archive** (2026-09-16). Prefer this for tray-efficiency claims. Recalibrate weights from a path-only export when available. |
 
 **Measured tray clusters (adversarial, 1 000 files, 2026-09-16):** of groups that need a pre-upload
 question, ~**95 % are `layer_package`** (filename street contradicts folder, or project-token
@@ -77,23 +77,27 @@ layer fights), ~**5 % are `admin_level_conflict`**. Most adversarial groups are 
 each conflict is its own question. Under `company_area` the same 1 000 files collapse to ≤21
 groups and land mostly on `area_only` (no pre-upload tray — area placement, F-19).
 
-**Measured profile comparison, 1 000 files, seed 7, camera naming (2026-09-16; `firma_at_archive`
-added same day — re-run `--scale=1000 --compare-profiles` to refresh):**
+**Measured profile comparison, 1 000 files, seed 7, camera naming (2026-09-16):**
 
 | Profile | Groups | Pre-upload trays | ms/file | Top outcome |
 | --- | ---: | ---: | ---: | --- |
-| `adversarial` | 791 | 354 | 3.6 | `street_locality` |
-| `company_area` | 19 | 1 | 2.2 | `area_only` |
-| `company_street` | 34 | 7 | 2.9 | `street_locality` |
+| `adversarial` | 791 | 354 | 3.3 | `street_locality` |
+| `company_area` | 19 | 1 | 2.0 | `area_only` |
+| `company_street` | 34 | 7 | 2.7 | `street_locality` |
 | `flat` | 1 | 0 | 0.03 | `incomplete` |
-| `shallow_many` | 19 | 1 | 2.1 | `area_only` |
-| `mixed` | 20 | 0 | 2.0 | `area_only` |
-| `firma_at_archive` | *(measure on next scale run)* |  |  |  |
+| `shallow_many` | 19 | 1 | 2.0 | `area_only` |
+| `mixed` | 20 | 0 | 1.9 | `area_only` |
+| **`firma_at_archive`** | **39** | **0** | 4.0 | `street_locality` |
 
-`company_street` at ~34 groups matches a “~30 medias per location → 30–40 places” archive.
-Adversarial tray count is ~50× higher for the same file count — that is packing, not product
-regression. For efficiency work, quote **`firma_at_archive`** (or a real path export), not
-`adversarial`.
+`firma_at_archive` lands ~39 places for 1 000 files (≈25 medias/place on average) with **zero**
+pre-upload layer/admin trays under the local gate — most paths classify as `street_locality` or
+`area_only`. Near-duplicate folders (`Mariahilfer Straße 5A` vs `… (1)`) still become **separate
+groups** today (see largest-group keys containing `(2)`), which is the next product lever.
+Adversarial tray count remains ~50× higher for the same file count — packing, not product
+regression. For efficiency work, quote **`firma_at_archive`**, not `adversarial`.
+
+Note: scale-tier “trays” = local-gate questions (`layer_conflict` / `admin_conflict` /
+`street_only`) before upload. Geocode ambiguity trays can still appear in a full interactive run.
 
 **Ways to reduce trays further (product, not just tests):**
 
@@ -103,8 +107,10 @@ regression. For efficiency work, quote **`firma_at_archive`** (or a real path ex
    F-08 import path).
 3. **Kill remaining `layer_package` sources** — filename-vs-folder street fights and project-token
    packages (F-04/F-11 mostly fixed; adversarial still synthesises them on purpose).
-4. **Merge near-duplicate building folders** — `Wasagasse 56` vs `Wasagasse 56 (1)` are the same
-   place to a human; today they are separate groups / questions (`firma_at_archive` synthesises this).
+4. **Merge near-duplicate building folders** — one place often appears as
+   `Wasagasse 4` / `Wasagasse 4 (1)` / `Wasagasse 4 (2)` **and** a spelling twin
+   `Wasagase 4` / `Wasagase 4 (1)` / … (Windows copy counter restarts). Today each folder is its
+   own group (`firma_at_archive` synthesises both chains).
 5. **Do not quote adversarial tray extrapolations as company cost** — use `--profile=firma_at_archive`
    (or `company_area` / `mixed`) for that claim; the scale report prints a profile comparison table
    so the two cannot be confused.
