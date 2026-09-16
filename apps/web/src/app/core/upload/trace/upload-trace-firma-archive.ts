@@ -143,19 +143,26 @@ export function firmaLocationForFileIndex(fileIndex: number): {
   return { locationIndex: 0, offsetInFolder: 0, folderSize: FIRMA_FOLDER_SIZE_PATTERN[0] };
 }
 
-/** Drop a letter / ascii-swap so the typo series is visibly the same place, wrong spelling. */
-export function typoStreetName(street: string): string {
+/**
+ * Second spelling of the same place, as field archives actually contain them.
+ *
+ * Two classes, and the corpus carries both on purpose:
+ *  - `ß`/`ss` — one street written two ways. The grouping key folds it, so these merge.
+ *  - a dropped letter — a real typo. Nothing folds it, so it stays its own group. A corpus that
+ *    only contained variants the pipeline can merge would measure the fix, not the archive.
+ */
+export function spellingVariantStreetName(street: string): string {
+  if (street.includes('straße')) {
+    return street.replace('straße', 'strasse');
+  }
+  if (street.includes('Straße')) {
+    return street.replace('Straße', 'Strasse');
+  }
   if (street.includes('gasse')) {
     return street.replace('gasse', 'gase');
   }
   if (street.includes('Gasse')) {
     return street.replace('Gasse', 'Gase');
-  }
-  if (street.includes('straße')) {
-    return street.replace('straße', 'strasse');
-  }
-  if (street.includes('Straße')) {
-    return street.replace('Straße', 'Strase');
   }
   if (street.length > 3) {
     return `${street.slice(0, 3)}${street.slice(4)}`;
@@ -174,7 +181,7 @@ function withCopySuffix(baseName: string, copyIndex: number): string {
 function placeBaseName(placeIndex: number, site: FirmaSite, spelling: 'canonical' | 'typo'): string {
   const streets = streetsFor(site);
   const streetRaw = streets[placeIndex % streets.length];
-  const street = spelling === 'typo' ? typoStreetName(streetRaw) : streetRaw;
+  const street = spelling === 'typo' ? spellingVariantStreetName(streetRaw) : streetRaw;
   const houseNumber = 1 + (placeIndex % 80);
   const kind = placeIndex % 5;
 
@@ -193,7 +200,7 @@ function placeBaseName(placeIndex: number, site: FirmaSite, spelling: 'canonical
     case 4:
     default: {
       const landmark = LANDMARKS[placeIndex % LANDMARKS.length];
-      return spelling === 'typo' ? typoStreetName(landmark) : landmark;
+      return spelling === 'typo' ? spellingVariantStreetName(landmark) : landmark;
     }
   }
 }

@@ -11,7 +11,7 @@ import {
   buildingFolderName,
   firmaLocationForFileIndex,
   placeFirmaArchiveFile,
-  typoStreetName,
+  spellingVariantStreetName,
 } from './upload-trace-firma-archive';
 import { buildGeneratedScenarios } from './upload-trace-generator';
 
@@ -69,8 +69,15 @@ describe('upload-trace-firma-archive', () => {
     expect(chain[3]).toBe('Wasagase 1');
     expect(chain[4]).toBe('Wasagase 1 (1)');
     expect(chain[5]).toBe('Wasagase 1 (2)');
-    expect(typoStreetName('Wasagasse')).toBe('Wasagase');
+    expect(spellingVariantStreetName('Wasagasse')).toBe('Wasagase');
     expect(FIRMA_COPIES_PER_SPELLING).toBe(3);
+  });
+
+  // The ß/ss pair is the variant the grouping key folds; the corpus must contain it, otherwise
+  // the fold is never exercised by a trace run.
+  it('models the ß/ss pair on Straße names', () => {
+    expect(spellingVariantStreetName('Mariahilfer Straße')).toBe('Mariahilfer Strasse');
+    expect(spellingVariantStreetName('Landstraße')).toBe('Landstrasse');
   });
 
   it('also emits unit and letter building forms somewhere in the tree', () => {

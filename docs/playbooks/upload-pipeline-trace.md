@@ -69,7 +69,7 @@ company-scale cost claim.
 | `flat` | `Rohdaten/IMG_*.jpg` | all | Camera-roll / USB dump — no address, `incomplete`. |
 | `shallow_many` | Many `/City/PLZ/` folders | 3 | Sparse tree (many places, few medias each). |
 | `mixed` | 70 % area / 20 % street / 10 % noise | 30 | Blended archive closer to a real drop. |
-| `firma_at_archive` | `/Wien\|Niederösterreich/{PLZ}/{building}/` — per place: `Wasagasse 4` / `(1)` / `(2)` **and** typo twin `Wasagase 4` / `(1)` / `(2)` (counter restarts); also units, letters, full address, landmarks; ~5 % loose under PLZ, ~2 % under Bundesland | mostly 10–50, occasional 100+ | **Owner-described company archive** (2026-09-16). Prefer this for tray-efficiency claims. Recalibrate weights from a path-only export when available. |
+| `firma_at_archive` | `/Wien\|Niederösterreich/{PLZ}/{building}/` — per place: `Wasagasse 4` / `(1)` / `(2)` **and** a second-spelling chain `Wasagase 4` / `(1)` / `(2)` (counter restarts; `Straße` streets get the `ß`/`ss` variant, `gasse` streets a dropped letter); also units, letters, full address, landmarks; ~5 % loose under PLZ, ~2 % under Bundesland | mostly 10–50, occasional 100+ | **Owner-described company archive** (2026-09-16). Prefer this for tray-efficiency claims. Recalibrate weights from a path-only export when available. |
 
 **Measured tray clusters (adversarial, 1 000 files, 2026-09-16):** of groups that need a pre-upload
 question, ~**95 % are `layer_package`** (filename street contradicts folder, or project-token
@@ -87,17 +87,25 @@ groups and land mostly on `area_only` (no pre-upload tray — area placement, F-
 | `flat` | 1 | 0 | 0.03 | `incomplete` |
 | `shallow_many` | 19 | 1 | 2.0 | `area_only` |
 | `mixed` | 20 | 0 | 1.9 | `area_only` |
-| **`firma_at_archive`** | **20** | **1** | 8.6 | `street_locality` |
+| **`firma_at_archive`** | **22** | **1** | 7.9 | `street_locality` |
 
-`firma_at_archive` progression @ 1 000 files (2026-09-16):
+`firma_at_archive` progression @ 1 000 files (re-measured 2026-09-16 after the letter-run fold was
+reverted; each row measured by disabling that step and re-running):
 
 | Step | Groups | Notes |
 | --- | ---: | --- |
-| Baseline (before `(N)` / fold) | 32 | Increment + typo chains split |
-| After Windows `(N)` strip | 22 | `Wasagasse 4 (1)` ≡ `Wasagasse 4` |
-| After street letter-run fold | **20** | `Wasagasse` ≡ `Wasagase` on `groupingKey` |
+| Baseline (before `(N)` / fold) | 36 | Increment + second-spelling chains split |
+| After Windows `(N)` strip | 24 | `Wasagasse 4 (1)` ≡ `Wasagasse 4` |
+| After street `ß`/`ss` + `str.` fold | **22** | `Mariahilfer Straße` ≡ `Mariahilfer Strasse` on `groupingKey` |
 
-Arbitrary typos (`Stephansplatz` vs `Stehansplatz`) stay out of scope. Adversarial remains ~791 / 354.
+Typos that are not orthographic variants (`Wasagasse` vs `Wasagase`, `Stephansplatz` vs
+`Stehansplatz`) stay out of scope and remain separate groups — see
+[street-fold supplement](../specs/service/media-upload-service/upload-search-object.street-fold.supplement.md)
+§ Rejected. Adversarial remains ~791 / 354.
+
+The corpus also exposes a classifier weakness worth naming: the typo street `…gase` fuzzy-matches
+the Styrian municipality **Gasen**, so 121 of the 1 000 files land in `admin_conflict|city` instead
+of a street group. That is the gazetteer lookup, not the fold.
 For efficiency work, quote **`firma_at_archive`**, not `adversarial`.
 
 Note: scale-tier “trays” = local-gate questions (`layer_conflict` / `admin_conflict` /
@@ -114,7 +122,7 @@ Note: scale-tier “trays” = local-gate questions (`layer_conflict` / `admin_c
 4. **Strip Windows copy suffixes `(N)` on folder/file segments** — so `Wasagasse 4 (1)` shares a
    `groupingKey` with `Wasagasse 4`. Spec:
    [upload-search-object.copy-suffix.supplement.md](../specs/service/media-upload-service/upload-search-object.copy-suffix.supplement.md).
-   Spelling twins (`Wasagasse` vs `Wasagase`) are a **separate** problem after the suffix is gone.
+   Spelling variants (`Straße` vs `Strasse`) fold on the key; genuine typos do not.
 5. **Do not quote adversarial tray extrapolations as company cost** — use `--profile=firma_at_archive`
    (or `company_area` / `mixed`) for that claim; the scale report prints a profile comparison table
    so the two cannot be confused.

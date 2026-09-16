@@ -241,6 +241,14 @@ export class UploadPanelComponent implements OnDestroy {
       .replace('{total}', `${total}`);
   }
 
+  /** Phase 5.2 — failed-import figure label; shown only when the count is above zero. */
+  archiveFilesFailedLabel(count: number): string {
+    return this.t('upload.archive.progress.filesFailed', 'Failed: {count}').replace(
+      '{count}',
+      `${count}`,
+    );
+  }
+
   /** Phase 5.2 — resolution backlog figure label. */
   archiveAwaitingResolutionLabel(count: number): string {
     return this.t(

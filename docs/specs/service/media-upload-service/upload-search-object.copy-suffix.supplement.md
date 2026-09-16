@@ -10,12 +10,12 @@ Wasagasse 4 (1)
 Wasagasse 4 (2)
 ```
 
-and, after a rename/typo, a **second chain that restarts the counter**:
+and, after someone retypes the name, a **second chain that restarts the counter**:
 
 ```
-Wasagase 4
-Wasagase 4 (1)
-Wasagase 4 (2)
+Mariahilfer Strasse 4
+Mariahilfer Strasse 4 (1)
+Mariahilfer Strasse 4 (2)
 ```
 
 Measured 2026-09-16 (`firma_at_archive` harness): without stripping, `(1)` / `(2)` are absorbed into
@@ -37,7 +37,7 @@ the same building.
 
 | Topic | Why |
 | --- | --- |
-| Spelling twins (`Wasagasse` vs `Wasagase`) | Handled by [street-fold supplement](./upload-search-object.street-fold.supplement.md) (deterministic letter-run collapse on the key). |
+| Spelling variants (`Straße` vs `Strasse`) | Handled by [street-fold supplement](./upload-search-object.street-fold.supplement.md). A typo that is not an orthographic variant (`Wasagase`) stays its own group — same supplement, § Rejected. |
 | Camera counters inside the name (`IMG_1274`, `_0012` mid-token) | Already gated elsewhere ([filename postcode gate](./upload-search-object.md#area-evidence)); do not confuse with a trailing `(N)`. |
 | Chunk-stem heuristics in [STUDY-008](../../../study/008-classification-chunking-strategy.md) § 4 | Those stems only order classification chunks. **This** contract is about Search Object fields and `groupingKey`. Both MUST agree on trailing `(N)`, but SO is the authority for address identity. |
 

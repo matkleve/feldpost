@@ -71,12 +71,20 @@ export function normalizeLayerKeySegment(segment: string): string {
     .normalize('NFC');
 }
 
-/** Normalize a street-level field value for compare, folding street-name spellings. */
-export function normalizeStreetLevelValue(value: string | null | undefined): string {
+/**
+ * Normalize one street-level value for compare. Only a street name folds its spelling variants;
+ * a house number, staircase or door is an identifier, so `11` and `1` stay two addresses.
+ * @see docs/specs/service/media-upload-service/upload-search-object.street-fold.supplement.md
+ */
+export function normalizeStreetLevelValue(
+  value: string | null | undefined,
+  key: keyof StreetLevelParsed,
+): string {
   if (value == null) {
     return '';
   }
-  return normalizeStreetForGroupingKey(value);
+  const normalized = normalizeKeyPart(value);
+  return key === 'street' ? normalizeStreetForGroupingKey(normalized) : normalized;
 }
 
 /**
@@ -179,7 +187,7 @@ function entriesConflict(a: AddressLayerEntry, b: AddressLayerEntry): boolean {
   for (const key of STREET_LEVEL_KEYS) {
     const av = a.parsed[key]?.trim();
     const bv = b.parsed[key]?.trim();
-    if (av && bv && normalizeStreetLevelValue(av) !== normalizeStreetLevelValue(bv)) {
+    if (av && bv && normalizeStreetLevelValue(av, key) !== normalizeStreetLevelValue(bv, key)) {
       return true;
     }
   }
@@ -252,7 +260,7 @@ export function mergeLayersWithoutConflict(layers: AddressLayerEntry[]): StreetL
     if (!values.length) {
       continue;
     }
-    const distinct = new Set(values.map((v) => normalizeStreetLevelValue(v)));
+    const distinct = new Set(values.map((v) => normalizeStreetLevelValue(v, key)));
     if (distinct.size === 1) {
       result[key] = values[0];
     }

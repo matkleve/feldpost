@@ -43,12 +43,26 @@ describe('computeArchiveImportProgress', () => {
 
     expect(figures).toEqual({
       filesImported: 2,
+      filesFailed: 0,
       filesTotal: 3,
       itemsAwaitingResolution: 1,
     });
   });
 
-  it('does not blend awaiting into the imported total', () => {
+  // A failed upload has no bytes in storage. Counting it as imported is the one thing the
+  // figure must never do. @see docs/CONSTITUTION.md § no silent failure
+  it('counts a failed upload as failed, never as imported', () => {
+    const figures = computeArchiveImportProgress(batch(), [
+      job({ id: '1', phase: 'complete' }),
+      job({ id: '2', phase: 'error' }),
+      job({ id: '3', phase: 'uploading' }),
+    ]);
+
+    expect(figures.filesImported).toBe(1);
+    expect(figures.filesFailed).toBe(1);
+  });
+
+  it('keeps imported and awaiting independent — one file can be both', () => {
     const figures = computeArchiveImportProgress(batch({ totalFiles: 2 }), [
       job({ id: '1', phase: 'missing_data', issueKind: 'address_deferred' }),
       job({ id: '2', phase: 'missing_data', issueKind: 'address_deferred' }),
@@ -56,28 +70,30 @@ describe('computeArchiveImportProgress', () => {
 
     expect(figures.filesImported).toBe(2);
     expect(figures.itemsAwaitingResolution).toBe(2);
-    expect(figures.filesImported).not.toBe(figures.itemsAwaitingResolution - figures.filesTotal);
+    expect(figures.filesImported + figures.itemsAwaitingResolution).toBeGreaterThan(
+      figures.filesTotal,
+    );
   });
 });
 
 describe('shouldShowArchiveImportProgress', () => {
   it('shows while an archive batch is uploading', () => {
-    const figures = { filesImported: 0, filesTotal: 10, itemsAwaitingResolution: 0 };
+    const figures = { filesImported: 0, filesFailed: 0, filesTotal: 10, itemsAwaitingResolution: 0 };
     expect(shouldShowArchiveImportProgress(batch({ status: 'uploading' }), figures)).toBe(true);
   });
 
   it('shows after complete while a backlog remains', () => {
-    const figures = { filesImported: 10, filesTotal: 10, itemsAwaitingResolution: 4 };
+    const figures = { filesImported: 10, filesFailed: 0, filesTotal: 10, itemsAwaitingResolution: 4 };
     expect(shouldShowArchiveImportProgress(batch({ status: 'complete' }), figures)).toBe(true);
   });
 
   it('hides when complete and backlog is empty', () => {
-    const figures = { filesImported: 10, filesTotal: 10, itemsAwaitingResolution: 0 };
+    const figures = { filesImported: 10, filesFailed: 0, filesTotal: 10, itemsAwaitingResolution: 0 };
     expect(shouldShowArchiveImportProgress(batch({ status: 'complete' }), figures)).toBe(false);
   });
 
   it('hides for interactive batches', () => {
-    const figures = { filesImported: 1, filesTotal: 1, itemsAwaitingResolution: 0 };
+    const figures = { filesImported: 1, filesFailed: 0, filesTotal: 1, itemsAwaitingResolution: 0 };
     expect(
       shouldShowArchiveImportProgress(batch({ importMode: 'interactive' }), figures),
     ).toBe(false);
