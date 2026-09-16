@@ -32,24 +32,54 @@ describe('upload-trace-firma-archive', () => {
     expect(seen.size).toBe(cycleSum);
   });
 
-  it('puts most medias under Bundesland/PLZ/building (third level)', () => {
+  it('puts most medias under Bundesland/PLZ/building, with loose files at both levels', () => {
     const scenarios = buildGeneratedScenarios(THOUSAND, SEED, { profile: 'firma_at_archive' });
-    let thirdLevel = 0;
+    let building = 0;
     let loosePlz = 0;
     let looseBundesland = 0;
     for (const scenario of scenarios) {
-      const depth = scenario.relativePath.split('/').length;
-      if (depth === 4) {
-        thirdLevel += 1;
-      } else if (depth === 3) {
+      const segments = scenario.relativePath.split('/');
+      if (segments.length > 3 && /^\d{4}$/.test(segments[1])) {
+        building += 1;
+      } else if (segments.length === 3) {
         loosePlz += 1;
-      } else if (depth === 2) {
+      } else if (segments.length === 2) {
         looseBundesland += 1;
       }
     }
-    expect(thirdLevel).toBeGreaterThan(THOUSAND * 0.85);
+    expect(building).toBeGreaterThan(THOUSAND * 0.7);
     expect(loosePlz).toBeGreaterThan(0);
     expect(looseBundesland).toBeGreaterThan(0);
+  });
+
+  // Owner: inside a Bundesland folder there are "folders too with streetnames". No postcode is
+  // in that path, so the classifier has to reach the locality from the street alone.
+  it('puts some places directly under the Bundesland, with no postcode folder', () => {
+    const scenarios = buildGeneratedScenarios(THOUSAND, SEED, { profile: 'firma_at_archive' });
+    const noPostcode = scenarios.filter((scenario) => {
+      const segments = scenario.relativePath.split('/');
+      return segments.length > 2 && !/^\d{4}$/.test(segments[1]);
+    });
+
+    expect(noPostcode.length).toBeGreaterThan(THOUSAND * 0.05);
+  });
+
+  // Owner: "Lange Gasse 6/3/5". Windows cannot hold `/` in one folder name, so the unit parts are
+  // nested folders — the shape `collapseAtSlashPathSegments` exists to reassemble.
+  it('emits nested unit folders under an address folder', () => {
+    const scenarios = buildGeneratedScenarios(THOUSAND, SEED, { profile: 'firma_at_archive' });
+
+    expect(scenarios.some((scenario) => /\s\d+(?:\s\(\d+\))?\/3\/5\//u.test(scenario.relativePath)))
+      .toBe(true);
+  });
+
+  // Owner: "Lerchenfelder Str 173". The abbreviation is the other half of what the key folds.
+  it('emits the Str abbreviation alongside the written-out Straße', () => {
+    const scenarios = buildGeneratedScenarios(THOUSAND, SEED, { profile: 'firma_at_archive' });
+    const paths = scenarios.map((scenario) => scenario.relativePath).join('\n');
+
+    expect(paths).toMatch(/\bStr \d/u);
+    expect(paths).toMatch(/Straße \d/u);
   });
 
   it('only uses Wien and Niederösterreich as bundesland roots', () => {
@@ -84,8 +114,18 @@ describe('upload-trace-firma-archive', () => {
     const names = Array.from({ length: 60 }, (_unused, locationIndex) =>
       buildingFolderName(locationIndex),
     ).join('\n');
-    expect(names).toMatch(/\d-\d-\d/);
+    expect(names).toMatch(/\d\/3\/5/);
     expect(names).toMatch(/\dA\b/);
+  });
+
+  // A copied address folder takes the suffix with it; the unit folders below keep their names.
+  it('puts the copy suffix on the address folder, not on the nested unit folder', () => {
+    const withUnits = Array.from({ length: 60 }, (_unused, locationIndex) =>
+      buildingFolderName(locationIndex),
+    ).filter((name) => name.includes('/3/5'));
+
+    expect(withUnits.some((name) => /\(\d\)\/3\/5$/u.test(name))).toBe(true);
+    expect(withUnits.every((name) => !/\/5 \(\d\)$/u.test(name))).toBe(true);
   });
 
   it('varies folder sizes across the 10–50 band and includes a 100+ folder', () => {
