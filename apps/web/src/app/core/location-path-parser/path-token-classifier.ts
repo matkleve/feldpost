@@ -415,10 +415,10 @@ export function tokenizeSegment(segment: string): string[] {
 }
 
 /**
- * Strip a trailing Windows Explorer copy suffix `(N)` from a path segment or filename.
+ * Strip a trailing Windows Explorer copy suffix `(N)` from a path segment.
  *
- * Folder: `Wasagasse 4 (1)` → `Wasagasse 4`
- * File:   `Wasagasse 4 (1).jpg` → `Wasagasse 4.jpg`
+ * `Wasagasse 4 (1)` → `Wasagasse 4`. The Search Object passes filename stems (extension already
+ * removed), but a folder name can contain a dot, so `Halle 4 (1).alt` → `Halle 4.alt` too.
  *
  * @see docs/specs/service/media-upload-service/upload-search-object.copy-suffix.supplement.md
  */
