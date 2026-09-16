@@ -198,9 +198,14 @@ function withCopySuffix(baseName: string, copyIndex: number): string {
   return [`${head} (${copyIndex})`, ...rest].join('/');
 }
 
-/** Owner wrote `Lerchenfelder Str 173`: the abbreviation appears in real folder names. */
+/**
+ * Owner wrote `Lerchenfelder Str 173`: the abbreviation appears in real folder names. It keeps the
+ * case of the word it replaces, so `Hauptstraße` shortens to `Hauptstr`, not `HauptStr`.
+ */
 function abbreviateStrasse(street: string): string {
-  return street.replace(/straße$/iu, 'Str').replace(/strasse$/iu, 'Str');
+  return street.replace(/stra(?:ß|ss)e$/iu, (match) =>
+    match[0] === match[0].toUpperCase() ? 'Str' : 'str',
+  );
 }
 
 /**
