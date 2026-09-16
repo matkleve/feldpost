@@ -105,11 +105,18 @@ whether the bytes are safe, which is the question the operator actually has duri
 | Behaviour | Owner | Note |
 | --- | --- | --- |
 | Mode selection and batch flag | submit path (`upload-manager-submit.util.ts`) | Fixed at submit (A1) |
+| Mode choice UI (Import archive button) | `upload-panel` intake (`upload-panel__intake-btn--archive`) | Same folder picker; passes `importMode: 'archive'` |
 | Chunked classify + drain | `enqueueAndClassifyInChunks` | Already built (Phase 3.3) |
 | Suppressing tray registration | the tray-flow service, gated on the batch mode | Must suppress **registration**, not only presentation — see the FSM supplement |
 | Routing unresolved to Issues | the pre-resolve / routing path | Writes `missing_data` + `address_deferred` |
 | Bulk resolution afterwards | the shared resolve engine | One engine for folder and filter selections |
 | Import progress | the batch record | Two figures, never blended |
+
+## Visual Behavior Contract
+
+| Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer (z-index/token) | Test Oracle |
+| --- | --- | --- | --- | --- | --- | --- |
+| Import archive intake | `.upload-panel__intake-btn--archive` | intake area (panel shell) | same button | `.upload-panel__intake-btn--archive` | intake (panel local) | `upload-panel.creation-dom.spec.ts` renders label; input-handlers pass `importMode: 'archive'` |
 
 ## Data
 

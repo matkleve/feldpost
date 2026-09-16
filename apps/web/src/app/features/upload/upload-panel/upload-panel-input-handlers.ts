@@ -4,6 +4,7 @@
 
 import { Injectable, inject, signal } from '@angular/core';
 import { UploadManagerService } from '../../../core/upload/upload-manager.service';
+import type { SubmitOptions, UploadImportMode } from '../../../core/upload/upload-manager.types';
 import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
 import { UploadPanelSignalsService } from './upload-panel-signals.service';
 import {
@@ -31,6 +32,13 @@ export class UploadPanelInputHandlersService {
 
   private readonly _isDragging = signal(false);
   readonly isDragging = this._isDragging.asReadonly();
+
+  /**
+   * Held across the webkitdirectory fallback click → change gap so archive mode
+   * survives the async input event. Reset after each folder input change.
+   * @see docs/specs/service/media-upload-service/upload-archive-import-mode.md A1
+   */
+  private folderPickImportMode: UploadImportMode = 'interactive';
 
   onDragOver(event: DragEvent): void {
     event.preventDefault();
@@ -132,27 +140,39 @@ export class UploadPanelInputHandlersService {
   /**
    * Folder intake: prefer File System Access API (no Chromium bulk-upload prompt).
    * Falls back to `<input webkitdirectory>` when FSA is missing or rejects.
+   *
+   * `importMode: 'archive'` is Phase 5.1 — classify everything, ask nothing
+   * (D-04). Mode is fixed at submit (A1).
+   * @see docs/specs/service/media-upload-service/upload-archive-import-mode.md
    */
-  onSelectFolder(event: MouseEvent, folderInput: HTMLInputElement): void {
+  onSelectFolder(
+    event: MouseEvent,
+    folderInput: HTMLInputElement,
+    importMode: UploadImportMode = 'interactive',
+  ): void {
     event.preventDefault();
     event.stopPropagation();
+    this.folderPickImportMode = importMode;
 
     const pickerWindow = window as DirectoryPickerWindow;
     if (typeof pickerWindow.showDirectoryPicker === 'function') {
       const pickerPromise = pickerWindow.showDirectoryPicker({ mode: 'read' });
       void pickerPromise
-        .then((dirHandle: FileSystemDirectoryHandle) => this.submitFolderFromHandle(dirHandle))
+        .then((dirHandle: FileSystemDirectoryHandle) =>
+          this.submitFolderFromHandle(dirHandle, importMode),
+        )
         .catch((error: unknown) => {
           if (error instanceof DOMException && error.name === 'AbortError') {
+            this.folderPickImportMode = 'interactive';
             return;
           }
           console.warn('[upload-panel] showDirectoryPicker failed, using file input fallback', error);
-          this.openFolderInputFallback(folderInput);
+          this.openFolderInputFallback(folderInput, importMode);
         });
       return;
     }
 
-    this.openFolderInputFallback(folderInput);
+    this.openFolderInputFallback(folderInput, importMode);
   }
 
   onFolderInputChange(event: Event): void {
@@ -161,11 +181,11 @@ export class UploadPanelInputHandlersService {
       return;
     }
 
+    const importMode = this.folderPickImportMode;
+    this.folderPickImportMode = 'interactive';
+    const options = this.buildFolderSubmitOptions(importMode);
+
     const { entries, rootFolderLabel } = scanFilesFromWebkitDirectory(Array.from(input.files));
-    const options = {
-      projectId: this.activeProjectId(),
-      locationRequirementMode: this.uploadSignals.locationRequirementMode(),
-    };
 
     if (entries.length === 0) {
       this.uploadManager.submit(Array.from(input.files), options);
@@ -176,8 +196,13 @@ export class UploadPanelInputHandlersService {
     input.value = '';
   }
 
-  private openFolderInputFallback(folderInput: HTMLInputElement): void {
+  private openFolderInputFallback(
+    folderInput: HTMLInputElement,
+    importMode: UploadImportMode = 'interactive',
+  ): void {
+    this.folderPickImportMode = importMode;
     if (!('webkitdirectory' in HTMLInputElement.prototype)) {
+      this.folderPickImportMode = 'interactive';
       this.toast.show({
         type: 'error',
         title: this.t('upload.folder.picker.failed.title', 'Folder upload unavailable'),
@@ -192,12 +217,13 @@ export class UploadPanelInputHandlersService {
     folderInput.click();
   }
 
-  private async submitFolderFromHandle(dirHandle: FileSystemDirectoryHandle): Promise<void> {
+  private async submitFolderFromHandle(
+    dirHandle: FileSystemDirectoryHandle,
+    importMode: UploadImportMode = 'interactive',
+  ): Promise<void> {
+    this.folderPickImportMode = 'interactive';
     try {
-      await this.uploadManager.submitFolder(dirHandle, {
-        projectId: this.activeProjectId(),
-        locationRequirementMode: this.uploadSignals.locationRequirementMode(),
-      });
+      await this.uploadManager.submitFolder(dirHandle, this.buildFolderSubmitOptions(importMode));
     } catch (error) {
       console.error('[upload-panel] folder import failed', error);
       this.toast.show({
@@ -210,6 +236,20 @@ export class UploadPanelInputHandlersService {
         codeRef: { file: 'upload-panel-input-handlers.ts', fn: 'submitFolderFromHandle' },
       });
     }
+  }
+
+  /**
+   * Archive import always classifies (not `optional`). Interactive keeps the
+   * Auto-location switch. @see upload-archive-import-mode.md § The three modes
+   */
+  private buildFolderSubmitOptions(importMode: UploadImportMode): SubmitOptions {
+    const locationRequirementMode =
+      importMode === 'archive' ? 'required' : this.uploadSignals.locationRequirementMode();
+    return {
+      projectId: this.activeProjectId(),
+      locationRequirementMode,
+      ...(importMode === 'archive' ? { importMode: 'archive' as const } : {}),
+    };
   }
 
   private t(key: string, fallback: string): string {

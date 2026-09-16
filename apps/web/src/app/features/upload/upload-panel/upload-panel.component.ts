@@ -214,6 +214,12 @@ export class UploadPanelComponent implements OnDestroy {
     );
   readonly uploadFolderLabelText = (): string =>
     nonEmptyLocalized(this.t('auto.0367.upload_folder', 'Upload folder'), 'Upload folder');
+
+  readonly importArchiveLabelText = () =>
+    nonEmptyLocalized(
+      this.t('upload.archive.import.label', 'Import archive'),
+      'Import archive',
+    );
   readonly takePhotoLabelText = (): string =>
     nonEmptyLocalized(this.t('auto.0349.take_photo', 'Take photo'), 'Take photo');
 

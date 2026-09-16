@@ -37079,6 +37079,68 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.archive.import.label', 'Import archive', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.ts label for archive import intake button')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Import archive', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.archive.import.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Archiv importieren', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.archive.import.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Importa archivio', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.archive.import.label'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.archive.import.hint', 'Import a company archive: resolve what can be resolved, ask nothing, park the rest in Issues.', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html title attr on archive intake button')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Import a company archive: resolve what can be resolved, ask nothing, park the rest in Issues.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.archive.import.hint'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Firmenarchiv importieren: auflösen was möglich ist, nichts fragen, den Rest in Probleme ablegen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.archive.import.hint'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Importa un archivio aziendale: risolvi ciò che si può, non chiedere nulla, metti il resto in Problemi.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.archive.import.hint'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'upload.fileTypeGroup.images', 'Images', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type group chip label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

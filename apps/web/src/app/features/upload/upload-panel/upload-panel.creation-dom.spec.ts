@@ -106,6 +106,15 @@ describe('UploadPanelComponent DOM intake controls', () => {
     expect(buttons.length).toBeGreaterThan(0);
     expect((buttons[0].nativeElement as HTMLButtonElement).textContent).toContain('Upload folder');
   });
+
+  it('renders the import-archive intake button', async () => {
+    // Phase 5.1 — mode choice at submit (A1).
+    // @see docs/specs/service/media-upload-service/upload-archive-import-mode.md
+    const { fixture } = await setupUploadPanel();
+    const archive = fixture.debugElement.query(By.css('.upload-panel__intake-btn--archive'));
+    expect(archive).toBeTruthy();
+    expect((archive.nativeElement as HTMLButtonElement).textContent).toContain('Import archive');
+  });
 });
 
 describe('UploadPanelComponent panel visibility', () => {

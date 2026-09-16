@@ -138,6 +138,34 @@
       <span class="upload-panel__intake-btn-label">{{ uploadFolderLabelText() }}</span>
     </button>
 
+    <!--
+      Stable state: archive import — classify, ask nothing (Phase 5.1 / D-04).
+      Same folder picker as Upload folder; mode is fixed at submit (A1).
+      @see docs/specs/service/media-upload-service/upload-archive-import-mode.md
+    -->
+    <button
+      hlmBtn
+      variant="outline"
+      iconPlacement="start"
+      class="upload-panel__intake-btn upload-panel__intake-btn--archive"
+      type="button"
+      [disabled]="scanning() || !folderImportSupported"
+      [attr.title]="
+        !folderImportSupported
+          ? t('upload.folder.unsupported.hint', 'Folder upload is not supported in this browser.')
+          : t(
+              'upload.archive.import.hint',
+              'Import a company archive: resolve what can be resolved, ask nothing, park the rest in Issues.'
+            )
+      "
+      (click)="inputHandlers.onSelectFolder($event, folderInput, 'archive')"
+    >
+      <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true"
+        >inventory_2</span
+      >
+      <span class="upload-panel__intake-btn-label">{{ importArchiveLabelText() }}</span>
+    </button>
+
     @if (!folderImportSupported) {
       <p class="upload-panel__folder-unsupported-hint" role="note">
         {{ t('upload.folder.unsupported.hint', 'Folder upload is not supported in this browser.') }}
