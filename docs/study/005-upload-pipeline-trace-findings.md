@@ -13,9 +13,9 @@ corrected-by: none
 
 **Status `partially-remediated`, 2026-09-16:** 17 of 22 findings are fixed, each struck through in the
 index below with its fix and its measurement recorded in place. Still open: F-08 (addressed for
-imports only), F-12/F-13 remainder (two spec files), F-17 and F-18 (both need an owner decision
-first). The correction work is [STUDY-006](./006-upload-pipeline-correction-plan.md); what is left is
-its § Phase 5.
+imports only), F-12 remainder (`upload.service.spec.ts` only — `media-detail-view.ui.spec.ts` fixed
+2026-09-16), F-17 and F-18 (both need an owner decision first). The correction work is
+[STUDY-006](./006-upload-pipeline-correction-plan.md); what is left is its § Phase 5.
 
 Every finding below came out of
 [`npm run trace:upload`](../playbooks/upload-pipeline-trace.md) — a headless harness that pushes a
@@ -507,7 +507,7 @@ the run:
 | `nav.component.spec.ts` | 6 failed | asserts 4 nav items; the component has had **5** since before this branch |
 | `login.component.spec.ts` | 4 failed | always fails |
 | `register.component.spec.ts` | 1 failed | always fails |
-| `media-detail-view.ui.spec.ts` | 3 failed | always fails |
+| `media-detail-view.ui.spec.ts` | 3 failed | always fails — **fixed 2026-09-16** (reflecting location store + delete-undo stub) |
 | `media-detail-view.component.spec.ts` | 1 failed | always fails |
 | `media-detail-view.replace-photo.spec.ts` | 1 failed | always fails |
 | `media-detail-delete.helper.spec.ts` | 1 failed | always fails |

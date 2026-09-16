@@ -10,6 +10,7 @@
 
 import { ComponentRef, NO_ERRORS_SCHEMA, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { Subject } from 'rxjs';
 import {
   MediaDetailViewComponent,
   MediaRecord,
@@ -19,8 +20,11 @@ import { SupabaseService } from '../../../core/supabase/supabase.service';
 import { GeocodingService } from '../../../core/geocoding/geocoding.service';
 import { createQueryChain, withChainFallback } from '../../../../test/mocks/supabase-chain.mock';
 import { MediaLocationsService } from '../../../core/media-locations/media-locations.service';
+import type { MediaItemLocationRow } from '../../../core/media-locations/media-locations.types';
 import { MetadataService } from '../../../core/metadata/metadata.service';
 import { MediaLocationUpdateService } from '../../../core/media-location-update/media-location-update.service';
+import { MediaDeleteUndoService } from '../../../core/media-delete/media-delete-undo.service';
+import type { ForwardGeocodeResult } from '../../../core/geocoding/geocoding.service';
 
 // ── Test fixtures ─────────────────────────────────────────────────────────────
 
@@ -148,25 +152,103 @@ export function buildFakeMetadataService() {
 }
 
 /**
+ * Shared location write-back state for the media-detail fake stack.
+ *
+ * applyAddressSuggestion patches locally, then refreshMediaLocationFields reloads
+ * via list_locations_for_media. A static empty RPC response overwrites the patch
+ * with nulls — the diary's "needs a fake that reflects written values back".
+ * @see docs/ai-diary/2026-09-16.md § Phase 0.4b
+ * @see docs/study/006-upload-pipeline-correction-plan.md Phase 5 · Test debt
+ */
+export function createReflectingLocationStore() {
+  const byMediaId = new Map<string, MediaItemLocationRow>();
+
+  const rowFromSuggestion = (
+    mediaItemId: string,
+    suggestion: ForwardGeocodeResult,
+  ): MediaItemLocationRow => ({
+    id: 'loc-written',
+    link_id: 'link-written',
+    media_item_id: mediaItemId,
+    organization_id: MOCK_MEDIA.organization_id ?? 'org-001',
+    street: suggestion.street ?? null,
+    house_number: suggestion.streetNumber || null,
+    staircase: null,
+    door: null,
+    floor: null,
+    postcode: suggestion.zip || null,
+    extra_information: null,
+    city: suggestion.city ?? null,
+    district: suggestion.district ?? null,
+    country: suggestion.country ?? null,
+    latitude: suggestion.lat,
+    longitude: suggestion.lng,
+    address_label: suggestion.addressLabel ?? null,
+    address_precision: null,
+    sort_order: 0,
+    staircase_sort_key: '',
+    door_sort_key: '',
+    created_at: '2025-06-15T12:00:00Z',
+    updated_at: '2025-06-15T12:00:00Z',
+  });
+
+  return {
+    record(mediaItemId: string, suggestion: ForwardGeocodeResult): MediaItemLocationRow {
+      const row = rowFromSuggestion(mediaItemId, suggestion);
+      byMediaId.set(mediaItemId, row);
+      // refreshMediaLocationFields loads media_items, then lists by the canonical
+      // row.id. This fixture's media_items.id is 'media-001' while media() carries
+      // the legacy source_image_id (MOCK_MEDIA.id). Mirror the write under both.
+      if (mediaItemId === MOCK_MEDIA.id) {
+        byMediaId.set('media-001', { ...row, media_item_id: 'media-001' });
+      } else if (mediaItemId === 'media-001') {
+        byMediaId.set(MOCK_MEDIA.id, { ...row, media_item_id: MOCK_MEDIA.id });
+      }
+      return row;
+    },
+    list(mediaItemId: string): MediaItemLocationRow[] {
+      const row = byMediaId.get(mediaItemId);
+      return row ? [row] : [];
+    },
+  };
+}
+
+export type ReflectingLocationStore = ReturnType<typeof createReflectingLocationStore>;
+
+/**
  * Stub for MediaLocationUpdateService.
  *
  * applyAddressSuggestion writes the address through this service (which calls
  * the resolve_media_location RPC) rather than updating media_items columns.
  * Unstubbed it returns not-ok, and the helper reverts its optimistic update.
+ * When a reflecting store is supplied, recorded rows feed list_locations_for_media
+ * so refreshMediaLocationFields does not wipe the write.
  */
-export function buildFakeMediaLocationUpdate() {
+export function buildFakeMediaLocationUpdate(store?: ReflectingLocationStore) {
   return {
-    updateFromAddressSuggestion: vi.fn(
-      async (_mediaId: string, suggestion: { lat?: number; lng?: number }) => ({
-        ok: true,
+    updateFromAddressSuggestion: vi.fn(async (mediaId: string, suggestion: ForwardGeocodeResult) => {
+      const row = store?.record(mediaId, suggestion);
+      return {
+        ok: true as const,
         lat: suggestion.lat,
         lng: suggestion.lng,
-      }),
-    ),
+        address: row
+          ? {
+              address_label: row.address_label,
+              street: row.street,
+              city: row.city,
+              district: row.district,
+              country: row.country,
+              latitude: row.latitude,
+              longitude: row.longitude,
+            }
+          : undefined,
+      };
+    }),
   };
 }
 
-export function buildFakeClient() {
+export function buildFakeClient(store?: ReflectingLocationStore) {
   const updateEqFn = vi.fn().mockResolvedValue({ data: null, error: null });
   const updateFn = vi.fn().mockReturnValue({ eq: updateEqFn, or: updateEqFn });
 
@@ -286,7 +368,18 @@ export function buildFakeClient() {
       // added in production does not crash a test about something else.
       return createQueryChain({ data: null, error: null });
     }),
-    rpc: vi.fn(() => createQueryChain({ data: [], error: null })),
+    rpc: vi.fn((fn: string, args?: Record<string, unknown>) => {
+      // refreshMediaLocationFields reloads address via this RPC after a write.
+      // @see media-detail-data.facade.ts · enrichWithPrimaryLocation
+      if (fn === 'list_locations_for_media') {
+        const mediaItemId = String(args?.['p_media_item_id'] ?? '');
+        return createQueryChain({
+          data: store?.list(mediaItemId) ?? [],
+          error: null,
+        });
+      }
+      return createQueryChain({ data: [], error: null });
+    }),
     storage: {
       from: vi.fn().mockReturnValue({
         createSignedUrl: vi.fn().mockResolvedValue({
@@ -314,13 +407,37 @@ export function buildFakeClient() {
   };
 }
 
+/**
+ * Stub for MediaDeleteUndoService.
+ *
+ * executeDelete only emits `closed` when deleteWithUndo invokes onAfterDelete —
+ * a rubber-stamp `{ ok: true }` leaves the UI open. Same trap as
+ * media-detail-delete.helper.spec.ts.
+ *
+ * WorkspaceViewService also injects this and subscribes to mediaDeleted$ /
+ * mediaRestored$ in its constructor — those streams must exist or setup()
+ * dies before any test runs.
+ */
+export function buildFakeMediaDeleteUndo() {
+  return {
+    mediaDeleted$: new Subject<{ mediaItemIds: string[] }>().asObservable(),
+    mediaRestored$: new Subject<{ mediaItemIds: string[] }>().asObservable(),
+    deleteWithUndo: vi.fn(async ({ onAfterDelete }: { onAfterDelete?: () => void }) => {
+      onAfterDelete?.();
+      return { ok: true as const };
+    }),
+  };
+}
+
 // ── Setup helper ──────────────────────────────────────────────────────────────
 
 export function setup() {
-  const fake = buildFakeClient();
+  const locationStore = createReflectingLocationStore();
+  const fake = buildFakeClient(locationStore);
   const fakeMediaLocations = buildFakeMediaLocations();
   const fakeMetadata = buildFakeMetadataService();
-  const fakeMediaLocationUpdate = buildFakeMediaLocationUpdate();
+  const fakeMediaLocationUpdate = buildFakeMediaLocationUpdate(locationStore);
+  const fakeMediaDeleteUndo = buildFakeMediaDeleteUndo();
   const fakeGeocoding = {
     forward: vi.fn().mockResolvedValue(null),
     reverse: vi.fn().mockResolvedValue(null),
@@ -335,6 +452,7 @@ export function setup() {
       { provide: MediaLocationsService, useValue: fakeMediaLocations },
       { provide: MetadataService, useValue: fakeMetadata },
       { provide: MediaLocationUpdateService, useValue: fakeMediaLocationUpdate },
+      { provide: MediaDeleteUndoService, useValue: fakeMediaDeleteUndo },
     ],
   });
 
@@ -354,6 +472,8 @@ export function setup() {
     fakeMediaLocations,
     fakeMetadata,
     fakeMediaLocationUpdate,
+    fakeMediaDeleteUndo,
+    locationStore,
   };
 }
 

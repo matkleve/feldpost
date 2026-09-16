@@ -636,13 +636,15 @@ and are tested, but an operator cannot reach either:
 | [F-18](./005-upload-pipeline-trace-findings.md#f-18) | The shipped postcode table is a 21-row stub. Needs a real data source, not a code change. |
 | Project label | `resolveProjectName` ignores `fallbackProjectId` once anything is selected, so a multi-project item is labelled by **option order, not its own `project_id`**. Found 2026-09-16 while repairing a test that claimed the opposite and could never have shown it. One line to change; it changes what users see, so it is a product call. |
 
-**Test debt (0.4b remainder), two files of different kinds:**
+**Test debt (0.4b remainder):**
 
 - `upload.service.spec.ts` — the one genuinely order-dependent case: passes alone, fails in some full
   runs, mocked `exifr.gps` returning `undefined`. Pairwise and whole-directory runs do not reproduce
-  it, because vitest's file→worker assignment changes with the file list.
-- `media-detail-view.ui.spec.ts` — needs a fake that reflects written values back rather than a
-  static row.
+  it, because vitest's file→worker assignment changes with the file list. Re-measured 2026-09-16
+  (three full runs: fail / pass / fail — always the same five EXIF assertions when it fails).
+- ~~`media-detail-view.ui.spec.ts`~~ **fixed 2026-09-16** — reflecting location store so
+  `list_locations_for_media` returns written rows after `applyAddressSuggestion`, plus a
+  `MediaDeleteUndoService` stub that invokes `onAfterDelete`. Soft debt 8/2 → 5/1.
 
 **Measurement gaps, stated so nobody treats them as settled:**
 
