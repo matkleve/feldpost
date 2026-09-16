@@ -247,6 +247,25 @@ async function enqueueAndClassifyInChunks(
     return;
   }
 
+  // F-05 / D-05: the upload panel's switch reads "Uploads without a location", and that sentence
+  // is the contract. `optional` skips the address pipeline outright — no classification, so no
+  // layer packages, no area conflicts, no geocode and no tray. It does NOT discard evidence: the
+  // folder path, file name and EXIF are still written at insert and stay readable, so the location
+  // can be resolved later from the media detail or in bulk.
+  // @see docs/specs/system/deferred-location-resolution.md
+  if (newJobs.every((job) => job.locationRequirementMode === 'optional')) {
+    for (let start = 0; start < newJobs.length; start += CLASSIFY_CHUNK_SIZE) {
+      const chunk = newJobs.slice(start, start + CLASSIFY_CHUNK_SIZE);
+      deps.addJobs([...chunk]);
+      deps.hydrateDeferredPreviews([...chunk]);
+      deps.drainQueue();
+      if (start + CLASSIFY_CHUNK_SIZE < newJobs.length) {
+        await yieldToEventLoop();
+      }
+    }
+    return;
+  }
+
   deps.beginBatchClassification?.(batchId, newJobs.length);
 
   for (let start = 0; start < newJobs.length; start += CLASSIFY_CHUNK_SIZE) {

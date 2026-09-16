@@ -159,8 +159,9 @@ async function runLocationOptionalTrace(): Promise<void> {
 
 /**
  * Folder submit with `locationRequirementMode: 'optional'`. The trigger matrix in
- * upload-address-resolution.phases.md says optional skips the address pipeline; this run
- * records what actually happens so the trace reports it instead of assuming it.
+ * upload-address-resolution.phases.md says optional skips the address pipeline — and since F-05
+ * was fixed it does, so this run now **enforces** that rather than only reporting it.
+ * @see docs/specs/system/deferred-location-resolution.md
  */
 async function runLocationOptionalFolderTrace(): Promise<void> {
   const scenarios = buildCorpus();
@@ -177,13 +178,15 @@ async function runLocationOptionalFolderTrace(): Promise<void> {
   emit(`  parked in awaiting_disambiguation before hashing: ${gated.length}`);
   emit(`  reached complete: ${jobs.filter((job) => job.phase === 'complete').length}`);
   emit(
-    '  Trays registered by classifyBatch (layer_package, admin_level_conflict) are not skipped\n' +
-      '  by the optional mode; only the per-job geocode step checks it.',
+    '  classifyBatch does not run at all in this mode, so no layer_package or\n' +
+      '  admin_level_conflict tray is registered and nothing parks before hashing.',
   );
 
   expect(jobs.length).toBe(scenarios.length);
   const stuck = jobs.filter((job) => ACTIVE_PHASES.has(job.phase));
   expect(stuck.map((job) => `${job.relativePath}=${job.phase}`)).toEqual([]);
+  // F-05: "Uploads without a location" must ask nothing.
+  expect(gated.map((job) => job.relativePath)).toEqual([]);
 }
 
 /**

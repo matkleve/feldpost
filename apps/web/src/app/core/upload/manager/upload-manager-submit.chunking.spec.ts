@@ -115,6 +115,38 @@ describe('submit · chunked classification', () => {
     expect(events.filter((e) => e.startsWith('drain:')).length).toBeGreaterThan(1);
   });
 
+  it('F-05: locationRequirementMode "optional" classifies nothing and asks nothing', async () => {
+    const { deps, events, added } = makeDeps(600);
+
+    await submitUploadManagerWebkitFolder(
+      makeEntries(600),
+      'Wien',
+      { locationRequirementMode: 'optional' },
+      deps,
+    );
+
+    // "Uploads without a location" must mean exactly that: no classification, so no layer
+    // packages, no area conflicts, no geocode and no tray.
+    expect(events.filter((e) => e.startsWith('classify:'))).toEqual([]);
+    expect(deps.beginBatchClassification).not.toHaveBeenCalled();
+    // The files still upload.
+    expect(added.length).toBe(600);
+    expect(events.filter((e) => e.startsWith('drain:')).length).toBeGreaterThan(0);
+  });
+
+  it('F-05: "required" still classifies, so the skip is the mode and not the path', async () => {
+    const { deps, events } = makeDeps(600);
+
+    await submitUploadManagerWebkitFolder(
+      makeEntries(600),
+      'Wien',
+      { locationRequirementMode: 'required' },
+      deps,
+    );
+
+    expect(events.filter((e) => e.startsWith('classify:')).length).toBeGreaterThan(0);
+  });
+
   it('classifies every submitted job exactly once across all chunks', async () => {
     const { deps, added, classified } = makeDeps(600);
 

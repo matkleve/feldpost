@@ -438,7 +438,7 @@ implementation whether they are one change; if they are, the spec amendment cove
 | --- | --- | --- |
 | 2.1 | Per **D-03 (re-derived)**: put the country-carrying exact lookup in front of the AT-only fuzzy gate, derive `country` from the city match, leave it null on cross-country ambiguity, add `country` provenance (`parsed` / `derived` / `narrowed`). Spec first. The org country list is a **later, optional** narrowing filter — not part of this step. | Red-first: `Graz/Annenstraße 10/DSC_0001.jpg` yields city `Graz`, country `AT` marked `derived`, and a non-empty `groupingKey`; a name present in two registries leaves `country` null instead of picking one. |
 | 2.2 | Widen the weak-filename guard (F-04) so a single-token file name with no house number never forms a street package. | Red-first: `foto.jpg` and `Abnahmeprotokoll.pdf` under an addressed folder open no `layer_package` tray. |
-| 2.3 | Resolve **D-05** — make code and `upload-address-resolution.phases.md` agree, in one change. | Red-first: harness run C parks **0** files in `awaiting_disambiguation`. |
+| 2.3 | Resolve **D-05** — make code and `upload-address-resolution.phases.md` agree, in one change. **Done 2026-09-16:** the matrix already said "Skip pipeline", so the code moved to meet it — `enqueueAndClassifyInChunks` skips classification when every job in the batch is `optional`. Harness run C: **0 parked** (was 13 of 15), and the run now asserts it. | Red-first: harness run C parks **0** files in `awaiting_disambiguation`. ✅ |
 
 **Class:** Sensitive. 2.1 does **not** touch org-scoped settings after all — the org country list
 stayed out of it, which is why it needed no security review.

@@ -41,7 +41,7 @@ spec-level — the spec says what the code does, so a fix needs a contract decis
 | [F-02](#f-02) | ~~`Wien` resolves to the municipality `Schottwien`~~ **fixed** | High | Data + code |
 | [F-03](#f-03) | ~~City classification requires an explicit country segment in the path~~ **fixed** | High | **Spec** |
 | [F-04](#f-04) | ~~Ordinary file names form competing street-level layer packages~~ **fixed** | Medium | Code |
-| [F-05](#f-05) | `locationRequirementMode: 'optional'` does not skip the address pipeline | Medium | **Spec** ↔ code |
+| [F-05](#f-05) | ~~`locationRequirementMode: 'optional'` does not skip the address pipeline~~ **fixed** | Medium | **Spec** ↔ code |
 | [F-06](#f-06) | ~~Classification costs ~9 ms/file and blocks the first upload~~ — cost cut 29 %, blocking **fixed** (chunked) | High | Code |
 | [F-07](#f-07) | ~~The job store is `O(n)` per write, so a batch is `O(n²)`~~ **fixed** | High | Code |
 | [F-08](#f-08) | Tray volume scales linearly with the file count | High | **Spec** (product) |
@@ -272,7 +272,22 @@ Location it should be entered."* `optional` must skip the address pipeline outri
 evidence must stay on the item so a person can resolve it afterwards. Contract:
 [deferred-location-resolution](../specs/system/deferred-location-resolution.md).
 
-Worth recording, because it shrinks the work: **the retention half already exists.** `relative_path`,
+**Fixed 2026-09-16** (Phase 2.3). `enqueueAndClassifyInChunks` skips classification entirely when
+every job in the batch carries `locationRequirementMode: 'optional'`, so no layer package, no area
+conflict, no geocode and no tray is produced. The spec's trigger matrix already said "Skip
+pipeline"; the code now agrees with it, so the divergence is closed by moving the code, not the
+spec. `[A]`
+
+**Measured**, harness run C, same corpus: **0 files parked in `awaiting_disambiguation`** (was 13 of
+15), 20 of 21 reaching `complete` — the 21st is the deliberate duplicate. The run now *asserts*
+zero parked rather than reporting the count. `[B]`
+
+Evidence is untouched by the skip: `relative_path`, `original_filename`, `exif_raw`,
+`exif_latitude`/`exif_longitude` and `captured_at` are written at insert regardless of the mode, and
+are now read back, so a skipped upload can be resolved afterwards — that is what
+[deferred-location-resolution](../specs/system/deferred-location-resolution.md) is for.
+
+Worth recording, because it shrank the work: **the retention half already existed.** `relative_path`,
 `original_filename`, `exif_latitude`/`exif_longitude`, `exif_raw` and `captured_at` are all written
 at insert (`upload-file-persist.util.ts:199-213`) and made immutable by
 `prevent_media_items_raw_source_overwrite`. `[A]` What is missing is (a) honouring the skip,

@@ -126,9 +126,11 @@ SelectionActionBar (media / workspace contexts)
 
 ## Acceptance Criteria
 
-- [ ] With the toggle off, a 15-file folder uploads **15 rows and asks zero questions**, and no job enters `awaiting_disambiguation`.
-- [ ] Those rows still carry `relative_path`, `original_filename`, `exif_raw` and EXIF coordinates where present.
-- [ ] The spec/code divergence in `upload-address-resolution.phases.md` § Trigger matrix is gone — the matrix and the code agree.
+- [x] With the toggle off, a folder asks **zero** questions — harness run C, 0 parked (was 13/15).
+- [x] Those rows still carry `relative_path`, `original_filename`, `exif_raw` and EXIF coordinates —
+      the skip bypasses classification, not persistence.
+- [x] The `upload-address-resolution.phases.md` § Trigger matrix divergence is gone — the matrix
+      already said "Skip pipeline" and the code moved to meet it.
 - [x] The read model exposes `relative_path` (detail + list) and `exif_raw` (detail only).
 - [x] *Original folder* shows the folder the file arrived with, and shows none when there was none.
 - [ ] Detail view of an unlocated item offers **Add as location** on the folder and file-name rows.
