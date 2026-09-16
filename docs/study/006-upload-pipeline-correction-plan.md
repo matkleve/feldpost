@@ -18,10 +18,10 @@ corrected-by: none
 | [D-01](#d-01----may-a-file-name-write-an-admin-field-at-all-f-01) | May a filename write an admin field at all? | Decided (Option A′) — built |
 | [D-02](#d-02----what-is-the-confidence-floor-for-a-gazetteer-substitution-f-02) | Confidence floor for a gazetteer substitution | Decided as recommended — built |
 | [D-03](#d-03) | How is `country` established, without assuming one? | Re-derived, decided — built (`place→country`) |
-| [D-04](#d-04----what-is-the-import-mode-for-a-company-sized-archive-f-08-f-06-f-07) | Import mode for a company-sized archive | Decided (dedicated archive-import mode) — Phase 4, gated on Phase 3 |
-| [D-05](#d-05----should-locationrequirementmode-optional-skip-classification-entirely-f-05) | Does `optional` skip classification entirely? | Decided (spec wins) |
+| [D-04](#d-04----what-is-the-import-mode-for-a-company-sized-archive-f-08-f-06-f-07) | Import mode for a company-sized archive | Decided (dedicated archive-import mode) — **pipeline built and measured 2026-09-16**; UI wiring is Phase 5 |
+| [D-05](#d-05----should-locationrequirementmode-optional-skip-classification-entirely-f-05) | Does `optional` skip classification entirely? | Decided (spec wins) — **built 2026-09-16** |
 | [D-06](#d-06----is-the-test-gate-allowed-to-pass-while-compiling-nothing-f-09-f-10) | Can the `test` gate pass while compiling nothing? | Decided — built (`verify.mjs` evidence hook) |
-| [D-09](#d-09----may-exif-supply-a-house-number-open) | May EXIF supply a house number? | **Decided 2026-09-15** — yes, confirm-only. Reasoning in [STUDY-007](./007-exif-coordinates-as-address-evidence.md) |
+| [D-09](#d-09----may-exif-supply-a-house-number-open) | May EXIF supply a house number? | **Decided 2026-09-15** — yes, confirm-only. Reasoning in [STUDY-007](./007-exif-coordinates-as-address-evidence.md); contract in the [exif house number supplement](../specs/service/media-upload-service/upload-exif-house-number.supplement.md) |
 | [D-10](#d-10) | Persist an area-only path, with no coordinates | Decided — **built and verified** ([F-19](./005-upload-pipeline-trace-findings.md#f-19)) |
 | [D-11](#d-11) | Corroborate a `city` conflict with the street before asking | Decided — **built and verified** |
 | [D-12](#d-12) | What should answering a **cross-field** admin conflict do? | Decided (**C + D**) — **built and verified** ([F-21](./005-upload-pipeline-trace-findings.md#f-21), [F-22](./005-upload-pipeline-trace-findings.md#f-22)) |
@@ -600,6 +600,56 @@ automatically, in exchange for asking nothing.
 engine the deferred items need ([files-page bulk
 resolution](../specs/page/files-page.bulk-resolution.supplement.md)). The pipeline half is done and
 proven; the UI half is not.
+
+### Phase 5 — What is left, 2026-09-16
+
+Phases 0–4 are built and measured. This section is the handoff: everything still open, what it is
+blocked on, and where its contract already lives. Nothing here is a new decision except where it says
+so.
+
+**Wiring — the gap between "proven" and "usable".** The archive import and bulk resolution both work
+and are tested, but an operator cannot reach either:
+
+| # | Work | Contract | Note |
+| --- | --- | --- | --- |
+| 5.1 | Upload panel: the archive/interactive mode choice | [archive import mode](../specs/service/media-upload-service/upload-archive-import-mode.md) § Actions | Mode is fixed at submit (A1) |
+| 5.2 | Two progress figures, never blended | same § What "done" means | Files imported (finite) + items awaiting resolution (backlog) |
+| 5.3 | Bulk-resolution adapters: `geocode` / `applyToItem` | [bulk resolution](../specs/page/files-page.bulk-resolution.supplement.md) | The engine is done; these are the only injected effects it lacks |
+| 5.4 | Selection UI + confirmation summary | same, R1/R7 | Plan already reports `eligibleCount`, `geocodeCount`, per-group label |
+| 5.5 | `/files` tree + its two aggregate RPCs | [files-page](../specs/page/files-page.md) | `relative_path` is already read; aggregation must stay in SQL |
+| 5.6 | *Add as location* row actions in media detail | [deferred location resolution](../specs/system/deferred-location-resolution.md) § Actions | The row slots already exist and are empty |
+
+**Decided but unbuilt:**
+
+| # | Work | Contract |
+| --- | --- | --- |
+| 5.7 | EXIF may supply a house number, confirm-only, once per address | [exif house number supplement](../specs/service/media-upload-service/upload-exif-house-number.supplement.md) |
+
+**Open findings needing an owner decision before any code:**
+
+| Finding | The question |
+| --- | --- |
+| [F-17](./005-upload-pipeline-trace-findings.md#f-17) | A parked job keeps its content-hash reservation, so a later, better upload of the same file is skipped as a duplicate of something never uploaded. Owner sketched "check whether the new file has more data and revive the parked job, with a confirmation" — the build-both-and-measure experiment has not been run. |
+| [F-18](./005-upload-pipeline-trace-findings.md#f-18) | The shipped postcode table is a 21-row stub. Needs a real data source, not a code change. |
+| Project label | `resolveProjectName` ignores `fallbackProjectId` once anything is selected, so a multi-project item is labelled by **option order, not its own `project_id`**. Found 2026-09-16 while repairing a test that claimed the opposite and could never have shown it. One line to change; it changes what users see, so it is a product call. |
+
+**Test debt (0.4b remainder), two files of different kinds:**
+
+- `upload.service.spec.ts` — the one genuinely order-dependent case: passes alone, fails in some full
+  runs, mocked `exifr.gps` returning `undefined`. Pairwise and whole-directory runs do not reproduce
+  it, because vitest's file→worker assignment changes with the file list.
+- `media-detail-view.ui.spec.ts` — needs a fake that reflects written values back rather than a
+  static row.
+
+**Measurement gaps, stated so nobody treats them as settled:**
+
+- Every Phase 3 figure is Node with synthetic paths on one core. **No browser, no real folder tree.**
+  If a browser is materially slower the ordering of this plan changes.
+- No wall-clock time-to-first-upload exists for Phase 3.3. The *ordering* is proven by test; the
+  improvement an operator would feel is not measured.
+- [STUDY-007](./007-exif-coordinates-as-address-evidence.md)'s distance reasoning is `[C]`: no device
+  photos were available. Fifty photos of known buildings would settle the radius in 5.7 and either
+  confirm or destroy its clustering argument.
 
 ### Not in this plan
 
