@@ -17,7 +17,8 @@ asking, put everything else in Issues, and let the operator work it afterwards a
 The operator picks *Import archive* instead of a normal upload, chooses a folder, and the panel
 starts uploading within a second. No questions appear at any point. Two figures run side by side:
 files imported, counting to a finite total, and items awaiting resolution, a backlog. When the first
-finishes the import is done; the second is then worked in the Issues lane, a folder at a time.
+finishes the import is done; the second is then worked in the Issues lane, a folder at a time. If a
+file fails to upload, a third line says so — a failure never hides inside the imported count.
 
 ## Where It Lives
 
@@ -54,7 +55,7 @@ run, because everything it resolves silently is a question the operator never ha
 | --- | --- | --- | --- |
 | 1 | Chooses *Import archive* and a folder | Batch is created with `importMode: 'archive'`; classification starts chunked | submit |
 | 2 | Waits | Uploading begins after the first chunk; no tray ever opens | drain |
-| 3 | Watches progress | Two figures: files imported, items awaiting resolution | batch record |
+| 3 | Watches progress | Files imported, items awaiting resolution, and failures when there are any | batch record |
 | 4 | Import finishes | Batch reports complete even with items unresolved | terminal |
 | 5 | Opens Issues or `/files` afterwards | Unresolved items are grouped by folder for bulk answering | bulk resolve |
 | 6 | Re-submits the same tree | Already-stored files are skipped by content hash | dedup |
@@ -95,10 +96,15 @@ unresolved by design — a definition of "done" that waits on those would never 
 train the operator to ignore it. Resolution is a **separate, ongoing workstream** with its own
 progress, worked in the Issues lane.
 
-The UI therefore shows **two independent progress figures**, never one blended number: *files
-imported* (finite, ends) and *items awaiting resolution* (a backlog that shrinks as work is done).
+The UI therefore shows **independent progress figures**, never one blended number: *files imported*
+(finite, ends) and *items awaiting resolution* (a backlog that shrinks as work is done).
 Alternatives considered: "done when everything resolves" (never fires) and one combined bar (hides
 whether the bytes are safe, which is the question the operator actually has during an import).
+
+*Files imported* counts files whose bytes are stored — `complete`, `skipped`, and `missing_data`
+(in, location deferred). A failed upload is **not** imported and MUST NOT be counted as one; when
+any file fails, a third figure names the failure count. Counting failures as imports would restore
+the blended number in the one place it matters most (`docs/CONSTITUTION.md` § no silent failure).
 
 ## Ownership
 
@@ -110,14 +116,14 @@ whether the bytes are safe, which is the question the operator actually has duri
 | Suppressing tray registration | the tray-flow service, gated on the batch mode | Must suppress **registration**, not only presentation — see the FSM supplement |
 | Routing unresolved to Issues | the pre-resolve / routing path | Writes `missing_data` + `address_deferred` |
 | Bulk resolution afterwards | the shared resolve engine | One engine for folder and filter selections |
-| Import progress | the batch record | Two figures, never blended |
+| Import progress | the batch record | Separate figures, never blended; a failure is never an import |
 
 ## Visual Behavior Contract
 
 | Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer (z-index/token) | Test Oracle |
 | --- | --- | --- | --- | --- | --- | --- |
 | Import archive intake | `.upload-panel__intake-btn--archive` | intake area (panel shell) | same button | `.upload-panel__intake-btn--archive` | intake (panel local) | `upload-panel.creation-dom.spec.ts` renders label; input-handlers pass `importMode: 'archive'` |
-| Dual import progress | `.upload-panel__archive-progress` | intake area (panel shell) | none (status only) | `.upload-panel__archive-progress`, `.upload-panel__archive-progress-line` | intake (panel local) | helper unit tests; figures never blend imported + awaiting |
+| Import progress figures | `.upload-panel__archive-progress` | intake area (panel shell) | none (status only) | `.upload-panel__archive-progress`, `.upload-panel__archive-progress-line`, `[data-state='failed']` | intake (panel local) | helper unit tests; figures never blend imported + awaiting, and `error` never counts as imported |
 
 ## Data
 
@@ -134,7 +140,7 @@ whether the bytes are safe, which is the question the operator actually has duri
 | `core/upload/manager/upload-manager-submit.util.ts` | accept and record the mode |
 | `core/upload/location/upload-location-tray-flow.service.ts` | suppress registration in archive mode |
 | `core/upload/pipelines/new/…` | route unresolved to Issues instead of a tray |
-| `features/upload/upload-panel/…` | mode choice, and the two progress figures |
+| `features/upload/upload-panel/…` | mode choice, and the progress figures |
 
 ## Acceptance Criteria
 
