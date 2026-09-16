@@ -41,4 +41,6 @@ fuzzy matching: it is a **deterministic orthographic fold** on the street compon
 
 ## Status
 
-Implementation follows this supplement; red-first SF-01.
+**Implemented 2026-09-16** — `normalizeStreetForGroupingKey` in `location-path-parser.util.ts`
+(foldStreetSpelling + consecutive duplicate-letter collapse); used by `buildGroupingKey` and
+`normalizeStreetLevelValue`. Acceptance SF-01…SF-03 in `upload-search-object.builder.spec.ts`.
