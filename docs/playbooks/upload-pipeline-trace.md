@@ -69,7 +69,7 @@ company-scale cost claim.
 | `flat` | `Rohdaten/IMG_*.jpg` | all | Camera-roll / USB dump — no address, `incomplete`. |
 | `shallow_many` | Many `/City/PLZ/` folders | 3 | Sparse tree (many places, few medias each). |
 | `mixed` | 70 % area / 20 % street / 10 % noise | 30 | Blended archive closer to a real drop. |
-| `firma_at_archive` | `/Wien\|Niederösterreich/{PLZ}/{building}/` — per place: `Wasagasse 4` / `(1)` / `(2)` **and** a second-spelling chain `Wasagase 4` / `(1)` / `(2)` (counter restarts; `Straße` streets get the `ß`/`ss` variant, `gasse` streets a dropped letter); also units, letters, full address, landmarks; ~5 % loose under PLZ, ~2 % under Bundesland | mostly 10–50, occasional 100+ | **Owner-described company archive** (2026-09-16). Prefer this for tray-efficiency claims. Recalibrate weights from a path-only export when available. |
+| `firma_at_archive` | `/Wien\|Niederösterreich/{PLZ}/{building}/` — per place: `Wasagasse 4` / `(1)` / `(2)` **and** a second-spelling chain `Wasagase 4` / `(1)` / `(2)` (counter restarts; `Straße` streets get the `ß`/`ss` variant, `gasse` streets a dropped letter); also letters (`8A`), nested unit folders (`Lange Gasse 6/3/5`), abbreviated `Lerchenfelder Str 6`, full address, landmarks; ~11 % of places sit directly under the Bundesland with no PLZ folder; ~5 % loose files under PLZ, ~2 % under Bundesland | mostly 10–50, occasional 100+ | **Owner-described company archive** (2026-09-16). Prefer this for tray-efficiency claims. Recalibrate weights from a path-only export when available. |
 
 **Measured tray clusters (adversarial, 1 000 files, 2026-09-16):** of groups that need a pre-upload
 question, ~**95 % are `layer_package`** (filename street contradicts folder, or project-token
@@ -87,16 +87,17 @@ groups and land mostly on `area_only` (no pre-upload tray — area placement, F-
 | `flat` | 1 | 0 | 0.03 | `incomplete` |
 | `shallow_many` | 19 | 1 | 2.0 | `area_only` |
 | `mixed` | 20 | 0 | 1.9 | `area_only` |
-| **`firma_at_archive`** | **22** | **1** | 7.9 | `street_locality` |
+| **`firma_at_archive`** | **21** | **1** | 5.5 | `street_locality` |
 
 `firma_at_archive` progression @ 1 000 files (re-measured 2026-09-16 after the letter-run fold was
-reverted; each row measured by disabling that step and re-running):
+reverted and the corpus gained the owner's remaining shapes; each row measured by disabling that
+step and re-running):
 
 | Step | Groups | Notes |
 | --- | ---: | --- |
-| Baseline (before `(N)` / fold) | 36 | Increment + second-spelling chains split |
-| After Windows `(N)` strip | 24 | `Wasagasse 4 (1)` ≡ `Wasagasse 4` |
-| After street `ß`/`ss` + `str.` fold | **22** | `Mariahilfer Straße` ≡ `Mariahilfer Strasse` on `groupingKey` |
+| Baseline (before `(N)` / fold) | 40 | Increment + second-spelling chains split |
+| After Windows `(N)` strip | 24 | `Wasagasse 4 (1)` ≡ `Wasagasse 4`, including `Wasagasse 4 (1)/3/5` |
+| After street `ß`/`ss` + `str.` fold | **21** | `Lerchenfelder Straße` ≡ `Lerchenfelder Strasse` ≡ `Lerchenfelder Str` |
 
 Typos that are not orthographic variants (`Wasagasse` vs `Wasagase`, `Stephansplatz` vs
 `Stehansplatz`) stay out of scope and remain separate groups — see
