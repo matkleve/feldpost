@@ -26,8 +26,8 @@ corrected-by: none
 | [D-11](#d-11) | Corroborate a `city` conflict with the street before asking | Decided — **built and verified** |
 | [D-12](#d-12) | What should answering a **cross-field** admin conflict do? | Decided (**C + D**) — **built and verified** ([F-21](./005-upload-pipeline-trace-findings.md#f-21), [F-22](./005-upload-pipeline-trace-findings.md#f-22)) |
 
-`status: proposed` means the study as a whole is not fully closed — D-09 is still open, and build
-status varies by row (table above). Per [`STUDY-FORMAT.md`](./STUDY-FORMAT.md) a `[D]` marks a
+`status: proposed` means the study as a whole is not fully closed — every decision above is now
+answered, but build status varies by row (table above) and Phase 4 has not started. Per [`STUDY-FORMAT.md`](./STUDY-FORMAT.md) a `[D]` marks a
 decision, not a fact — including any recommendation nobody has answered yet.
 
 The upload pipeline is **Sensitive** class ([`AGENTS.md`](../../AGENTS.md) § Change Classification):
