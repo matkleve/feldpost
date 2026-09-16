@@ -105,6 +105,20 @@ export interface UploadDisambiguationGroup {
 export type UploadJobMode = 'new' | 'replace' | 'attach';
 export type UploadLocationRequirementMode = 'required' | 'optional';
 
+/**
+ * Which upload flow a batch is running.
+ *
+ * `archive` is the import mode for an existing archive: classification still runs, but **no
+ * disambiguation group is ever registered**, so nothing can reach `awaiting_disambiguation` and
+ * everything unresolved lands in Issues as `address_deferred` instead.
+ *
+ * It is not `locationRequirementMode: 'optional'` with more files — that one skips classification
+ * altogether because the user wants no location at all. Archive import wants every location it can
+ * get without asking.
+ * @see docs/specs/service/media-upload-service/upload-archive-import-mode.md
+ */
+export type UploadImportMode = 'interactive' | 'archive';
+
 export type UploadJobIssueKind =
   | 'duplicate_file'
   | 'missing_gps'
@@ -221,6 +235,8 @@ export interface UploadJob {
   conflictResolution?: ConflictResolution;
   /** Session-scoped location gate mode chosen in the upload panel. */
   locationRequirementMode?: UploadLocationRequirementMode;
+  /** Which upload flow this job belongs to. Absent means `interactive`. */
+  importMode?: UploadImportMode;
   /** Pre-upload disambiguation group (OD-1). */
   disambiguationGroupId?: string;
   /** Pre-upload geocode resolution state. */
@@ -246,6 +262,8 @@ export interface SubmitOptions {
   projectId?: string;
   batchLabel?: string;
   locationRequirementMode?: UploadLocationRequirementMode;
+  /** Which upload flow this job belongs to. Absent means `interactive`. */
+  importMode?: UploadImportMode;
 }
 
 // ── Events ─────────────────────────────────────────────────────────────────────
@@ -401,6 +419,8 @@ export interface UploadBatch {
   status: 'scanning' | 'uploading' | 'complete' | 'cancelled';
   startedAt: Date;
   finishedAt?: Date;
+  /** Which upload flow this batch is running. Absent means `interactive`. Fixed at submit. */
+  importMode?: UploadImportMode;
   /** Count of groups with resolutionGateOpen (aggregates only; no batch-wide gate). */
   pendingDisambiguationCount?: number;
   /** Tray focus group id when multiple groups are open. */

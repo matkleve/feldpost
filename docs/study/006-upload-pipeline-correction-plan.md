@@ -567,6 +567,40 @@ chunked import, uploads first, no trays during import, everything unresolved to 
 folder-level bulk resolution in the Issues lane afterwards. Needs its own ownership matrix and FSM
 table, and a decision about what "done" means for an import that leaves 40 000 items in Issues.
 
+**Status, 2026-09-16: the core is built.** Spec first, as the class requires —
+[archive import mode](../specs/service/media-upload-service/upload-archive-import-mode.md) with the
+ownership matrix, and its
+[FSM supplement](../specs/service/media-upload-service/upload-archive-import-mode.fsm.supplement.md)
+for the transitions.
+
+**The decision the plan asked for.** An archive import is **done when every file is uploaded or has
+terminally failed** — never conditional on resolution. `[D]` An import of 100 000 files leaves tens
+of thousands of items unresolved by design; a "done" that waits on them never fires and teaches the
+operator to ignore it. So the UI carries **two independent figures** — files imported (finite) and
+items awaiting resolution (a backlog) — and never blends them, because during an import the question
+the operator actually has is whether the bytes are safe.
+
+**The narrowing, and the trap in it.** The mode is one phase removed from the existing machine:
+`awaiting_disambiguation` is unreachable, and anything that would have parked there goes to
+`missing_data` with `issueKind: 'address_deferred'` — both of which already exist, so no new phase
+and no new terminal.
+
+Phase 3.3 holds tray *presentation* while still *registering* groups per chunk. Archive mode must do
+the **opposite**: suppress registration itself. Holding only presentation would still mark jobs
+`awaiting_disambiguation` — the very phase this mode forbids — leaving them waiting on a user with
+nothing to answer, which is exactly [TRAP-021](../TRAPS.md)'s shape. The gate therefore sits at
+`registerDisambiguationGroup`, not at the wave.
+
+**Measured**, harness run D, curated corpus (21 files): **0 parked**, 16 resolved silently and
+uploaded, 4 deferred to Issues. `[B]` The interactive run of the same corpus uploads 19 — but asks
+**7 questions** to get there. That is the trade stated plainly: three fewer files placed
+automatically, in exchange for asking nothing.
+
+**Not yet built:** the panel's mode choice and the two progress figures, and the bulk-resolution
+engine the deferred items need ([files-page bulk
+resolution](../specs/page/files-page.bulk-resolution.supplement.md)). The pipeline half is done and
+proven; the UI half is not.
+
 ### Not in this plan
 
 - **Rewriting the tray system.** F-08 is a product decision (D-04), and the merging that exists

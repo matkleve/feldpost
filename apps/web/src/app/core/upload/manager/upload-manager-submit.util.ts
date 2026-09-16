@@ -49,6 +49,7 @@ export async function submitUploadManagerFiles(
     overallProgress: 0,
     status: 'uploading',
     startedAt: new Date(),
+    importMode: options?.importMode,
   });
 
   const scannedEntries: ScannedFileEntry[] = files.map((file) => ({
@@ -64,6 +65,7 @@ export async function submitUploadManagerFiles(
     deps,
     undefined,
     options?.locationRequirementMode,
+    options?.importMode,
   );
 
   await enqueueAndClassifyInChunks(batchId, newJobs, deps);
@@ -136,6 +138,7 @@ export async function submitUploadManagerFolder(
     deps,
     folderAddressHint,
     options?.locationRequirementMode,
+    options?.importMode,
   );
 
   await enqueueAndClassifyInChunks(batchId, newJobs, deps);
@@ -186,6 +189,7 @@ export async function submitUploadManagerWebkitFolder(
     deps,
     folderAddressHint,
     options?.locationRequirementMode,
+    options?.importMode,
   );
 
   await enqueueAndClassifyInChunks(batchId, newJobs, deps);
@@ -326,6 +330,7 @@ function createNewUploadJobs(
   deps: UploadManagerSubmitDeps,
   folderAddressHint?: string,
   locationRequirementMode?: UploadJob['locationRequirementMode'],
+  importMode?: UploadJob['importMode'],
 ): UploadJob[] {
   const locationConfig = deps.getLocationConfig();
 
@@ -364,6 +369,7 @@ function createNewUploadJobs(
       titleAddress: perFileFolderHint,
       titleAddressSource: perFileFolderHint ? 'folder' : undefined,
       locationRequirementMode,
+      importMode,
     };
   });
 }

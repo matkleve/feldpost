@@ -13,7 +13,11 @@ import {
 } from './upload-location-disambiguation-registration.helpers';
 import { UploadLocationResolutionService } from './upload-location-resolution.service';
 import { isGroupBlocked } from './upload-location-resolution.helpers';
-import { uploadTraceDecision, uploadTraceEnter } from '../address-resolution/upload-address-resolution.debug';
+import {
+  uploadTraceDecision,
+  uploadTraceEnter,
+  uploadTraceExit,
+} from '../address-resolution/upload-address-resolution.debug';
 import { UploadLocationTrayProducerAdapter } from '../../upload-resolver-tray-orchestrator/adapters/upload-location-tray-producer.adapter';
 import { UploadPreResolveWaveService } from '../support/upload-pre-resolve-wave.service';
 import type { DisambiguationRequiredEvent, UploadDisambiguationGroup } from '../upload-manager.types';
@@ -41,6 +45,22 @@ export class UploadLocationDisambiguationRegistrationService {
       candidateCount: input.candidates.length,
       titleAddress: input.titleAddress,
     });
+    // Archive import never asks. A group registered here would mark its jobs
+    // `awaiting_disambiguation` — the one phase that mode forbids — and they would sit there
+    // waiting on a user with nothing to answer (TRAP-021's shape). Suppressing *presentation* is
+    // not enough; the registration itself must not happen.
+    // @see docs/specs/service/media-upload-service/upload-archive-import-mode.fsm.supplement.md
+    if (this.isArchiveImport(input.jobIds)) {
+      uploadTraceDecision('tray', 'archive import — routing to Issues instead of a tray', {
+        batchId: input.batchId,
+        queryKey: input.queryKey,
+        jobIds: input.jobIds,
+      });
+      this.routeJobsToDeferredIssues(input.jobIds);
+      uploadTraceExit('tray', 'registerDisambiguationGroup', 'archive (deferred)');
+      return;
+    }
+
     const existing = this.disambiguationStore.groups().find(
       (g) => g.batchId === input.batchId && g.queryKey === input.queryKey && isGroupBlocked(g),
     );
@@ -83,6 +103,33 @@ export class UploadLocationDisambiguationRegistrationService {
     }
     this.syncTrayOrchestratorIfNeeded(input, updated, !existing);
     this.disambiguationStore.syncBatchDisambiguationAggregates(input.batchId);
+  }
+
+  /** A batch is an archive import when its jobs say so; absent means interactive. */
+  private isArchiveImport(jobIds: readonly string[]): boolean {
+    for (const jobId of jobIds) {
+      const job = this.jobState.findJob(jobId);
+      if (job) {
+        return job.importMode === 'archive';
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Park jobs in the Issues lane instead of a tray. `missing_data` is already terminal and already
+   * the Issues lane, so this adds no phase and no new terminal — the archive mode narrows the
+   * existing machine rather than introducing a second one.
+   */
+  private routeJobsToDeferredIssues(jobIds: readonly string[]): void {
+    for (const jobId of jobIds) {
+      this.jobState.setPhase(jobId, 'missing_data');
+      this.jobState.updateJob(jobId, {
+        issueKind: 'address_deferred',
+        resolutionStatus: 'pending',
+        statusLabel: '',
+      });
+    }
   }
 
   private markJobsAwaitingDisambiguation(

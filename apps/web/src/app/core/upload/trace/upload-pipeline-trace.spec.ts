@@ -190,6 +190,51 @@ async function runLocationOptionalFolderTrace(): Promise<void> {
 }
 
 /**
+ * Archive import: classification still runs, but no tray is ever registered, so everything the
+ * pipeline cannot resolve on its own lands in Issues instead of parking for a question.
+ * @see docs/specs/service/media-upload-service/upload-archive-import-mode.md
+ */
+async function runArchiveImportTrace(): Promise<void> {
+  const scenarios = buildCorpus();
+  const recorder = new UploadTraceRecorder();
+  const run = await runTraceBatch(scenarios, recorder, {
+    rootFolderLabel: 'Trace Batch (archive import)',
+    importMode: 'archive',
+  });
+  const jobs = run.harness.manager.jobs();
+  const gated = jobs.filter((job) => job.phase === 'awaiting_disambiguation');
+  const deferred = jobs.filter((job) => job.issueKind === 'address_deferred');
+  const complete = jobs.filter((job) => job.phase === 'complete');
+
+  emit(renderHeading('RUN D \u00b7 ARCHIVE IMPORT (importMode = archive)'));
+  emit(`  files: ${jobs.length}`);
+  emit(`  parked in awaiting_disambiguation: ${gated.length}`);
+  emit(`  resolved silently and uploaded: ${complete.length}`);
+  emit(`  deferred to Issues (address_deferred): ${deferred.length}`);
+  emit(
+    '  Classification runs; only the tray is suppressed. Everything it cannot answer\n' +
+      '  on its own goes to Issues for folder-level bulk resolution afterwards.',
+  );
+
+  expect(jobs.length).toBe(scenarios.length);
+  // The defining property of the mode.
+  expect(gated.map((job) => job.relativePath)).toEqual([]);
+  // Nothing may be stranded in an active phase either.
+  const stuck = jobs.filter((job) => ACTIVE_PHASES.has(job.phase));
+  expect(stuck.map((job) => `${job.relativePath}=${job.phase}`)).toEqual([]);
+  // And nothing is lost: every file is either uploaded, deferred, or a deliberate skip/error.
+  const accounted = jobs.filter(
+    (job) =>
+      job.phase === 'complete' ||
+      job.phase === 'skipped' ||
+      job.phase === 'error' ||
+      job.issueKind === 'address_deferred' ||
+      job.phase === 'missing_data',
+  );
+  expect(accounted.length).toBe(jobs.length);
+}
+
+/**
  * The full pipeline does not reach company scale (see the playbook's measured ceiling), so this
  * measures the two costs that dominate it, each against real production code.
  */
@@ -251,7 +296,13 @@ describe('upload pipeline trace harness', () => {
   );
 
   it(
-    'D \u00b7 scale — classification throughput and job-store cost at batch size',
+    'D \u00b7 archive import — classify everything, ask nothing, defer the rest to Issues',
+    runArchiveImportTrace,
+    TRACE_TIMEOUT_MS,
+  );
+
+  it(
+    'E \u00b7 scale — classification throughput and job-store cost at batch size',
     runScaleTrace,
     SCALE_TIMEOUT_MS,
   );

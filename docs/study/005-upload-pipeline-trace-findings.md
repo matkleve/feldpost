@@ -44,7 +44,7 @@ spec-level — the spec says what the code does, so a fix needs a contract decis
 | [F-05](#f-05) | ~~`locationRequirementMode: 'optional'` does not skip the address pipeline~~ **fixed** | Medium | **Spec** ↔ code |
 | [F-06](#f-06) | ~~Classification costs ~9 ms/file and blocks the first upload~~ — cost cut 29 %, blocking **fixed** (chunked) | High | Code |
 | [F-07](#f-07) | ~~The job store is `O(n)` per write, so a batch is `O(n²)`~~ **fixed** | High | Code |
-| [F-08](#f-08) | Tray volume scales linearly with the file count | High | **Spec** (product) |
+| [F-08](#f-08) | Tray volume scales linearly with the file count — **addressed for imports** (archive mode), open for interactive batches | High | **Spec** (product) |
 | [F-09](#f-09) | The `test` gate compiles nothing, so it runs no specs | Medium | Repo |
 | [F-10](#f-10) | Two gate debt notes state numbers that no longer match | Low | Repo |
 | [F-11](#f-11) | ~~A meaningless folder segment outranks a valid address in the file name~~ **fixed** | High | Code |
@@ -401,6 +401,20 @@ file naming **every** group needs a question, because [F-01](#f-01) puts every f
 45 000 questions. The trays were designed for a batch; a database import needs a different mode —
 answer-once-per-folder, defer-all-and-fix-later, or import without location and resolve afterwards.
 That is a decision, not a bug fix; see [STUDY-006](./006-upload-pipeline-correction-plan.md) D-04.
+
+**Addressed 2026-09-16** (Phase 4, D-04 option A: a distinct
+[archive import mode](../specs/service/media-upload-service/upload-archive-import-mode.md)).
+Classification still runs — every silent resolution is a question never asked — but **no
+disambiguation group is registered**, so nothing parks for an answer and everything unresolved goes
+to Issues as `address_deferred`, to be cleared a folder at a time afterwards.
+
+**Measured**, harness run D on the curated corpus (21 files): **0 tray questions**, 16 resolved and
+uploaded silently, 4 deferred. `[B]` The interactive run places 19 of the same corpus but asks 7
+questions to do it. The finding's arithmetic is unchanged — this mode does not make 45 000 questions
+cheaper, it stops asking them.
+
+**Still open:** the tray volume of the *interactive* mode is what it was. This finding is addressed
+for imports, not removed for batches.
 
 ---
 
