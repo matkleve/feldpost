@@ -39,6 +39,32 @@
       <p class="upload-panel__scan-status" role="status" aria-live="polite">{{ label }}</p>
     }
 
+    <!--
+      Stable state: archive import dual progress (Phase 5.2).
+      Two figures, never blended — files imported (finite) + awaiting resolution (backlog).
+      @see docs/specs/service/media-upload-service/upload-archive-import-mode.md § What "done" means
+    -->
+    @if (archiveImportProgress(); as archiveProgress) {
+      <div
+        class="upload-panel__archive-progress"
+        role="status"
+        aria-live="polite"
+        data-state="archive-import"
+      >
+        <p class="upload-panel__archive-progress-line">
+          {{
+            archiveFilesImportedLabel(
+              archiveProgress.filesImported,
+              archiveProgress.filesTotal
+            )
+          }}
+        </p>
+        <p class="upload-panel__archive-progress-line">
+          {{ archiveAwaitingResolutionLabel(archiveProgress.itemsAwaitingResolution) }}
+        </p>
+      </div>
+    }
+
     <!-- Drop zone shell: clickable dropzone + chip row (siblings — no nested interactives). -->
     <div
       class="upload-panel__dropzone-shell"

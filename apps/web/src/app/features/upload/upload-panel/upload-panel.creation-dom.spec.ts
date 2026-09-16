@@ -115,6 +115,52 @@ describe('UploadPanelComponent DOM intake controls', () => {
     expect(archive).toBeTruthy();
     expect((archive.nativeElement as HTMLButtonElement).textContent).toContain('Import archive');
   });
+
+  it('renders dual archive progress figures when archiveImportProgress is set', async () => {
+    // Phase 5.2 — two figures, never blended.
+    // @see docs/specs/service/media-upload-service/upload-archive-import-mode.md § What "done" means
+    const { fixture, fakeManager } = await setupUploadPanel({ deferChangeDetection: true });
+    const archiveBatch = {
+      id: 'archive-batch',
+      label: 'Archive',
+      totalFiles: 5,
+      completedFiles: 1,
+      skippedFiles: 0,
+      failedFiles: 0,
+      overallProgress: 40,
+      status: 'uploading' as const,
+      startedAt: new Date(),
+      importMode: 'archive' as const,
+    };
+    fakeManager._activeBatchSignal.set(archiveBatch);
+    fakeManager._batchesSignal.set([archiveBatch]);
+    fakeManager._jobsSignal.set([
+      makeUploadJob({ batchId: 'archive-batch', phase: 'complete' }),
+      makeUploadJob({
+        batchId: 'archive-batch',
+        phase: 'missing_data',
+        issueKind: 'address_deferred',
+      }),
+      makeUploadJob({
+        batchId: 'archive-batch',
+        phase: 'missing_data',
+        issueKind: 'address_deferred',
+      }),
+      makeUploadJob({
+        batchId: 'archive-batch',
+        phase: 'missing_data',
+        issueKind: 'address_deferred',
+      }),
+      makeUploadJob({ batchId: 'archive-batch', phase: 'uploading' }),
+    ]);
+    fixture.detectChanges();
+
+    const root = fixture.debugElement.query(By.css('.upload-panel__archive-progress'));
+    expect(root).toBeTruthy();
+    const text = (root.nativeElement as HTMLElement).textContent ?? '';
+    expect(text).toContain('Files imported: 4 of 5');
+    expect(text).toContain('Awaiting resolution: 3');
+  });
 });
 
 describe('UploadPanelComponent panel visibility', () => {

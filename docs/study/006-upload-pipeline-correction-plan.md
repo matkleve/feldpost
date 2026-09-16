@@ -615,8 +615,8 @@ and are tested, but an operator cannot reach either:
 
 | # | Work | Contract | Note |
 | --- | --- | --- | --- |
-| 5.1 | Upload panel: the archive/interactive mode choice | [archive import mode](../specs/service/media-upload-service/upload-archive-import-mode.md) § Actions | Mode is fixed at submit (A1). **UI wired 2026-09-16** — Import archive intake button; still needs 5.2 progress figures |
-| 5.2 | Two progress figures, never blended | same § What "done" means | Files imported (finite) + items awaiting resolution (backlog) |
+| 5.1 | Upload panel: the archive/interactive mode choice | [archive import mode](../specs/service/media-upload-service/upload-archive-import-mode.md) § Actions | Mode is fixed at submit (A1). **UI wired 2026-09-16** — Import archive intake button |
+| 5.2 | Two progress figures, never blended | same § What "done" means | Files imported (finite) + items awaiting resolution (backlog). **Wired 2026-09-16**; `missing_data` counts toward import progress |
 | 5.3 | Bulk-resolution adapters: `geocode` / `applyToItem` | [bulk resolution](../specs/page/files-page.bulk-resolution.supplement.md) | The engine is done; these are the only injected effects it lacks |
 | 5.4 | Selection UI + confirmation summary | same, R1/R7 | Plan already reports `eligibleCount`, `geocodeCount`, per-group label |
 | 5.5 | `/files` tree + its two aggregate RPCs | [files-page](../specs/page/files-page.md) | `relative_path` is already read; aggregation must stay in SQL |

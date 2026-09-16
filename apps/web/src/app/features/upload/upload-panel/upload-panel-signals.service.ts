@@ -42,6 +42,7 @@ export class UploadPanelSignalsService {
   readonly laneCounts = this.state.laneCounts;
   readonly scanning = this.state.scanning;
   readonly scanningLabel = this.state.scanningLabel;
+  readonly archiveImportProgress = this.state.archiveImportProgress;
   readonly hasAwaitingPlacement = this.state.hasAwaitingPlacement;
   readonly showProgressBoard = this.state.showProgressBoard;
 

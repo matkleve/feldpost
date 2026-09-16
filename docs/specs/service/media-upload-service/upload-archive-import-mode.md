@@ -117,6 +117,7 @@ whether the bytes are safe, which is the question the operator actually has duri
 | Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer (z-index/token) | Test Oracle |
 | --- | --- | --- | --- | --- | --- | --- |
 | Import archive intake | `.upload-panel__intake-btn--archive` | intake area (panel shell) | same button | `.upload-panel__intake-btn--archive` | intake (panel local) | `upload-panel.creation-dom.spec.ts` renders label; input-handlers pass `importMode: 'archive'` |
+| Dual import progress | `.upload-panel__archive-progress` | intake area (panel shell) | none (status only) | `.upload-panel__archive-progress`, `.upload-panel__archive-progress-line` | intake (panel local) | helper unit tests; figures never blend imported + awaiting |
 
 ## Data
 
