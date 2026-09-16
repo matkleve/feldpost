@@ -94,8 +94,8 @@ export class UploadLocationResolutionService {
     return this.sourceConflict.getSourceConflictChoice(batchId, groupingKey);
   }
 
-  registerLayerPackageGroupsAfterClassify(batchId: string): void {
-    this.trayFlow.registerLayerPackageGroupsAfterClassify(batchId);
+  async registerLayerPackageGroupsAfterClassify(batchId: string): Promise<void> {
+    await this.trayFlow.registerLayerPackageGroupsAfterClassify(batchId);
   }
 
   async confirmTrayCity(groupId: string, city: string): Promise<void> {

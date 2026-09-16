@@ -103,7 +103,7 @@ export function measureClassifyAtScale(
     const key = classifyKey(outcome, so.groupingKey, conflictKey);
     groupSizes.set(key, (groupSizes.get(key) ?? 0) + 1);
     outcomes.set(outcome, (outcomes.get(outcome) ?? 0) + 1);
-    if (outcome === 'layer_conflict' || outcome === 'admin_conflict' || outcome === 'branch_c') {
+    if (outcome === 'layer_conflict' || outcome === 'admin_conflict' || outcome === 'street_only') {
       trayKeys.add(key);
     }
   }

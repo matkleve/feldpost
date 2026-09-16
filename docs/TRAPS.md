@@ -47,6 +47,8 @@ Entries are numbered, never renumbered, and never deleted. Order is by cost, not
 | [TRAP-017](#trap-017--a-country-can-appear-in-the-search-object-that-never-appears-in-the-path) | A country can appear in the Search Object that never appears in the path | `open` |
 | [TRAP-018](#trap-018--a-group-level-loop-returns-one-jobs-verdict) | A group-level loop returns one job's verdict | `open` |
 | [TRAP-019](#trap-019--the-flat-street-was-a-concatenation-of-leftovers) | The flat `street` was a concatenation of leftovers | `open` |
+| [TRAP-020](#trap-020--a-circular-import-between-two-trace-fixture-modules-silently-zeroed-three-files) | A circular import between two modules silently zeroed three fixture files | `pattern open` |
+| [TRAP-021](#trap-021--a-resolution-event-with-zero-subscribers-looks-like-it-resumed-the-job) | A resolution event with zero subscribers looks like it resumed the job | `pattern open` |
 
 ---
 
@@ -377,6 +379,64 @@ Better: end the migration with a `DO` block that raises when any touched functio
 **Source** — [`STUDY-005`](./study/005-upload-pipeline-trace-findings.md) F-04 and F-11; [`2026-09-12`](./ai-diary/2026-09-12.md). Rules in [`upload-search-object.evidence-model.md`](./specs/service/media-upload-service/upload-search-object.evidence-model.md); code at `apps/web/src/app/core/location-path-parser/upload-search-object.builder.ts` (`writeFieldValue`).
 
 **Status** — `open`.
+
+---
+
+## TRAP-020 — A circular import between two trace-fixture modules silently zeroed three files
+
+**Surface** — `upload-trace-fixtures.ts` defines `TRACE_PHOTO_MIME`/`TRACE_PHOTO_SIZE_BYTES` and, further down the same file, imports `TRACE_AREA_ONLY_SCENARIOS` from `upload-trace-fixtures.area-only.ts` to append to the curated array. That file imported the two constants back from `upload-trace-fixtures.ts` to build its own scenario objects, instead of inlining the literals the way the rest of `upload-trace-fixtures.ts` does (`const JPEG = TRACE_PHOTO_MIME`).
+
+**Assumption** — importing a named export from a sibling module and using it in a top-level object literal is safe as long as both files export what they claim to; a two-file import cycle "just works" the way it does for functions called later.
+
+**Truth** — ES module evaluation order is fixed by the import graph, not by where an `import` statement sits in the file text. Because `upload-trace-fixtures.ts` imports `upload-trace-fixtures.area-only.ts` (to get the array) and that file imports back (to get the constants), the second file's `TRACE_AREA_ONLY_SCENARIOS` array literal evaluates **before** `upload-trace-fixtures.ts` has assigned `TRACE_PHOTO_MIME`/`TRACE_PHOTO_SIZE_BYTES` — Vite/esbuild's transform resolves the cycle by handing back `undefined` rather than throwing. The three scenario objects were built with `mimeType: undefined, sizeBytes: undefined` baked in permanently (object literals capture the value at construction, not a live binding), so every file `scenarioToFile` built for them ended up **zero bytes**, all three synthetic photos hashed identically, and the trace report printed `mime: undefined bytes: undefined` — no error anywhere, no red test, `npm run trace:upload` simply lied by omission (dedup silently ate two of the three scenarios it was supposed to exercise).
+
+**Detect** — when two trace-fixture files import from each other and a scenario/object built from an imported constant renders as `undefined` (or a fake file's content-hash collides with an unrelated scenario's), suspect a cycle before suspecting the constant's value: check whether the module holding the constant also imports something from the module using it. The fix is to inline the literal (or move the shared constant to a third, leaf module both sides import) — never import a same-package sibling's export into a module that sibling itself imports from.
+
+**Source** — found while implementing area-only location persistence ([`STUDY-005`](./study/005-upload-pipeline-trace-findings.md) F-19), 2026-09-13. Code at `apps/web/src/app/core/upload/trace/upload-trace-fixtures.area-only.ts` and `upload-trace-fixtures.ts`.
+
+**Status** — `fixed` 2026-09-13 — constants inlined in `upload-trace-fixtures.area-only.ts`; no import cycle remains between the two files.
+
+---
+
+## TRAP-021 — A resolution event with zero subscribers looks like it resumed the job
+
+**Surface** — `applyContainmentCheckChoice`'s "Keep" branch (the V1 `containment_check` tray, "accept
+this address even though the geocoder found nothing") does everything a resolved tray normally does:
+sets `resolutionStatus: 'resolved'` on the job, marks the disambiguation group's `resolutionGateOpen:
+false`, and calls `notifyDisambiguationResolved(event)`.
+
+**Assumption** — a service method with a name like `notifyDisambiguationResolved`, called at the end of
+every other tray-resolution path in the same file, is doing something — advancing the pipeline,
+draining the queue, whatever the other call sites' effects turn out to be. Reading the call site alone
+gives no reason to doubt it.
+
+**Truth** — `notifyDisambiguationResolved` only pushes onto an RxJS `Subject`
+(`disambiguationResolved$`). Grepping the entire frontend for a subscriber to that Subject finds none.
+Combined with the fact that the only gate into the upload phase (`routePreparedNewJob`) checks
+`job.coords || job.textOnlyLocation` — and a "Keep" job had neither — the job's `phase` simply never
+moves again. Nothing crashes, nothing logs an error, no test failed before this was found: the group is
+marked resolved, so the tray disappears from the UI, but the file underneath never uploads and never
+routes to Issues either. It reads as "waiting for user" to anyone who checks its phase, indefinitely,
+with no user action pending on it at all ([F-20](./study/005-upload-pipeline-trace-findings.md#f-20)).
+
+**Detect** — before trusting that a `notify*`/`emit*` call site does something, find who's listening.
+`grep` the exact identifier (`someSubject$` or the method name) across the whole app, not just the
+module that defines it — a zero-result grep on an event name is the signature of this trap. Cross-check
+against the one thing that actually decides pipeline progress (here, `routePreparedNewJob`'s own
+condition) rather than assuming the notification is wired into it.
+
+**Source** — found while speccing [STUDY-006 D-11](./study/006-upload-pipeline-correction-plan.md#d-11),
+2026-09-13, by tracing what "Keep" on a `containment_check` tray actually does — confirmed against
+scenario S06's own recorded trace outcome (`phase=awaiting_disambiguation`, never resolved further).
+Code at `apps/web/src/app/core/upload/location/upload-location-tray-flow.service.ts`
+(`applyContainmentCheckChoice`) and `upload-location-resolution.service.ts`
+(`notifyDisambiguationResolved`).
+
+**Status** — `pattern open`. The instance is fixed (2026-09-15): "Keep" now places the job
+(`textOnlyLocation`, no coordinates) and re-queues it, and the trace harness shows S06 reaching
+`complete`. The shape stays open because `disambiguationResolved$` still has **zero subscribers** and
+is still called from five paths — the next reader of any of those call sites faces the same misleading
+surface.
 
 ---
 

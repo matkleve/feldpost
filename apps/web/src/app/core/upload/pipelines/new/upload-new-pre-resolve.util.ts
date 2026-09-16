@@ -200,14 +200,14 @@ function applyExifOnlyPlacement(
   deps.jobState.updateJob(jobId, buildChosenPlacementPatch(job, 'exif', exifCoords));
   const after = deps.jobState.findJob(jobId);
   if (after) {
-    uploadPlacementLog('P4', jobId, job.file.name, 'EXIF-only placement (Branch B)', {
+    uploadPlacementLog('P4', jobId, job.file.name, 'EXIF-only placement (no text address)', {
       ...summarizeJobPlacement(after),
     });
   }
 }
 
 /**
- * Phase 3–4 after orchestrator or legacy geocode: placement, source tray, EXIF-only, or Branch A.
+ * Phase 3–4 after orchestrator or legacy geocode: placement, source tray, EXIF-only, or Issues.
  * @returns held when job stops in tray or Issues
  */
 async function completePlacementAfterLocationResolve(
@@ -224,6 +224,13 @@ async function completePlacementAfterLocationResolve(
   uploadPlacementLog('P1', jobId, current.file.name, 'complete placement pass', {
     ...summarizeJobPlacement(current),
   });
+
+  if (current.textOnlyLocation) {
+    uploadPlacementLog('P0', jobId, current.file.name, 'skip — area-only precision, no geocode', {
+      titleAddress: current.titleAddress,
+    });
+    return null;
+  }
 
   if (current.coords) {
     uploadPlacementLog('P6', jobId, current.file.name, 'skip — placement already set', {
@@ -294,7 +301,7 @@ async function completePlacementAfterLocationResolve(
     return null;
   }
 
-  uploadPlacementLog('A', jobId, current.file.name, 'Branch A — no text coords, no EXIF', {
+  uploadPlacementLog('A', jobId, current.file.name, 'no placement — no text coords, no EXIF', {
     ...summarizeJobPlacement(current),
   });
   routeJobToMissingData(deps, jobId, current, ctx);

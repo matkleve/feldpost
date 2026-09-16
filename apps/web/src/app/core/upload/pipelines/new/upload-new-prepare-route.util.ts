@@ -42,7 +42,11 @@ export async function resumeIfAlreadyRoutedNewJob(
 ): Promise<boolean> {
   const job = deps.jobState.findJob(jobId)!;
 
-  if (job.coords && !job.conflictResolution && isAutoLocationEnabled(job)) {
+  if (
+    (job.coords || job.textOnlyLocation) &&
+    !job.conflictResolution &&
+    isAutoLocationEnabled(job)
+  ) {
     await runUploadPhase(jobId, job.coords, job.parsedExif, ctx);
     return true;
   }
@@ -121,7 +125,7 @@ export async function routePreparedNewJob(
   }
 
   const routedJob = deps.jobState.findJob(jobId)!;
-  if (routedJob.coords) {
+  if (routedJob.coords || routedJob.textOnlyLocation) {
     const conflicted = await runConflictCheck(deps, jobId, ctx);
     if (conflicted) {
       return;
@@ -137,7 +141,7 @@ export async function routePreparedNewJob(
   routeJobToMissingData(deps, jobId, routedJob, ctx);
 }
 
-/** Branch A — no text coords and no EXIF metadata after geocode failure. */
+/** No placement — no text coords and no EXIF metadata after geocode failure. */
 export function routeJobToMissingData(
   deps: RouteToMissingDataDeps,
   jobId: string,

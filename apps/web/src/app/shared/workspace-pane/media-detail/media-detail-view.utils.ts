@@ -90,6 +90,31 @@ export function splitOriginalFilePath(path: string | null | undefined): Original
   return { folder, filename };
 }
 
+/**
+ * Which stored value the "Original folder" / "Original file name" rows are read from.
+ *
+ * `relative_path` is the folder path the file actually arrived with, written once at upload and
+ * immutable afterwards. `original_filename` is a **leaf name**: for a directory upload it is
+ * `IMG_001.jpg` and contains no folder at all, so splitting it yields a folder only when the name
+ * happens to contain a slash. `relative_path` therefore wins whenever it carries a folder, and the
+ * filename remains the fallback for rows uploaded before this column was read.
+ * @see docs/specs/system/deferred-location-resolution.md
+ */
+export function resolveOriginalFilePathParts(
+  relativePath: string | null | undefined,
+  originalFilename: string | null | undefined,
+): OriginalFilePathParts {
+  const fromRelativePath = splitOriginalFilePath(relativePath);
+  if (fromRelativePath.folder) {
+    return fromRelativePath;
+  }
+  const fromFilename = splitOriginalFilePath(originalFilename);
+  if (fromFilename.folder || fromFilename.filename) {
+    return fromFilename;
+  }
+  return fromRelativePath;
+}
+
 export function resolveMediaTypeLabel(
   media: MediaRecord | null,
   mediaType: string | null,

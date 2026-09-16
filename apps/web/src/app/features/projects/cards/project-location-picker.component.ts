@@ -1,5 +1,5 @@
 /**
- * Minimal project ↔ location linker for upload tier-3 / Branch B bias.
+ * Minimal project ↔ location linker for upload tier-3 / `street_project_bias` bias.
  * @see docs/specs/component/project/project-location-picker.md
  */
 

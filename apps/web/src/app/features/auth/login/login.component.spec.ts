@@ -41,8 +41,13 @@ function setup(signInError: Error | null = null) {
 function fillForm(fixture: ReturnType<typeof setup>['fixture'], email: string, password: string) {
     const el: HTMLElement = fixture.nativeElement;
 
-    const emailInput = el.querySelector<HTMLInputElement>('#email')!;
-    const passwordInput = el.querySelector<HTMLInputElement>('#password')!;
+    // The template's ids are login-email / login-password. A `!` on a missing element turns a
+    // renamed id into "Cannot set properties of null" four tests deep, so fail loudly instead.
+    const emailInput = el.querySelector<HTMLInputElement>('#login-email');
+    const passwordInput = el.querySelector<HTMLInputElement>('#login-password');
+    if (!emailInput || !passwordInput) {
+      throw new Error('login form inputs not found — did the template ids change?');
+    }
 
     emailInput.value = email;
     emailInput.dispatchEvent(new Event('input'));

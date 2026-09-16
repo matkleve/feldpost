@@ -188,6 +188,8 @@ export interface TraceRunOptions {
    * `files` = plain multi-file submit, no folder context at all (Action 1).
    */
   submitMode?: 'folder' | 'files';
+  /** `archive` is the import mode for an existing archive: classify, but never open a tray. */
+  importMode?: 'interactive' | 'archive';
 }
 
 /** Submit the corpus as one webkitdirectory folder batch and let the pipeline run. */
@@ -212,7 +214,10 @@ export async function runTraceBatch(
     recorder.recordPhase(event.jobId, event.previousPhase, event.currentPhase);
   });
 
-  const submitOptions = { locationRequirementMode: options.locationRequirementMode };
+  const submitOptions = {
+    locationRequirementMode: options.locationRequirementMode,
+    importMode: options.importMode,
+  };
   const batchId =
     options.submitMode === 'files'
       ? await harness.manager.submit(

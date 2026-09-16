@@ -114,10 +114,10 @@ Jobs with the same `groupingKey` become one group. Per group,
 
 | Branch | Condition | Consequence |
 | --- | --- | --- |
-| `branch_a` | street AND (city OR postcode) | structured forward geocode |
-| `branch_b` | street, no locality, project centroid exists | biased forward geocode |
-| `branch_c` | street, no locality, no centroid | street + country geocode, then a city/house tray |
-| `metadata_only` | admin fields only, no street | no geocode, admin centroid |
+| `street_locality` | street AND (city OR postcode) | structured forward geocode |
+| `street_project_bias` | street, no locality, project centroid exists | biased forward geocode |
+| `street_only` | street, no locality, no centroid | street + country geocode, then a city/house tray |
+| `area_only` | admin fields only, no street | no geocode, admin centroid |
 | `postcode_blocked` / `incomplete` | ambiguous postcode without city, or nothing usable | `partial` |
 
 `houseNumber` is never a gate — it only sharpens a geocode that already has a street.
@@ -183,7 +183,7 @@ all three pipelines, `persistUploadFile`, and the tuning defaults.
 | Photon / Nominatim | 12-row stub gazetteer, fixed `importance` | real ranking is fuzzy; a path that auto-resolves here can open a tray in production, and the reverse |
 | Supabase | in memory | no RLS, no triggers, no constraints, no PostGIS, no `address_dedupe_key` uniqueness |
 | `get_location_by_address_components` | always misses | in production an existing `locations` row skips the geocode |
-| `list_project_locations` | empty | no project centroid, so **Branch B is never taken** |
+| `list_project_locations` | empty | no project centroid, so **`street_project_bias` is never taken** |
 | Storage | acknowledged without bytes | no latency, no 180 s timeout, no partial-upload rollback |
 | Org search tuning | defaults | an org's saved tuning changes distance gates |
 | `--answer-trays` | picks the **first** candidate every time | a real user picks the right one; coordinates past a tray are arbitrary |
@@ -294,14 +294,14 @@ Classification, 2 000 generated paths, one core:
 | per file | 9.1 ms | 8.8 ms |
 | distinct groups (= geocoder calls) | 897 | 1 359 |
 | groups needing a tray | 897 (**100 %**) | 895 (66 %) |
-| outcomes | `layer_conflict` 985, `admin_conflict` 782, `branch_c` 233, **`branch_a` 0** | `layer_conflict` 985, **`branch_a` 549**, `admin_conflict` 233, `branch_c` 233 |
+| outcomes | `layer_conflict` 985, `admin_conflict` 782, `street_only` 233, **`street_locality` 0** | `layer_conflict` 985, **`street_locality` 549**, `admin_conflict` 233, `street_only` 233 |
 
 **After the 2026-09-13 fixes**, the two columns are identical — 500 paths, 442 groups, 237 needing a
-tray (54 %), `layer_conflict` 229, `branch_a` 214, `branch_c` 57, `admin_conflict` 0, and 5.5-6.6 ms
+tray (54 %), `layer_conflict` 229, `street_locality` 214, `street_only` 57, `admin_conflict` 0, and 5.5-6.6 ms
 per file across two runs (the exact index answers before a Fuse index is built). It took three steps,
 each measured on the same 500 paths:
 
-| After | groups | trays | `branch_a` | `admin_conflict` | `layer_conflict` |
+| After | groups | trays | `street_locality` | `admin_conflict` | `layer_conflict` |
 | --- | --- | --- | --- | --- | --- |
 | filename gate (F-01) | 391 | 269 (69 %) | 129 | 53 | 261 |
 | exact before fuzzy (F-02) | 391 | 269 (69 %) | 166 | 0 | 277 |
@@ -315,7 +315,19 @@ open a `layer_package` tray asking which meaningless string was the street.
 The remaining tray load is folder shape (`layer_conflict`, F-04/F-11), not file naming. Re-run
 `--scale=2000` for figures comparable to the table above.
 
-Job store, real `UploadJobStateService`:
+**After Phase 3.2, 2026-09-15** (Fuse index cached per dataset), 2 000 paths, both naming modes:
+
+| | camera naming | neutral naming |
+| --- | --- | --- |
+| per file, before | 6.967 ms | 6.860 ms |
+| per file, after | **4.886 ms** | **4.912 ms** |
+| distinct groups | 1 483 (unchanged) | 1 483 (unchanged) |
+| groups needing a tray | 634 / 43 % (unchanged) | 634 / 43 % (unchanged) |
+
+A cost change only — the group and tray columns are identical on both sides, which is the check that
+the cache did not alter an answer.
+
+Job store, real `UploadJobStateService` — **before Phase 3.1** (`prev.map` per write):
 
 | Jobs held | `updateJob` | `findJob` | whole batch at 15 writes/job |
 | --- | --- | --- | --- |
@@ -323,6 +335,18 @@ Job store, real `UploadJobStateService`:
 | 1 000 | 0.016 ms | 0.013 ms | 0.25 s |
 | 5 000 | 0.080 ms | 0.064 ms | 6 s |
 | 20 000 | 0.573 ms | 0.383 ms | 2.9 min |
+
+**After Phase 3.1, 2026-09-15** (id-keyed `Map` + `revision` signal, same tier, same machine):
+
+| Jobs held | `updateJob` | `findJob` | whole batch at 15 writes/job |
+| --- | --- | --- | --- |
+| 100 | 0.0007 ms | 0.0001 ms | 1 ms |
+| 1 000 | 0.0007 ms | 0.0001 ms | 11 ms |
+| 5 000 | 0.0014 ms | 0.0001 ms | 106 ms |
+| 20 000 | 0.0010 ms | 0.0002 ms | 315 ms |
+
+Both operations are flat across the whole range; the job-store row of the extrapolation below is
+historical. Re-run `--scale=20000` to reproduce.
 
 Extrapolated at the measured rates — linear for classification, quadratic for the job store,
 both **optimistic** bounds:
@@ -338,18 +362,27 @@ both **optimistic** bounds:
 - **A 100 000-file folder is not viable today.** Roughly **1.5 hours of synchronous main-thread
   work** before the upload is even done starting, and about **45 000 tray questions** for the user
   to answer. Neither number is a network limit; both are local CPU and UX.
-- **Classification: ~9 ms per file, and it is the fuzzy gazetteer.**
-  `path-token-classifier.ts:86` constructs `new Fuse(items, …)` **per candidate token**, then
-  searches 2 114 municipalities with `threshold: 0.4` over two keys. Measured separately: building
-  the index costs 1.06 ms, the search itself 2.75 ms. So caching the index buys ~30 %; the rest is
-  the fuzzy search, and a normalized exact-match map consulted before Fuse would remove it for the
-  overwhelming majority of tokens (a folder segment is usually either exactly a municipality or
-  nowhere near one).
-- **Job store: `O(n)` per write, so `O(n²)` per batch.**
-  `upload-job-state.service.ts:126` is `this._jobs.update((prev) => prev.map(...))` — every single
-  field write allocates a fresh array of every job in the batch, and `findJob` at :122 is a linear
-  scan. At 20 000 jobs one write already costs 0.57 ms. An id-keyed `Map` (or a per-job signal)
-  makes both `O(1)` and is the single highest-leverage change for large batches.
+- **Classification: the fuzzy gazetteer — was ~9 ms per file, now ~4.9 ms.**
+  `classifyWithFuse` used to construct `new Fuse(items, …)` **per candidate token**, then search
+  2 114 municipalities with `threshold: 0.4` over two keys. Measured separately: building the index
+  cost 1.06 ms, the search itself 2.75 ms, so the prediction was that caching the index buys ~30 %.
+  Both halves have since landed — the normalized exact-match map consulted **before** Fuse (F-02,
+  which is a correctness rule first: `Wien` fuzzy-matched `Schottwien` at 0.992) and, in Phase 3.2,
+  the Fuse index memoized per dataset. Measured effect of the latter: **−29 %**, as predicted.
+  Contract in the
+  [gazetteer lookup supplement](../specs/service/media-upload-service/upload-search-object.gazetteer-lookup.supplement.md).
+  What is left is the fuzzy search itself, which is inherent; only a narrower candidate set removes
+  it.
+- **Job store: ~~`O(n)` per write, so `O(n²)` per batch~~ — fixed 2026-09-15.**
+  `upload-job-state.service.ts` used to be `this._jobs.update((prev) => prev.map(...))`, so every
+  single field write allocated a fresh array of every job in the batch, and `findJob` was a linear
+  scan; at 20 000 jobs one write cost 0.57 ms. It is now an id-keyed `Map` behind a `revision`
+  signal, with `jobs` as a `computed` projection — both operations `O(1)`, the array built once per
+  notified read instead of once per write. Guarantees in the
+  [job store supplement](../specs/service/media-upload-service/upload-manager.job-store.supplement.md);
+  measured effect in the table above and in
+  [F-07](../study/005-upload-pipeline-trace-findings.md#f-07). The extrapolation table's job-store
+  column predates this and is left as the historical record.
 - **Chunk the batch, or move classification off the main thread.** Even with both hot spots fixed,
   classification is inherently per-file work; a company-scale import wants it batched into chunks
   that yield to the event loop, or moved to a worker, so the panel stays responsive and uploads
@@ -357,7 +390,7 @@ both **optimistic** bounds:
 - **The tray count is the harder problem.** 45 000 questions cannot be answered one at a time.
   The layer/admin trays already merge by conflict signature — at scale the largest group covered
   549 files with one question — but with camera file names **every** group needs a question. Fixing
-  the file-name postcode classification alone moves 27 % of the corpus to `branch_a` (no question),
+  the file-name postcode classification alone moves 27 % of the corpus to `street_locality` (no question),
   which is the cheapest available win.
 
 ### What the scale tier does not measure

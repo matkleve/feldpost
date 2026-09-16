@@ -87,6 +87,24 @@ export async function finalizeNewUploadPhase(args: FinalizeNewUploadPhaseArgs): 
     return;
   }
 
+  // Area-only precision has no coordinates by design — forward-geocoding the area label (e.g.
+  // "Wien") would either find nothing or silently invent a point the folder never claimed.
+  // @see docs/study/005-upload-pipeline-trace-findings.md#f-19
+  if (updatedJob.textOnlyLocation) {
+    setPhase('complete');
+    markDone();
+    emitCompletion({
+      jobId,
+      finalJob: updatedJob,
+      setLocalUrl,
+      persistThumbnail,
+      emitImageUploaded,
+      emitBatchProgress,
+      drainQueue,
+    });
+    return;
+  }
+
   const titleAddress = updatedJob.titleAddress?.trim();
   const textPlacement = usesTextPlacementSource(updatedJob) && !!titleAddress;
   const exifCoords = exifMetadataCoords(updatedJob);

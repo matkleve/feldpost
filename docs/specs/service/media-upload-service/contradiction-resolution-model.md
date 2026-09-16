@@ -58,12 +58,16 @@ Every tray scenario maps to exactly one contradiction class. The class determine
 | **C4** | Folder-to-folder sibling | Sibling folders disagree on an area field shared by a common child (e.g. `Wien/` and `St. Pölten/` both contain `1200/Straße`) | Gazetteer containment check after C3 resolution | `admin_level_conflict` (cascading) | "Postcode 1200 is in Wien. Is that correct for these files?" | **Gap G1** |
 | **C5** | Placement vs project anchor | Resolved coords far from org project GPS reference | `contextDistanceMaxMeters` (org km cap) | *(deferred — no `disambiguationKind`)* | "Is this photo in the right project area?" | **Distance filter only** — tray deferred indefinitely; see [Deferred backlog](#deferred-backlog-not-in-active-acceptance-criteria) |
 
+**C3 pre-check (D-11, gap G6):** before opening a `city`-vs-`city` C3 tray, one corroborating geocode
+query can resolve it without asking — see
+[C3 street-corroboration supplement](./contradiction-resolution-model.c3-street-corroboration.supplement.md).
+
 ### Class A — Ambiguity (one source, multiple valid interpretations)
 
 | ID | Phenomenon | Source | Detector | `disambiguationKind` | Question | Impl |
 | --- | --- | --- | --- | --- | --- | --- |
 | **A1** | Street exists in N cities | Photon multi-hit, discriminating field differs | `pickDiscriminatingField` | `city_step` / `geocode` | "Which city is {street} in?" | **Done** |
-| **A2** | Street found, house number missing | Incomplete Search Object (no `houseNumber`) | Branch C step 5c | `house_step` | "What's the door number for {street}?" | **Done** |
+| **A2** | Street found, house number missing | Incomplete Search Object (no `houseNumber`) | `street_only` step 5c | `house_step` | "What's the door number for {street}?" | **Done** |
 
 ### Class V — Validation failure (post-resolution inconsistency)
 
@@ -157,6 +161,8 @@ This gate prevents the system from silently pushing a user's city choice through
 | **G3** | Post-resolution validation gate | After admin conflict resolution, Photon 0-hit on resolved `(street, city)` opens `containment_check` tray (`patchContainmentCheckOutcome`) instead of silent `partial`. | V1 | **Done** |
 | **G4** | Deferred resolution lifecycle | Skip must set an explicit `deferred` status that persists through upload and is actionable in Media Detail | Deferred contract | Medium |
 | **G5** | Cross-batch dedup for admin conflicts | Same `(field, conflicting-value-set)` across batches must reuse/merge, not open duplicate trays | Already documented in `address-resolution-model.md` | Medium |
+| **G6** | C3 pre-check: street corroboration | Query the conflicting street bare before opening a `city`-vs-`city` C3 tray; auto-resolve on a clean one-city split, still ask otherwise. [D-11](../../../study/006-upload-pipeline-correction-plan.md#d-11) | [C3 street-corroboration supplement](./contradiction-resolution-model.c3-street-corroboration.supplement.md) | **Done** |
+| **G7** | Answering a cross-field conflict | A tray answer must be authoritative for the fields it implies (drop contradicting evidence, re-derive via `city→state`), and a signature already asked must never be asked again. Answering must also re-queue the job. [D-12](../../../study/006-upload-pipeline-correction-plan.md#d-12) | [cross-field answers supplement](./contradiction-resolution-model.cross-field-answers.supplement.md) | **Done** |
 
 ---
 

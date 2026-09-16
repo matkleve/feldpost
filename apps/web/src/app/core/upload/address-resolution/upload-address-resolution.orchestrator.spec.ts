@@ -204,7 +204,7 @@ describe('UploadAddressResolutionOrchestrator — admin level conflicts', () => 
     expect(geocodeState?.resolvedFromAdminConflict).toBe(true);
   });
 
-  it('integrateResolvedAdminGroups sets resolvedFromAdminConflict on branch_c groups', async () => {
+  it('integrateResolvedAdminGroups sets resolvedFromAdminConflict on resolved groups', async () => {
     jobState.addJobs([buildJob()]);
     await orchestrator.classifyBatch('batch-admin');
 

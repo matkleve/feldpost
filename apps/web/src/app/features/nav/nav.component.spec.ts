@@ -110,15 +110,21 @@ describe('NavComponent', () => {
   it('renders three primary nav items plus settings row', () => {
     const fixture = TestBed.createComponent(NavComponent);
     fixture.detectChanges();
+    // Scoped to the nav list: the header row and the account row also carry .nav__link.
     const links = Array.from<HTMLElement>(
-      fixture.nativeElement.querySelectorAll('.nav__link:not(.nav__link--disabled)'),
+      fixture.nativeElement.querySelectorAll('.nav__list .nav__link:not(.nav__link--disabled)'),
     );
 
     const hrefs = Array.from<HTMLAnchorElement>(
       fixture.nativeElement.querySelectorAll('a.nav__link'),
     ).map((link) => link.getAttribute('href'));
 
-    expect(links.length).toBe(4);
+    // Derived from the component's own list: a hardcoded count silently rots every time a nav
+    // item is added, which is exactly how this test came to assert 4 against a nav of 5.
+    const expectedEnabled = fixture.componentInstance
+      .navItems()
+      .filter((item) => !item.disabled).length;
+    expect(links.length).toBe(expectedEnabled);
     expect(hrefs).toContain('/projects');
   });
 
@@ -255,11 +261,13 @@ describe('NavComponent', () => {
   it('icons are rendered as span.material-icons elements', () => {
     const fixture = TestBed.createComponent(NavComponent);
     fixture.detectChanges();
+    // Scoped to the nav list: the header's collapse button also carries .nav__icon.material-icons,
+    // so an unscoped selector counts chrome as nav items.
     const icons = Array.from<HTMLElement>(
-      fixture.nativeElement.querySelectorAll('.nav__icon.material-icons'),
+      fixture.nativeElement.querySelectorAll('.nav__list .nav__icon.material-icons'),
     );
     // One icon per primary nav item.
-    expect(icons.length).toBe(3);
+    expect(icons.length).toBe(fixture.componentInstance.navItems().length);
     // Icon text content matches a Material Icon name (no emoji).
     const firstIcon = icons[0];
     expect(firstIcon.textContent?.trim()).toBe('map');
@@ -268,9 +276,11 @@ describe('NavComponent', () => {
   it('each nav row has a .nav__label element for the expand animation', () => {
     const fixture = TestBed.createComponent(NavComponent);
     fixture.detectChanges();
-    const labels = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.nav__label'));
-    // 3 primary nav rows + avatar settings row.
-    expect(labels.length).toBe(4);
+    // Scoped to the nav list; the header and account rows carry their own labels.
+    const labels = Array.from<HTMLElement>(
+      fixture.nativeElement.querySelectorAll('.nav__list .nav__label'),
+    );
+    expect(labels.length).toBe(fixture.componentInstance.navItems().length);
   });
 
   it('sidebar container has .sidebar__panel class', () => {
@@ -290,7 +300,7 @@ describe('NavComponent', () => {
       ),
     );
 
-    expect(rowLinks.length).toBe(4);
+    expect(rowLinks.length).toBe(fixture.componentInstance.navItems().length);
 
     for (const rowLink of rowLinks) {
       expect(rowLink.children.length).toBe(2);
@@ -303,11 +313,16 @@ describe('NavComponent', () => {
     const fixture = TestBed.createComponent(NavComponent);
     fixture.detectChanges();
 
+    // The account row sits below the spacer rather than inside .nav__list — it is pinned to the
+    // bottom of the sidebar by design. What this test is about is that it reuses the shared row
+    // shell (sidebar__item + nav__link) instead of a bespoke avatar slot, so assert that.
     const accountItem = fixture.nativeElement.querySelector(
-      '.nav__list > .sidebar__item--account',
+      '.sidebar__item--account',
     ) as HTMLElement | null;
 
     expect(accountItem).not.toBeNull();
+    expect(accountItem?.classList.contains('sidebar__item')).toBe(true);
+    expect(accountItem?.querySelector('.nav__link')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('.sidebar__avatar-slot')).toBeNull();
   });
 
@@ -402,6 +417,9 @@ describe('NavComponent', () => {
     expect(invalidateMapSize).not.toHaveBeenCalled();
 
     fixture.componentInstance.toggleCollapse();
+    // The invalidation runs from an effect() on sidebarCollapsed, which Angular schedules rather
+    // than running inline — without flushing change detection the assertion races it.
+    fixture.detectChanges();
 
     expect(invalidateMapSize).toHaveBeenCalled();
   });

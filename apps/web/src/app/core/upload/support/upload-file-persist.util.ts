@@ -235,11 +235,13 @@ async function insertUploadMediaRow(args: {
     return { error: 'Upload cancelled by user.' };
   }
 
-  if (finalCoords) {
+  // Area-only precision has no coordinates by design — the text address is still worth
+  // persisting (F-19), so this fires on text address alone, not just on coords.
+  if (finalCoords || addressContext?.hasEstablishedTextAddress) {
     resolveUploadAddress({
       mediaItemId: mediaRow.id as string,
-      lat: finalCoords.lat,
-      lng: finalCoords.lng,
+      lat: finalCoords?.lat,
+      lng: finalCoords?.lng,
       geocoding: deps.geocoding,
       supabaseClient: deps.supabaseClient,
       describePersistError: describeUploadPersistError,

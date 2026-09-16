@@ -38,7 +38,7 @@ export function patchAmbiguousGeocodeOutcome(
     config.unitGeocodeSplitMinMeters,
   );
   uploadTraceDecision('geocode', 'ambiguous — register tray', {
-    trayStep: group.geocodeBranch === 'branch_c' ? '1a' : '3',
+    trayStep: group.geocodeBranch === 'street_only' ? '1a' : '3',
     candidateCount: candidates.length,
     unitPhotonSplit: unitSplit,
   });
@@ -47,7 +47,7 @@ export function patchAmbiguousGeocodeOutcome(
     ...group,
     status: 'ambiguous',
     candidates,
-    trayStep: group.geocodeBranch === 'branch_c' ? '1a' : '3',
+    trayStep: group.geocodeBranch === 'street_only' ? '1a' : '3',
     discriminatingField: discriminatingField ?? undefined,
   };
   orchestrator.patchGroupState(batchId, ambiguous);
@@ -94,7 +94,7 @@ export function patchContainmentCheckOutcome(
 ): UploadGroupResolutionState {
   const street = group.searchObject.street?.trim() ?? '';
   const city = group.searchObject.city?.trim() ?? '';
-  uploadTraceDecision('geocode', 'containment_check — Branch A 0-hit after admin resolution', {
+  uploadTraceDecision('geocode', 'containment_check — `street_locality` 0-hit after admin resolution', {
     street,
     city,
   });

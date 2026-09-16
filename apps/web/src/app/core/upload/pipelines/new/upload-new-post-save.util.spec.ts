@@ -97,6 +97,31 @@ describe('finalizeNewUploadPhase', () => {
     expect(job.titleAddressCoords).toEqual({ lat: 48.20820005, lng: 16.37380005 });
     expect(job.locationMismatchMeters).toBeUndefined();
   });
+
+  it('completes an area-only job without attempting a forward geocode of the area label', async () => {
+    // @see docs/study/005-upload-pipeline-trace-findings.md#f-19
+    const phases: string[] = [];
+    const enrichWithForwardGeocode = vi.fn();
+    let job = createJob({
+      titleAddress: 'Niederösterreich, AT',
+      locationSourceUsed: 'folder',
+      textOnlyLocation: true,
+      coords: undefined,
+    });
+
+    await runFinalize(
+      job,
+      (next) => {
+        job = next;
+      },
+      { setPhase: (phase) => phases.push(phase), enrichWithForwardGeocode },
+    );
+
+    expect(enrichWithForwardGeocode).not.toHaveBeenCalled();
+    expect(phases).toEqual(['complete']);
+    expect(job.coords).toBeUndefined();
+    expect(job.issueKind).toBeUndefined();
+  });
 });
 
 function createJobWithMismatch(): UploadJob {

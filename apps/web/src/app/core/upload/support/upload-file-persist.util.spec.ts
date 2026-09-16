@@ -73,4 +73,46 @@ describe('persistUploadFile', () => {
     expect(result.error).toBeNull();
     expect(storageRemove).not.toHaveBeenCalled();
   });
+
+  it('persists a text-only location with no coordinates for an area-only precision result', async () => {
+    // @see docs/study/005-upload-pipeline-trace-findings.md#f-19
+    const { deps } = buildDeps();
+    const rpc = vi.fn().mockResolvedValue({ data: true, error: null });
+    (deps.supabaseClient as unknown as { rpc: typeof rpc }).rpc = rpc;
+
+    const result = await persistUploadFile(
+      {
+        file: makeFile(),
+        addressContext: {
+          hasEstablishedTextAddress: true,
+          fields: {
+            country: 'AT',
+            state: 'Niederösterreich',
+            postcode: null,
+            city: null,
+            street: null,
+            houseNumber: null,
+          },
+          precision: 'state',
+          addressLabel: 'Niederösterreich, AT',
+        },
+      },
+      deps,
+    );
+
+    expect(result.error).toBeNull();
+    // resolveUploadAddress fires and forgets — flush the microtask queue.
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(rpc).toHaveBeenCalledWith(
+      'resolve_media_location',
+      expect.objectContaining({
+        p_media_item_id: 'media-1',
+        p_latitude: null,
+        p_longitude: null,
+        p_address_label: 'Niederösterreich, AT',
+        p_address_precision: 'state',
+      }),
+    );
+  });
 });

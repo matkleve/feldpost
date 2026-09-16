@@ -15,6 +15,9 @@ interface MediaItemRow {
   storage_path: string | null;
   thumbnail_path: string | null;
   original_filename?: string | null;
+  /** Folder path from the upload scan; immutable after insert. `exif_raw` is deliberately not
+   * selected in list queries — it is a jsonb blob and belongs to the single-row detail read. */
+  relative_path?: string | null;
   latitude: number | null;
   longitude: number | null;
   exif_latitude: number | null;
@@ -39,6 +42,8 @@ interface MediaGalleryDbRow {
   storage_path: string | null;
   thumbnail_path: string | null;
   original_filename?: string | null;
+  /** Folder path from the upload scan; immutable after insert. */
+  relative_path?: string | null;
   preview_generation_status?: string | null;
   latitude: number | string | null;
   longitude: number | string | null;
@@ -120,7 +125,7 @@ export class MediaQueryService {
       const { data, error } = await this.supabase.client
         .from('media_items')
         .select(
-          'id, organization_id, created_by, storage_path, thumbnail_path, original_filename, preview_generation_status, exif_latitude, exif_longitude, captured_at, created_at, location_status, source_image_id',
+          'id, organization_id, created_by, storage_path, thumbnail_path, original_filename, relative_path, preview_generation_status, exif_latitude, exif_longitude, captured_at, created_at, location_status, source_image_id',
         )
         .order('created_at', { ascending: false })
         .range(offset, offset + MediaQueryService.GALLERY_PAGE_SIZE - 1);
@@ -249,7 +254,7 @@ export class MediaQueryService {
     const { data, error } = await this.supabase.client
       .from('media_items')
       .select(
-        'id, organization_id, created_by, storage_path, thumbnail_path, original_filename, exif_latitude, exif_longitude, captured_at, created_at, location_status',
+        'id, organization_id, created_by, storage_path, thumbnail_path, original_filename, relative_path, exif_latitude, exif_longitude, captured_at, created_at, location_status',
       )
       .range(offset, offset + limit - 1)
       .order('created_at', { ascending: false });
@@ -321,6 +326,7 @@ export class MediaQueryService {
       storage_path: row.storage_path,
       thumbnail_path: row.thumbnail_path,
       original_filename: row.original_filename ?? null,
+      relative_path: row.relative_path ?? null,
       latitude: row.latitude,
       longitude: row.longitude,
       exif_latitude: row.exif_latitude,

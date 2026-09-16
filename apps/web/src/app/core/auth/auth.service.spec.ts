@@ -196,15 +196,33 @@ describe('AuthService', () => {
 
     it('does not call signUp when Web Crypto is unavailable (fail closed)', async () => {
       const { service, fakeSupabase } = setup();
-      const cryptoRef = globalThis.crypto as Crypto & { subtle?: SubtleCrypto };
-      const savedSubtle = cryptoRef.subtle;
-      Object.assign(cryptoRef, { subtle: undefined });
+      // `crypto.subtle` is an accessor with no setter on a real `Crypto`, so `Object.assign`
+      // (a [[Set]]) throws "Cannot set property subtle ... which has only a getter" whenever an
+      // earlier file in the same worker has installed the real implementation. Replace the whole
+      // `crypto` binding instead, which is configurable, and put the original back afterwards.
+      const savedCrypto = globalThis.crypto;
+      // Delegate the rest rather than spreading: `getRandomValues` / `randomUUID` live on the
+      // prototype, so a spread would silently drop them.
+      Object.defineProperty(globalThis, 'crypto', {
+        value: {
+          subtle: undefined,
+          getRandomValues: (array: Parameters<Crypto['getRandomValues']>[0]) =>
+            savedCrypto.getRandomValues(array),
+          randomUUID: () => savedCrypto.randomUUID(),
+        },
+        configurable: true,
+        writable: true,
+      });
       try {
         const result = await service.signUp('a@b.com', 'pass', 'Bob', 'ab'.repeat(24));
         expect(result.error?.message).toMatch(/Secure hashing|hashing failed/i);
         expect(fakeSupabase.client.auth.signUp).not.toHaveBeenCalled();
       } finally {
-        Object.assign(cryptoRef, { subtle: savedSubtle });
+        Object.defineProperty(globalThis, 'crypto', {
+          value: savedCrypto,
+          configurable: true,
+          writable: true,
+        });
       }
     });
 

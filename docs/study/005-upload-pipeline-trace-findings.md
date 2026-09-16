@@ -41,10 +41,10 @@ spec-level — the spec says what the code does, so a fix needs a contract decis
 | [F-02](#f-02) | ~~`Wien` resolves to the municipality `Schottwien`~~ **fixed** | High | Data + code |
 | [F-03](#f-03) | ~~City classification requires an explicit country segment in the path~~ **fixed** | High | **Spec** |
 | [F-04](#f-04) | ~~Ordinary file names form competing street-level layer packages~~ **fixed** | Medium | Code |
-| [F-05](#f-05) | `locationRequirementMode: 'optional'` does not skip the address pipeline | Medium | **Spec** ↔ code |
-| [F-06](#f-06) | Classification costs ~9 ms/file and blocks the first upload | High | Code |
-| [F-07](#f-07) | The job store is `O(n)` per write, so a batch is `O(n²)` | High | Code |
-| [F-08](#f-08) | Tray volume scales linearly with the file count | High | **Spec** (product) |
+| [F-05](#f-05) | ~~`locationRequirementMode: 'optional'` does not skip the address pipeline~~ **fixed** | Medium | **Spec** ↔ code |
+| [F-06](#f-06) | ~~Classification costs ~9 ms/file and blocks the first upload~~ — cost cut 29 %, blocking **fixed** (chunked) | High | Code |
+| [F-07](#f-07) | ~~The job store is `O(n)` per write, so a batch is `O(n²)`~~ **fixed** | High | Code |
+| [F-08](#f-08) | Tray volume scales linearly with the file count — **addressed for imports** (archive mode), open for interactive batches | High | **Spec** (product) |
 | [F-09](#f-09) | The `test` gate compiles nothing, so it runs no specs | Medium | Repo |
 | [F-10](#f-10) | Two gate debt notes state numbers that no longer match | Low | Repo |
 | [F-11](#f-11) | ~~A meaningless folder segment outranks a valid address in the file name~~ **fixed** | High | Code |
@@ -55,7 +55,10 @@ spec-level — the spec says what the code does, so a fix needs a contract decis
 | [F-16](#f-16) | ~~One held job in a resolved group holds every job in it, and stops the rest being placed~~ **fixed** | High | Code |
 | [F-17](#f-17) | A parked job keeps its content-hash reservation, so a later identical file is skipped as a duplicate of a file that was never uploaded | High | Code |
 | [F-18](#f-18) | ~~The shipped postcode table is a 21-row stub, and Wien was missing from the gazetteer~~ **gazetteer fixed; postcode table open** | High | Data |
-| [F-19](#f-19) | A path that names only an area ends in Issues; the spec claims an area centroid is stored, and the code stores nothing | High | **Spec** ↔ code |
+| [F-19](#f-19) | ~~A path that names only an area ends in Issues; the spec claims an area centroid is stored, and the code stores nothing~~ **fixed** | High | **Spec** ↔ code |
+| [F-20](#f-20) | ~~Choosing "Keep" on a `containment_check` tray never resumes the job — it sits forever, looking like it's waiting on the user when nothing is~~ **fixed** | High | Code |
+| [F-21](#f-21) | ~~An `admin_level_conflict` between **two different fields** (`city` ⊥ `state`) can never be answered: every option re-opens the same question, forever~~ **fixed** | High | Code |
+| [F-22](#f-22) | ~~Answering a `layer_package` or `admin_level_conflict` tray places the job but never returns it to the queue — it stays "Active" forever~~ **fixed** | High | Code |
 
 ---
 
@@ -264,6 +267,33 @@ Only the per-job geocode step reads the mode, at `upload-new-pre-resolve.util.ts
 listed as Medium because the flat multi-file path (`submit`) does behave as intended — 150 files
 uploaded 142 rows and skipped 8 duplicates with no questions. `[A]`
 
+**Owner decision, 2026-09-15 — the toggle wins.** *"clearly if the button says Upload without
+Location it should be entered."* `optional` must skip the address pipeline outright, and the raw
+evidence must stay on the item so a person can resolve it afterwards. Contract:
+[deferred-location-resolution](../specs/system/deferred-location-resolution.md).
+
+**Fixed 2026-09-16** (Phase 2.3). `enqueueAndClassifyInChunks` skips classification entirely when
+every job in the batch carries `locationRequirementMode: 'optional'`, so no layer package, no area
+conflict, no geocode and no tray is produced. The spec's trigger matrix already said "Skip
+pipeline"; the code now agrees with it, so the divergence is closed by moving the code, not the
+spec. `[A]`
+
+**Measured**, harness run C, same corpus: **0 files parked in `awaiting_disambiguation`** (was 13 of
+15), 20 of 21 reaching `complete` — the 21st is the deliberate duplicate. The run now *asserts*
+zero parked rather than reporting the count. `[B]`
+
+Evidence is untouched by the skip: `relative_path`, `original_filename`, `exif_raw`,
+`exif_latitude`/`exif_longitude` and `captured_at` are written at insert regardless of the mode, and
+are now read back, so a skipped upload can be resolved afterwards — that is what
+[deferred-location-resolution](../specs/system/deferred-location-resolution.md) is for.
+
+Worth recording, because it shrank the work: **the retention half already existed.** `relative_path`,
+`original_filename`, `exif_latitude`/`exif_longitude`, `exif_raw` and `captured_at` are all written
+at insert (`upload-file-persist.util.ts:199-213`) and made immutable by
+`prevent_media_items_raw_source_overwrite`. `[A]` What is missing is (a) honouring the skip,
+(b) selecting `relative_path` / `exif_raw` in the read model — the same gap that blocks
+[files-page](../specs/page/files-page.md) — and (c) the resolve-later actions, single and batch.
+
 ---
 
 ### F-06 · Classification costs ~9 ms per file and blocks the first upload {#f-06}
@@ -284,6 +314,32 @@ work is synchronous on the main thread.
 
 **Extrapolated** at the measured rate, linear, the optimistic bound: 1.5 min at 10 000 files,
 **15 min at 100 000**, 2.5 h at 1 000 000. `[C]`
+
+**Partial fix, 2026-09-15** (STUDY-006 Phase 3.2, spec:
+[gazetteer lookup supplement](../specs/service/media-upload-service/upload-search-object.gazetteer-lookup.supplement.md)).
+The Fuse index is now built **once per dataset** in a `WeakMap` keyed by the array, the same
+memoization the exact index already had, instead of once per candidate token. Measured on 2 000
+generated paths, both naming modes: **6.97 / 6.86 → 4.89 / 4.91 ms per file**, a **29 %** drop — the
+share the separate 1.06 ms-build / 2.75 ms-search measurement above predicted. Groups (1 483) and
+tray count (634) are identical before and after. `[B]`
+
+**Second fix, 2026-09-15** (Phase 3.3, spec:
+[chunked classification supplement](../specs/service/media-upload-service/upload-manager-pipeline.chunked-classification.supplement.md)).
+The finding's *other* half — that the cost is paid before anything uploads — is now addressed.
+Classification runs in chunks that yield to the event loop; each chunk's jobs are added, classified
+and drained before the next begins, so uploading starts after the first chunk instead of after the
+whole tree. Tray *presentation* is held until the batch finishes classifying, which is what stops a
+split group from asking its question twice
+([STUDY-008](./008-classification-chunking-strategy.md)). `[A]`
+
+Outcome is unchanged, which is the acceptance criterion: identical lanes, identical group count
+(402) and identical tray answers by kind, chunked versus not. `[B]`
+
+**Still open.** The fuzzy search itself is the remaining per-file cost and is inherent to the lookup;
+only a narrower candidate set would remove it. And **no wall-clock time-to-first-upload figure is
+claimed**: the ordering is proven by test, but the harness's `--scale` tier measures classification
+and the job store, not a full pipeline drain, so how much sooner the first byte moves in a browser
+is unmeasured. `[D]`
 
 ---
 
@@ -309,6 +365,27 @@ complete new-upload run. `[A]`
 **Extrapolated:** ~43 s of pure job-store work for 10 000 files, **~72 min for 100 000**. `[C]`
 Superlinear in practice (allocation and GC), so linear extrapolation understates it.
 
+**Fix, 2026-09-15** (STUDY-006 Phase 3.1, spec:
+[job store supplement](../specs/service/media-upload-service/upload-manager.job-store.supplement.md)).
+The store is an id-keyed `Map` plus a `revision` signal; the public `jobs` array is a `computed` over
+it, so reads and writes are `O(1)` and only the array projection is `O(n)`, once per notified read
+rather than once per write. Insertion order is preserved (`Map` iteration order), so every existing
+consumer that treats `jobs()` as batch order is unaffected.
+
+**Measured on the same harness tier, before and after:** `[B]`
+
+| Jobs held | `updateJob` before → after | `findJob` before → after | whole batch (15 writes/job) |
+| --- | --- | --- | --- |
+| 100 | 0.0029 → **0.0007 ms** | 0.0023 → **0.0001 ms** | 4 ms → **1 ms** |
+| 1 000 | 0.0148 → **0.0007 ms** | 0.0154 → **0.0001 ms** | 222 ms → **11 ms** |
+| 5 000 | 0.0972 → **0.0014 ms** | 0.0666 → **0.0001 ms** | 7.3 s → **106 ms** |
+| 20 000 | 0.9448 → **0.0010 ms** | 0.3569 → **0.0002 ms** | 4.7 min → **315 ms** |
+
+Both operations are now flat across a 200× range in batch size, which is the acceptance criterion
+STUDY-006 Phase 3.1 set. The trace harness reports identical lanes before and after
+(`Issues=1 Uploaded=16 Waiting for user=4` on the curated corpus, `Skipped=1 Uploaded=20` on the
+generated one), so the rewrite is a cost change and not a behaviour change. `[B]`
+
 ---
 
 ### F-08 · Tray volume scales linearly with the file count {#f-08}
@@ -324,6 +401,20 @@ file naming **every** group needs a question, because [F-01](#f-01) puts every f
 45 000 questions. The trays were designed for a batch; a database import needs a different mode —
 answer-once-per-folder, defer-all-and-fix-later, or import without location and resolve afterwards.
 That is a decision, not a bug fix; see [STUDY-006](./006-upload-pipeline-correction-plan.md) D-04.
+
+**Addressed 2026-09-16** (Phase 4, D-04 option A: a distinct
+[archive import mode](../specs/service/media-upload-service/upload-archive-import-mode.md)).
+Classification still runs — every silent resolution is a question never asked — but **no
+disambiguation group is registered**, so nothing parks for an answer and everything unresolved goes
+to Issues as `address_deferred`, to be cleared a folder at a time afterwards.
+
+**Measured**, harness run D on the curated corpus (21 files): **0 tray questions**, 16 resolved and
+uploaded silently, 4 deferred. `[B]` The interactive run places 19 of the same corpus but asks 7
+questions to do it. The finding's arithmetic is unchanged — this mode does not make 45 000 questions
+cheaper, it stops asking them.
+
+**Still open:** the tray volume of the *interactive* mode is what it was. This finding is addressed
+for imports, not removed for batches.
 
 ---
 
@@ -395,6 +486,45 @@ in some orders. So:
 `scripts/verify.mjs` now clears that cache before the test check, so the count is reproducible. That
 makes the measurement trustworthy; it does **not** fix the pollution — tracked as
 [STUDY-006](./006-upload-pipeline-correction-plan.md) Phase 0.4b.
+
+---
+
+**Correction, 2026-09-16 — most of these are not pollution at all.** `[A]`
+
+Phase 0.4b began from this finding's premise, that "14 files pass in isolation and fail in a full
+run". Checking it file by file under `ng test` shows the premise is wrong for almost all of them.
+Of the nine files failing at the time of writing, **eight fail on their own**, with no other spec in
+the run:
+
+| File | Alone | Verdict |
+| --- | --- | --- |
+| `nav.component.spec.ts` | 6 failed | asserts 4 nav items; the component has had **5** since before this branch |
+| `login.component.spec.ts` | 4 failed | always fails |
+| `register.component.spec.ts` | 1 failed | always fails |
+| `media-detail-view.ui.spec.ts` | 3 failed | always fails |
+| `media-detail-view.component.spec.ts` | 1 failed | always fails |
+| `media-detail-view.replace-photo.spec.ts` | 1 failed | always fails |
+| `media-detail-delete.helper.spec.ts` | 1 failed | always fails |
+| `settings-overlay.component.spec.ts` | 1 failed | incomplete stubs — **fixed 2026-09-16** |
+| `supabase-runtime-config.spec.ts` | whole suite | `vi.mock` on a relative import — **fixed 2026-09-16** |
+| `upload.service.spec.ts` | **passes** (46) | the one genuine order-dependent case |
+
+`nav.component.spec.ts` and `media-detail-view.component.spec.ts` carry **zero commits on this
+branch**, and `origin/main` already ships five nav routes against the test's four `[A]` — so these
+are stale tests that predate this work entirely.
+
+Two runners give the same answer, too: `nav` and `login` fail with identical counts under plain
+`npx vitest run` and under `ng test` `[A]`, so this is not [F-13](#f-13)'s configuration split
+either.
+
+**What this means.** The "order-dependent pollution" framing has been acting as a bucket that
+ordinary broken tests fell into and stopped being read. The order-dependence in the table above is
+real — it decides *which* subset is reported on a given run — but the failures themselves are mostly
+static. Only `upload.service.spec.ts` (≈5 assertions, mocked `exifr.gps` returning `undefined`)
+behaves the way the whole group was assumed to.
+
+The likely origin of the wrong premise is that "passes in isolation" was measured with
+`npx vitest run <file>` at a time when that did differ, and never re-checked as the specs drifted.
 
 **What the polluter is not.** `core/upload/upload.service.spec.ts` fails because its mocked
 `exifr.gps` returns `undefined`, so the 5 assertions that read EXIF values fail. `[A]` Ruled out by
@@ -706,35 +836,201 @@ carry the rest — a postcode that is a whole folder segment is accepted without
 
 ### F-19 · A path that names only an area ends in Issues, and the spec says otherwise {#f-19}
 
-**What happens.** `[A]` Three scenarios added on 2026-09-13 to measure the owner's case — a folder that
-names a place and nothing else:
+**What happened.** `[A]` Three scenarios added on 2026-09-13 to measure the owner's case — a folder
+that names a place and nothing else — all ended the same way before the fix:
 
-| Scenario | Search Object | Group | Job |
+| Scenario | Search Object | Group | Job (before) |
 | --- | --- | --- | --- |
 | S19 `Wien/IMG_1101.jpg` | `country=AT state=Wien city=Wien` | `partial` / `metadata_only` | **`missing_data`**, `missing_gps`, Issues |
 | S20 `Wien/1090/IMG_1102.jpg` | `+ postcode=1090` | `partial` / `metadata_only` | **`missing_data`**, Issues |
-| S21 `AT/Niederösterreich/IMG_1103.jpg` | `country=AT state=Niederösterreich` | **no group at all** (`groupingKey` is empty on the job) | **`missing_data`**, Issues |
+| S21 `AT/Niederösterreich/IMG_1103.jpg` | `country=AT state=Niederösterreich` | never reached grouping — `isSearchObjectMeaningless` dropped it | **`missing_data`**, Issues |
 
-No `locations` row, no coordinates, nothing searchable. The photo is parked for a human even though
-the path said, unambiguously, where it is.
+No `locations` row, no coordinates, nothing searchable, even though the path said unambiguously
+where the photo is.
 
-**What the spec says.** `upload-search-object.md` § Completeness: "**Below street** | area fields only |
-none (**area centroid stored**) | none". `[A]` The centroid is never stored — and per the owner's
-decision on 2026-09-13 it should not be: an area gets **no coordinates at all**, only its text and
-`address_precision`. So both the code and that spec row are wrong, in opposite directions.
+**What the spec said.** `upload-search-object.md` § Completeness used to say: "**Below street** | area
+fields only | none (**area centroid stored**) | none". `[A]` The centroid was never stored — and per
+the owner's decision on 2026-09-12 it should not be: an area gets **no coordinates at all**, only its
+text and `address_precision`. Both the code and that spec row were wrong, in opposite directions; the
+row now reads "no coordinates" and matches the code.
 
-**What already works.** The area side is complete *upward*: `Wien` alone yields
-`country=AT state=Wien city=Wien` because `place→country` and `city→state` fire. `[A]` So the record is
-ready to store at `city` precision; only the persisting and the finding are missing.
+**Fixed 2026-09-13 — [STUDY-006 D-10](./006-upload-pipeline-correction-plan.md#d-10).** Three
+coords-only gates opened for a text-only, no-coordinates placement (`handlePartialPreResolve`'s
+`metadata_only` branch, `routePreparedNewJob`'s route-to-upload check, `finalizeNewUploadPhase`'s
+post-save enrichment), plus two supporting fixes found only by running the scenarios rather than by
+reasoning about the code: `isSearchObjectMeaningless` didn't anchor on `state` (S21's actual root
+cause — not a missing `groupingKey`, which was fine all along), and `formatSearchObjectLabel` fell
+back to the raw filename below city precision.
 
-**Why `groupingKey` is empty for S21.** A state-only Search Object produces no group, so it never
-reaches the grouping or lookup path at all. That is a second, smaller gap in the same area.
+| Scenario | Job (after) |
+| --- | --- |
+| S19 | `complete`, lane `Uploaded`, `coords=—`, `titleAddress=Wien` |
+| S20 | `complete`, lane `Uploaded`, `coords=—`, `titleAddress=1090 Wien` |
+| S21 | `complete`, lane `Uploaded`, `coords=—`, `titleAddress=Niederösterreich, AT` |
 
-**Consequence.** The Issues lane fills with files nobody needs to look at, and the one case the owner
-raised first — "ein Ordner heißt Wien, die Fotos gehören zu Wien" — is the case that does not work.
-Fixing it is [STUDY-006](./006-upload-pipeline-correction-plan.md) Block A, and it is two changes:
-persisting the area location, and making a coordinate-less location findable
-(`db-address.provider.ts` filters those rows out today).
+Verified with `npm run trace:upload` (curated set) — no other scenario's outcome changed — and
+against a 500-file corpus (21 curated + 479 generated, seed 7): `distinct groups`, `groups needing a
+tray`, and every completeness outcome (`branch_a=224 layer_conflict=128 incomplete=75 branch_c=57
+admin_conflict=16`) are identical to the pre-fix baseline in
+[`upload-pipeline-trace.md`](../playbooks/upload-pipeline-trace.md) — the fix is additive; no
+generated path in that seeded set happens to be area-only, so the change only ever touches the three
+curated `metadata_only` scenarios.
+
+---
+
+### F-20 · "Keep" on a `containment_check` tray never resumes the job {#f-20}
+
+**Found while speccing** [D-11](./006-upload-pipeline-correction-plan.md#d-11) (street corroboration
+for `admin_level_conflict`) — the owner asked "what if the street is genuinely new, not in any
+database yet." The answer is that a mechanism for exactly that already exists — the V1
+`containment_check` tray, which offers *"Keep: {street}, {city}"* (accept the folder's text despite
+zero geocoder hits) or *"Enter a different address."* Checking whether "Keep" actually works surfaced
+this.
+
+**What happened.** `applyContainmentCheckChoice`'s "Keep" branch set `resolutionStatus: 'resolved'`
+and `pendingPartialLocation: true` on every job in the group, then emitted `notifyDisambiguationResolved`
+— an RxJS `Subject` (`disambiguationResolved$`). `[A]` Grepped: **nothing in the codebase subscribes to
+it**, anywhere. Separately, the only gate that routes a job into the upload phase
+(`routePreparedNewJob`) checks `job.coords || job.textOnlyLocation` — a job resolved this way had
+neither, so nothing ever re-evaluated it into either the upload path or `routeJobToMissingData`. The
+job's `phase` never advanced past wherever it was parked when the tray opened.
+
+**Measured, not inferred.** Scenario **S06** in the curated trace corpus (`AT/Wien/Innsbruck/
+Maria-Theresien-Straße 18/…`) exercises exactly this path — the trace harness's own auto-answer picks
+the tray's first candidate, which `patchContainmentCheckOutcome` always puts "Keep" first. `[A]` S06's
+recorded final outcome: `phase=awaiting_disambiguation`, `lane=Waiting for user`. Not uploaded. Not in
+Issues. The disambiguation group itself is marked resolved (`resolutionGateOpen: false`), so there is
+no tray left for a real user to answer, either — the file just sits, indistinguishable in the UI from
+one still genuinely waiting on input.
+
+**Consequence.** Every C3-cascade path that ends in a zero-hit Branch A geocode (admin conflict
+resolved → street not found in the resolved city → V1 tray → "Keep") produces a file that silently
+never completes. This predates D-11 entirely — D-11 does not create or touch this path, it only led to
+checking it.
+
+**Fixed** (2026-09-15, after D-11 shipped). "Keep" is a placement decision, so it now places: every
+job in the group gets the text-established address with no coordinates — the same shape `area_only`
+uses, at whatever precision the path established (street or house number here, not area) — and goes
+back to `queued`, followed by a queue drain. The flag that carries this through the coordinate gates
+was renamed `areaOnlyLocation` → **`textOnlyLocation`**, because it never meant "area precision"; it
+means "the address came from text and has no coordinates", which is exactly as true for a kept street
+address as for a `Niederösterreich`-only folder. `disambiguationResolved$` still has no subscriber —
+that was never the mechanism doing the work, and wiring one would have hidden the real gap rather
+than closing it.
+
+**Measured after the fix.** The same `--answer-trays` trace run: S06 now reaches `phase=complete`,
+`lane=Uploaded`, with `coords=—` and a `resolve_media_location` call carrying the text address and
+null coordinates. Batch totals moved from `complete=16 awaiting_disambiguation=3` to
+`complete=17 awaiting_disambiguation=2` — the two remaining holds are S05 and S18, which are waiting
+on genuinely unanswered trays, not on a dead event.
+
+---
+
+### F-21 · A cross-field admin conflict can never be answered — the same tray re-opens forever {#f-21}
+
+**Found while verifying the [F-20](#f-20) fix**, 2026-09-15, in the same `--answer-trays` trace run.
+Scenario **S18** — `Mödling/Wilhelminenstraße 141/Wilhelminenstr 141, 1160 Wien.jpg`, the owner's own
+documented case (folder names one city, the filename repeats the address with a different city and
+postcode) — had its `admin_level_conflict` tray answered **55 times** in one run and still ended
+`phase=awaiting_disambiguation`. `[A]` 55 of the batch's 60 total tray answers went to this one
+question.
+
+**Why it never converges.** The conflict is not city-vs-city. `detectAreaConflicts`'s AT-gazetteer
+cross-check merges the contradicting **`state`** entry into the `city` conflict's own entry list, so
+the conflict reads `[city:Mödling@L2, city:Wien@L0, state:Wien@L0]` — Mödling is in Niederösterreich,
+so it cannot sit under `state: Wien`. `applyAdminLevelSelectionsToSearchObject` then writes **only the
+chosen field's** evidence and leaves every other field alone. Picking `city = Mödling` therefore
+yields `city=Mödling, state=Wien` — which `detectAreaConflicts` immediately re-raises as the *same*
+contradiction, `applyAreaConflictChoice`'s `stillConflicted` branch re-registers an identical tray,
+and the loop closes. `[A]` Measured directly against the real classifier and the shipped AT assets:
+
+```
+INITIAL  city=Wien postcode=1160 state=Wien
+         conflicts=[city: [city:Mödling@L2, city:Wien@L0, state:Wien@L0]]
+round 1: picked city=Mödling@L2 → city=Mödling state=Wien
+         conflicts=[city: [city:Mödling@L0, state:Wien@L0]]
+round 2: picked city=Mödling@L0 → city=Mödling state=Wien   (identical)
+round 3: picked city=Mödling@L0 → city=Mödling state=Wien   (identical)
+…
+```
+
+A fixed point, not a resolution. Picking the `state:Wien` entry instead is no better: it sets `state`
+to the value it already has and leaves `city=Mödling` standing, so the same conflict re-forms. The
+only escape the tray offers is *"Manual: city"* typed as a city that happens to sit in Wien — i.e. the
+tray lists options it structurally **cannot honour**, and the folder's own value is one of them.
+
+**Consequence.** For a real user this is an endless question: click "Mödling", the same question
+reappears, forever, with no way to accept the folder's own reading of its own path. It is not
+throttled, not counted, and not detectable from the UI. The trace harness only escaped because it has
+a fixed answer budget.
+
+**Shape, not a one-off.** Any admin conflict whose entries span two fields has this property — the
+`city ⊥ state` gazetteer check and the `postcode ⊥ state` / `postcode ⊥ city` cross-checks all merge a
+foreign-field entry into one conflict, while the answer path only ever writes one field. The same
+mechanism forced [D-11](./006-upload-pipeline-correction-plan.md#d-11)'s corroboration pre-check to
+cascade rather than auto-resolve when a residual `state` entry survived; that was treated then as
+accepted product behaviour. It is not — it is this bug, seen from the other side.
+
+**Fixed** (2026-09-15) — owner chose **option C with the loop guard**, built as
+[D-12](./006-upload-pipeline-correction-plan.md#d-12) and specified in the
+[cross-field answers supplement](../specs/service/media-upload-service/contradiction-resolution-model.cross-field-answers.supplement.md).
+An answer now drops exactly the evidence `detectAreaConflicts` would have contradicted it with, and
+the existing `city→state` derivation refills the dependent field — `Mödling` →
+`Niederösterreich`, written as a normal derived entry. The guard keys on **progress** (did the
+answer move any of the four area fields?), not on the conflict signature: pass 3 synthesizes a
+`city` entry for every city a contradicting postcode expands to, so a legitimate follow-up question
+carries the *same* signature as the one just answered. `[A]` Measured in
+`upload-location-area-choice.util.spec.ts`.
+
+**Measured after the fix.** Same `--answer-trays` run: S18 is answered **once**, resolves to
+`Mödling`/`Niederösterreich`, and reaches `complete` (`media-0019`). Batch tray answers fell from
+**60 to 7**.
+
+---
+
+### F-22 · A `layer_package` / `admin_level_conflict` answer places the job but never re-queues it {#f-22}
+
+**Found while measuring the [F-20](#f-20) fix**, 2026-09-15 — the same run that surfaced
+[F-21](#f-21). Scenario **S07** (`Graz/Annenstraße 10/Annenstraße 12 Detail.jpg`, filename street
+contradicts folder street) answers its `layer_package` tray, gets a placement, and then stops: `[A]`
+
+```
+[ 278] tray  answer layer_package → Folder: Annenstraße 10
+outcome: phase=resolving_location  lane=Active  coords=47.0707, 15.4395 via folder  mediaId=—
+```
+
+Coordinates resolved, nothing wrong with the address — and the file never uploads. In the UI it sits
+in the **Active** lane, indistinguishable from one genuinely in flight.
+
+**Why.** `applyLayerPackageChoice` and `applyAreaConflictChoice` both end the same way:
+
+```ts
+this.jobState.setPhase(jobId, 'resolving_location');
+void this.resolution().applyPreResolveFromOrchestrator(jobId);
+```
+
+`applyPreResolveFromOrchestrator` applies the candidate and returns `'continue'` — it does not move
+the phase on. And the queue drain only ever selects `job.phase === 'queued'`
+(`selectQueuedJobsForStart`, `upload-manager-queue.util.ts:15`). `[A]` So the job is left in a phase
+the queue cannot see. Grepped: the only paths that put a job back to `queued` after a tray are the
+plain candidate path (`upload-location-candidate-apply.service.ts:91`), the two source-conflict paths,
+and — since 2026-09-15 — `containment_check`'s "Keep". The layer and admin paths are the two that
+never do. `[A]`
+
+**Same shape as F-20**, one layer up: a tray answer that changes job state but not the one thing that
+decides whether the pipeline can pick the job up again. [TRAP-021](../TRAPS.md#trap-021--a-resolution-event-with-zero-subscribers-looks-like-it-resumed-the-job)
+is the reading habit that catches it.
+
+**Caveat worth checking before fixing** `[C]`: the trace harness drives the services with no UI
+attached. If some component effect re-queues these jobs in the real app, production would be less
+broken than the harness shows — but nothing in `core/` does it, and the three paths that *do* re-queue
+do it explicitly rather than relying on a listener, which is evidence against that hope.
+
+**Fixed** (2026-09-15, together with [F-21](#f-21)). Both answer paths now go through one helper
+that awaits `applyPreResolveFromOrchestrator` and acts on its verdict: `'continue'` re-queues the job
+and drains, `'held'` and `'partial'` leave it to whatever now owns it. `[A]` S07 reaches `complete`
+with its coordinates in the same trace run; an end-to-end regression test `(d5)` in
+`upload-folder-upload.integration.spec.ts` fails by timeout without the fix.
 
 ---
 

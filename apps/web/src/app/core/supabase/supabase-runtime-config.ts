@@ -1,5 +1,27 @@
 import { environment } from '../../../environments/environment';
 
+/**
+ * Test seam for the environment record.
+ *
+ * The Angular unit-test system refuses `vi.mock()` on a **relative** import ("Please use Angular
+ * TestBed for mocking dependencies"), and this module is plain functions with no injector to go
+ * through — so the spec for it could not run at all. An explicit override is the honest way in:
+ * it is visible in the source, it is named for what it is, and production never calls it.
+ * @see docs/study/005-upload-pipeline-trace-findings.md#f-13
+ */
+let environmentOverride: typeof environment | null = null;
+
+/** Testing only. Pass `null` to restore the real environment. */
+export function setSupabaseEnvironmentOverrideForTests(
+  override: typeof environment | null,
+): void {
+  environmentOverride = override;
+}
+
+function env(): typeof environment {
+  return environmentOverride ?? environment;
+}
+
 export type SupabaseTarget = 'local' | 'cloud';
 
 export interface SupabaseEndpoint {
@@ -43,7 +65,7 @@ export type DevSupabaseEnv = {
 };
 
 function getSupabaseEnv(): DevSupabaseEnv {
-  return environment.supabase as DevSupabaseEnv;
+  return env().supabase as DevSupabaseEnv;
 }
 
 function getCloudEndpoint(): SupabaseEndpoint {
@@ -80,7 +102,7 @@ function getDevTargetOverride(): SupabaseTarget | null {
 const DEV_LOG_RELAY_PORT = 47291;
 
 function reportSupabaseTargetToDevTerminal(config: ResolvedSupabaseConfig): void {
-  if (environment.production) {
+  if (env().production) {
     return;
   }
 
@@ -164,7 +186,7 @@ function warnLocalEdgeFunctionsUnavailable(): void {
 export async function resolveSupabaseRuntimeConfig(): Promise<ResolvedSupabaseConfig> {
   const cloud = getCloudEndpoint();
 
-  if (environment.production) {
+  if (env().production) {
     resolvedConfig = { ...cloud, target: 'cloud' };
     return resolvedConfig;
   }

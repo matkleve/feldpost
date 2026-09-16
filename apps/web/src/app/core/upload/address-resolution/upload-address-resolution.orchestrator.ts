@@ -79,9 +79,27 @@ export class UploadAddressResolutionOrchestrator {
     return this.jobState.findJob(jobId)?.groupingKey;
   }
 
-  async classifyBatch(batchId: string): Promise<void> {
-    uploadTraceEnter('orchestrator', 'classifyBatch', { batchId });
-    const jobs = this.jobState.jobs().filter((j) => j.batchId === batchId);
+  /**
+   * Build Search Objects and group states for a batch, or for one chunk of it.
+   *
+   * `options.jobIds` restricts the pass to those jobs; the resulting group states are **merged**
+   * into the batch cache rather than replacing it, so a grouping key that spans two chunks ends up
+   * as one group holding all its jobs (G5).
+   * @see docs/specs/service/media-upload-service/upload-manager-pipeline.chunked-classification.supplement.md
+   */
+  async classifyBatch(
+    batchId: string,
+    options?: { jobIds?: ReadonlySet<string> },
+  ): Promise<void> {
+    uploadTraceEnter('orchestrator', 'classifyBatch', {
+      batchId,
+      chunkSize: options?.jobIds?.size,
+    });
+    const jobIdFilter = options?.jobIds;
+    const jobs = this.jobState
+      .jobs()
+      .filter((j) => j.batchId === batchId)
+      .filter((j) => !jobIdFilter || jobIdFilter.has(j.id));
     if (!jobs.length) {
       uploadTraceDecision('orchestrator', 'classifyBatch — no jobs in batch');
       uploadTraceExit('orchestrator', 'classifyBatch', 'empty');
@@ -303,13 +321,13 @@ export class UploadAddressResolutionOrchestrator {
         continue;
       }
 
-      if (local === 'branch_c') {
-        uploadTraceDecision('orchestrator', 'group needsGeocode — branch_c (street only, no locality)', {
+      if (local === 'street_only') {
+        uploadTraceDecision('orchestrator', 'group needsGeocode — street_only (street only, no locality)', {
           groupingKey,
           street: so.street,
           jobIds,
         });
-        const branchCState: UploadGroupResolutionState = {
+        const streetOnlyState: UploadGroupResolutionState = {
           status: 'needsGeocode',
           groupingKey,
           jobIds,
@@ -319,15 +337,15 @@ export class UploadAddressResolutionOrchestrator {
           },
           folderDisplayPath,
           titleAddressLabel,
-          geocodeBranch: 'branch_c',
+          geocodeBranch: 'street_only',
         };
-        cache.set(groupingKey, branchCState);
-        uploadAddressDebug('orchestrator', 'group → needsGeocode (branch C)', summarizeGroupState(branchCState));
+        cache.set(groupingKey, streetOnlyState);
+        uploadAddressDebug('orchestrator', 'group → needsGeocode (street_only)', summarizeGroupState(streetOnlyState));
         continue;
       }
 
-      if (local === 'metadata_only') {
-        uploadTraceDecision('orchestrator', 'group partial — metadata_only', { groupingKey, jobIds });
+      if (local === 'area_only') {
+        uploadTraceDecision('orchestrator', 'group partial — area_only', { groupingKey, jobIds });
         const metaState: UploadGroupResolutionState = {
           status: 'partial',
           groupingKey,
@@ -335,7 +353,7 @@ export class UploadAddressResolutionOrchestrator {
           searchObject: so,
           folderDisplayPath,
           titleAddressLabel,
-          geocodeBranch: 'metadata_only',
+          geocodeBranch: 'area_only',
         };
         cache.set(groupingKey, metaState);
         continue;
@@ -355,7 +373,7 @@ export class UploadAddressResolutionOrchestrator {
           searchObject: so,
           folderDisplayPath,
           titleAddressLabel,
-          geocodeBranch: local === 'branch_b' ? 'branch_b' : 'branch_a',
+          geocodeBranch: local === 'street_project_bias' ? 'street_project_bias' : 'street_locality',
           candidate: locationRowToCandidate(row),
         };
         cache.set(groupingKey, resolvedState);
@@ -370,8 +388,8 @@ export class UploadAddressResolutionOrchestrator {
         searchObject: so,
         folderDisplayPath,
         titleAddressLabel,
-        geocodeBranch: local === 'branch_b' ? 'branch_b' : 'branch_a',
-        projectCentroid: local === 'branch_b' ? (projectCentroid ?? undefined) : undefined,
+        geocodeBranch: local === 'street_project_bias' ? 'street_project_bias' : 'street_locality',
+        projectCentroid: local === 'street_project_bias' ? (projectCentroid ?? undefined) : undefined,
       };
       cache.set(groupingKey, needsGeocodeState);
       uploadTraceDecision('orchestrator', 'group needsGeocode — no DB row', {
@@ -382,7 +400,7 @@ export class UploadAddressResolutionOrchestrator {
       uploadAddressDebug('orchestrator', 'group → needsGeocode', summarizeGroupState(needsGeocodeState));
     }
 
-    this.batchCaches.set(batchId, cache);
+    this.mergeBatchCache(batchId, cache);
     uploadTraceExit('orchestrator', 'classifyBatch', `groups=${cache.size}`);
     uploadAddressDebug('orchestrator', 'classifyBatch done', {
       batchId,
@@ -393,6 +411,34 @@ export class UploadAddressResolutionOrchestrator {
         jobCount: state.jobIds.length,
       })),
     });
+  }
+
+  /**
+   * Merge one chunk's group states into the batch cache.
+   *
+   * A grouping key already present keeps its existing state and gains the chunk's job ids — the
+   * cache-level form of "the 301st file belongs to the group the first 300 formed". Job ids are
+   * de-duplicated because a re-classify of the same job must not double-count it.
+   * @see docs/specs/service/media-upload-service/upload-manager-pipeline.chunked-classification.supplement.md G5
+   */
+  private mergeBatchCache(
+    batchId: string,
+    incoming: Map<string, UploadGroupResolutionState>,
+  ): void {
+    const existing = this.batchCaches.get(batchId);
+    if (!existing) {
+      this.batchCaches.set(batchId, incoming);
+      return;
+    }
+    for (const [groupingKey, state] of incoming) {
+      const prior = existing.get(groupingKey);
+      if (!prior) {
+        existing.set(groupingKey, state);
+        continue;
+      }
+      const jobIds = [...new Set([...prior.jobIds, ...state.jobIds])];
+      existing.set(groupingKey, { ...prior, jobIds });
+    }
   }
 
   patchGroupState(batchId: string, state: UploadGroupResolutionState): void {
@@ -448,7 +494,7 @@ export class UploadAddressResolutionOrchestrator {
         continue;
       }
 
-      if (local === 'branch_c') {
+      if (local === 'street_only') {
         cache.set(groupingKey, {
           status: 'needsGeocode',
           groupingKey,
@@ -456,13 +502,13 @@ export class UploadAddressResolutionOrchestrator {
           searchObject: { ...so, country: so.country ?? 'AT' },
           folderDisplayPath,
           titleAddressLabel,
-          geocodeBranch: 'branch_c',
+          geocodeBranch: 'street_only',
           resolvedFromAdminConflict: true,
         });
         continue;
       }
 
-      if (local === 'metadata_only') {
+      if (local === 'area_only') {
         cache.set(groupingKey, {
           status: 'partial',
           groupingKey,
@@ -470,7 +516,7 @@ export class UploadAddressResolutionOrchestrator {
           searchObject: so,
           folderDisplayPath,
           titleAddressLabel,
-          geocodeBranch: 'metadata_only',
+          geocodeBranch: 'area_only',
         });
         continue;
       }
@@ -484,7 +530,7 @@ export class UploadAddressResolutionOrchestrator {
           searchObject: so,
           folderDisplayPath,
           titleAddressLabel,
-          geocodeBranch: local === 'branch_b' ? 'branch_b' : 'branch_a',
+          geocodeBranch: local === 'street_project_bias' ? 'street_project_bias' : 'street_locality',
           candidate: locationRowToCandidate(row),
         });
         continue;
@@ -497,8 +543,8 @@ export class UploadAddressResolutionOrchestrator {
         searchObject: so,
         folderDisplayPath,
         titleAddressLabel,
-        geocodeBranch: local === 'branch_b' ? 'branch_b' : 'branch_a',
-        projectCentroid: local === 'branch_b' ? (projectCentroid ?? undefined) : undefined,
+        geocodeBranch: local === 'street_project_bias' ? 'street_project_bias' : 'street_locality',
+        projectCentroid: local === 'street_project_bias' ? (projectCentroid ?? undefined) : undefined,
         resolvedFromAdminConflict: true,
       });
     }
@@ -547,7 +593,7 @@ export class UploadAddressResolutionOrchestrator {
         continue;
       }
 
-      if (local === 'branch_c') {
+      if (local === 'street_only') {
         cache.set(groupingKey, {
           status: 'needsGeocode',
           groupingKey,
@@ -555,12 +601,12 @@ export class UploadAddressResolutionOrchestrator {
           searchObject: { ...so, country: so.country ?? 'AT' },
           folderDisplayPath,
           titleAddressLabel,
-          geocodeBranch: 'branch_c',
+          geocodeBranch: 'street_only',
         });
         continue;
       }
 
-      if (local === 'metadata_only') {
+      if (local === 'area_only') {
         cache.set(groupingKey, {
           status: 'partial',
           groupingKey,
@@ -568,7 +614,7 @@ export class UploadAddressResolutionOrchestrator {
           searchObject: so,
           folderDisplayPath,
           titleAddressLabel,
-          geocodeBranch: 'metadata_only',
+          geocodeBranch: 'area_only',
         });
         continue;
       }
@@ -582,7 +628,7 @@ export class UploadAddressResolutionOrchestrator {
           searchObject: so,
           folderDisplayPath,
           titleAddressLabel,
-          geocodeBranch: local === 'branch_b' ? 'branch_b' : 'branch_a',
+          geocodeBranch: local === 'street_project_bias' ? 'street_project_bias' : 'street_locality',
           candidate: locationRowToCandidate(row),
         });
         continue;
@@ -595,8 +641,8 @@ export class UploadAddressResolutionOrchestrator {
         searchObject: so,
         folderDisplayPath,
         titleAddressLabel,
-        geocodeBranch: local === 'branch_b' ? 'branch_b' : 'branch_a',
-        projectCentroid: local === 'branch_b' ? (projectCentroid ?? undefined) : undefined,
+        geocodeBranch: local === 'street_project_bias' ? 'street_project_bias' : 'street_locality',
+        projectCentroid: local === 'street_project_bias' ? (projectCentroid ?? undefined) : undefined,
       });
     }
 

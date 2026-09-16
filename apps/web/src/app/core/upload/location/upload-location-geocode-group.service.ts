@@ -1,5 +1,6 @@
 /**
- * Group-level Photon geocode (branches A/B/C) with in-flight dedupe.
+ * Group-level Photon geocode (the street_locality/street_project_bias/street_only paths) with
+ * in-flight dedupe.
  * @see docs/specs/service/media-upload-service/address-resolution-model.md § Step 5
  */
 
@@ -11,10 +12,10 @@ import { UploadJobStateService } from '../support/upload-job-state.service';
 import { UploadLocationConfigService } from './upload-location-config.service';
 import { getExifMetadataCoords } from './upload-location-precedence.helpers';
 import {
-  buildBranchCCity01Candidates,
+  buildStreetOnlyCity01Candidates,
   classifySearchHits,
   filterGeocodeHitsByContextDistance,
-  shouldForceBranchCCityTray,
+  shouldForceStreetOnlyCityTray,
 } from './upload-location-resolution.helpers';
 import {
   patchAmbiguousGeocodeOutcome,
@@ -64,8 +65,9 @@ export class UploadLocationGeocodeGroupService {
   }
 
   /**
-   * Geocode a group via Branch A (street+city), B (project centroid bias), or C (street only).
-   * @see docs/specs/service/media-upload-service/address-resolution-model.md § Step 5 (Photon + branches A/B/C)
+   * Geocode a group via `street_locality` (street+city), `street_project_bias` (project centroid
+   * bias), or `street_only` (street alone).
+   * @see docs/specs/service/media-upload-service/address-resolution-model.md § Step 5
    */
   private async runGeocodeForGroup(
     batchId: string,
@@ -132,7 +134,7 @@ export class UploadLocationGeocodeGroupService {
   ): Promise<Awaited<ReturnType<GeocodingService['searchStructuredForward']>>> {
     const so = group.searchObject;
     const geocodeRequest =
-      group.geocodeBranch === 'branch_c'
+      group.geocodeBranch === 'street_only'
         ? { street, countryCode }
         : {
             street: [so.street, so.houseNumber].filter(Boolean).join(' ').trim(),
@@ -142,7 +144,7 @@ export class UploadLocationGeocodeGroupService {
           };
 
     let hits;
-    if (group.geocodeBranch === 'branch_b' && group.projectCentroid) {
+    if (group.geocodeBranch === 'street_project_bias' && group.projectCentroid) {
       uploadAddressDebug('geocode', 'edge invoke structured-forward-bias', {
         batchId,
         groupingKey: group.groupingKey,
@@ -205,14 +207,14 @@ export class UploadLocationGeocodeGroupService {
     if (outcome.kind === 'auto' && exifCoords) {
       const exifReverse = await this.geocoding.reverse(exifCoords.lat, exifCoords.lng);
       const exifReverseCity = exifReverse?.city ?? null;
-      if (shouldForceBranchCCityTray(group, outcome, exifReverseCity)) {
-        uploadTraceDecision('geocode', 'branch_c CITY-01 — EXIF city disagrees with Photon auto, force city_step', {
+      if (shouldForceStreetOnlyCityTray(group, outcome, exifReverseCity)) {
+        uploadTraceDecision('geocode', 'street_only CITY-01 — EXIF city disagrees with Photon auto, force city_step', {
           autoCity: outcome.candidate.city,
           exifReverseCity,
         });
         outcome = {
           kind: 'ambiguous',
-          candidates: buildBranchCCity01Candidates(
+          candidates: buildStreetOnlyCity01Candidates(
             outcome.candidate,
             exifReverseCity!,
             exifCoords,
@@ -246,7 +248,7 @@ export class UploadLocationGeocodeGroupService {
         config,
       );
     }
-    if (group.geocodeBranch === 'branch_c' || group.geocodeBranch === 'branch_b') {
+    if (group.geocodeBranch === 'street_only' || group.geocodeBranch === 'street_project_bias') {
       return patchFallbackTrayGeocodeOutcome(this.orchestrator, batchId, group);
     }
     if (group.resolvedFromAdminConflict) {
@@ -261,8 +263,8 @@ export class UploadLocationGeocodeGroupService {
     autoCandidate: UploadAddressCandidate,
   ): UploadGroupResolutionState {
     const so = group.searchObject;
-    if (group.geocodeBranch === 'branch_c' && !so.houseNumber?.trim()) {
-      uploadTraceDecision('geocode', 'needsTray 1b — branch_c auto hit but no houseNumber on SO', {
+    if (group.geocodeBranch === 'street_only' && !so.houseNumber?.trim()) {
+      uploadTraceDecision('geocode', 'needsTray 1b — street_only auto hit but no houseNumber on SO', {
         street: so.street,
         autoCity: autoCandidate.city,
         autoLabel: autoCandidate.addressLabel,

@@ -475,7 +475,7 @@ export class GeocodingService {
   }
 
   /**
-   * Structured forward with geographic bias (Branch B).
+   * Structured forward with geographic bias (`street_project_bias`).
    * Returns empty array when edge/Photon unavailable — never throws.
    */
   async searchStructuredForwardBias(

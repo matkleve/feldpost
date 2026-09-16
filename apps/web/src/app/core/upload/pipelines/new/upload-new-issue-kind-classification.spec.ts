@@ -1,6 +1,6 @@
 /**
  * Compares the two independent "no location, route to Issues" classifiers in
- * the `new` pipeline: `routeJobToMissingData` (Branch A — no EXIF, no title
+ * the `new` pipeline: `routeJobToMissingData` (no EXIF, no title
  * candidate) and the classifier inside `finalizeNewUploadPhase` for a failed
  * forward-geocode (`routeUnresolvedAfterFailedGeocode`, private). Both decide
  * `issueKind: 'document_unresolved' | 'missing_gps'` for the same job shape,
@@ -34,7 +34,7 @@ describe('issueKind classification: routeJobToMissingData vs. failed-geocode rou
     // sniffing (with extension fallback) runs on it.
     expect(resolveUploadMediaType(resolveUploadMimeType(file))).toBe('document');
 
-    // Path 1: routeJobToMissingData (Branch A, no EXIF/no title candidate).
+    // Path 1: routeJobToMissingData (no EXIF/no title candidate).
     let jobA: UploadJob = {
       id: 'job-a',
       batchId: 'batch-1',

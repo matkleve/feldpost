@@ -1023,7 +1023,7 @@ export class ProjectsService {
     return value.replace(/[%_]/g, (match) => `\\${match}`);
   }
 
-  /** Linked locations for upload Branch B / project address tier. */
+  /** Linked locations for upload `street_project_bias` / project address tier. */
   async loadProjectLocations(projectId: string): Promise<
     Array<{
       linkId: string;

@@ -1,15 +1,18 @@
 /**
- * Geocode completeness branches for upload Search Objects.
+ * Resolution path for upload Search Objects — which evidence family resolves the group and how.
+ * `street_*` all require a street and differ only in what locality context is available to geocode
+ * with; `area_only` has no street but resolves via area text/precision instead (D-10); `incomplete`
+ * has neither.
  * @see docs/specs/service/media-upload-service/upload-search-object.md
  */
 
 import type { UploadSearchObject } from '../upload/address-resolution/upload-address-resolution.types';
 
-export type GeocodeCompletenessBranch =
-  | 'branch_a'
-  | 'branch_b'
-  | 'branch_c'
-  | 'metadata_only'
+export type UploadResolutionPath =
+  | 'street_locality'
+  | 'street_project_bias'
+  | 'street_only'
+  | 'area_only'
   | 'incomplete';
 
 export interface ProjectGeocodeCentroid {
@@ -43,35 +46,35 @@ export function searchObjectIsBelowStreet(so: UploadSearchObject): boolean {
 }
 
 /**
- * Classify which geocode branch applies.
+ * Classify which resolution path applies.
  * houseNumber is never a gate — only improves precision when street exists.
  */
 export function classifySearchObjectCompleteness(
   so: UploadSearchObject,
   projectCentroid?: ProjectGeocodeCentroid | null,
-): GeocodeCompletenessBranch {
+): UploadResolutionPath {
   if (so.postcodeCandidates.length > 1 && !so.city?.trim()) {
     return 'incomplete';
   }
 
   if (searchObjectHasStreet(so)) {
     if (searchObjectHasLocality(so)) {
-      return 'branch_a';
+      return 'street_locality';
     }
     if (projectCentroid && Number.isFinite(projectCentroid.lat) && Number.isFinite(projectCentroid.lng)) {
-      return 'branch_b';
+      return 'street_project_bias';
     }
-    return 'branch_c';
+    return 'street_only';
   }
 
   if (searchObjectIsBelowStreet(so)) {
-    return 'metadata_only';
+    return 'area_only';
   }
 
   return 'incomplete';
 }
 
-/** @deprecated Use classifySearchObjectCompleteness — Branch A only. */
+/** @deprecated Use classifySearchObjectCompleteness — `street_locality` only. */
 export function isSearchObjectComplete(so: UploadSearchObject): boolean {
-  return classifySearchObjectCompleteness(so) === 'branch_a';
+  return classifySearchObjectCompleteness(so) === 'street_locality';
 }

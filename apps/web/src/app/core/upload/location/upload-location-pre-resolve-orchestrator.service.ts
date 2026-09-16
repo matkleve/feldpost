@@ -138,8 +138,8 @@ export class UploadLocationPreResolveOrchestratorService {
     batchId: string,
     groupState: UploadGroupResolutionState,
   ): 'continue' | 'held' {
-    if (this.placement.tryApplyExifPlacementForWeakBranchC(groupState)) {
-      uploadTraceExit('ulr', 'applyPreResolveFromOrchestrator', 'continue (exif weak branch c)');
+    if (this.placement.tryApplyExifPlacementForWeakStreetOnly(groupState)) {
+      uploadTraceExit('ulr', 'applyPreResolveFromOrchestrator', 'continue (exif weak street_only)');
       return 'continue';
     }
     if (groupState.containmentCheck) {
@@ -194,7 +194,22 @@ export class UploadLocationPreResolveOrchestratorService {
     return outcome;
   }
 
-  private handlePartialPreResolve(groupState: UploadGroupResolutionState): 'partial' {
+  /**
+   * `area_only` is a deliberate result (a folder names a place and nothing else), not a
+   * failure — it gets a text-only location at area precision, no coordinates, no tray. Every
+   * other partial cause (postcode_blocked, incomplete) is still genuinely stuck and goes to
+   * Issues as before.
+   * @see docs/study/005-upload-pipeline-trace-findings.md#f-19
+   */
+  private handlePartialPreResolve(groupState: UploadGroupResolutionState): 'continue' | 'partial' {
+    if (groupState.geocodeBranch === 'area_only') {
+      uploadTraceDecision('ulr', 'continue — area-only precision, no coordinates', {
+        groupingKey: groupState.groupingKey,
+      });
+      this.markGroupAreaOnly(groupState);
+      uploadTraceExit('ulr', 'applyPreResolveFromOrchestrator', 'continue (area-only)');
+      return 'continue';
+    }
     uploadTraceDecision('ulr', 'partial — markGroupPartial', { groupingKey: groupState.groupingKey });
     this.markGroupPartial(groupState);
     uploadTraceExit('ulr', 'applyPreResolveFromOrchestrator', 'partial');
@@ -205,8 +220,8 @@ export class UploadLocationPreResolveOrchestratorService {
     job: NonNullable<ReturnType<UploadJobStateService['findJob']>>,
     groupState: UploadGroupResolutionState,
   ): 'held' {
-    if (groupState.geocodeBranch === 'branch_c') {
-      uploadTraceDecision('ulr', 'held — branch_c ambiguous → city_step tray 1a', {
+    if (groupState.geocodeBranch === 'street_only') {
+      uploadTraceDecision('ulr', 'held — street_only ambiguous → city_step tray 1a', {
         candidateCount: groupState.candidates!.length,
         discriminatingField: groupState.discriminatingField,
       });
@@ -254,6 +269,29 @@ export class UploadLocationPreResolveOrchestratorService {
         resolutionStatus: 'failed',
         pendingPartialLocation: true,
         disambiguationGroupId: undefined,
+      });
+    }
+  }
+
+  /**
+   * Text-only placement for an `area_only` group: the highest area tier the folder path
+   * established (country/state/postcode/city), no coordinates, no geocode. `textOnlyLocation`
+   * tells later placement/routing steps this job is already done and must not attempt to
+   * geocode the area label.
+   */
+  private markGroupAreaOnly(group: UploadGroupResolutionState): void {
+    for (const jobId of group.jobIds) {
+      const job = this.jobState.findJob(jobId);
+      const source = job?.titleAddressSource ?? 'folder';
+      this.jobState.updateJob(jobId, {
+        resolutionStatus: 'resolved',
+        textOnlyLocation: true,
+        pendingPartialLocation: false,
+        disambiguationGroupId: undefined,
+        issueKind: undefined,
+        titleAddress: group.titleAddressLabel,
+        titleAddressSource: source,
+        locationSourceUsed: source,
       });
     }
   }

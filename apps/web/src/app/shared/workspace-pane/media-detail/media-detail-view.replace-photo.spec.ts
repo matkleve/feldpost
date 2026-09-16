@@ -108,8 +108,10 @@ function setupReplace() {
       }
       if (table === 'images') {
         return withChainFallback({
+          // The nested level needs its own fallback: withChainFallback only covers props missing
+          // on the object it wraps, so an unmodelled `.order()` after `.eq()` still threw.
           select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({ single: imageSingleFn }),
+            eq: vi.fn().mockReturnValue(withChainFallback({ single: imageSingleFn })),
           }),
           update: vi.fn().mockReturnValue({
             eq: vi.fn().mockResolvedValue({ data: null, error: null }),
@@ -123,7 +125,7 @@ function setupReplace() {
       }
       if (table === 'media_metadata') {
         return withChainFallback({
-          select: vi.fn().mockReturnValue({ eq: metaSelectEqFn }),
+          select: vi.fn().mockReturnValue(withChainFallback({ eq: metaSelectEqFn })),
         });
       }
       if (table === 'projects') {
@@ -135,17 +137,24 @@ function setupReplace() {
       }
       if (table === 'metadata_keys') {
         return withChainFallback({
+          // Production selects 'id, key_name, key_type' here and then `.order('key_name')`; the
+          // old exact-match on 'key_name' sent it down the maybeSingle branch, which has no
+          // `.order`. Match on the column being present, and give both branches a fallback.
           select: vi.fn().mockImplementation((cols: string) => {
-            if (cols === 'key_name') {
-              return { eq: vi.fn().mockReturnValue({ order: metaKeysOrderFn }) };
+            if (cols.includes('key_name')) {
+              return withChainFallback({
+                eq: vi.fn().mockReturnValue(withChainFallback({ order: metaKeysOrderFn })),
+              });
             }
-            return {
-              eq: vi.fn().mockReturnValue({
-                eq: vi.fn().mockReturnValue({
-                  maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+            return withChainFallback({
+              eq: vi.fn().mockReturnValue(
+                withChainFallback({
+                  eq: vi.fn().mockReturnValue({
+                    maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+                  }),
                 }),
-              }),
-            };
+              ),
+            });
           }),
         });
       }
@@ -164,8 +173,7 @@ function setupReplace() {
     parseExif: vi.fn().mockResolvedValue({}),
     getSignedUrl: vi.fn().mockResolvedValue('https://example.com/signed'),
   };
-  const fakeWorkspaceView = {
-    rawImages: signal([
+  const rawImagesSignal = signal([
       {
         id: MOCK_MEDIA.id,
         storagePath: MOCK_MEDIA.storage_path,
@@ -188,7 +196,15 @@ function setupReplace() {
         country: MOCK_MEDIA.country,
         userName: null,
       },
-    ]),
+  ]);
+  const fakeWorkspaceView = {
+    rawImages: rawImagesSignal,
+    // The real service applies the updater to its rawImages signal; the stub must too, because
+    // the test asserts on the resulting cache contents rather than on the call.
+    updateRawImages: vi.fn(
+      (updater: (images: ReturnType<typeof rawImagesSignal>) => ReturnType<typeof rawImagesSignal>) =>
+        rawImagesSignal.update(updater),
+    ),
     batchSignThumbnails: vi.fn().mockResolvedValue(undefined),
     activeSorts: signal([]),
     activeGroupings: signal([]),
@@ -209,6 +225,11 @@ function setupReplace() {
     preload: vi.fn().mockResolvedValue(true),
     invalidate: vi.fn(),
     markNoMedia: vi.fn(),
+    // Called when a replaced image re-registers its paths; without it the component throws
+    // mid-handler and the grid cache assertion below sees the stale path.
+    registerPreviewPaths: vi.fn(),
+    getCachedUrl: vi.fn().mockReturnValue(null),
+    getState: vi.fn().mockReturnValue(new Subject()),
   };
 
   TestBed.configureTestingModule({
@@ -340,9 +361,11 @@ describe('MediaDetailViewComponent — IE-10 Replace Photo', () => {
       newStoragePath: 'org-001/user-001/new-photo.jpg',
     });
 
-    const gridImage = ctx.fakeWorkspaceView.rawImages().find((wi) => wi.id === MOCK_MEDIA.id);
-    expect(gridImage?.storagePath).toBe('org-001/user-001/photo.jpg');
-
+    // There used to be an assertion here that the cache still held the OLD path at this point.
+    // It only held because `updateRawImages` was missing from the stub and threw, so the cache
+    // never updated at all — and the real service applies the updater synchronously
+    // (`_rawImages.update(updater)`). Asserting "not yet updated" encoded the broken state, not a
+    // contract, so what remains is the thing the test is actually about.
     return vi.waitFor(() => {
       const updated = ctx.fakeWorkspaceView.rawImages().find((wi) => wi.id === MOCK_MEDIA.id);
       expect(updated?.storagePath).toBe('org-001/user-001/new-photo.jpg');

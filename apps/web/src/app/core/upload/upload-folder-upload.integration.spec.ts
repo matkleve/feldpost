@@ -3,8 +3,8 @@
  * photos: Search Object (SO) creation → dedup (content-hash) → DB lookup
  * (findBySearchObject) → tray / disambiguation registration.
  *
- * Uses the REAL AT geo data (assets/geo/*.json) so SO branch classification
- * (branch_a / branch_c / packageConflict) reflects production behavior.
+ * Uses the REAL AT geo data (assets/geo/*.json) so SO resolution-path classification
+ * (street_locality / street_only / packageConflict) reflects production behavior.
  */
 
 import { TestBed } from '@angular/core/testing';
@@ -25,6 +25,7 @@ import { UploadLocationResolutionService } from './location/upload-location-reso
 import {
   adminLevelManualCandidateId,
 } from './location/upload-location-area-choice.util';
+import { CONTAINMENT_CHECK_KEEP_CANDIDATE_ID } from './location/upload-location-geocode-outcome.util';
 import { UploadLocationPreResolveOrchestratorService } from './location/upload-location-pre-resolve-orchestrator.service';
 import { UploadLocationTrayFlowService } from './location/upload-location-tray-flow.service';
 import type { ScannedFileEntry } from '../folder-scan/folder-scan.service';
@@ -394,23 +395,30 @@ describe('UploadManagerService — folder upload integration (SO → dedup → D
       await setup();
     const preResolve = TestBed.inject(UploadLocationPreResolveOrchestratorService);
 
-    fakeGeocoding.searchStructuredForward.mockResolvedValue([
-      {
-        lat: 47.2692,
-        lng: 11.4041,
-        displayName: 'Hauptstraße 5, Wien, Österreich',
-        name: 'Hauptstraße 5',
-        importance: 0.9,
-        address: {
-          road: 'Hauptstraße',
-          house_number: '5',
-          postcode: '1010',
-          city: 'Wien',
-          country: 'Österreich',
-          country_code: 'at',
+    // D-11's street-corroboration pre-check runs first (Tier 1 with house number, then Tier 2
+    // bare street): both return empty here so the admin_level_conflict tray still opens for a
+    // manual choice, exactly as it did before D-11 existed. Once the user resolves the conflict
+    // below, every later call (the real post-resolution geocode) gets the Wien hit.
+    fakeGeocoding.searchStructuredForward
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValue([
+        {
+          lat: 47.2692,
+          lng: 11.4041,
+          displayName: 'Hauptstraße 5, Wien, Österreich',
+          name: 'Hauptstraße 5',
+          importance: 0.9,
+          address: {
+            road: 'Hauptstraße',
+            house_number: '5',
+            postcode: '1010',
+            city: 'Wien',
+            country: 'Österreich',
+            country_code: 'at',
+          },
         },
-      },
-    ]);
+      ]);
 
     const entries: ScannedFileEntry[] = [
       {
@@ -429,7 +437,7 @@ describe('UploadManagerService — folder upload integration (SO → dedup → D
       expect(groups.length).toBe(1);
     });
 
-    expect(fakeGeocoding.searchStructuredForward).not.toHaveBeenCalled();
+    expect(fakeGeocoding.searchStructuredForward).toHaveBeenCalledTimes(2);
     expect(fakeGeocoding.searchStructuredForwardBias).not.toHaveBeenCalled();
 
     const group = locationResolution
@@ -469,6 +477,147 @@ describe('UploadManagerService — folder upload integration (SO → dedup → D
         ['needsGeocode', 'needsTray', 'resolved', 'partial'].includes(s.status),
       ),
     ).toBe(true);
+    },
+    15_000,
+  );
+
+  it(
+    '(d4) F-20: "Keep" on a containment_check tray resumes the job and persists the text address',
+    async () => {
+      const { service, fakeUpload, fakeGeocoding, locationResolution, trayFlow } = await setup();
+
+      // Every geocode comes back empty: D-11's two corroboration tiers before the admin tray,
+      // and the real post-resolution geocode that then opens the containment_check tray.
+      fakeGeocoding.searchStructuredForward.mockResolvedValue([]);
+
+      const entries: ScannedFileEntry[] = [
+        {
+          file: makeFile('photo.jpg'),
+          relativePath: 'AT/Wien/Innsbruck/Hauptstraße 5/photo.jpg',
+          directorySegments: ['AT', 'Wien', 'Innsbruck', 'Hauptstraße 5'],
+        },
+      ];
+      await service.submitWebkitFolder(entries, 'Hauptstraße 5');
+
+      // 1 · the admin conflict tray, answered by hand.
+      await vi.waitFor(() => {
+        const groups = locationResolution
+          .disambiguationGroups()
+          .filter((g) => g.disambiguationKind === 'admin_level_conflict');
+        expect(groups.length).toBe(1);
+      });
+      const adminGroup = locationResolution
+        .disambiguationGroups()
+        .find((g) => g.disambiguationKind === 'admin_level_conflict')!;
+      await trayFlow.applyAreaConflictChoice(adminGroup, adminLevelManualCandidateId('city'), 'Wien');
+
+      // 2 · the geocode finds nothing, so the V1 containment_check tray opens.
+      await vi.waitFor(
+        () => {
+          const groups = locationResolution
+            .disambiguationGroups()
+            .filter((g) => g.disambiguationKind === 'containment_check');
+          expect(groups.length).toBe(1);
+        },
+        { timeout: 5000 },
+      );
+      const containmentGroup = locationResolution
+        .disambiguationGroups()
+        .find((g) => g.disambiguationKind === 'containment_check')!;
+
+      // 3 · "Keep" must actually resume the job, not only close the tray.
+      locationResolution.applyContainmentCheckChoice(
+        containmentGroup.id,
+        CONTAINMENT_CHECK_KEEP_CANDIDATE_ID,
+      );
+
+      await vi.waitFor(
+        () => {
+          expect(service.jobs()[0]?.phase).toBe('complete');
+        },
+        { timeout: 5000 },
+      );
+
+      const job = service.jobs()[0]!;
+      expect(job.coords).toBeUndefined();
+      expect(job.mediaId).toBeTruthy();
+      expect(job.issueKind).toBeUndefined();
+
+      // The kept text address reaches the persist layer, with no coordinates beside it.
+      // (`uploadFile` args: file, manualCoords, …, addressContext — see UploadService.uploadFile.)
+      const uploadArgs = fakeUpload.uploadFile.mock.calls.at(-1)!;
+      expect(uploadArgs[1]).toBeUndefined();
+      const addressContext = uploadArgs[8] as {
+        hasEstablishedTextAddress: boolean;
+        precision: string | null;
+        fields: { street: string | null; city: string | null; houseNumber: string | null };
+      };
+      expect(addressContext.hasEstablishedTextAddress).toBe(true);
+      expect(addressContext.fields.street).toBe('Hauptstraße');
+      expect(addressContext.fields.city).toBe('Wien');
+      expect(addressContext.fields.houseNumber).toBe('5');
+      expect(addressContext.precision).toBe('houseNumber');
+    },
+    15_000,
+  );
+
+  it(
+    '(d5) F-22: answering a layer_package tray uploads the job instead of parking it as "Active"',
+    async () => {
+      const { service, fakeGeocoding, locationResolution } = await setup();
+
+      fakeGeocoding.searchStructuredForward.mockResolvedValue([
+        {
+          lat: 47.0707,
+          lng: 15.4395,
+          displayName: 'Kirchengasse 11, Graz, Österreich',
+          name: 'Kirchengasse 11',
+          importance: 0.97,
+          address: {
+            road: 'Kirchengasse',
+            house_number: '11',
+            postcode: '8010',
+            city: 'Graz',
+            country: 'Österreich',
+            country_code: 'at',
+          },
+        },
+      ]);
+
+      const entries: ScannedFileEntry[] = [
+        {
+          file: makeFile('Schmiedgasse_5.jpg'),
+          relativePath: 'AT/Graz/Kirchengasse 11/Schmiedgasse_5.jpg',
+          directorySegments: ['AT', 'Graz', 'Kirchengasse 11'],
+        },
+      ];
+      await service.submitWebkitFolder(entries, 'Kirchengasse 11');
+
+      await vi.waitFor(() => {
+        const groups = locationResolution
+          .disambiguationGroups()
+          .filter((g) => g.disambiguationKind === 'layer_package');
+        expect(groups.length).toBe(1);
+      });
+
+      const group = locationResolution
+        .disambiguationGroups()
+        .find((g) => g.disambiguationKind === 'layer_package')!;
+      const folderCandidate = group.candidates.find((c) => c.addressLabel.includes('Kirchengasse'))!;
+      locationResolution.applyCandidateToGroup(group.id, folderCandidate.id);
+
+      // Before F-22 the job stopped at `resolving_location` here — placed, but invisible to the
+      // queue drain, sitting in the Active lane forever.
+      await vi.waitFor(
+        () => {
+          expect(service.jobs()[0]?.phase).toBe('complete');
+        },
+        { timeout: 5000 },
+      );
+
+      const job = service.jobs()[0]!;
+      expect(job.mediaId).toBeTruthy();
+      expect(job.coords).toEqual({ lat: 47.0707, lng: 15.4395 });
     },
     15_000,
   );

@@ -39,7 +39,12 @@ describe('MediaDetailDeleteHelper', () => {
   });
 
   it('executes delete when media id is present', async () => {
-    const deleteWithUndo = vi.fn(async () => ({ ok: true }));
+    // The real deleteWithUndo invokes onAfterDelete, which is what clears the confirm state and
+    // calls onDeleted. A fake that only returns { ok: true } cannot satisfy the assertion below.
+    const deleteWithUndo = vi.fn(async ({ onAfterDelete }: { onAfterDelete?: () => void }) => {
+      onAfterDelete?.();
+      return { ok: true };
+    });
     const onDeleted = vi.fn();
     const localHelper = new MediaDetailDeleteHelper({
       services: { mediaDeleteUndo: { deleteWithUndo } as any },

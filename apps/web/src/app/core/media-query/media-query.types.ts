@@ -16,6 +16,18 @@ export interface MediaRecord {
   preview_generation_status?: PreviewGenerationStatus | null;
   /** Client-side name at upload (immutable display label). */
   original_filename?: string | null;
+  /**
+   * Folder path the file arrived with, from the folder scan. Immutable after insert and the source
+   * of truth for "original folder" — `original_filename` is a leaf name and carries no folder for a
+   * directory upload. Present only on reads that select it (media detail), not on list reads.
+   * @see docs/specs/system/deferred-location-resolution.md
+   */
+  relative_path?: string | null;
+  /**
+   * Full EXIF payload captured at ingest, immutable after insert. Selected on the single-row detail
+   * read only — it is a jsonb blob and does not belong in list queries.
+   */
+  exif_raw?: Record<string, unknown> | null;
   latitude: number | null;
   longitude: number | null;
   exif_latitude: number | null;
