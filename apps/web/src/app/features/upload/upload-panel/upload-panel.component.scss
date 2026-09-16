@@ -77,6 +77,27 @@
     border-radius: var(--radius-sm);
   }
 
+  // Dual archive-import figures — files imported + awaiting resolution (never blended).
+  // @see docs/specs/service/media-upload-service/upload-archive-import-mode.md § What "done" means
+  &__archive-progress {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+    margin: 0;
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: var(--font-size-xs);
+    color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 8%, transparent); // emphasis-ok: semantic status chip fill (not hover)
+    border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
+    border-radius: var(--radius-sm);
+  }
+
+  // One of the two independent archive progress lines (finite import vs backlog).
+  // @see docs/specs/service/media-upload-service/upload-archive-import-mode.md § What "done" means
+  &__archive-progress-line {
+    margin: 0;
+  }
+
   // Section header — icon + stacked title/subtitle (sidebar row rhythm).
   // @see apps/web/src/app/features/nav/nav.component.scss
   &__header {

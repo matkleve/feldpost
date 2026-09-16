@@ -414,6 +414,26 @@ export function tokenizeSegment(segment: string): string[] {
     .filter((t) => t.length > 0);
 }
 
+/**
+ * Strip a trailing Windows Explorer copy suffix `(N)` from a path segment or filename.
+ *
+ * Folder: `Wasagasse 4 (1)` → `Wasagasse 4`
+ * File:   `Wasagasse 4 (1).jpg` → `Wasagasse 4.jpg`
+ *
+ * @see docs/specs/service/media-upload-service/upload-search-object.copy-suffix.supplement.md
+ */
+export function stripWindowsCopySuffix(segment: string): string {
+  const trimmed = segment.trim();
+  if (!trimmed) {
+    return trimmed;
+  }
+  const withExtension = trimmed.match(/^(.*?)(\s*\(\d+\))(\.[^.]+)$/u);
+  if (withExtension) {
+    return `${withExtension[1].trimEnd()}${withExtension[3]}`;
+  }
+  return trimmed.replace(/\s*\(\d+\)$/u, '').trimEnd();
+}
+
 export function classifyTokensInSegment(
   tokens: string[],
   geo: {

@@ -37141,6 +37141,68 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.archive.progress.filesImported', 'Files imported: {imported} of {total}', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html archive dual progress finite figure')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Files imported: {imported} of {total}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.archive.progress.filesImported'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Dateien importiert: {imported} von {total}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.archive.progress.filesImported'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'File importati: {imported} di {total}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.archive.progress.filesImported'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.archive.progress.awaitingResolution', 'Awaiting resolution: {count}', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html archive dual progress backlog figure')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Awaiting resolution: {count}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.archive.progress.awaitingResolution'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Warten auf Auflösung: {count}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.archive.progress.awaitingResolution'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'In attesa di risoluzione: {count}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.archive.progress.awaitingResolution'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'upload.fileTypeGroup.images', 'Images', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type group chip label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

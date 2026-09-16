@@ -16,7 +16,8 @@
  *   npm run trace:upload                       # 15 curated files
  *   npm run trace:upload -- --count=150        # + generated corpus
  *   npm run trace:upload -- --count=150 --seed=7 --detail=20 --answer-trays
- *   npm run trace:upload -- --scale=20000      # database-scale cost, classification + job store
+ *   npm run trace:upload -- --scale=1000 --profile=company_area --files-per-location=30
+ *   npm run trace:upload -- --scale=1000 --compare-profiles
  *
  * @see docs/playbooks/upload-pipeline-trace.md
  */
@@ -27,7 +28,12 @@ import { ACTIVE_PHASES } from '../support/upload-phase-transitions';
 import { clearInflightDedupRegistryForTests } from '../support/upload-inflight-dedup.registry';
 import { clearHeicConversionRegistryForTests } from '../support/upload-heic-prepare.util';
 import { TRACE_SCENARIOS, type UploadTraceScenario } from './upload-trace-fixtures';
-import { buildGeneratedScenarios } from './upload-trace-generator';
+import {
+  buildGeneratedScenarios,
+  CORPUS_PROFILES,
+  DEFAULT_FILES_PER_LOCATION,
+  type CorpusProfile,
+} from './upload-trace-generator';
 import { UploadTraceRecorder } from './upload-trace-recorder';
 import { loadRealGeo, runTraceBatch, waitForBatchSettled } from './upload-trace-harness';
 import { autoAnswerTrays } from './upload-trace-tray-answers';
@@ -38,6 +44,7 @@ import {
   SCALE_CAVEAT,
   renderClassifyScale,
   renderJobStoreScale,
+  renderProfileComparison,
   renderScaleHeading,
 } from './upload-trace-scale-report';
 
@@ -61,11 +68,28 @@ const JOB_STORE_SIZES = [100, 1_000, 5_000, 20_000] as const;
 /** Streaming by index must keep memory flat; a leak would blow past this. */
 const MAX_SCALE_HEAP_MB = 512;
 
+const DEFAULT_PROFILE: CorpusProfile = 'adversarial';
+const PROFILE = (process.env['UPLOAD_TRACE_PROFILE'] ?? DEFAULT_PROFILE) as CorpusProfile;
+const FILES_PER_LOCATION = Number(
+  process.env['UPLOAD_TRACE_FILES_PER_LOCATION'] ?? DEFAULT_FILES_PER_LOCATION,
+);
+/**
+ * Profile comparison is on by default — tray volume is folder-shape-dominated, so a single
+ * adversarial number is not a company estimate. Set `UPLOAD_TRACE_COMPARE_PROFILES=0` to skip.
+ */
+const COMPARE_PROFILES = process.env['UPLOAD_TRACE_COMPARE_PROFILES'] !== '0';
+
 function buildCorpus(): UploadTraceScenario[] {
   if (COUNT <= TRACE_SCENARIOS.length) {
     return TRACE_SCENARIOS.slice(0, COUNT);
   }
-  return [...TRACE_SCENARIOS, ...buildGeneratedScenarios(COUNT - TRACE_SCENARIOS.length, SEED)];
+  return [
+    ...TRACE_SCENARIOS,
+    ...buildGeneratedScenarios(COUNT - TRACE_SCENARIOS.length, SEED, {
+      profile: PROFILE,
+      filesPerLocation: FILES_PER_LOCATION,
+    }),
+  ];
 }
 
 /** Optional file sink — the runner script uses it to print a clean report. */
@@ -240,12 +264,48 @@ async function runArchiveImportTrace(): Promise<void> {
  */
 async function runScaleTrace(): Promise<void> {
   const geo = loadRealGeo();
-  const camera = measureClassifyAtScale(SCALE_FILES, SEED, geo, 'camera');
-  const neutral = measureClassifyAtScale(SCALE_FILES, SEED, geo, 'neutral');
+  const detailOptions = {
+    profile: PROFILE,
+    filesPerLocation: FILES_PER_LOCATION,
+  };
+  const camera = measureClassifyAtScale(SCALE_FILES, SEED, geo, {
+    ...detailOptions,
+    naming: 'camera',
+  });
+  const neutral = measureClassifyAtScale(SCALE_FILES, SEED, geo, {
+    ...detailOptions,
+    naming: 'neutral',
+  });
   const jobStore = measureJobStoreAtScale(JOB_STORE_SIZES);
 
   emit(renderScaleHeading());
+  if (COMPARE_PROFILES) {
+    const compared = CORPUS_PROFILES.map((profile) =>
+      measureClassifyAtScale(SCALE_FILES, SEED, geo, {
+        naming: 'camera',
+        profile,
+        filesPerLocation: FILES_PER_LOCATION,
+      }),
+    );
+    emit(renderProfileComparison(compared));
+    emit('');
+    for (const result of compared) {
+      expect(result.distinctGroups).toBeGreaterThan(0);
+      expect(result.distinctGroups).toBeLessThanOrEqual(SCALE_FILES);
+      const grouped = [...result.outcomes.values()].reduce((sum, count) => sum + count, 0);
+      expect(grouped).toBe(SCALE_FILES);
+    }
+    // Company-area packing must collapse to far fewer groups than adversarial chaos.
+    const adversarial = compared.find((row) => row.profile === 'adversarial');
+    const companyArea = compared.find((row) => row.profile === 'company_area');
+    if (adversarial && companyArea && SCALE_FILES >= DEFAULT_FILES_PER_LOCATION) {
+      expect(companyArea.distinctGroups).toBeLessThan(adversarial.distinctGroups);
+      expect(companyArea.trayGroups).toBeLessThanOrEqual(adversarial.trayGroups);
+    }
+  }
+
   emit('  1 · Search Object classification (classifyBatch, synchronous, before any upload)');
+  emit(`  detail profile: ${PROFILE} (filesPerLocation=${FILES_PER_LOCATION})`);
   emit(renderClassifyScale(camera));
   emit(
     '\n  Same folders and shapes, but 6-digit leaf numbers that cannot be read as an AT postcode.\n' +

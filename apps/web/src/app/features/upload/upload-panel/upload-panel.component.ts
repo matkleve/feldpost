@@ -178,6 +178,7 @@ export class UploadPanelComponent implements OnDestroy {
   readonly laneCounts = this.signals.laneCounts;
   readonly scanning = this.signals.scanning;
   readonly scanningLabel = this.signals.scanningLabel;
+  readonly archiveImportProgress = this.signals.archiveImportProgress;
   readonly hasAwaitingPlacement = this.signals.hasAwaitingPlacement;
   readonly showProgressBoard = this.signals.showProgressBoard;
   readonly isDragging = this.inputs.isDragging;
@@ -220,6 +221,24 @@ export class UploadPanelComponent implements OnDestroy {
       this.t('upload.archive.import.label', 'Import archive'),
       'Import archive',
     );
+
+  /** Phase 5.2 — finite import figure label. */
+  archiveFilesImportedLabel(imported: number, total: number): string {
+    return this.t(
+      'upload.archive.progress.filesImported',
+      'Files imported: {imported} of {total}',
+    )
+      .replace('{imported}', `${imported}`)
+      .replace('{total}', `${total}`);
+  }
+
+  /** Phase 5.2 — resolution backlog figure label. */
+  archiveAwaitingResolutionLabel(count: number): string {
+    return this.t(
+      'upload.archive.progress.awaitingResolution',
+      'Awaiting resolution: {count}',
+    ).replace('{count}', `${count}`);
+  }
   readonly takePhotoLabelText = (): string =>
     nonEmptyLocalized(this.t('auto.0349.take_photo', 'Take photo'), 'Take photo');
 
