@@ -617,10 +617,27 @@ and are tested, but an operator cannot reach either:
 | --- | --- | --- | --- |
 | 5.1 | Upload panel: the archive/interactive mode choice | [archive import mode](../specs/service/media-upload-service/upload-archive-import-mode.md) § Actions | Mode is fixed at submit (A1). **UI wired 2026-09-16** — Import archive intake button |
 | 5.2 | Two progress figures, never blended | same § What "done" means | Files imported (finite) + items awaiting resolution (backlog). **Wired 2026-09-16**; `missing_data` counts toward import progress |
-| 5.3 | Bulk-resolution adapters: `geocode` / `applyToItem` | [bulk resolution](../specs/page/files-page.bulk-resolution.supplement.md) | The engine is done; these are the only injected effects it lacks |
+| 5.3 | Bulk-resolution adapters: `geocode` / `applyToItem` | [bulk resolution](../specs/page/files-page.bulk-resolution.supplement.md) | **Built 2026-09-18** — `bulk-resolution.adapter.ts`. Wiring it found a real defect in the engine: see below |
 | 5.4 | Selection UI + confirmation summary | same, R1/R7 | Plan already reports `eligibleCount`, `geocodeCount`, per-group label |
 | 5.5 | `/files` tree + its two aggregate RPCs | [files-page](../specs/page/files-page.md) | `relative_path` is already read; aggregation must stay in SQL |
 | 5.6 | *Add as location* row actions in media detail | [deferred location resolution](../specs/system/deferred-location-resolution.md) § Actions | The row slots already exist and are empty |
+
+**What wiring 5.3 found.** The engine's geocode result was typed `{ addressLabel, lat, lng }`.
+`updateFromAddressSuggestion` derives address precision from `city` / `street` / `streetNumber` /
+`zip` / `country` (`geocodeResultToPrecisionFields`), so that narrower shape would have written
+**every bulk-resolved item with coordinates and no address** — silently, since nothing throws. The
+runner is now generic over the suggestion type and passes through whatever `geocode` returned.
+
+A second, smaller one came from the typechecker rather than a test: `ReverseGeocodeResult` carries no
+`lat`/`lng`, because it answers *what is at this point* rather than locating one. The adapter carries
+the photo's own coordinates forward instead of taking the geocoder's idea of where the address is —
+otherwise an EXIF-sourced run would move items to the geocoded address rather than where the camera
+stood, which is the distinction [STUDY-007](./007-exif-coordinates-as-address-evidence.md) is
+entirely about. Both are now pinned by tests.
+
+Worth recording as a pattern: **an injected-effect engine is only as honest as its first real
+adapter.** Both defects were invisible while every effect was a `vi.fn()` returning a convenient
+shape.
 
 **Decided but unbuilt:**
 

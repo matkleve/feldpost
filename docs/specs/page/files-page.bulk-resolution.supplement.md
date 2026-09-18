@@ -74,9 +74,20 @@ Addresses are derived with `buildSearchObjectFromRelativePath`, the **same** fun
 pipeline uses. That is what makes a folder answered in bulk identical to the same folder answered one
 file at a time, rather than a second interpretation of the same path.
 
-**Still to wire:** the UI that builds the selection and shows the confirmation, and the adapters that
-supply `geocode` / `applyToItem` from the existing services. The decision logic is done; the
-plumbing is not.
+**Adapters, 2026-09-18** (`bulk-resolution.adapter.ts`). The only place bulk resolution touches
+`GeocodingService` or `MediaLocationUpdateService`. It guarantees two things the engine cannot:
+
+- **The whole geocode result passes through.** `updateFromAddressSuggestion` reads `city` /
+  `street` / `streetNumber` / `zip` / `country`; anything narrower writes coordinates with no
+  address. The runner is generic over the suggestion type for exactly this reason.
+- **Nothing thrown escapes.** A geocoder outage or a rejected row becomes a reported outcome, since
+  the engine's contract is that a failure never aborts the run.
+
+On the EXIF path the adapter carries the **photo's own coordinates** forward: `ReverseGeocodeResult`
+has no `lat`/`lng` because it names a point rather than locating one, and taking the geocoder's
+position instead would move the item to the address rather than to where the camera stood.
+
+**Still to wire:** the UI that builds the selection and shows the confirmation (5.4).
 
 ## Acceptance Criteria
 
