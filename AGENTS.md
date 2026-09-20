@@ -98,6 +98,7 @@ Verification floor for any behavior change: `grep` the removed symbol/field/conc
 
 ## Required Feature Workflow
 
+0. **Read the issue tracker first, update it last.** Search open issues for the area before starting, file what you find in passing *when you find it*, and on finishing update every issue you touched — ticking only criteria actually met and naming those you did not. Rules: [`agent-daily-workflow.md`](docs/agent-workflows/agent-daily-workflow.md) § Step 0.
 1. Read the target element spec: `docs/specs/...`
 2. Read the relevant **service facade spec** under `docs/specs/service/<module>/` when the feature depends on that boundary (index: `docs/specs/service/README.md`).
 3. Read additional design docs only if the spec or service contract does not answer the question.
