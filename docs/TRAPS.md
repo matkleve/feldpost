@@ -50,6 +50,7 @@ Entries are numbered, never renumbered, and never deleted. Order is by cost, not
 | [TRAP-020](#trap-020--a-circular-import-between-two-trace-fixture-modules-silently-zeroed-three-files) | A circular import between two modules silently zeroed three fixture files | `pattern open` |
 | [TRAP-021](#trap-021--a-resolution-event-with-zero-subscribers-looks-like-it-resumed-the-job) | A resolution event with zero subscribers looks like it resumed the job | `pattern open` |
 | [TRAP-022](#trap-022--vimock-is-unreliable-under-the-angular-unit-test-builder-and-fails-silently) | `vi.mock()` is unreliable under the Angular unit-test builder, and fails silently | `pattern open` |
+| [TRAP-023](#trap-023--the-suite-did-not-run-is-a-spec-compile-error-the-pre-flight-type-check-does-not-catch) | "the suite did not run" is a spec compile error the pre-flight type-check does not catch | `pattern open` |
 
 ---
 
@@ -452,6 +453,54 @@ diaries [`2026-09-16`](./ai-diary/2026-09-16.md) and [`2026-09-18`](./ai-diary/2
 **Status** — `pattern open` 2026-09-20. The three instances are fixed and the gate is at zero across
 three cold runs, but nothing stops the next spec reaching for `vi.mock` — it is the obvious move,
 and it fails quietly.
+
+---
+
+## TRAP-023 — "the suite did not run" is a spec compile error the pre-flight type-check does not catch
+
+**Surface** — the verify `test` gate fails with no failing-test list at all:
+
+```
+✗ test
+    no test report was written — the suite did not run
+✗ verify failed: test
+```
+
+**Assumption** — the suite is fine and something about the runner broke: a worker died, the JSON
+report path moved, the machine ran out of memory. Nothing names a file, so nothing points at the
+change just made. And the change *was* checked — `npx tsc --noEmit -p tsconfig.spec.json` was clean
+and `npx vitest run <dir>` was green.
+
+**Truth** — it is almost always a **type error in a spec**, and the two checks above do not see it.
+`@angular/build:unit-test` type-checks the specs through the Angular compiler plugin as it bundles
+them; that build is stricter than `tsconfig.spec.json`, and a direct `vitest run` transpiles without
+type-checking at all. One error there aborts the bundle, so **zero** tests execute and the gate has
+no report to read. Two instances in one week:
+
+| Change | Real cause | Passed `tsc -p tsconfig.spec.json`? |
+| --- | --- | --- |
+| a tray spec | missing `UploadDisambiguationGroup` type import | yes |
+| `media-folder-tree.service.spec.ts` | `setup(rpc = vi.fn(async () => ({ data: [], error: null })))` inferred the parameter from its own default, so `data` was `never[]` and every caller passing real rows was rejected | yes |
+
+The second shape is worth naming on its own: **a test helper whose parameter type is inferred from
+its default argument**. The default is the emptiest case — `[]`, `null`, `{}` — so the inferred type
+is the narrowest one (`never[]`), and every honest caller fails against it.
+
+**Detect** — read the gate's output **above** the summary line, not just the summary. The compiler
+errors are printed in full, tagged `[plugin angular-compiler]`, with file and line; the summary
+simply has no report to describe. An empty failing-file list (`grep -E "^ FAIL"` returning nothing)
+confirms "did not run" rather than "tests failed".
+
+**Instead** — reproduce with the gate itself (`node scripts/verify.mjs test`), not with `tsc` or a
+scoped `vitest run`; those two agreeing green is exactly the state this trap produces. For the helper
+shape, give every shared spec helper an explicit parameter type and leave the default as a value, not
+a type source.
+
+**Source** — Phase 5.5, 2026-09-20; commit `f199e06b` fixing `9a43b638`, which was pushed before the
+gate reported.
+
+**Status** — `pattern open` 2026-09-20. Both instances are fixed. The message stays misleading: the
+gate reports the *consequence* (no report) where the *cause* (a compile error) is already on screen.
 
 ---
 
