@@ -18,6 +18,19 @@ export interface UploadLocationConfig {
    */
   exifAssistRadiusMeters: number;
   /**
+   * Meters: house-scale radius for D-09 — may EXIF supply a house number for a street the path
+   * established without one. **Deliberately not `exifAssistRadiusMeters`.** That value answers
+   * "which of these candidates does the GPS favour", where 80 m usefully contains one candidate;
+   * this one answers "is this the house", where 80 m contains an entire terrace row. A separate
+   * constant also stops the two meanings being tuned into each other later.
+   *
+   * `null` keeps the rule inert. STUDY-007 § 7 declines to name a value without a real device
+   * export, and a guessed default would be exactly the invented precision the rule exists to
+   * prevent — so the number is an explicit decision, not a default. Issue #221.
+   * @see docs/specs/service/media-upload-service/upload-exif-house-number.supplement.md
+   */
+  exifHouseNumberRadiusMeters: number | null;
+  /**
    * Meters: when SO has units and Photon returns multiple hits, pairwise distance above this
    * keeps ambiguous tray (units are not added to grouping_key).
    * @see docs/specs/service/media-upload-service/upload-search-object.md#photon-multi-hit-gate
@@ -74,6 +87,8 @@ export const DEFAULT_UPLOAD_LOCATION_CONFIG: UploadLocationConfig = {
   sourceAgreementRadiusMeters: 150,
   mismatchToleranceMeters: 15,
   exifAssistRadiusMeters: 80,
+  // Unset on purpose — see the field's doc comment. Setting a number turns D-09 on.
+  exifHouseNumberRadiusMeters: null,
   unitGeocodeSplitMinMeters: 25,
   exifContextCheck: true,
   defaultGeocodeCountry: 'AT',
