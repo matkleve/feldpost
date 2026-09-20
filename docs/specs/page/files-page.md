@@ -82,17 +82,19 @@ FilesComponent (/files)
 | --- | --- | --- |
 | `media_items` | `relative_path` | **Persisted today, not read today** — see Prerequisite |
 | `media_items` | `id`, `location_status`, `captured_at`, `thumbnail_path`, `storage_path` | already selected by the workspace read model |
-| `locations` | address fields | written by bulk resolution, not read for the tree |
-| new RPC | `list_media_folder_children(prefix)` | returns child segments + file/unresolved counts |
-| new RPC | `list_media_in_folder(prefix, recursive)` | paginated file rows |
+| `locations` | address fields | written by bulk resolution, not read here |
+| RPC | `list_media_folder_children(prefix)` | child segments + file/unresolved counts |
+| RPC | `list_media_in_folder(prefix, recursive)` | paginated file rows |
 
-**Prerequisite — done 2026-09-15.** `relative_path` was stored but selected nowhere, so nothing could
-be grouped by folder. It is now selected in the media list reads (`media-query.service.ts`) and on
-the detail read, and carried on `MediaRecord`. What remains here is the tree and its aggregate RPCs.
+**Prerequisite — done 2026-09-15.** `relative_path` was stored but selected nowhere; it is now read
+in the media list and detail queries and carried on `MediaRecord`.
 
-**Aggregation belongs in SQL.** Counting a subtree client-side means fetching every row; at 100 000
-items that repeats the mistake Phase 3 just removed. The two RPCs above MUST aggregate server-side
-and MUST be `organization_id`-scoped by the same RLS as `media_items`.
+**Aggregation belongs in SQL.** Counting a subtree client-side means fetching every row — at 100 000
+items, the cost Phase 3 removed. Both RPCs MUST aggregate server-side and MUST be
+`organization_id`-scoped by the same RLS as `media_items`.
+
+**Implementation status, and an unmet verification requirement:**
+[files-page.tree-rpcs.supplement.md](./files-page.tree-rpcs.supplement.md).
 
 ## State
 
@@ -140,10 +142,4 @@ apply action is the page's single high-attention control and takes **brand gold*
 toggles are passive context (cool blue) per
 [state-visuals § Interaction emphasis](../../design/state-visuals.md).
 
-## Risks
-
-- **Silent merge across imports.** The chosen scope merges identical paths; mitigated by showing the
-  upload batch per file, not by splitting the tree. Revisit if operators report confusion.
-- **Bulk writes are irreversible at scale.** Applying an address to 5 000 files must be confirmable and reportable — a hard requirement in the supplement.
-- **A tree is a second organising axis.** Address stays canonical; this page must not become a
-  parallel place where location is "really" stored.
+**Risks:** see [tree RPCs supplement](./files-page.tree-rpcs.supplement.md) § Risks.

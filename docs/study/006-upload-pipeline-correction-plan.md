@@ -619,7 +619,7 @@ and are tested, but an operator cannot reach either:
 | 5.2 | Two progress figures, never blended | same § What "done" means | Files imported (finite) + items awaiting resolution (backlog). **Wired 2026-09-16**; `missing_data` counts toward import progress |
 | 5.3 | Bulk-resolution adapters: `geocode` / `applyToItem` | [bulk resolution](../specs/page/files-page.bulk-resolution.supplement.md) | **Built 2026-09-18** — `bulk-resolution.adapter.ts`. Wiring it found a real defect in the engine: see below |
 | 5.4 | Selection UI + confirmation summary | same, R1/R7 | **Service built 2026-09-20** — `BulkResolutionService.plan()` / `.run()`, plan/run split so nothing is written before confirmation. The dialog that renders the plan is the remaining piece |
-| 5.5 | `/files` tree + its two aggregate RPCs | [files-page](../specs/page/files-page.md) | `relative_path` is already read; aggregation must stay in SQL |
+| 5.5 | `/files` tree + its two aggregate RPCs | [files-page](../specs/page/files-page.md) | **Client facade built and tested 2026-09-20. The migration is written but NOT live-verified** — see the blocker below. The tree component is still to build |
 | 5.6 | *Add as location* row actions in media detail | [deferred location resolution](../specs/system/deferred-location-resolution.md) § Actions | The row slots already exist and are empty |
 
 **What 5.4 found.** `location_unresolved` is derived in **two places that disagree** —
@@ -649,6 +649,30 @@ entirely about. Both are now pinned by tests.
 Worth recording as a pattern: **an injected-effect engine is only as honest as its first real
 adapter.** Both defects were invisible while every effect was a `vi.fn()` returning a convenient
 shape.
+
+**5.5 has a blocker this environment cannot clear.** The two RPCs are `SECURITY DEFINER` functions
+that read `media_items` and scope by `organization_id` — which AGENTS.md classes **Sensitive**, with
+live verification and `/security-review` mandatory. This environment has `psql` but no database
+URL, no Supabase CLI and no credentials, so the migration
+(`20260920120000_media_folder_tree_rpcs.sql`) has **never been applied or executed**. It follows the
+two established idioms exactly, and the file says so in a banner at the top, but *"follows the
+idiom"* is not *"verified"*, and the gap is in the one area where a mistake leaks another
+organization's rows.
+
+**Before that migration merges it needs:** apply, the matching `validate-*-rls.sql`, a
+cross-organization read that must return nothing, and `/security-review`.
+
+Two details in it worth not losing, both learned from existing migrations rather than invented:
+
+- Matching uses `starts_with()`, **not** `LIKE`. A folder name may legitimately contain `%` or `_`,
+  and `LIKE` would read those as wildcards — silently folding unrelated folders into one node.
+- The grants revoke from **`anon` as well as `PUBLIC`**. Supabase grants EXECUTE on every new
+  function to `anon` as its own role grant, and revoking from `PUBLIC` alone does not strip it —
+  the gap that made every "authenticated only" RPC anon-callable until
+  `20260911120000_revoke_anon_execute_on_authenticated_rpcs.sql`.
+
+The tree's unresolved badge uses the **same predicate** as bulk eligibility (`NOT IN ('resolved',
+'gps')`). If those two ever drift apart the badge becomes a number the user cannot act on.
 
 **Decided but unbuilt:**
 
