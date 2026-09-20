@@ -72,6 +72,7 @@ import { UploadPanelDialogActionsService } from './upload-panel-dialog-actions.s
 import { UploadPanelMenuActionRouterService } from './upload-panel-menu-action-router.service';
 import { UploadPanelRegistrationService } from './upload-panel-registration.service';
 import { UploadPanelRowInteractionsService } from './upload-panel-row-interactions.service';
+import { DeferredLocationCountService } from '../../../core/media-location-bulk/deferred-location-count.service';
 import { UploadPanelSetupService } from './upload-panel-setup.service';
 import type {
   MapMarkerImageUploadedEvent,
@@ -150,6 +151,7 @@ export class UploadPanelComponent implements OnDestroy {
   private readonly setup = inject(UploadPanelSetupService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly rowInteractions = inject(UploadPanelRowInteractionsService);
+  private readonly deferredCounts = inject(DeferredLocationCountService);
   readonly actionHandlers = this.jobActions;
   readonly inputHandlers = this.inputs;
   readonly laneHandlers = this.lanes;
@@ -239,6 +241,36 @@ export class UploadPanelComponent implements OnDestroy {
       'Awaiting resolution: {count}',
     ).replace('{count}', `${count}`);
   }
+  /**
+   * The deferred-location backlog (#232).
+   *
+   * Deliberately **not** the archive-import figures above it. Those count `UploadJob`s in the
+   * current batch and disappear with the session; these come from `media_items` and are still here
+   * in a tab opened tomorrow with nothing uploading. STUDY-009 § Correction 3: a question the
+   * pipeline did not ask is a decision taken on the user's behalf, and it is only legitimate if the
+   * user can see it was taken.
+   */
+  readonly deferredBacklog = this.deferredCounts.counts;
+
+  /** Hidden at zero: an empty backlog is not news, and the intake area is not a dashboard. */
+  readonly showDeferredBacklog = computed(() => (this.deferredBacklog()?.total ?? 0) > 0);
+
+  /** #232: "has no location" — nothing was established for these at all. */
+  deferredNoLocationLabel(count: number): string {
+    return this.t(
+      'upload.deferred.backlog.noLocation',
+      '{count} items have no location',
+    ).replace('{count}', `${count}`);
+  }
+
+  /** #232: "could be more precise" — an address was established, coordinates were not. */
+  deferredImprovableLabel(count: number): string {
+    return this.t(
+      'upload.deferred.backlog.improvable',
+      '{count} items could be located more precisely',
+    ).replace('{count}', `${count}`);
+  }
+
   readonly takePhotoLabelText = (): string =>
     nonEmptyLocalized(this.t('auto.0349.take_photo', 'Take photo'), 'Take photo');
 
@@ -274,6 +306,10 @@ export class UploadPanelComponent implements OnDestroy {
   private modalFocusTrap: UploadPanelFocusTrap | null = null;
 
   constructor() {
+    // Count once when the panel is constructed. The tab is persistent, so this is per session, not
+    // per render — `refresh()` also collapses concurrent callers into one run.
+    void this.deferredCounts.refresh();
+
     effect(() => {
       if (!this.visible()) {
         this.clearPinnedFileTypeGroup();

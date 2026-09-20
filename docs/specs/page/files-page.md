@@ -5,6 +5,7 @@
 **Parent:** Authenticated app layout (split host) — see [workspace-pane § Layout host](../ui/workspace/workspace-pane.md#layout-host-canonical); `FilesComponent` renders inside the layout's `router-outlet` main column.
 **Decision:** [STUDY-006 D-04 / Phase 4](../../study/006-upload-pipeline-correction-plan.md) · **Findings:** [F-08](../../study/005-upload-pipeline-trace-findings.md#f-08)
 **Detail:** [files-page.bulk-resolution.supplement.md](./files-page.bulk-resolution.supplement.md)
+**Detail:** [files-page.deferred-improvement.supplement.md](./files-page.deferred-improvement.supplement.md) — the standing backlog figures and why they are two numbers
 
 ---
 

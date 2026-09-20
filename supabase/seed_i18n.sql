@@ -37203,6 +37203,68 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.deferred.backlog.noLocation', '{count} items have no location', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html deferred location backlog figure')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '{count} items have no location', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.deferred.backlog.noLocation'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '{count} Objekte haben keinen Standort', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.deferred.backlog.noLocation'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '{count} elementi non hanno una posizione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.deferred.backlog.noLocation'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.deferred.backlog.improvable', '{count} items could be located more precisely', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html deferred location backlog figure')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '{count} items could be located more precisely', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.deferred.backlog.improvable'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '{count} Objekte koennten genauer verortet werden', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.deferred.backlog.improvable'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '{count} elementi potrebbero essere localizzati con maggiore precisione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.deferred.backlog.improvable'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'upload.fileTypeGroup.images', 'Images', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html file-type group chip label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

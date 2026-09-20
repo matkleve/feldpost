@@ -65,6 +65,31 @@
       </div>
     }
 
+    <!--
+      Stable state: deferred location backlog (#232, STUDY-009 idea C).
+      Two figures, never blended — "has no location" and "could be more precise" are different
+      jobs, and one merged number is one the user cannot plan against. Sourced from media_items,
+      not from the current batch, so it outlives the upload session.
+      @see docs/specs/page/files-page.deferred-improvement.supplement.md
+    -->
+    @if (showDeferredBacklog()) {
+      @if (deferredBacklog(); as backlog) {
+        <div
+          class="upload-panel__deferred-backlog"
+          role="status"
+          aria-live="polite"
+          data-state="deferred-backlog"
+        >
+          <p class="upload-panel__deferred-backlog-line">
+            {{ deferredNoLocationLabel(backlog.noLocation) }}
+          </p>
+          <p class="upload-panel__deferred-backlog-line">
+            {{ deferredImprovableLabel(backlog.improvable) }}
+          </p>
+        </div>
+      }
+    }
+
     <!-- Drop zone shell: clickable dropzone + chip row (siblings — no nested interactives). -->
     <div
       class="upload-panel__dropzone-shell"

@@ -261,6 +261,32 @@ concentrated: priority is useful on its own (it makes `house_step` demotable tod
 surface is useful on its own (it clears archive-import deferrals, which already exist and have no
 home). Only **B** has to wait for a number.
 
+## What building A and C changed in this reasoning
+
+**Written 2026-09-20, after implementing both.** Two corrections the study could not have made from
+reading alone:
+
+`[A]` **C's discriminator is `location_status = 'partial'`, not distance or coordinates.**
+`resolveUploadLocationStatus` writes `partial` for exactly one case — an address established, no
+coordinates — which is the D-10 area-only result and is literally *"has a location that could be
+more precise"*. Coordinates looked like the natural signal and are the wrong one twice: they live on
+the linked `locations` row rather than on `media_items`, so every count would need a join, and the
+population this figure is about has none by design.
+
+`[A]` **C's surface is smaller than the study assumed, and its click-through is blocked.** The study
+said C *"overlaps almost exactly with the unbuilt `/files` tree badge (#220) and the bulk dialog
+(#219)"*. `/files` turns out not to exist at all — no route, no component, only a spec — and #220 is
+gated behind #217, whose migration has never been applied. So C could not be built as "one surface
+rather than three". The figures now live in the workspace pane's Upload tab, which is persistent and
+therefore satisfies *"outlives the upload session"*; the run they should start still waits on #219,
+because writing without R7's confirmation would create the second write path the bulk supplement
+exists to prevent.
+
+`[B]` **A's invariant landed before the budget, as intended, and cost nothing.** The
+`Record<UploadDisambiguationKind, …>` annotation means the kind `exif_house_number` cannot be added
+by #221 without a priority being chosen for it. That is the cheapest possible version of *"the
+budget cannot be built wrong"*, and it is in place with no budget in sight.
+
 ## Out of scope
 
 | Topic | Why |

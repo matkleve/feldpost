@@ -13,6 +13,7 @@ import {
 } from '../../../core/upload/upload-manager.service';
 import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
 import { WORKSPACE_PANE_SHELL_HOST } from '../../../core/workspace-pane/workspace-pane-shell-host.token';
+import { DeferredLocationCountAdapter } from '../../../core/media-location-bulk/deferred-location-count.adapter';
 
 export function buildFakeUploadManager() {
   const jobsSignal = signal<ReadonlyArray<UploadJob>>([]);
@@ -75,21 +76,37 @@ export type UploadPanelSetupResult = {
   component: UploadPanelComponent;
   ref: ComponentRef<UploadPanelComponent>;
   fakeManager: FakeUploadManager;
+  fakeDeferredCounts: FakeDeferredLocationCountAdapter;
 };
 
-export async function setupUploadPanel(
-  options: {
-    initialJobs?: ReadonlyArray<UploadJob>;
-    /** Skip the initial detectChanges so callers can set inputs first. */
-    deferChangeDetection?: boolean;
-  } = {},
-): Promise<UploadPanelSetupResult> {
-  const fakeManager = buildFakeUploadManager();
-  const fakeWorkspaceView = {
-    selectedProjectIds: signal<Set<string>>(new Set()).asReadonly(),
-  };
+/**
+ * The panel reads the deferred-location backlog (#232). Every panel spec gets a counting adapter
+ * that answers from memory, because the alternative is each of them reaching a real Supabase client
+ * to render a header figure. Specs that care about the figures pass their own `deferredCounts`.
+ */
+export interface FakeDeferredLocationCounts {
+  all: number;
+  byStatus: Record<string, number>;
+}
 
-  const fakeShellHost = {
+export interface FakeDeferredLocationCountAdapter {
+  countAll: ReturnType<typeof vi.fn>;
+  countWithStatusIn: ReturnType<typeof vi.fn>;
+}
+
+export function buildFakeDeferredLocationCountAdapter(
+  counts: FakeDeferredLocationCounts = { all: 0, byStatus: {} },
+): FakeDeferredLocationCountAdapter {
+  return {
+    countAll: vi.fn(async () => counts.all),
+    countWithStatusIn: vi.fn(async (statuses: readonly string[]) =>
+      statuses.reduce((sum, status) => sum + (counts.byStatus[status] ?? 0), 0),
+    ),
+  };
+}
+
+function buildFakeShellHost(): Record<string, ReturnType<typeof vi.fn>> {
+  return {
     openDetailView: vi.fn(),
     closeDetailView: vi.fn(),
     closeWorkspacePane: vi.fn(),
@@ -105,6 +122,25 @@ export async function setupUploadPanel(
     onWorkspaceItemHoverStartedFromPane: vi.fn(),
     onWorkspaceItemHoverEndedFromPane: vi.fn(),
   };
+}
+
+export async function setupUploadPanel(
+  options: {
+    initialJobs?: ReadonlyArray<UploadJob>;
+    /** Skip the initial detectChanges so callers can set inputs first. */
+    deferChangeDetection?: boolean;
+    /** Backlog figures the counting adapter should report. Defaults to an empty library. */
+    deferredCounts?: FakeDeferredLocationCounts;
+  } = {},
+): Promise<UploadPanelSetupResult> {
+  const fakeManager = buildFakeUploadManager();
+  const fakeWorkspaceView = {
+    selectedProjectIds: signal<Set<string>>(new Set()).asReadonly(),
+  };
+
+  const fakeDeferredCounts = buildFakeDeferredLocationCountAdapter(options.deferredCounts);
+
+  const fakeShellHost = buildFakeShellHost();
 
   await TestBed.configureTestingModule({
     imports: [UploadPanelComponent],
@@ -112,6 +148,10 @@ export async function setupUploadPanel(
       { provide: UploadManagerService, useValue: fakeManager },
       { provide: WorkspaceViewService, useValue: fakeWorkspaceView },
       { provide: WORKSPACE_PANE_SHELL_HOST, useValue: fakeShellHost },
+      {
+        provide: DeferredLocationCountAdapter,
+        useValue: fakeDeferredCounts,
+      },
     ],
   }).compileComponents();
 
@@ -132,5 +172,6 @@ export async function setupUploadPanel(
     component,
     ref,
     fakeManager,
+    fakeDeferredCounts,
   };
 }
