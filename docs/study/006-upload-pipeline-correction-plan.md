@@ -618,9 +618,20 @@ and are tested, but an operator cannot reach either:
 | 5.1 | Upload panel: the archive/interactive mode choice | [archive import mode](../specs/service/media-upload-service/upload-archive-import-mode.md) § Actions | Mode is fixed at submit (A1). **UI wired 2026-09-16** — Import archive intake button |
 | 5.2 | Two progress figures, never blended | same § What "done" means | Files imported (finite) + items awaiting resolution (backlog). **Wired 2026-09-16**; `missing_data` counts toward import progress |
 | 5.3 | Bulk-resolution adapters: `geocode` / `applyToItem` | [bulk resolution](../specs/page/files-page.bulk-resolution.supplement.md) | **Built 2026-09-18** — `bulk-resolution.adapter.ts`. Wiring it found a real defect in the engine: see below |
-| 5.4 | Selection UI + confirmation summary | same, R1/R7 | Plan already reports `eligibleCount`, `geocodeCount`, per-group label |
+| 5.4 | Selection UI + confirmation summary | same, R1/R7 | **Service built 2026-09-20** — `BulkResolutionService.plan()` / `.run()`, plan/run split so nothing is written before confirmation. The dialog that renders the plan is the remaining piece |
 | 5.5 | `/files` tree + its two aggregate RPCs | [files-page](../specs/page/files-page.md) | `relative_path` is already read; aggregation must stay in SQL |
 | 5.6 | *Add as location* row actions in media detail | [deferred location resolution](../specs/system/deferred-location-resolution.md) § Actions | The row slots already exist and are empty |
+
+**What 5.4 found.** `location_unresolved` is derived in **two places that disagree** —
+`media-query.service.ts` counts `'partial'` as unresolved, `media-detail-data.facade.ts` does not.
+Bulk eligibility therefore reads `location_status` directly rather than inheriting a disagreement
+that has nothing to do with it. Worth a separate look: two mappers producing different answers for
+the same row is a bug waiting for whoever next trusts that field.
+
+Also decided there: `unresolvable` **is** eligible for bulk resolution. The pipeline gave up on those
+items, and a human answer applied folder-wide is exactly what that case needs — excluding them would
+leave the hardest items permanently out of reach of the tool built for them. An unknown or absent
+status is eligible too, because a silent skip is invisible while an unwanted offer is not.
 
 **What wiring 5.3 found.** The engine's geocode result was typed `{ addressLabel, lat, lng }`.
 `updateFromAddressSuggestion` derives address precision from `city` / `street` / `streetNumber` /
