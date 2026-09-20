@@ -65,9 +65,30 @@
     </div>
   }
 
-  <div class="detail-row detail-row--readonly">
+  <div
+    class="detail-row detail-row--readonly detail-row--path-location-add"
+    [attr.data-state]="folderLocationAddState()"
+  >
     <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
-    <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+    @if (folderLocationAddState() !== 'hidden') {
+      <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        class="detail-row-action detail-row-action--l1"
+        type="button"
+        [disabled]="saving() || folderLocationAddState() === 'resolving'"
+        [attr.aria-label]="t('workspace.imageDetail.action.addFolderToLocations.aria', 'Resolve a location from this folder path and add it')"
+        [attr.title]="t('workspace.imageDetail.action.addFolderToLocations', 'Add as location')"
+        (click)="pathToLocationRequested.emit('folder')"
+      >
+        <span class="material-icons" aria-hidden="true">{{
+          folderLocationAddState() === 'resolving' ? 'progress_activity' : 'add_location'
+        }}</span>
+      </button>
+    } @else {
+      <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+    }
     <div class="detail-row__center">
       <span class="material-icons detail-row__icon" aria-hidden="true">folder</span>
       <span class="detail-row__label">{{
@@ -83,9 +104,30 @@
     <span class="detail-row-action detail-row-action--r2" aria-hidden="true"></span>
   </div>
 
-  <div class="detail-row detail-row--readonly">
+  <div
+    class="detail-row detail-row--readonly detail-row--path-location-add"
+    [attr.data-state]="filenameLocationAddState()"
+  >
     <span class="detail-row-action detail-row-action--l2" aria-hidden="true"></span>
-    <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+    @if (filenameLocationAddState() !== 'hidden') {
+      <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        class="detail-row-action detail-row-action--l1"
+        type="button"
+        [disabled]="saving() || filenameLocationAddState() === 'resolving'"
+        [attr.aria-label]="t('workspace.imageDetail.action.addFilenameToLocations.aria', 'Resolve a location from this file name and add it')"
+        [attr.title]="t('workspace.imageDetail.action.addFilenameToLocations', 'Add as location')"
+        (click)="pathToLocationRequested.emit('filename')"
+      >
+        <span class="material-icons" aria-hidden="true">{{
+          filenameLocationAddState() === 'resolving' ? 'progress_activity' : 'add_location'
+        }}</span>
+      </button>
+    } @else {
+      <span class="detail-row-action detail-row-action--l1" aria-hidden="true"></span>
+    }
     <div class="detail-row__center">
       <span class="material-icons detail-row__icon" aria-hidden="true">drive_file_rename_outline</span>
       <span class="detail-row__label">{{
@@ -94,9 +136,7 @@
       <span
         class="detail-row__value detail-row__value--static"
         [attr.title]="originalFilenameLabel() ?? null"
-        >{{
-          originalFilenameLabel() ?? t('workspace.imageDetail.value.empty', '—')
-        }}</span
+        >{{ originalFilenameLabel() ?? t('workspace.imageDetail.value.empty', '—') }}</span
       >
     </div>
     <span class="detail-row-action detail-row-action--r1" aria-hidden="true"></span>

@@ -85,6 +85,24 @@ read-only rows, each with four empty action slots (`detail-row-action--l1/l2/r1/
 The action reuses the existing resolution services. It MUST NOT introduce a second way to write a
 location — same evidence model, same derivation, same trays.
 
+**Implemented 2026-09-20.** The row action runs the **bulk** engine on a selection of one
+(`BulkResolutionService.plan([media], { source })` then `.run(plan)`), rather than a single-item
+service of its own. That is how the rule above is kept by construction instead of by two
+implementations agreeing: the address is derived by the pipeline's own
+`buildSearchObjectFromRelativePath`, so one item answered here and the same folder answered in bulk
+produce the same write.
+
+Row 4 (ambiguous → the normal tray) is **not** built. The bulk engine geocodes and writes; it has no
+tray path. An item whose source yields no usable address is reported
+(`no_address_in_source` → `workspace.imageDetail.toast.pathLocationNoAddress`), not queued as a
+question. Opening a single-item tray from here is separate work, and is the one part of this table
+still outstanding.
+
+Visibility, states and the transition map: [media-detail-inline-section
+spec](../ui/media-detail/media-detail-inline-section.md#path--location-fsm). Eligibility uses
+`isBulkEligibleStatus` — the same predicate bulk resolution uses — so a row offered in the detail
+view is a row a bulk run would also act on.
+
 ## Component Hierarchy
 
 ```
@@ -121,7 +139,8 @@ SelectionActionBar (media / workspace contexts)
 | `core/upload/manager/upload-manager-submit.util.ts` | honour `optional` by skipping classify |
 | `core/workspace-view/workspace-view.service.ts` | select `relative_path`, `exif_raw` |
 | `shared/workspace-pane/media-detail/media-detail-inline-section/` | row actions |
-| `core/media-location/deferred-resolution.service.ts` | one engine for single and batch runs |
+| `core/media-location-bulk/bulk-resolution.service.ts` | one engine for single and batch runs — `plan()` / `run()` |
+| `shared/workspace-pane/media-detail/media-detail-path-location-add.state.ts` | the row FSM and its visibility rule |
 | `docs/specs/system/action-context-matrix.md` | register the batch action |
 
 ## Acceptance Criteria

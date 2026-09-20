@@ -44580,4 +44580,252 @@ on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.action.addFolderToLocations', 'Compact button on the Original folder row that resolves a location from the folder path', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-inline-section/media-detail-inline-section.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Add as location', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.addFolderToLocations'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Als Standort hinzufügen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.addFolderToLocations'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Aggiungi come posizione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.addFolderToLocations'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.action.addFolderToLocations.aria', 'Aria label for the Original folder add-as-location button', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-inline-section/media-detail-inline-section.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Resolve a location from this folder path and add it', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.addFolderToLocations.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Aus diesem Ordnerpfad einen Standort ermitteln und hinzufügen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.addFolderToLocations.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ricava una posizione da questo percorso di cartella e aggiungila', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.addFolderToLocations.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.action.addFilenameToLocations', 'Compact button on the Original file name row that resolves a location from the file name', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-inline-section/media-detail-inline-section.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Add as location', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.addFilenameToLocations'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Als Standort hinzufügen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.addFilenameToLocations'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Aggiungi come posizione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.addFilenameToLocations'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.action.addFilenameToLocations.aria', 'Aria label for the Original file name add-as-location button', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-inline-section/media-detail-inline-section.component.html')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Resolve a location from this file name and add it', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.addFilenameToLocations.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Aus diesem Dateinamen einen Standort ermitteln und hinzufügen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.addFilenameToLocations.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ricava una posizione da questo nome file e aggiungila', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.action.addFilenameToLocations.aria'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.toast.pathLocationAdded', 'Toast after a path-derived location add succeeds', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view.component.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Location added', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.pathLocationAdded'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Standort hinzugefügt', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.pathLocationAdded'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Posizione aggiunta', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.pathLocationAdded'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.toast.pathLocationNoAddress', 'Toast when the chosen path carries no readable address', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view.component.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'No address could be read from this path', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.pathLocationNoAddress'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Aus diesem Pfad konnte keine Adresse gelesen werden', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.pathLocationNoAddress'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Da questo percorso non è stato possibile leggere alcun indirizzo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.pathLocationNoAddress'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.toast.pathLocationAlreadyResolved', 'Toast when the item already has a location, so the add action is declined', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view.component.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'This item already has a location', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.pathLocationAlreadyResolved'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Dieses Element hat bereits einen Standort', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.pathLocationAlreadyResolved'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Questo elemento ha già una posizione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.pathLocationAlreadyResolved'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.imageDetail.toast.pathLocationFailed', 'Toast when resolving a location from the path fails', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view.component.ts')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Location could not be resolved from this path', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.pathLocationFailed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Aus diesem Pfad konnte kein Standort ermittelt werden', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.pathLocationFailed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Non è stato possibile ricavare una posizione da questo percorso', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.imageDetail.toast.pathLocationFailed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
 commit;

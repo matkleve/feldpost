@@ -620,7 +620,7 @@ and are tested, but an operator cannot reach either:
 | 5.3 | Bulk-resolution adapters: `geocode` / `applyToItem` | [bulk resolution](../specs/page/files-page.bulk-resolution.supplement.md) | **Built 2026-09-18** — `bulk-resolution.adapter.ts`. Wiring it found a real defect in the engine: see below |
 | 5.4 | Selection UI + confirmation summary | same, R1/R7 | **Service built 2026-09-20** — `BulkResolutionService.plan()` / `.run()`, plan/run split so nothing is written before confirmation. The dialog that renders the plan is the remaining piece |
 | 5.5 | `/files` tree + its two aggregate RPCs | [files-page](../specs/page/files-page.md) | **Client facade built and tested 2026-09-20. The migration is written but NOT live-verified** — see the blocker below. The tree component is still to build |
-| 5.6 | *Add as location* row actions in media detail | [deferred location resolution](../specs/system/deferred-location-resolution.md) § Actions | The row slots already exist and are empty |
+| 5.6 | *Add as location* row actions in media detail | [deferred location resolution](../specs/system/deferred-location-resolution.md) § Actions | **Built 2026-09-20** — both path rows run the bulk engine on a selection of one. The single-item **tray** path (row 4, ambiguous) is not built |
 
 **What 5.4 found.** `location_unresolved` is derived in **two places that disagree** —
 `media-query.service.ts` counts `'partial'` as unresolved, `media-detail-data.facade.ts` does not.
@@ -658,6 +658,22 @@ URL, no Supabase CLI and no credentials, so the migration
 two established idioms exactly, and the file says so in a banner at the top, but *"follows the
 idiom"* is not *"verified"*, and the gap is in the one area where a mistake leaks another
 organization's rows.
+
+**What 5.6 confirmed.** Running the bulk engine on a selection of one was cheaper than writing a
+single-item service *and* it is the only version of this that cannot drift: the spec's rule ("MUST
+NOT introduce a second way to write a location") is satisfied by construction rather than by review.
+The same reuse settled the eligibility question without a second decision — the row calls
+`isBulkEligibleStatus`, so `unresolvable` and `partial` are offered here for exactly the reasons they
+are eligible in bulk.
+
+It also surfaced what reuse does **not** give: the engine geocodes and writes, and has no tray. Row 4
+of the spec's action table — *ambiguous resolution opens the normal tray, for this item only* —
+stays unbuilt, and an item whose source yields no address is now **reported** rather than asked
+about. That is a real narrowing of the specced behaviour, recorded here rather than quietly shipped.
+
+One more thing worth a reader's time: the EXIF row's own spec tables say the add button lives in
+slot `--l2`; the component has always rendered it in `--l1`. The path rows follow the code. The stale
+tables are corrected by a dated note in the UI spec rather than edited away.
 
 **Before that migration merges it needs:** apply, the matching `validate-*-rls.sql`, a
 cross-organization read that must return nothing, and `/security-review`.
