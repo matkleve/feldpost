@@ -9,7 +9,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { setupUploadPanel } from './upload-panel.spec-setup';
+import { buildFakeDeferredBulkFlow, setupUploadPanel } from './upload-panel.spec-setup';
 
 /** 5 000 photos: 4 588 located, 254 with an address but no pin, 158 with nothing. */
 const LIBRARY = {
@@ -80,5 +80,49 @@ describe('upload panel — deferred location backlog', () => {
     const block = fixture.nativeElement.querySelector('[data-state="deferred-backlog"]');
     expect(block?.getAttribute('aria-live')).toBe('polite');
     expect(block?.getAttribute('role')).toBe('status');
+  });
+});
+
+describe('upload panel — backlog figures start a bulk run', () => {
+  it('offers each figure as its own action, because they are different jobs', async () => {
+    const { fixture } = await setupUploadPanel({ deferredCounts: LIBRARY });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[data-role="resolve-improvable"]')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-role="resolve-no-location"]')).not.toBeNull();
+  });
+
+  it('clicking "could be located more precisely" opens a plan over exactly that bucket', async () => {
+    const { fixture, fakeBulkFlow } = await setupUploadPanel({ deferredCounts: LIBRARY });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    (
+      fixture.nativeElement.querySelector('[data-role="resolve-improvable"]') as HTMLButtonElement
+    ).click();
+
+    expect(fakeBulkFlow['openBucket']).toHaveBeenCalledWith('improvable');
+  });
+
+  it('clicking "have no location" opens a plan over the other bucket, not the same one', async () => {
+    const { fixture, fakeBulkFlow } = await setupUploadPanel({ deferredCounts: LIBRARY });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    (
+      fixture.nativeElement.querySelector('[data-role="resolve-no-location"]') as HTMLButtonElement
+    ).click();
+
+    expect(fakeBulkFlow['openBucket']).toHaveBeenCalledWith('no_location');
+  });
+
+  it('renders the confirmation only once the flow says it is open', async () => {
+    const flow = buildFakeDeferredBulkFlow();
+    const { fixture } = await setupUploadPanel({ deferredCounts: LIBRARY, bulkFlow: flow });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(document.body.querySelector('[data-state="confirming"]')).toBeNull();
   });
 });

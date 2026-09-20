@@ -80,12 +80,22 @@
           aria-live="polite"
           data-state="deferred-backlog"
         >
-          <p class="upload-panel__deferred-backlog-line">
+          <button
+            type="button"
+            class="upload-panel__deferred-backlog-line"
+            data-role="resolve-no-location"
+            (click)="onResolveDeferredBucket('no_location')"
+          >
             {{ deferredNoLocationLabel(backlog.noLocation) }}
-          </p>
-          <p class="upload-panel__deferred-backlog-line">
+          </button>
+          <button
+            type="button"
+            class="upload-panel__deferred-backlog-line"
+            data-role="resolve-improvable"
+            (click)="onResolveDeferredBucket('improvable')"
+          >
             {{ deferredImprovableLabel(backlog.improvable) }}
-          </p>
+          </button>
         </div>
       }
     }
@@ -593,6 +603,22 @@
       (selectedIdChange)="actionHandlers.onProjectSelectionDialogSelected($event)"
       (confirmed)="actionHandlers.onProjectSelectionDialogConfirmed($event)"
       (cancelled)="actionHandlers.onProjectSelectionDialogCancelled()"
+    />
+  }
+
+  <!--
+    Stable state: bulk-resolution confirmation (#219). Mounted only while the flow is open —
+    BrnDialog opens its portal on mount, the same idiom as the other panel modals.
+    @see docs/specs/component/bulk-resolution-dialog/bulk-resolution-dialog.md
+  -->
+  @if (bulkFlowOpen()) {
+    <app-bulk-resolution-dialog
+      [plan]="bulkFlowPlan()"
+      [running]="bulkFlowRunning()"
+      [progress]="bulkFlowProgress()"
+      [report]="bulkFlowReport()"
+      (confirmed)="onBulkFlowConfirmed()"
+      (cancelled)="onBulkFlowCancelled()"
     />
   }
 </section>

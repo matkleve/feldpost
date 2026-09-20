@@ -37203,6 +37203,471 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'bulk.resolution.dialog.title', 'Apply addresses in bulk', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Apply addresses in bulk', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Adressen gesammelt zuweisen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Assegna indirizzi in blocco', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'bulk.resolution.dialog.applyCount', '{count} items will get an address', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '{count} items will get an address', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.applyCount'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '{count} Objekte erhalten eine Adresse', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.applyCount'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '{count} elementi riceveranno un indirizzo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.applyCount'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'bulk.resolution.dialog.geocodeCount', 'Address lookups: {count}', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Address lookups: {count}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.geocodeCount'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Adressabfragen: {count}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.geocodeCount'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ricerche di indirizzi: {count}', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.geocodeCount'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'bulk.resolution.dialog.groupCount', '{count} files', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '{count} files', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.groupCount'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '{count} Dateien', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.groupCount'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '{count} file', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.groupCount'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'bulk.resolution.dialog.skip.alreadyResolved', '{count} skipped: they already have a location', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '{count} skipped: they already have a location', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.skip.alreadyResolved'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '{count} uebersprungen: sie haben bereits einen Standort', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.skip.alreadyResolved'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '{count} saltati: hanno gia una posizione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.skip.alreadyResolved'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'bulk.resolution.dialog.skip.noAddressInSource', '{count} skipped: no address in the folder path or file name', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '{count} skipped: no address in the folder path or file name', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.skip.noAddressInSource'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '{count} uebersprungen: keine Adresse im Ordnerpfad oder Dateinamen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.skip.noAddressInSource'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '{count} saltati: nessun indirizzo nel percorso della cartella o nel nome del file', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.skip.noAddressInSource'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'bulk.resolution.dialog.overwrite', 'Also overwrite items that already have a location', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Also overwrite items that already have a location', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.overwrite'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Auch Objekte ueberschreiben, die bereits einen Standort haben', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.overwrite'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Sovrascrivi anche gli elementi che hanno gia una posizione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.overwrite'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'bulk.resolution.dialog.nothingToDo', 'Nothing here can be given an address automatically.', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Nothing here can be given an address automatically.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.nothingToDo'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Hier kann nichts automatisch eine Adresse erhalten.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.nothingToDo'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nulla qui puo ricevere un indirizzo automaticamente.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.nothingToDo'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'bulk.resolution.dialog.progress', 'Writing {done} of {total}…', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Writing {done} of {total}…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.progress'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Schreibe {done} von {total}…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.progress'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Scrittura {done} di {total}…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.progress'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'bulk.resolution.dialog.starting', 'Starting…', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Starting…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.starting'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Startet…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.starting'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Avvio…', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.starting'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'bulk.resolution.dialog.report', '{resolved} written, {failed} failed, {geocodes} address lookups', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', '{resolved} written, {failed} failed, {geocodes} address lookups', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.report'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', '{resolved} geschrieben, {failed} fehlgeschlagen, {geocodes} Adressabfragen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.report'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', '{resolved} scritti, {failed} non riusciti, {geocodes} ricerche di indirizzi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.report'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'bulk.resolution.dialog.incomplete', 'The run was stopped before every item was written.', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'The run was stopped before every item was written.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.incomplete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Der Durchlauf wurde gestoppt, bevor alle Objekte geschrieben wurden.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.incomplete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'L esecuzione e stata interrotta prima che tutti gli elementi fossero scritti.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.incomplete'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'bulk.resolution.dialog.cancel', 'Cancel', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Cancel', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.cancel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Abbrechen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.cancel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Annulla', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.cancel'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'bulk.resolution.dialog.close', 'Close', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Close', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.close'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Schliessen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.close'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Chiudi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.close'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'bulk.resolution.dialog.confirm', 'Apply', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Apply', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Anwenden', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Applica', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'bulk.resolution.dialog.confirm'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'upload.deferred.backlog.noLocation', '{count} items have no location', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html deferred location backlog figure')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

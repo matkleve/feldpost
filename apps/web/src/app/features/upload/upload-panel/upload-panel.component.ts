@@ -73,6 +73,11 @@ import { UploadPanelMenuActionRouterService } from './upload-panel-menu-action-r
 import { UploadPanelRegistrationService } from './upload-panel-registration.service';
 import { UploadPanelRowInteractionsService } from './upload-panel-row-interactions.service';
 import { DeferredLocationCountService } from '../../../core/media-location-bulk/deferred-location-count.service';
+import {
+  DeferredLocationBulkFlowService,
+  type DeferredLocationBulkBucket,
+} from '../../../core/media-location-bulk/deferred-location-bulk-flow.service';
+import { BulkResolutionDialogComponent } from '../../../shared/bulk-resolution-dialog/bulk-resolution-dialog.component';
 import { UploadPanelSetupService } from './upload-panel-setup.service';
 import type {
   MapMarkerImageUploadedEvent,
@@ -91,6 +96,7 @@ export type {
   standalone: true,
   imports: [
     CommonModule,
+    BulkResolutionDialogComponent,
     UploadPanelItemComponent,
     ChipComponent,
     ...BrnToggleGroupImports,
@@ -152,6 +158,7 @@ export class UploadPanelComponent implements OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
   private readonly rowInteractions = inject(UploadPanelRowInteractionsService);
   private readonly deferredCounts = inject(DeferredLocationCountService);
+  private readonly deferredBulk = inject(DeferredLocationBulkFlowService);
   readonly actionHandlers = this.jobActions;
   readonly inputHandlers = this.inputs;
   readonly laneHandlers = this.lanes;
@@ -269,6 +276,30 @@ export class UploadPanelComponent implements OnDestroy {
       'upload.deferred.backlog.improvable',
       '{count} items could be located more precisely',
     ).replace('{count}', `${count}`);
+  }
+
+  /** The confirmation over a backlog figure (#219). One flow, so two figures cannot both be open. */
+  readonly bulkFlowOpen = this.deferredBulk.open;
+  readonly bulkFlowPlan = this.deferredBulk.plan;
+  readonly bulkFlowRunning = this.deferredBulk.running;
+  readonly bulkFlowProgress = this.deferredBulk.progress;
+  readonly bulkFlowReport = this.deferredBulk.report;
+  readonly bulkFlowError = this.deferredBulk.error;
+
+  /**
+   * Plan a bulk run over one figure's items. Writes nothing — the flow stops at the confirmation,
+   * which is R7.
+   */
+  onResolveDeferredBucket(bucket: DeferredLocationBulkBucket): void {
+    void this.deferredBulk.openBucket(bucket);
+  }
+
+  onBulkFlowConfirmed(): void {
+    void this.deferredBulk.confirm();
+  }
+
+  onBulkFlowCancelled(): void {
+    this.deferredBulk.cancel();
   }
 
   readonly takePhotoLabelText = (): string =>

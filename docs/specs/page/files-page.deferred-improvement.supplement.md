@@ -3,7 +3,7 @@
 > **Parent:** [files-page.md](./files-page.md) · **Sibling:** [files-page.bulk-resolution.supplement.md](./files-page.bulk-resolution.supplement.md)
 > **Reasoning:** [STUDY-009](../../study/009-tray-question-budget-and-priority.md) idea C · **Issue:** [#232](https://github.com/matkleve/feldpost/issues/232)
 > **Code:** `apps/web/src/app/core/media-location-bulk/deferred-location.selection.ts`
-> **Status:** counting built and shown 2026-09-20; **the run it should start is blocked on [#219](https://github.com/matkleve/feldpost/issues/219)** — see § What is not built
+> **Status:** built end to end 2026-09-20 — figures, confirmation and run. Counts live-verified against the project database the same day.
 
 ## What It Is
 
@@ -64,31 +64,40 @@ the session ends — which is exactly the gap #232 names, since the backlog outl
 two blocks sit beside each other and must not be confused: one reports an import in flight, the
 other standing work.
 
-## What is not built
+## What clicking a figure does
 
-| Acceptance criterion | State |
-| --- | --- |
-| A count visible outside the upload panel, outliving the session | **Built** |
-| Distinguishes "no location" from "could be more precise" | **Built** |
-| The count uses the same predicate as bulk eligibility | **Built** |
-| Suppressed-by-budget items reachable here | **Built structurally** (D2) — untestable end to end until the budget exists |
-| Clicking through starts a bulk resolution over exactly those items | **Not built** — see below |
+```
+click "254 items could be located more precisely"
+  → DeferredLocationFetchService.loadBucket('improvable')      the set, frozen here (R1)
+  → BulkResolutionService.plan(rows, { source: 'folder' })     writes nothing
+  → app-bulk-resolution-dialog                                 exact count, exact addresses (R7)
+  → user confirms
+  → BulkResolutionService.run(plan, { onProgress })            one geocode per address (R5)
+  → DeferredLocationCountService.refresh()                     recount, never a delta
+```
 
-`selectDeferredLocationIds` already produces the exact id set a run needs, and
-`BulkResolutionService.plan()` / `.run()` are built and tested. What is missing is R7's
-confirmation — nothing may be written until the user confirms an exact count and address — and that
-dialog is [#219](https://github.com/matkleve/feldpost/issues/219). Rendering a second, smaller
-confirmation here would be the second write path
-[files-page.bulk-resolution.supplement.md](./files-page.bulk-resolution.supplement.md) exists to
-prevent, so the figures are deliberately inert until #219 lands.
+**The set is frozen at open.** `confirm()` never re-queries: an upload landing while the user reads
+the confirmation is not in the set they agreed to, and appears in the next recount instead. That is
+R1, enforced as behaviour rather than as a comment.
 
-## Evidence
+**The recount is a recount, not arithmetic.** Subtracting `report.resolved` from the badge would
+drift the first time anything else writes a location.
 
-| Claim | Grade | Tracked in |
+| # | Rule | Why |
 | --- | --- | --- |
-| The classifier and the aggregate counts agree on any population | `[A]` — both run over the same fixture in `deferred-location-count.service.spec.ts` | — |
-| The count queries return what they claim against a real database | `[D]` — never executed; no database URL, CLI or credentials in the build environment, as for Phases 5.5/5.6 | [#234](https://github.com/matkleve/feldpost/issues/234) |
-| `partial` is emitted in production for the D-10 area-only case | `[C]` — the writer is unit-tested; that production rows carry it is not measured | [#218](https://github.com/matkleve/feldpost/issues/218) |
+| **D8** | Each figure is its own action. | They are different jobs; one "resolve everything" button would merge them again at the point the user acts. |
+| **D9** | The overwrite toggle (B3) does not appear in this flow. | The buckets are bulk-eligible by construction, so `already_resolved` cannot occur and the control could not change anything. The dialog derives this from the plan, so no caller has to know it. |
+
+## Evidence## Evidence
+
+| Claim | Grade | Evidence |
+| --- | --- | --- |
+| The classifier and the aggregate counts agree on any population | `[A]` | Both run over the same fixture in `deferred-location-count.service.spec.ts` |
+| The count queries return what they claim against a real database | `[A]` | Run on the project database 2026-09-20: `all 20, located 15, partial 0` → `no_location 5`, which is exactly the 4 `pending` + 1 `unresolvable` rows present |
+| The counts are organization-scoped by RLS, with no predicate in the adapter | `[A]` | Policy `media_items: org read` is `organization_id = user_org_id()`. Simulated as `authenticated`: a member of the owning org counts 20, a subject in no org counts **0** |
+| `NOT IN` would have dropped NULL-status rows | `[A]` | On the same engine, over `('resolved','gps','pending','partial',NULL)`: `IN` matches 2, `NOT IN` matches 2, `count(*) − IN` gives **3**. The subtraction is why the adapter does not use `NOT IN` |
+| `partial` is emitted in production for the D-10 area-only case | `[D]` | **Zero `partial` rows exist** on the project database (15 `resolved`, 4 `pending`, 1 `unresolvable`). The writer is unit-tested; that it ever fires in practice is unobserved. Tracked in [#218](https://github.com/matkleve/feldpost/issues/218) |
+| A bulk run over a figure writes correct locations | `[D]` | Unexercisable on the project database: all 20 rows have `relative_path` NULL **and** `exif_latitude` NULL, so no source yields an address. Every item plans as `no_address_in_source` — which is why the dialog has a `nothing-to-do` state. Tracked in [#236](https://github.com/matkleve/feldpost/issues/236) |
 
 ## Acceptance Criteria
 
@@ -97,5 +106,6 @@ prevent, so the figures are deliberately inert until #219 lands.
 - [x] The count uses `isBulkEligibleStatus`, and a test pins it against the row classifier
 - [x] Counting a 40 000-item library fetches no rows
 - [x] A count failure shows the failure, not a zero
-- [ ] Clicking a figure starts a bulk resolution over exactly those items — blocked on #219
-- [ ] Budget-suppressed items verified reachable here — blocked on #233
+- [x] Clicking a figure starts a bulk resolution over exactly those items
+- [x] Nothing is written before the user confirms an exact count and address (R7)
+- [ ] Budget-suppressed items verified reachable here — structurally in place (D2); untestable until #233

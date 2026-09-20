@@ -14,6 +14,7 @@ import {
 import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
 import { WORKSPACE_PANE_SHELL_HOST } from '../../../core/workspace-pane/workspace-pane-shell-host.token';
 import { DeferredLocationCountAdapter } from '../../../core/media-location-bulk/deferred-location-count.adapter';
+import { DeferredLocationBulkFlowService } from '../../../core/media-location-bulk/deferred-location-bulk-flow.service';
 
 export function buildFakeUploadManager() {
   const jobsSignal = signal<ReadonlyArray<UploadJob>>([]);
@@ -77,6 +78,7 @@ export type UploadPanelSetupResult = {
   ref: ComponentRef<UploadPanelComponent>;
   fakeManager: FakeUploadManager;
   fakeDeferredCounts: FakeDeferredLocationCountAdapter;
+  fakeBulkFlow: Record<string, unknown>;
 };
 
 /**
@@ -124,6 +126,25 @@ function buildFakeShellHost(): Record<string, ReturnType<typeof vi.fn>> {
   };
 }
 
+/**
+ * The bulk flow the backlog figures start. Faked wholesale in panel specs: the real one reaches a
+ * geocoder and writes locations, which is not what a panel spec is asserting.
+ */
+export function buildFakeDeferredBulkFlow(): Record<string, unknown> {
+  return {
+    open: signal(false).asReadonly(),
+    bucket: signal<string | null>(null).asReadonly(),
+    plan: signal<unknown>(null).asReadonly(),
+    running: signal(false).asReadonly(),
+    progress: signal<unknown>(null).asReadonly(),
+    report: signal<unknown>(null).asReadonly(),
+    error: signal<string | null>(null).asReadonly(),
+    openBucket: vi.fn(async () => undefined),
+    confirm: vi.fn(async () => undefined),
+    cancel: vi.fn(),
+  };
+}
+
 export async function setupUploadPanel(
   options: {
     initialJobs?: ReadonlyArray<UploadJob>;
@@ -131,6 +152,8 @@ export async function setupUploadPanel(
     deferChangeDetection?: boolean;
     /** Backlog figures the counting adapter should report. Defaults to an empty library. */
     deferredCounts?: FakeDeferredLocationCounts;
+    /** Replace the faked bulk flow, e.g. to drive the dialog's open state. */
+    bulkFlow?: Record<string, unknown>;
   } = {},
 ): Promise<UploadPanelSetupResult> {
   const fakeManager = buildFakeUploadManager();
@@ -139,6 +162,7 @@ export async function setupUploadPanel(
   };
 
   const fakeDeferredCounts = buildFakeDeferredLocationCountAdapter(options.deferredCounts);
+  const fakeBulkFlow = options.bulkFlow ?? buildFakeDeferredBulkFlow();
 
   const fakeShellHost = buildFakeShellHost();
 
@@ -152,6 +176,7 @@ export async function setupUploadPanel(
         provide: DeferredLocationCountAdapter,
         useValue: fakeDeferredCounts,
       },
+      { provide: DeferredLocationBulkFlowService, useValue: fakeBulkFlow },
     ],
   }).compileComponents();
 
@@ -173,5 +198,6 @@ export async function setupUploadPanel(
     ref,
     fakeManager,
     fakeDeferredCounts,
+    fakeBulkFlow,
   };
 }

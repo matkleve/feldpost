@@ -25,6 +25,16 @@
 import { Injectable, inject } from '@angular/core';
 import { SupabaseService } from '../supabase/supabase.service';
 
+/** The columns `toBulkCandidates` reads, and no others. */
+export interface DeferredLocationCandidateRow {
+  id: string;
+  location_status: string | null;
+  relative_path: string | null;
+  original_filename: string | null;
+  exif_latitude: number | null;
+  exif_longitude: number | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class DeferredLocationCountAdapter {
   private readonly supabase = inject(SupabaseService);
@@ -39,6 +49,29 @@ export class DeferredLocationCountAdapter {
       throw new Error(error.message);
     }
     return count ?? 0;
+  }
+
+  /**
+   * The rows behind a badge figure, with the fields the bulk planner reads.
+   *
+   * Server-side this is the inverse of `located`: `.not.in.(resolved,gps)` is **not** used, for the
+   * NULL reason below — instead every row is fetched and the caller re-filters with the same
+   * classifier the badge used. Verified on the project database 2026-09-20: with statuses
+   * `('resolved','gps','pending','partial',NULL)`, `IN` matches 2, `NOT IN` matches 2 — it drops the
+   * NULL — and `count(*) - IN` gives 3, which is the right answer.
+   *
+   * Selected columns are exactly `toBulkCandidates`' inputs, so the plan needs no second round trip.
+   */
+  async listCandidateRows(): Promise<DeferredLocationCandidateRow[]> {
+    const { data, error } = await this.supabase.client
+      .from('media_items')
+      .select('id, location_status, relative_path, original_filename, exif_latitude, exif_longitude')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+    return (data ?? []) as DeferredLocationCandidateRow[];
   }
 
   /**

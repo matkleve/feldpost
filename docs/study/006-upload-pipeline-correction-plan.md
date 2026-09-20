@@ -683,9 +683,32 @@ are issues, because a runnable checklist is open work and open work is the issue
 ([backlog README](../backlog/README.md) § Where open work lives). This section keeps only the part
 that is reasoning: *what is being claimed, and on what evidence.*
 
+**Update 2026-09-20 — a database was reachable.** Three of these moved, and one got worse.
+
+`[A]` **The tree RPCs are confirmed absent.** Querying `pg_proc` for `media_folder_tree` and its
+siblings returns nothing: `20260920120000_media_folder_tree_rpcs.sql` has never been applied. "Never
+applied" is now measured rather than assumed.
+
+`[A]` **RLS does scope `media_items` by organization with no predicate in the client.** The policy
+`media_items: org read` is `organization_id = user_org_id()`; simulated as `authenticated`, a member
+of the owning org counts 20 rows and a subject belonging to no org counts **0**. That settles the
+idiom the tree RPCs follow, though not the RPCs themselves, which do not exist to test.
+
+`[D] → still [D], and now known to be untestable here.` **The equivalence claim has no data to test
+against.** All 20 rows have `relative_path` NULL *and* `exif_latitude` NULL, so neither bulk source
+yields an address and a run writes nothing at all. This is not a failure of the engine — the planner
+correctly reports `no_address_in_source` — but it means `run()` has still never geocoded or written.
+Filed as [#236](https://github.com/matkleve/feldpost/issues/236), with what would settle it: a real
+folder upload, not seeded rows.
+
+`[A]` **`media_items` really has lost its location columns.** `latitude`, `longitude`,
+`address_label`, `street`, `city`, `district`, `country` and `geog` are gone from the table, while
+`MediaItemRow` still declares seven of them and `toMediaRecord` reads two
+([#235](https://github.com/matkleve/feldpost/issues/235)).
+
 | Claim | Grade | Tracked in |
 | --- | --- | --- |
-| The tree RPCs scope correctly by `organization_id` | `[D]` — follows the two established idioms exactly, never executed | [#217](https://github.com/matkleve/feldpost/issues/217) |
+| The tree RPCs scope correctly by `organization_id` | `[D]` — follows the two established idioms exactly; **confirmed never applied 2026-09-20** | [#217](https://github.com/matkleve/feldpost/issues/217) |
 | A single-item add and a bulk run over the same folder write the same location | `[D]` — true by construction (one engine, one derivation), never measured | [#218](https://github.com/matkleve/feldpost/issues/218) |
 | Row visibility matches real `location_status` values | `[C]` — the predicate is unit-tested; that production emits those exact strings is not | [#218](https://github.com/matkleve/feldpost/issues/218) |
 

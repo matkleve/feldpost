@@ -119,6 +119,17 @@
   // @see docs/specs/page/files-page.deferred-improvement.supplement.md
   &__deferred-backlog-line {
     margin: 0;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    text-align: start;
+    cursor: pointer;
+    background: none;
+    border: 0;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 
   // Section header — icon + stacked title/subtitle (sidebar row rhythm).
