@@ -7,6 +7,8 @@
 -- │ Before merge it needs: apply, the matching validate-*-rls.sql, a         │
 -- │ cross-organization read attempt that must return nothing, and            │
 -- │ /security-review — the full Sensitive ceremony per AGENTS.md.            │
+-- │ Copy-pasteable steps and pass criteria: STUDY-006 § Live-verification    │
+-- │ register, item V1.                                                       │
 -- └─────────────────────────────────────────────────────────────────────────┘
 --
 -- Why RPCs at all: the tree shows a file count and an unresolved count per

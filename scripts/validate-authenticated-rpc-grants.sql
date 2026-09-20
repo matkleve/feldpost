@@ -67,7 +67,13 @@ insert into _expected_authenticated_only (regprocedure) values
   ('public.viewport_markers(numeric, numeric, numeric, numeric, integer)'),
   ('public.user_role_level()'),
   ('public.target_user_role_level(uuid)'),
-  ('public.can_manage_user(uuid)');
+  ('public.can_manage_user(uuid)'),
+  -- Added 2026-09-20 with 20260920120000_media_folder_tree_rpcs.sql. The migration has NOT yet
+  -- been applied anywhere, so these two rows are the first thing this validator should catch if
+  -- it is ever run before the migration lands: a missing function is a louder failure than a
+  -- silently unchecked one.
+  ('public.list_media_folder_children(text)'),
+  ('public.list_media_in_folder(text, boolean, integer, integer)');
 
 -- ---------------------------------------------------------------------------
 -- Category 2: service_role-only (anon: NO EXECUTE, authenticated: NO

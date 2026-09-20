@@ -675,6 +675,101 @@ One more thing worth a reader's time: the EXIF row's own spec tables say the add
 slot `--l2`; the component has always rendered it in `--l1`. The path rows follow the code. The stale
 tables are corrected by a dated note in the UI spec rather than edited away.
 
+### Live-verification register — run these at a real database
+
+Everything below was built in an environment with **no database URL, no Supabase CLI and no
+credentials**. None of it is verified. This section exists so that "verify later" is a checklist
+someone can execute, not a memory. Work top-down: **V1 gates V2 and V3** — the tree RPCs must exist
+before anything that reads them means much.
+
+Set `DATABASE_URL` first. Every command below is copy-pasteable as written.
+
+| # | What | Class | Gated on |
+| --- | --- | --- | --- |
+| V1 | The two folder-tree RPCs (`20260920120000_media_folder_tree_rpcs.sql`) | **Sensitive** — `SECURITY DEFINER`, reads `media_items`, scopes by `organization_id` | nothing; do this first |
+| V2 | 5.6's equivalence claim: one item ≡ the same folder in bulk | Sensitive — writes a location | V1 not strictly, but do it after |
+| V3 | 5.6's row visibility against real `location_status` values | Sensitive (stateful UI) | V1 |
+| V4 | 5.5's tree component and 5.4's dialog | — | both are **unbuilt**; nothing to verify yet |
+
+#### V1 — apply and prove the tree RPCs
+
+```bash
+psql "$DATABASE_URL" -f supabase/migrations/20260920120000_media_folder_tree_rpcs.sql
+psql "$DATABASE_URL" -f scripts/validate-authenticated-rpc-grants.sql   # both RPCs now listed
+psql "$DATABASE_URL" -f scripts/validate-dsgvo-security.sql
+```
+
+Then the check no validator makes — that the `organization_id` scoping actually holds. As a user of
+org A, with a folder prefix that exists **only** in org B:
+
+```sql
+select * from public.list_media_folder_children('<prefix-that-exists-only-in-org-B>');
+select * from public.list_media_in_folder('<same-prefix>', false, 200, 0);
+```
+
+**Pass:** both return **zero rows** — not an error, not a partial list. A `SECURITY DEFINER` function
+that leaks here leaks silently, which is why this is a manual step and not a unit test.
+
+Two things to read with your own eyes while you are in there, because they are the idioms this
+migration was written to follow and "follows the idiom" is not "verified":
+
+- `REVOKE ... FROM PUBLIC, anon` — Supabase grants EXECUTE to `anon` **separately** from `PUBLIC`,
+  so revoking only `PUBLIC` leaves the function anon-callable. This is TRAP-shaped and has bitten
+  this repo before (issues #193, #201).
+- `starts_with(relative_path, p_prefix)`, never `LIKE` — a folder named `50%_fertig` or
+  `Haus_3` turns `LIKE` into a wildcard match across other folders.
+
+Finally, `/security-review` on the migration, and a **fresh-context adversarial review by an agent
+that did not write it** — both are Sensitive-class requirements that were skipped.
+
+#### V2 — the claim 5.6's whole design rests on
+
+*A single-item run and a bulk run over the same folder write the same location.* It is true by
+construction (both call `BulkResolutionService`, which derives the address with the upload
+pipeline's own `buildSearchObjectFromRelativePath`) — **which is an argument, not a measurement.**
+
+1. Find a folder with several unlocated items sharing one address.
+2. Open one item's detail, click **Add as location** on the **Original folder** row.
+3. Record the written location: `address_label`, `street`, `house_number`, `city`, `zip`,
+   `country`, `latitude`, `longitude`, and `location_status`.
+4. On the rest of that folder, run the bulk resolution with source `folder`.
+5. **Pass:** every field in step 3 matches what the bulk run wrote for its siblings. A difference in
+   `latitude`/`longitude` alone still fails — it would mean the two paths geocode differently.
+
+Repeat once with the **Original file name** row and source `filename`.
+
+#### V3 — row visibility against real data
+
+The FSM is unit-tested; what is untested is that real `location_status` values are the strings the
+predicate expects.
+
+| Item's `location_status` | Expected on both path rows |
+| --- | --- |
+| `resolved`, `gps` | **no** add button |
+| `pending`, `partial`, `unresolvable`, null | add button present |
+| any item with no `relative_path` and no `original_filename` | **no** add button |
+
+Also click the action on an item whose folder is pure noise (`Neuer Ordner/IMG_0001.jpg`).
+**Pass:** a warning toast "No address could be read from this path", and **nothing written**.
+
+And the one real gap in the build, so it is not discovered as a bug: an **ambiguous** source does
+not open a tray. The spec's action-table row 4 says it should; the bulk engine has no tray path, so
+it does not. Confirm the behaviour you actually get, then decide whether row 4 is still wanted.
+
+#### Carried over, not owned by any phase
+
+- **`location_unresolved` is derived two ways.** `media-query.service.ts` counts `'partial'` as
+  unresolved; `media-detail-data.facade.ts` does not. Bulk eligibility deliberately reads
+  `location_status` directly to avoid inheriting the disagreement, but the disagreement is still
+  there for the next person who trusts that field.
+- **`supabase/seed_i18n.sql` has two rows swapped.** For
+  `workspace.imageDetail.action.addExifToLocations`, the `de` row holds the English string and the
+  `it` row holds the German one. One line each; needs a re-seed, which is why it was reported rather
+  than fixed inside an unrelated commit.
+- **Three owner decisions, declined three times each:** F-17 (a parked job holding a content-hash
+  reservation), F-18 (the 21-row postcode stub), and whether `resolveProjectName` should honour
+  `fallbackProjectId`.
+
 **Before that migration merges it needs:** apply, the matching `validate-*-rls.sql`, a
 cross-organization read that must return nothing, and `/security-review`.
 
