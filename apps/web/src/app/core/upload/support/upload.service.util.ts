@@ -87,9 +87,38 @@ export function validateUploadFile(file: File): FileValidation {
   return { valid: true };
 }
 
+/**
+ * Test seam for the EXIF reader.
+ *
+ * `vi.mock('exifr/dist/lite.esm.js')` binds per module registry, and the Angular unit-test system
+ * bundles the whole suite — so whether the mock takes effect depends on whether another spec loaded
+ * this module into the same worker first. That made `upload.service.spec.ts` alternate between 0 and
+ * 5 failures run to run, with no subset reproducing it: changing the file list changes the worker
+ * assignment, which is the variable.
+ *
+ * An explicit override removes the dependence on load order entirely. Production never calls it.
+ * @see docs/study/005-upload-pipeline-trace-findings.md#f-12
+ */
+export interface UploadExifReader {
+  gps: (file: File) => Promise<{ latitude?: number | null; longitude?: number | null } | null>;
+  parse: (file: File) => Promise<unknown>;
+}
+
+let exifReaderOverride: UploadExifReader | null = null;
+
+/** Testing only. Pass `null` to restore the real `exifr`. */
+export function setUploadExifReaderForTests(reader: UploadExifReader | null): void {
+  exifReaderOverride = reader;
+}
+
+function exifReader(): UploadExifReader {
+  return exifReaderOverride ?? (exifr as unknown as UploadExifReader);
+}
+
 export async function parseUploadExif(file: File): Promise<ParsedExif> {
   try {
-    const [gps, rawMeta] = await Promise.all([exifr.gps(file), exifr.parse(file)]);
+    const reader = exifReader();
+    const [gps, rawMeta] = await Promise.all([reader.gps(file), reader.parse(file)]);
 
     const meta =
       rawMeta && typeof rawMeta === 'object' ? (rawMeta as Record<string, unknown>) : undefined;
