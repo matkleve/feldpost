@@ -44,3 +44,11 @@ fuzzy matching: it is a **deterministic orthographic fold** on the street compon
 **Implemented 2026-09-16** — `normalizeStreetForGroupingKey` in `location-path-parser.util.ts`
 (foldStreetSpelling + consecutive duplicate-letter collapse); used by `buildGroupingKey` and
 `normalizeStreetLevelValue`. Acceptance SF-01…SF-03 in `upload-search-object.builder.spec.ts`.
+
+**Follow-up 2026-09-20.** The fold left two older tests red on `main`, in
+`upload-search-object.builder.spec.ts` and `upload-search-object.unit-parsing.integration.spec.ts`.
+Neither is about street spelling — both used "`groupingKey` contains `neustiftgasse`" as shorthand
+for *the street landed in the key*, which S3 made false. They now assert the **folded** form in the
+key **and** the path spelling on flat `street`, so each one pins S3 and S4 together instead of
+assuming which form lands where. The code was not changed: S3 says the key folds, so the key was
+right and the assertions were stale.

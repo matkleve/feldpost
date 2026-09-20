@@ -40,7 +40,12 @@ describe('buildSearchObjectFromRelativePath', () => {
     );
     expect(so.country).toBe('AT');
     expect(so.postcode).toBeNull();
-    expect(so.groupingKey).toContain('neustiftgasse');
+    // The key carries the spelling **fold** (S3: consecutive duplicate letters collapse), while
+    // flat `street` keeps the path spelling (S4). This test is about token classification, so it
+    // asserts both rather than assuming which form lands where.
+    // @see docs/specs/service/media-upload-service/upload-search-object.street-fold.supplement.md
+    expect(so.groupingKey).toContain('neustiftgase');
+    expect(so.street).toBe('Neustiftgasse');
   });
 
   it('classifies house number after city in same segment when country unknown', () => {
