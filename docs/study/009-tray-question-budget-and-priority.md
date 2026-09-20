@@ -243,6 +243,24 @@ real; that should be tested against the backlog experience rather than assumed.
   #221), the volume pressure that motivates this study drops substantially, though `house_step`
   keeps it alive.
 
+## Tracked as
+
+Open work is issues, not bullets here ([backlog README](../backlog/README.md) § Where open work
+lives). This study keeps the reasoning; the tracker keeps the tasks.
+
+| Issue | Idea | Blocked on |
+| --- | --- | --- |
+| [#229](https://github.com/matkleve/feldpost/issues/229) | Measure the question-per-file curve across corpus shapes | nothing — **do this first** |
+| [#230](https://github.com/matkleve/feldpost/issues/230) | `presentationBundleMaxDialogueUnits` is dead config | nothing |
+| [#231](https://github.com/matkleve/feldpost/issues/231) | **A** — static kind→priority table | nothing |
+| [#232](https://github.com/matkleve/feldpost/issues/232) | **C** — deferred-improvement surface | nothing (overlaps #219, #220) |
+| [#233](https://github.com/matkleve/feldpost/issues/233) | **B** — the budget | #229, #230, #231, and **#232 ships with it** |
+
+**A and C need no measurement.** They can be built while #229 runs, and they are where the value is
+concentrated: priority is useful on its own (it makes `house_step` demotable today), and the backlog
+surface is useful on its own (it clears archive-import deferrals, which already exist and have no
+home). Only **B** has to wait for a number.
+
 ## Out of scope
 
 | Topic | Why |
