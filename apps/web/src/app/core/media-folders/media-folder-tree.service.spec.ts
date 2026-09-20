@@ -5,7 +5,16 @@ import { SupabaseService } from '../supabase/supabase.service';
 
 /** @see docs/specs/page/files-page.md */
 
-function setup(rpc = vi.fn(async () => ({ data: [], error: null }))) {
+/**
+ * The stub is typed explicitly: inferring it from the default `data: []` narrows the
+ * parameter to `never[]`, which the test build rejects for every caller passing real rows.
+ */
+type SupabaseRpcStub = (
+  name: string,
+  params?: Record<string, unknown>,
+) => Promise<{ data: unknown; error: { message: string } | null }>;
+
+function setup(rpc: SupabaseRpcStub = vi.fn(async () => ({ data: [], error: null }))) {
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
     providers: [{ provide: SupabaseService, useValue: { client: { rpc } } }],
