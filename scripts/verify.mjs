@@ -148,7 +148,7 @@ const CHECKS = [
     ],
     soft: true,
     debt:
-      "5 failing tests across 1 file (measured 2026-09-16 on cursor/phase5-wiring-and-test-debt-17ae; was 8/2 earlier the same day). media-detail-view.ui.spec.ts (3) fixed: reflecting location store for list_locations_for_media after address writes, and MediaDeleteUndoService stub that invokes onAfterDelete. Remaining: upload.service.spec.ts (5) — genuinely order-dependent; passes alone and in some full runs, fails in others (mocked exifr.gps returning undefined). Pairwise/directory runs do not reproduce it. STUDY-006 Phase 0.4b / Phase 5 test debt. See docs/study/005-upload-pipeline-trace-findings.md F-12.",
+      "0 failing tests (measured 2026-09-20, three consecutive cold runs, 1 551 tests). The gate carried 25 failing across 12 files on 2026-09-13; Phase 0.4b is closed. The last file, upload.service.spec.ts, was genuinely order-dependent — four cold runs gave 0/0, 5/1, 0/0, 5/1, all five assertions or none, decided by vitest's file-to-worker assignment, which is why no subset reproduced it. Cause: vi.mock() binds per module registry and the Angular unit-test system bundles the whole suite, so the mock applied only when no other spec had loaded upload.service.util into that worker first. Fixed by an explicit reader seam (setUploadExifReaderForTests) rather than a module mock. If this note ever needs raising again, raise it with a measurement of several cold runs, not one: a single green run alternated to five twice during this work. See docs/study/005-upload-pipeline-trace-findings.md F-12 and docs/TRAPS.md.",
   },
   { name: "build", cmd: "npm", args: ["run", "--silent", "build"] },
 ];
