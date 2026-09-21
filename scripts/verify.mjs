@@ -105,6 +105,11 @@ const CHECKS = [
   },
   { name: "spec-coverage", cmd: "node", args: ["scripts/check-spec-coverage.mjs"] },
   {
+    name: "config-field-readers",
+    cmd: "node",
+    args: ["scripts/check-config-field-readers.mjs"],
+  },
+  {
     name: "rpc-param-contract",
     cmd: "node",
     args: ["scripts/check-rpc-param-contract.mjs"],
