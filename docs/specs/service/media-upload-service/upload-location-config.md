@@ -59,7 +59,6 @@ Source of truth: `apps/web/src/app/core/upload/location/upload-location-config.t
 | `sourceAgreementRadiusMeters` | `number` | `150` | **Meters.** Text vs EXIF metadata agree → auto placement; else `disambiguationKind: source` tray. Not the org km “internet results” cap. |
 | `exifAssistRadiusMeters` | `number` | `80` | **Meters.** Among multiple geocode hits, prefer candidate within this distance of EXIF; Step 7 pin nudge. Not the org km realism cap — see [search-tuning.distance-radii-contract.md](../search/search-tuning.distance-radii-contract.md). |
 | `unitGeocodeSplitMinMeters` | `number` | `25` | **Meters.** Photon multi-hit gate when SO has `staircase`/`door` — see [upload-search-object.md](./upload-search-object.md#photon-multi-hit-gate). |
-| `exifContextCheck` | `boolean` | `true` | Enable step 4 EXIF reverse superset check (`lang=en`). |
 | `defaultGeocodeCountry` | `string` | `AT` | `street_only` Photon default country code. |
 | `tokenNormalizerFuzzyThreshold` | `number` | `0.85` | Minimum confidence for fuzzy token-normalizer matches. |
 | `minMeaningfulScore` | `number` | `0.55` | Minimum geocode score for a candidate to be considered meaningful. |
@@ -70,8 +69,6 @@ Source of truth: `apps/web/src/app/core/upload/location/upload-location-config.t
 | `folderHintUseRootFallback` | `boolean` | `true` | Allows root-level folder hint only as fallback. |
 | `filenameAlwaysOverridesFolder` | `boolean` | `true` | Enforces file-level textual location precedence over folder-level hints. |
 | `maxDirectorySegmentsForHint` | `number` | `32` | Guardrail for maximum directory depth considered during hint extraction. |
-| `clusterAssistWeight.project` | `number` | `0.7` | Ranking weight for project cluster proximity in disambiguation. |
-| `clusterAssistWeight.company` | `number` | `0.3` | Ranking weight for company cluster proximity in disambiguation. |
 | `geocodeCacheTtlMs` | `number` | `300000` | TTL for cached geocoding responses. |
 | `geocodeMaxProxyAttempts` | `number` | `3` | Maximum retry attempts for proxied geocode requests. |
 | `geocodeLogDedupWindowMs` | `number` | `30000` | Deduplication window for repeated geocode error logs. |
@@ -136,18 +133,3 @@ Upload forward-geocode must reject hits farther than org **`resolver.contextDist
 - [ ] Ambiguous address candidates use the configured disambiguation threshold before auto-assigning.
 - [ ] EXIF-assisted reconciliation uses the configured radius and preserves both source values.
 - [ ] Missing-data routing uses the same config contract across upload entry points.
-
-## The tray bundle cap is not here
-
-A `presentationBundleMaxDialogueUnits: 5` row used to sit in the table above. **Nothing read it.**
-The cap it described is a constant in the orchestrator, and always was:
-`PRESENTATION_BUNDLE_MAX_DIALOGUE_UNITS` (`5`) and `PRESENTATION_BUNDLE_WINDOW_MS` (`5000`) in
-`apps/web/src/app/core/upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.types.ts`,
-read by that module's service and covered by its spec. Removing the field changed no behaviour,
-because it had no reader to change.
-
-This tombstone is deliberate: the duplicate gave both a config lookup and a spec row saying the cap
-was configurable here, which is what anyone designing the tray budget
-([#233](https://github.com/matkleve/feldpost/issues/233)) would have built on.
-[#230](https://github.com/matkleve/feldpost/issues/230) ·
-[TRAP-010](../../../TRAPS.md#trap-010--dead-code-that-outlives-its-producer)

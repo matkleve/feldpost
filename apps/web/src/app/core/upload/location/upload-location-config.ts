@@ -36,8 +36,6 @@ export interface UploadLocationConfig {
    * @see docs/specs/service/media-upload-service/upload-search-object.md#photon-multi-hit-gate
    */
   unitGeocodeSplitMinMeters: number;
-  /** Step 4: EXIF reverse superset check enabled. */
-  exifContextCheck: boolean;
   /** `street_only` default country code (ISO). */
   defaultGeocodeCountry: string;
   /** Token normalizer fuzzy match minimum score. */
@@ -50,10 +48,6 @@ export interface UploadLocationConfig {
   folderHintUseRootFallback: boolean;
   filenameAlwaysOverridesFolder: boolean;
   maxDirectorySegmentsForHint: number;
-  clusterAssistWeight: {
-    project: number;
-    company: number;
-  };
   geocodeCacheTtlMs: number;
   geocodeMaxProxyAttempts: number;
   geocodeLogDedupWindowMs: number;
@@ -88,7 +82,6 @@ export const DEFAULT_UPLOAD_LOCATION_CONFIG: UploadLocationConfig = {
   // Unset on purpose — see the field's doc comment. Setting a number turns D-09 on.
   exifHouseNumberRadiusMeters: null,
   unitGeocodeSplitMinMeters: 25,
-  exifContextCheck: true,
   defaultGeocodeCountry: 'AT',
   tokenNormalizerFuzzyThreshold: 0.85,
   minMeaningfulScore: 0.55,
@@ -99,10 +92,6 @@ export const DEFAULT_UPLOAD_LOCATION_CONFIG: UploadLocationConfig = {
   folderHintUseRootFallback: true,
   filenameAlwaysOverridesFolder: true,
   maxDirectorySegmentsForHint: 32,
-  clusterAssistWeight: {
-    project: 0.7,
-    company: 0.3,
-  },
   geocodeCacheTtlMs: 300000,
   geocodeMaxProxyAttempts: 3,
   geocodeLogDedupWindowMs: 30000,

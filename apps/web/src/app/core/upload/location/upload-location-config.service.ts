@@ -10,40 +10,21 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class UploadLocationConfigService {
-  private config: UploadLocationConfig = {
-    ...DEFAULT_UPLOAD_LOCATION_CONFIG,
-    clusterAssistWeight: { ...DEFAULT_UPLOAD_LOCATION_CONFIG.clusterAssistWeight },
-  };
+  private config: UploadLocationConfig = { ...DEFAULT_UPLOAD_LOCATION_CONFIG };
 
   getConfig(): UploadLocationConfig {
     return this.config;
   }
 
   setConfig(next: UploadLocationConfig): void {
-    this.config = {
-      ...next,
-      clusterAssistWeight: { ...next.clusterAssistWeight },
-    };
+    this.config = { ...next };
   }
 
   patchConfig(patch: Partial<UploadLocationConfig>): void {
-    const clusterPatch = patch.clusterAssistWeight;
-    this.config = {
-      ...this.config,
-      ...patch,
-      clusterAssistWeight: clusterPatch
-        ? {
-            ...this.config.clusterAssistWeight,
-            ...clusterPatch,
-          }
-        : this.config.clusterAssistWeight,
-    };
+    this.config = { ...this.config, ...patch };
   }
 
   resetToDefaults(): void {
-    this.config = {
-      ...DEFAULT_UPLOAD_LOCATION_CONFIG,
-      clusterAssistWeight: { ...DEFAULT_UPLOAD_LOCATION_CONFIG.clusterAssistWeight },
-    };
+    this.config = { ...DEFAULT_UPLOAD_LOCATION_CONFIG };
   }
 }

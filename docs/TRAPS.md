@@ -236,6 +236,16 @@ Better: end the migration with a `DO` block that raises when any touched functio
 
 **Source** — [`2026-06-13`](./ai-diary/2026-06-13.md) § Mistakes/lessons; [`docs/playbooks/change-classification-upload-example.md`](./playbooks/change-classification-upload-example.md). Live instance: `apps/web/src/app/features/upload/upload-resolver-tray/upload-resolver-tray.helpers.ts:33-34` and `apps/web/src/app/features/upload/upload-resolver-tray/upload-resolver-tray.component.ts:595-598`.
 
+**A second shape, in config (2026-09-21).** Three of `UploadLocationConfig`'s 37 fields were declared, defaulted, documented in the spec with a plausible sentence each — and read by nothing. A config field is the worst carrier for this, because a reader who greps it finds a name, a value *and* a spec row all agreeing, which reads as three independent confirmations rather than one declaration copied twice.
+
+| Field | Spec claimed | Truth |
+| --- | --- | --- |
+| `presentationBundleMaxDialogueUnits: 5` | max dialogue units per tray bundle | the real cap is `PRESENTATION_BUNDLE_MAX_DIALOGUE_UNITS` in `upload-resolver-tray-orchestrator.types.ts`; the field was a same-named duplicate |
+| `exifContextCheck: true` | enables the step 4 EXIF reverse superset check | the reverse geocode runs unconditionally in four call sites; the flag switched nothing |
+| `clusterAssistWeight: {project: 0.7, company: 0.3}` | ranking weights for multi-hit disambiguation | no project/company weighting exists; `runDisambiguation` weights `zipMatch`, `countryMatch`, `parserConfidence`, and the upload path never calls it |
+
+**Detect, for the config shape** — grep is necessary and not sufficient: a field with no reader is dead, but a field *with* a reader can still be a duplicate of a live constant. **Flip the value and re-run.** Setting `exifContextCheck: false` and `clusterAssistWeight: {project: 0, company: 0}` and re-running the upload trace gave byte-identical results — 8 reverse geocodes, 62 forward, the same 27 trays — which is proof, where a grep is an argument. Removed in [#230](https://github.com/matkleve/feldpost/issues/230) and [#237](https://github.com/matkleve/feldpost/issues/237).
+
 **Status** — `open`.
 
 ---
