@@ -62,7 +62,6 @@ Source of truth: `apps/web/src/app/core/upload/location/upload-location-config.t
 | `exifContextCheck` | `boolean` | `true` | Enable step 4 EXIF reverse superset check (`lang=en`). |
 | `defaultGeocodeCountry` | `string` | `AT` | `street_only` Photon default country code. |
 | `tokenNormalizerFuzzyThreshold` | `number` | `0.85` | Minimum confidence for fuzzy token-normalizer matches. |
-| `presentationBundleMaxDialogueUnits` | `number` | `5` | Max dialogue units per resolver tray bundle. |
 | `minMeaningfulScore` | `number` | `0.55` | Minimum geocode score for a candidate to be considered meaningful. |
 | `minTopGap` | `number` | `0.1` | Minimum score gap between rank 1 and rank 2 for automatic selection. |
 | `titleConfidenceThreshold` | `number` | `0.8` | Minimum parser confidence needed to treat filename/folder text as resolvable location input. |
@@ -137,3 +136,18 @@ Upload forward-geocode must reject hits farther than org **`resolver.contextDist
 - [ ] Ambiguous address candidates use the configured disambiguation threshold before auto-assigning.
 - [ ] EXIF-assisted reconciliation uses the configured radius and preserves both source values.
 - [ ] Missing-data routing uses the same config contract across upload entry points.
+
+## The tray bundle cap is not here
+
+A `presentationBundleMaxDialogueUnits: 5` row used to sit in the table above. **Nothing read it.**
+The cap it described is a constant in the orchestrator, and always was:
+`PRESENTATION_BUNDLE_MAX_DIALOGUE_UNITS` (`5`) and `PRESENTATION_BUNDLE_WINDOW_MS` (`5000`) in
+`apps/web/src/app/core/upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.types.ts`,
+read by that module's service and covered by its spec. Removing the field changed no behaviour,
+because it had no reader to change.
+
+This tombstone is deliberate: the duplicate gave both a config lookup and a spec row saying the cap
+was configurable here, which is what anyone designing the tray budget
+([#233](https://github.com/matkleve/feldpost/issues/233)) would have built on.
+[#230](https://github.com/matkleve/feldpost/issues/230) ·
+[TRAP-010](../../../TRAPS.md#trap-010--dead-code-that-outlives-its-producer)

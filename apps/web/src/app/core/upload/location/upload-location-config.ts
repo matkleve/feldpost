@@ -42,8 +42,6 @@ export interface UploadLocationConfig {
   defaultGeocodeCountry: string;
   /** Token normalizer fuzzy match minimum score. */
   tokenNormalizerFuzzyThreshold: number;
-  /** Max dialogue units per resolver tray presentation bundle. */
-  presentationBundleMaxDialogueUnits: number;
   minMeaningfulScore: number;
   minTopGap: number;
   titleConfidenceThreshold: number;
@@ -93,7 +91,6 @@ export const DEFAULT_UPLOAD_LOCATION_CONFIG: UploadLocationConfig = {
   exifContextCheck: true,
   defaultGeocodeCountry: 'AT',
   tokenNormalizerFuzzyThreshold: 0.85,
-  presentationBundleMaxDialogueUnits: 5,
   minMeaningfulScore: 0.55,
   minTopGap: 0.1,
   titleConfidenceThreshold: 0.8,

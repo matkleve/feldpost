@@ -65,6 +65,12 @@ exists and build on top of it. It is [TRAP-010](../TRAPS.md#trap-010--dead-code-
 shape — dead code outliving its producer, with the spec outliving both. Filed separately; it should
 be deleted or implemented before **B** is designed, not left as a decoy.
 
+`[A]` **Resolved 2026-09-21 ([#230](https://github.com/matkleve/feldpost/issues/230)): deleted.** The
+cap was never missing — it is `PRESENTATION_BUNDLE_MAX_DIALOGUE_UNITS` in
+`upload-resolver-tray-orchestrator.types.ts`, live and tested. The config field was a same-named
+duplicate with no reader, so the fix was to remove the duplicate, not to wire it. Two more unread
+fields on the same interface were found while checking and filed separately.
+
 **The most important consequence of mechanism 1:** archive import mode is *already* idea **B** at its
 extreme setting — suppress everything, defer to a backlog — and it is already built and measured. So
 **B is not a new capability. It is a dial on an existing one.** That reframing removes most of the
