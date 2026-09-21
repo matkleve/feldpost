@@ -1,9 +1,9 @@
 ---
 id: STUDY-009
 type: proposal
-status: proposed
+status: decided
 supersedes: none
-corrected-by: none
+corrected-by: self (§ The measurement, 2026-09-21)
 ---
 
 **Written 2026-09-20** on `claude/uploader-pipeline-test-badges-kktrpg`, from the owner's proposal
@@ -325,7 +325,7 @@ lives). This study keeps the reasoning; the tracker keeps the tasks.
 | [#230](https://github.com/matkleve/feldpost/issues/230) | `presentationBundleMaxDialogueUnits` is dead config | nothing |
 | [#231](https://github.com/matkleve/feldpost/issues/231) | **A** — static kind→priority table | nothing |
 | [#232](https://github.com/matkleve/feldpost/issues/232) | **C** — deferred-improvement surface | nothing (overlaps #219, #220) |
-| [#233](https://github.com/matkleve/feldpost/issues/233) | **B** — the budget | #229, #230, #231, and **#232 ships with it** |
+| [#233](https://github.com/matkleve/feldpost/issues/233) | **B** — the budget | **closed 2026-09-21, not planned** — the measurement found nothing to suppress |
 
 **A and C need no measurement.** They can be built while #229 runs, and they are where the value is
 concentrated: priority is useful on its own (it makes `house_step` demotable today), and the backlog
