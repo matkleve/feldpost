@@ -166,6 +166,71 @@ The shapes worth measuring, because they are the ones that differ in the field:
 Until those numbers exist, a threshold like "100 files" or "10 000 files" is a placeholder, and
 should be written down as one.
 
+## The measurement, 2026-09-21 (#229)
+
+`[A]` Measured with `measureQuestionCurve`, seed 7, questions counted **after group merge** by
+`classifyGroupQuestion` — which is pinned against the real pipeline's own registered
+`disambiguationKind`s by `upload-trace-question-kind.spec.ts` over two corpora.
+
+| Shape | 100 files | 1 000 | 10 000 | files/question at 10 000 |
+| --- | --- | --- | --- | --- |
+| Deep + uniform (one address) | 0 | 0 | **0** | — |
+| Wide + flat (~25 files/address) | 0 | 3 | **29** | 345 |
+| Mixed evidence | 0 | 0 | **5** | 2 000 |
+| Noisy names (`firma_at_archive`) | 0 | 1 | **7** | 1 429 |
+| No GPS anywhere | 0 | 3 | **29** | 345 |
+
+By kind at 10 000 files, wide + flat — the worst shape measured:
+`admin_level_conflict = 19`, `city_step = 10`. 383 groups, of which 304 went to Issues and 50
+resolved silently.
+
+### Correction 1 is confirmed, and larger than stated
+
+`[A]` **10 000 files produce between 0 and 29 questions depending only on folder shape.** The
+Company A / Company B dichotomy this study invented turns out to be real and to span the entire
+range: one address is 1 group and 0 questions at any size, and the scattered shape is 383 groups
+and 29 questions. A file-count trigger gets both wrong, exactly as argued.
+
+### Correction 5 — the volume problem this study was written about does not exist at these sizes
+
+`[A]` **The highest question count anywhere in the matrix is 29, on 10 000 files.** The proposal
+asks what to do when there are too many questions to answer; at the measured rate a 10 000-file
+upload asks fewer questions than a 100-file upload of the adversarial shape used for defect
+hunting. Three mechanisms absorb the volume before a budget could: group merge collapses files to
+groups, `area_only` resolves without asking (D-10), and `incomplete` routes to Issues — 304 of 383
+groups on the worst shape.
+
+**This does not retire #233; it re-aims it.** Two things stay true. The numbers are `[A]` for *this
+corpus* and the corpus is invented — a real customer export could differ by an order of magnitude,
+and that remains the highest-value missing input. And the composition argument in Correction 4 gets
+sharper, not weaker: of the 29 questions on the worst shape, **19 are `admin_level_conflict` and 10
+are `city_step` — all seven measured kinds that occur are `critical`, and a budget may suppress
+none of them.** Not one `house_step` or `geocode` appeared anywhere in the matrix.
+
+So the honest reading is: **a budget has nothing to suppress on any shape measured.** B3 — "always
+suppress `low`" — would change zero questions here. That is an argument for doing nothing until a
+real export says otherwise, and for spending the effort on Issues instead, where 304 of 383 groups
+actually land.
+
+### What the measurement does not cover, and why that matters here
+
+`[B]` **`source` questions cannot occur in this corpus.** The generator gives a file EXIF for the
+same city its folder names, so text and GPS agree by construction. The no-GPS shape therefore
+produces byte-identical counts to the same shape with GPS — the sanity check #229 asked for passes,
+and proves almost nothing.
+
+This is the blind spot that matters most: `source` is `critical` in the priority table, so it is
+precisely a kind a budget could never suppress. If real corpora produce many of them, the
+conclusion above gets stronger, not weaker. `containment_check` is likewise unreachable, since it
+needs an answered admin conflict first.
+
+| Claim | Grade | Basis |
+| --- | --- | --- |
+| Question count is decided by folder shape, not file count | `[A]` | 0 vs 29 at the same 10 000 files |
+| A budget would suppress nothing on any measured shape | `[A]` | every question measured is `critical` |
+| These rates hold for real customer archives | `[D]` | the corpus is invented; unchanged by this measurement |
+| `source` is rare | **not evidenced** | structurally absent from the corpus |
+
 ## Correction 3 — suppression is only legal if it is visible
 
 `[D]` This is the load-bearing constraint on the whole idea, and it is the same argument that made
@@ -250,7 +315,7 @@ lives). This study keeps the reasoning; the tracker keeps the tasks.
 
 | Issue | Idea | Blocked on |
 | --- | --- | --- |
-| [#229](https://github.com/matkleve/feldpost/issues/229) | Measure the question-per-file curve across corpus shapes | nothing — **do this first** |
+| [#229](https://github.com/matkleve/feldpost/issues/229) | Measure the question-per-file curve across corpus shapes | **done 2026-09-21** — see § The measurement |
 | [#230](https://github.com/matkleve/feldpost/issues/230) | `presentationBundleMaxDialogueUnits` is dead config | nothing |
 | [#231](https://github.com/matkleve/feldpost/issues/231) | **A** — static kind→priority table | nothing |
 | [#232](https://github.com/matkleve/feldpost/issues/232) | **C** — deferred-improvement surface | nothing (overlaps #219, #220) |
