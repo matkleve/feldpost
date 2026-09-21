@@ -22,8 +22,6 @@ export const SEARCH_TUNING_SYSTEM_DEFAULTS: SearchTuningConfig = {
     maxGeocoderResults: 3,
     maxDbAddressResults: 3,
     maxDbContentResults: 6,
-    constrainedLimitMultiplier: 4,
-    shortPrefixLimitFloor: 12,
     // 120 km default — see search-tuning.distance-radii-contract.md (not exifAssistRadiusMeters).
     contextDistanceMaxMeters: 120_000,
     remoteTopDistanceMeters: 60_000,
@@ -45,9 +43,6 @@ export const SEARCH_TUNING_SYSTEM_DEFAULTS: SearchTuningConfig = {
     shortPrefixAmbiguousTextScoreLt: 0.95,
     weightsShortPrefix: { text: 0.35, geo: 0.45, quality: 0.1, country: 0.1 },
     weightsNormal: { text: 0.5, geo: 0.3, quality: 0.15, country: 0.05 },
-    countryBoostIn: 1.6,
-    countryBoostOut: 0.7,
-    countryBoostNeutral: 1.0,
     penaltyOutOfViewOutCountry: 0.25,
     penaltyOutOfViewInCountry: 0.15,
     penaltyGeoLt015: 0.3,
@@ -56,9 +51,6 @@ export const SEARCH_TUNING_SYSTEM_DEFAULTS: SearchTuningConfig = {
   },
   query: {
     specificStreetMinLength: 5,
-    prefixBackoffMaxCuts: 3,
-    prefixBackoffMinRetainedLength: 5,
-    displayNameTruncateLength: 60,
   },
   provider: {
     geocodeSearchDefaultLimit: 10,
@@ -66,6 +58,5 @@ export const SEARCH_TUNING_SYSTEM_DEFAULTS: SearchTuningConfig = {
     geocodeAuthFailureCooldownMs: 120_000,
     geocodeLogDedupWindowMs: 30_000,
     geocodeCacheTtlMs: 300_000,
-    nominatimMinIntervalMs: 1100,
   },
 };

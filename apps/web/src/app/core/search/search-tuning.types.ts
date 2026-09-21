@@ -25,8 +25,6 @@ export interface SearchTuningResolverConfig {
   maxGeocoderResults: number;
   maxDbAddressResults: number;
   maxDbContentResults: number;
-  constrainedLimitMultiplier: number;
-  shortPrefixLimitFloor: number;
   /**
    * Max distance from geographic search anchor (meters). UI: Settings → Search Tuning →
    * "Max distance for internet results (km)" — slider shows km, persistence is always meters.
@@ -61,9 +59,6 @@ export interface SearchTuningScoringConfig {
   shortPrefixAmbiguousTextScoreLt: number;
   weightsShortPrefix: SearchTuningScoringWeights;
   weightsNormal: SearchTuningScoringWeights;
-  countryBoostIn: number;
-  countryBoostOut: number;
-  countryBoostNeutral: number;
   penaltyOutOfViewOutCountry: number;
   penaltyOutOfViewInCountry: number;
   penaltyGeoLt015: number;
@@ -73,9 +68,6 @@ export interface SearchTuningScoringConfig {
 
 export interface SearchTuningQueryConfig {
   specificStreetMinLength: number;
-  prefixBackoffMaxCuts: number;
-  prefixBackoffMinRetainedLength: number;
-  displayNameTruncateLength: number;
 }
 
 export interface SearchTuningProviderConfig {
@@ -84,7 +76,6 @@ export interface SearchTuningProviderConfig {
   geocodeAuthFailureCooldownMs: number;
   geocodeLogDedupWindowMs: number;
   geocodeCacheTtlMs: number;
-  nominatimMinIntervalMs: number;
 }
 
 export interface SearchTuningConfig {

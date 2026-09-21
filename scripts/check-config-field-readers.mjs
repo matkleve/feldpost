@@ -52,16 +52,7 @@ const GUARDED = [
   {
     file: `${SRC}/app/core/search/search-tuning.defaults.ts`,
     constName: "SEARCH_TUNING_SYSTEM_DEFAULTS",
-    /**
-     * Ratchet, not an exemption. Nine fields here are declared in `search-tuning.types.ts`,
-     * defaulted, and referenced nowhere else — measured 2026-09-21, the day this gate was
-     * written. None is exposed in the Search Tuning settings section, so no user can set one and
-     * watch it do nothing; they are dead config rather than a broken control. Tracked in #238.
-     *
-     * The number may only go down. A tenth fails the gate, which is the point: existing debt is
-     * not a licence to add more.
-     */
-    maxUnread: 9,
+    maxUnread: 0,
   },
   {
     file: `${SRC}/app/core/search/search.models.ts`,

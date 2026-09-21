@@ -223,7 +223,7 @@ After the initial free-form forward search (`action: forward`, `layer=address`, 
 | Street suffix probe | **disabled** (Phase 1) | — | — |
 | House-number sibling | **active** | `parseStreetAndHouseNumber(query)` | second forward: street token only, `limit=15` |
 
-Final list is sliced to `maxGeocoderResults` at pipeline exit. Org tuning fields `constrainedLimitMultiplier` and `shortPrefixLimitFloor` remain in schema but are runtime no-ops.
+Final list is sliced to `maxGeocoderResults` at pipeline exit.
 
 ### 2.5 City-hint retry
 
