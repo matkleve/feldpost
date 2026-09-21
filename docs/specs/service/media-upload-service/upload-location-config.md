@@ -42,6 +42,8 @@ UploadLocationConfigService
 | `disambiguationAutoAssignThreshold` | `number`  | Minimum probability for automatic candidate selection                      |
 | `sourceAgreementRadiusMeters`       | `number`  | **Meters.** Text geocode vs EXIF metadata; source tray above this (not km Search Tuning) |
 | `exifAssistRadiusMeters`            | `number`  | **Meters.** Pick among ambiguous geocode hits near EXIF; Step 7 pin nudge (not km cap) |
+| `exifHouseNumberRadiusMeters`       | `number \| null` | **Meters.** House-scale radius for D-09 — may EXIF supply a house number for a street the path gave without one. `null` keeps the rule inert; deliberately not `exifAssistRadiusMeters`, which answers a different question. Unset pending [#221](https://github.com/matkleve/feldpost/issues/221) |
+| `mismatchToleranceMeters`           | `number`  | **Meters.** Post-upload mismatch audit tolerance: title-geocode coords vs EXIF coords within this radius count as the same location |
 | `unitGeocodeSplitMinMeters`         | `number`  | **Meters.** When SO has units and Photon returns ≥2 hits, max pairwise distance above this keeps ambiguous tray (not added to `grouping_key`) |
 | `folderHintRequireHighConfidence`   | `boolean` | Whether folder hints may only come from high-confidence segment matches    |
 | `folderHintUseRootFallback`         | `boolean` | Whether the root folder hint may be used as fallback only                  |

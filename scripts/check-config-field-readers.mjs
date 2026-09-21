@@ -48,6 +48,13 @@ const GUARDED = [
     file: `${SRC}/app/core/upload/location/upload-location-config.ts`,
     constName: "DEFAULT_UPLOAD_LOCATION_CONFIG",
     maxUnread: 0,
+    /**
+     * This spec is a field-by-field reference table, so it can be held to exact parity. Opt-in
+     * rather than required of every config: `search-tuning-settings.md` documents the settings
+     * *screen*, and only the fields with a control belong in it — asserting parity there would
+     * demand rows for 44 internals nobody sets.
+     */
+    spec: "docs/specs/service/media-upload-service/upload-location-config.md",
   },
   {
     file: `${SRC}/app/core/search/search-tuning.defaults.ts`,
@@ -166,6 +173,29 @@ for (const config of GUARDED) {
     unread.push(field);
   }
 
+  if (config.spec) {
+    const specText = readFileSync(join(ROOT, config.spec), "utf8");
+    const documented = new Set(
+      [...specText.matchAll(/^\|\s*`([A-Za-z][\w.]*)`/gm)].map((m) => m[1].split(".")[0]),
+    );
+    for (const field of fields) {
+      if (!documented.has(field)) {
+        problems.push(
+          `✗ ${config.constName}.${field} — live in code, absent from ${config.spec}\n` +
+            `  → a tuning value nobody documented is one nobody can review; add its row`,
+        );
+      }
+    }
+    for (const field of documented) {
+      if (!fields.includes(field)) {
+        problems.push(
+          `✗ ${config.spec} documents \`${field}\` — no such field in ${config.constName}\n` +
+            `  → the spec outlived the code; delete the row`,
+        );
+      }
+    }
+  }
+
   const budget = config.maxUnread ?? 0;
   if (unread.length > budget) {
     for (const field of unread) {
@@ -188,7 +218,7 @@ for (const config of GUARDED) {
 
 if (problems.length) {
   console.error(problems.join("\n"));
-  console.error(`\n✗ config-field-readers: ${problems.length} field(s) nothing reads`);
+  console.error(`\n✗ config-field-readers: ${problems.length} problem(s)`);
   process.exit(1);
 }
 
