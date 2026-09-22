@@ -178,4 +178,5 @@ Do **not** change existing component visual styling — SCSS/Tailwind geometry, 
 
 - [`AGENTS.md`](../../AGENTS.md) — § Collaboration with the user
 - [`agent-quick-reference.md`](./agent-quick-reference.md) — simple fix / anti-loop
+- [`agent-benchmark.md`](./agent-benchmark.md) — tier ladder, trace scenarios, adversarial audit
 - [`element-spec-format.md`](./element-spec-format.md) — SPEC GAP
