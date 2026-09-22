@@ -1,50 +1,62 @@
 # Control-area grid — slot inventory
 
-> **Parent:** [control-area-grid-layout.md](./control-area-grid-layout.md)
+> **Parent:** [control-area-grid-layout.md](./control-area-grid-layout.md)  
+> **Visual reference:** [reference-mock supplement](./control-area-grid-layout.reference-mock.supplement.md)
 
-## Left control area — baseline slots
+## Shell grid tracks (OQ-06-E)
 
-| Container | Alignment | Control options (baseline) |
+```text
+| left rail | map | content panel column | right rail |
+```
+
+## Left control area
+
+| Container | Control options |
+| --- | --- |
+| Top | Logo · Map · Other pages |
+| Bottom | **Profile** · **Settings** (separate panels — OQ-07) |
+
+## Right control area
+
+| Container | Control options |
+| --- | --- |
+| Top 1 | Notifications · Upload · Download · Shared media |
+| *(gap)* | Explicit vertical gap (OQ-17) |
+| Top 2 | Undo · Change history · Redo |
+| Bottom | Tips · Help |
+
+**Hover (OQ-02):** every option above — label expansion on ~1 s hover; overlays canvas.
+
+## Content panel column (beside map)
+
+Toggled by rail icons; large `.ui-container` panels per reference mock:
+
+| Panel | Trigger | Status |
 | --- | --- | --- |
-| Top | start (top) | Logo · Map · Other pages |
-| Bottom | end (bottom) | Settings · Profile (**two separate options** — OQ-07) |
+| Upload | Right rail Upload (+ mock shows panel open) | Exists — re-home from upload shell |
+| Help | Right rail Help | Mock / STUDY-011 |
+| Settings | Left rail Settings | **Replaces settings overlay** |
+| Profile | Left rail Profile | **Separate** from Settings — new panel |
+| Shared media | Right rail | STUDY-010 |
+| Workspace / selection | TBD | STUDY-007 — today’s workspace pane |
 
-**Left rail width (OQ-02):** fixed icon-only track; labels on **~1 s hover** via horizontal option expansion.
+## Map zone floats
 
-## Right control area — baseline slots
+| Control | Placement |
+| --- | --- |
+| Search + filter | Top-left (OQ-18) |
+| Theme cycle | **Bottom-right** (OQ-15) |
+| Compass | Top-right (mock) |
+| Scale | Bottom-left |
+| Zoom ± | Bottom-right (with theme) |
 
-| Container | Alignment | Control options (baseline) |
-| --- | --- | --- |
-| Top 1 | start (top) | Notifications · Upload · Download · **Shared media** |
-| *(gap)* | — | Explicit vertical gap — **not** continuous stack ([OQ-17](./control-area-grid-layout.open-questions.supplement.md)) |
-| Top 2 | start (below gap) | Undo · Change history · Redo |
-| Bottom | end (bottom) | Tips · Help |
+## Migration from today
 
-## Route canvas floats (map zone — not control areas)
-
-| Control | Placement | Decision |
-| --- | --- | --- |
-| Search bar + filter | Map zone, **top-left** | OQ-18 |
-| Theme cycle | Map zone (exact corner TBD) | OQ-15 |
-| GPS, basemap, scale, zoom | Map zone | Existing map-shell floats |
-
-## Current → baseline mapping
-
-| Baseline slot | Exists today | Current home | Migration notes |
-| --- | --- | --- | --- |
-| Logo | Yes | Nav header | OQ-04 |
-| Map | Yes | Nav link `/` | Straightforward |
-| Other pages | Yes | Nav links | OQ-05 |
-| Settings | Yes | Account row → settings overlay | **Split** — own bottom option (OQ-07) |
-| Profile | Partial | Same account row | **Split** — own bottom option (OQ-07) |
-| Notifications | **No** | — | OQ-08 |
-| Upload | Yes | `app-upload-shell` + workspace Upload tab | OQ-09 |
-| Download | Partial | Workspace footer / bulk export | OQ-10 |
-| Shared media | Partial | Share / restore flows in workspace | OQ-11 — STUDY-010 for RLS scope |
-| Undo | Partial | Delete toast undo only | OQ-13 |
-| Change history | **No** | — | OQ-13 |
-| Redo | **No** | — | OQ-13 |
-| Tips | **Unclear** | Not in shipped nav | OQ-14 |
-| Help | Partial | Mock / future | OQ-14 |
-| Theme cycle | Yes | Nav utility row | **Move to map zone** (OQ-15) |
-| Search bar | Yes | Map top-center | **Move to top-left** (OQ-18) |
+| Today | Target |
+| --- | --- |
+| Settings overlay | Settings **content panel** |
+| Account row | Split → Profile panel + Settings panel |
+| `app-upload-shell` absolute | Upload **content panel** + right rail icon |
+| Workspace pane | Content panel column or STUDY-007 merge |
+| Nav theme row | Theme float bottom-right on map |
+| Search top-center | Search top-left |

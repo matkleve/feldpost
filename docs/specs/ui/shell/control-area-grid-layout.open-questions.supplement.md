@@ -33,14 +33,16 @@ Legend: 🔴 blocks scaffold · 🟡 blocks a container · 🟢 can defer
 
 **Related code:** [`sidebar.collapse.supplement.md`](../../component/workspace/sidebar.collapse.supplement.md), settings overlay `left` calc duplication.
 
-**Decision (2026-09-22):** **D — Icon-only fixed rail + delayed hover label expansion**
+**Decision (2026-09-22):** **D — Icon-only fixed rail + delayed hover label expansion (all sides)**
 
-- Control area track stays **fixed width** (icon-only baseline; no pinned expand/collapse control).
-- After **~1 s hover** on a control option, that option **extends horizontally** to reveal its label (per-option, not whole-rail expand).
+- Applies to **every control option** on **left and right** control areas (not left-only).
+- Control area tracks stay **fixed width** (icon-only baseline; no pinned expand/collapse control).
+- After **~1 s hover** (desktop) or **long hover** (tablet), the **option** extends horizontally to reveal its label (per-option — not whole-rail expand).
+- Expanded label **overlays** map / content panels; it does **not** push layout. Content underneath keeps normal interaction except the expanded label pill’s own hit target.
 - Collapse when pointer leaves the option (timing TBD in STUDY-008).
 - **Deprecates** today’s `3rem` ↔ `15rem` sidebar collapse ([`sidebar.collapse.supplement.md`](../../component/workspace/sidebar.collapse.supplement.md)) on desktop/tablet.
 
-**Follow-ups:** exact delay token; expansion overlays canvas vs pushes layout; tablet/touch behavior (long-press?).
+**Follow-ups:** exact delay token; collapse delay; keyboard/focus label reveal.
 
 ---
 
@@ -92,8 +94,11 @@ The screenshot shows Upload + Help **panels** beside the map. Today **Workspace 
 | **B — Pane becomes canvas content** | Upload/help render as center panels; control options only open/close |
 | **C — Dedicated fourth grid track** | `[left | canvas | workspace | right]` — widest desktop layout |
 | **D — Panel docked to right control area** | Upload/help panels attach to inner edge of right control column |
+| **E — Reference mock (owner screenshot)** | `[left rail \| map \| content panel column \| right rail]` — large panels beside map ([reference mock](./control-area-grid-layout.reference-mock.supplement.md)) |
 
-**Your call:**
+**Decision (2026-09-22):** **E — Reference mock layout** — see [reference mock supplement](./control-area-grid-layout.reference-mock.supplement.md). Upload, Help, Settings, Profile, etc. open as **content panels** in the column between map and right rail. **Deprecates** resizable workspace pane + settings overlay as primary surfaces (migration in STUDY-007).
+
+**Follow-ups:** fate of workspace selected-items / detail (same column? separate route?).
 
 ---
 
@@ -107,7 +112,12 @@ Today one **account row** opens settings overlay.
 | **B — Profile only** | Settings nested inside profile panel |
 | **C — Settings only** | Profile avatar inside settings overlay (status quo, two icons redundant) |
 
-**Decision (2026-09-22):** **A — Two options** — separate **Settings** and **Profile** control options in the left bottom container. Settings opens settings overlay; Profile opens account/profile surface (exact route vs overlay section TBD).
+**Decision (2026-09-22, updated):** **Two separate options — two separate content surfaces**
+
+| Option | Opens |
+| --- | --- |
+| **Settings** (gear, left bottom) | **Settings content panel** in the map-adjacent panel column — same class of surface as Upload / Help in the reference mock. **Not** the current fixed settings overlay ([`settings-overlay.md`](../settings-overlay/settings-overlay.md) → migrate to page/panel). |
+| **Profile** (avatar, left bottom) | **Profile content panel** — fully separate from Settings (not a section inside settings). Own panel chrome and route/state. |
 
 ---
 
@@ -229,9 +239,7 @@ Today: theme row in nav with cycle dots.
 | **D — Right bottom with tips/help** | Utility cluster |
 | **E — Route canvas (map zone)** | Theme float on map / big content area (owner decision) |
 
-**Decision (2026-09-22):** **E — Route canvas (map zone)** — theme cycle control lives on the **map / big content area**, not in left or right control containers. Matches reference layout (utility on canvas alongside search). Removes theme row from nav ([`nav-system.md`](../nav/nav-system.md) migration).
-
-**Follow-up:** exact position on map (near basemap switch vs dedicated float — STUDY-008).
+**Decision (2026-09-22):** **E — Route canvas (map zone), bottom-right corner** — theme cycle float near zoom controls (see [reference mock](./control-area-grid-layout.reference-mock.supplement.md)). Remove nav theme row.
 
 ---
 
@@ -307,10 +315,11 @@ Search bar, filter, GPS, basemap switch today float **inside map zone**.
 
 | ID | Decision | Date | Notes |
 | --- | --- | --- | --- |
-| OQ-02 | D — Icon-only fixed rail + ~1s hover label expansion | 2026-09-22 | Per-option horizontal expand; deprecates sidebar collapse |
-| OQ-07 | A — Two buttons (Settings + Profile) | 2026-09-22 | Left bottom container |
+| OQ-02 | D — Hover label expansion on **all** L+R options; overlay; tablet long-hover | 2026-09-22 | Deprecates sidebar collapse |
+| OQ-06 | E — Reference mock: map + content panel column + rails | 2026-09-22 | Replaces workspace pane + settings overlay model |
+| OQ-07 | Settings panel + Profile panel (fully separate) | 2026-09-22 | Left bottom; not settings overlay |
 | OQ-11 | Shared media | 2026-09-22 | Right top container 1; RLS scope in STUDY-010 |
-| OQ-15 | E — Theme on route canvas (map zone) | 2026-09-22 | Not in control areas; remove nav theme row |
+| OQ-15 | E — Theme bottom-right on map | 2026-09-22 | Remove nav theme row |
 | OQ-18 | D — Search on map, top-left | 2026-09-22 | Update search-bar.md positioning |
 | OQ-01 | | | |
 | OQ-03 | | | |
