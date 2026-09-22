@@ -105,6 +105,24 @@ const CHECKS = [
   },
   { name: "spec-coverage", cmd: "node", args: ["scripts/check-spec-coverage.mjs"] },
   {
+    name: "study-format",
+    cmd: "node",
+    args: ["scripts/check-study-format.mjs"],
+    // Hard on purpose. The known debt this check carries is registered inside
+    // the check itself (`KNOWN_DEBT` in scripts/check-study-format.mjs):
+    // **2 violations in 1 file, measured 2026-09-22 at 318180e** — STUDY-009's
+    // `status: decided` and its `corrected-by: self (…)`, both introduced by
+    // cfc7c78 on 2026-09-21. Neither is fixable without a decision the product
+    // owner owns, and studies are never rewritten into agreement, so they are
+    // allowlisted by name rather than fixed. They live there and not in a
+    // `debt` string here because that list is a ratchet the check enforces: a
+    // violation outside it fails, and an entry that no longer matches fails
+    // too, so the count can only go down. Marking the check soft would have
+    // been the other option and is the wrong one — it would let the next
+    // missing index row through as silently as this one arrived.
+    // @see docs/study/011-study-system-audit.md
+  },
+  {
     name: "config-field-readers",
     cmd: "node",
     args: ["scripts/check-config-field-readers.mjs"],
