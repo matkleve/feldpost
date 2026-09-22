@@ -85,6 +85,7 @@ Map-adjacent floats (search top-left, theme bottom-right per #257) stay on **map
 | --- | --- |
 | M4 | Is `/media` a full-page widget that **hides** map track, or split view? |
 | M5 | Non-map routes (Projects, Colleagues) — replace map track or overlay it? |
+| M6 | SIDE activation shrinks MAIN — map stays mounted but narrower ([STUDY-012](./012-shell-grid-layout-change-plan.md)) |
 
 ---
 
