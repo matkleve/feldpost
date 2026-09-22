@@ -108,19 +108,28 @@ const CHECKS = [
     name: "study-format",
     cmd: "node",
     args: ["scripts/check-study-format.mjs"],
-    // Hard on purpose. The known debt this check carries is registered inside
-    // the check itself (`KNOWN_DEBT` in scripts/check-study-format.mjs):
-    // **2 violations in 1 file, measured 2026-09-22 at 318180e** — STUDY-009's
-    // `status: decided` and its `corrected-by: self (…)`, both introduced by
-    // cfc7c78 on 2026-09-21. Neither is fixable without a decision the product
-    // owner owns, and studies are never rewritten into agreement, so they are
-    // allowlisted by name rather than fixed. They live there and not in a
-    // `debt` string here because that list is a ratchet the check enforces: a
+    // Hard on purpose, and at zero debt. It was written on 2026-09-22 carrying
+    // two allowlisted violations (STUDY-009's `status: decided` and its
+    // `corrected-by: self (…)`, from cfc7c78); the owner decided both the same
+    // day and the allowlist is now empty. Any debt this check ever carries
+    // lives in `KNOWN_DEBT` inside the check, not in a `debt` string here,
+    // because that list is a ratchet the check enforces in both directions: a
     // violation outside it fails, and an entry that no longer matches fails
-    // too, so the count can only go down. Marking the check soft would have
-    // been the other option and is the wrong one — it would let the next
-    // missing index row through as silently as this one arrived.
+    // too, so debt cannot outlive its fix. Marking the check soft was the other
+    // option and is the wrong one — it would let the next missing index row
+    // through as silently as that one arrived.
     // @see docs/study/011-study-system-audit.md
+  },
+  {
+    name: "study-claim-deletion",
+    cmd: "node",
+    args: ["scripts/check-study-claim-deletion.mjs"],
+    // The half of the study rules a frontmatter linter cannot reach: whether a
+    // change DELETED a graded claim rather than appending beside it. It does not
+    // judge the removal, only that someone declared it — `study-correction:` in
+    // the commit body. Skips with a printed reason when no base ref resolves, so
+    // a shallow or detached checkout never fails on something it cannot see.
+    // @see docs/study/STUDY-FORMAT.md § Correcting a study
   },
   {
     name: "config-field-readers",
@@ -171,7 +180,7 @@ const CHECKS = [
     ],
     soft: true,
     debt:
-      "0 failing tests (measured 2026-09-20, three consecutive cold runs, 1 551 tests). The gate carried 25 failing across 12 files on 2026-09-13; Phase 0.4b is closed. The last file, upload.service.spec.ts, was genuinely order-dependent — four cold runs gave 0/0, 5/1, 0/0, 5/1, all five assertions or none, decided by vitest's file-to-worker assignment, which is why no subset reproduced it. Cause: vi.mock() binds per module registry and the Angular unit-test system bundles the whole suite, so the mock applied only when no other spec had loaded upload.service.util into that worker first. Fixed by an explicit reader seam (setUploadExifReaderForTests) rather than a module mock. If this note ever needs raising again, raise it with a measurement of several cold runs, not one: a single green run alternated to five twice during this work. See docs/study/005-upload-pipeline-trace-findings.md F-12 and docs/TRAPS.md.",
+      "0 failing tests (re-measured 2026-09-22 cold, 1 710 tests; the note said 1 551 from 2026-09-20 and the suite has grown since). It was NOT 0 in between: four assertions demanding the letter-run collapse survived the revert that deleted it (50979bf, 2026-09-16), and one more was written against the deleted contract four days later — so the gate read `known debt: 0 failing` while measuring 4 across 3 files, and nothing compared the two lines. The specs were corrected against upload-search-object.street-fold.supplement.md S3/SF-05, which is what the code had implemented all along. The failure count is the ratchet and stays at 0; the test count is not a ratchet and may rise. See docs/study/011-study-system-audit.md S-06. The gate carried 25 failing across 12 files on 2026-09-13; Phase 0.4b is closed. The last file, upload.service.spec.ts, was genuinely order-dependent — four cold runs gave 0/0, 5/1, 0/0, 5/1, all five assertions or none, decided by vitest's file-to-worker assignment, which is why no subset reproduced it. Cause: vi.mock() binds per module registry and the Angular unit-test system bundles the whole suite, so the mock applied only when no other spec had loaded upload.service.util into that worker first. Fixed by an explicit reader seam (setUploadExifReaderForTests) rather than a module mock. If this note ever needs raising again, raise it with a measurement of several cold runs, not one: a single green run alternated to five twice during this work. See docs/study/005-upload-pipeline-trace-findings.md F-12 and docs/TRAPS.md.",
   },
   { name: "build", cmd: "npm", args: ["run", "--silent", "build"] },
 ];
