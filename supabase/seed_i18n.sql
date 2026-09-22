@@ -45793,14 +45793,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'shell.control.download', 'Download', 'en', 'Grid shell right rail. Opens the download panel.')
+values (null, 'shell.control.download', 'Selected items', 'en', 'Grid shell right rail. Opens the selected-items panel.')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Download', 'published'
+select t.id, 'en', 'Selected items', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'shell.control.download'
 on conflict (app_text_id, lang) do update set
@@ -45808,7 +45808,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Herunterladen', 'published'
+select t.id, 'de', 'Ausgewählte Elemente', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'shell.control.download'
 on conflict (app_text_id, lang) do update set
@@ -45816,7 +45816,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Scarica', 'published'
+select t.id, 'it', 'Elementi selezionati', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'shell.control.download'
 on conflict (app_text_id, lang) do update set
@@ -45886,14 +45886,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'shell.control.history', 'Change history', 'en', 'Grid shell right rail. Inert until a history product exists.')
+values (null, 'shell.control.history', 'Activity history', 'en', 'Grid shell right rail. Inert until a history product exists.')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Change history', 'published'
+select t.id, 'en', 'Activity history', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'shell.control.history'
 on conflict (app_text_id, lang) do update set
@@ -45901,7 +45901,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Änderungsverlauf', 'published'
+select t.id, 'de', 'Aktivitätsverlauf', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'shell.control.history'
 on conflict (app_text_id, lang) do update set
@@ -45909,7 +45909,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Cronologia modifiche', 'published'
+select t.id, 'it', 'Cronologia attività', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'shell.control.history'
 on conflict (app_text_id, lang) do update set
@@ -46010,14 +46010,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'shell.panel.download.title', 'Download', 'en', 'Download panel surface title.')
+values (null, 'shell.panel.download.title', 'Selected items', 'en', 'Selected items panel surface title.')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Download', 'published'
+select t.id, 'en', 'Selected items', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'shell.panel.download.title'
 on conflict (app_text_id, lang) do update set
@@ -46025,7 +46025,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Herunterladen', 'published'
+select t.id, 'de', 'Ausgewählte Elemente', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'shell.panel.download.title'
 on conflict (app_text_id, lang) do update set
@@ -46033,7 +46033,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Scarica', 'published'
+select t.id, 'it', 'Elementi selezionati', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'shell.panel.download.title'
 on conflict (app_text_id, lang) do update set

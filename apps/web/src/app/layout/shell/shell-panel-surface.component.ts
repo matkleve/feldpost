@@ -20,9 +20,8 @@ export class ShellPanelSurfaceComponent {
 
   title(): string {
     const titles: Record<ShellPanelId, readonly [string, string]> = {
-      notifications: ['shell.panel.notifications.title', 'Notifications'],
       upload: ['shell.panel.upload.title', 'Upload'],
-      download: ['shell.panel.download.title', 'Download'],
+      download: ['shell.panel.download.title', 'Selected items'],
       'shared-media': ['shell.panel.sharedMedia.title', 'Shared media'],
       tips: ['shell.panel.tips.title', 'Tips'],
       help: ['shell.panel.help.title', 'Help'],

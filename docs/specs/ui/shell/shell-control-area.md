@@ -31,7 +31,7 @@ app-shell-control-area
 └── app-shell-control-container [bottom group]
 ```
 
-Left static list: logo, map, projects, media, `+` (inert), account, settings. Right static list, three containers: notifications, upload, download, shared media; undo, change history, redo (inert until a history product exists); tips, help. The leftover sits before the last container. Account and settings keep today's routes and the settings overlay.
+Left static list: logo, map, projects, media, `+` (inert), account, settings. Right rail, three containers. The first two sit at the top with `gap: var(--spacing-3)`. The third is the last container, so the leftover pushes it to the bottom. Container 1: upload, selected items, shared media. Container 2: undo, activity history, redo (inert until a history product exists). Container 3: tips, help. Account and settings keep today's routes and the settings overlay.
 
 ## Data
 

@@ -24,14 +24,6 @@ const RIGHT_GROUPS: readonly ShellControlGroup[] = [
     id: 'actions',
     options: [
       {
-        id: 'notifications',
-        icon: 'notifications',
-        labelKey: 'shell.control.notifications',
-        labelFallback: 'Notifications',
-        kind: 'panel',
-        panelId: 'notifications',
-      },
-      {
         id: 'upload',
         icon: 'upload',
         labelKey: 'shell.control.upload',
@@ -43,7 +35,7 @@ const RIGHT_GROUPS: readonly ShellControlGroup[] = [
         id: 'download',
         icon: 'download',
         labelKey: 'shell.control.download',
-        labelFallback: 'Download',
+        labelFallback: 'Selected items',
         kind: 'panel',
         panelId: 'download',
       },
@@ -71,7 +63,7 @@ const RIGHT_GROUPS: readonly ShellControlGroup[] = [
         id: 'history',
         icon: 'history',
         labelKey: 'shell.control.history',
-        labelFallback: 'Change history',
+        labelFallback: 'Activity history',
         kind: 'inert',
       },
       {

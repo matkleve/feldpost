@@ -2,7 +2,7 @@
 
 ## What It Is
 
-The open/closed stack for the panel column. Ids are `notifications`, `upload`, `download`, `shared-media`, `tips`, and `help`. It does not route the canvas. Undo, change history, and redo are not panel ids.
+The open/closed stack for the panel column. Ids are `upload`, `download`, `shared-media`, `tips`, and `help`. It does not route the canvas. Undo, activity history, and redo are not panel ids.
 
 ## What It Looks Like
 
@@ -39,7 +39,7 @@ No adapters. This module does not call Supabase or the router.
 | --- | --- | --- |
 | In-memory signal | `{ id, open, order }[]` | Read and write |
 
-Ids are `notifications`, `upload`, `download`, `shared-media`, `tips`, and `help`. An unknown id is ignored.
+Ids are `upload`, `download`, `shared-media`, `tips`, and `help`. An unknown id is ignored.
 
 ## State
 

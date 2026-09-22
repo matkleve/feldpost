@@ -1607,14 +1607,14 @@ shell.panel.help.title,Help,Help panel surface title.,Help,Hilfe,Aiuto
 shell.panel.help.body,Help is not available yet.,Help panel placeholder body.,Help is not available yet.,Hilfe ist noch nicht verfügbar.,L'aiuto non è ancora disponibile.
 shell.panel.close,Close,Panel surface close control.,Close,Schließen,Chiudi
 shell.control.notifications,Notifications,Grid shell right rail. Opens the notifications panel.,Notifications,Benachrichtigungen,Notifiche
-shell.control.download,Download,Grid shell right rail. Opens the download panel.,Download,Herunterladen,Scarica
+shell.control.download,Selected items,Grid shell right rail. Opens the selected-items panel.,Selected items,Ausgewählte Elemente,Elementi selezionati
 shell.control.sharedMedia,Shared media,Grid shell right rail. Opens the shared media panel.,Shared media,Geteilte Medien,Media condivisi
 shell.control.undo,Undo,Grid shell right rail. Inert until a history product exists.,Undo,Rückgängig,Annulla
-shell.control.history,Change history,Grid shell right rail. Inert until a history product exists.,Change history,Änderungsverlauf,Cronologia modifiche
+shell.control.history,Activity history,Grid shell right rail. Inert until a history product exists.,Activity history,Aktivitätsverlauf,Cronologia attività
 shell.control.redo,Redo,Grid shell right rail. Inert until a history product exists.,Redo,Wiederholen,Ripeti
 shell.control.tips,Tips,Grid shell right rail. Opens the tips panel.,Tips,Tipps,Suggerimenti
 shell.panel.notifications.title,Notifications,Notifications panel surface title.,Notifications,Benachrichtigungen,Notifiche
-shell.panel.download.title,Download,Download panel surface title.,Download,Herunterladen,Scarica
+shell.panel.download.title,Selected items,Selected items panel surface title.,Selected items,Ausgewählte Elemente,Elementi selezionati
 shell.panel.sharedMedia.title,Shared media,Shared media panel surface title.,Shared media,Geteilte Medien,Media condivisi
 shell.panel.tips.title,Tips,Tips panel surface title.,Tips,Tipps,Suggerimenti
 shell.panel.unavailable.body,This panel is not available yet.,Placeholder body for a right-rail panel that has no product yet.,This panel is not available yet.,Dieser Bereich ist noch nicht verfügbar.,Questo pannello non è ancora disponibile.
