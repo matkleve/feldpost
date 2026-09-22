@@ -48,10 +48,12 @@
 | Work | Notes |
 | --- | --- |
 | Introduce `app-control-area-left` OR refactor `app-nav` innards | Prefer evolution of `app-nav` to limit route churn |
-| Top container: logo + route options per OQ-04/05 | Remove or relocate collapse per OQ-02 |
-| Bottom container: settings + profile per OQ-07 | Theme row per OQ-15 |
-| Deprecate frosted full-height sidebar panel if icon-only | Update [`sidebar.md`](../../component/workspace/sidebar.md) + collapse supplement |
+| Top container: logo + route options per OQ-04/05 | Fixed icon track; **~1 s hover horizontal label expansion** (OQ-02) |
+| Bottom container: **Settings + Profile** as separate options (OQ-07) | Remove combined account row |
+| **Remove theme row from nav** | Theme moves to map zone (OQ-15) |
+| Deprecate frosted full-height sidebar + pinned collapse | [`sidebar.collapse.supplement.md`](../../component/workspace/sidebar.collapse.supplement.md) |
 | Fix settings overlay `left` offset once track width stable | [`settings-overlay.md`](../settings-overlay/settings-overlay.md) |
+| Reposition search bar to **top-left** on map | [`search-bar.md`](../search-bar/search-bar.md) (OQ-18) |
 
 **Verify:** Nav e2e / vitest; settings overlay alignment LIVE CHECK; keyboard focus order top→bottom containers.
 

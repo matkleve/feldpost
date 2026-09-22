@@ -33,7 +33,14 @@ Legend: 🔴 blocks scaffold · 🟡 blocks a container · 🟢 can defer
 
 **Related code:** [`sidebar.collapse.supplement.md`](../../component/workspace/sidebar.collapse.supplement.md), settings overlay `left` calc duplication.
 
-**Your call:**
+**Decision (2026-09-22):** **D — Icon-only fixed rail + delayed hover label expansion**
+
+- Control area track stays **fixed width** (icon-only baseline; no pinned expand/collapse control).
+- After **~1 s hover** on a control option, that option **extends horizontally** to reveal its label (per-option, not whole-rail expand).
+- Collapse when pointer leaves the option (timing TBD in STUDY-008).
+- **Deprecates** today’s `3rem` ↔ `15rem` sidebar collapse ([`sidebar.collapse.supplement.md`](../../component/workspace/sidebar.collapse.supplement.md)) on desktop/tablet.
+
+**Follow-ups:** exact delay token; expansion overlays canvas vs pushes layout; tablet/touch behavior (long-press?).
 
 ---
 
@@ -100,7 +107,7 @@ Today one **account row** opens settings overlay.
 | **B — Profile only** | Settings nested inside profile panel |
 | **C — Settings only** | Profile avatar inside settings overlay (status quo, two icons redundant) |
 
-**Your call:**
+**Decision (2026-09-22):** **A — Two options** — separate **Settings** and **Profile** control options in the left bottom container. Settings opens settings overlay; Profile opens account/profile surface (exact route vs overlay section TBD).
 
 ---
 
@@ -159,7 +166,7 @@ Today one **account row** opens settings overlay.
 
 **Needs:** STUDY-010.
 
-**Your call:**
+**Decision (2026-09-22):** **Shared media** — right top container 1 opens a **shared media** surface (media shared with the user / org scope — exact RLS scope in STUDY-010). Slot label: **Shared media** (not generic “shared items”).
 
 ---
 
@@ -220,8 +227,11 @@ Today: theme row in nav with cycle dots.
 | **B — Inside settings overlay only** | Remove from shell |
 | **C — Profile menu** | Submenu of profile option |
 | **D — Right bottom with tips/help** | Utility cluster |
+| **E — Route canvas (map zone)** | Theme float on map / big content area (owner decision) |
 
-**Your call:**
+**Decision (2026-09-22):** **E — Route canvas (map zone)** — theme cycle control lives on the **map / big content area**, not in left or right control containers. Matches reference layout (utility on canvas alongside search). Removes theme row from nav ([`nav-system.md`](../nav/nav-system.md) migration).
+
+**Follow-up:** exact position on map (near basemap switch vs dedicated float — STUDY-008).
 
 ---
 
@@ -263,8 +273,9 @@ Search bar, filter, GPS, basemap switch today float **inside map zone**.
 | **A — Unchanged** | Floats remain; control areas are additive columns |
 | **B — Search moves to center top** | Part of canvas grid, not map overlay |
 | **C — Search in left container** | Icon opens search overlay |
+| **D — Search on map, top-left** | Map zone float; top-left anchor (owner decision) |
 
-**Your call:**
+**Decision (2026-09-22):** **D — Search on map, top-left aligned** — search bar remains a **map zone float** (route canvas), anchored **top-left** of the map (not top-center). Filter stays with search row per current pattern. **Requires** update to [`search-bar.md`](../search-bar/search-bar.md) positioning contract.
 
 ---
 
@@ -292,10 +303,27 @@ Search bar, filter, GPS, basemap switch today float **inside map zone**.
 
 ---
 
-## Decision log (fill as owner answers)
+## Decision log
 
 | ID | Decision | Date | Notes |
 | --- | --- | --- | --- |
+| OQ-02 | D — Icon-only fixed rail + ~1s hover label expansion | 2026-09-22 | Per-option horizontal expand; deprecates sidebar collapse |
+| OQ-07 | A — Two buttons (Settings + Profile) | 2026-09-22 | Left bottom container |
+| OQ-11 | Shared media | 2026-09-22 | Right top container 1; RLS scope in STUDY-010 |
+| OQ-15 | E — Theme on route canvas (map zone) | 2026-09-22 | Not in control areas; remove nav theme row |
+| OQ-18 | D — Search on map, top-left | 2026-09-22 | Update search-bar.md positioning |
 | OQ-01 | | | |
-| OQ-02 | | | |
-| … | | | |
+| OQ-03 | | | |
+| OQ-04 | | | |
+| OQ-05 | | | |
+| OQ-06 | | | |
+| OQ-08 | | | |
+| OQ-09 | | | |
+| OQ-10 | | | |
+| OQ-12 | | | |
+| OQ-13 | | | |
+| OQ-14 | | | |
+| OQ-16 | | | |
+| OQ-17 | | | |
+| OQ-19 | | | |
+| OQ-20 | | | |
