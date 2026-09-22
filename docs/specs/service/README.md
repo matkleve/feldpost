@@ -51,6 +51,7 @@ Symmetry tracker: [service-spec-symmetry-matrix](../../backlog/service-spec-symm
 | toast | [toast/toast-system.md](toast/toast-system.md) |
 | user-profile | [user-profile/user-profile-service.md](user-profile/user-profile-service.md) |
 | workspace-selection | [workspace-selection/workspace-selection-service.md](workspace-selection/workspace-selection-service.md) |
+| organization-widgets | [organization-widgets/organization-widgets.md](organization-widgets/organization-widgets.md) |
 | widgets | [widgets/widgets.md](widgets/widgets.md) |
 | wide-event | [wide-event/wide-event-service.md](wide-event/wide-event-service.md) |
 | workspace-view | [workspace-view/workspace-view-system.md](workspace-view/workspace-view-system.md) |

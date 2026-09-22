@@ -20,7 +20,7 @@ export function findWidget(
   return entries.find((entry) => entry.id === id) ?? null;
 }
 
-/** Fixed rail entries read as on the rail. Installable entries are not added until #270. */
+/** Fixed rail entries read as on the rail. Installable entries stay not-added until the rail reads installs. */
 export function overviewState(entry: WidgetCatalogEntry): 'on-rail' | 'not-added' {
   return entry.rail === 'fixed' ? 'on-rail' : 'not-added';
 }

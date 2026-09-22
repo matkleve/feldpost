@@ -13,7 +13,7 @@ The page renders inside `app-shell-main-canvas` and adds no second gutter. Each 
 - **Trigger:** left-rail `+` (`shell.control.more`).
 - **Parent:** `app-shell-main-canvas`. Journey: [widgets-page.md](widgets-page.md).
 - **Route:** `/widgets`.
-- **Catalog:** [widgets.md](../service/widgets/widgets.md). Add does not store a row until the install table exists.
+- **Catalog:** [widgets.md](../service/widgets/widgets.md). Add stores a row through [organization-widgets.md](../service/organization-widgets/organization-widgets.md).
 
 ## Actions
 
@@ -37,7 +37,7 @@ app-shell-main-canvas
 
 ## Data
 
-The directory reads the catalog in [widget-suite.md](widget-suite.md) plus Mitarbeiter and Organisation. It does not name a table. Allowance is [widget-grants.md](../system/widget-grants.md).
+The directory reads the catalog in [widget-suite.md](widget-suite.md) plus Mitarbeiter and Organisation. Add writes `organization_widgets` for the member's organization. Allowance is [widget-grants.md](../system/widget-grants.md).
 
 ## State
 
@@ -51,17 +51,18 @@ The directory reads the catalog in [widget-suite.md](widget-suite.md) plus Mitar
 | --- | --- |
 | `features/widgets/widget-directory.page.ts` | This page |
 | `core/widgets/widgets.service.ts` | Catalog |
+| `core/organization-widgets/organization-widgets.service.ts` | Install write |
 
 ## Wiring
 
-`+` navigates to `/widgets`. Add calls `addInstalls`, which is false until the install table exists.
+`+` navigates to `/widgets`. Add calls `addInstalls(entry, true)`, then `OrganizationWidgetsService.install`. A greyed rectangle still installs nothing.
 
 ## Acceptance Criteria
 
 - [ ] `+` opens `/widgets`.
 - [ ] A rectangle shows the name, a short explanation, More, and Add.
 - [ ] Add on a greyed rectangle installs nothing.
-- [ ] No migration is added from this spec alone.
+- [ ] Add on an allowed installable rectangle writes one `organization_widgets` row.
 
 ## Visual Behavior Contract
 

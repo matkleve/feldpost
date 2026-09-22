@@ -44,7 +44,7 @@ Three modules, matching the roles system that already exists. No second grant en
 | Install | Whether the organization has added the widget | One table `organization_widgets (organization_id, widget_id)`, RLS by `user_org_id()` |
 | Role | Who may open it, and who may view, create, edit, or delete its records | New keys on `org_permissions`: `widget.<id>.open` and `widget.<id>.view`, `.create`, `.edit`, `.delete`. The roles screen already saves `org_role_permissions`. |
 
-A role key says what a member may do. The audience says which records they may do it to. The organization is the outer boundary. A record with no audience is visible to every role in the organization that holds the data key. A record can also be limited to selected roles, or to selected groups. Groups are the reserved organization groups in [groups-feature.md](../page/groups-feature.md), not workspace grouping. This spec does not name the audience table and still adds no migration.
+A role key says what a member may do. The audience says which records they may do it to. The organization is the outer boundary. A record with no audience is visible to every role in the organization that holds the data key. A record can also be limited to selected roles, or to selected groups. Groups are the reserved organization groups in [groups-feature.md](../page/groups-feature.md), not workspace grouping. This spec does not name the audience table and adds no audience migration. Install storage is `supabase/migrations/20260922120000_organization_widgets.sql`.
 
 ## State
 
@@ -60,6 +60,7 @@ Install state is `organizationAllows`. It is not a page-local flag.
 | File | Purpose |
 | --- | --- |
 | `features/organization/sections/roles/organization-roles-section.component.ts` | Roles screen that will gain the grants |
+| `supabase/migrations/20260922120000_organization_widgets.sql` | Install table and policies |
 | `docs/specs/system/widget-grants.md` | This contract |
 
 ## Wiring
@@ -68,7 +69,7 @@ Install state is `organizationAllows`. It is not a page-local flag.
 
 ## Acceptance Criteria
 
-- [ ] No migration is added from this spec alone.
+- [ ] Install storage is `organization_widgets` only. No audience table.
 - [ ] Add on a greyed directory rectangle installs nothing.
 - [ ] A role without the widget has no rail option for it.
 - [ ] `org.roles.manage` stays the grant that edits roles.

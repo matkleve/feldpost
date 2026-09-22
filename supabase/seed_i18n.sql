@@ -47217,3 +47217,65 @@ where t.organization_id is null and t.key = 'widget.catalog.buildings.body'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.directory.added', 'Widget added.', 'en', 'Success after Add stores an install row.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Widget added.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.directory.added'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Widget hinzugefügt.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.directory.added'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Widget aggiunto.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.directory.added'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.directory.addFailed', 'Could not add the widget.', 'en', 'Error when the install row was not stored.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Could not add the widget.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.directory.addFailed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Das Widget konnte nicht hinzugefügt werden.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.directory.addFailed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile aggiungere il widget.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.directory.addFailed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
