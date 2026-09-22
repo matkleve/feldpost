@@ -250,8 +250,44 @@ These are not objections; they are the gate, and they apply to all three candida
 | That the 30 trade words are representative | Chosen from domain knowledge, not from a corpus. `[C]` | Take the vocabulary from a real import's folder names. |
 | That no other decision point qualifies | The sweep covered `core/` closed-set types and classifier entry points; `features/` and `supabase/` were not inventoried. `[B]` | Extend the sweep if the first three prove out. |
 
+## Update 2026-09-22 — the owner's verdict, and C-2 is filed
+
+Appended under [`STUDY-FORMAT.md`](./STUDY-FORMAT.md) § Correcting a study. Nothing above is deleted.
+
+**On adoption, the owner:**
+
+> *"I don't see where we could make use of the typed decision yet, but it's good to have done the
+> study."*
+
+`[D]` **That is the decision, and it is the right reading of § 1.** The inventory's own conclusion is
+that most of Feldpost has no fit, and the three candidates all sit behind work that has to happen
+first regardless: C-1's calibration is unmeasured, C-2 is a plain defect, and C-3's incumbent cannot
+fire at all. A study whose honest answer is *"not yet, and here is what would have to change"* has
+done its job. **§ 6's ordering survives the verdict unchanged** — steps 1 to 3 were never adoption
+decisions, and the Constitution § 1 egress question in § 5 never had to be asked.
+
+Recorded rather than acted on: the status stays `proposed`, because the owner parked the adoption
+question rather than ruling on the study, and `rejected` would misdescribe that.
+
+**C-2 is now [#261](https://github.com/matkleve/feldpost/issues/261)** — *"a trade word stuck to the
+street name splits one building into two grouping keys"*, Sensitive class, red-test-first. Its
+acceptance criteria carry the part of § 3 that matters most and is easiest to get wrong:
+
+- The fix must be a **pattern, not a longer word list.** Adding `baustelle` to `NOISE_SEGMENTS` is
+  explicitly called out as insufficient and to be rejected in review — the list is the wrong *shape*
+  for an open vocabulary, not too short.
+- A test must assert the conservative behaviour **does not regress**: those 30 trade words must still
+  produce no street on their own. The risk in fixing an under-stripping bug is over-stripping, and a
+  real street whose name begins with a common word is the failure mode.
+- The spec section must be extended to say the rule holds **inside** a segment, not only across them.
+
+`[C]` C-2 was the only candidate worth doing with or without a model, which is why it is the only one
+that became an issue today. C-1's calibration measurement (§ 6.1) remains the cheapest useful thing on
+the list — in-house, no external model, zero cost — and is still unowned.
+
 ## Related
 
+- [#261](https://github.com/matkleve/feldpost/issues/261) — C-2, filed from § 3
 - [STUDY-012](./012-disambiguation-model-evaluation.md) — what Jev is, and C-3's incumbent measured
 - [STUDY-009](./009-tray-question-budget-and-priority.md) — the tray-question volume any gain must be measured against
 - [STUDY-005](./005-upload-pipeline-trace-findings.md) F-02 — the `Wien` → `Schottwien` incident, and F-11 on segment ranking
