@@ -10,7 +10,7 @@ Who may then open that widget, and which of its records they may use, is a grant
 
 ## What It Looks Like
 
-Both pages render inside `app-shell-main-canvas`, so they share that box's radius. The directory is a list of widgets: icon, name, one-line explanation. The explanation page is the same icon and name, then a longer explanation, then one install or remove control. No second radius and no second gutter: spacing stays `var(--spacing-3)`, radius stays `var(--container-radius-panel)` via the canvas. The `+` option does not become a page of its own inside the rail.
+Both pages render inside `app-shell-main-canvas`, so they share that box's radius. The directory is a set of rectangles. Each rectangle shows the widget name, a short explanation, and two controls: More and Add. A rectangle the organization does not allow is greyed out. More opens that widget's explanation page. The explanation page is the longer text. No second gutter: spacing stays `var(--spacing-3)`. The `+` option does not become a page of its own inside the rail.
 
 ## Where It Lives
 
@@ -23,12 +23,12 @@ Both pages render inside `app-shell-main-canvas`, so they share that box's radiu
 | # | User Action | System Response | Triggers |
 | --- | --- | --- | --- |
 | 1 | Activates `+` | Canvas shows the directory | route, after STUDY-016 |
-| 2 | Activates a widget in the directory | Canvas shows that widget's explanation page | route |
-| 3 | Activates Install on an explanation page | Widget becomes available to the organization | install |
-| 4 | Activates Remove on an installed widget | Widget leaves the organization | remove |
+| 2 | Activates More on a directory rectangle | Canvas shows that widget's explanation page | route |
+| 3 | Activates Add on a directory rectangle | Widget becomes available to the organization | install |
+| 4 | Activates Add on a greyed rectangle | Nothing is installed | organization does not allow it |
 | 5 | Activates Back on an explanation page | Canvas shows the directory | route |
 
-Map, projects, and media stay on the rail. This spec does not say they can be removed.
+Whether map, projects, and media can leave the rail is [STUDY-018](../../study/018-rail-placement.md). This spec does not remove them.
 
 ## Component Hierarchy
 
@@ -66,6 +66,7 @@ Install state is not a page state. It is whatever STUDY-016 decides stores an in
 | --- | --- |
 | `docs/specs/page/widgets-page.md` | This journey |
 | `docs/study/016-widgets-page-flow.md` | Open decisions |
+| `docs/study/018-rail-placement.md` | Where a widget sits on the rails |
 | `layout/shell/shell-control.types.ts` | `+` stays inert <!-- planned change --> |
 
 ## Wiring

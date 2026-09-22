@@ -39,3 +39,9 @@ An owner decision: organization-wide install, or per-user install. Until that se
 ## Update 2026-09-22
 
 The owner rejected the install-scope question as the rights model `[D]`. A role on the organization is the grant, and that role is customized for allowed widgets and allowed data. The directory-then-explanation flow in this study is unchanged. The rights reading, the existing `org_roles` catalog, and a proposed GPS-and-media suite are [STUDY-017](017-role-widget-grants.md). The W1 row above stays as it was written.
+
+## Update 2026-09-22 — W3, W4, W5
+
+The owner leaned yes on W3 and asked for a study rather than a decision `[D]`. W4 is both a canvas page and a right-rail panel in general, and Workers and Organisation join the bottom-left container `[D]`. Those two questions are [STUDY-018](018-rail-placement.md). The W3 and W4 rows above stay as they were written.
+
+W5, as asked, was who writes the explanation. The owner answered with the card `[D]`: a rectangle with the name, a short explanation, More, and Add, greyed out when the organization does not allow the widget. That shape is in [widgets-page.md](../specs/page/widgets-page.md). Who stores the sentences is still open. The W5 row above stays as it was written.

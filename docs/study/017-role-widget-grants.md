@@ -58,6 +58,10 @@ The owner asked for one further widget in the same shape. The proposal is **Equi
 | R3 | Are the five English names, and Equipment, the catalog? | They are a proposal. W2 in STUDY-016 stays open until the owner accepts a list. |
 | R4 | What followed the word "and"? | The message ended there. It is not in this study. |
 
+## Update 2026-09-22
+
+The owner later leaned that map, projects, and media can leave the rail, and asked for that to be studied `[D]`. The sentence above that calls them fixed stays. The placement study is [STUDY-018](018-rail-placement.md).
+
 ## What would settle this
 
 One owner sentence: the organization installs a widget, and a role then allows that widget and its data. A second sentence: the English names above, with Equipment in or out. Until both exist, no migration and no route.
