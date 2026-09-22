@@ -55,6 +55,7 @@ import {
 import { detectCoordinates } from '../../../core/search/coordinate-detection';
 import { MediaLocationUpdateService } from '../../../core/media-location-update/media-location-update.service';
 import { MediaLocationsService } from '../../../core/media-locations/media-locations.service';
+import { isLocationUnresolvedStatus } from '../../../core/location-resolver/location-resolver.helpers';
 import {
   locationDisplaySnapshotFromRows,
   mergeLocationDisplayIntoMediaRecord,
@@ -636,7 +637,9 @@ export class MediaDetailViewComponent implements OnDestroy {
       const patch = {
         latitude: evt.lat,
         longitude: evt.lng,
-        location_unresolved: false,
+        // Optimistic mirror of the `location_status = 'resolved'` a coordinate write persists.
+        // Taken from the one derivation so the patched row matches the reloaded one (#222).
+        location_unresolved: isLocationUnresolvedStatus('resolved'),
         ...evt.address,
       };
       const targetMediaId = mediaId;
@@ -813,7 +816,8 @@ export class MediaDetailViewComponent implements OnDestroy {
           this.applyLocationPatch({
             latitude: result.lat ?? media.latitude,
             longitude: result.lng ?? media.longitude,
-            location_unresolved: false,
+            // Mirrors the 'resolved' status this path settles on; see the sync effect above (#222).
+            location_unresolved: isLocationUnresolvedStatus('resolved'),
             ...result.address,
           });
           refresh = await this.dataFacade.refreshMediaLocationFields(mediaId, signal);
@@ -848,7 +852,8 @@ export class MediaDetailViewComponent implements OnDestroy {
       this.handleExternalLocationSync(pending.mediaId, {
         latitude: pending.lat,
         longitude: pending.lng,
-        location_unresolved: false,
+        // Mirrors the 'resolved' status a map pick persists (#222).
+        location_unresolved: isLocationUnresolvedStatus('resolved'),
         ...pending.address,
       }),
     );
@@ -1695,7 +1700,8 @@ export class MediaDetailViewComponent implements OnDestroy {
     const patch = prepareLocationPatchAfterGpsChange(media, {
       latitude: result.lat ?? coords.lat,
       longitude: result.lng ?? coords.lng,
-      location_unresolved: false,
+      // Mirrors the 'resolved' status a manual coordinate entry persists (#222).
+      location_unresolved: isLocationUnresolvedStatus('resolved'),
       ...result.address,
     });
     this.applyLocationPatch(patch);

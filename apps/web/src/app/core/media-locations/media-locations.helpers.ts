@@ -18,14 +18,7 @@ import type { MediaItemLocationRow, OrgLocationSearchRow } from './media-locatio
  */
 export type LocationDisplayFields = Pick<
   MediaRecord,
-  | 'address_label'
-  | 'street'
-  | 'city'
-  | 'district'
-  | 'country'
-  | 'latitude'
-  | 'longitude'
-  | 'location_unresolved'
+  'address_label' | 'street' | 'city' | 'district' | 'country' | 'latitude' | 'longitude'
 >;
 
 export interface LocationDisplaySnapshot {
@@ -395,12 +388,21 @@ export function locationDisplaySnapshotFromRows(
       country: display.country,
       latitude: display.latitude,
       longitude: display.longitude,
-      location_unresolved: !legacyMediaHasGps(display.latitude, display.longitude),
     },
   };
 }
 
-/** Merge first-link display fields into the loaded detail media record (`MediaRecord` DTO). */
+/**
+ * Merge first-link display fields into the loaded detail media record (`MediaRecord` DTO).
+ *
+ * `location_unresolved` is deliberately **not** among the merged fields (#222). Whether the display
+ * link carries coordinates is a different question from whether the item's location is resolved —
+ * it is `mediaHasZoomableLocation` / `locationPinEligible`, and answering it under the other name
+ * is TRAP-001's shape. The record keeps the value its loader derived from `location_status`, which
+ * for every case this function can see gives the same answer the coordinate rule used to: an
+ * address-only display link means `partial`, and no links at all means `pending` or `unresolvable`
+ * — all unresolved.
+ */
 export function mergeLocationDisplayIntoMediaRecord<T extends MediaRecord>(
   media: T,
   snapshot: LocationDisplaySnapshot | null,
@@ -415,7 +417,6 @@ export function mergeLocationDisplayIntoMediaRecord<T extends MediaRecord>(
       country: null,
       latitude: null,
       longitude: null,
-      location_unresolved: true,
     };
   }
 

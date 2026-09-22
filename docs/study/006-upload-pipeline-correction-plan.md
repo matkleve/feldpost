@@ -628,6 +628,15 @@ Bulk eligibility therefore reads `location_status` directly rather than inheriti
 that has nothing to do with it. Worth a separate look: two mappers producing different answers for
 the same row is a bug waiting for whoever next trusts that field.
 
+**Closed 2026-09-22 ([#222](https://github.com/matkleve/feldpost/issues/222)).** There were four
+derivations, not two: the two status mappers above, plus a coordinate rule in
+`locationDisplaySnapshotFromRows` that overwrote the detail pane's value on every location
+rehydrate, plus a `latitude != null` fallback in `mergeMediaLocationPatch`. `location_unresolved` is
+now one projection of `location_status` — `isLocationUnresolvedStatus`, which `isBulkEligibleStatus`
+delegates to instead of dodging — and `partial` counts as unresolved. The two coordinate rules are
+deleted; that question is `mediaHasZoomableLocation`. Decision and reasoning:
+[location-resolver README § Location Status Contract](../specs/service/location-resolver/README.md).
+
 Also decided there: `unresolvable` **is** eligible for bulk resolution. The pipeline gave up on those
 items, and a human answer applied folder-wide is exactly what that case needs — excluding them would
 leave the hardest items permanently out of reach of the tool built for them. An unknown or absent
@@ -741,7 +750,7 @@ Found while building Phase 5, owned by nobody's phase:
 
 | Finding | Issue |
 | --- | --- |
-| `location_unresolved` derived two ways, disagreeing on `partial` | [#222](https://github.com/matkleve/feldpost/issues/222) |
+| `location_unresolved` derived two ways, disagreeing on `partial` — **closed 2026-09-22** | [#222](https://github.com/matkleve/feldpost/issues/222) |
 | `seed_i18n.sql` has `de` and `it` swapped for `addExifToLocations` | [#223](https://github.com/matkleve/feldpost/issues/223) |
 
 

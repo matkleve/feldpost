@@ -11,6 +11,10 @@ Thin orchestration for loading a media row, wiring metadata, signed URLs, and pr
 
 Domain-specific helpers (`media-detail-view.utils`, project membership helper, types) remain under `apps/web/src/app/shared/workspace-pane/media-detail/` per UI boundary.
 
+## Contract notes
+
+- `toMediaRecord` derives `location_unresolved` with `isLocationUnresolvedStatus` — the **same** predicate the list mapper in `core/media-query/media-query.service.ts` uses, so one row cannot answer differently on the two load paths ([#222](https://github.com/matkleve/feldpost/issues/222)). Rule and reasoning: [location-resolver README § Location Status Contract](../location-resolver/README.md).
+
 ## Related
 
 - UI contract: `docs/specs/ui/media-detail/media-detail-view.md`

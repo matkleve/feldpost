@@ -49,6 +49,7 @@
  * @see docs/study/009-tray-question-budget-and-priority.md
  */
 
+import { LOCATED_LOCATION_STATUSES } from '../location-resolver/location-resolver.helpers';
 import { isBulkEligibleStatus } from './bulk-resolution.selection';
 
 export type DeferredLocationBucket =
@@ -90,7 +91,9 @@ export const DEFERRED_LOCATION_STATUS_FILTERS: Readonly<{
   located: readonly string[];
 }> = {
   improvable: ['partial'],
-  located: ['resolved', 'gps'],
+  // The same set `isLocationUnresolvedStatus` calls located, not a copy of it: a query filtered on
+  // a second literal list would drift from the predicate the badge and the run classify with.
+  located: LOCATED_LOCATION_STATUSES,
 };
 
 /**

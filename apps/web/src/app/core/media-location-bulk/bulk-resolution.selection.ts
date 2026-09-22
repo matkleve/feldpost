@@ -10,32 +10,32 @@
  * @see docs/specs/system/deferred-location-resolution.batch.supplement.md
  */
 
+import { isLocationUnresolvedStatus } from '../location-resolver/location-resolver.helpers';
 import type { MediaRecord } from '../media-query/media-query.types';
 import type { BulkResolutionCandidate } from './bulk-resolution.planner';
 
 /**
- * Statuses that mean "this item already has a location", so bulk resolution leaves it alone unless
- * overwrite mode was explicitly chosen (B3).
+ * Is an item's location status one that bulk resolution may act on (B3)?
  *
- * Deliberately **not** derived from `location_unresolved`: two mappers compute that field
- * differently — `media-query.service.ts` counts `'partial'` as unresolved and
- * `media-detail-data.facade.ts` does not — so eligibility would inherit a disagreement that has
- * nothing to do with it. Reading the status directly keeps this decision in one place.
- */
-const LOCATED_STATUSES = new Set(['resolved', 'gps']);
-
-/**
- * Is an item's location status one that bulk resolution may act on?
+ * "Bulk resolution may act on it" and "its location is unresolved" are the same fact asked from two
+ * sides, so this is `isLocationUnresolvedStatus` and not a second rule. It used to be a separate
+ * rule on purpose — two mappers derived `location_unresolved` differently and eligibility refused
+ * to inherit the disagreement — and #222 removed the disagreement rather than the duplication, so
+ * the reason to keep them apart is gone.
  *
- * `unresolvable` counts as eligible: the pipeline gave up on it, and a human answer applied to a
- * whole folder is precisely what that case needs. Excluding it would leave the hardest items
- * permanently out of reach of the tool built for them.
+ * The two judgement calls that made this predicate worth writing down still hold, and now hold for
+ * every consumer instead of this one:
  *
- * An unknown or absent status is eligible too — failing toward offering the work is safer than
- * silently skipping rows, because a skip is invisible while an unwanted offer is not.
+ * - `unresolvable` is eligible: the pipeline gave up on it, and a human answer applied to a whole
+ *   folder is precisely what that case needs. Excluding it would leave the hardest items
+ *   permanently out of reach of the tool built for them.
+ * - An unknown or absent status is eligible too — failing toward offering the work is safer than
+ *   silently skipping rows, because a skip is invisible while an unwanted offer is not.
+ *
+ * @see docs/specs/service/location-resolver/README.md § Location Status Contract
  */
 export function isBulkEligibleStatus(status: string | null | undefined): boolean {
-  return !status || !LOCATED_STATUSES.has(status);
+  return isLocationUnresolvedStatus(status);
 }
 
 /** Map selected media rows to planner candidates. Pure; no I/O. */

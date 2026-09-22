@@ -54,9 +54,9 @@ Normative TypeScript: `apps/web/src/app/core/media-query/media-query.types.ts`. 
 | `created_at` | string | ISO from row. |
 | `address_label`, `street`, `city`, `district`, `country` | string \| null | Not populated by list query (`null`). |
 | `direction` | number \| null | Not populated by list query (`null`). |
-| `location_unresolved` | boolean \| null | Derived: `true` when `location_status` is `pending` or `no_gps`; otherwise `false` from mapper (see service). |
+| `location_unresolved` | boolean \| null | Projection of `location_status` via the one derivation, `isLocationUnresolvedStatus` (`core/location-resolver/location-resolver.helpers.ts`): `false` for `resolved` \| `gps`, `true` for everything else including `partial` and unknown values. `null` only from mappers that do not read the column. Rule and reasoning: [location-resolver README § Location Status Contract](../location-resolver/README.md). |
 
-**`location_status` (read path):** Selected from `media_items` for mapping only; not part of `MediaRecord`. Legacy or extended enum values may appear on read; list mapper treats unknowns as not-unresolved except the branches above.
+**`location_status` (read path):** Selected from `media_items` for mapping only. Legacy or extended enum values may appear on read; the mapper treats an unknown value as **unresolved**, so a status nobody has seen before surfaces as work rather than disappearing. The detail mapper (`core/media-detail-data/media-detail-data.facade.ts`) calls the same predicate on the same column, so the two load paths cannot answer one row differently (#222).
 
 ## State
 

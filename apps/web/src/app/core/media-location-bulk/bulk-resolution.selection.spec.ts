@@ -93,9 +93,10 @@ describe('toBulkCandidates', () => {
     expect(candidate.exifCoords).toBeNull();
   });
 
-  it('does not depend on location_unresolved, which two mappers compute differently', () => {
-    // media-query.service counts 'partial' as unresolved; media-detail-data.facade does not.
-    // Reading location_status directly keeps eligibility from inheriting that disagreement.
+  it('reads location_status, not a location_unresolved value handed in on the row', () => {
+    // `location_unresolved` is derived from `location_status` by whichever mapper loaded the row
+    // (#222), so a record carrying a stale or hand-built value must not steer a run. The status is
+    // the column; the boolean is a projection of it.
     const [candidate] = toBulkCandidates([
       media({ location_status: 'resolved', location_unresolved: true }),
     ]);
