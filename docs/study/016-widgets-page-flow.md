@@ -35,3 +35,7 @@ W1 is the first of these. W2 through W5 can be written against its answer. None 
 ## What would settle W1
 
 An owner decision: organization-wide install, or per-user install. Until that sentence exists, no migration and no route.
+
+## Update 2026-09-22
+
+The owner rejected the install-scope question as the rights model `[D]`. A role on the organization is the grant, and that role is customized for allowed widgets and allowed data. The directory-then-explanation flow in this study is unchanged. The rights reading, the existing `org_roles` catalog, and a proposed GPS-and-media suite are [STUDY-017](017-role-widget-grants.md). The W1 row above stays as it was written.

@@ -4,7 +4,9 @@ The directory the left-rail `+` opens, and the explanation page for one widget. 
 
 ## What It Is
 
-Two canvas pages. The directory lists widgets the organization can add. The explanation page is one widget: what it does, and whether it is installed. Installing adds that widget's option to the left rail. Removing takes it off the rail. An uninstalled widget is absent, not disabled.
+Two canvas pages. The directory lists widgets the organization can add. The explanation page is one widget: what it does, and whether it is installed. Installing makes the widget available to the organization. Removing takes it off the rail. An uninstalled widget is absent, not disabled.
+
+Who may then open that widget, and which of its records they may use, is a grant on the organization role. That grant is proposed in [STUDY-017](../../study/017-role-widget-grants.md) and is not a table in this spec.
 
 ## What It Looks Like
 
@@ -22,8 +24,8 @@ Both pages render inside `app-shell-main-canvas`, so they share that box's radiu
 | --- | --- | --- | --- |
 | 1 | Activates `+` | Canvas shows the directory | route, after STUDY-016 |
 | 2 | Activates a widget in the directory | Canvas shows that widget's explanation page | route |
-| 3 | Activates Install on an explanation page | Widget becomes installed and its rail option appears | install, scope undecided |
-| 4 | Activates Remove on an installed widget | Rail option disappears | remove, scope undecided |
+| 3 | Activates Install on an explanation page | Widget becomes available to the organization | install |
+| 4 | Activates Remove on an installed widget | Widget leaves the organization | remove |
 | 5 | Activates Back on an explanation page | Canvas shows the directory | route |
 
 Map, projects, and media stay on the rail. This spec does not say they can be removed.
