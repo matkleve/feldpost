@@ -23,13 +23,30 @@ corrected-by: none
 
 ## Summary `[D]`
 
-Replace today's authenticated shell (flex row + expandable left sidebar + resizable workspace pane + settings overlay + absolute upload shell) with a **four-track grid**:
+Replace today's authenticated shell with a **three-part center** between fixed control rails:
 
 ```text
-| left control rail | map | content panel column | right control rail |
+| left rail | MAIN (map / route canvas) ⇄ SIDE (optional) | right rail |
 ```
 
-Control rails hold **icon-only** options (min 44×44 px) in **grouped containers**. The **content panel column** holds large surfaces (Upload, Help, Settings, Profile, …) like the owner mock — **not** today's settings overlay.
+- **MAIN** fills all space between rails when nothing is activated.
+- **SIDE** (content panel column) **only appears when a rail action activates it** (Upload, Help, Settings, Profile, …). When it opens, **MAIN shrinks** — they **share** the center band; the side is not a permanent fourth column.
+- **SIDE** can hold **multiple panels stacked vertically** (e.g. Upload above Help in the mock).
+- Control rails: icon-only options, hover label overlay, 44×44 px min.
+
+**Not** today's settings overlay; **not** a always-visible workspace pane column.
+
+### Activation model (owner 2026-09-22) `[D]`
+
+| State | Center layout |
+| --- | --- |
+| **Idle** | MAIN only — map/route uses full width between rails |
+| **Activated** (e.g. Upload pressed) | MAIN **narrows**; SIDE **mounts** beside MAIN (toward right rail) |
+| **Multiple activations** | SIDE splits **vertically** — stacked panels (each toggled by its rail icon) |
+
+Example: Upload + Help open → MAIN shrunk + SIDE with Upload panel top, Help panel bottom.
+
+**Open:** SIDE width fixed vs user-resizable; animation; minimum MAIN width before SIDE refuses to open.
 
 ---
 
@@ -53,12 +70,16 @@ Owner screenshot (2026-09-22 chat). Read left → right:
 | Scale | Bottom-left |
 | Zoom ± | Bottom-right |
 
-### Content panel column (between map and right rail)
+### Side content area (conditional — shown in mock when active) `[D]`
 
-| Panel | Content |
+Mock shows Upload + Help **while SIDE is open** — not a permanent column:
+
+| Panel slot (vertical stack) | Content |
 | --- | --- |
 | **Upload** (top) | Drag-drop, upload tabs, progress rows |
 | **Hilfe** (bottom) | Collapsible help links |
+
+When Upload is pressed: **MAIN (map) shrinks**, SIDE **appears** and shares the center band. Additional rail actions can add/stack panels vertically inside SIDE.
 
 ### Right rail (thin, grouped with gap)
 
@@ -83,6 +104,7 @@ Owner screenshot (2026-09-22 chat). Read left → right:
 | Shared slot | **Shared media** | RLS scope TBD |
 | Theme | **Bottom-right** on map | Remove nav theme row |
 | Search | **Top-left** on map | Change from today's top-center spec |
+| **Side content area** | **On-demand** — MAIN shrinks when open; vertical stack for multiple panels | Replaces always-on workspace pane + overlay model |
 
 ---
 
@@ -90,16 +112,18 @@ Owner screenshot (2026-09-22 chat). Read left → right:
 
 | ID | Question | Options |
 | --- | --- | --- |
-| Q1 | Grid implementation | 3-track vs **4-track** (mock implies 4) vs extend `app-page-grid` |
-| Q2 | Selected media / workspace | Same panel column? Full route swap? Tab inside column? |
-| Q3 | Upload entry | Right rail only vs keep workspace upload tab |
-| Q4 | Tablet / mobile | Same 4-track on tablet? What replaces bottom nav on mobile? |
-| Q5 | Terminology | Control area / container / option vs keep Sidebar |
-| Q6 | Which routes in left rail | All nav routes vs subset vs overflow |
-| Q7 | Logo | Option vs non-interactive header |
+| Q1 | Center split mechanics | Fixed SIDE width vs resizable divider vs token default; min MAIN width |
+| Q2 | Selected media / workspace | Same SIDE stack? separate panel slot? |
+| Q3 | Upload entry | Right rail toggles SIDE slot vs keep workspace upload tab |
+| Q4 | Tablet / mobile | Same activate/shrink model? bottom sheet instead? |
+| Q5 | Terminology | Control area / container / option vs Sidebar |
+| Q6 | Which routes in left rail | All nav routes vs subset |
+| Q7 | Logo | Interactive option vs header |
 | Q8 | Inter-rail gap token | Fixed spacing vs `1fr` spacer |
-| Q9 | Rollout | Feature flag vs route-scoped vs big bang |
+| Q9 | Rollout | Feature flag vs route-scoped |
 | Q10 | Notifications, undo/history, help/tips | Defer vs define scope |
+| **Q11** | **Multiple SIDE panels** | Max stack depth? close one closes slot only? |
+| **Q12** | **SIDE + route pages** | `/media` full MAIN only or can open SIDE alongside? |
 
 ---
 
@@ -130,11 +154,11 @@ CSS grid parity; no visible change.
 **Phase 3 — Control rails**  
 Left/right containers; hover label overlay; 44px targets.
 
-**Phase 4 — Content panel column**  
-Upload, Help, Settings panel, Profile panel; retire overlay + re-home upload shell.
+**Phase 4 — Side content area (on-demand)**  
+Activation FSM: rail icon → SIDE slot opens, MAIN shrinks; support **vertical stack** of panels; Upload, Help, Settings, Profile; retire overlay + re-home upload shell.
 
 **Phase 5 — Workspace / selection**  
-Per Q2 answer.
+Per Q2 — likely a SIDE slot when selection active.
 
 **Phase 6 — Breakpoints + legacy removal**  
 Tablet/mobile; remove flex/collapse paths.
@@ -169,10 +193,10 @@ Each phase: `npm run verify` + targeted Playwright snapshots.
 
 Owner explicitly confirms:
 
-1. Four-track layout matches intent  
+1. **Conditional SIDE + shrinking MAIN** matches intent (not permanent fourth track)  
 2. Settings panel + Profile panel separation  
 3. Hover overlay behaviour on all rails  
-4. Answers to Q1–Q10 (or explicit deferrals)  
+4. Answers to Q1–Q12 (or explicit deferrals)  
 5. Workspace/selection strategy (Q2)
 
 Then open a **separate** implementation-tracking issue per phase or one epic with checkboxes.
