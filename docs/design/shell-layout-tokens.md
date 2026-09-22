@@ -50,9 +50,30 @@ After nav or spacing changes, re-verify overlay alignment per [settings-overlay.
 
 Both mount under `AppComponent`. **`:host` vars do not cross siblings.**
 
-- **Shipped:** duplicate the canonical collapsed-rail literal in settings-overlay (`calc(0.25rem * 12)` — same value as nav `--sidebar-width-collapsed`).
-- **Forbidden:** `--shell-settings-overlay-left` without an `AppComponent` `:host` spec row.
-- **Future (optional):** shared rail metrics on `AppComponent` `:host` — requires spec + matrix (not scheduled).
+**Corrected 2026-09-22.** This section described a duplicated `calc(0.25rem * 12)` literal in
+settings-overlay as the shipped mechanism, and a shared variable as unscheduled future work. The
+code does the opposite, and has for some time: it ships the shared variable, and that `calc` does
+not appear in the repository. An agent following the old text would have written the wrong thing
+into the one file this document exists to govern. Measured at `87385f2`; see
+[STUDY-015](../study/015-shell-grid-layout-change-plan.md) § 13.2.
+
+**What actually ships:** a global custom property, written imperatively from a feature component.
+
+| Step | Where |
+| ---- | ----- |
+| `NavComponent` effect writes `--feldpost-sidebar-width` on `document.documentElement` (`3rem` collapsed / `15rem` expanded) | `apps/web/src/app/features/nav/nav.component.ts` |
+| Settings overlay reads it back: `left: calc(var(--feldpost-sidebar-width, 15rem) + var(--spacing-3))` | `apps/web/src/app/features/settings-overlay/settings-overlay.component.scss` |
+| The layout reserves matching space with a third copy of the literal, because the real rail is `position: fixed` and outside the flex row | `apps/web/src/app/layout/authenticated-app-layout.component.scss` |
+
+`--feldpost-sidebar-width` is specced — [sidebar.collapse.supplement.md](../specs/component/workspace/sidebar.collapse.supplement.md),
+[sidebar.md](../specs/component/workspace/sidebar.md), [nav-system.md](../specs/ui/nav/nav-system.md) —
+so it is **not** an ad-hoc name. It is a legitimate mechanism with a real cost: one geometric fact
+lives in three places and is synchronised at runtime through the document element.
+
+- **Shipped:** `--feldpost-sidebar-width` on `document.documentElement`, written by `NavComponent`, read by settings-overlay.
+- **Forbidden:** `--shell-settings-overlay-left` and any other `--shell-*` bridge without a spec row + ownership matrix. Unchanged.
+- **Do not** add a fourth reader of the rail width. If you need the rail width somewhere new, that is a sign the geometry wants an owner — see below.
+- **Planned replacement:** [STUDY-015](../study/015-shell-grid-layout-change-plan.md) proposes a CSS Grid shell whose host owns every track width, which removes the writer, the reader and the spacer together. `proposed`, not accepted — do not build against it yet.
 
 ---
 
