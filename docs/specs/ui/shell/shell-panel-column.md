@@ -6,7 +6,7 @@ The third grid track. It stacks the panels the right rail has opened. It has no 
 
 ## What It Looks Like
 
-A vertical stack of panel surfaces with `gap: var(--spacing-2)`. The track scrolls when the stack is taller than the viewport. When nothing is open this host is `display: none`, so it is not a grid item and the shell `gap` is not doubled. Width when open follows the open surfaces, not a `--shell-*` maximum.
+A vertical stack of panel surfaces with `gap: var(--spacing-3)`, the same gutter as the grid. The track scrolls when the stack is taller than the viewport. When nothing is open this host is `display: none`, so it is not a grid item and the shell `gap` is not doubled. Width when open follows the open surfaces, not a `--shell-*` maximum.
 
 ## Where It Lives
 

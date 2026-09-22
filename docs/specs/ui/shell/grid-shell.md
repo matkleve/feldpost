@@ -6,7 +6,7 @@ The authenticated page grid. Its host owns every track width. The left control a
 
 ## What It Looks Like
 
-Four columns in one grid when a panel is open: `auto 1fr auto auto`. The gutter is `gap: var(--spacing-3)` and `padding: var(--spacing-3)` on this host, not margin on a child. When no panel is open the template is `auto 1fr auto` and the panel column is not a grid item, so one gap remains between the canvas and the right rail. The left and right tracks size to their content. The canvas takes the remaining width (`1fr`). Rail tracks stay transparent. The main canvas is a `shell-box`: the rounded page slot for every left-rail route. Panel surfaces use the same mixin. `@mixin shell-box` in `apps/web/src/styles/_frosted-chrome.scss` wraps `@mixin panel` and `border-radius: var(--container-radius-panel)`. No `--shell-*` custom property.
+Four columns in one grid when a panel is open: `auto 1fr auto auto`. The gutter is `gap: var(--spacing-3)` and `padding: var(--spacing-3)` on this host. Action containers, panel boxes, and the canvas share that same gap and one radius, `shell-box` (`var(--container-radius-panel)`). When no panel is open the template is `auto 1fr auto` and the panel column is not a grid item, so one gap remains between the canvas and the right rail. The left and right tracks size to their content. The canvas takes the remaining width (`1fr`). Rail tracks stay transparent. The main canvas is a `shell-box`: the rounded page slot for every left-rail route. Panel surfaces use the same mixin. `@mixin shell-box` in `apps/web/src/styles/_frosted-chrome.scss` wraps `@mixin panel` and `border-radius: var(--container-radius-panel)`. No `--shell-*` custom property.
 
 ## Where It Lives
 
