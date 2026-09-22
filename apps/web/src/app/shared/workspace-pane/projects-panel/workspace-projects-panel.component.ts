@@ -63,7 +63,8 @@ export const DRAG_MEDIA_IDS_MIME = 'application/x-feldpost-media-ids';
   host: {
     // app-confirm-dialog closes its overlay on Escape (BrnDialog `disableClose` defaults to
     // false) but emits `cancelled` only from its Cancel button, so the pending signal has to
-    // be cleared here or it outlives the closed dialog and Delete stops opening it again.
+    // be cleared here or it outlives the closed dialog and Delete stops opening it again. Shared-
+    // dialog gap, issue #254 — drop this binding when the dialog emits `cancelled` on Escape.
     '(document:keydown.escape)': 'cancelPendingDelete()',
   },
 })

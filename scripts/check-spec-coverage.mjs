@@ -45,7 +45,11 @@ const ROOT = resolve(import.meta.dirname, "..");
  * sections, five of the projects surfaces, and the three colleagues surfaces.
  * Tracked in issue #180. `projects-confirm-dialog` is the sharpest case: it is
  * recommended *by name* in component-reuse-gate.mdc as the destructive-confirm
- * component and has no spec of its own.
+ * component and has no spec of its own — and it duplicates the registered
+ * `app-confirm-dialog`, which is issue #256.
+ *
+ * `project-details-panel` left the list on 2026-09-22: the projects-tab
+ * destructive-actions supplement names it as the archived-only delete precedent.
  */
 const ALLOWLIST = new Set([
   "apps/web/src/app/layout/shell-route-placeholder.component.ts",
@@ -57,7 +61,6 @@ const ALLOWLIST = new Set([
   "apps/web/src/app/features/organization/sections/profile/organization-profile-section.component.ts",
   "apps/web/src/app/features/organization/sections/roles/organization-roles-section.component.ts",
   "apps/web/src/app/features/projects/dashboard/project-dashboard-view.component.ts",
-  "apps/web/src/app/features/projects/details-panel/project-details-panel.component.ts",
   "apps/web/src/app/features/projects/dialogs/projects-confirm-dialog.component.ts",
   "apps/web/src/app/features/projects/media-section/project-media-section.component.ts",
   "apps/web/src/app/features/projects/sidebar/projects-sidebar.component.ts",

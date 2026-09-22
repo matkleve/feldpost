@@ -67,6 +67,8 @@ which defaults to `false`, so BrnDialog subscribes to `keydownEvents` and closes
 Escape — but the dialog emits `cancelled` only from its Cancel button. Without the host binding the
 signal would outlive the closed overlay, `@if` would stay truthy, the dialog component would not be
 re-created, and Delete would silently stop opening anything for the rest of the panel's life.
+This is a gap in the shared dialog, tracked in issue #254; **remove this host binding when #254
+lands** rather than copying it into further call sites.
 
 **`confirmPendingDelete()` reads and clears `pendingDeleteProjectId` before awaiting**, for two
 reasons: `app-confirm-dialog` closes its own CDK portal on click, so leaving the signal set would
