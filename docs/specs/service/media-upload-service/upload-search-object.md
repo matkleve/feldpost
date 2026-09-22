@@ -71,6 +71,25 @@ Folder paths encode **text addresses**, not GPS per Tür/Stiege. Geocoders retur
 
 Units are still parsed into the SO and persisted via `p_staircase` / `p_door` on resolve. They affect display, sort keys, and DB uniqueness — not default batch geocode grouping.
 
+### Grouping identity is address identity
+
+**A segment that carries no address field does not enter `groupingKey`** — customer names, job numbers, `Fotos/`, and every other organizational folder. Two paths that name the same building therefore produce the same key regardless of which customer folder they sit under:
+
+| Path | `groupingKey` |
+| --- | --- |
+| `Kunde Mueller/Seestadtstrasse/5/IMG_001.jpg` | `\|\|\|\|seestadtstrasse\|5` |
+| `Kunde Hofer/Seestadtstrasse/5/LV.pdf` | `\|\|\|\|seestadtstrasse\|5` |
+
+This looks like a defect and is a decision. Owner, 2026-09-22:
+
+> "Wenn wir jetzt zum Beispiel die gleiche Straße haben mit einem anderen Kunden, dann hätten wir zwei Trays. Das darf nicht passieren."
+
+One building is one geocode question, so it gets **one** tray question — splitting by customer would ask the same question twice and let the two answers disagree about one address. Any rule that narrows a set of media items sharing a key MUST narrow it by **geographic** evidence (dispersion, precision, conflict), never by the customer segment.
+
+The **media type** is not in the key either: `buildSearchObjectFromRelativePath` takes a path and a file name and no media type, so `.jpg`, `.pdf`, `.xlsx`, `.mp4` and `.txt` under one folder share one key. That is what lets a document be resolved alongside the photos it arrived with.
+
+Reasoning and measurements: [STUDY-011](../../../study/011-exif-inheritance-grouping-unit.md).
+
 ### Photon multi-hit gate
 
 When SO has `staircase` and/or `door`, Photon returns **≥2** candidates, and pairwise max distance between candidates **> `unitGeocodeSplitMinMeters`** ([upload-location-config.md](./upload-location-config.md)), use existing ambiguous / city_step trays to let the user pick a coordinate — **do not** add units to the forward-geocode request.

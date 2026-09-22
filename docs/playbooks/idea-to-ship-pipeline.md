@@ -61,6 +61,7 @@ Done means **all** of:
 - [ ] `ng build` green; relevant gate scripts green (`design-system:check`, `i18n:check`, `lint:specs`, RLS/DSGVO for Sensitive).
 - [ ] **Change-Completeness** holds: `grep`-to-zero for every removed symbol/concept across `apps/web/src` *and* `docs/specs` (see `AGENTS.md`).
 - [ ] Spec synced to final behavior; no new component added without a registry/reuse decision.
+- [ ] **If a study's recommendation is what shipped, its `status` moved in the same change.** A study left at `proposed` after the owner accepted it and the code landed says, in the format's own words, *"nobody has accepted this — not permission to implement"* about reasoning the product now depends on. STUDY-007 and STUDY-008 sat that way for a week ([STUDY-013](../study/013-study-system-audit.md) § 3). The status is part of the change, not follow-up.
 - [ ] Fresh-context adversarial review passed (correctness/requirement gaps only).
 - [ ] For Sensitive work: LIVE VERIFICATION block run.
 

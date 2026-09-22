@@ -40,11 +40,12 @@ describe('buildSearchObjectFromRelativePath', () => {
     );
     expect(so.country).toBe('AT');
     expect(so.postcode).toBeNull();
-    // The key carries the spelling **fold** (S3: consecutive duplicate letters collapse), while
-    // flat `street` keeps the path spelling (S4). This test is about token classification, so it
+    // The key carries the spelling fold (S2: case, diacritics, ß→ss, str.→strasse) and nothing
+    // else — S3 forbids letter-run and edit-distance rules, so `neustiftgasse` keeps both s's.
+    // Flat `street` keeps the path spelling (S4). This test is about token classification, so it
     // asserts both rather than assuming which form lands where.
     // @see docs/specs/service/media-upload-service/upload-search-object.street-fold.supplement.md
-    expect(so.groupingKey).toContain('neustiftgase');
+    expect(so.groupingKey).toContain('neustiftgasse');
     expect(so.street).toBe('Neustiftgasse');
   });
 

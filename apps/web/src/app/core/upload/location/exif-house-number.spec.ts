@@ -59,9 +59,11 @@ describe('exifHouseNumberProposal', () => {
     expect(decision).toEqual({ propose: false, reason: 'street_mismatch' });
   });
 
-  it('compares streets through the same fold the grouping key uses, not raw equality', () => {
-    // `Wasagasse` vs `Wasagase` is one place; a raw !== would call it a different street and
-    // silently drop a legitimate proposal.
+  it('does not fold a dropped letter — SF-05 says those are two streets', () => {
+    // `Wasagasse` vs `Wasagase` differ by a letter, which S3 says makes them two names, not two
+    // spellings of one. Folding them would let a reverse-geocode hit for a different street write
+    // a house number to this one. The fold corrects orthography (S2), not typos.
+    // @see docs/specs/service/media-upload-service/upload-search-object.street-fold.supplement.md
     const decision = exifHouseNumberProposal(
       input({
         establishedStreet: 'Wasagasse',
@@ -69,7 +71,7 @@ describe('exifHouseNumberProposal', () => {
       }),
     );
 
-    expect(decision.propose).toBe(true);
+    expect(decision).toEqual({ propose: false, reason: 'street_mismatch' });
   });
 
   it('folds abbreviations too — Argentinierstr. is Argentinierstraße', () => {
@@ -164,10 +166,12 @@ describe('exifHouseNumberProposalKey', () => {
     expect(a).toBe(b);
   });
 
-  it('folds the street into the key, so spelling twins do not ask twice', () => {
+  it('separates a dropped letter, so two streets get two questions (S3)', () => {
+    // The mirror of SF-05 on the key: if these shared a key, answering one would silently answer
+    // the other, and one of the two answers would be wrong.
     expect(
       exifHouseNumberProposalKey({ street: 'Wasagasse', houseNumber: '4', areaKey: 'wien|1090' }),
-    ).toBe(
+    ).not.toBe(
       exifHouseNumberProposalKey({ street: 'Wasagase', houseNumber: '4', areaKey: 'wien|1090' }),
     );
   });

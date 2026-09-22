@@ -16,7 +16,7 @@ Studies exist because Feldpost's four kinds of memory get read at different mome
 | Narrative | `docs/ai-diary/` | What **happened** |
 | Traps | [`docs/TRAPS.md`](../TRAPS.md) | How this code **misleads** people |
 
-Point-in-time findings — what was **true** on a stated date — are studies too: `type: review`, `status: historical`. The folders that used to hold them (`docs/audits/`, `docs/backlog/`, `docs/implementation-blueprints/`) are **closed to new documents**; see [`README.md`](./README.md) § Where new reasoning goes.
+Point-in-time findings — what was **true** on a stated date — are studies too: `type: review`, `status: historical`. The folders that used to hold them (`docs/audits/`, `docs/backlog/`, `docs/implementation-blueprints/`, `docs/migration/reports/`) are **closed to new documents**; see [`README.md`](./README.md) § Where new reasoning goes. Enforced by `scripts/check-study-format.mjs`, which pins all four against the file list they closed with.
 
 ---
 
@@ -68,6 +68,25 @@ Below the frontmatter, state **when** it was measured, **on what** (branch and c
 | `superseded` | Replaced by a later study named in `corrected-by`. |
 
 Studies are **never deleted and never rewritten into agreement**. A claim that turned out wrong stays, with the correction linked. That is the whole value of the status axis.
+
+### Correcting a study: append in place, reverse in a new study
+
+The rule above says what must not happen. This says what must, because "never rewritten" was read as "never touched", and twice in one week a careful agent corrected a study in place anyway — once in STUDY-009 and once in STUDY-006 — inventing the same shape independently. A rule that two people break by converging on a better one is a rule missing a clause.
+
+**Draw the line at the conclusion, not at the word count.**
+
+| What changed | What to do |
+| --- | --- |
+| New evidence **adds to** the study's conclusion — a phase shipped, a blocker cleared, a number re-measured | An **`## Update YYYY-MM-DD`** section, at the end or beside the finding it touches. Same file. |
+| New evidence **reverses** the study's conclusion — the recommendation was wrong, the premise did not hold | A **new study**. `corrected-by` on the old file names it; the old file's status becomes `superseded`. |
+
+An `## Update` section is **append-only**:
+
+- It **MUST NOT delete or edit a graded claim.** Say the earlier claim is superseded and why; leave its text where it is. `[A] the RPCs are absent` and `[A] the RPCs are present, 2026-09-22` can both be true of different days, and the pair is the record.
+- It **MUST carry its own date and its own grades.** It is a measurement, not an annotation.
+- It **MUST NOT change the frontmatter's `corrected-by`.** That field names *other studies*. A study does not correct itself in a reference field — if a reader needs warning before the stale sections, put a short banner under the frontmatter pointing at the update.
+
+Enforced as far as a machine honestly can: `scripts/check-study-claim-deletion.mjs` fails a change that removes a graded line from `docs/study/` unless the commit body carries a `study-correction:` trailer saying why. Whether the removal was legitimate is a judgement — the gate only makes it deliberate and reviewable.
 
 ---
 
