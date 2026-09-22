@@ -28,7 +28,7 @@ Both pages render inside `app-shell-main-canvas`, so they share that box's radiu
 | 4 | Activates Add on a greyed rectangle | Nothing is installed | organization does not allow it |
 | 5 | Activates Back on an explanation page | Canvas shows the directory | route |
 
-Whether map, projects, and media can leave the rail is [STUDY-018](../../study/018-rail-placement.md). This spec does not remove them.
+Map, Projects, and Media may leave the rail. Leaving removes the icon. The route still renders the page. The static list does not drop them until [STUDY-018](../../study/018-rail-placement.md) names the canvas that shows when the Map icon is absent.
 
 ## Component Hierarchy
 

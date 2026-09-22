@@ -60,3 +60,16 @@ The owner described the directory rectangle `[D]`: the widget name, a short expl
 ## What would settle this
 
 One sentence for P1: the page the canvas shows when Map is not on the rail. The bottom-container placement for Workers and Organisation does not need that sentence, and it still waits for STUDY-016 to be accepted before any rail list changes.
+
+## Update 2026-09-22 — owner sign-off
+
+The owner accepted the readings in this study `[D]`. Signed off:
+
+- Map, Projects, and Media may leave the rail. The icon goes. The route still renders the page.
+- Logo, `+`, Account, and Settings stay.
+- A widget may be a canvas page, a right-rail panel, or both.
+- Workers and Organisation join the bottom-left container. They do not join the top container.
+- The GPS-and-media suite has no container yet. It is not assumed to be the top container.
+- The directory rectangle in the page spec is the card.
+
+`LEFT_GROUPS` stays as measured above `[A]`. P1 is still open, so this sign-off does not remove an icon and does not add Workers or Organisation to the rail `[D]`.
