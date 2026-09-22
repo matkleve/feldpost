@@ -1,7 +1,9 @@
 @if (side() === 'left') {
-  <div class="shell-control-area__logo">
-    <img src="/assets/logo.svg" width="16" height="16" alt="" />
-  </div>
+  <app-shell-control-container side="left" [options]="logoOptions">
+    <div class="shell-control-area__logo">
+      <img src="/assets/logo.svg" width="16" height="16" alt="" />
+    </div>
+  </app-shell-control-container>
 }
 @for (group of groups(); track group.id) {
   <app-shell-control-container

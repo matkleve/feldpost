@@ -6,7 +6,7 @@ A backgroundless rail column. The left rail changes the main canvas. The right r
 
 ## What It Looks Like
 
-A vertical flex column with no background, no border, and no padding. The grid's `gap` and `padding` are the only gutter. The logo, on the left rail only, is its own non-interactive block above the top container. A flex leftover separates the top groups from the last group. That leftover is not a token. The gap between stacked containers is `var(--spacing-3)`, the same as the grid gap. Both rails paint above the middle tracks (`z-index: 200`) so a hover label can sit on the page without widening the track.
+A vertical flex column with no background, no border, and no padding. The grid's `gap` and `padding` are the only gutter. The logo, on the left rail only, sits in its own `app-shell-control-container`. It is not a button. A flex leftover separates the top groups from the last group. That leftover is not a token. The gap between stacked containers is `var(--spacing-3)`, the same as the grid gap. Both rails paint above the middle tracks (`z-index: 200`) so a hover label can sit on the page without widening the track.
 
 ## Where It Lives
 
@@ -25,7 +25,7 @@ A vertical flex column with no background, no border, and no padding. The grid's
 
 ```text
 app-shell-control-area
-├── logo [left only, not a button]
+├── app-shell-control-container [logo, left only, not a button]
 ├── app-shell-control-container [top group]
 ├── leftover spacer
 └── app-shell-control-container [bottom group]

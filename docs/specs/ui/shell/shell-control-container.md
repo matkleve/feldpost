@@ -2,7 +2,7 @@
 
 ## What It Is
 
-A frosted box that groups control options inside a control area. The column outside it stays backgroundless.
+A frosted box inside a control area. It groups control options, or it holds the logo. The column outside it stays backgroundless. The logo is projected content and is not an option.
 
 ## What It Looks Like
 
@@ -11,7 +11,7 @@ A frosted box that groups control options inside a control area. The column outs
 ## Where It Lives
 
 - **Parent:** `app-shell-control-area`.
-- **Appears when:** its group has at least one option.
+- **Appears when:** its group has at least one option, or it is the logo box.
 
 ## Actions
 
@@ -23,6 +23,7 @@ A frosted box that groups control options inside a control area. The column outs
 
 ```text
 app-shell-control-container
+├── ng-content [logo only]
 └── app-shell-control-option [repeat]
 ```
 

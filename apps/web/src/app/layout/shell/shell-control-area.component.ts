@@ -33,6 +33,7 @@ export class ShellControlAreaComponent {
   private readonly i18n = inject(I18nService);
 
   readonly side = input.required<ShellControlSide>();
+  readonly logoOptions: readonly ShellControlOptionModel[] = [];
 
   readonly t = (key: string, fallback = ''): string => this.i18n.t(key, fallback);
 
