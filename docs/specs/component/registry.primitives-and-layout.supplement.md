@@ -626,6 +626,24 @@
 
 ---
 
+### `<app-bulk-resolution-dialog>` — Bulk Resolution Dialog
+
+- **File**: `apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.ts`
+- **Purpose**: Confirming a bulk location-resolution plan before anything is written (R7): exact item count, one row per address, what will be skipped and why, then progress and a final report.
+- **Not for**: A yes/no question with no plan behind it — use app-confirm-dialog, which takes a plain message string.
+- **Spec**: [`docs/specs/component/bulk-resolution-dialog/bulk-resolution-dialog.md`](bulk-resolution-dialog/bulk-resolution-dialog.md)
+- **Variant axes**:
+  | Input | Type | Values | Visual effect |
+  |---|---|---|---|
+  | `running` | `boolean` | `true`, `false` | Swaps the plan for progress and removes Apply |
+  | `report` | `BulkResolutionReport \| null` | set, `null` | Terminal state; outranks `running` |
+- **Other inputs**: `plan: BulkResolutionPlan | null`, `progress: {done,total} | null`, `overwriteExisting: boolean` (B3, off by default)
+- **Composed of**: spartan brnDialog + hlmDialog, same portal idiom as app-confirm-dialog
+- **Used in**: upload panel deferred-location backlog figures; /files bulk selection when that page exists
+- **Gaps**: Presentational only — holds no run state and calls no service; the host owns plan()/run().
+
+---
+
 ### `<app-text-input-dialog>` — Text Input Dialog
 
 - **File**: `apps/web/src/app/shared/text-input-dialog/text-input-dialog.component.ts`

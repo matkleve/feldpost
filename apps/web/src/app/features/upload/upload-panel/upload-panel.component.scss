@@ -77,6 +77,67 @@
     border-radius: var(--radius-sm);
   }
 
+  // Archive-import figures — files imported, failed, awaiting resolution (never blended).
+  // @see docs/specs/service/media-upload-service/upload-archive-import-mode.md § What "done" means
+  &__archive-progress {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+    margin: 0;
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: var(--font-size-xs);
+    color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 8%, transparent); // emphasis-ok: semantic status chip fill (not hover)
+    border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
+    border-radius: var(--radius-sm);
+  }
+
+  // One of the independent archive progress lines (finite import / failed / backlog).
+  // @see docs/specs/service/media-upload-service/upload-archive-import-mode.md § What "done" means
+  &__archive-progress-line {
+    margin: 0;
+  }
+
+  // Deferred location backlog — "has no location" + "could be more precise" (never blended).
+  // A calmer fill than the archive figures beside it: that block reports an import in flight,
+  // this one reports standing work, and the two must not compete for the same attention.
+  // @see docs/specs/page/files-page.deferred-improvement.supplement.md
+  &__deferred-backlog {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+    margin: 0;
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: var(--font-size-xs);
+    color: var(--muted-foreground);
+    background: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+
+  // One of the two independent backlog lines. Same rhythm as the archive lines above.
+  // @see docs/specs/page/files-page.deferred-improvement.supplement.md
+  &__deferred-backlog-line {
+    margin: 0;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    text-align: start;
+    cursor: pointer;
+    background: none;
+    border: 0;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  // Failed-import line — a failure reads as a failure, not as neutral progress text.
+  // @see docs/design/state-visuals.md
+  &__archive-progress-line[data-state='failed'] {
+    color: var(--destructive);
+  }
+
   // Section header — icon + stacked title/subtitle (sidebar row rhythm).
   // @see apps/web/src/app/features/nav/nav.component.scss
   &__header {

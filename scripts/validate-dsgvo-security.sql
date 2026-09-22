@@ -1,6 +1,6 @@
 -- Feldpost: DSGVO/Security verification helpers
 -- Scope: post-migration validation after storage orphan cleanup / media cutover
--- @see docs/study/009-defensive-security-review.md F-06
+-- @see docs/study/010-defensive-security-review.md F-06
 
 -- 1) Run cleanup via Storage API (outside SQL):
 --    node scripts/cleanup-storage-orphans.mjs 1000

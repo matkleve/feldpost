@@ -4,6 +4,42 @@
 
 ---
 
+## 🗂 Step 0: Read the issue tracker — before, during, and at the end
+
+**GitHub Issues is the task register** ([backlog README](../backlog/README.md) § Where open work
+lives). A study explains *why*; a spec says *what the code must do*; the issue is *the work*. An
+agent that never opens the tracker is working from a snapshot of whatever was in its prompt.
+
+Do this on **every** task, not only when an issue number was handed to you:
+
+| When | Do |
+| --- | --- |
+| **Starting** | Search open issues for the area you are about to touch, by keyword, not only by number. Read the ones that match: they carry acceptance criteria, prior decisions, and blockers. If an issue already exists for what you were asked to do, work *that* issue — do not open a parallel one. |
+| **While analysing** | When you find something outside your scope — a defect in passing, a stale doc, a decision nobody has made — check whether it is already filed. If not, file it **then**, while you have the evidence. Do not save it for the final message, where it becomes a sentence nobody can action. |
+| **Finishing** | Update every issue your work touched: tick the acceptance criteria you actually met, say plainly which you did **not** and why, and close only what is genuinely done. If the work changed what the issue should say, edit the issue. |
+
+### The rules that make this worth doing
+
+- **Do not silently narrow an issue.** If you implemented six of eight acceptance criteria, say which
+  two are missing, in the issue, before anyone asks. An issue closed on partial work is worse than an
+  open one, because it stops being visible.
+- **Do not duplicate.** Search before filing. A near-duplicate splits the discussion and one half
+  gets lost.
+- **File the blocker you hit, not the blocker you assume.** "Needs live verification" is only useful
+  with the commands and the pass criterion attached.
+- **A finding with no issue does not exist.** It lives in a chat log the next agent will never read.
+- **An issue is not a diary.** Narrative belongs in `docs/ai-diary/`, reasoning in `docs/study/`, the
+  contract in `docs/specs/`. The issue holds the task and its acceptance criteria.
+
+Convention for work that belongs to a study's phase plan: the issue title **names the phase** — e.g.
+*"Unit suite: 14 spec files pass in isolation and fail in a full run (STUDY-006 Phase 0.4b)"* (#203).
+The study keeps the reasoning; the issue keeps the task. Do not let a study grow a checklist.
+
+Batch-filing: use `node scripts/create-github-issues.mjs path/to/issues.json` rather than a loop of
+single creates ([gates-and-commands](./gates-and-commands.md)).
+
+---
+
 ## 🎯 Typical Workflow: Implement a UI Element
 
 ### Step 1: Find & Read the Spec
@@ -198,6 +234,13 @@ import { createClient } from "@supabase/supabase-js";
 - [ ] Shared primitives used
 - [ ] Mobile-friendly (touch targets ≥48px)
 - [ ] Loading/error/empty states
+
+### Issue tracker
+
+- [ ] Every issue this work touched has been updated, not just the one you started from
+- [ ] Acceptance criteria ticked only where actually met; unmet ones named explicitly with the reason
+- [ ] Anything found in passing is filed, with its evidence, rather than mentioned in a message
+- [ ] Nothing closed that is not genuinely done
 
 ### Documentation
 

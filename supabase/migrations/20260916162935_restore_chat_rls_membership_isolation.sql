@@ -16,7 +16,7 @@
 --
 -- This migration drops the weak SELECT policy, restores membership gates, and
 -- keeps the (select …) InitPlan wraps where the helper is argument-free.
--- @see docs/study/009-defensive-security-review.md
+-- @see docs/study/010-defensive-security-review.md
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------

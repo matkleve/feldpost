@@ -65,8 +65,13 @@ Everything else is **weak**: it stays in the evidence layer, and it
 - **MUST NOT** enter the grouping key.
 
 When comparing street values (package conflicts, grouping), fold the abbreviations first:
-`str`/`str.` ≡ `straße`, `g.` ≡ `gasse`, `pl.` ≡ `platz`. `Wilhelminenstr 141` and
-`Wilhelminenstraße 141` are therefore one address, not a question.
+`str`/`str.` ≡ `straße`, `g.` ≡ `gasse`, `pl.` ≡ `platz`, and `ß` ≡ `ss`. `Wilhelminenstr 141` and
+`Wilhelminenstraße 141` are therefore one address, not a question. The same fold applies to the
+street part of **`groupingKey`** — see
+[street-fold supplement](./upload-search-object.street-fold.supplement.md). It is deterministic
+orthography, not Fuse fuzzy substitution, and it stops there: a name that differs by a letter
+(`Wasagasse` vs `Wasagase`) is a different key, because the key holds no evidence about which
+spelling is the mistake.
 
 ## The address side is all or nothing
 

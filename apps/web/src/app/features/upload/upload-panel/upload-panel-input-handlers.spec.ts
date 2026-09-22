@@ -146,4 +146,64 @@ describe('UploadPanelInputHandlersService', () => {
     expect(uploadManager.submit).not.toHaveBeenCalled();
     expect(input.value).toBe('');
   });
+
+  it('onSelectFolder with archive mode submits importMode archive and forces required location', async () => {
+    // Phase 5.1 — archive import mode choice at submit (A1).
+    // @see docs/specs/service/media-upload-service/upload-archive-import-mode.md
+    const { service, uploadManager } = setupHandlers();
+    const dirHandle = { name: 'Archive 2019' } as FileSystemDirectoryHandle;
+    const showDirectoryPicker = vi.fn().mockResolvedValue(dirHandle);
+    vi.stubGlobal('showDirectoryPicker', showDirectoryPicker);
+
+    service.onSelectFolder(
+      { preventDefault: vi.fn(), stopPropagation: vi.fn() } as unknown as MouseEvent,
+      document.createElement('input'),
+      'archive',
+    );
+
+    await vi.waitFor(() => {
+      expect(uploadManager.submitFolder).toHaveBeenCalledWith(dirHandle, {
+        projectId: undefined,
+        locationRequirementMode: 'required',
+        importMode: 'archive',
+      });
+    });
+    vi.unstubAllGlobals();
+  });
+
+  it('onFolderInputChange after archive folder pick submits importMode archive', () => {
+    const { service, uploadManager } = setupHandlers();
+    vi.stubGlobal('showDirectoryPicker', undefined);
+    if (!('webkitdirectory' in HTMLInputElement.prototype)) {
+      Object.defineProperty(HTMLInputElement.prototype, 'webkitdirectory', {
+        configurable: true,
+        value: true,
+      });
+    }
+
+    const folderInput = document.createElement('input');
+    service.onSelectFolder(
+      { preventDefault: vi.fn(), stopPropagation: vi.fn() } as unknown as MouseEvent,
+      folderInput,
+      'archive',
+    );
+
+    const file = new File([new Uint8Array(64)], 'a.jpg', { type: 'image/jpeg' });
+    Object.defineProperty(file, 'webkitRelativePath', {
+      value: 'Archive 2019/a.jpg',
+    });
+    const input = { files: [file], value: 'placeholder' } as unknown as HTMLInputElement;
+    service.onFolderInputChange({ target: input } as unknown as Event);
+
+    expect(uploadManager.submitWebkitFolder).toHaveBeenCalledWith(
+      expect.any(Array),
+      'Archive 2019',
+      {
+        projectId: undefined,
+        locationRequirementMode: 'required',
+        importMode: 'archive',
+      },
+    );
+    vi.unstubAllGlobals();
+  });
 });

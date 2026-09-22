@@ -12,7 +12,8 @@ import {
   expandPostcodeOnSearchObject,
 } from './upload-search-object.builder';
 import { collapseAtSlashPathSegments } from './upload-search-object.unit-parsing.at';
-import { foldStreetSpelling, splitPathSegments, stripFileExtension } from './location-path-parser.util';
+import { stripWindowsCopySuffix } from './path-token-classifier';
+import { normalizeStreetForGroupingKey, splitPathSegments, stripFileExtension } from './location-path-parser.util';
 import type { UploadSearchObject } from '../upload/address-resolution/upload-address-resolution.types';
 
 /** Same normalization as grouping keys — kept local to avoid parser → upload cycle. */
@@ -71,12 +72,20 @@ export function normalizeLayerKeySegment(segment: string): string {
     .normalize('NFC');
 }
 
-/** Normalize a street-level field value for compare, folding street-name spellings. */
-export function normalizeStreetLevelValue(value: string | null | undefined): string {
+/**
+ * Normalize one street-level value for compare. Only a street name folds its spelling variants;
+ * a house number, staircase or door is an identifier, so `11` and `1` stay two addresses.
+ * @see docs/specs/service/media-upload-service/upload-search-object.street-fold.supplement.md
+ */
+export function normalizeStreetLevelValue(
+  value: string | null | undefined,
+  key: keyof StreetLevelParsed,
+): string {
   if (value == null) {
     return '';
   }
-  return foldStreetSpelling(normalizeKeyPart(value));
+  const normalized = normalizeKeyPart(value);
+  return key === 'street' ? normalizeStreetForGroupingKey(normalized) : normalized;
 }
 
 /**
@@ -113,13 +122,20 @@ function extractStreetLevel(so: UploadSearchObject): StreetLevelParsed {
   };
 }
 
+/**
+ * Folder segments with Windows copy suffixes removed, in the same order as the Search Object
+ * builder: drop the filename, strip `(N)` per folder, then collapse nested unit folders. Copies of
+ * one address therefore share a layerKey instead of each opening its own tray.
+ * @see docs/specs/service/media-upload-service/upload-search-object.copy-suffix.supplement.md
+ */
 function folderSegmentsFromPath(relativePath: string, fileName: string): string[] {
   const normalizedPath = relativePath.replace(/\\/g, '/');
-  const segments = collapseAtSlashPathSegments(splitPathSegments(normalizedPath));
-  if (segments.length > 0 && segments[segments.length - 1] === fileName) {
-    return segments.slice(0, -1);
-  }
-  return segments.filter((s) => s !== fileName);
+  const segments = splitPathSegments(normalizedPath);
+  const withoutFile =
+    segments.length > 0 && segments[segments.length - 1] === fileName
+      ? segments.slice(0, -1)
+      : segments.filter((segment) => segment !== fileName);
+  return collapseAtSlashPathSegments(withoutFile.map(stripWindowsCopySuffix));
 }
 
 function buildFolderLayerKey(folderSegments: string[], index: number): string {
@@ -179,7 +195,7 @@ function entriesConflict(a: AddressLayerEntry, b: AddressLayerEntry): boolean {
   for (const key of STREET_LEVEL_KEYS) {
     const av = a.parsed[key]?.trim();
     const bv = b.parsed[key]?.trim();
-    if (av && bv && normalizeStreetLevelValue(av) !== normalizeStreetLevelValue(bv)) {
+    if (av && bv && normalizeStreetLevelValue(av, key) !== normalizeStreetLevelValue(bv, key)) {
       return true;
     }
   }
@@ -252,7 +268,7 @@ export function mergeLayersWithoutConflict(layers: AddressLayerEntry[]): StreetL
     if (!values.length) {
       continue;
     }
-    const distinct = new Set(values.map((v) => normalizeStreetLevelValue(v)));
+    const distinct = new Set(values.map((v) => normalizeStreetLevelValue(v, key)));
     if (distinct.size === 1) {
       result[key] = values[0];
     }

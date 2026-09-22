@@ -13,9 +13,9 @@ corrected-by: none
 
 **Status `partially-remediated`, 2026-09-16:** 17 of 22 findings are fixed, each struck through in the
 index below with its fix and its measurement recorded in place. Still open: F-08 (addressed for
-imports only), F-12/F-13 remainder (two spec files), F-17 and F-18 (both need an owner decision
-first). The correction work is [STUDY-006](./006-upload-pipeline-correction-plan.md); what is left is
-its § Phase 5.
+imports only), F-12 remainder (`upload.service.spec.ts` only — `media-detail-view.ui.spec.ts` fixed
+2026-09-16), F-17 and F-18 (both need an owner decision first). The correction work is
+[STUDY-006](./006-upload-pipeline-correction-plan.md); what is left is its § Phase 5.
 
 Every finding below came out of
 [`npm run trace:upload`](../playbooks/upload-pipeline-trace.md) — a headless harness that pushes a
@@ -54,7 +54,7 @@ spec-level — the spec says what the code does, so a fix needs a contract decis
 | [F-09](#f-09) | The `test` gate compiles nothing, so it runs no specs | Medium | Repo |
 | [F-10](#f-10) | Two gate debt notes state numbers that no longer match | Low | Repo |
 | [F-11](#f-11) | ~~A meaningless folder segment outranks a valid address in the file name~~ **fixed** | High | Code |
-| [F-12](#f-12) | The unit suite is order-dependent; the count depends on a build cache | Medium | Repo |
+| [F-12](#f-12) | ~~The unit suite is order-dependent; the count depends on a build cache~~ **fixed** — 0 failing across three cold runs | Medium | Repo |
 | [F-13](#f-13) | `ng test` never loads `vitest.config.ts`, so its aliases are inert in CI | Medium | Repo |
 | [F-14](#f-14) | ~~An async tray gate is overwritten by the hashing step, stranding the job~~ **fixed** | High | Code |
 | [F-15](#f-15) | ~~A path carrying a complete address **twice** can yield an empty Search Object~~ **fixed** | High | **Spec** |
@@ -422,6 +422,15 @@ cheaper, it stops asking them.
 **Still open:** the tray volume of the *interactive* mode is what it was. This finding is addressed
 for imports, not removed for batches.
 
+**Corpus caveat, 2026-09-16.** The original "scales linearly with file count" arithmetic was measured
+on the **adversarial** generator (~1 file per address). Real company drops often pack ~30 medias
+under one `/City/PLZ/` (or street) folder, so group count — and therefore tray count — tracks
+**places**, not files. Re-measure with
+`--scale=N --profile=company_area --files-per-location=30` (and the profile comparison table in
+[upload-pipeline-trace.md](../playbooks/upload-pipeline-trace.md#corpus-profiles)) before quoting
+interactive tray volume as a company-archive cost. Adversarial remains the right corpus for defect
+hunting; it is the wrong corpus for that cost claim.
+
 ---
 
 ### F-09 · The `test` gate compiles nothing, so it runs no specs {#f-09}
@@ -507,7 +516,7 @@ the run:
 | `nav.component.spec.ts` | 6 failed | asserts 4 nav items; the component has had **5** since before this branch |
 | `login.component.spec.ts` | 4 failed | always fails |
 | `register.component.spec.ts` | 1 failed | always fails |
-| `media-detail-view.ui.spec.ts` | 3 failed | always fails |
+| `media-detail-view.ui.spec.ts` | 3 failed | always fails — **fixed 2026-09-16** (reflecting location store + delete-undo stub) |
 | `media-detail-view.component.spec.ts` | 1 failed | always fails |
 | `media-detail-view.replace-photo.spec.ts` | 1 failed | always fails |
 | `media-detail-delete.helper.spec.ts` | 1 failed | always fails |
@@ -522,6 +531,15 @@ are stale tests that predate this work entirely.
 Two runners give the same answer, too: `nav` and `login` fail with identical counts under plain
 `npx vitest run` and under `ng test` `[A]`, so this is not [F-13](#f-13)'s configuration split
 either.
+
+**Closed 2026-09-20.** The gate is at **0 failing of 1 551, across three consecutive cold runs** —
+from 25 across 12 files on 09-13. The last file, `upload.service.spec.ts`, was the one genuinely
+order-dependent case, and it is now diagnosed rather than merely counted: four cold runs gave
+**0/0, 5/1, 0/0, 5/1** — all five assertions or none, decided by vitest's file-to-worker assignment,
+which is exactly why pairwise and whole-directory runs never reproduced it. Cause: `vi.mock()` binds
+per module registry while the Angular unit-test system bundles the whole suite, so the mock applied
+only when no other spec had loaded `upload.service.util` into that worker first. Fixed with an
+explicit reader seam, not a module mock — the pattern is now [TRAP-022](../TRAPS.md).
 
 **What this means.** The "order-dependent pollution" framing has been acting as a bucket that
 ordinary broken tests fell into and stopped being read. The order-dependence in the table above is
@@ -1051,6 +1069,9 @@ with its coordinates in the same trace run; an end-to-end regression test `(d5)`
 - **Branch B (street + project centroid bias) was never exercised**, because the harness returns no
   project locations. `[A]`
 - **No user research backs [F-08](#f-08)'s claim that 45 000 questions is unusable.** `[C]`
-- **File-name and folder conventions in the corpus are invented.** `[A]` What real customer archives
-  look like — how many files, how deep, how they are named — is unmeasured, and it decides how much
-  [F-01](#f-01) and [F-03](#f-03) actually cost. Settling it needs one real exported folder tree.
+- **File-name and folder conventions in the corpus used to be a single invented mix.** `[A]` What
+  real customer archives look like — how many files, how deep, how they are named — still needs
+  one real exported folder tree to calibrate weights. Until then, measure with the named
+  [corpus profiles](../playbooks/upload-pipeline-trace.md#corpus-profiles)
+  (`company_area`, `company_street`, `flat`, `shallow_many`, `mixed`) instead of quoting only
+  `adversarial`.

@@ -45,7 +45,7 @@ psql -v ON_ERROR_STOP=1 -d feldpost_verify -f scripts/validate-chat-rls.sql
 psql -v ON_ERROR_STOP=1 -d feldpost_verify -f scripts/validate-upload-role-rls.sql
 ```
 
-CI: `.github/workflows/local-rls-verify.yml` (STUDY-009 F-03).
+CI: `.github/workflows/local-rls-verify.yml` (STUDY-010 F-03).
 
 To confirm a validation script still *detects* its bug, re-run the chain while
 skipping the fix migration and check that it fails. Omitting

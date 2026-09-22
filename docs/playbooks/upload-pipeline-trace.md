@@ -23,7 +23,8 @@ npm run trace:upload                                     # 15 curated files
 npm run trace:upload -- --count=150                      # + generated corpus, seed 7
 npm run trace:upload -- --count=150 --seed=42 --detail=5  # 5 files in full, rest aggregated
 npm run trace:upload -- --answer-trays                   # keep going past the user gate
-npm run trace:upload -- --scale=20000                    # database-scale cost measurement
+npm run trace:upload -- --scale=1000 --compare-profiles  # classify cost across folder shapes
+npm run trace:upload -- --scale=1000 --profile=company_area --files-per-location=30
 npm run trace:upload -- --out=trace.txt                  # keep the report
 ```
 
@@ -46,8 +47,96 @@ run A parked in a tray — not a second duplicate in the corpus.
 | `--seed=N` | Generator seed (default 7). Same seed, same 150 paths. |
 | `--detail=N` | How many files get a full per-file section. The rest appear only in the aggregate tables. |
 | `--answer-trays` | Answer every resolver tray with its first candidate so the trace continues past the gate. Off by default — see [Real vs mock](#real-vs-mock). |
-| `--scale=N` | Files the [database-scale tier](#database-scale) classifies (default 2 000). This tier streams paths, so N can be 100 000+. |
+| `--scale=N` | Files the [database-scale tier](#database-scale) classifies (default 500). This tier streams paths, so N can be 100 000+. |
+| `--profile=NAME` | Corpus packing profile for generated paths and the scale detail block. Default `adversarial`. See [Corpus profiles](#corpus-profiles). |
+| `--files-per-location=N` | Medias sharing one location folder for dense profiles (default **30**). |
+| `--compare-profiles` | Force the profile comparison table (on by default for scale; set `UPLOAD_TRACE_COMPARE_PROFILES=0` to skip). |
 | `--out=FILE` | Write the report to `FILE` instead of a temp file. |
+
+## Corpus profiles
+
+Companies do not upload 1 000 files with 1 000 different addresses. A common layout is
+`/Wien/1020/` (or `/City/PLZ/Street N/`) with **~30 medias per location** — so 1 000 files is
+**~30–40 groups**, not ~800. Tray volume is **per group**, not per file: the old generator's
+random-per-file packing (`adversarial`) maximises questions and is the wrong corpus for a
+company-scale cost claim.
+
+| Profile | Folder shape | Files / location | What it is for |
+| --- | --- | --- | --- |
+| `adversarial` | Random mix of curated shapes (`full_chain`, `filename_address`, `project_token`, …) | ~1 | Defect hunting / worst-case tray surface. **Default** for regression E2E. |
+| `company_area` | `/City/PLZ/IMG_*.jpg` | 30 (configurable) | Typical construction archive. Uses the 21 rows in `at-plz.json`, so distinct places **cap at 21** for pure area paths — extra location slots merge into the same City/PLZ (one group, correctly). For ~30–40 distinct places at 1 000 files use `company_street` or `mixed`. |
+| `company_street` | `/City/PLZ/Street N/IMG_*.jpg` | 30 | Address-complete folders; expects `street_locality` auto-resolve when the gazetteer hits. |
+| `flat` | `Rohdaten/IMG_*.jpg` | all | Camera-roll / USB dump — no address, `incomplete`. |
+| `shallow_many` | Many `/City/PLZ/` folders | 3 | Sparse tree (many places, few medias each). |
+| `mixed` | 70 % area / 20 % street / 10 % noise | 30 | Blended archive closer to a real drop. |
+| `firma_at_archive` | `/Wien\|Niederösterreich/{PLZ}/{building}/` — per place: `Wasagasse 4` / `(1)` / `(2)` **and** a second-spelling chain `Wasagase 4` / `(1)` / `(2)` (counter restarts; `Straße` streets get the `ß`/`ss` variant, `gasse` streets a dropped letter); also letters (`8A`), nested unit folders (`Lange Gasse 6/3/5`), abbreviated `Lerchenfelder Str 6`, full address, landmarks; ~11 % of places sit directly under the Bundesland with no PLZ folder; ~5 % loose files under PLZ, ~2 % under Bundesland | mostly 10–50, occasional 100+ | **Owner-described company archive** (2026-09-16). Prefer this for tray-efficiency claims. Recalibrate weights from a path-only export when available. |
+
+**Measured tray clusters (adversarial, 1 000 files, 2026-09-16):** of groups that need a pre-upload
+question, ~**95 % are `layer_package`** (filename street contradicts folder, or project-token
+layer fights), ~**5 % are `admin_level_conflict`**. Most adversarial groups are **1 file**, so
+each conflict is its own question. Under `company_area` the same 1 000 files collapse to ≤21
+groups and land mostly on `area_only` (no pre-upload tray — area placement, F-19).
+
+**Measured profile comparison, 1 000 files, seed 7, camera naming (2026-09-16):**
+
+| Profile | Groups | Pre-upload trays | ms/file | Top outcome |
+| --- | ---: | ---: | ---: | --- |
+| `adversarial` | 823 | 386 | 3.4 | `street_locality` |
+| `company_area` | 19 | 1 | 2.0 | `area_only` |
+| `company_street` | 34 | 7 | 2.7 | `street_locality` |
+| `flat` | 1 | 0 | 0.03 | `incomplete` |
+| `shallow_many` | 19 | 1 | 2.0 | `area_only` |
+| `mixed` | 20 | 0 | 1.9 | `area_only` |
+| **`firma_at_archive`** | **21** | **1** | 5.5 | `street_locality` |
+
+`firma_at_archive` progression @ 1 000 files (re-measured 2026-09-16 after the letter-run fold was
+reverted and the corpus gained the owner's remaining shapes; each row measured by disabling that
+step and re-running):
+
+| Step | Groups | Notes |
+| --- | ---: | --- |
+| Baseline (before `(N)` / fold) | 40 | Increment + second-spelling chains split |
+| After Windows `(N)` strip | 24 | `Wasagasse 4 (1)` ≡ `Wasagasse 4`, including `Wasagasse 4 (1)/3/5` |
+| After street `ß`/`ss` + `str.` fold | **21** | `Lerchenfelder Straße` ≡ `Lerchenfelder Strasse` ≡ `Lerchenfelder Str` |
+
+Typos that are not orthographic variants (`Wasagasse` vs `Wasagase`, `Stephansplatz` vs
+`Stehansplatz`) stay out of scope and remain separate groups — see
+[street-fold supplement](../specs/service/media-upload-service/upload-search-object.street-fold.supplement.md)
+§ Rejected. Adversarial remains ~823 / 386.
+
+The corpus also exposes a classifier weakness worth naming: the typo street `…gase` fuzzy-matches
+the Styrian municipality **Gasen**, so 121 of the 1 000 files classify as
+`at|wien|1020|gasen|lange|2a` — the suffix eaten as a city, the remaining word left as the street —
+and land in `admin_conflict` instead of a street group. That is the gazetteer lookup, not the fold.
+
+Tray keying: an `admin_conflict` group is keyed by its **address plus** the disagreeing field. It
+used to be keyed by the field name alone, which collapsed every city conflict in a corpus into one
+group and one tray — the number this report exists to state. Correcting it moved `adversarial` from
+791/354 to 823/386; `firma_at_archive` was unaffected because its 121 conflicting files genuinely
+are one address.
+For efficiency work, quote **`firma_at_archive`**, not `adversarial`.
+
+Note: scale-tier “trays” = local-gate questions (`layer_conflict` / `admin_conflict` /
+`street_only`) before upload. Geocode ambiguity trays can still appear in a full interactive run.
+
+**Ways to reduce trays further (product, not just tests):**
+
+1. **Pack by place** — one question covers N medias when they share a `groupingKey` (already true;
+   dense folders are how companies get it).
+2. **Archive import mode** — classify, never open a tray, defer leftovers to Issues (Phase 5 /
+   F-08 import path).
+3. **Kill remaining `layer_package` sources** — filename-vs-folder street fights and project-token
+   packages (F-04/F-11 mostly fixed; adversarial still synthesises them on purpose).
+4. **Strip Windows copy suffixes `(N)` on folder/file segments** — so `Wasagasse 4 (1)` shares a
+   `groupingKey` with `Wasagasse 4`. Spec:
+   [upload-search-object.copy-suffix.supplement.md](../specs/service/media-upload-service/upload-search-object.copy-suffix.supplement.md).
+   Spelling variants (`Straße` vs `Strasse`) fold on the key; genuine typos do not.
+5. **Do not quote adversarial tray extrapolations as company cost** — use `--profile=firma_at_archive`
+   (or `company_area` / `mixed`) for that claim; the scale report prints a profile comparison table
+   so the two cannot be confused.
+
+Generator: `apps/web/src/app/core/upload/trace/upload-trace-generator.ts` ·
+`upload-trace-firma-archive.ts`.
 
 The harness is also a normal unit test: without `UPLOAD_TRACE=1` it prints nothing and only
 asserts. That is deliberate — a diagnostic that nothing keeps honest rots. Run it as a test with:
@@ -56,11 +145,9 @@ asserts. That is deliberate — a diagnostic that nothing keeps honest rots. Run
 cd apps/web && npx vitest run src/app/core/upload/trace/upload-pipeline-trace.spec.ts
 ```
 
-It is **not** yet exercised by `npm run verify`: the `test` gate's bundle does not compile on
-`main` (type errors in `upload-address-persist.acceptance.spec.ts` and
-`upload-new-pre-resolve-dedup-disambiguation.integration.spec.ts`, part of the gate's recorded
-debt), so `ng test` runs no specs at all today. Once that bundle compiles, this harness runs with
-the rest.
+It **is** exercised by `npm run verify` — the `test` gate compiles and runs it with the rest
+(1 556 specs on 2026-09-16). An earlier note here said the gate's bundle did not compile and ran no
+specs at all; that stopped being true and the note was not re-measured.
 
 ## Three runs, because the pipeline has three shapes
 

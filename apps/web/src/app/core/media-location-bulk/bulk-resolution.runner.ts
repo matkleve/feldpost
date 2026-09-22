@@ -14,6 +14,16 @@
 
 import type { BulkResolutionGroup, BulkResolutionPlan } from './bulk-resolution.planner';
 
+/**
+ * The minimum the runner itself needs to know about a geocode result: enough to report it.
+ *
+ * The runner is **generic over the suggestion type** and passes whatever `geocode` returned
+ * straight to `applyToItem`. That is not gold-plating — an earlier version fixed this to
+ * `{ addressLabel, lat, lng }`, and wiring the real adapter showed it would have dropped
+ * `street` / `city` / `streetNumber` / `zip` / `country`, which is exactly what
+ * `geocodeResultToPrecisionFields` reads. Every bulk-resolved item would have been written with
+ * coordinates and no address.
+ */
 export interface BulkGeocodeResult {
   addressLabel: string;
   lat: number;
@@ -37,19 +47,19 @@ export interface BulkResolutionReport {
   completed: boolean;
 }
 
-export interface BulkResolutionRunnerDeps {
+export interface BulkResolutionRunnerDeps<TSuggestion extends BulkGeocodeResult = BulkGeocodeResult> {
   /** Called once per group (R5). Returning null means the address could not be placed. */
   geocode: (
     addressLabel: string,
     coords: { lat: number; lng: number } | null,
-  ) => Promise<BulkGeocodeResult | null>;
+  ) => Promise<TSuggestion | null>;
   /**
    * Applies one resolved address to one item, through the same service a single-item edit uses —
    * so a bulk answer is the same kind of write as a tray answer, not a second path.
    */
   applyToItem: (
     mediaId: string,
-    suggestion: BulkGeocodeResult,
+    suggestion: TSuggestion,
   ) => Promise<{ ok: boolean; error?: string }>;
   onProgress?: (done: number, total: number) => void;
   /** Explicit cancel. Navigating away is NOT a cancel — a confirmed write runs to completion. */
@@ -64,9 +74,9 @@ function defaultYield(): Promise<void> {
   return new Promise<void>((resolve) => setTimeout(resolve, 0));
 }
 
-async function runGroup(
+async function runGroup<TSuggestion extends BulkGeocodeResult>(
   group: BulkResolutionGroup,
-  deps: BulkResolutionRunnerDeps,
+  deps: BulkResolutionRunnerDeps<TSuggestion>,
   outcomes: BulkResolutionOutcome[],
   progress: { done: number; total: number },
 ): Promise<{ geocoded: boolean; aborted: boolean }> {
@@ -113,9 +123,9 @@ async function runGroup(
   return { geocoded: true, aborted: false };
 }
 
-export async function runBulkResolution(
+export async function runBulkResolution<TSuggestion extends BulkGeocodeResult = BulkGeocodeResult>(
   plan: BulkResolutionPlan,
-  deps: BulkResolutionRunnerDeps,
+  deps: BulkResolutionRunnerDeps<TSuggestion>,
 ): Promise<BulkResolutionReport> {
   const outcomes: BulkResolutionOutcome[] = plan.skipped.map((entry) => ({
     mediaId: entry.mediaId,

@@ -5,7 +5,10 @@
  *  - SupabaseService is replaced with a fake that mirrors the Supabase JS SDK
  *    call chains used by UploadService.
  *  - AuthService is replaced with a minimal fake exposing a user() signal.
- *  - exifr is vi.mock()'d so no real EXIF parsing occurs (no real files on disk).
+ *  - the EXIF reader is replaced through setUploadExifReaderForTests, so no real EXIF parsing
+ *    occurs. It is NOT vi.mock()'d: that bound per module registry, and under the bundled Angular
+ *    runner whether it applied depended on which spec loaded upload.service.util first in the same
+ *    worker — this file alternated between 0 and 5 failures because of it.
  *  - No real HTTP / Storage calls are made.
  *  - Arrange–Act–Assert for every behavior; one it per behavior.
  */
@@ -16,14 +19,21 @@ import { SupabaseService } from '../supabase/supabase.service';
 import { AuthService } from '../auth/auth.service';
 import { GeocodingService } from '../geocoding/geocoding.service';
 
-// ── Mock exifr ─────────────────────────────────────────────────────────────────
-// Prevent any real EXIF / file parsing in the test environment.
-vi.mock('exifr/dist/lite.esm.js', () => ({
-  gps: vi.fn(),
-  parse: vi.fn(),
-}));
+// ── EXIF reader ────────────────────────────────────────────────────────────────
+// Prevent any real EXIF / file parsing, without depending on module-load order.
+import { setUploadExifReaderForTests } from './support/upload.service.util';
 
-import * as exifr from 'exifr/dist/lite.esm.js';
+const exifr = { gps: vi.fn(), parse: vi.fn() };
+
+beforeEach(() => {
+  exifr.gps.mockReset();
+  exifr.parse.mockReset();
+  setUploadExifReaderForTests(exifr);
+});
+
+afterEach(() => {
+  setUploadExifReaderForTests(null);
+});
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -266,8 +276,8 @@ describe('UploadService', () => {
 
   describe('parseExif()', () => {
     it('returns coordinates when GPS tags are present', async () => {
-      vi.mocked(exifr.gps).mockResolvedValue({ latitude: 37.7749, longitude: -122.4194 });
-      vi.mocked(exifr.parse).mockResolvedValue({ DateTimeOriginal: new Date('2025-06-01') });
+      exifr.gps.mockResolvedValue({ latitude: 37.7749, longitude: -122.4194 });
+      exifr.parse.mockResolvedValue({ DateTimeOriginal: new Date('2025-06-01') });
 
       const { service } = setup();
       const file = makeFile();
@@ -279,8 +289,8 @@ describe('UploadService', () => {
     });
 
     it('returns undefined coords when GPS data is absent', async () => {
-      vi.mocked(exifr.gps).mockResolvedValue(null as any);
-      vi.mocked(exifr.parse).mockResolvedValue(null as any);
+      exifr.gps.mockResolvedValue(null as any);
+      exifr.parse.mockResolvedValue(null as any);
 
       const { service } = setup();
       const result = await service.parseExif(makeFile());
@@ -289,8 +299,8 @@ describe('UploadService', () => {
     });
 
     it('returns empty object when exifr throws', async () => {
-      vi.mocked(exifr.gps).mockRejectedValue(new Error('parse error'));
-      vi.mocked(exifr.parse).mockRejectedValue(new Error('parse error') as any);
+      exifr.gps.mockRejectedValue(new Error('parse error'));
+      exifr.parse.mockRejectedValue(new Error('parse error') as any);
 
       const { service } = setup();
       const result = await service.parseExif(makeFile());
@@ -299,8 +309,8 @@ describe('UploadService', () => {
     });
 
     it('returns undefined coords when GPS latitude is null', async () => {
-      vi.mocked(exifr.gps).mockResolvedValue({ latitude: null, longitude: null } as any);
-      vi.mocked(exifr.parse).mockResolvedValue(null as any);
+      exifr.gps.mockResolvedValue({ latitude: null, longitude: null } as any);
+      exifr.parse.mockResolvedValue(null as any);
 
       const { service } = setup();
       const result = await service.parseExif(makeFile());
@@ -309,8 +319,8 @@ describe('UploadService', () => {
     });
 
     it('returns direction when GPSImgDirection is present', async () => {
-      vi.mocked(exifr.gps).mockResolvedValue({ latitude: 37.7, longitude: -122.4 });
-      vi.mocked(exifr.parse).mockResolvedValue({
+      exifr.gps.mockResolvedValue({ latitude: 37.7, longitude: -122.4 });
+      exifr.parse.mockResolvedValue({
         DateTimeOriginal: new Date('2025-06-01'),
         GPSImgDirection: 127.5,
       });
@@ -322,8 +332,8 @@ describe('UploadService', () => {
     });
 
     it('returns undefined direction when GPSImgDirection is absent', async () => {
-      vi.mocked(exifr.gps).mockResolvedValue({ latitude: 37.7, longitude: -122.4 });
-      vi.mocked(exifr.parse).mockResolvedValue({ DateTimeOriginal: new Date('2025-06-01') });
+      exifr.gps.mockResolvedValue({ latitude: 37.7, longitude: -122.4 });
+      exifr.parse.mockResolvedValue({ DateTimeOriginal: new Date('2025-06-01') });
 
       const { service } = setup();
       const result = await service.parseExif(makeFile());
@@ -332,8 +342,8 @@ describe('UploadService', () => {
     });
 
     it('rejects direction outside 0–360 range', async () => {
-      vi.mocked(exifr.gps).mockResolvedValue({ latitude: 37.7, longitude: -122.4 });
-      vi.mocked(exifr.parse).mockResolvedValue({ GPSImgDirection: 400 });
+      exifr.gps.mockResolvedValue({ latitude: 37.7, longitude: -122.4 });
+      exifr.parse.mockResolvedValue({ GPSImgDirection: 400 });
 
       const { service } = setup();
       const result = await service.parseExif(makeFile());
@@ -342,8 +352,8 @@ describe('UploadService', () => {
     });
 
     it('rejects non-numeric direction values', async () => {
-      vi.mocked(exifr.gps).mockResolvedValue({ latitude: 37.7, longitude: -122.4 });
-      vi.mocked(exifr.parse).mockResolvedValue({ GPSImgDirection: 'NNW' });
+      exifr.gps.mockResolvedValue({ latitude: 37.7, longitude: -122.4 });
+      exifr.parse.mockResolvedValue({ GPSImgDirection: 'NNW' });
 
       const { service } = setup();
       const result = await service.parseExif(makeFile());
@@ -357,8 +367,8 @@ describe('UploadService', () => {
   describe('uploadFile()', () => {
     beforeEach(() => {
       // Default: EXIF has GPS data
-      vi.mocked(exifr.gps).mockResolvedValue({ latitude: 51.5074, longitude: -0.1278 });
-      vi.mocked(exifr.parse).mockResolvedValue({ DateTimeOriginal: new Date('2025-01-10') });
+      exifr.gps.mockResolvedValue({ latitude: 51.5074, longitude: -0.1278 });
+      exifr.parse.mockResolvedValue({ DateTimeOriginal: new Date('2025-01-10') });
     });
 
     it('returns an error when the user is not authenticated', async () => {
@@ -457,8 +467,8 @@ describe('UploadService', () => {
     });
 
     it('sets null coords in DB when no EXIF GPS and no manual coords provided', async () => {
-      vi.mocked(exifr.gps).mockResolvedValue(null as any);
-      vi.mocked(exifr.parse).mockResolvedValue(null as any);
+      exifr.gps.mockResolvedValue(null as any);
+      exifr.parse.mockResolvedValue(null as any);
 
       const { service, fakeSupabase } = setup();
 
@@ -471,8 +481,8 @@ describe('UploadService', () => {
     });
 
     it('does not write latitude/longitude on media_items when EXIF is absent (manual coords via resolve)', async () => {
-      vi.mocked(exifr.gps).mockResolvedValue(null as any);
-      vi.mocked(exifr.parse).mockResolvedValue(null as any);
+      exifr.gps.mockResolvedValue(null as any);
+      exifr.parse.mockResolvedValue(null as any);
 
       const { service, fakeSupabase } = setup();
       const manualCoords = { lat: 48.8566, lng: 2.3522 };
@@ -487,8 +497,8 @@ describe('UploadService', () => {
     });
 
     it('allows document uploads with provided coordinates by enabling GPS assignment on insert', async () => {
-      vi.mocked(exifr.gps).mockResolvedValue(null as any);
-      vi.mocked(exifr.parse).mockResolvedValue(null as any);
+      exifr.gps.mockResolvedValue(null as any);
+      exifr.parse.mockResolvedValue(null as any);
 
       const { service, fakeSupabase } = setup();
       const documentFile = makeFile('report.pdf', 'application/pdf');
@@ -515,7 +525,7 @@ describe('UploadService', () => {
 
     it('inserts captured_at from EXIF DateTimeOriginal', async () => {
       const capturedAt = new Date('2025-01-10');
-      vi.mocked(exifr.parse).mockResolvedValue({ DateTimeOriginal: capturedAt });
+      exifr.parse.mockResolvedValue({ DateTimeOriginal: capturedAt });
 
       const { service, fakeSupabase } = setup();
       await service.uploadFile(makeFile());
@@ -525,7 +535,7 @@ describe('UploadService', () => {
     });
 
     it('inserts null captured_at when EXIF has no DateTimeOriginal', async () => {
-      vi.mocked(exifr.parse).mockResolvedValue(null as any);
+      exifr.parse.mockResolvedValue(null as any);
 
       const { service, fakeSupabase } = setup();
       await service.uploadFile(makeFile());
@@ -535,7 +545,7 @@ describe('UploadService', () => {
     });
 
     it('inserts direction when EXIF GPSImgDirection is present', async () => {
-      vi.mocked(exifr.parse).mockResolvedValue({
+      exifr.parse.mockResolvedValue({
         DateTimeOriginal: new Date('2025-01-10'),
         GPSImgDirection: 245.3,
       });
@@ -549,7 +559,7 @@ describe('UploadService', () => {
     });
 
     it('inserts null direction when EXIF has no GPSImgDirection', async () => {
-      vi.mocked(exifr.parse).mockResolvedValue({ DateTimeOriginal: new Date('2025-01-10') });
+      exifr.parse.mockResolvedValue({ DateTimeOriginal: new Date('2025-01-10') });
 
       const { service, fakeSupabase } = setup();
       await service.uploadFile(makeFile());
@@ -559,7 +569,7 @@ describe('UploadService', () => {
     });
 
     it('includes direction in successful upload result', async () => {
-      vi.mocked(exifr.parse).mockResolvedValue({
+      exifr.parse.mockResolvedValue({
         DateTimeOriginal: new Date('2025-01-10'),
         GPSImgDirection: 90,
       });
@@ -604,8 +614,8 @@ describe('UploadService', () => {
 
   describe('address resolution after upload', () => {
     beforeEach(() => {
-      vi.mocked(exifr.gps).mockResolvedValue({ latitude: 47.3769, longitude: 8.5417 });
-      vi.mocked(exifr.parse).mockResolvedValue({ DateTimeOriginal: new Date('2025-06-01') });
+      exifr.gps.mockResolvedValue({ latitude: 47.3769, longitude: 8.5417 });
+      exifr.parse.mockResolvedValue({ DateTimeOriginal: new Date('2025-06-01') });
     });
 
     it('calls GeocodingService.reverse() with placement coordinates after successful upload', async () => {
@@ -640,8 +650,8 @@ describe('UploadService', () => {
     });
 
     it('does not call reverse geocode when image has no coordinates', async () => {
-      vi.mocked(exifr.gps).mockResolvedValue(null as any);
-      vi.mocked(exifr.parse).mockResolvedValue(null as any);
+      exifr.gps.mockResolvedValue(null as any);
+      exifr.parse.mockResolvedValue(null as any);
 
       const { service, fakeGeocoding } = setup();
 
@@ -661,8 +671,8 @@ describe('UploadService', () => {
     });
 
     it('calls reverse geocode with manual coords when EXIF GPS is absent', async () => {
-      vi.mocked(exifr.gps).mockResolvedValue(null as any);
-      vi.mocked(exifr.parse).mockResolvedValue(null as any);
+      exifr.gps.mockResolvedValue(null as any);
+      exifr.parse.mockResolvedValue(null as any);
 
       const { service, fakeGeocoding } = setup();
 

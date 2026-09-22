@@ -299,6 +299,20 @@
   pointer-events: auto;
 }
 
+// Path add control follows the same rule: an unlocated item always shows it, no hover gate.
+// `resolving` keeps the button visible but inert — the busy icon is the affordance, and a
+// second click would start a second run on the same item.
+// @see docs/specs/ui/media-detail/media-detail-inline-section.md#path--location-fsm
+.detail-row--path-location-add[data-state='idle'] .detail-row-action--l1:is(button),
+.detail-row--path-location-add[data-state='resolving'] .detail-row-action--l1:is(button) {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.detail-row--path-location-add[data-state='resolving'] .detail-row-action--l1:is(button) {
+  pointer-events: none;
+}
+
 // Active stack anchors dropdown below the projects row (scrolls with detail panel).
 // @see docs/specs/ui/media-detail/media-detail-inline-section.md
 .media-detail-projects-stack {

@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * Runs the upload pipeline trace harness and prints its report.
  *
@@ -11,7 +10,8 @@
  *   npm run trace:upload
  *   npm run trace:upload -- --count=150 --seed=7 --detail=20
  *   npm run trace:upload -- --answer-trays
- *   npm run trace:upload -- --scale=100000
+ *   npm run trace:upload -- --scale=1000 --profile=company_area --files-per-location=30
+ *   npm run trace:upload -- --scale=1000 --compare-profiles
  *   npm run trace:upload -- --out=trace.txt
  *
  * @see docs/playbooks/upload-pipeline-trace.md
@@ -51,6 +51,11 @@ if (detail) env.UPLOAD_TRACE_DETAIL = detail;
 if (flag('answer-trays')) env.UPLOAD_TRACE_ANSWER_TRAYS = '1';
 const scale = flag('scale');
 if (scale) env.UPLOAD_TRACE_SCALE = scale;
+const profile = flag('profile');
+if (profile) env.UPLOAD_TRACE_PROFILE = profile;
+const filesPerLocation = flag('files-per-location');
+if (filesPerLocation) env.UPLOAD_TRACE_FILES_PER_LOCATION = filesPerLocation;
+if (flag('compare-profiles')) env.UPLOAD_TRACE_COMPARE_PROFILES = '1';
 
 const result = spawnSync('npx', ['vitest', 'run', SPEC], {
   cwd: WEB_DIR,

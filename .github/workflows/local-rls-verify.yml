@@ -1,6 +1,6 @@
 name: Local RLS Verify
 
-# STUDY-009 F-03: apply the full migration chain to ephemeral Postgres + PostGIS
+# STUDY-010 F-03: apply the full migration chain to ephemeral Postgres + PostGIS
 # and run grant / chat / upload-role validation scripts.
 # @see scripts/local-verify/README.md
 

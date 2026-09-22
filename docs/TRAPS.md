@@ -49,7 +49,9 @@ Entries are numbered, never renumbered, and never deleted. Order is by cost, not
 | [TRAP-019](#trap-019--the-flat-street-was-a-concatenation-of-leftovers) | The flat `street` was a concatenation of leftovers | `open` |
 | [TRAP-020](#trap-020--a-circular-import-between-two-trace-fixture-modules-silently-zeroed-three-files) | A circular import between two modules silently zeroed three fixture files | `pattern open` |
 | [TRAP-021](#trap-021--a-resolution-event-with-zero-subscribers-looks-like-it-resumed-the-job) | A resolution event with zero subscribers looks like it resumed the job | `pattern open` |
-| [TRAP-022](#trap-022--an-rls-perf-wrap-that-reintroduces-pre-hardening-policies) | An RLS “perf wrap” that reintroduces pre-hardening policies | `pattern open` |
+| [TRAP-022](#trap-022--vimock-is-unreliable-under-the-angular-unit-test-builder-and-fails-silently) | `vi.mock()` is unreliable under the Angular unit-test builder, and fails silently | `pattern open` |
+| [TRAP-023](#trap-023--the-suite-did-not-run-is-a-spec-compile-error-the-pre-flight-type-check-does-not-catch) | "the suite did not run" is a spec compile error the pre-flight type-check does not catch | `pattern open` |
+| [TRAP-024](#trap-024--an-rls-perf-wrap-that-reintroduces-pre-hardening-policies) | An RLS “perf wrap” that reintroduces pre-hardening policies | `pattern open` |
 
 ---
 
@@ -235,6 +237,16 @@ Better: end the migration with a `DO` block that raises when any touched functio
 
 **Source** — [`2026-06-13`](./ai-diary/2026-06-13.md) § Mistakes/lessons; [`docs/playbooks/change-classification-upload-example.md`](./playbooks/change-classification-upload-example.md). Live instance: `apps/web/src/app/features/upload/upload-resolver-tray/upload-resolver-tray.helpers.ts:33-34` and `apps/web/src/app/features/upload/upload-resolver-tray/upload-resolver-tray.component.ts:595-598`.
 
+**A second shape, in config (2026-09-21).** Three of `UploadLocationConfig`'s 37 fields were declared, defaulted, documented in the spec with a plausible sentence each — and read by nothing. A config field is the worst carrier for this, because a reader who greps it finds a name, a value *and* a spec row all agreeing, which reads as three independent confirmations rather than one declaration copied twice.
+
+| Field | Spec claimed | Truth |
+| --- | --- | --- |
+| `presentationBundleMaxDialogueUnits: 5` | max dialogue units per tray bundle | the real cap is `PRESENTATION_BUNDLE_MAX_DIALOGUE_UNITS` in `upload-resolver-tray-orchestrator.types.ts`; the field was a same-named duplicate |
+| `exifContextCheck: true` | enables the step 4 EXIF reverse superset check | the reverse geocode runs unconditionally in four call sites; the flag switched nothing |
+| `clusterAssistWeight: {project: 0.7, company: 0.3}` | ranking weights for multi-hit disambiguation | no project/company weighting exists; `runDisambiguation` weights `zipMatch`, `countryMatch`, `parserConfidence`, and the upload path never calls it |
+
+**Detect, for the config shape** — grep is necessary and not sufficient: a field with no reader is dead, but a field *with* a reader can still be a duplicate of a live constant. **Flip the value and re-run.** Setting `exifContextCheck: false` and `clusterAssistWeight: {project: 0, company: 0}` and re-running the upload trace gave byte-identical results — 8 reverse geocodes, 62 forward, the same 27 trays — which is proof, where a grep is an argument. Removed in [#230](https://github.com/matkleve/feldpost/issues/230) and [#237](https://github.com/matkleve/feldpost/issues/237).
+
 **Status** — `open`.
 
 ---
@@ -399,6 +411,110 @@ Better: end the migration with a `DO` block that raises when any touched functio
 
 ---
 
+## TRAP-022 — `vi.mock()` is unreliable under the Angular unit-test builder, and fails silently
+
+**Surface** — mocking a module in a spec, the ordinary way:
+
+```ts
+vi.mock('exifr/dist/lite.esm.js', () => ({ gps: vi.fn(), parse: vi.fn() }));
+```
+
+Run that spec on its own and it passes. It is the documented Vitest API, it is what every guide
+shows, and `npx vitest run <file>` confirms it works.
+
+**Assumption** — the mock applies whenever the spec runs. Module mocking is a per-file concern, so a
+spec's own `vi.mock` governs its own imports.
+
+**Truth** — `@angular/build:unit-test` **bundles the whole suite**, so the mock binds per module
+registry rather than per spec file, and whether it applies depends on whether another spec already
+loaded that module into the same worker. Three distinct shapes of the same cause, all in one week:
+
+| Spec | Symptom | Looked like |
+| --- | --- | --- |
+| a `fuse.js` counting mock | counted **zero** constructions in a full run, correct alone | a caching bug |
+| `supabase-runtime-config.spec.ts` | whole suite **would not load** — `vi.mock` on a *relative* import is rejected outright | a broken spec |
+| `upload.service.spec.ts` | alternated **0 ↔ 5** failures run to run, four cold runs: 0/0, 5/1, 0/0, 5/1 | cross-file "pollution" |
+
+The third is the expensive one. It is all-or-nothing and decided by vitest's file-to-worker
+assignment, so **no subset reproduces it**: pairwise runs, whole-directory runs and isolation all
+pass, because changing the file list changes the assignment. It sat in a "known debt / pollution"
+bucket for weeks being re-counted rather than diagnosed.
+
+**Detect** — a spec that passes with `npx vitest run <file>` but fails under
+`npx ng test --include=<file>`, or fails only in full runs with no reproducible subset. If the spec
+mocks a module, suspect this before suspecting test order. A construction counter that reads exactly
+**zero** is the giveaway: the mock never applied at all, rather than applying wrongly.
+
+**Instead** — use an explicit, documented seam on the module under test and set it in
+`beforeEach` / clear it in `afterEach`. It has no load-order dependence, it is visible in the source
+rather than in a bundler's behaviour, and production never calls it:
+
+```ts
+let exifReaderOverride: UploadExifReader | null = null;
+export function setUploadExifReaderForTests(reader: UploadExifReader | null): void { … }
+```
+
+Precedents in the tree: `setUploadExifReaderForTests` (`upload.service.util.ts`),
+`setSupabaseEnvironmentOverrideForTests` (`supabase-runtime-config.ts`), and `fuseIndexFor` exported
+so "built once per dataset" is observable as object identity instead of a call count.
+
+**Source** — [`STUDY-005`](./study/005-upload-pipeline-trace-findings.md) F-12/F-13 and Phase 0.4b;
+diaries [`2026-09-16`](./ai-diary/2026-09-16.md) and [`2026-09-18`](./ai-diary/2026-09-18.md).
+
+**Status** — `pattern open` 2026-09-20. The three instances are fixed and the gate is at zero across
+three cold runs, but nothing stops the next spec reaching for `vi.mock` — it is the obvious move,
+and it fails quietly.
+
+---
+
+## TRAP-023 — "the suite did not run" is a spec compile error the pre-flight type-check does not catch
+
+**Surface** — the verify `test` gate fails with no failing-test list at all:
+
+```
+✗ test
+    no test report was written — the suite did not run
+✗ verify failed: test
+```
+
+**Assumption** — the suite is fine and something about the runner broke: a worker died, the JSON
+report path moved, the machine ran out of memory. Nothing names a file, so nothing points at the
+change just made. And the change *was* checked — `npx tsc --noEmit -p tsconfig.spec.json` was clean
+and `npx vitest run <dir>` was green.
+
+**Truth** — it is almost always a **type error in a spec**, and the two checks above do not see it.
+`@angular/build:unit-test` type-checks the specs through the Angular compiler plugin as it bundles
+them; that build is stricter than `tsconfig.spec.json`, and a direct `vitest run` transpiles without
+type-checking at all. One error there aborts the bundle, so **zero** tests execute and the gate has
+no report to read. Two instances in one week:
+
+| Change | Real cause | Passed `tsc -p tsconfig.spec.json`? |
+| --- | --- | --- |
+| a tray spec | missing `UploadDisambiguationGroup` type import | yes |
+| `media-folder-tree.service.spec.ts` | `setup(rpc = vi.fn(async () => ({ data: [], error: null })))` inferred the parameter from its own default, so `data` was `never[]` and every caller passing real rows was rejected | yes |
+
+The second shape is worth naming on its own: **a test helper whose parameter type is inferred from
+its default argument**. The default is the emptiest case — `[]`, `null`, `{}` — so the inferred type
+is the narrowest one (`never[]`), and every honest caller fails against it.
+
+**Detect** — read the gate's output **above** the summary line, not just the summary. The compiler
+errors are printed in full, tagged `[plugin angular-compiler]`, with file and line; the summary
+simply has no report to describe. An empty failing-file list (`grep -E "^ FAIL"` returning nothing)
+confirms "did not run" rather than "tests failed".
+
+**Instead** — reproduce with the gate itself (`node scripts/verify.mjs test`), not with `tsc` or a
+scoped `vitest run`; those two agreeing green is exactly the state this trap produces. For the helper
+shape, give every shared spec helper an explicit parameter type and leave the default as a value, not
+a type source.
+
+**Source** — Phase 5.5, 2026-09-20; commit `f199e06b` fixing `9a43b638`, which was pushed before the
+gate reported.
+
+**Status** — `pattern open` 2026-09-20. Both instances are fixed. The message stays misleading: the
+gate reports the *consequence* (no report) where the *cause* (a compile error) is already on screen.
+
+---
+
 ## TRAP-021 — A resolution event with zero subscribers looks like it resumed the job
 
 **Surface** — `applyContainmentCheckChoice`'s "Keep" branch (the V1 `containment_check` tray, "accept
@@ -441,17 +557,17 @@ surface.
 
 ---
 
-## TRAP-022 — An RLS “perf wrap” that reintroduces pre-hardening policies
+## TRAP-024 — An RLS “perf wrap” that reintroduces pre-hardening policies
 
 **Surface** — a migration that claims to InitPlan-wrap “current” chat (or other) RLS policies “verbatim,” with a header citing an older schema migration as the source of the policy bodies.
 
 **Assumption** — the rewrite is behaviour-identical: only `(select helper())` wrapping changes; private/DM isolation still holds.
 
-**Truth** — the cited source was the *pre-hardening* policy set. Recreating a weak permissive SELECT (e.g. `chat_channels: org read`) alongside a later hardened policy (`accessible read`) **ORs** in Postgres and reopens private channel rows; replacing message policies with org-only checks drops `can_access_chat_channel` entirely. Same-org non-members can read/write private/DM messages. Fixed by `20260916162935_restore_chat_rls_membership_isolation.sql` — **do not re-implement F-01/F-02**; see STUDY-009 ledger.
+**Truth** — the cited source was the *pre-hardening* policy set. Recreating a weak permissive SELECT (e.g. `chat_channels: org read`) alongside a later hardened policy (`accessible read`) **ORs** in Postgres and reopens private channel rows; replacing message policies with org-only checks drops `can_access_chat_channel` entirely. Same-org non-members can read/write private/DM messages. Fixed by `20260916162935_restore_chat_rls_membership_isolation.sql` — **do not re-implement F-01/F-02**; see STUDY-010 ledger.
 
 **Detect** — before any “perf-only” RLS rewrite: (1) `grep` the policy **name** across all later migrations to find the latest body; (2) confirm private-channel denial still exists in `scripts/validate-chat-rls.sql`; (3) never recreate a dropped weak policy name without dropping the hardened one first.
 
-**Source** — [STUDY-009](./study/009-defensive-security-review.md) F-01; bad wrap `supabase/migrations/20260621090100_chat_rls_initplan_perf_wrap.sql`; restore `20260916162935_restore_chat_rls_membership_isolation.sql`.
+**Source** — [STUDY-010](./study/010-defensive-security-review.md) F-01; bad wrap `supabase/migrations/20260621090100_chat_rls_initplan_perf_wrap.sql`; restore `20260916162935_restore_chat_rls_membership_isolation.sql`.
 
 **Status** — `pattern open`. This instance is remediated in git (PR #207); the shape recurs whenever a wrap migration copies from the wrong ancestor.
 

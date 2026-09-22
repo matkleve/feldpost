@@ -101,8 +101,12 @@ export class UploadBatchService {
     const completed = batchJobs.filter((j) => j.phase === 'complete').length;
     const skipped = batchJobs.filter((j) => j.phase === 'skipped').length;
     const failed = batchJobs.filter((j) => j.phase === 'error').length;
+    // missing_data is terminal for the *import* (bytes are in; location may be deferred).
+    // Omitting it stalled overallProgress during archive imports until checkBatchComplete.
+    // @see docs/specs/service/media-upload-service/upload-archive-import-mode.md § What "done" means
+    const missingData = batchJobs.filter((j) => j.phase === 'missing_data').length;
     const active = batchJobs.filter((j) => ACTIVE_PHASES.has(j.phase)).length;
-    const terminal = completed + skipped + failed;
+    const terminal = completed + skipped + failed + missingData;
     const overallProgress = Math.round((terminal / total) * 100);
 
     this.updateBatch(batchId, {

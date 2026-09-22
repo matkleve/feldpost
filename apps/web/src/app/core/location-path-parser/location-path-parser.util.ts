@@ -49,6 +49,19 @@ export function foldStreetSpelling(value: string): string {
     .replace(/([a-z]*)str\.?(?=\s|$)/g, (_match, prefix: string) => `${prefix}strasse`);
 }
 
+/**
+ * Street component of `groupingKey` and of the layer street compare: the orthographic variants of
+ * one spelling (`ß`/`ss`, `str.`/`straße`), and nothing beyond them. Letter-run collapse was tried
+ * here and reverted — it merges `Bischofgasse` with `Bischoffgasse`, two real Vienna streets.
+ * @see docs/specs/service/media-upload-service/upload-search-object.street-fold.supplement.md
+ */
+export function normalizeStreetForGroupingKey(value: string | null | undefined): string {
+  if (value == null || !value.trim()) {
+    return '';
+  }
+  return foldStreetSpelling(value);
+}
+
 export function splitPathSegments(fullPath: string): string[] {
   return fullPath
     .split(/[\\/]+/)

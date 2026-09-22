@@ -105,6 +105,11 @@ const CHECKS = [
   },
   { name: "spec-coverage", cmd: "node", args: ["scripts/check-spec-coverage.mjs"] },
   {
+    name: "config-field-readers",
+    cmd: "node",
+    args: ["scripts/check-config-field-readers.mjs"],
+  },
+  {
     name: "rpc-param-contract",
     cmd: "node",
     args: ["scripts/check-rpc-param-contract.mjs"],
@@ -148,7 +153,7 @@ const CHECKS = [
     ],
     soft: true,
     debt:
-      "8 failing tests across 2 files (measured 2026-09-16 on claude/uploader-pipeline-test-badges-kktrpg; was 25/12 on 2026-09-13). The 2026-09-13 note claimed 'all 12 pass in isolation; they fail only in a full run'. That was checked on 2026-09-16 and was wrong: 8 of the 9 files failing then failed on their own, under ng test and plain vitest alike, several with zero commits on this branch. They were stale or broken tests, not pollution, and nine have been fixed for their actual causes (relative-import vi.mock, getter-only crypto.subtle, incomplete service stubs, hardcoded DOM counts, renamed template ids, provider ordering against provideRouter, a fake that never invoked its callback). What remains: upload.service.spec.ts (5) is the one genuinely order-dependent case — it passes alone and fails in a full run, mocked exifr.gps returning undefined; and media-detail-view.ui.spec.ts (3) needs a fake that reflects written values back. STUDY-006 Phase 0.4b. See docs/study/005-upload-pipeline-trace-findings.md F-12, F-13.",
+      "0 failing tests (measured 2026-09-20, three consecutive cold runs, 1 551 tests). The gate carried 25 failing across 12 files on 2026-09-13; Phase 0.4b is closed. The last file, upload.service.spec.ts, was genuinely order-dependent — four cold runs gave 0/0, 5/1, 0/0, 5/1, all five assertions or none, decided by vitest's file-to-worker assignment, which is why no subset reproduced it. Cause: vi.mock() binds per module registry and the Angular unit-test system bundles the whole suite, so the mock applied only when no other spec had loaded upload.service.util into that worker first. Fixed by an explicit reader seam (setUploadExifReaderForTests) rather than a module mock. If this note ever needs raising again, raise it with a measurement of several cold runs, not one: a single green run alternated to five twice during this work. See docs/study/005-upload-pipeline-trace-findings.md F-12 and docs/TRAPS.md.",
   },
   { name: "build", cmd: "npm", args: ["run", "--silent", "build"] },
 ];

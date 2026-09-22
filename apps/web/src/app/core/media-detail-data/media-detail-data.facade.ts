@@ -11,6 +11,7 @@ import type {
   SelectOption,
 } from '../../shared/workspace-pane/media-detail/media-detail-view.types';
 import { displayLocationFromRows } from '../media-locations/media-locations.helpers';
+import { isLocationUnresolvedStatus } from '../location-resolver/location-resolver.helpers';
 import type { MediaItemLocationRow } from '../media-locations/media-locations.types';
 import {
   MEDIA_ITEM_DETAIL_SELECT_BASE,
@@ -267,7 +268,9 @@ export class MediaDetailDataFacade {
   }
 
   private toMediaRecord(media: MediaDetailRow, legacyMediaId: string): MediaRecord {
-    const unresolved = media.location_status === 'pending' || media.location_status === 'no_gps';
+    // One derivation, shared with the list mapper and bulk eligibility (#222).
+    // @see docs/specs/service/location-resolver/README.md § Location Status Contract
+    const unresolved = isLocationUnresolvedStatus(media.location_status);
 
     return {
       id: legacyMediaId,

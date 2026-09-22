@@ -69,7 +69,7 @@ Fixture: two links, both address-only (null or invalid lat/lng), sort 0 = “The
 | Check | Expected |
 | --- | --- |
 | `displayLocationFromRows` | Row at sort 0 (not null) |
-| `locationDisplaySnapshotFromRows` | `location_unresolved: true`; `latitude` / `longitude` null on merged `media()` |
+| `locationDisplaySnapshotFromRows` | `latitude` / `longitude` null on merged `media()`; the snapshot carries **no** `location_unresolved` — that is a projection of `location_status`, not of the display link's coordinates ([#222](https://github.com/matkleve/feldpost/issues/222)) |
 | `mediaHasZoomableLocation` | `false` |
 | Tile map | disabled (`interactive-*-map-disabled`) |
 | Precision-aware zoomable list | `[]` (legacy helper name: `locationsWithGps`) |

@@ -615,34 +615,169 @@ and are tested, but an operator cannot reach either:
 
 | # | Work | Contract | Note |
 | --- | --- | --- | --- |
-| 5.1 | Upload panel: the archive/interactive mode choice | [archive import mode](../specs/service/media-upload-service/upload-archive-import-mode.md) § Actions | Mode is fixed at submit (A1) |
-| 5.2 | Two progress figures, never blended | same § What "done" means | Files imported (finite) + items awaiting resolution (backlog) |
-| 5.3 | Bulk-resolution adapters: `geocode` / `applyToItem` | [bulk resolution](../specs/page/files-page.bulk-resolution.supplement.md) | The engine is done; these are the only injected effects it lacks |
-| 5.4 | Selection UI + confirmation summary | same, R1/R7 | Plan already reports `eligibleCount`, `geocodeCount`, per-group label |
-| 5.5 | `/files` tree + its two aggregate RPCs | [files-page](../specs/page/files-page.md) | `relative_path` is already read; aggregation must stay in SQL |
-| 5.6 | *Add as location* row actions in media detail | [deferred location resolution](../specs/system/deferred-location-resolution.md) § Actions | The row slots already exist and are empty |
+| 5.1 | Upload panel: the archive/interactive mode choice | [archive import mode](../specs/service/media-upload-service/upload-archive-import-mode.md) § Actions | Mode is fixed at submit (A1). **UI wired 2026-09-16** — Import archive intake button |
+| 5.2 | Two progress figures, never blended | same § What "done" means | Files imported (finite) + items awaiting resolution (backlog). **Wired 2026-09-16**; `missing_data` counts toward import progress |
+| 5.3 | Bulk-resolution adapters: `geocode` / `applyToItem` | [bulk resolution](../specs/page/files-page.bulk-resolution.supplement.md) | **Built 2026-09-18** — `bulk-resolution.adapter.ts`. Wiring it found a real defect in the engine: see below |
+| 5.4 | Selection UI + confirmation summary | same, R1/R7 | **Service built 2026-09-20** — `BulkResolutionService.plan()` / `.run()`, plan/run split so nothing is written before confirmation. The dialog that renders the plan is the remaining piece |
+| 5.5 | `/files` tree + its two aggregate RPCs | [files-page](../specs/page/files-page.md) | **Client facade built and tested 2026-09-20. The migration is written but NOT live-verified** — see the blocker below. The tree component is still to build |
+| 5.6 | *Add as location* row actions in media detail | [deferred location resolution](../specs/system/deferred-location-resolution.md) § Actions | **Built 2026-09-20** — both path rows run the bulk engine on a selection of one. The single-item **tray** path (row 4, ambiguous) is not built |
 
-**Decided but unbuilt:**
+**What 5.4 found.** `location_unresolved` is derived in **two places that disagree** —
+`media-query.service.ts` counts `'partial'` as unresolved, `media-detail-data.facade.ts` does not.
+Bulk eligibility therefore reads `location_status` directly rather than inheriting a disagreement
+that has nothing to do with it. Worth a separate look: two mappers producing different answers for
+the same row is a bug waiting for whoever next trusts that field.
 
-| # | Work | Contract |
+**Closed 2026-09-22 ([#222](https://github.com/matkleve/feldpost/issues/222)).** There were four
+derivations, not two: the two status mappers above, plus a coordinate rule in
+`locationDisplaySnapshotFromRows` that overwrote the detail pane's value on every location
+rehydrate, plus a `latitude != null` fallback in `mergeMediaLocationPatch`. `location_unresolved` is
+now one projection of `location_status` — `isLocationUnresolvedStatus`, which `isBulkEligibleStatus`
+delegates to instead of dodging — and `partial` counts as unresolved. The two coordinate rules are
+deleted; that question is `mediaHasZoomableLocation`. Decision and reasoning:
+[location-resolver README § Location Status Contract](../specs/service/location-resolver/README.md).
+
+Also decided there: `unresolvable` **is** eligible for bulk resolution. The pipeline gave up on those
+items, and a human answer applied folder-wide is exactly what that case needs — excluding them would
+leave the hardest items permanently out of reach of the tool built for them. An unknown or absent
+status is eligible too, because a silent skip is invisible while an unwanted offer is not.
+
+**What wiring 5.3 found.** The engine's geocode result was typed `{ addressLabel, lat, lng }`.
+`updateFromAddressSuggestion` derives address precision from `city` / `street` / `streetNumber` /
+`zip` / `country` (`geocodeResultToPrecisionFields`), so that narrower shape would have written
+**every bulk-resolved item with coordinates and no address** — silently, since nothing throws. The
+runner is now generic over the suggestion type and passes through whatever `geocode` returned.
+
+A second, smaller one came from the typechecker rather than a test: `ReverseGeocodeResult` carries no
+`lat`/`lng`, because it answers *what is at this point* rather than locating one. The adapter carries
+the photo's own coordinates forward instead of taking the geocoder's idea of where the address is —
+otherwise an EXIF-sourced run would move items to the geocoded address rather than where the camera
+stood, which is the distinction [STUDY-007](./007-exif-coordinates-as-address-evidence.md) is
+entirely about. Both are now pinned by tests.
+
+Worth recording as a pattern: **an injected-effect engine is only as honest as its first real
+adapter.** Both defects were invisible while every effect was a `vi.fn()` returning a convenient
+shape.
+
+**5.5 blocker update (2026-09-22).** The migration is applied on hosted Feldpost; the blocker is now
+the Sensitive **verification ceremony** (cross-org read, validators, security review — #217), not
+DDL availability.
+
+**What 5.6 confirmed.** Running the bulk engine on a selection of one was cheaper than writing a
+single-item service *and* it is the only version of this that cannot drift: the spec's rule ("MUST
+NOT introduce a second way to write a location") is satisfied by construction rather than by review.
+The same reuse settled the eligibility question without a second decision — the row calls
+`isBulkEligibleStatus`, so `unresolvable` and `partial` are offered here for exactly the reasons they
+are eligible in bulk.
+
+It also surfaced what reuse does **not** give: the engine geocodes and writes, and has no tray. Row 4
+of the spec's action table — *ambiguous resolution opens the normal tray, for this item only* —
+stays unbuilt, and an item whose source yields no address is now **reported** rather than asked
+about. That is a real narrowing of the specced behaviour, recorded here rather than quietly shipped.
+
+One more thing worth a reader's time: the EXIF row's own spec tables say the add button lives in
+slot `--l2`; the component has always rendered it in `--l1`. The path rows follow the code. The stale
+tables are corrected by a dated note in the UI spec rather than edited away.
+
+### What is unverified, and why that is a claim rather than a checklist
+
+Phases 5.5 and 5.6 were built in an environment with **no database URL, no Supabase CLI and no
+credentials**. Neither is verified. The steps for verifying them are **not in this document** — they
+are issues, because a runnable checklist is open work and open work is the issue tracker's job
+([backlog README](../backlog/README.md) § Where open work lives). This section keeps only the part
+that is reasoning: *what is being claimed, and on what evidence.*
+
+**Update 2026-09-20 — a database was reachable.** Three of these moved, and one got worse.
+
+**Update 2026-09-22 — migration applied on hosted.** Supabase MCP + `schema_migrations` on project
+`yvvzbpnoesxlzlbomlkv`: version `20260920120000` is recorded; `list_media_folder_children` and
+`list_media_in_folder` exist with `authenticated`-only EXECUTE. The 2026-09-20 `[A]` "RPCs confirmed
+absent" claim is **superseded for hosted** — it was true then, not now. Cross-org read, validator
+scripts, and `/security-review` remain open ([#217](https://github.com/matkleve/feldpost/issues/217)).
+
+`[A]` **RLS does scope `media_items` by organization with no predicate in the client.** The policy
+`media_items: org read` is `organization_id = user_org_id()`; simulated as `authenticated`, a member
+of the owning org counts 20 rows and a subject belonging to no org counts **0**. That settles the
+idiom the tree RPCs follow, though not the RPCs themselves, which do not exist to test.
+
+`[D] → still [D], and now known to be untestable here.` **The equivalence claim has no data to test
+against.** All 20 rows have `relative_path` NULL *and* `exif_latitude` NULL, so neither bulk source
+yields an address and a run writes nothing at all. This is not a failure of the engine — the planner
+correctly reports `no_address_in_source` — but it means `run()` has still never geocoded or written.
+Filed as [#236](https://github.com/matkleve/feldpost/issues/236), with what would settle it: a real
+folder upload, not seeded rows.
+
+`[A]` **`media_items` really has lost its location columns.** `latitude`, `longitude`,
+`address_label`, `street`, `city`, `district`, `country` and `geog` are gone from the table, while
+`MediaItemRow` still declares seven of them and `toMediaRecord` reads two
+([#235](https://github.com/matkleve/feldpost/issues/235)).
+
+| Claim | Grade | Tracked in |
 | --- | --- | --- |
-| 5.7 | EXIF may supply a house number, confirm-only, once per address | [exif house number supplement](../specs/service/media-upload-service/upload-exif-house-number.supplement.md) |
+| The tree RPCs scope correctly by `organization_id` | `[D]` — follows the two established idioms exactly; **confirmed never applied 2026-09-20** | [#217](https://github.com/matkleve/feldpost/issues/217) |
+| A single-item add and a bulk run over the same folder write the same location | `[D]` — true by construction (one engine, one derivation), never measured | [#218](https://github.com/matkleve/feldpost/issues/218) |
+| Row visibility matches real `location_status` values | `[C]` — the predicate is unit-tested; that production emits those exact strings is not | [#218](https://github.com/matkleve/feldpost/issues/218) |
 
-**Open findings needing an owner decision before any code:**
+The distinction that matters for #217 and #218 is the same one in both rows: **"follows the idiom"
+is not "verified", and "true by construction" is not "measured."** Both are good arguments. Neither
+is evidence, and this plan has a standing rule that claims carry their grade.
 
-| Finding | The question |
+**Why `[D]` and not `[B]` for the equivalence claim.** It would be easy to call it well-evidenced —
+there genuinely is only one engine, and the unit tests are green. But the tests exercise the engine
+with injected effects; what has never run is the real adapter against a real geocoder and a real
+write. Phase 5.3 is the reason to be careful here: wiring the first real adapter to an engine whose
+every effect had been a convenient `vi.fn()` exposed **two** defects the tests could not see. An
+injected-effect engine is only as honest as its first real adapter, and 5.6's adapter has not met a
+database.
+
+### Open work, tracked as issues
+
+This plan's phases 0–4 are done. What remains is filed, so there is no second "next" list here:
+
+| Phase | Work | Issue |
+| --- | --- | --- |
+| 5.4 | Dialog that renders the bulk plan (engine built, unreachable) | [#219](https://github.com/matkleve/feldpost/issues/219) |
+| 5.5 | Apply and security-review the tree RPCs — **gates the rest** | [#217](https://github.com/matkleve/feldpost/issues/217) |
+| 5.5 | `/files` tree component (service built, nothing renders it) | [#220](https://github.com/matkleve/feldpost/issues/220) |
+| 5.6 | Verify the equivalence claim and row visibility | [#218](https://github.com/matkleve/feldpost/issues/218) |
+| 5.6 | Ambiguous source opens no tray — spec action row 4 unbuilt; **decide before building** | [#224](https://github.com/matkleve/feldpost/issues/224) |
+| 5.7 | EXIF house number, confirm-only (D-09) — decided, unbuilt | [#221](https://github.com/matkleve/feldpost/issues/221) |
+
+Found while building Phase 5, owned by nobody's phase:
+
+| Finding | Issue |
 | --- | --- |
-| [F-17](./005-upload-pipeline-trace-findings.md#f-17) | A parked job keeps its content-hash reservation, so a later, better upload of the same file is skipped as a duplicate of something never uploaded. Owner sketched "check whether the new file has more data and revive the parked job, with a confirmation" — the build-both-and-measure experiment has not been run. |
-| [F-18](./005-upload-pipeline-trace-findings.md#f-18) | The shipped postcode table is a 21-row stub. Needs a real data source, not a code change. |
-| Project label | `resolveProjectName` ignores `fallbackProjectId` once anything is selected, so a multi-project item is labelled by **option order, not its own `project_id`**. Found 2026-09-16 while repairing a test that claimed the opposite and could never have shown it. One line to change; it changes what users see, so it is a product call. |
+| `location_unresolved` derived two ways, disagreeing on `partial` — **closed 2026-09-22** | [#222](https://github.com/matkleve/feldpost/issues/222) |
+| `seed_i18n.sql` has `de` and `it` swapped for `addExifToLocations` | [#223](https://github.com/matkleve/feldpost/issues/223) |
 
-**Test debt (0.4b remainder), two files of different kinds:**
+
+**Decided but unbuilt:** 5.7, the EXIF house number (D-09) — contract in the [exif house number
+supplement](../specs/service/media-upload-service/upload-exif-house-number.supplement.md), tracked as
+[#221](https://github.com/matkleve/feldpost/issues/221). Its one genuine blocker is reasoning and so
+stays here: the radius must not reuse `exifAssistRadiusMeters` (80 m answers *"which candidate does
+the GPS favour"*, where 80 m usefully holds one candidate; for *"is this the house"* it holds an
+entire terrace row), and [STUDY-007 § 7](./007-exif-coordinates-as-address-evidence.md) declines to
+name a replacement value because doing so without real device photos would be invention.
+
+**Open findings needing an owner decision before any code.** The *question* is reasoning and belongs
+here; chasing the answer is work and belongs in the tracker. Each now has an issue, so it stops being
+a verbal question re-asked every session:
+
+| Finding | The question | Issue |
+| --- | --- | --- |
+| [F-17](./005-upload-pipeline-trace-findings.md#f-17) | A parked job keeps its content-hash reservation, so a later, better upload of the same file is skipped as a duplicate of something never uploaded. Owner sketched "check whether the new file has more data and revive the parked job, with a confirmation" — the build-both-and-measure experiment has not been run. | [#225](https://github.com/matkleve/feldpost/issues/225) |
+| [F-18](./005-upload-pipeline-trace-findings.md#f-18) | The shipped postcode table is a 21-row stub. Needs a real data source, not a code change. | [#226](https://github.com/matkleve/feldpost/issues/226) |
+| Project label | `resolveProjectName` ignores `fallbackProjectId` once anything is selected, so a multi-project item is labelled by **option order, not its own `project_id`**. Found 2026-09-16 while repairing a test that claimed the opposite and could never have shown it. One line to change; it changes what users see, so it is a product call. | [#227](https://github.com/matkleve/feldpost/issues/227) |
+
+**Test debt (0.4b remainder):**
 
 - `upload.service.spec.ts` — the one genuinely order-dependent case: passes alone, fails in some full
   runs, mocked `exifr.gps` returning `undefined`. Pairwise and whole-directory runs do not reproduce
-  it, because vitest's file→worker assignment changes with the file list.
-- `media-detail-view.ui.spec.ts` — needs a fake that reflects written values back rather than a
-  static row.
+  it, because vitest's file→worker assignment changes with the file list. Re-measured 2026-09-16
+  (three full runs: fail / pass / fail — always the same five EXIF assertions when it fails).
+- ~~`media-detail-view.ui.spec.ts`~~ **fixed 2026-09-16** — reflecting location store so
+  `list_locations_for_media` returns written rows after `applyAddressSuggestion`, plus a
+  `MediaDeleteUndoService` stub that invokes `onAfterDelete`. Soft debt 8/2 → 5/1.
 
 **Measurement gaps, stated so nobody treats them as settled:**
 

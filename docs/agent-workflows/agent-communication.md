@@ -97,6 +97,20 @@ Agents: copy the table row(s) that apply into every handoff; use the heading **�
 
 ---
 
+## Explain with concrete examples — standing owner preference (2026-09-20)
+
+When explaining a rule, a guard, a decision or a piece of behaviour, **show it running on real
+input**. Not "the street must match" — *"folder `Wien/1010/Stephansplatz/`, photo GPS reverse-geocodes
+to `Rotenturmstraße 9` → `street_mismatch`, nothing written"*. Use paths, coordinates, field values
+and the actual outcome.
+
+Why the owner asked for it: an abstract rule and its implementation can differ and the prose still
+reads correct. A worked example fails visibly when the code does not do what the sentence claims —
+it is the cheapest review tool available, and it is how the owner checks the work.
+
+Applies to chat replies, spec prose, and doc comments alike. A guard table is better with an example
+column; a skip reason is better named alongside the case that produces it.
+
 ## What helps from the user (optional but high signal)
 
 - Invariant first: “Two lists are the same iff every address matches.”
@@ -164,4 +178,5 @@ Do **not** change existing component visual styling — SCSS/Tailwind geometry, 
 
 - [`AGENTS.md`](../../AGENTS.md) — § Collaboration with the user
 - [`agent-quick-reference.md`](./agent-quick-reference.md) — simple fix / anti-loop
+- [`agent-benchmark.md`](./agent-benchmark.md) — tier ladder, trace scenarios, adversarial audit
 - [`element-spec-format.md`](./element-spec-format.md) — SPEC GAP

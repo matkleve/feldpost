@@ -55,6 +55,7 @@ import {
 import { detectCoordinates } from '../../../core/search/coordinate-detection';
 import { MediaLocationUpdateService } from '../../../core/media-location-update/media-location-update.service';
 import { MediaLocationsService } from '../../../core/media-locations/media-locations.service';
+import { isLocationUnresolvedStatus } from '../../../core/location-resolver/location-resolver.helpers';
 import {
   locationDisplaySnapshotFromRows,
   mergeLocationDisplayIntoMediaRecord,
@@ -95,11 +96,18 @@ import {
   resolveFileFormatLabel,
   resolveMediaTypeChipLabel,
   resolveProjectName,
+  resolveOriginalFilePathParts,
 } from './media-detail-view.utils';
 import { MediaDetailHeaderComponent } from './media-detail-header/media-detail-header.component';
 import { MediaDetailMediaViewerComponent } from './media-detail-media-viewer/media-detail-media-viewer.component';
 import { MediaDetailInlineSectionComponent } from './media-detail-inline-section/media-detail-inline-section.component';
 import type { ExifLocationAddState } from './media-detail-exif-location-add.state';
+import {
+  pathLocationAddStateFor,
+  type PathLocationAddSource,
+  type PathLocationAddState,
+} from './media-detail-path-location-add.state';
+import { BulkResolutionService } from '../../../core/media-location-bulk/bulk-resolution.service';
 import { MediaDetailLocationSectionComponent } from './media-detail-location-section/media-detail-location-section.component';
 import { ImageDetailProjectMembershipHelper } from './media-detail-project-membership.helper';
 import { MediaDetailDataFacade } from '../../../core/media-detail-data/media-detail-data.facade';
@@ -196,6 +204,7 @@ export class MediaDetailViewComponent implements OnDestroy {
   private readonly mediaDeleteUndo = inject(MediaDeleteUndoService);
   private readonly mediaDownloadService = inject(MediaDownloadService);
   private readonly toastService = inject(ToastService);
+  private readonly bulkResolution = inject(BulkResolutionService);
   private readonly projectsService = inject(ProjectsService);
   private readonly actionEngineService = inject(ActionEngineService);
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
@@ -278,6 +287,7 @@ export class MediaDetailViewComponent implements OnDestroy {
   readonly highlightedLocationFields = signal<ReadonlySet<LocationHighlightField>>(new Set());
   /** EXIF row → add location pipeline. @see media-detail-inline-section.md */
   private readonly exifLocationAddResolving = signal(false);
+  private readonly pathLocationAddResolving = signal<PathLocationAddSource | null>(null);
   readonly acceptTypes = Array.from(ALLOWED_MIME_TYPES).join(',');
   private locationHighlightTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly activeJobId = signal<string | null>(null);
@@ -326,6 +336,36 @@ export class MediaDetailViewComponent implements OnDestroy {
     }
     return 'hidden';
   });
+
+  /**
+   * Same split the inline section renders — computed once here so the row's *state* and the row's
+   * *text* can never disagree about whether there is evidence to act on.
+   */
+  private readonly originalFilePathParts = computed(() =>
+    resolveOriginalFilePathParts(this.media()?.relative_path, this.media()?.original_filename),
+  );
+
+  /**
+   * The two path rows read the same FSM helper with different evidence, so "offered here" and
+   * "acted on by a bulk run" cannot drift apart — both go through `isBulkEligibleStatus`.
+   * @see docs/specs/system/deferred-location-resolution.md § Actions — Single item
+   */
+  readonly folderLocationAddState = computed((): PathLocationAddState =>
+    pathLocationAddStateFor({
+      evidenceLabel: this.originalFilePathParts().folder,
+      locationStatus: this.media()?.location_status,
+      resolving: this.pathLocationAddResolving() === 'folder',
+    }),
+  );
+
+  readonly filenameLocationAddState = computed((): PathLocationAddState =>
+    pathLocationAddStateFor({
+      evidenceLabel:
+        this.originalFilePathParts().filename ?? this.media()?.original_filename ?? null,
+      locationStatus: this.media()?.location_status,
+      resolving: this.pathLocationAddResolving() === 'filename',
+    }),
+  );
 
   readonly hasAddress = computed(() => this.fullAddress().trim().length > 0);
 
@@ -597,7 +637,9 @@ export class MediaDetailViewComponent implements OnDestroy {
       const patch = {
         latitude: evt.lat,
         longitude: evt.lng,
-        location_unresolved: false,
+        // Optimistic mirror of the `location_status = 'resolved'` a coordinate write persists.
+        // Taken from the one derivation so the patched row matches the reloaded one (#222).
+        location_unresolved: isLocationUnresolvedStatus('resolved'),
         ...evt.address,
       };
       const targetMediaId = mediaId;
@@ -774,7 +816,8 @@ export class MediaDetailViewComponent implements OnDestroy {
           this.applyLocationPatch({
             latitude: result.lat ?? media.latitude,
             longitude: result.lng ?? media.longitude,
-            location_unresolved: false,
+            // Mirrors the 'resolved' status this path settles on; see the sync effect above (#222).
+            location_unresolved: isLocationUnresolvedStatus('resolved'),
             ...result.address,
           });
           refresh = await this.dataFacade.refreshMediaLocationFields(mediaId, signal);
@@ -809,7 +852,8 @@ export class MediaDetailViewComponent implements OnDestroy {
       this.handleExternalLocationSync(pending.mediaId, {
         latitude: pending.lat,
         longitude: pending.lng,
-        location_unresolved: false,
+        // Mirrors the 'resolved' status a map pick persists (#222).
+        location_unresolved: isLocationUnresolvedStatus('resolved'),
         ...pending.address,
       }),
     );
@@ -1656,7 +1700,8 @@ export class MediaDetailViewComponent implements OnDestroy {
     const patch = prepareLocationPatchAfterGpsChange(media, {
       latitude: result.lat ?? coords.lat,
       longitude: result.lng ?? coords.lng,
-      location_unresolved: false,
+      // Mirrors the 'resolved' status a manual coordinate entry persists (#222).
+      location_unresolved: isLocationUnresolvedStatus('resolved'),
       ...result.address,
     });
     this.applyLocationPatch(patch);
@@ -1798,6 +1843,76 @@ export class MediaDetailViewComponent implements OnDestroy {
       type: 'success',
       dedupe: true,
     });
+  }
+
+  /**
+   * *Add as location* on the Original folder / Original file name rows.
+   *
+   * This runs the **bulk** engine on a selection of one. That is the point: the spec says a single
+   * item must not introduce a second way to write a location, and the engine already derives the
+   * address with the upload pipeline's own `buildSearchObjectFromRelativePath`. One item answered
+   * here and the same folder answered in bulk therefore produce the same write, by construction
+   * rather than by two implementations agreeing.
+   *
+   * @see docs/specs/system/deferred-location-resolution.md § Actions — Single item
+   */
+  async onPathToLocationRequested(source: PathLocationAddSource): Promise<void> {
+    const media = this.media();
+    if (!media) {
+      return;
+    }
+    // A run already in flight on either row wins; `resolving → resolving` is not a legal edge.
+    if (this.pathLocationAddResolving()) {
+      return;
+    }
+
+    this.pathLocationAddResolving.set(source);
+    this.saving.set(true);
+    try {
+      const plan = await this.bulkResolution.plan([media], { source });
+      if (plan.eligibleCount === 0) {
+        // The planner, not this component, decides whether the source carries an address.
+        const alreadyResolved = plan.skipped.some((row) => row.reason === 'already_resolved');
+        this.toastService.show({
+          message: alreadyResolved
+            ? this.t(
+                'workspace.imageDetail.toast.pathLocationAlreadyResolved',
+                'This item already has a location',
+              )
+            : this.t(
+                'workspace.imageDetail.toast.pathLocationNoAddress',
+                'No address could be read from this path',
+              ),
+          type: 'warning',
+          dedupe: true,
+        });
+        return;
+      }
+
+      const report = await this.bulkResolution.run(plan);
+      if (report.resolved === 0) {
+        this.toastService.show({
+          message: this.t(
+            'workspace.imageDetail.toast.pathLocationFailed',
+            'Location could not be resolved from this path',
+          ),
+          type: 'warning',
+          dedupe: true,
+        });
+        return;
+      }
+
+      await this.refreshMediaAfterLocationMutation(media.id);
+      this.toastService.show({
+        message: this.t('workspace.imageDetail.toast.pathLocationAdded', 'Location added'),
+        type: 'success',
+        dedupe: true,
+      });
+    } finally {
+      // Always clears, so a thrown geocode cannot strand the row in `resolving` forever.
+      this.saving.set(false);
+      this.pathLocationAddResolving.set(null);
+    }
   }
 
   async onLocationAddFromText(label: string): Promise<void> {

@@ -42,6 +42,8 @@ UploadLocationConfigService
 | `disambiguationAutoAssignThreshold` | `number`  | Minimum probability for automatic candidate selection                      |
 | `sourceAgreementRadiusMeters`       | `number`  | **Meters.** Text geocode vs EXIF metadata; source tray above this (not km Search Tuning) |
 | `exifAssistRadiusMeters`            | `number`  | **Meters.** Pick among ambiguous geocode hits near EXIF; Step 7 pin nudge (not km cap) |
+| `exifHouseNumberRadiusMeters`       | `number \| null` | **Meters.** House-scale radius for D-09 — may EXIF supply a house number for a street the path gave without one. `null` keeps the rule inert; deliberately not `exifAssistRadiusMeters`, which answers a different question. Unset pending [#221](https://github.com/matkleve/feldpost/issues/221) |
+| `mismatchToleranceMeters`           | `number`  | **Meters.** Post-upload mismatch audit tolerance: title-geocode coords vs EXIF coords within this radius count as the same location |
 | `unitGeocodeSplitMinMeters`         | `number`  | **Meters.** When SO has units and Photon returns ≥2 hits, max pairwise distance above this keeps ambiguous tray (not added to `grouping_key`) |
 | `folderHintRequireHighConfidence`   | `boolean` | Whether folder hints may only come from high-confidence segment matches    |
 | `folderHintUseRootFallback`         | `boolean` | Whether the root folder hint may be used as fallback only                  |
@@ -59,10 +61,8 @@ Source of truth: `apps/web/src/app/core/upload/location/upload-location-config.t
 | `sourceAgreementRadiusMeters` | `number` | `150` | **Meters.** Text vs EXIF metadata agree → auto placement; else `disambiguationKind: source` tray. Not the org km “internet results” cap. |
 | `exifAssistRadiusMeters` | `number` | `80` | **Meters.** Among multiple geocode hits, prefer candidate within this distance of EXIF; Step 7 pin nudge. Not the org km realism cap — see [search-tuning.distance-radii-contract.md](../search/search-tuning.distance-radii-contract.md). |
 | `unitGeocodeSplitMinMeters` | `number` | `25` | **Meters.** Photon multi-hit gate when SO has `staircase`/`door` — see [upload-search-object.md](./upload-search-object.md#photon-multi-hit-gate). |
-| `exifContextCheck` | `boolean` | `true` | Enable step 4 EXIF reverse superset check (`lang=en`). |
 | `defaultGeocodeCountry` | `string` | `AT` | `street_only` Photon default country code. |
 | `tokenNormalizerFuzzyThreshold` | `number` | `0.85` | Minimum confidence for fuzzy token-normalizer matches. |
-| `presentationBundleMaxDialogueUnits` | `number` | `5` | Max dialogue units per resolver tray bundle. |
 | `minMeaningfulScore` | `number` | `0.55` | Minimum geocode score for a candidate to be considered meaningful. |
 | `minTopGap` | `number` | `0.1` | Minimum score gap between rank 1 and rank 2 for automatic selection. |
 | `titleConfidenceThreshold` | `number` | `0.8` | Minimum parser confidence needed to treat filename/folder text as resolvable location input. |
@@ -71,8 +71,6 @@ Source of truth: `apps/web/src/app/core/upload/location/upload-location-config.t
 | `folderHintUseRootFallback` | `boolean` | `true` | Allows root-level folder hint only as fallback. |
 | `filenameAlwaysOverridesFolder` | `boolean` | `true` | Enforces file-level textual location precedence over folder-level hints. |
 | `maxDirectorySegmentsForHint` | `number` | `32` | Guardrail for maximum directory depth considered during hint extraction. |
-| `clusterAssistWeight.project` | `number` | `0.7` | Ranking weight for project cluster proximity in disambiguation. |
-| `clusterAssistWeight.company` | `number` | `0.3` | Ranking weight for company cluster proximity in disambiguation. |
 | `geocodeCacheTtlMs` | `number` | `300000` | TTL for cached geocoding responses. |
 | `geocodeMaxProxyAttempts` | `number` | `3` | Maximum retry attempts for proxied geocode requests. |
 | `geocodeLogDedupWindowMs` | `number` | `30000` | Deduplication window for repeated geocode error logs. |

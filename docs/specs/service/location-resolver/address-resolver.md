@@ -297,9 +297,9 @@ The `UploadService` sets `location_unresolved: true` on insert when GPS coordina
 
 Legacy note:
 
-- The boolean `location_unresolved` wording is deprecated and retained here for historical context.
-- Canonical status contract is now `media_items.location_status` with `pending` | `resolved` | `unresolvable`.
-- During migration, boolean semantics map to canonical statuses via spec-layer normalization.
+- The paragraph above describes a `media_items.location_unresolved` **column** that no longer exists. It is retained for historical context only.
+- The canonical status contract is `media_items.location_status` with `pending` | `resolved` | `unresolvable` | `partial` — see [README § Location Status Contract](README.md).
+- `location_unresolved` survives only as a **derived field on `MediaRecord`**, computed from that column by `isLocationUnresolvedStatus` and never written to the database.
 
 ---
 

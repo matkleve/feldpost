@@ -1,5 +1,5 @@
 ---
-id: STUDY-009
+id: STUDY-010
 type: review
 status: partially-remediated
 supersedes: none
@@ -34,7 +34,7 @@ When hosted is confirmed green, flip this file to `historical` (or leave the led
 Before any security/RLS work on chat, `user_roles`, branding, API keys, or grant validators:
 
 1. Read this ledger.
-2. Read [TRAP-022](../TRAPS.md#trap-022--an-rls-perf-wrap-that-reintroduces-pre-hardening-policies).
+2. Read [TRAP-024](../TRAPS.md#trap-024--an-rls-perf-wrap-that-reintroduces-pre-hardening-policies).
 3. Run `npm run supabase:local-verify` (or wait for `local-rls-verify` CI).
 
 **Do not** re-implement F-01…F-07 unless local-verify fails after a rebase. Remaining operator work: `supabase db push` on hosted, then `supabase migration list`.
@@ -77,7 +77,7 @@ Orphan counts now use `media` / `media_items` (legacy images bucket kept as a se
 
 ### F-07 — Dead SECURITY DEFINER functions (LOW) — remediated
 
-Already dropped in `20260911150000` (#202). STUDY-009 initially flagged revoke-only; drop had already landed. `[A]`
+Already dropped in `20260911150000` (#202). STUDY-010 initially flagged revoke-only; drop had already landed. `[A]`
 
 ## What this review did **not** do
 

@@ -9,11 +9,20 @@
  */
 
 import { renderHeading } from './upload-trace-render';
+import type { QuestionScaleSample } from './upload-trace-question-scale';
+
+/** Column widths for the question-curve table. Named so the rows are not a wall of numbers. */
+const COL_SHAPE = 16;
+const COL_FILES = 7;
+const COL_GROUPS = 8;
+const COL_QUESTIONS = 11;
+const COL_RATIO = 16;
 import {
   JOB_STORE_WRITES_PER_JOB,
   type ClassifyScaleResult,
   type JobStoreScaleSample,
 } from './upload-trace-scale';
+import type { CorpusProfile } from './upload-trace-generator';
 
 const MS_PER_MINUTE = 60_000;
 const MS_PER_S = 1000;
@@ -21,6 +30,7 @@ const KEY_COL = 60;
 const SIZE_COL = 9;
 const MS_COL = 11;
 const COUNT_COL = 7;
+const PROFILE_COL = 16;
 const MS_DECIMALS = 4;
 const MS_PER_FILE_DECIMALS = 3;
 const PERCENT = 100;
@@ -46,15 +56,27 @@ function shorten(value: string): string {
   return value.length > KEY_COL ? `${value.slice(0, KEY_COL)}…` : value;
 }
 
+function topOutcome(result: ClassifyScaleResult): string {
+  const ranked = [...result.outcomes.entries()].sort((a, b) => b[1] - a[1]);
+  if (!ranked.length) {
+    return '—';
+  }
+  const [outcome, count] = ranked[0];
+  return `${outcome}=${count}`;
+}
+
 export function renderClassifyScale(result: ClassifyScaleResult): string {
   const outcomes = [...result.outcomes.entries()]
     .sort((a, b) => b[1] - a[1])
     .map(([outcome, count]) => `${outcome}=${count}`)
     .join('  ');
 
-  const trayShare = ((result.trayGroups / result.distinctGroups) * PERCENT).toFixed(0);
+  const trayShare =
+    result.distinctGroups === 0
+      ? '0'
+      : ((result.trayGroups / result.distinctGroups) * PERCENT).toFixed(0);
   const lines = [
-    `  measured on ${result.files.toLocaleString('en-US')} generated paths, ${result.naming} file naming`,
+    `  measured on ${result.files.toLocaleString('en-US')} generated paths, profile=${result.profile}, filesPerLocation=${result.filesPerLocation}, ${result.naming} naming`,
     `    classification total: ${duration(result.totalMs)}  (${result.msPerFile.toFixed(MS_PER_FILE_DECIMALS)} ms/file)`,
     `    heap after run:       ${result.heapUsedMb.toFixed(0)} MB (counters only — no jobs, no File handles)`,
     `    distinct groups:      ${result.distinctGroups.toLocaleString('en-US')}  → geocoder calls, one per group`,
@@ -72,6 +94,22 @@ export function renderClassifyScale(result: ClassifyScaleResult): string {
     }),
   ];
   return lines.join('\n');
+}
+
+/** Side-by-side profile table — folder shape dominates tray count more than file count. */
+export function renderProfileComparison(results: readonly ClassifyScaleResult[]): string {
+  const header = [
+    `  ${'profile'.padEnd(PROFILE_COL)} ${'groups'.padStart(SIZE_COL)} ${'trays'.padStart(SIZE_COL)} ${'ms/file'.padStart(MS_COL)}  top outcome`,
+  ];
+  const rows = results.map((result) => {
+    return `  ${result.profile.padEnd(PROFILE_COL)} ${String(result.distinctGroups).padStart(SIZE_COL)} ${String(result.trayGroups).padStart(SIZE_COL)} ${result.msPerFile.toFixed(MS_PER_FILE_DECIMALS).padStart(MS_COL)}  ${topOutcome(result)}`;
+  });
+  return [
+    '  Profile comparison (same N / seed / naming — only folder packing changes):',
+    ...header,
+    ...rows,
+    '  Read this before extrapolating tray volume: adversarial ≈ 1 file/address; company_area ≈ City/PLZ with many files per place.',
+  ].join('\n');
 }
 
 export function renderJobStoreScale(samples: readonly JobStoreScaleSample[]): string {
@@ -112,4 +150,62 @@ export const SCALE_CAVEAT = `
       A real run adds all of those on top of the numbers above.
     · Both measured costs are main-thread and synchronous. Classification runs in full before
       the queue drains, so its total is time-to-first-byte, not background work.
+    · Tray extrapolations are profile-dependent. Do not quote adversarial tray counts as the
+      company-archive cost — use company_area / company_street / mixed for that claim.
 `;
+
+export type { CorpusProfile };
+
+/**
+ * The question-per-file curve (#229): what a budget would actually have to work with.
+ *
+ * `f/q` is files per question — the merge-effectiveness ratio. A high number means group merge is
+ * doing the work and there is little for a budget to suppress.
+ */
+export function renderQuestionCurve(samples: readonly QuestionScaleSample[]): string {
+  const row = (
+    shape: string,
+    files: string,
+    groups: string,
+    questions: string,
+    ratio: string,
+    kinds: string,
+  ): string =>
+    '  ' +
+    shape.padEnd(COL_SHAPE) +
+    files.padStart(COL_FILES) +
+    groups.padStart(COL_GROUPS) +
+    questions.padStart(COL_QUESTIONS) +
+    ratio.padStart(COL_RATIO) +
+    '  ' +
+    kinds;
+
+  const lines = [
+    '  Question curve by corpus shape (questions counted AFTER group merge):',
+    row('shape', 'files', 'groups', 'questions', 'files/question', 'by kind'),
+  ];
+  for (const sample of samples) {
+    const kinds =
+      Object.entries(sample.byKind)
+        .sort((a, b) => b[1] - a[1])
+        .map(([kind, count]) => `${kind}=${count}`)
+        .join(' ') || '—';
+    lines.push(
+      row(
+        sample.shape,
+        String(sample.files),
+        String(sample.groups),
+        String(sample.questions),
+        sample.filesPerQuestion.toFixed(1),
+        kinds,
+      ),
+    );
+  }
+  lines.push(
+    '',
+    '  `source` and `containment_check` are NOT counted — the predictor cannot reach them, and',
+    '  this corpus cannot produce them: the generator gives a file EXIF for the same city its',
+    '  folder names, so text and GPS never disagree. See upload-trace-question-kind.ts.',
+  );
+  return lines.join('\n');
+}

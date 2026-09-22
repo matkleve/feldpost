@@ -19,6 +19,10 @@ import { Injectable, computed, inject } from '@angular/core';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { UploadManagerService, type UploadJob } from '../../../core/upload/upload-manager.service';
 import { getLaneForJob as mapJobToLane, type UploadLane } from '../upload-phase.helpers';
+import {
+  computeArchiveImportProgress,
+  shouldShowArchiveImportProgress,
+} from './upload-archive-import-progress.helpers';
 
 @Injectable({ providedIn: 'root' })
 export class UploadPanelStateService {
@@ -66,6 +70,33 @@ export class UploadPanelStateService {
     )
       .replace('{count}', String(count))
       .replace('{suffix}', suffix);
+  });
+
+  /**
+   * Dual archive-import figures (Phase 5.2). Prefer the active archive batch;
+   * after it completes, keep showing while a deferred backlog remains.
+   * @see docs/specs/service/media-upload-service/upload-archive-import-mode.md § What "done" means
+   */
+  readonly archiveImportProgress = computed(() => {
+    const jobs = this.uploadManager.jobs();
+    const active = this.uploadManager.activeBatch();
+    if (active?.importMode === 'archive') {
+      const figures = computeArchiveImportProgress(active, jobs);
+      return shouldShowArchiveImportProgress(active, figures) ? figures : null;
+    }
+
+    const batches = this.uploadManager.batches();
+    for (let i = batches.length - 1; i >= 0; i--) {
+      const candidate = batches[i];
+      if (candidate.importMode !== 'archive') {
+        continue;
+      }
+      const figures = computeArchiveImportProgress(candidate, jobs);
+      if (shouldShowArchiveImportProgress(candidate, figures)) {
+        return figures;
+      }
+    }
+    return null;
   });
 
   readonly hasAwaitingPlacement = computed(() =>

@@ -349,10 +349,12 @@ export function mergeMediaLocationPatch(
       : {}),
   };
 
+  // Only what the patch states. The coordinate fallback that used to sit here ("has lat/lng ⇒
+  // resolved") was a second rule for a field derived from `location_status` (#222); it could only
+  // fire on a record whose status disagreed with its coordinates, which the one derivation no
+  // longer produces.
   if (patch.location_unresolved !== undefined) {
     next.location_unresolved = patch.location_unresolved;
-  } else if (next.latitude != null && next.longitude != null) {
-    next.location_unresolved = false;
   }
 
   return next;

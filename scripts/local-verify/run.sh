@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Apply the full migration chain to a throwaway Postgres DB and run the live
-# RLS / grant validation scripts (STUDY-009 F-03).
+# RLS / grant validation scripts (STUDY-010 F-03).
 # @see scripts/local-verify/README.md
 set -euo pipefail
 

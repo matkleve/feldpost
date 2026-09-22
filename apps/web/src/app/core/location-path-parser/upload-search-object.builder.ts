@@ -21,11 +21,12 @@ import type { GemeindeRecord, PlzMap } from './local-geo-data.adapter';
 import {
   classifyTokensInSegment,
   isUncertainConfidence,
+  stripWindowsCopySuffix,
   tokenizeSegment,
   type ClassifiedToken,
   type TokenClassificationContext,
 } from './path-token-classifier';
-import { splitPathSegments, stripFileExtension } from './location-path-parser.util';
+import { splitPathSegments, stripFileExtension, normalizeStreetForGroupingKey } from './location-path-parser.util';
 import type { BundeslandRecord } from './local-geo-data.adapter';
 import {
   collapseAtSlashPathSegments,
@@ -322,7 +323,9 @@ function applySegment(
   areaEvidence: Partial<Record<AreaFieldKey, FieldLevelEntry[]>>,
 ): void {
   const countryCode = normalizeCountryCode(context.country);
-  const atUnits = parseAtSegmentUnits(segment, countryCode);
+  // @see docs/specs/service/media-upload-service/upload-search-object.copy-suffix.supplement.md
+  const withoutCopySuffix = stripWindowsCopySuffix(segment);
+  const atUnits = parseAtSegmentUnits(withoutCopySuffix, countryCode);
   applyPresetUnits(fields, atUnits, source, sources);
   const tokens = tokenizeSegment(atUnits.workingSegment);
   const classified = classifyTokensInSegment(tokens, geo, context, atUnits.workingSegment);
@@ -406,12 +409,13 @@ export function buildGroupingKey(fields: SoFields): string {
       .toLowerCase()
       .normalize('NFKD')
       .replace(/[\u0300-\u036f]/g, '');
+  // @see docs/specs/service/media-upload-service/upload-search-object.street-fold.supplement.md
   return [
     norm(fields.country),
     norm(fields.state),
     norm(fields.postcode),
     norm(fields.city),
-    norm(fields.street),
+    normalizeStreetForGroupingKey(fields.street),
     norm(fields.houseNumber),
   ].join('|');
 }
@@ -504,12 +508,19 @@ export function buildSearchObjectFromRelativePath(
   geo: BuildSearchObjectGeo,
 ): UploadSearchObject {
   const normalizedPath = relativePath.replace(/\\/g, '/');
-  const segments = collapseAtSlashPathSegments(splitPathSegments(normalizedPath));
+  const rawSegments = splitPathSegments(normalizedPath);
+  const rawFolderSegments =
+    rawSegments.length > 0 && rawSegments[rawSegments.length - 1] === fileName
+      ? rawSegments.slice(0, -1)
+      : rawSegments.filter((segment) => segment !== fileName);
+  // Strip `(N)` per folder *before* the unit collapse joins `Lange Gasse 6` + `3` + `5`. The strip
+  // is anchored to the end of a segment, so on the joined string the suffix sits mid-text and
+  // survives into street and groupingKey.
+  // @see docs/specs/service/media-upload-service/upload-search-object.copy-suffix.supplement.md
+  const folderSegments = collapseAtSlashPathSegments(
+    rawFolderSegments.map(stripWindowsCopySuffix),
+  );
   const fileBase = stripFileExtension(fileName);
-  const folderSegments =
-    segments.length > 0 && segments[segments.length - 1] === fileName
-      ? segments.slice(0, -1)
-      : segments.filter((s) => s !== fileName);
 
   const fields = emptyFields();
   const sources: UploadAddressSourceEntry[] = [];

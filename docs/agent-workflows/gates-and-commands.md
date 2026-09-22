@@ -82,3 +82,4 @@ Build the JSON file first (schema in `scripts/create-github-issues.example.json`
 - [`AGENTS.md`](../../AGENTS.md) — § Development, § Change Classification (which gates a change class requires)
 - [`implementation-checklist.md`](./implementation-checklist.md) — post-implementation verification
 - [`agent-communication.md`](./agent-communication.md) — 🔴 LIVE VERIFICATION, the checks a gate cannot run
+- [`agent-benchmark.md`](./agent-benchmark.md) — tier ladder, frozen trace scenarios, adversarial audit

@@ -107,6 +107,9 @@ The owner's pattern (`Mariahilfer Straße 100 (1).jpg`, `(2)`, `(3)` …) sugges
    is meaningless unsorted. Sorting 100 000 strings is tens of milliseconds. `[C]`
 2. **Reduce each name to a stem**: strip the extension, strip a trailing sequence marker
    (`(12)`, `_0012`, `-12`, ` 12` at the end), strip a leading camera prefix (`IMG_`, `DSC`).
+   Trailing `(N)` on **address identity** (Search Object / `groupingKey`) is normative in
+   [upload-search-object.copy-suffix.supplement.md](../specs/service/media-upload-service/upload-search-object.copy-suffix.supplement.md)
+   — chunk stems MUST use the same strip so they do not disagree with SO grouping.
 3. **Cut where the stem changes.** Consecutive files sharing a stem stay together.
 4. **Cap the run**: if one stem covers more files than the chunk budget, cut inside it. A single
    address with 5 000 photos is one question anyway, so splitting it is harmless *given B*.

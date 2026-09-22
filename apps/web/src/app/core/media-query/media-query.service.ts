@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { isLocationUnresolvedStatus } from '../location-resolver/location-resolver.helpers';
 import { galleryCoordsFromDisplayLocation } from '../media-locations/media-locations.helpers';
 import type { MediaItemLocationRow } from '../media-locations/media-locations.types';
 import { MediaLocationsService } from '../media-locations/media-locations.service';
@@ -313,10 +314,9 @@ export class MediaQueryService {
   }
 
   private toMediaRecord(row: MediaItemRow): MediaRecord {
-    const unresolved =
-      row.location_status === 'pending' ||
-      row.location_status === 'no_gps' ||
-      row.location_status === 'partial';
+    // One derivation, shared with the detail mapper and bulk eligibility (#222).
+    // @see docs/specs/service/location-resolver/README.md § Location Status Contract
+    const unresolved = isLocationUnresolvedStatus(row.location_status);
 
     return {
       id: row.id,

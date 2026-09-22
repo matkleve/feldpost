@@ -127,7 +127,9 @@ describe('media-locations.helpers', () => {
     const snapshot = locationDisplaySnapshotFromRows([BASE_ROW]);
     expect(snapshot?.displayLocationId).toBe('loc-1');
     expect(snapshot?.fields.address_label).toBe('Main 1');
-    expect(snapshot?.fields.location_unresolved).toBe(false);
+    // The snapshot carries display fields only. `location_unresolved` is derived from
+    // `location_status` by its loader and is not this function's to answer (#222).
+    expect(Object.keys(snapshot?.fields ?? {})).not.toContain('location_unresolved');
   });
 
   it('address-only links: display-hydrate + snapshot oracle (zero zoomable)', () => {
@@ -154,7 +156,6 @@ describe('media-locations.helpers', () => {
     const snapshot = locationDisplaySnapshotFromRows(rows);
     expect(snapshot?.fields.latitude).toBeNull();
     expect(snapshot?.fields.longitude).toBeNull();
-    expect(snapshot?.fields.location_unresolved).toBe(true);
     expect(
       mediaHasZoomableLocation({
         zoomable_location_count: countZoomableLinks(rows),
@@ -179,7 +180,6 @@ describe('media-locations.helpers', () => {
       country: 'AT',
       latitude: 48.2,
       longitude: 16.37,
-      location_unresolved: false,
     };
     type AssertNotLineInput = LocationDisplayFields extends LocationDisplayLineInput ? true : false;
     const notAssignable: AssertNotLineInput = false;
@@ -215,7 +215,10 @@ describe('media-locations.helpers', () => {
     );
     expect(merged.latitude).toBeNull();
     expect(merged.address_label).toBeNull();
-    expect(merged.location_unresolved).toBe(true);
+    // Clearing display fields does not re-answer the status question: the record keeps what its
+    // loader derived from `location_status` (#222). An item with no links reads `pending` or
+    // `unresolvable` there, so the old coordinate rule and this one agree on the live cases.
+    expect(merged.location_unresolved).toBe(false);
   });
 
   it('formatLocationFullAddressCopy joins populated address segments', () => {

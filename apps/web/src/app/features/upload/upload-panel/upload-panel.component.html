@@ -39,6 +39,72 @@
       <p class="upload-panel__scan-status" role="status" aria-live="polite">{{ label }}</p>
     }
 
+    <!--
+      Stable state: archive import dual progress (Phase 5.2).
+      Two figures, never blended — files imported (finite) + awaiting resolution (backlog).
+      @see docs/specs/service/media-upload-service/upload-archive-import-mode.md § What "done" means
+    -->
+    @if (archiveImportProgress(); as archiveProgress) {
+      <div
+        class="upload-panel__archive-progress"
+        role="status"
+        aria-live="polite"
+        data-state="archive-import"
+      >
+        <p class="upload-panel__archive-progress-line">
+          {{
+            archiveFilesImportedLabel(
+              archiveProgress.filesImported,
+              archiveProgress.filesTotal
+            )
+          }}
+        </p>
+        @if (archiveProgress.filesFailed > 0) {
+          <p class="upload-panel__archive-progress-line" data-state="failed">
+            {{ archiveFilesFailedLabel(archiveProgress.filesFailed) }}
+          </p>
+        }
+        <p class="upload-panel__archive-progress-line">
+          {{ archiveAwaitingResolutionLabel(archiveProgress.itemsAwaitingResolution) }}
+        </p>
+      </div>
+    }
+
+    <!--
+      Stable state: deferred location backlog (#232, STUDY-009 idea C).
+      Two figures, never blended — "has no location" and "could be more precise" are different
+      jobs, and one merged number is one the user cannot plan against. Sourced from media_items,
+      not from the current batch, so it outlives the upload session.
+      @see docs/specs/page/files-page.deferred-improvement.supplement.md
+    -->
+    @if (showDeferredBacklog()) {
+      @if (deferredBacklog(); as backlog) {
+        <div
+          class="upload-panel__deferred-backlog"
+          role="status"
+          aria-live="polite"
+          data-state="deferred-backlog"
+        >
+          <button
+            type="button"
+            class="upload-panel__deferred-backlog-line"
+            data-role="resolve-no-location"
+            (click)="onResolveDeferredBucket('no_location')"
+          >
+            {{ deferredNoLocationLabel(backlog.noLocation) }}
+          </button>
+          <button
+            type="button"
+            class="upload-panel__deferred-backlog-line"
+            data-role="resolve-improvable"
+            (click)="onResolveDeferredBucket('improvable')"
+          >
+            {{ deferredImprovableLabel(backlog.improvable) }}
+          </button>
+        </div>
+      }
+    }
+
     <!-- Drop zone shell: clickable dropzone + chip row (siblings — no nested interactives). -->
     <div
       class="upload-panel__dropzone-shell"
@@ -136,6 +202,34 @@
     >
       <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true">folder</span>
       <span class="upload-panel__intake-btn-label">{{ uploadFolderLabelText() }}</span>
+    </button>
+
+    <!--
+      Stable state: archive import — classify, ask nothing (Phase 5.1 / D-04).
+      Same folder picker as Upload folder; mode is fixed at submit (A1).
+      @see docs/specs/service/media-upload-service/upload-archive-import-mode.md
+    -->
+    <button
+      hlmBtn
+      variant="outline"
+      iconPlacement="start"
+      class="upload-panel__intake-btn upload-panel__intake-btn--archive"
+      type="button"
+      [disabled]="scanning() || !folderImportSupported"
+      [attr.title]="
+        !folderImportSupported
+          ? t('upload.folder.unsupported.hint', 'Folder upload is not supported in this browser.')
+          : t(
+              'upload.archive.import.hint',
+              'Import a company archive: resolve what can be resolved, ask nothing, park the rest in Issues.'
+            )
+      "
+      (click)="inputHandlers.onSelectFolder($event, folderInput, 'archive')"
+    >
+      <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true"
+        >inventory_2</span
+      >
+      <span class="upload-panel__intake-btn-label">{{ importArchiveLabelText() }}</span>
     </button>
 
     @if (!folderImportSupported) {
@@ -514,6 +608,22 @@
       (selectedIdChange)="actionHandlers.onProjectSelectionDialogSelected($event)"
       (confirmed)="actionHandlers.onProjectSelectionDialogConfirmed($event)"
       (cancelled)="actionHandlers.onProjectSelectionDialogCancelled()"
+    />
+  }
+
+  <!--
+    Stable state: bulk-resolution confirmation (#219). Mounted only while the flow is open —
+    BrnDialog opens its portal on mount, the same idiom as the other panel modals.
+    @see docs/specs/component/bulk-resolution-dialog/bulk-resolution-dialog.md
+  -->
+  @if (bulkFlowOpen()) {
+    <app-bulk-resolution-dialog
+      [plan]="bulkFlowPlan()"
+      [running]="bulkFlowRunning()"
+      [progress]="bulkFlowProgress()"
+      [report]="bulkFlowReport()"
+      (confirmed)="onBulkFlowConfirmed()"
+      (cancelled)="onBulkFlowCancelled()"
     />
   }
 </section>

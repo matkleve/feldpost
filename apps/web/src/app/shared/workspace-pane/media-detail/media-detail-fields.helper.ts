@@ -7,6 +7,7 @@ import type {
 import type { ForwardGeocodeResult } from '../../../core/geocoding/geocoding.service';
 import type { MediaLocationUpdateService } from '../../../core/media-location-update/media-location-update.service';
 import type { MediaLocationsService } from '../../../core/media-locations/media-locations.service';
+import { isLocationUnresolvedStatus } from '../../../core/location-resolver/location-resolver.helpers';
 import {
   locationDisplaySnapshotFromRows,
   mergeLocationDisplayIntoMediaRecord,
@@ -421,7 +422,9 @@ export class MediaDetailFieldsHelper {
               ? {
                   latitude: suggestion.lat,
                   longitude: suggestion.lng,
-                  location_unresolved: false,
+                  // Mirrors the `location_status = 'resolved'` written further down this method.
+                  // Taken from the one derivation so the two cannot drift apart (#222).
+                  location_unresolved: isLocationUnresolvedStatus('resolved'),
                 }
               : {}),
           }

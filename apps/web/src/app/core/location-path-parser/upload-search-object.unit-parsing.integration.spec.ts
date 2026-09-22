@@ -16,7 +16,10 @@ describe('buildSearchObjectFromRelativePath AT units', () => {
     expect(so.country).toBe('AT');
     expect(so.houseNumber).toBe('25');
     expect(so.door).toBe('14');
-    expect(so.groupingKey).toContain('neustiftgasse');
+    // Folded in the key (S3), path spelling on the flat field (S4).
+    // @see docs/specs/service/media-upload-service/upload-search-object.street-fold.supplement.md
+    expect(so.groupingKey).toContain('neustiftgase');
+    expect(so.street).toBe('Neustiftgasse');
     expect(so.groupingKey).not.toContain('14');
   });
 

@@ -9,6 +9,7 @@ import type { BundeslandRecord, GemeindeRecord } from './local-geo-data.adapter'
 import { COUNTRY_NAMES } from './city-registry.const';
 import { isPostcodeToken, normalizeCountryCode } from './postcode-patterns';
 import { findCitiesBySegment, isNoiseSegment, normalizeSegment } from './location-path-parser.util';
+import { STREET_KEYWORDS } from './street-keywords.const';
 import type { CountryProvenance } from '../upload/address-resolution/upload-address-resolution.types';
 
 export type ClassifiedTokenKind =
@@ -86,17 +87,6 @@ const CAMERA_LABELS = new Set([
 /** `str`/`str.` is the everyday abbreviation of `straße` and appears in real folder names. */
 const STREET_SUFFIX_RE = /(?:straße|strasse|str\.?|gasse|weg|platz|ring|allee|gürtel|zeile|steig)$/i;
 
-const STREET_KEYWORDS = new Set([
-  'straße',
-  'gasse',
-  'weg',
-  'platz',
-  'ring',
-  'allee',
-  'gürtel',
-  'zeile',
-  'steig',
-]);
 
 /** Numeric tokens are classified after country/city/street tokens in the same segment. */
 function isDeferredNumericToken(token: string): boolean {
@@ -412,6 +402,26 @@ export function tokenizeSegment(segment: string): string[] {
     .split(/[\s\-_. ,]+/)
     .map((t) => t.trim())
     .filter((t) => t.length > 0);
+}
+
+/**
+ * Strip a trailing Windows Explorer copy suffix `(N)` from a path segment.
+ *
+ * `Wasagasse 4 (1)` → `Wasagasse 4`. The Search Object passes filename stems (extension already
+ * removed), but a folder name can contain a dot, so `Halle 4 (1).alt` → `Halle 4.alt` too.
+ *
+ * @see docs/specs/service/media-upload-service/upload-search-object.copy-suffix.supplement.md
+ */
+export function stripWindowsCopySuffix(segment: string): string {
+  const trimmed = segment.trim();
+  if (!trimmed) {
+    return trimmed;
+  }
+  const withExtension = trimmed.match(/^(.*?)(\s*\(\d+\))(\.[^.]+)$/u);
+  if (withExtension) {
+    return `${withExtension[1].trimEnd()}${withExtension[3]}`;
+  }
+  return trimmed.replace(/\s*\(\d+\)$/u, '').trimEnd();
 }
 
 export function classifyTokensInSegment(

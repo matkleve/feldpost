@@ -31,8 +31,10 @@ describe('MediaDetailViewComponent – delete flow', () => {
     expect(component.destructiveConfirm()).toBeNull();
   });
 
-  it('executeDelete calls Supabase delete and emits closed', async () => {
-    const { component, fake, fixture } = setup();
+  it('executeDelete calls deleteWithUndo and emits closed', async () => {
+    // Delete goes through MediaDeleteUndoService, not a direct media_items delete.
+    // @see media-detail-delete.helper.ts
+    const { component, fakeMediaDeleteUndo, fixture } = setup();
     setImageId(component, 'img-001');
     fixture.detectChanges();
     let closedEmitted = false;
@@ -40,18 +42,19 @@ describe('MediaDetailViewComponent – delete flow', () => {
 
     await component.executeDelete();
 
-    expect(fake.client.from).toHaveBeenCalledWith('media_items');
+    expect(fakeMediaDeleteUndo.deleteWithUndo).toHaveBeenCalled();
     expect(closedEmitted).toBe(true);
   });
 
   it('executeDelete does nothing when imageId is null', async () => {
-    const { component, fake } = setup();
-    fake.deleteFn.mockClear();
+    const { component, fakeMediaDeleteUndo } = setup();
+    fakeMediaDeleteUndo.deleteWithUndo.mockClear();
     let closedEmitted = false;
     component.closed.subscribe(() => (closedEmitted = true));
 
     await component.executeDelete();
 
+    expect(fakeMediaDeleteUndo.deleteWithUndo).not.toHaveBeenCalled();
     expect(closedEmitted).toBe(false);
   });
 });
@@ -113,11 +116,13 @@ describe('MediaDetailViewComponent – address search', () => {
     expect(component.editingField()).toBeNull();
   });
 
-  it('applyAddressSuggestion calls Supabase update', async () => {
-    const { component, fake } = setup();
+  it('applyAddressSuggestion resolves via MediaLocationUpdate and persists address_field_meta', async () => {
+    // Address columns left media_items; the write path is MediaLocationUpdateService
+    // plus address_field_meta on media_items. Assert that contract, not the old columns.
+    const { component, fake, fakeMediaLocationUpdate } = setup();
     component.media.set({ ...MOCK_MEDIA });
 
-    await component.applyAddressSuggestion({
+    const suggestion = {
       lat: 47.07,
       lng: 15.44,
       addressLabel: 'Hauptplatz 1, Graz',
@@ -127,15 +132,24 @@ describe('MediaDetailViewComponent – address search', () => {
       country: 'Austria',
       streetNumber: '',
       zip: '',
-    });
+    };
+    await component.applyAddressSuggestion(suggestion);
 
-    expect(fake.client.from).toHaveBeenCalledWith('media_items');
-    expect(fake.updateFn).toHaveBeenCalledWith(
+    expect(fakeMediaLocationUpdate.updateFromAddressSuggestion).toHaveBeenCalledWith(
+      MOCK_MEDIA.id,
       expect.objectContaining({
         street: 'Hauptplatz',
         city: 'Graz',
-        country: 'Austria',
-        address_label: 'Hauptplatz 1, Graz',
+        addressLabel: 'Hauptplatz 1, Graz',
+      }),
+    );
+    expect(fake.client.from).toHaveBeenCalledWith('media_items');
+    expect(fake.updateFn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        address_field_meta: expect.objectContaining({
+          street: expect.objectContaining({ source: 'address-search', verified: true }),
+          city: expect.objectContaining({ source: 'address-search', verified: true }),
+        }),
       }),
     );
   });

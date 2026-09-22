@@ -33,6 +33,7 @@ describe('UploadPanelLaneHandlersService', () => {
             laneCounts: signal({ uploading: 0, uploaded: 0, issues: 0 }),
             scanning: signal(false),
             scanningLabel: signal(null),
+            archiveImportProgress: signal(null),
             hasAwaitingPlacement: signal(false),
             showProgressBoard: signal(false),
             laneBuckets: signal({ uploading: [], uploaded: [], issues: [] }),

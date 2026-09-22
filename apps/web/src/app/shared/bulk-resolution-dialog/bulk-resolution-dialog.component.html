@@ -1,0 +1,136 @@
+<!--
+  BULK RESOLUTION CONFIRMATION — four mutually exclusive stable states via @switch on `stage()`:
+  confirming | nothing-to-do (no Apply offered) | running | done.
+  Portal nesting is the shared dialog idiom, copied from confirm-dialog.component.html.
+  @see docs/specs/component/bulk-resolution-dialog/bulk-resolution-dialog.md § Stable states
+-->
+<!-- What the run will NOT do. Defined once; both pre-write states render it. -->
+<ng-template #skippedList>
+  @if (skippedByReason().length) {
+    <ul class="bulk-dialog__skipped" data-role="plan-skipped">
+      @for (summary of skippedByReason(); track summary.reason) {
+        <li class="bulk-dialog__skip">{{ skipReasonLabel(summary) }}</li>
+      }
+    </ul>
+  }
+</ng-template>
+
+<ng-container
+  brnDialog
+  [state]="'open'"
+  [closeOnBackdropClick]="false"
+  [aria-label]="titleText()"
+  [aria-modal]="true"
+>
+  <div hlmDialogOverlay></div>
+  <ng-template brnDialogContent>
+    <div hlmDialogContent [class]="'max-w-[32rem]'">
+      <div hlmDialogHeader>
+        <div brnDialogTitle hlmDialogTitle role="heading" aria-level="2">{{ titleText() }}</div>
+      </div>
+
+      @if (plan(); as currentPlan) {
+        @switch (stage()) {
+          @case ('confirming') {
+            <!-- Stable state: confirming — R7, the exact count and the exact addresses. -->
+            <div class="bulk-dialog__body" data-state="confirming">
+              <p class="bulk-dialog__headline" data-role="eligible-count">
+                {{ applyCountLabel(currentPlan.eligibleCount) }}
+              </p>
+              <p class="bulk-dialog__cost" data-role="geocode-count">
+                {{ geocodeCountLabel(currentPlan.geocodeCount) }}
+              </p>
+
+              <ul class="bulk-dialog__groups">
+                @for (group of currentPlan.groups; track group.addressKey) {
+                  <li class="bulk-dialog__group" data-role="plan-group">
+                    <span class="bulk-dialog__group-address">{{ group.addressLabel }}</span>
+                    <span class="bulk-dialog__group-count">{{
+                      groupCountLabel(group.mediaIds.length)
+                    }}</span>
+                  </li>
+                }
+              </ul>
+
+              <ng-container [ngTemplateOutlet]="skippedList" />
+
+              @if (overwriteWouldChangeSomething()) {
+              <label class="bulk-dialog__overwrite">
+                <input
+                  type="checkbox"
+                  data-role="overwrite"
+                  [checked]="overwriteExisting()"
+                  (change)="onOverwriteChange($event)"
+                />
+                <span>{{ overwriteLabel() }}</span>
+              </label>
+              }
+            </div>
+          }
+
+          @case ('nothing-to-do') {
+            <!-- Stable state: nothing-to-do — a correct plan with no eligible item. No Apply. -->
+            <div class="bulk-dialog__body" data-state="nothing-to-do">
+              <p class="bulk-dialog__headline">{{ nothingToDoLabel() }}</p>
+              <ng-container [ngTemplateOutlet]="skippedList" />
+            </div>
+          }
+
+          @case ('running') {
+            <!-- Stable state: running — the write is in flight; Apply is absent, not disabled. -->
+            <div class="bulk-dialog__body" data-state="running" role="status" aria-live="polite">
+              @if (progress(); as p) {
+                <p class="bulk-dialog__headline">{{ progressLabel(p.done, p.total) }}</p>
+              } @else {
+                <p class="bulk-dialog__headline">{{ startingLabel() }}</p>
+              }
+            </div>
+          }
+
+          @case ('done') {
+            <!-- Stable state: done — terminal. Failures are reported, never rounded away. -->
+            @if (report(); as finished) {
+              <div
+                class="bulk-dialog__body"
+                data-state="done"
+                [attr.data-completed]="finished.completed"
+                role="status"
+                aria-live="polite"
+              >
+                <p class="bulk-dialog__headline">{{ reportLabel(finished) }}</p>
+                @if (!finished.completed) {
+                  <p class="bulk-dialog__cost">{{ incompleteLabel() }}</p>
+                }
+              </div>
+            }
+          }
+        }
+      }
+
+      <div hlmDialogFooter>
+        <button
+          hlmBtn
+          variant="ghost"
+          class="bulk-dialog__cancel"
+          type="button"
+          data-role="cancel"
+          (click)="cancelled.emit()"
+        >
+          {{ dismissLabel() }}
+        </button>
+        @if (stage() === 'confirming') {
+          <button
+            hlmBtn
+            variant="default"
+            class="bulk-dialog__confirm"
+            type="button"
+            data-role="confirm"
+            (click)="confirmed.emit()"
+          >
+            {{ t('bulk.resolution.dialog.confirm', 'Apply') }}
+          </button>
+        }
+      </div>
+    </div>
+  </ng-template>
+</ng-container>

@@ -15,6 +15,10 @@ import { I18nService } from '../../../../core/i18n/i18n.service';
 import type { DetailEditingField, MediaRecord, SelectOption } from '../media-detail-view.types';
 import { formatCoordinate, resolveOriginalFilePathParts } from '../media-detail-view.utils';
 import type { ExifLocationAddState } from '../media-detail-exif-location-add.state';
+import type {
+  PathLocationAddSource,
+  PathLocationAddState,
+} from '../media-detail-path-location-add.state';
 import { DropdownShellComponent } from '../../../dropdown-trigger/shell/dropdown-shell.component';
 import { HLM_BUTTON_IMPORTS } from '../../../../shared/ui/button';
 import {
@@ -56,6 +60,8 @@ export class MediaDetailInlineSectionComponent {
   readonly isImageLike = input(false);
   readonly saving = input(false);
   readonly exifLocationAddState = input<ExifLocationAddState>('hidden');
+  readonly folderLocationAddState = input<PathLocationAddState>('hidden');
+  readonly filenameLocationAddState = input<PathLocationAddState>('hidden');
 
   readonly capturedDropdownValue = computed(() => {
     const date = this.editDate();
@@ -115,6 +121,11 @@ export class MediaDetailInlineSectionComponent {
 
   readonly fieldEditRequested = output<Exclude<DetailEditingField, null>>();
   readonly exifToLocationRequested = output<void>();
+  /**
+   * One output for both path rows: the source is the payload, so the two rows cannot drift into
+   * two handlers that resolve differently. @see docs/specs/system/deferred-location-resolution.md
+   */
+  readonly pathToLocationRequested = output<PathLocationAddSource>();
   readonly fieldSaveRequested = output<{ field: string; value: string }>();
   readonly editingCancelled = output<void>();
   readonly capturedAtEditRequested = output<void>();
