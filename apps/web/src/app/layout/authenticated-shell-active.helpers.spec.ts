@@ -27,6 +27,11 @@ describe('resolveAuthenticatedActiveShell', () => {
   it('resolves the overview shell', () => {
     expect(resolveAuthenticatedActiveShell('/overview')).toBe('overview');
   });
+
+  it('resolves the widget directory and explanation', () => {
+    expect(resolveAuthenticatedActiveShell('/widgets')).toBe('widgets');
+    expect(resolveAuthenticatedActiveShell('/widgets/vehicles')).toBe('widgets');
+  });
 });
 
 describe('resolveMapShellDisplayed', () => {

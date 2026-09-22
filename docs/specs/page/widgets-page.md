@@ -12,7 +12,7 @@ Both pages render inside `app-shell-main-canvas`. The rectangle, More, and Add a
 
 ## Where It Lives
 
-- **Trigger:** the left-rail `+` (`shell.control.more`). It stays `inert` until a route is assigned.
+- **Trigger:** the left-rail `+` (`shell.control.more`). Route `/widgets`.
 - **Parent:** `app-shell-main-canvas`, on the grid shell.
 - **Routes:** not assigned.
 
@@ -83,7 +83,7 @@ sequenceDiagram
 
 ## Acceptance Criteria
 
-- [ ] `+` does not navigate while no directory route exists.
+- [ ] `+` opens `/widgets`.
 - [ ] The directory and the explanation page are the only two destinations this journey adds.
 - [ ] An uninstalled widget has no left-rail option.
 - [ ] No migration is added from this spec alone.

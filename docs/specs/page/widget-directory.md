@@ -10,9 +10,10 @@ The page renders inside `app-shell-main-canvas` and adds no second gutter. Each 
 
 ## Where It Lives
 
-- **Trigger:** left-rail `+` (`shell.control.more`). It stays inert until this page is implemented.
+- **Trigger:** left-rail `+` (`shell.control.more`).
 - **Parent:** `app-shell-main-canvas`. Journey: [widgets-page.md](widgets-page.md).
-- **Route:** not assigned.
+- **Route:** `/widgets`.
+- **Catalog:** [widgets.md](../service/widgets/widgets.md). Add does not store a row until the install table exists.
 
 ## Actions
 
@@ -48,15 +49,16 @@ The directory reads the catalog in [widget-suite.md](widget-suite.md) plus Mitar
 
 | File | Purpose |
 | --- | --- |
-| `docs/specs/page/widget-directory.md` | This page |
+| `features/widgets/widget-directory.page.ts` | This page |
+| `core/widgets/widgets.service.ts` | Catalog |
 
 ## Wiring
 
-`+` does not navigate in the current shell. No route is added by this spec.
+`+` navigates to `/widgets`. Add calls `addInstalls`, which is false until the install table exists.
 
 ## Acceptance Criteria
 
-- [ ] `+` does not navigate while no directory route exists.
+- [ ] `+` opens `/widgets`.
 - [ ] A rectangle shows the name, a short explanation, More, and Add.
 - [ ] Add on a greyed rectangle installs nothing.
 - [ ] No migration is added from this spec alone.

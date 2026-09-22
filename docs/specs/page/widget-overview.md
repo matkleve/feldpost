@@ -34,7 +34,7 @@ app-shell-main-canvas
 
 ## Data
 
-A static list in the page. On the rail: Map, Projects, Media. Not added: Workers, Organisation, Vehicles, Boats, Material, Storage locations, Buildings. The catalog module and the install table are [widget-grants.md](../system/widget-grants.md). This page does not read them yet.
+The page reads [widgets.md](../service/widgets/widgets.md). Fixed entries show "On the rail". Installable entries show "Not added".
 
 ## State
 

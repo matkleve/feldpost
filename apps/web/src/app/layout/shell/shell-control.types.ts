@@ -119,7 +119,14 @@ const LEFT_GROUPS: readonly ShellControlGroup[] = [
         kind: 'canvas',
         route: '/media',
       },
-      { id: 'more', icon: 'add', labelKey: 'shell.control.more', labelFallback: 'More', kind: 'inert' },
+      {
+        id: 'more',
+        icon: 'add',
+        labelKey: 'shell.control.more',
+        labelFallback: 'More',
+        kind: 'canvas',
+        route: '/widgets',
+      },
     ],
   },
   {

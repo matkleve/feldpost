@@ -6,7 +6,8 @@ export type AuthenticatedActiveShell =
   | 'projects'
   | 'colleagues'
   | 'organization'
-  | 'overview';
+  | 'overview'
+  | 'widgets';
 
 /**
  * Resolves which authenticated shell is active from the primary router URL.
@@ -37,6 +38,10 @@ export function resolveAuthenticatedActiveShell(url: string): AuthenticatedActiv
 
   if (head === 'overview') {
     return 'overview';
+  }
+
+  if (head === 'widgets') {
+    return 'widgets';
   }
 
   return 'map';

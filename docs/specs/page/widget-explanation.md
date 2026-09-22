@@ -12,7 +12,7 @@ The page renders inside `app-shell-main-canvas`. It shows the same widget name a
 
 - **Trigger:** More on a [widget directory](widget-directory.md) rectangle.
 - **Parent:** `app-shell-main-canvas`. Journey: [widgets-page.md](widgets-page.md).
-- **Route:** not assigned.
+- **Route:** `/widgets/:widgetId`.
 
 ## Actions
 
@@ -44,11 +44,12 @@ The longer explanation is copy for that widget. Who stores the sentences, a spec
 
 | File | Purpose |
 | --- | --- |
-| `docs/specs/page/widget-explanation.md` | This page |
+| `features/widgets/widget-explanation.page.ts` | This page |
+| `core/widgets/widgets.service.ts` | Catalog |
 
 ## Wiring
 
-Back returns to the directory. This spec adds no route.
+Back returns to `/widgets`. More on a rectangle is the navigation onto `/widgets/:widgetId`.
 
 ## Acceptance Criteria
 

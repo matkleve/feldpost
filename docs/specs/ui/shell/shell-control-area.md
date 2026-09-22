@@ -19,7 +19,7 @@ A vertical flex column with no background, no border, and no padding. The grid's
 | --- | --- | --- | --- |
 | 1 | Activates a left-rail canvas option | Canvas route changes | existing router links |
 | 2 | Activates a right-rail panel option | `ShellLayoutService.setOpen` flips that panel | [shell-layout.md](../../service/shell-layout/shell-layout.md) |
-| 3 | Activates `+` | No navigation | inert until [widgets-page.md](../../page/widgets-page.md) is implemented |
+| 3 | Activates `+` | Canvas shows the widget directory | route `/widgets` |
 | 4 | Activates the logo | Canvas shows the overview | [widget-overview.md](../../page/widget-overview.md) |
 
 ## Component Hierarchy
@@ -81,5 +81,5 @@ flowchart TB
 
 - [ ] The host background is transparent.
 - [ ] Left and right options render from one array per side, not copied buttons.
-- [ ] `+` does not navigate.
+- [ ] `+` opens `/widgets`.
 - [ ] The space between groups is `space-between`, not a spacing token on an empty element.

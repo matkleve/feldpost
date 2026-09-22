@@ -1,0 +1,13 @@
+<h1>{{ t('widget.directory.title', 'Widgets') }}</h1>
+@for (entry of entries; track entry.id) {
+  <article class="widget-directory__card" [attr.data-allowed]="entry.allowed ? 'true' : 'false'">
+    <h2>{{ t(entry.nameKey, entry.nameFallback) }}</h2>
+    <p>{{ t(entry.summaryKey, entry.summaryFallback) }}</p>
+    <div class="widget-directory__actions">
+      <button type="button" (click)="openMore(entry.id)">{{ t('shell.control.more', 'More') }}</button>
+      <button type="button" (click)="onAdd(entry)" [disabled]="!entry.allowed">
+        {{ t('widget.directory.add', 'Add') }}
+      </button>
+    </div>
+  </article>
+}

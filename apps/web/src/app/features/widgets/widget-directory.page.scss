@@ -1,0 +1,51 @@
+// Directory column inside the canvas. The canvas owns the outer radius.
+// @see docs/specs/page/widget-directory.md
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  padding: var(--spacing-3);
+  overflow: auto;
+}
+
+// Name, short explanation, More, and Add. Not a button itself.
+// @see docs/specs/page/widget-directory.md
+.widget-directory__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3);
+  border-radius: var(--radius-md);
+  background: var(--chrome-surface);
+}
+
+// Greyed when the organization does not allow the widget.
+// @see docs/specs/page/widget-directory.md
+.widget-directory__card[data-allowed='false'] {
+  color: var(--muted-foreground);
+}
+
+// More and Add sit on one row.
+// @see docs/specs/page/widget-directory.md
+.widget-directory__actions {
+  display: flex;
+  gap: var(--spacing-3);
+}
+
+// Text controls. Resting color lives here so a later state can change it.
+// @see docs/specs/page/widget-directory.md
+.widget-directory__actions button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  cursor: pointer;
+}
+
+.widget-directory__actions button:hover,
+.widget-directory__actions button:focus-visible {
+  color: var(--primary);
+}

@@ -33,6 +33,12 @@ const loadColleagues = () =>
 const loadOverview = () =>
   import('../features/widgets/widget-overview.page').then((m) => m.WidgetOverviewPage);
 
+const loadWidgetDirectory = () =>
+  import('../features/widgets/widget-directory.page').then((m) => m.WidgetDirectoryPage);
+
+const loadWidgetExplanation = () =>
+  import('../features/widgets/widget-explanation.page').then((m) => m.WidgetExplanationPage);
+
 export const AUTHENTICATED_APP_ROUTES: Routes = [
   {
     path: '',
@@ -66,6 +72,14 @@ export const AUTHENTICATED_APP_ROUTES: Routes = [
       {
         path: 'overview',
         loadComponent: loadOverview,
+      },
+      {
+        path: 'widgets',
+        loadComponent: loadWidgetDirectory,
+      },
+      {
+        path: 'widgets/:widgetId',
+        loadComponent: loadWidgetExplanation,
       },
       {
         path: 'settings/:section/:subsection',

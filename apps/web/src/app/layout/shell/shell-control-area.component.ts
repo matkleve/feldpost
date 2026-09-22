@@ -48,12 +48,17 @@ export class ShellControlAreaComponent {
 
   readonly groups = computed(() => shellControlGroups(this.side()));
   readonly openIds = computed(() => this.shellLayout.openPanels().map((panel) => panel.id));
+  private readonly shell = computed(() => resolveAuthenticatedActiveShell(this.url()));
+
   readonly activeId = computed(() => {
     if (this.side() !== 'left') return null;
-    return resolveAuthenticatedActiveShell(this.url());
+    const shell = this.shell();
+    if (shell === 'widgets') return 'more';
+    if (shell === 'overview') return null;
+    return shell;
   });
 
-  readonly logoActive = computed(() => this.activeId() === 'overview');
+  readonly logoActive = computed(() => this.shell() === 'overview');
 
   openOverview(): void {
     void this.router.navigateByUrl('/overview');
