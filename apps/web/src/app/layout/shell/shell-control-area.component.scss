@@ -14,9 +14,15 @@
   background: transparent;
 }
 
-// Pushes the last group to the end of the rail. The space is leftover, not a token.
+// Left rail: account and settings take the leftover at the bottom.
 // @see docs/specs/ui/shell/shell-control-area.md
-:host > app-shell-control-container:last-of-type {
+:host[data-side='left'] > app-shell-control-container:last-of-type {
+  margin-top: auto;
+}
+
+// Right rail: the history container and the help container sit at the bottom.
+// @see docs/specs/ui/shell/shell-control-area.md
+:host[data-side='right'] > app-shell-control-container:nth-last-of-type(2) {
   margin-top: auto;
 }
 

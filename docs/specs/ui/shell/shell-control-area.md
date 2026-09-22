@@ -6,7 +6,7 @@ A backgroundless rail column. The left rail changes the main canvas. The right r
 
 ## What It Looks Like
 
-A vertical flex column with no background, no border, and no padding. The grid's `gap` and `padding` are the only gutter. The logo, on the left rail only, sits in its own `app-shell-control-container`. It is not a button. A flex leftover separates the top groups from the last group. That leftover is not a token. The gap between stacked containers is `var(--spacing-3)`, the same as the grid gap. Both rails paint above the middle tracks (`z-index: 200`) so a hover label can sit on the page without widening the track.
+A vertical flex column with no background, no border, and no padding. The grid's `gap` and `padding` are the only gutter. The logo, on the left rail only, sits in its own `app-shell-control-container`. It is not a button. A flex leftover separates the top groups from the bottom groups. On the left it sits above the last container. On the right it sits above the history container, so history and help share the bottom. That leftover is not a token. Where two containers are stacked, the gap is `var(--spacing-3)`, the same as the grid gap. The leftover is the space above the bottom group, not that gap. Both rails paint above the middle tracks (`z-index: 200`) so a hover label can sit on the page without widening the track.
 
 ## Where It Lives
 
@@ -31,7 +31,7 @@ app-shell-control-area
 └── app-shell-control-container [bottom group]
 ```
 
-Left static list: logo, map, projects, media, `+` (inert), account, settings. Right rail, three containers. The first two sit at the top with `gap: var(--spacing-3)`. The third is the last container, so the leftover pushes it to the bottom. Container 1: upload, selected items, shared media. Container 2: undo, activity history, redo (inert until a history product exists). Container 3: tips, help. Account and settings keep today's routes and the settings overlay.
+Left static list: logo, map, projects, media, `+` (inert), account, settings. Right rail, three containers. Container 1 stays at the top: upload, selected items, shared media. The leftover sits above container 2, so container 2 and container 3 are bottom aligned. The gap between those two is `var(--spacing-3)`. Container 2: undo, activity history, redo (inert until a history product exists). Container 3: tips, help. Account and settings keep today's routes and the settings overlay.
 
 ## Data
 
