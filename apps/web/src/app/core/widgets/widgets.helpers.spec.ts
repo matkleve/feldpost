@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { WidgetsCatalogAdapter } from './adapters/widgets-catalog.adapter';
-import { WIDGET_CATALOG_IDS, addInstalls, findWidget, overviewState } from './widgets.helpers';
+import {
+  WIDGET_CATALOG_IDS,
+  WIDGET_PERMISSION_ACTIONS,
+  addInstalls,
+  findWidget,
+  overviewState,
+  widgetPermissionKey,
+} from './widgets.helpers';
 
 describe('widget catalog', () => {
   const entries = new WidgetsCatalogAdapter().entries();
@@ -22,5 +29,10 @@ describe('widget catalog', () => {
   it('does not install, including when the organization does not allow it', () => {
     expect(addInstalls(entries[5])).toBe(false);
     expect(addInstalls({ ...entries[5], allowed: false })).toBe(false);
+  });
+
+  it('names role keys as widget.<id>.<action>', () => {
+    expect(widgetPermissionKey('storage-locations', 'open')).toBe('widget.storage-locations.open');
+    expect(WIDGET_PERMISSION_ACTIONS).toEqual(['open', 'view', 'create', 'edit', 'delete']);
   });
 });

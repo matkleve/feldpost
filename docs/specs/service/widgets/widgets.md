@@ -47,7 +47,7 @@ There is no terminal state.
 | --- | --- |
 | `core/widgets/widgets.service.ts` | Facade |
 | `core/widgets/widgets.types.ts` | Entry shape |
-| `core/widgets/widgets.helpers.ts` | Lookup and add gate |
+| `core/widgets/widgets.helpers.ts` | Lookup, add gate, and role-key names |
 | `core/widgets/adapters/widgets-catalog.adapter.ts` | Static list |
 | `core/widgets/README.md` | Module index |
 

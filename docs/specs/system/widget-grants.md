@@ -61,11 +61,12 @@ Install state is `organizationAllows`. It is not a page-local flag.
 | --- | --- |
 | `features/organization/sections/roles/organization-roles-section.component.ts` | Roles screen that will gain the grants |
 | `supabase/migrations/20260922120000_organization_widgets.sql` | Install table and policies |
+| `supabase/migrations/20260922130000_widget_role_permissions.sql` | Widget keys on `org_permissions` |
 | `docs/specs/system/widget-grants.md` | This contract |
 
 ## Wiring
 
-`has_permission` remains the check. Frontend gates are disclosure only. An uninstalled widget is absent from the rail, not shown disabled.
+`has_permission` remains the check. The key is `widget.<id>.open`, `.view`, `.create`, `.edit`, or `.delete`, from `widgetPermissionKey`. Frontend gates are disclosure only. An uninstalled widget is absent from the rail, not shown disabled. Existing admin roles receive the new keys. Other roles do not, until the roles screen saves them.
 
 ## Acceptance Criteria
 

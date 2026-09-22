@@ -1,5 +1,14 @@
 import type { WidgetCatalogEntry } from './widgets.types';
 
+export const WIDGET_PERMISSION_ACTIONS = ['open', 'view', 'create', 'edit', 'delete'] as const;
+
+export type WidgetPermissionAction = (typeof WIDGET_PERMISSION_ACTIONS)[number];
+
+/** Role key on org_permissions. has_permission is the check. */
+export function widgetPermissionKey(widgetId: string, action: WidgetPermissionAction): string {
+  return `widget.${widgetId}.${action}`;
+}
+
 export const WIDGET_CATALOG_IDS = [
   'map',
   'projects',
