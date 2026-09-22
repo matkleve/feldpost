@@ -51,6 +51,7 @@ Entries are numbered, never renumbered, and never deleted. Order is by cost, not
 | [TRAP-021](#trap-021--a-resolution-event-with-zero-subscribers-looks-like-it-resumed-the-job) | A resolution event with zero subscribers looks like it resumed the job | `pattern open` |
 | [TRAP-022](#trap-022--vimock-is-unreliable-under-the-angular-unit-test-builder-and-fails-silently) | `vi.mock()` is unreliable under the Angular unit-test builder, and fails silently | `pattern open` |
 | [TRAP-023](#trap-023--the-suite-did-not-run-is-a-spec-compile-error-the-pre-flight-type-check-does-not-catch) | "the suite did not run" is a spec compile error the pre-flight type-check does not catch | `pattern open` |
+| [TRAP-024](#trap-024--an-rls-perf-wrap-that-reintroduces-pre-hardening-policies) | An RLS “perf wrap” that reintroduces pre-hardening policies | `pattern open` |
 
 ---
 
@@ -553,6 +554,22 @@ Code at `apps/web/src/app/core/upload/location/upload-location-tray-flow.service
 `complete`. The shape stays open because `disambiguationResolved$` still has **zero subscribers** and
 is still called from five paths — the next reader of any of those call sites faces the same misleading
 surface.
+
+---
+
+## TRAP-024 — An RLS “perf wrap” that reintroduces pre-hardening policies
+
+**Surface** — a migration that claims to InitPlan-wrap “current” chat (or other) RLS policies “verbatim,” with a header citing an older schema migration as the source of the policy bodies.
+
+**Assumption** — the rewrite is behaviour-identical: only `(select helper())` wrapping changes; private/DM isolation still holds.
+
+**Truth** — the cited source was the *pre-hardening* policy set. Recreating a weak permissive SELECT (e.g. `chat_channels: org read`) alongside a later hardened policy (`accessible read`) **ORs** in Postgres and reopens private channel rows; replacing message policies with org-only checks drops `can_access_chat_channel` entirely. Same-org non-members can read/write private/DM messages. Fixed by `20260916162935_restore_chat_rls_membership_isolation.sql` — **do not re-implement F-01/F-02**; see STUDY-010 ledger.
+
+**Detect** — before any “perf-only” RLS rewrite: (1) `grep` the policy **name** across all later migrations to find the latest body; (2) confirm private-channel denial still exists in `scripts/validate-chat-rls.sql`; (3) never recreate a dropped weak policy name without dropping the hardened one first.
+
+**Source** — [STUDY-010](./study/010-defensive-security-review.md) F-01; bad wrap `supabase/migrations/20260621090100_chat_rls_initplan_perf_wrap.sql`; restore `20260916162935_restore_chat_rls_membership_isolation.sql`.
+
+**Status** — `pattern open`. This instance is remediated in git (PR #207); the shape recurs whenever a wrap migration copies from the wrong ancestor.
 
 ---
 

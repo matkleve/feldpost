@@ -1,8 +1,9 @@
 -- Chat RLS Validation Script
--- Purpose: prove the chat membership/message hardening in
---          supabase/migrations/20260620100000_chat_and_branding_rls_hardening.sql
+-- Purpose: prove chat membership/message isolation after
+--          20260620100000_chat_and_branding_rls_hardening.sql and the restore in
+--          20260916162935_restore_chat_rls_membership_isolation.sql
 -- Scope:   chat_channel_members (self-join), chat_channels (private read),
---          chat_channel_members role escalation.
+--          chat_channel_members role escalation, private message read/write.
 -- Safety:  runs inside a transaction and ends with ROLLBACK.
 --
 -- Run against a live database (cannot run in the offline sandbox):
@@ -12,6 +13,9 @@
 --   - non-member self-insert into a PRIVATE channel  -> DENY
 --   - self-insert into a PUBLIC channel              -> ALLOW
 --   - member self-elevation to role 'owner'          -> DENY
+--   - non-member SELECT private channel row          -> DENY (0 rows)
+--   - non-member SELECT private channel messages     -> DENY (0 rows)
+--   - non-member INSERT into private channel         -> DENY
 
 begin;
 
@@ -22,6 +26,9 @@ create temporary table if not exists _chat_rls_results (
   passed boolean not null,
   details text
 ) on commit drop;
+
+-- act_as() switches to authenticated; that role must write results rows.
+grant all on table _chat_rls_results to authenticated;
 
 create or replace function pg_temp.run_check(
   p_check_name text,
@@ -59,13 +66,24 @@ returns void
 language plpgsql
 as $$
 begin
-  perform set_config('role', 'authenticated', true);
+  -- JWT claims consumed by auth.uid() / user_org_id().
   perform set_config('request.jwt.claim.sub', p_user_id::text, true);
   perform set_config(
     'request.jwt.claims',
     json_build_object('role', 'authenticated', 'sub', p_user_id::text)::text,
     true
   );
+  -- Actually become the authenticated role so RLS applies (superuser bypasses it).
+  execute 'set local role authenticated';
+end;
+$$;
+
+create or replace function pg_temp.act_as_postgres()
+returns void
+language plpgsql
+as $$
+begin
+  execute 'reset role';
 end;
 $$;
 
@@ -77,12 +95,23 @@ declare
   public_channel uuid;
   private_channel uuid;
 begin
-  -- Two distinct members of the same organization.
+  -- Prefer an admin as the channel owner when available.
   select p.organization_id, p.id
     into org_id, owner_id
   from public.profiles p
+  join public.user_roles ur on ur.user_id = p.id
+  join public.org_roles orole on orole.id = ur.org_role_id
   where p.removed_at is null
+    and orole.name = 'admin'
   limit 1;
+
+  if owner_id is null then
+    select p.organization_id, p.id
+      into org_id, owner_id
+    from public.profiles p
+    where p.removed_at is null
+    limit 1;
+  end if;
 
   select p.id into intruder_id
   from public.profiles p
@@ -95,9 +124,9 @@ begin
     raise exception 'Need two members in one organization to run chat RLS checks';
   end if;
 
-  -- Seed channels as the owner (created_by = owner).
-  perform pg_temp.act_as(owner_id);
-
+  -- Seed channels as table owner (postgres). INSERT … RETURNING on a private
+  -- channel fails under authenticated RLS because SELECT requires membership
+  -- and the creator is not a member yet.
   insert into public.chat_channels (organization_id, name, type, created_by)
   values (org_id, 'rls-validation-public', 'public', owner_id)
   returning id into public_channel;
@@ -107,6 +136,7 @@ begin
   returning id into private_channel;
 
   -- Owner self-joins their private channel (created_by path) -> ALLOW.
+  perform pg_temp.act_as(owner_id);
   perform pg_temp.run_check(
     'owner self-join own private channel',
     format('insert into public.chat_channel_members (channel_id, user_id, role) values (%L, %L, %L)',
@@ -127,7 +157,7 @@ begin
   -- (1/0) if access is wrongly granted, so ALLOW == access correctly denied.
   perform pg_temp.run_check(
     'intruder cannot access private channel',
-    format('select (case when public.can_access_chat_channel(%L) then 1/0 else 1 end)', private_channel),
+    format('select (case when public.can_access_chat_channel(%L) then (1 / nullif(0, 0)) else 1 end)', private_channel),
     true
   );
 
@@ -146,6 +176,51 @@ begin
            'owner', public_channel, intruder_id),
     false
   );
+
+  -- Owner posts a private message (membership already seeded above).
+  perform pg_temp.act_as(owner_id);
+  perform pg_temp.run_check(
+    'owner can insert private channel message',
+    format(
+      'insert into public.chat_messages (channel_id, user_id, content) values (%L, %L, %L)',
+      private_channel, owner_id, 'rls-private-body'
+    ),
+    true
+  );
+
+  -- Intruder must not see the private channel row (perf-wrap regression).
+  perform pg_temp.act_as(intruder_id);
+  perform pg_temp.run_check(
+    'intruder cannot select private channel row',
+    format(
+      'select (case when exists (select 1 from public.chat_channels where id = %L) then (1 / nullif(0, 0)) else 1 end)',
+      private_channel
+    ),
+    true
+  );
+
+  -- Intruder must not see private message bodies.
+  perform pg_temp.run_check(
+    'intruder cannot select private channel messages',
+    format(
+      'select (case when exists (select 1 from public.chat_messages where channel_id = %L) then (1 / nullif(0, 0)) else 1 end)',
+      private_channel
+    ),
+    true
+  );
+
+  -- Intruder must not write into the private channel.
+  perform pg_temp.run_check(
+    'intruder cannot insert private channel message',
+    format(
+      'insert into public.chat_messages (channel_id, user_id, content) values (%L, %L, %L)',
+      private_channel, intruder_id, 'intruder-should-fail'
+    ),
+    false
+  );
+
+  -- Return to postgres so the result SELECT outside this block can read the temp table.
+  perform pg_temp.act_as_postgres();
 end;
 $$;
 

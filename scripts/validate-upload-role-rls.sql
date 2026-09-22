@@ -22,6 +22,8 @@ create temporary table if not exists _rls_results (
   details text
 ) on commit drop;
 
+grant all on table _rls_results to authenticated;
+
 create or replace function pg_temp.run_check(
   p_check_name text,
   p_actor_role text,
@@ -60,13 +62,13 @@ returns void
 language plpgsql
 as $$
 begin
-  perform set_config('role', 'authenticated', true);
   perform set_config('request.jwt.claim.sub', p_user_id::text, true);
   perform set_config(
     'request.jwt.claims',
     json_build_object('role', 'authenticated', 'sub', p_user_id::text)::text,
     true
   );
+  execute 'set local role authenticated';
 end;
 $$;
 
@@ -107,22 +109,22 @@ begin
 
   insert into public.media_items
     (organization_id, created_by, media_type, mime_type, storage_path,
-     file_name, file_size_bytes, location_status)
+     original_filename, file_size_bytes, location_status)
   values
     (org_id, admin_id, 'photo', 'image/jpeg',
      format('%s/%s/%s.jpg', org_id, admin_id, gen_random_uuid()),
-     'admin.jpg', 1024, 'unresolved')
+     'admin.jpg', 1024, 'pending')
   returning id into admin_media_id;
 
   insert into public.media_projects (media_item_id, project_id)
   values (admin_media_id, project_id)
   on conflict do nothing;
 
-  insert into public.metadata_keys (organization_id, created_by, name)
+  insert into public.metadata_keys (organization_id, created_by, key_name)
   values (org_id, admin_id, 'rls_validation_key')
   returning id into metadata_key_id;
 
-  insert into public.media_metadata (media_item_id, key_id, value)
+  insert into public.media_metadata (media_item_id, metadata_key_id, value_text)
   values (admin_media_id, metadata_key_id, 'seed')
   on conflict do nothing;
 
@@ -148,25 +150,29 @@ begin
     perform pg_temp.run_check(
       'media_items insert (own)', role_name,
       format(
-        'insert into public.media_items (organization_id, created_by, media_type, mime_type, storage_path, file_name, file_size_bytes, location_status) '
+        'insert into public.media_items (organization_id, created_by, media_type, mime_type, storage_path, original_filename, file_size_bytes, location_status) '
         || 'values (%L, %L, %L, %L, %L, %L, %s, %L)',
         org_id, actor_id, 'photo', 'image/jpeg',
         format('%s/%s/%s.jpg', org_id, actor_id, gen_random_uuid()),
-        'own.jpg', 2048, 'unresolved'),
+        'own.jpg', 2048, 'pending'),
       not is_viewer
     );
 
     -- 2) Update another user's (admin's) media item: only admin may (is_admin()).
+    --    Plain UPDATE under RLS returns 0 rows (no error) when denied — use INTO STRICT.
     perform pg_temp.run_check(
       'media_items update (other user''s)', role_name,
-      format('update public.media_items set file_name = %L where id = %L', 'touched.jpg', admin_media_id),
+      format(
+        'do $u$ declare x uuid; begin update public.media_items set original_filename = %L where id = %L returning id into strict x; end $u$',
+        'touched.jpg', admin_media_id
+      ),
       role_name = 'admin'
     );
 
     -- 3) media_metadata insert on an org media item: allowed for non-viewers.
     perform pg_temp.run_check(
       'media_metadata insert', role_name,
-      format('insert into public.media_metadata (media_item_id, key_id, value) values (%L, %L, %L) on conflict (media_item_id, key_id) do update set value = excluded.value',
+      format('insert into public.media_metadata (media_item_id, metadata_key_id, value_text) values (%L, %L, %L) on conflict (media_item_id, metadata_key_id) do update set value_text = excluded.value_text',
              admin_media_id, metadata_key_id, role_name),
       not is_viewer
     );
@@ -174,7 +180,7 @@ begin
     -- 4) metadata_keys insert: allowed for non-viewers.
     perform pg_temp.run_check(
       'metadata_keys insert', role_name,
-      format('insert into public.metadata_keys (organization_id, created_by, name) values (%L, %L, %L)',
+      format('insert into public.metadata_keys (organization_id, created_by, key_name) values (%L, %L, %L)',
              org_id, actor_id, 'key_' || role_name),
       not is_viewer
     );
@@ -196,6 +202,8 @@ begin
       actor_id = admin_id
     );
   end loop;
+
+  execute 'reset role';
 end;
 $$;
 

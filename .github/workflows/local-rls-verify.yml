@@ -1,0 +1,45 @@
+name: Local RLS Verify
+
+# STUDY-010 F-03: apply the full migration chain to ephemeral Postgres + PostGIS
+# and run grant / chat / upload-role validation scripts.
+# @see scripts/local-verify/README.md
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "supabase/migrations/**"
+      - "scripts/validate-*.sql"
+      - "scripts/local-verify/**"
+      - ".github/workflows/local-rls-verify.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "supabase/migrations/**"
+      - "scripts/validate-*.sql"
+      - "scripts/local-verify/**"
+      - ".github/workflows/local-rls-verify.yml"
+
+jobs:
+  local-rls-verify:
+    name: local-verify (Postgres + RLS scripts)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL 16 + PostGIS
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-16 postgresql-16-postgis-3
+
+      - name: Start PostgreSQL
+        run: sudo pg_ctlcluster 16 main start
+
+      - name: Run local-verify suite
+        run: |
+          sudo -u postgres env FELDPOST_VERIFY_DB=feldpost_verify \
+            bash scripts/local-verify/run.sh

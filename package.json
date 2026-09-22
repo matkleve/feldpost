@@ -36,7 +36,8 @@
     "diagnose:geocoder": "node --experimental-strip-types scripts/diagnose-geocoder.ts",
     "trace:upload": "node scripts/trace-upload-pipeline.mjs",
     "geo:build-gemeinden": "node scripts/build-at-gemeinden-bev.mjs",
-    "geo:build-gemeinden:fast": "node scripts/build-at-gemeinden-bev.mjs --source=github"
+    "geo:build-gemeinden:fast": "node scripts/build-at-gemeinden-bev.mjs --source=github",
+    "supabase:local-verify": "bash scripts/local-verify/run.sh"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.97.0",
