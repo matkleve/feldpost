@@ -15,6 +15,8 @@ corrected-by: none
 
 **Related:** [#258 — Widget modularity platform](https://github.com/matkleve/feldpost/issues/258) (STUDY-013) — left rail may become installed widget list; coordinate before spec lock.
 
+**Implementation sequence (owner 2026-09-22) `[D]`:** **Shell grid (#257) ships first.** Widget platform (#258) follows — do not block shell grid on widget install engine.
+
 **Process note:** An agent prematurely wrote normative files under `docs/specs/ui/shell/` before owner approved a change plan. Those files were **reverted**. This study + the issue are the correct home until the owner signs off; **no spec edits until then** ([`docs/study/README.md`](./README.md) · [`agent-daily-workflow.md`](../agent-workflows/agent-daily-workflow.md)).
 
 ---
