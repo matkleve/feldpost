@@ -35,8 +35,37 @@ Two of them are.
 > **JEV is the new "System One" agent by Diogo.** The lost study was an evaluation of **whether
 > Feldpost could use it.**
 
-That is a **different question from the one this file answers**, and the difference matters enough to
-state plainly:
+**What that is, researched 2026-09-22.** `[C]` — read from public write-ups, not from the product;
+every number below is **vendor-stated and not independently reproduced**, which several of the
+sources say outright.
+
+**Jev** is the first public model from **TypeSafe AI**, founded by **Diogo Almeida** (≈4 years at
+OpenAI on RLHF, InstructGPT, ChatGPT and GPT-4), launched 2026-09-15. It is a **"System One"** model —
+the fast, intuitive counterpart to deliberative "System Two" reasoning. **It does not generate text.**
+It takes structured or natural-language input and returns a **typed decision** — a choice, a score, or
+a yes/no probability — in **one parallel forward pass** rather than token by token.
+
+| | Vendor-stated | |
+| --- | --- | :---: |
+| Training objective | **RLCD** — Reinforcement Learning for *Calibrated Decisions*. Calibration of the returned probability **is the objective**, not a by-product | `[C]` |
+| Latency | 70–500 ms end to end | `[C]` |
+| Cost | $0.042 per million input tokens; output tokens unmetered | `[C]` |
+| Context | 64 000 tokens, of which 32 000 is the state you pass in | `[C]` |
+| Claimed advantage on classification | 40–200× faster, ~400× cheaper | `[C]` — self-tested; a 445× cost claim is reported as not independently reproduced |
+
+**Why someone looked at it for this, specifically.** `[C]` This is not a general "should we add AI"
+question, and the fit is uncomfortably exact. § F-2 below finds that
+`DisambiguationOutcome.probability` is a **normalised share of an unbounded score** being compared
+against `disambiguationAutoAssignThreshold: 0.95` as though it were a calibrated probability — a
+Constitution § 3 violation. **Calibrated decision probabilities are the one thing Jev's training
+objective is named after.** The shape matches too: the disambiguation step is a closed-set choice over
+candidates returning a score, which is a typed `Choice`, not a generation task.
+
+So the honest framing of the lost study is: *the incumbent's confidence number does not mean what its
+name says; does an external model whose entire pitch is that the number means what it says do better?*
+That is a real question and this file does not answer it.
+
+The difference between the two studies matters enough to state plainly:
 
 | | The lost study | This study |
 | --- | --- | --- |
@@ -55,13 +84,24 @@ without knowing what the incumbent scores. Read § F-4 as that baseline.
 
 **What the redo owes**, when someone has access: `[D]`
 
-1. What JEV System One is asked to do here — city disambiguation only, or the whole address
-   resolution path?
-2. The same corpus through both, scored the same way. The internal side's numbers are in this file.
-3. The cost and dependency side an internal model does not have: latency per file at 10 000 files
-   (compare [STUDY-008](./008-classification-chunking-strategy.md)'s 0.17 s structure-read against
-   8.2 min classification), what leaves the machine, and what happens when it is unavailable.
-4. A `[D]` on adoption that says who owns it, kept separate from the `[A]`s about either model.
+1. **Scope.** City disambiguation only, or the whole address-resolution path? The narrow version is
+   the honest first test: it is a closed-set choice with a ground truth, which is the shape Jev is
+   built for and the shape § F-2 shows the incumbent handles badly.
+2. **The same corpus through both, scored the same way**, against the incumbent numbers in this file.
+   Report **calibration**, not just accuracy — a model that is right 70 % of the time and says so is
+   usable behind a 0.95 gate; one that is right 90 % of the time and always says 0.99 is not. That
+   distinction is the entire reason this question was asked, and an accuracy-only comparison would
+   miss it.
+3. **Verify the vendor numbers rather than quoting them.** Every figure in the table above is
+   self-reported and publicly noted as not independently reproduced. Measure latency and cost on
+   Feldpost's own corpus; `[B]` at best until then.
+4. **The dependency side an internal model does not have.** Latency per file at 10 000 files (compare
+   [STUDY-008](./008-classification-chunking-strategy.md): 0.17 s to read structure against 8.2 min to
+   classify it); **what leaves the machine** — customer folder names and site addresses are
+   DSGVO-relevant personal data under Constitution § 1, so an external call is a Sensitive-class
+   question before it is a quality one; and what the pipeline does when the service is unavailable
+   (Constitution § 2 — no silent failure).
+5. **A `[D]` on adoption naming its owner**, kept separate from the `[A]`s about either model.
 
 Tracked in the same issues that cited it — see § Related.
 
@@ -268,7 +308,7 @@ All `[D]`. Someone owns these and it is not this study.
 | The tray-question volume attributable to this | Nothing was run end to end; no tray was opened. `[C]` | `upload-trace-report.ts` already counts `disambiguationGroups()` — measure before and after option 1. |
 | That deletion (option 4) is safe | No caller inventory was taken. `[C]` | `grep` every reader of `DisambiguationOutcome` and `CITY_REGISTRY` and check what depends on the shape. |
 | Anything about `distance-weighted` or `bayesian-context` in production | Neither is the shipped algorithm; they were read, not exercised. `[B]` | Only matters if `disambiguationAlgorithm` is ever changed. |
-| **Whether JEV System One should replace any of this** | The agent is not reachable from this environment, and the original evaluation was never filed. `[D]` — not even `[C]`: there is no evidence here, only an open question. | The redo described in § What `jev` was. It needs access to the agent and a restated scope, and it is the only part of the original citation this file does not recover. |
+| **Whether JEV System One should replace any of this** | The model was not called; the description above is read from public write-ups and is vendor-stated throughout. `[C]` on what Jev is, `[D]` on whether to adopt it — there is no evidence here, only an open question. | The redo described in § What `jev` was: the same corpus through both, scored on calibration as well as accuracy, with the vendor's latency and cost figures re-measured rather than quoted. |
 
 ## How to re-run this
 
@@ -293,3 +333,4 @@ would have been a test that tests nothing. To reproduce, drive the shipped code 
 - [STUDY-005](./005-upload-pipeline-trace-findings.md) F-18 — the 2 118-municipality gazetteer, against this model's 6-city registry
 - [STUDY-013](./013-study-system-audit.md) § S-03 — why this study had to be written from scratch, and the id cascade around it
 - **The JEV System One adoption evaluation — still owed.** Not in this repository, not recoverable from here, and not answered by this file. See § What `jev` was.
+- Public sources on Jev, read 2026-09-22 (vendor-stated throughout, none independently reproduced): [Latent Space interview with Diogo Almeida](https://www.latent.space/p/jev) · [DataCamp](https://www.datacamp.com/blog/system-one-models-jev) · [Sanity glossary](https://www.sanity.io/glossary/jev-typesafe-ai-model) · [ts2.tech on the unreproduced 445× cost claim](https://ts2.tech/en/typesafe-ai-raises-40-million-for-jev-but-its-445x-cost-claim-is-still-self-tested/)
