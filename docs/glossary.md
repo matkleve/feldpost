@@ -276,6 +276,12 @@ Canonical names for every visible piece of the interface. Use these in code, doc
 - **Control option**  
   A 2.75rem icon button (`app-shell-control-option`) inside a control container. Its hover label overlays and does not change track size.
 
+- **Widget**  
+  An optional rail destination. Absent from the rail until installed. Mitarbeiter and Organisation are the two named so far.
+
+- **Widget page**  
+  The canvas journey opened by the left-rail `+`: a directory, then one explanation page per widget. Spec: `docs/specs/page/widgets-page.md`. Not built.
+
 - **Panel column**  
   The third grid track (`app-shell-panel-column`). It stacks open panel surfaces and contributes no width when nothing is open.
 

@@ -19,7 +19,7 @@ A vertical flex column with no background, no border, and no padding. The grid's
 | --- | --- | --- | --- |
 | 1 | Activates a left-rail canvas option | Canvas route changes | existing router links |
 | 2 | Activates a right-rail panel option | `ShellLayoutService.setOpen` flips that panel | [shell-layout.md](../../service/shell-layout/shell-layout.md) |
-| 3 | Activates `+` | No navigation | inert until the widget page exists |
+| 3 | Activates `+` | No navigation | inert until [widgets-page.md](../../page/widgets-page.md) is implemented |
 
 ## Component Hierarchy
 
