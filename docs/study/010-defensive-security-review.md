@@ -1,7 +1,7 @@
 ---
 id: STUDY-010
 type: review
-status: partially-remediated
+status: historical
 supersedes: none
 corrected-by: none
 ---
@@ -13,9 +13,7 @@ corrected-by: none
 
 ### How this study is marked
 
-Frontmatter stays `partially-remediated` until **hosted** has applied the restore/hardening migrations (`supabase migration list` Local=Remote) — that last step is operator-side, not a missing code fix. Per [`STUDY-FORMAT.md`](./STUDY-FORMAT.md): do not rewrite findings away; use the ledger. `corrected-by` is for superseding studies only.
-
-When hosted is confirmed green, flip this file to `historical` (or leave the ledger and stop opening F-01…F-07 work).
+Hosted applied `20260916162935` and `20260916165450` on 2026-09-22 (`supabase migration list` Local=Remote). Per [`STUDY-FORMAT.md`](./STUDY-FORMAT.md): do not rewrite findings away; use the ledger. `corrected-by` is for superseding studies only.
 
 ### Remediation ledger
 
