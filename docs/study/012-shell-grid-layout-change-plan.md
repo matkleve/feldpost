@@ -13,6 +13,8 @@ corrected-by: none
 
 **GitHub issue (task register):** [#257](https://github.com/matkleve/feldpost/issues/257)
 
+**Related:** [#258 — Widget modularity platform](https://github.com/matkleve/feldpost/issues/258) (STUDY-013) — left rail may become installed widget list; coordinate before spec lock.
+
 **Process note:** An agent prematurely wrote normative files under `docs/specs/ui/shell/` before owner approved a change plan. Those files were **reverted**. This study + the issue are the correct home until the owner signs off; **no spec edits until then** ([`docs/study/README.md`](./README.md) · [`agent-daily-workflow.md`](../agent-workflows/agent-daily-workflow.md)).
 
 ---
