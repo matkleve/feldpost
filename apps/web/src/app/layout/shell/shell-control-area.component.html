@@ -1,8 +1,14 @@
 @if (side() === 'left') {
   <app-shell-control-container side="left" [options]="logoOptions">
-    <div class="shell-control-area__logo">
+    <button
+      type="button"
+      class="shell-control-area__logo"
+      [attr.aria-current]="logoActive() ? 'page' : null"
+      [attr.aria-label]="t('widget.overview.title', 'Overview')"
+      (click)="openOverview()"
+    >
       <img src="/assets/logo.svg" width="16" height="16" alt="" />
-    </div>
+    </button>
   </app-shell-control-container>
 }
 @for (group of groups(); track group.id) {

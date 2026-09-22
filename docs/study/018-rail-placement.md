@@ -79,3 +79,9 @@ The owner accepted the readings in this study `[D]`. Signed off:
 The owner does not know what the canvas shows when it would otherwise be empty `[D]`. The candidate they named is an overview of "this and states." That is not a page, and it is not the projects dashboard at `/projects` `[A]` (`docs/specs/page/projects-dashboard.md`).
 
 Read as a candidate only `[D]`: the overview lists the widgets the organization has, and a state for each one — not allowed, allowed but not added, added. Which states, and whether this overview replaces `/` when the Map icon is absent, are not decided. Map stays on the rail until they are.
+
+## Update 2026-09-22 — logo and grants
+
+The owner chose the overview as the empty-canvas widget, and the logo as the control that opens it `[D]`. The page contract is [widget-overview.md](../specs/page/widget-overview.md). `/` stays the map while the Map icon is on the rail `[D]`.
+
+The grant shape, chosen for modularity `[D]`: a code catalog, one organization install table, and new keys on the existing `org_permissions` catalog. Data scope is the organization. The contract is [widget-grants.md](../specs/system/widget-grants.md). The earlier "candidate only" paragraph stays.

@@ -282,6 +282,9 @@ Canonical names for every visible piece of the interface. Use these in code, doc
 - **Widget page**  
   The canvas journey opened by the left-rail `+`: a directory of rectangles, then one explanation page per widget. Spec: `docs/specs/page/widgets-page.md`. Not built.
 
+- **Widget overview**  
+  The empty canvas. A short explanation and one state per widget. The left-rail logo opens it. Spec: `docs/specs/page/widget-overview.md`.
+
 - **Widget suite**  
   Vehicles, Boats, Material, Storage locations, and Buildings. Each record has one place and media on `media_items`. Spec: `docs/specs/page/widget-suite.md`. Not built.
 

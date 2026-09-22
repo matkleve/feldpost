@@ -30,6 +30,9 @@ const loadOrganization = () =>
 const loadColleagues = () =>
   import('../features/colleagues/page/colleagues-page.component').then((m) => m.ColleaguesPageComponent);
 
+const loadOverview = () =>
+  import('../features/widgets/widget-overview.page').then((m) => m.WidgetOverviewPage);
+
 export const AUTHENTICATED_APP_ROUTES: Routes = [
   {
     path: '',
@@ -59,6 +62,10 @@ export const AUTHENTICATED_APP_ROUTES: Routes = [
       {
         matcher: organizationShellMatcher,
         loadComponent: loadOrganization,
+      },
+      {
+        path: 'overview',
+        loadComponent: loadOverview,
       },
       {
         path: 'settings/:section/:subsection',

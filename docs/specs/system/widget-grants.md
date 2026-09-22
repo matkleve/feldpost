@@ -36,16 +36,15 @@ organization roles section
 
 ## Data
 
-Existing tables, read today by `RoleService`: `org_roles`, `org_permissions`, `org_role_permissions`. None of the permission keys name a widget.
+Three modules, matching the roles system that already exists. No second grant engine.
 
-This spec names no new table and no new key. Two gates block a migration:
+| Module | Owns | Storage |
+| --- | --- | --- |
+| Catalog | Widget id, placement, copy keys | Code module `core/widgets`. Not a table. |
+| Install | Whether the organization has added the widget | One table `organization_widgets (organization_id, widget_id)`, RLS by `user_org_id()` |
+| Role | Who may open it, and who may view, create, edit, or delete its records | New keys on `org_permissions`: `widget.<id>.open` and `widget.<id>.view`, `.create`, `.edit`, `.delete`. The roles screen already saves `org_role_permissions`. |
 
-| Id | Gate |
-| --- | --- |
-| R1 | New keys in `org_permissions`, or a separate grant table |
-| R2 | Allowed data is the whole organization, or a narrower set |
-
-Until both are answered, no migration.
+Allowed data is the whole organization, the same cut as `projects.*` and `media.*`. A per-record or per-project grant is a later module. This spec still adds no migration.
 
 ## State
 

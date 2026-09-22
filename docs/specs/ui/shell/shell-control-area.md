@@ -6,7 +6,7 @@ A backgroundless rail column. The left rail changes the main canvas. The right r
 
 ## What It Looks Like
 
-A vertical flex column with no background, no border, and no padding. The grid's `gap` and `padding` are the only gutter. The logo, on the left rail only, sits in its own `app-shell-control-container`. It is not a button. A flex leftover separates the top groups from the bottom groups. On the left it sits above the last container. On the right it sits above the history container, so history and help share the bottom. That leftover is not a token. Where two containers are stacked, the gap is `var(--spacing-3)`, the same as the grid gap. The leftover is the space above the bottom group, not that gap. Both rails paint above the middle tracks (`z-index: 200`) so a hover label can sit on the page without widening the track.
+A vertical flex column with no background, no border, and no padding. The grid's `gap` and `padding` are the only gutter. The logo, on the left rail only, sits in its own `app-shell-control-container`. It is the control that opens the overview. A flex leftover separates the top groups from the bottom groups. On the left it sits above the last container. On the right it sits above the history container, so history and help share the bottom. That leftover is not a token. Where two containers are stacked, the gap is `var(--spacing-3)`, the same as the grid gap. The leftover is the space above the bottom group, not that gap. Both rails paint above the middle tracks (`z-index: 200`) so a hover label can sit on the page without widening the track.
 
 ## Where It Lives
 
@@ -20,12 +20,13 @@ A vertical flex column with no background, no border, and no padding. The grid's
 | 1 | Activates a left-rail canvas option | Canvas route changes | existing router links |
 | 2 | Activates a right-rail panel option | `ShellLayoutService.setOpen` flips that panel | [shell-layout.md](../../service/shell-layout/shell-layout.md) |
 | 3 | Activates `+` | No navigation | inert until [widgets-page.md](../../page/widgets-page.md) is implemented |
+| 4 | Activates the logo | Canvas shows the overview | [widget-overview.md](../../page/widget-overview.md) |
 
 ## Component Hierarchy
 
 ```text
 app-shell-control-area
-├── app-shell-control-container [logo, left only, not a button]
+├── app-shell-control-container [logo, left only, opens the overview]
 ├── app-shell-control-container [top group]
 ├── leftover spacer
 └── app-shell-control-container [bottom group]

@@ -26,12 +26,17 @@
   margin-top: auto;
 }
 
-// Logo is its own block and is not a button.
-// @see docs/specs/ui/shell/shell-control-area.md
+// Logo control. Opens the overview. Same hit size as one rail option.
+// @see docs/specs/page/widget-overview.md
 .shell-control-area__logo {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 2.75rem;
   height: 2.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  cursor: pointer;
 }

@@ -44,7 +44,7 @@ No installed-widget query in this window. [shell-control-area.md](shell-control-
 
 Workers are Mitarbeiter. Workers and Organisation join the bottom container when they exist. They do not join the top container. The GPS-and-media suite in [widget-suite.md](../../page/widget-suite.md) has no container yet.
 
-Logo, `+`, Account, and Settings stay. Map, Projects, and Media may leave as icons. The route still renders the page. The owner has not named the canvas for when that icon is absent. An overview of widgets and their states is a candidate in [STUDY-018](../../../study/018-rail-placement.md), not this spec. The static list keeps those three icons.
+Logo, `+`, Account, and Settings stay. The logo opens the overview, which is the empty canvas: a short explanation and one state per widget ([widget-overview.md](../../page/widget-overview.md)). Map, Projects, and Media may leave as icons. The route still renders the page. The static list keeps those three icons. When the Map icon is absent, `/` shows the overview. Until then, `/` stays the map.
 
 ## State
 

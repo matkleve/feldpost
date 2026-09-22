@@ -53,6 +53,12 @@ export class ShellControlAreaComponent {
     return resolveAuthenticatedActiveShell(this.url());
   });
 
+  readonly logoActive = computed(() => this.activeId() === 'overview');
+
+  openOverview(): void {
+    void this.router.navigateByUrl('/overview');
+  }
+
   onChosen(option: ShellControlOptionModel): void {
     if (option.kind === 'panel' && option.panelId) {
       this.shellLayout.setOpen(option.panelId, !this.shellLayout.isOpen(option.panelId));

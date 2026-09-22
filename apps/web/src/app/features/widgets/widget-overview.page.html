@@ -1,0 +1,12 @@
+<h1>{{ t('widget.overview.title', 'Overview') }}</h1>
+<p>
+  {{ t('widget.overview.body', 'This canvas is the overview. It explains the shell and lists each widget with its state.') }}
+</p>
+<ul class="widget-overview__list">
+  @for (row of rows; track row.id) {
+    <li class="widget-overview__row">
+      <span>{{ t(row.nameKey, row.nameFallback) }}</span>
+      <span class="widget-overview__state">{{ t(stateKey(row.state), stateFallback(row.state)) }}</span>
+    </li>
+  }
+</ul>

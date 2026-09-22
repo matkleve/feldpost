@@ -1618,3 +1618,14 @@ shell.panel.download.title,Selected items,Selected items panel surface title.,Se
 shell.panel.sharedMedia.title,Shared media,Shared media panel surface title.,Shared media,Geteilte Medien,Media condivisi
 shell.panel.tips.title,Tips,Tips panel surface title.,Tips,Tipps,Suggerimenti
 shell.panel.unavailable.body,This panel is not available yet.,Placeholder body for a right-rail panel that has no product yet.,This panel is not available yet.,Dieser Bereich ist noch nicht verfügbar.,Questo pannello non è ancora disponibile.
+widget.overview.title,Overview,Canvas page opened by the left-rail logo.,Overview,Übersicht,Panoramica
+widget.overview.body,This canvas is the overview. It explains the shell and lists each widget with its state.,Overview page explanation.,This canvas is the overview. It explains the shell and lists each widget with its state.,Diese Fläche ist die Übersicht. Sie erklärt die Oberfläche und listet jedes Widget mit seinem Zustand.,Questa area è la panoramica. Spiega la superficie ed elenca ogni widget con il suo stato.
+widget.overview.state.onRail,On the rail,Overview row when the widget icon is on the rail.,On the rail,In der Leiste,Nella barra
+widget.overview.state.notAdded,Not added,Overview row when the organization has not added the widget.,Not added,Nicht hinzugefügt,Non aggiunto
+widget.catalog.workers,Workers,Widget name for Mitarbeiter.,Workers,Mitarbeiter,Collaboratori
+widget.catalog.organisation,Organisation,Widget name for the organisation widget.,Organisation,Organisation,Organizzazione
+widget.catalog.vehicles,Vehicles,Suite widget name.,Vehicles,Fahrzeuge,Veicoli
+widget.catalog.boats,Boats,Suite widget name.,Boats,Boote,Barche
+widget.catalog.material,Material,Suite widget name.,Material,Material,Materiale
+widget.catalog.storageLocations,Storage locations,Suite widget name. German Lagerorte.,Storage locations,Lagerorte,Luoghi di deposito
+widget.catalog.buildings,Buildings,Suite widget name. German Gebäude.,Buildings,Gebäude,Edifici
