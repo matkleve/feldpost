@@ -84,16 +84,17 @@ This looks like a bug and is a decision. `[D]` Ruled by the owner on 2026-09-22,
 > *"Wenn wir jetzt zum Beispiel die gleiche Straße haben mit einem anderen Kunden, dann hätten wir
 > zwei Trays. Das darf nicht passieren."*
 
-**The ruling has no normative home yet, and that is a finding.** `[A]` #245 states it is *"now
-normative in `docs/specs/service/media-upload-service/upload-search-object.md` § Grouping identity is
-address identity"*. That section does not exist: the spec's headings are Normative index, Fields, Area
-evidence, Keys philosophy, Token classification order, Country-specific data, Conflict rule,
-Completeness, Confidence thresholds, and neither that file nor its supplements mentions the customer
-segment at all. The **behaviour** is real and measured above; only the claim that it is written down
-is false. Until someone records it, the next reader of § Keys philosophy will find a leading segment
-being silently dropped and no sentence saying it is meant to be — which is how a decision becomes a
-bug report. Recording it is a spec change in Sensitive territory and belongs to whoever owns that
-spec, not to this study.
+**The ruling had no normative home, and now it does.** `[A]` When this study was written, #245
+stated the rule was *"now normative in `upload-search-object.md` § Grouping identity is address
+identity"* and that section did not exist — neither that spec nor its supplements mentioned the
+customer segment at all. The **behaviour** was real and measured above; only the claim that it was
+written down was false, which is how a decision becomes a bug report: the next reader of § Keys
+philosophy would find a leading segment being silently dropped with no sentence saying it is meant
+to be.
+
+The section now exists, written from the measurement above and the owner's ruling, and states the
+positive rule (a segment carrying no address field does not enter the key), the consequence (narrow
+by geographic evidence, never by customer), and that media type is not in the key either.
 
 **Consequence for this feature:** narrow the donor set by **dispersion**, never by the customer
 segment. `[D]` A donor set that spans two customers at one address is correct; a donor set that spans
@@ -175,4 +176,4 @@ These are the issue's open questions, unchanged in substance and graded:
 - [STUDY-007](./007-exif-coordinates-as-address-evidence.md) — why EXIF may not supply a house number
 - [STUDY-009](./009-tray-question-budget-and-priority.md) — priority, budget, and the deferred-improvement surface
 - [STUDY-012](./012-study-system-audit.md) § S-03 — how this study came to be cited before it existed
-- [`upload-search-object.md`](../specs/service/media-upload-service/upload-search-object.md) — the builder's contract; it does **not** yet carry the customer-segment ruling (see above)
+- [`upload-search-object.md`](../specs/service/media-upload-service/upload-search-object.md) § Grouping identity is address identity — the customer-segment rule, written from this study

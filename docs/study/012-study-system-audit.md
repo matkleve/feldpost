@@ -614,18 +614,40 @@ has a written rationale, so it wins:
 
 | id | Document | State |
 | --- | --- | --- |
-| **STUDY-010** | `010-jev-system-one-model-evaluation.md` | **Reserved. Still does not exist.** |
+| **STUDY-010** | [`010-disambiguation-model-evaluation.md`](./010-disambiguation-model-evaluation.md) | **Written from scratch** — see below |
 | **STUDY-011** | [`011-exif-inheritance-grouping-unit.md`](./011-exif-inheritance-grouping-unit.md) | **Written** — this update's deliverable, matching #245 |
 | **STUDY-012** | this file | Renumbered from 011 |
 
 Renumbering *this* audit was the cheap move — its only inbound references were the ones written
 today, in this branch. Renumbering #241, #242 and #245 instead would have been a fourth cascade.
 
-**STUDY-010 stays empty, deliberately.** `[C]` The jev measurement — 28 280 input combinations
-against `resolveIssue`, and the ranker table in #242 — may well have been run, but it was never filed
-and cannot be honestly reconstructed from here. Writing a study to fill an id would be fabricating
-evidence to satisfy a citation, which is the inverse of the problem. Both issues carry their
-measurement output inline, so nothing is lost meanwhile; what is owed is the file, from whoever ran it.
+**STUDY-010 was re-measured rather than reconstructed, and that turned out to matter.** `[A]` The
+first plan here was to leave the id reserved, because writing a study to fill an id would be
+fabricating evidence to satisfy a citation. The owner's instruction was to redo the measurement
+instead — so it was redone, from zero, against the shipped code: the 28 280-combination sweep through
+`resolveIssue`, and the ranker tables through `runDisambiguation` with the real `CITY_REGISTRY`.
+
+The result justifies the instruction. **Two of the issues' claims did not survive re-measurement:**
+
+- #242 says `auto_assigned` **never** fires. It fires 10 times in 28 280 combinations. The true
+  statement is narrower and much worse — auto-assign is reachable only at `parserConfidence ≤ 0.013`
+  while the parser's floor is `parserBaseConfidence: 0.5` and every boost is non-negative. A 20× gap,
+  not an impossibility.
+- #242's acceptance criteria say to supply `batchResolvedCities`. Measured with it supplied, the top
+  probability rises 0.274 → 0.430 and then **saturates: 1 item and 380 items give the identical
+  number**, because `prior` is a share of the most frequent city rather than a weight of evidence. So
+  the fix as specified would pass its own acceptance test and change nothing a user sees.
+
+Neither would have been found by filing the citation as written. `[A]` The name `jev` carried no
+meaning anywhere in the repository, so the file is named for its subject:
+[`010-disambiguation-model-evaluation.md`](./010-disambiguation-model-evaluation.md).
+
+**The general lesson is not about these two issues.** `[C]` A citation to a study that does not exist
+is not merely a broken link — it is a claim of verification that nobody can check, and in this case
+two of the claims behind it were wrong. `[A]` grades are the part of this system that licenses a
+reader to act without re-deriving; an `[A]` pointing at nothing is the single most expensive kind of
+drift the folder can carry, and the only reason it was caught is that someone went looking for the
+file.
 
 [STUDY-011](./011-exif-inheritance-grouping-unit.md) re-ran every measurement rather than copying
 #245's table — the two agree, which is the only reason either is trustworthy.
@@ -667,7 +689,9 @@ records what happened instead of only the number.
   closed.
 - **§ 5.1** — `STUDY-FORMAT.md` now names all four closed folders, but that line is part of the
   unverified Grundriss port and still needs reconciling there.
-- The customer-segment ruling needs recording in a spec (above).
+- ~~The customer-segment ruling needs recording in a spec~~ — **written**:
+  [`upload-search-object.md`](../specs/service/media-upload-service/upload-search-object.md)
+  § Grouping identity is address identity, from STUDY-011's measurement and the owner's ruling.
 
 ## Related
 
