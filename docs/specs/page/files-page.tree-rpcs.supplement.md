@@ -8,7 +8,7 @@
 | Piece | State |
 | --- | --- |
 | `MediaFolderTreeService` | **built and tested** — one level per expand, cached per path, counts read from the RPC and never recomputed |
-| `20260920120000_media_folder_tree_rpcs.sql` | **written, NOT live-verified** |
+| `20260920120000_media_folder_tree_rpcs.sql` | **applied on hosted** (2026-09-22, project `yvvzbpnoesxlzlbomlkv`); cross-org + validator + security review still [#217](https://github.com/matkleve/feldpost/issues/217) |
 | Tree component | not started |
 
 ## The verification requirement this does not yet meet
@@ -17,13 +17,15 @@ Both RPCs are `SECURITY DEFINER` functions that read `media_items` and scope by
 `organization_id`. `AGENTS.md` classes that **Sensitive**: live verification and `/security-review`
 are mandatory, not advisory.
 
-The migration was written in an environment with `psql` but **no database URL, no Supabase CLI and
-no credentials**, so it has never been applied or executed. It follows the two established idioms
-exactly and says so in a banner at the top of the file — but *"follows the idiom"* is not
-*"verified"*, and the gap sits in the one area where a mistake returns another organization's rows.
+**Update 2026-09-22.** The migration is **applied on hosted** Feldpost (`20260920120000` in
+`schema_migrations`; both RPCs exist; `anon` EXECUTE revoked, `authenticated` granted). What remains
+is the Sensitive ceremony, not the DDL:
 
-**Before merge:** apply · the matching `validate-*-rls.sql` · a cross-organization read that returns
-nothing · `/security-review`.
+- `scripts/validate-authenticated-rpc-grants.sql` and `scripts/validate-dsgvo-security.sql`
+- Cross-organization read attempt (must return zero rows)
+- `/security-review` + fresh-context adversarial review
+
+Tracked in [#217](https://github.com/matkleve/feldpost/issues/217).
 
 ## Two details worth not losing
 
@@ -55,5 +57,5 @@ number the user cannot act on: it would offer work that bulk resolution then dec
 - [x] Expanding a node fetches exactly that node's children; opening the page reads no subtree.
 - [x] Counts come from the RPC, not from counting rows client-side.
 - [x] A failed query surfaces as an error rather than an empty tree.
-- [ ] Counts verified against a real database at 20 000 rows (needs apply).
-- [ ] A second organization's media never appears (RLS test, needs apply).
+- [ ] Counts verified against a real database at 20 000 rows (needs owner run — RPCs exist on hosted).
+- [ ] A second organization's media never appears (RLS test — needs owner run; [#217](https://github.com/matkleve/feldpost/issues/217)).

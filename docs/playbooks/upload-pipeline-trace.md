@@ -69,7 +69,7 @@ company-scale cost claim.
 | `flat` | `Rohdaten/IMG_*.jpg` | all | Camera-roll / USB dump — no address, `incomplete`. |
 | `shallow_many` | Many `/City/PLZ/` folders | 3 | Sparse tree (many places, few medias each). |
 | `mixed` | 70 % area / 20 % street / 10 % noise | 30 | Blended archive closer to a real drop. |
-| `firma_at_archive` | `/Wien\|Niederösterreich/{PLZ}/{building}/` — per place: `Wasagasse 4` / `(1)` / `(2)` **and** typo twin `Wasagase 4` / `(1)` / `(2)` (counter restarts); also units, letters, full address, landmarks; ~5 % loose under PLZ, ~2 % under Bundesland | mostly 10–50, occasional 100+ | **Owner-described company archive** (2026-09-16). Prefer this for tray-efficiency claims. Recalibrate weights from a path-only export when available. |
+| `firma_at_archive` | `/Wien\|Niederösterreich/{PLZ}/{building}/` — per place: `Wasagasse 4` / `(1)` / `(2)` **and** a second-spelling chain `Wasagase 4` / `(1)` / `(2)` (counter restarts; `Straße` streets get the `ß`/`ss` variant, `gasse` streets a dropped letter); also letters (`8A`), nested unit folders (`Lange Gasse 6/3/5`), abbreviated `Lerchenfelder Str 6`, full address, landmarks; ~11 % of places sit directly under the Bundesland with no PLZ folder; ~5 % loose files under PLZ, ~2 % under Bundesland | mostly 10–50, occasional 100+ | **Owner-described company archive** (2026-09-16). Prefer this for tray-efficiency claims. Recalibrate weights from a path-only export when available. |
 
 **Measured tray clusters (adversarial, 1 000 files, 2026-09-16):** of groups that need a pre-upload
 question, ~**95 % are `layer_package`** (filename street contradicts folder, or project-token
@@ -81,23 +81,39 @@ groups and land mostly on `area_only` (no pre-upload tray — area placement, F-
 
 | Profile | Groups | Pre-upload trays | ms/file | Top outcome |
 | --- | ---: | ---: | ---: | --- |
-| `adversarial` | 791 | 354 | 3.3 | `street_locality` |
+| `adversarial` | 823 | 386 | 3.4 | `street_locality` |
 | `company_area` | 19 | 1 | 2.0 | `area_only` |
 | `company_street` | 34 | 7 | 2.7 | `street_locality` |
 | `flat` | 1 | 0 | 0.03 | `incomplete` |
 | `shallow_many` | 19 | 1 | 2.0 | `area_only` |
 | `mixed` | 20 | 0 | 1.9 | `area_only` |
-| **`firma_at_archive`** | **20** | **1** | 8.6 | `street_locality` |
+| **`firma_at_archive`** | **21** | **1** | 5.5 | `street_locality` |
 
-`firma_at_archive` progression @ 1 000 files (2026-09-16):
+`firma_at_archive` progression @ 1 000 files (re-measured 2026-09-16 after the letter-run fold was
+reverted and the corpus gained the owner's remaining shapes; each row measured by disabling that
+step and re-running):
 
 | Step | Groups | Notes |
 | --- | ---: | --- |
-| Baseline (before `(N)` / fold) | 32 | Increment + typo chains split |
-| After Windows `(N)` strip | 22 | `Wasagasse 4 (1)` ≡ `Wasagasse 4` |
-| After street letter-run fold | **20** | `Wasagasse` ≡ `Wasagase` on `groupingKey` |
+| Baseline (before `(N)` / fold) | 40 | Increment + second-spelling chains split |
+| After Windows `(N)` strip | 24 | `Wasagasse 4 (1)` ≡ `Wasagasse 4`, including `Wasagasse 4 (1)/3/5` |
+| After street `ß`/`ss` + `str.` fold | **21** | `Lerchenfelder Straße` ≡ `Lerchenfelder Strasse` ≡ `Lerchenfelder Str` |
 
-Arbitrary typos (`Stephansplatz` vs `Stehansplatz`) stay out of scope. Adversarial remains ~791 / 354.
+Typos that are not orthographic variants (`Wasagasse` vs `Wasagase`, `Stephansplatz` vs
+`Stehansplatz`) stay out of scope and remain separate groups — see
+[street-fold supplement](../specs/service/media-upload-service/upload-search-object.street-fold.supplement.md)
+§ Rejected. Adversarial remains ~823 / 386.
+
+The corpus also exposes a classifier weakness worth naming: the typo street `…gase` fuzzy-matches
+the Styrian municipality **Gasen**, so 121 of the 1 000 files classify as
+`at|wien|1020|gasen|lange|2a` — the suffix eaten as a city, the remaining word left as the street —
+and land in `admin_conflict` instead of a street group. That is the gazetteer lookup, not the fold.
+
+Tray keying: an `admin_conflict` group is keyed by its **address plus** the disagreeing field. It
+used to be keyed by the field name alone, which collapsed every city conflict in a corpus into one
+group and one tray — the number this report exists to state. Correcting it moved `adversarial` from
+791/354 to 823/386; `firma_at_archive` was unaffected because its 121 conflicting files genuinely
+are one address.
 For efficiency work, quote **`firma_at_archive`**, not `adversarial`.
 
 Note: scale-tier “trays” = local-gate questions (`layer_conflict` / `admin_conflict` /
@@ -114,7 +130,7 @@ Note: scale-tier “trays” = local-gate questions (`layer_conflict` / `admin_c
 4. **Strip Windows copy suffixes `(N)` on folder/file segments** — so `Wasagasse 4 (1)` shares a
    `groupingKey` with `Wasagasse 4`. Spec:
    [upload-search-object.copy-suffix.supplement.md](../specs/service/media-upload-service/upload-search-object.copy-suffix.supplement.md).
-   Spelling twins (`Wasagasse` vs `Wasagase`) are a **separate** problem after the suffix is gone.
+   Spelling variants (`Straße` vs `Strasse`) fold on the key; genuine typos do not.
 5. **Do not quote adversarial tray extrapolations as company cost** — use `--profile=firma_at_archive`
    (or `company_area` / `mixed`) for that claim; the scale report prints a profile comparison table
    so the two cannot be confused.
@@ -129,11 +145,9 @@ asserts. That is deliberate — a diagnostic that nothing keeps honest rots. Run
 cd apps/web && npx vitest run src/app/core/upload/trace/upload-pipeline-trace.spec.ts
 ```
 
-It is **not** yet exercised by `npm run verify`: the `test` gate's bundle does not compile on
-`main` (type errors in `upload-address-persist.acceptance.spec.ts` and
-`upload-new-pre-resolve-dedup-disambiguation.integration.spec.ts`, part of the gate's recorded
-debt), so `ng test` runs no specs at all today. Once that bundle compiles, this harness runs with
-the rest.
+It **is** exercised by `npm run verify` — the `test` gate compiles and runs it with the rest
+(1 556 specs on 2026-09-16). An earlier note here said the gate's bundle did not compile and ran no
+specs at all; that stopped being true and the note was not re-measured.
 
 ## Three runs, because the pipeline has three shapes
 

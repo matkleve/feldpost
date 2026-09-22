@@ -6,7 +6,12 @@
  * Layout:
  *   /{Bundesland}/{PLZ}/{building-or-place}/{IMG_…}
  * Most medias live in the third-level folder. A small share drops randomly under PLZ or
- * Bundesland.
+ * Bundesland, and some places have no PLZ folder at all — the owner described street-named
+ * folders sitting directly inside a Bundesland folder.
+ *
+ * Building folders carry the owner's spellings: `Wasagasse 56`, `Kirchengasse 8A`, nested unit
+ * folders (`Lange Gasse 6/3/5` — Windows cannot hold `/` in one name, so those are real nested
+ * folders), the abbreviation (`Lerchenfelder Str 6`), full addresses, and landmarks.
  *
  * **Increment chains (owner clarification):** one logical address often appears as
  *   Wasagasse 4 / Wasagasse 4 (1) / Wasagasse 4 (2) / …
@@ -89,6 +94,16 @@ const FIRMA_CYCLE_SUM = FIRMA_FOLDER_SIZE_PATTERN.reduce((sum, size) => sum + si
 const LOOSE_UNDER_PLZ_EVERY = 20;
 /** GUESS: ~2 % sit directly under /Bundesland/. */
 const LOOSE_UNDER_BUNDESLAND_EVERY = 50;
+/**
+ * Owner: inside a Bundesland folder there are "random files or folders too with streetnames".
+ * Such a folder skips the PLZ level, so the postcode is never in the path.
+ * GUESS: every 9th place (~11 %).
+ */
+const PLACE_WITHOUT_POSTCODE_EVERY = 9;
+
+function placeSkipsPostcode(placeIndex: number): boolean {
+  return placeIndex % PLACE_WITHOUT_POSTCODE_EVERY === 4;
+}
 
 /**
  * Per logical place: canonical spelling gets bare + (1) + (2), then a typo spelling restarts
@@ -143,19 +158,26 @@ export function firmaLocationForFileIndex(fileIndex: number): {
   return { locationIndex: 0, offsetInFolder: 0, folderSize: FIRMA_FOLDER_SIZE_PATTERN[0] };
 }
 
-/** Drop a letter / ascii-swap so the typo series is visibly the same place, wrong spelling. */
-export function typoStreetName(street: string): string {
+/**
+ * Second spelling of the same place, as field archives actually contain them.
+ *
+ * Two classes, and the corpus carries both on purpose:
+ *  - `ß`/`ss` — one street written two ways. The grouping key folds it, so these merge.
+ *  - a dropped letter — a real typo. Nothing folds it, so it stays its own group. A corpus that
+ *    only contained variants the pipeline can merge would measure the fix, not the archive.
+ */
+export function spellingVariantStreetName(street: string): string {
+  if (street.includes('straße')) {
+    return street.replace('straße', 'strasse');
+  }
+  if (street.includes('Straße')) {
+    return street.replace('Straße', 'Strasse');
+  }
   if (street.includes('gasse')) {
     return street.replace('gasse', 'gase');
   }
   if (street.includes('Gasse')) {
     return street.replace('Gasse', 'Gase');
-  }
-  if (street.includes('straße')) {
-    return street.replace('straße', 'strasse');
-  }
-  if (street.includes('Straße')) {
-    return street.replace('Straße', 'Strase');
   }
   if (street.length > 3) {
     return `${street.slice(0, 3)}${street.slice(4)}`;
@@ -163,20 +185,39 @@ export function typoStreetName(street: string): string {
   return `${street}x`;
 }
 
+/**
+ * Windows appends `(N)` to the folder that was copied. When the address folder has nested unit
+ * folders below it (`Lange Gasse 6/3/5`), copying the address copies the subtree, so the suffix
+ * lands on the first segment and the ones below keep their names.
+ */
 function withCopySuffix(baseName: string, copyIndex: number): string {
-  return copyIndex === 0 ? baseName : `${baseName} (${copyIndex})`;
+  if (copyIndex === 0) {
+    return baseName;
+  }
+  const [head, ...rest] = baseName.split('/');
+  return [`${head} (${copyIndex})`, ...rest].join('/');
 }
 
 /**
- * Base label for a logical place (no Windows copy suffix yet).
- * Kind rotates: plain street, letter, units, full address, landmark.
+ * Owner wrote `Lerchenfelder Str 173`: the abbreviation appears in real folder names. It keeps the
+ * case of the word it replaces, so `Hauptstraße` shortens to `Hauptstr`, not `HauptStr`.
+ */
+function abbreviateStrasse(street: string): string {
+  return street.replace(/stra(?:ß|ss)e$/iu, (match) =>
+    match[0] === match[0].toUpperCase() ? 'Str' : 'str',
+  );
+}
+
+/**
+ * Base label for a logical place (no Windows copy suffix yet). `/` means nested folders.
+ * Kind rotates: plain street, letter, nested units, full address, landmark, abbreviated street.
  */
 function placeBaseName(placeIndex: number, site: FirmaSite, spelling: 'canonical' | 'typo'): string {
   const streets = streetsFor(site);
   const streetRaw = streets[placeIndex % streets.length];
-  const street = spelling === 'typo' ? typoStreetName(streetRaw) : streetRaw;
+  const street = spelling === 'typo' ? spellingVariantStreetName(streetRaw) : streetRaw;
   const houseNumber = 1 + (placeIndex % 80);
-  const kind = placeIndex % 5;
+  const kind = placeIndex % 6;
 
   switch (kind) {
     case 0:
@@ -184,16 +225,27 @@ function placeBaseName(placeIndex: number, site: FirmaSite, spelling: 'canonical
     case 1:
       return `${street} ${houseNumber}A`;
     case 2:
-      // Windows forbids `/` in folder names — humans write units with dashes.
-      return `${street} ${houseNumber}-3-5`;
+      // Owner wrote `Lange Gasse 6/3/5`. A Windows folder name cannot hold `/`, so the unit parts
+      // are nested folders — which is what `collapseAtSlashPathSegments` reassembles.
+      return `${street} ${houseNumber}/3/5`;
     case 3:
       return spelling === 'typo'
         ? `${site.city} ${site.postcode} ${street} ${houseNumber}`
-        : `${site.city} ${site.postcode}, ${streetRaw} ${houseNumber}`;
-    case 4:
-    default: {
+        : `${site.city} ${site.postcode}, ${abbreviateStrasse(streetRaw)} ${houseNumber}`;
+    case 4: {
       const landmark = LANDMARKS[placeIndex % LANDMARKS.length];
-      return spelling === 'typo' ? typoStreetName(landmark) : landmark;
+      return spelling === 'typo' ? spellingVariantStreetName(landmark) : landmark;
+    }
+    case 5:
+    default: {
+      // Only a `Straße` name can carry the abbreviation, and index arithmetic alone kept landing
+      // on `…gasse` streets — so pick from the Straße pool explicitly. The second spelling is the
+      // written-out form: abbreviating both would produce two chains with identical folder names.
+      const strasseStreets = streets.filter((name) => /straße/iu.test(name));
+      const strasseRaw = strasseStreets[placeIndex % strasseStreets.length];
+      return spelling === 'typo'
+        ? `${spellingVariantStreetName(strasseRaw)} ${houseNumber}`
+        : `${abbreviateStrasse(strasseRaw)} ${houseNumber}`;
     }
   }
 }
@@ -241,8 +293,19 @@ export function placeFirmaArchiveFile(fileIndex: number, _seed: number): FirmaAr
   const slot = locationIndex % FIRMA_FOLDERS_PER_PLACE;
   const spelling = slot < FIRMA_COPIES_PER_SPELLING ? 'canonical' : 'typo';
   const copyIndex = slot % FIRMA_COPIES_PER_SPELLING;
+  // A `/` in the building name is a nested unit folder, not one folder with a slash in it.
+  const buildingSegments = building.split('/');
+
+  if (placeSkipsPostcode(placeIndex)) {
+    return {
+      segments: [site.bundesland, ...buildingSegments],
+      city: site.city,
+      shapeLabel: `firma_at_archive:street_under_bundesland:${spelling}:copy${copyIndex}`,
+    };
+  }
+
   return {
-    segments: [site.bundesland, site.postcode, building],
+    segments: [site.bundesland, site.postcode, ...buildingSegments],
     city: site.city,
     shapeLabel: `firma_at_archive:building:${spelling}:copy${copyIndex}`,
   };

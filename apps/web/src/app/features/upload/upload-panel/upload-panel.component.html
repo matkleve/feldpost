@@ -59,6 +59,11 @@
             )
           }}
         </p>
+        @if (archiveProgress.filesFailed > 0) {
+          <p class="upload-panel__archive-progress-line" data-state="failed">
+            {{ archiveFilesFailedLabel(archiveProgress.filesFailed) }}
+          </p>
+        }
         <p class="upload-panel__archive-progress-line">
           {{ archiveAwaitingResolutionLabel(archiveProgress.itemsAwaitingResolution) }}
         </p>

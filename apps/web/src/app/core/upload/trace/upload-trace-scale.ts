@@ -107,7 +107,10 @@ export function measureClassifyAtScale(
     let conflictKey: string | undefined;
     if (so.areaConflicts?.length) {
       outcome = 'admin_conflict';
-      conflictKey = so.areaConflicts.map((conflict) => conflict.field).join(',');
+      // Key by the address, not only by which field disagreed. Keying on the field name alone
+      // collapsed every city conflict in a corpus into one group and one tray, which is the
+      // number this report exists to state.
+      conflictKey = `${so.groupingKey}|${so.areaConflicts.map((conflict) => conflict.field).join(',')}`;
     } else if (layers.packageConflict) {
       outcome = 'layer_conflict';
       conflictKey = layers.packageConflict.layerConflictQueryKey;

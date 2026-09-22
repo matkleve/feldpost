@@ -235,6 +235,20 @@ describe('buildAddressLayers — weak segments never compete', () => {
     expect(detectPackageConflicts(layers, 'Graz/Annenstraße 10')).not.toBeNull();
   });
 
+  // Street spelling folding is for streets. A house number is a number: 11 and 1 are two
+  // buildings, and a compare that cannot tell them apart answers a question nobody asked.
+  // @see docs/specs/service/media-upload-service/upload-search-object.street-fold.supplement.md S5
+  it('keeps a disagreement between house numbers that share a leading digit', () => {
+    const layers = buildAddressLayers(
+      'Graz/Annenstraße 11/Annenstraße 1 Detail.jpg',
+      'Annenstraße 1 Detail.jpg',
+      geoAt,
+    );
+
+    expect(detectPackageConflicts(layers, 'Graz/Annenstraße 11')).not.toBeNull();
+    expect(mergeLayersWithoutConflict(layers).houseNumber).toBeUndefined();
+  });
+
   it('does not form a package from a house number with no street', () => {
     const layers = buildAddressLayers('Baustelle Süd/Woche 12/IMG_8001.jpg', 'IMG_8001.jpg', geoAt);
 

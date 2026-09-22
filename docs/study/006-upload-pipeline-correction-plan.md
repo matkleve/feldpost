@@ -659,14 +659,9 @@ Worth recording as a pattern: **an injected-effect engine is only as honest as i
 adapter.** Both defects were invisible while every effect was a `vi.fn()` returning a convenient
 shape.
 
-**5.5 has a blocker this environment cannot clear.** The two RPCs are `SECURITY DEFINER` functions
-that read `media_items` and scope by `organization_id` — which AGENTS.md classes **Sensitive**, with
-live verification and `/security-review` mandatory. This environment has `psql` but no database
-URL, no Supabase CLI and no credentials, so the migration
-(`20260920120000_media_folder_tree_rpcs.sql`) has **never been applied or executed**. It follows the
-two established idioms exactly, and the file says so in a banner at the top, but *"follows the
-idiom"* is not *"verified"*, and the gap is in the one area where a mistake leaks another
-organization's rows.
+**5.5 blocker update (2026-09-22).** The migration is applied on hosted Feldpost; the blocker is now
+the Sensitive **verification ceremony** (cross-org read, validators, security review — #217), not
+DDL availability.
 
 **What 5.6 confirmed.** Running the bulk engine on a selection of one was cheaper than writing a
 single-item service *and* it is the only version of this that cannot drift: the spec's rule ("MUST
@@ -694,9 +689,11 @@ that is reasoning: *what is being claimed, and on what evidence.*
 
 **Update 2026-09-20 — a database was reachable.** Three of these moved, and one got worse.
 
-`[A]` **The tree RPCs are confirmed absent.** Querying `pg_proc` for `media_folder_tree` and its
-siblings returns nothing: `20260920120000_media_folder_tree_rpcs.sql` has never been applied. "Never
-applied" is now measured rather than assumed.
+**Update 2026-09-22 — migration applied on hosted.** Supabase MCP + `schema_migrations` on project
+`yvvzbpnoesxlzlbomlkv`: version `20260920120000` is recorded; `list_media_folder_children` and
+`list_media_in_folder` exist with `authenticated`-only EXECUTE. The 2026-09-20 `[A]` "RPCs confirmed
+absent" claim is **superseded for hosted** — it was true then, not now. Cross-org read, validator
+scripts, and `/security-review` remain open ([#217](https://github.com/matkleve/feldpost/issues/217)).
 
 `[A]` **RLS does scope `media_items` by organization with no predicate in the client.** The policy
 `media_items: org read` is `organization_id = user_org_id()`; simulated as `authenticated`, a member

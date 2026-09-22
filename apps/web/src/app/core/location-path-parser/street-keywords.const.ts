@@ -1,6 +1,15 @@
+/**
+ * The words that make the token before them part of the street name (`Lange` + `Gasse`).
+ * One owner: the token classifier used to keep a second, shorter copy of this list, and the copy
+ * had no `strasse` — so `Wiener Strasse` and `Lerchenfelder Strasse` both became the street
+ * `Strasse` and shared one grouping key.
+ */
 export const STREET_KEYWORDS = new Set<string>([
   'gasse',
   'gassen',
+  'gürtel',
+  'guertel',
+  'steig',
   'straße',
   'straßen',
   'strasse',

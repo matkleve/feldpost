@@ -347,7 +347,7 @@ population this figure is about has none by design.
 `[A]` **C's surface is smaller than the study assumed, and its click-through is blocked.** The study
 said C *"overlaps almost exactly with the unbuilt `/files` tree badge (#220) and the bulk dialog
 (#219)"*. `/files` turns out not to exist at all — no route, no component, only a spec — and #220 is
-gated behind #217, whose migration has never been applied. So C could not be built as "one surface
+gated behind #217 — migration applied on hosted 2026-09-22; cross-org verification still open. So C could not be built as "one surface
 rather than three". The figures now live in the workspace pane's Upload tab, which is persistent and
 therefore satisfies *"outlives the upload session"*; the run they should start still waits on #219,
 because writing without R7's confirmation would create the second write path the bulk supplement

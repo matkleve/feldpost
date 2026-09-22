@@ -50,18 +50,16 @@ export function foldStreetSpelling(value: string): string {
 }
 
 /**
- * Street component of `groupingKey` / layer street compare — abbreviation fold plus collapse of
- * consecutive duplicate letters (`Wasagasse` ≡ `Wasagase`).
+ * Street component of `groupingKey` and of the layer street compare: the orthographic variants of
+ * one spelling (`ß`/`ss`, `str.`/`straße`), and nothing beyond them. Letter-run collapse was tried
+ * here and reverted — it merges `Bischofgasse` with `Bischoffgasse`, two real Vienna streets.
  * @see docs/specs/service/media-upload-service/upload-search-object.street-fold.supplement.md
  */
 export function normalizeStreetForGroupingKey(value: string | null | undefined): string {
   if (value == null || !value.trim()) {
     return '';
   }
-  return foldStreetSpelling(value)
-    .replace(/(.)\1+/gu, '$1')
-    .replace(/\s+/g, ' ')
-    .trim();
+  return foldStreetSpelling(value);
 }
 
 export function splitPathSegments(fullPath: string): string[] {
