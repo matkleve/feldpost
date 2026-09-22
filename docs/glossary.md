@@ -265,7 +265,7 @@ Canonical names for every visible piece of the interface. Use these in code, doc
   The authenticated page grid (`app-grid-shell`). Four tracks: control area, main canvas, panel column, control area. The host owns every track width.
 
 - **Main canvas**  
-  The `1fr` track (`app-shell-main-canvas`). Route content mounts here. The map is one tenant of this track.
+  The `1fr` track (`app-shell-main-canvas`). A rounded `shell-box`. Every left-rail page mounts here. The map is one tenant of this track.
 
 - **Control area**  
   A backgroundless rail column (`app-shell-control-area`). The left rail changes the main canvas. The right rail opens and closes the panel column.

@@ -1,4 +1,4 @@
-// Scrollable stack. No background. Width comes from the open surfaces.
+// Scrollable stack. Block padding lines the cards up with the canvas box.
 // @see docs/specs/ui/shell/shell-panel-column.md
 :host {
   display: flex;
@@ -6,7 +6,7 @@
   gap: var(--spacing-2);
   min-width: 0;
   min-height: 0;
-  height: 100%;
+  padding-block: var(--spacing-3);
   overflow: auto;
   background: transparent;
 }

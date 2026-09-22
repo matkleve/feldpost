@@ -6,7 +6,7 @@ The authenticated page grid. Its host owns every track width. The left control a
 
 ## What It Looks Like
 
-Four columns in one grid. The left and right tracks size to their content. The canvas takes the remaining width (`1fr`). The panel column is an `auto` track and contributes no width when no panel is open. Track backgrounds are transparent. Containers inside the rails and panel surfaces share one surface: `@mixin shell-box` in `apps/web/src/styles/_frosted-chrome.scss`, which wraps `@mixin panel` and `border-radius: var(--container-radius-panel)`. No `--shell-*` custom property.
+Four columns in one grid. The left and right tracks size to their content. The canvas takes the remaining width (`1fr`). The panel column is an `auto` track and contributes no width when no panel is open. Rail tracks stay transparent. The main canvas is a `shell-box`: the rounded page slot for every left-rail route. Panel surfaces use the same mixin. `@mixin shell-box` in `apps/web/src/styles/_frosted-chrome.scss` wraps `@mixin panel` and `border-radius: var(--container-radius-panel)`. No `--shell-*` custom property.
 
 ## Where It Lives
 

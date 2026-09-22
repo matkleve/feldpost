@@ -6,7 +6,7 @@ The generic content track of the grid shell. It shows whatever route or widget i
 
 ## What It Looks Like
 
-A transparent region that fills the `1fr` track. It has no chrome of its own. Content brings its own surface. The track stretches to the grid row height.
+A rounded page box in the `1fr` track. Every left-rail page (map, projects, media, and later pages) renders inside this one box. `@include shell-box` supplies the frost, the border, and `border-radius: var(--container-radius-panel)`. `margin: var(--spacing-3)` insets the box so the page background shows in the corners. `overflow: hidden` clips the page to that radius.
 
 ## Where It Lives
 
@@ -47,7 +47,7 @@ This component does not read panel state or rail lists.
 | --- | --- |
 | `layout/shell/shell-main-canvas.component.ts` | Slot host |
 | `layout/shell/shell-main-canvas.component.html` | Projection |
-| `layout/shell/shell-main-canvas.component.scss` | Fill the track |
+| `layout/shell/shell-main-canvas.component.scss` | Rounded page box |
 
 ## Wiring
 
@@ -63,12 +63,14 @@ flowchart LR
 
 | Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer | Test Oracle |
 | --- | --- | --- | --- | --- | --- | --- |
-| Fill track | `app-shell-main-canvas` | `app-shell-main-canvas` | projected content | `:host` | content `0` | host is `min-width: 0` and `min-height: 0` |
+| Page box | `app-shell-main-canvas` | `app-shell-main-canvas` | projected page | `:host` | content `0` | `shell-box`, radius `--container-radius-panel`, inset `--spacing-3` |
 
-`:host` is a grid child and declares `min-width: 0` and `min-height: 0`. No background, border, or radius on this host.
+`:host` is a grid child and declares `min-width: 0` and `min-height: 0`. The projected page does not paint its own outer radius.
 
 ## Acceptance Criteria
 
-- [ ] The host has no background and no border.
-- [ ] The map can mount inside the canvas without the canvas importing Leaflet.
+- [ ] `:host` includes `shell-box` and clips its page with `overflow: hidden`.
+- [ ] Radius is `var(--container-radius-panel)`.
+- [ ] The inset is `var(--spacing-3)`, so the corners read against the page background.
+- [ ] Map, projects, and media all mount in this box. The canvas does not import Leaflet.
 - [ ] `:host` sets `min-width: 0` and `min-height: 0`.

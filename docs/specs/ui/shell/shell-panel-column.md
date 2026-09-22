@@ -6,7 +6,7 @@ The third grid track. It stacks the panels the right rail has opened. It has no 
 
 ## What It Looks Like
 
-A vertical stack of panel surfaces with `gap: var(--spacing-2)`. The track scrolls when the stack is taller than the viewport. When nothing is open the track contributes no width, because the grid template uses `auto` and this host is empty. Width when open follows the open surfaces, not a `--shell-*` maximum.
+A vertical stack of panel surfaces with `gap: var(--spacing-2)`. `padding-block: var(--spacing-3)` lines the stack up with the canvas box. The track scrolls when the stack is taller than the viewport. When nothing is open the track contributes no width, because the grid template uses `auto` and this host is empty. Width when open follows the open surfaces, not a `--shell-*` maximum. Inline padding is omitted so a closed column stays `0` wide.
 
 ## Where It Lives
 

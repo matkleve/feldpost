@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-/** Generic content track. The map is one tenant, not the shell. */
+/** Rounded page slot. Every left-rail route renders here. */
 @Component({
   selector: 'app-shell-main-canvas',
   standalone: true,
