@@ -105,6 +105,33 @@ const CHECKS = [
   },
   { name: "spec-coverage", cmd: "node", args: ["scripts/check-spec-coverage.mjs"] },
   {
+    name: "study-format",
+    cmd: "node",
+    args: ["scripts/check-study-format.mjs"],
+    // Hard on purpose, and at zero debt. It was written on 2026-09-22 carrying
+    // two allowlisted violations (STUDY-009's `status: decided` and its
+    // `corrected-by: self (…)`, from cfc7c78); the owner decided both the same
+    // day and the allowlist is now empty. Any debt this check ever carries
+    // lives in `KNOWN_DEBT` inside the check, not in a `debt` string here,
+    // because that list is a ratchet the check enforces in both directions: a
+    // violation outside it fails, and an entry that no longer matches fails
+    // too, so debt cannot outlive its fix. Marking the check soft was the other
+    // option and is the wrong one — it would let the next missing index row
+    // through as silently as that one arrived.
+    // @see docs/study/013-study-system-audit.md
+  },
+  {
+    name: "study-claim-deletion",
+    cmd: "node",
+    args: ["scripts/check-study-claim-deletion.mjs"],
+    // The half of the study rules a frontmatter linter cannot reach: whether a
+    // change DELETED a graded claim rather than appending beside it. It does not
+    // judge the removal, only that someone declared it — `study-correction:` in
+    // the commit body. Skips with a printed reason when no base ref resolves, so
+    // a shallow or detached checkout never fails on something it cannot see.
+    // @see docs/study/STUDY-FORMAT.md § Correcting a study
+  },
+  {
     name: "config-field-readers",
     cmd: "node",
     args: ["scripts/check-config-field-readers.mjs"],
@@ -151,9 +178,38 @@ const CHECKS = [
       "--reporters=default",
       `--output-file=${testResultFile}`,
     ],
+    // STAYS SOFT, and the attempt to promote it is why.
+    //
+    // CONTRIBUTING.md says a soft check is promoted to hard the moment its
+    // count reaches zero, and on 2026-09-22 the count was zero, so it was
+    // promoted. **The very first full `npm run verify` after the promotion
+    // reported 1 failing of 1710.** Measured after, same tree, same day:
+    //
+    //   full `npm run verify`            1, 0, 0   (1 of 3)
+    //   isolated `verify.mjs test`       0, 0, 0, 0
+    //
+    // The failing test's name was not captured — it did not recur while being
+    // looked for, which is the signature rather than an excuse.
+    //
+    // The distinguishing condition is not the cache — `clean` clears .vite
+    // every time — it is **load**: it has only ever appeared inside a full run,
+    // where lint and lint:specs compete for the machine and Vitest's
+    // file-to-worker assignment changes. That is F-12's mechanism, and it means
+    // Phase 0.4b closed the symptom on an idle machine rather than the
+    // cross-file pollution underneath. One in three is rare enough to have been
+    // missed and far too common to gate a merge on.
+    //
+    // So the precondition for promotion is NOT met: the suite is zero in
+    // isolation and intermittently non-zero under the conditions the gate
+    // actually runs in. Promoting anyway would make `verify` and CI
+    // occasionally red on a clean tree — the exact failure this file's header
+    // says the gate exists to end.
+    //
+    // To promote it later, measure several consecutive FULL runs, not isolated
+    // `verify.mjs test` runs. The isolated number is the optimistic one.
     soft: true,
     debt:
-      "0 failing tests (measured 2026-09-20, three consecutive cold runs, 1 551 tests). The gate carried 25 failing across 12 files on 2026-09-13; Phase 0.4b is closed. The last file, upload.service.spec.ts, was genuinely order-dependent — four cold runs gave 0/0, 5/1, 0/0, 5/1, all five assertions or none, decided by vitest's file-to-worker assignment, which is why no subset reproduced it. Cause: vi.mock() binds per module registry and the Angular unit-test system bundles the whole suite, so the mock applied only when no other spec had loaded upload.service.util into that worker first. Fixed by an explicit reader seam (setUploadExifReaderForTests) rather than a module mock. If this note ever needs raising again, raise it with a measurement of several cold runs, not one: a single green run alternated to five twice during this work. See docs/study/005-upload-pipeline-trace-findings.md F-12 and docs/TRAPS.md.",
+      "0 failing in isolation, 1 in roughly one full run out of three (re-measured 2026-09-22, same tree: full runs 1/0/0, isolated runs 0/0/0/0, 1 710 tests — see the promotion note above for why it stays soft; the note said 1 551 from 2026-09-20 and the suite has grown since). It was NOT 0 in between: four assertions demanding the letter-run collapse survived the revert that deleted it (50979bf, 2026-09-16), and one more was written against the deleted contract four days later — so the gate read `known debt: 0 failing` while measuring 4 across 3 files, and nothing compared the two lines. The specs were corrected against upload-search-object.street-fold.supplement.md S3/SF-05, which is what the code had implemented all along. The failure count is the ratchet and stays at 0; the test count is not a ratchet and may rise. See docs/study/013-study-system-audit.md S-06. The gate carried 25 failing across 12 files on 2026-09-13; Phase 0.4b is closed. The last file, upload.service.spec.ts, was genuinely order-dependent — four cold runs gave 0/0, 5/1, 0/0, 5/1, all five assertions or none, decided by vitest's file-to-worker assignment, which is why no subset reproduced it. Cause: vi.mock() binds per module registry and the Angular unit-test system bundles the whole suite, so the mock applied only when no other spec had loaded upload.service.util into that worker first. Fixed by an explicit reader seam (setUploadExifReaderForTests) rather than a module mock. If this note ever needs raising again, raise it with a measurement of several cold runs, not one: a single green run alternated to five twice during this work. See docs/study/005-upload-pipeline-trace-findings.md F-12 and docs/TRAPS.md.",
   },
   { name: "build", cmd: "npm", args: ["run", "--silent", "build"] },
 ];

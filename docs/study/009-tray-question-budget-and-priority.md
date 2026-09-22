@@ -1,10 +1,18 @@
 ---
 id: STUDY-009
 type: proposal
-status: decided
+status: accepted
 supersedes: none
-corrected-by: self (§ The measurement, 2026-09-21)
+corrected-by: none
 ---
+
+> **This study corrected itself. Read [§ The measurement, 2026-09-21](#the-measurement-2026-09-21-229)
+> before acting on anything above it.** The measurement overturned this study's central worry: the
+> question volume it was written to control does not exist at the sizes it feared (0–29 questions at
+> 10 000 files, decided by folder shape and not by file count). Priority (#231) and the backlog
+> surface (#232) shipped; the budget (#230) was closed as not planned. The earlier sections are kept
+> as written — the reasoning that led to the measurement is the point — but they are not the
+> conclusion.
 
 **Written 2026-09-20** on `claude/uploader-pipeline-test-badges-kktrpg`, from the owner's proposal
 plus a read of the shipped tray code and config. **No question-volume measurement exists yet**, so
