@@ -18,7 +18,7 @@ no tray was opened.
 **Why this file exists.** The reasoning below was written in the body of
 [issue #245](https://github.com/matkleve/feldpost/issues/245) and cited from it as a study — first as
 `STUDY-010`, then, after an edit at 10:39 the same morning, as `STUDY-011`. Neither file existed.
-[STUDY-012](./012-study-system-audit.md) § S-03 found the dangling citation, and its
+[STUDY-013](./013-study-system-audit.md) § S-03 found the dangling citation, and its
 § Update 2026-09-22 records what the renumbering turned out to be part of: three studies that do not
 exist cascading across three consecutive ids in two minutes. This file is the document #245 points
 at, filed at **011** to match the citation as it now stands rather than moving it a third time.
@@ -175,5 +175,5 @@ These are the issue's open questions, unchanged in substance and graded:
 - [Issue #245](https://github.com/matkleve/feldpost/issues/245) — the feature, its acceptance criteria and its change class (**Sensitive**: upload pipeline, and it writes locations)
 - [STUDY-007](./007-exif-coordinates-as-address-evidence.md) — why EXIF may not supply a house number
 - [STUDY-009](./009-tray-question-budget-and-priority.md) — priority, budget, and the deferred-improvement surface
-- [STUDY-012](./012-study-system-audit.md) § S-03 — how this study came to be cited before it existed
+- [STUDY-013](./013-study-system-audit.md) § S-03 — how this study came to be cited before it existed
 - [`upload-search-object.md`](../specs/service/media-upload-service/upload-search-object.md) § Grouping identity is address identity — the customer-segment rule, written from this study

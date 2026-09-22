@@ -1,5 +1,5 @@
 ---
-id: STUDY-012
+id: STUDY-013
 type: review
 status: proposed
 supersedes: none
@@ -379,19 +379,19 @@ for issues, PRs and specs"* and says it is *"never reused"*. The handle's whole 
 following #241's `[A]` grade to `docs/study/009-…` lands on a tray-question budget study that says
 nothing about `resolveIssue`. `[A]`
 
-**This is also why this study is STUDY-011 and not STUDY-010**, which `STUDY-FORMAT.md:98` would
-otherwise require ("take the next free `STUDY-NNN`"). `STUDY-010` is unfree in the only sense that
+**This is also why this study is STUDY-011 and not STUDY-012**, which `STUDY-FORMAT.md:98` would
+otherwise require ("take the next free `STUDY-NNN`"). `STUDY-012` is unfree in the only sense that
 matters: it is publicly cited, in an open issue, as a specific accepted document. Taking it would
 create a *second* collision of exactly the kind § S-03 is about. The gap at 010 is deliberate and is
 recorded here so nobody closes it by accident. `[D]`
 
 > **The ids in the paragraph above are the ids as they stood when it was written, and this file is
-> now STUDY-012.** The paragraph is kept rather than corrected in place, because its reasoning is the
+> now STUDY-013.** The paragraph is kept rather than corrected in place, because its reasoning is the
 > evidence for what happened next — see § Update 2026-09-22, *§ S-03 was right about the mechanism and
 > wrong about which id was safe*.
 
 **Recommend:** (b) for both — whoever owns #245 and #241/#242 either writes the study that was cited
-or corrects the citation. Reusing `STUDY-010` for anything else needs the owner's word first.
+or corrects the citation. Reusing `STUDY-012` for anything else needs the owner's word first.
 
 ### The closed folders
 
@@ -584,7 +584,7 @@ where the text below supersedes a claim, it says which.
 | 1 | STUDY-009's `decided` | → `accepted`. No ninth status value. |
 | 2 | `corrected-by: self (…)` | → `none`, and the self-correction moved into a **banner** under the frontmatter pointing at § The measurement. The frontmatter says what a machine reads; the banner says what a reader needs. |
 | 3 | STUDY-007, STUDY-008 | → `accepted`. And the Definition of Done in [`idea-to-ship-pipeline.md`](../playbooks/idea-to-ship-pipeline.md) now requires the status to move in the same change that ships the recommendation, so it cannot rot the same way twice. |
-| 4 | The dangling study citations | [STUDY-011](./011-exif-inheritance-grouping-unit.md) **written**; STUDY-010 (jev) reserved and still owed; this audit renumbered 011 → 012 to yield. See below — the ids had cascaded twice before the audit was committed. |
+| 4 | The dangling study citations | [STUDY-011](./011-exif-inheritance-grouping-unit.md) and [STUDY-012](./012-disambiguation-model-evaluation.md) **both written and both re-measured from scratch**; the JEV System One adoption evaluation is a different question and is still owed (STUDY-012 § What `jev` was). This audit renumbered twice, 011 → 012 → 013, yielding each time. See § S-07 — the ids collided four times in one day and the scheme, not the people, is why. |
 | 5 | In-place update vs new study | Legalised with a line: **append in place, reverse in a new study**, and `## Update` sections are append-only. Backed by `scripts/check-study-claim-deletion.mjs`. |
 | 6 | `.cursor/rules/` citing studies | **No** — and the gap was real, so the index gained a § Read before touching routing table instead. STUDY-004 now has a route. |
 | 7 | `CONTRIBUTING.md` | Stops restating gate counts; points at `node scripts/verify.mjs --list`. |
@@ -600,7 +600,7 @@ on 2026-09-22** — after this audit's evidence was gathered and before it was c
 
 | Issue | Cited when the audit read it | Cites now | Note in the issue |
 | --- | --- | --- | --- |
-| #241 | `009-jev-system-one-model-evaluation.md` | `010-jev-…` | *"filed as STUDY-009 when the issue was opened; `main` already carried a different STUDY-009, so it became STUDY-010 on merge"* |
+| #241 | `009-jev-system-one-model-evaluation.md` | `010-jev-…` | *"filed as STUDY-009 when the issue was opened; `main` already carried a different STUDY-009, so it became STUDY-012 on merge"* |
 | #242 | `009-jev-system-one-model-evaluation.md` | `010-jev-…` | same |
 | #245 | `010-exif-inheritance-grouping-unit.md` | `011-exif-…` | none |
 
@@ -614,14 +614,14 @@ has a written rationale, so it wins:
 
 | id | Document | State |
 | --- | --- | --- |
-| **STUDY-010** | [`010-disambiguation-model-evaluation.md`](./010-disambiguation-model-evaluation.md) | **Written from scratch** — see below |
+| **STUDY-012** | [`012-disambiguation-model-evaluation.md`](./012-disambiguation-model-evaluation.md) | **Written from scratch** — see below |
 | **STUDY-011** | [`011-exif-inheritance-grouping-unit.md`](./011-exif-inheritance-grouping-unit.md) | **Written** — this update's deliverable, matching #245 |
-| **STUDY-012** | this file | Renumbered from 011 |
+| **STUDY-013** | this file | Renumbered from 011 |
 
 Renumbering *this* audit was the cheap move — its only inbound references were the ones written
 today, in this branch. Renumbering #241, #242 and #245 instead would have been a fourth cascade.
 
-**STUDY-010 was re-measured rather than reconstructed, and that turned out to matter.** `[A]` The
+**STUDY-012 was re-measured rather than reconstructed, and that turned out to matter.** `[A]` The
 first plan here was to leave the id reserved, because writing a study to fill an id would be
 fabricating evidence to satisfy a citation. The owner's instruction was to redo the measurement
 instead — so it was redone, from zero, against the shipped code: the 28 280-combination sweep through
@@ -640,7 +640,7 @@ The result justifies the instruction. **Two of the issues' claims did not surviv
 
 Neither would have been found by filing the citation as written. `[A]` The name `jev` carried no
 meaning anywhere in the repository, so the file is named for its subject:
-[`010-disambiguation-model-evaluation.md`](./010-disambiguation-model-evaluation.md).
+[`012-disambiguation-model-evaluation.md`](./012-disambiguation-model-evaluation.md).
 
 **The general lesson is not about these two issues.** `[C]` A citation to a study that does not exist
 is not merely a broken link — it is a claim of verification that nobody can check, and in this case
@@ -678,6 +678,53 @@ against the spec, and their **names** with them — *"folds the street into the 
 do not ask twice"* was a Constitution § 3 violation in a test name, describing behaviour the repository
 had decided against. `[A]` Measured after: **0 failing of 1 710 tests**, cold. The gate's debt note now
 records what happened instead of only the number.
+
+### S-07 — the id scheme has a concurrency problem, and it is not a process failure
+
+This is the finding the day actually produced, and it outranks S-03. `[A]`
+
+**A sequential id is allocated by reading the folder and taking the next free number. That read is
+stale the moment a second branch exists.** In one working day, 2026-09-22, `STUDY-010` was claimed
+four separate times by four pieces of work:
+
+| Claimed by | As | Outcome |
+| --- | --- | --- |
+| #241, #242 (renumbered 009 → 010 at 10:37) | `010-jev-system-one-model-evaluation.md` | Never filed |
+| #245 (renumbered 010 → 011 at 10:39) | `010-exif-inheritance-grouping-unit.md` | Moved, then filed at 011 |
+| This audit's first fix | `010-disambiguation-model-evaluation.md` | Moved to 012 |
+| **PR #207, merged to `main`** | `010-defensive-security-review.md` | **Won — it merged first** |
+
+`[A]` PR #207 carried its own renumbering commits (`docs(study): mark STUDY-009 F-01…F-07
+remediated`, then `merge(main): resolve PR #207 conflicts — STUDY-010`), so that branch had already
+fought the same collision independently, against a *different* neighbour, and resolved it the same
+way — by moving.
+
+**Nobody did anything wrong in any of the four.** `[C]` Each allocated the lowest free id against the
+tree it could see. The scheme guarantees a collision whenever two branches allocate between merges,
+and the cost is paid by whoever merges last: every inbound citation — issues, specs, code comments —
+has to move with the file, and a citation that is *not* updated becomes a confident pointer at
+someone else's document. That is strictly worse than a broken link, and S-03 shows it had already
+happened twice.
+
+The `study-format` check does not help here. `[A]` It enforces that an id matches its filename and is
+unique **within one tree**, which every one of the four states satisfied individually. Cross-branch
+uniqueness is not a property a single checkout can see.
+
+**Recommend** — `[D]`, and this is a real decision, not a nit:
+
+1. **Allocate on merge, not on write.** A study is drafted with no number
+   (`docs/study/draft-<slug>.md`) and takes its id in the commit that merges it, when the tree is
+   authoritative. Costs one rename per study; removes the class.
+2. **Or drop sequential ids** for something allocation-free — a date-prefixed slug
+   (`2026-09-22-disambiguation-model-evaluation`) collides only if two studies on one subject land on
+   one day. It breaks `STUDY-NNN` as a citable handle, which `STUDY-FORMAT.md:49` treats as the
+   field's whole point, so this is the expensive option.
+3. **Or accept collisions and make them cheap:** a `reserved` line in the index that a branch adds
+   *first*, before writing, so the next allocator sees the claim. Weakest, but it costs nothing and
+   would have prevented three of the four.
+
+Until one is chosen, the working rule is the one this audit ended up following: **whoever has the
+fewest inbound citations moves.** `[D]`
 
 ### What is still open
 

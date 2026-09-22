@@ -30,7 +30,7 @@
  * Usage: `node scripts/check-study-claim-deletion.mjs [--base <ref>]`
  *
  * @see docs/study/STUDY-FORMAT.md § Correcting a study
- * @see docs/study/012-study-system-audit.md § S-04
+ * @see docs/study/013-study-system-audit.md § S-04
  */
 
 import { execFileSync } from "node:child_process";

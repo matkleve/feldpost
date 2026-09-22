@@ -1,5 +1,5 @@
 ---
-id: STUDY-010
+id: STUDY-012
 type: investigation
 status: proposed
 supersedes: none
@@ -20,13 +20,50 @@ upload. Reproduction recipe in § How to re-run this.
 [#242](https://github.com/matkleve/feldpost/issues/242) have cited a study for this work since
 2026-09-22, first as `STUDY-009`, then as `docs/study/010-jev-system-one-model-evaluation.md`.
 **That file never existed**, in any branch or any commit
-([STUDY-012](./012-study-system-audit.md) § S-03). The measurements quoted in those issues are
+([STUDY-013](./013-study-system-audit.md) § S-03). The measurements quoted in those issues are
 therefore unverifiable as filed — not wrong, but unbacked.
 
 So nothing here is inherited. **Every number below was re-measured from scratch**, and where a
 re-measurement disagrees with what the issues claim, this study says so and the issue is wrong.
-Two of them are. The name `jev` carried no meaning in this repository — `grep -rni '\bjev\b'`
-returns nothing outside quotations of the citation itself — so the file is named for what it is.
+Two of them are.
+
+### What `jev` was, and what this study is therefore *not*
+
+`grep -rni '\bjev\b'` returns nothing in this repository outside quotations of the citation itself.
+`[A]` The owner supplied the missing context on 2026-09-22:
+
+> **JEV is the new "System One" agent by Diogo.** The lost study was an evaluation of **whether
+> Feldpost could use it.**
+
+That is a **different question from the one this file answers**, and the difference matters enough to
+state plainly:
+
+| | The lost study | This study |
+| --- | --- | --- |
+| Question | *Should we adopt JEV System One?* | *What can the disambiguation model we already ship decide?* |
+| Subject | An external agent, outside this repository | `location-path-parser.service.ts`, `disambiguation-algorithms.ts` |
+| Evidence available here | **None** — the agent is not reachable from this environment | The shipped code, executed |
+
+The measurements quoted in #241 and #242 are *about the internal model*, so re-running them was
+possible and is what this file is. **The adoption evaluation is not recoverable and has to be done
+again** — it needs access to JEV System One, and a scope nobody has restated.
+
+**So this study does not close the question the original was asked.** `[D]` It closes the half that
+could be re-measured, and it establishes what the internal model can and cannot do — which is the
+baseline any adoption comparison needs anyway: you cannot say whether an external agent is better
+without knowing what the incumbent scores. Read § F-4 as that baseline.
+
+**What the redo owes**, when someone has access: `[D]`
+
+1. What JEV System One is asked to do here — city disambiguation only, or the whole address
+   resolution path?
+2. The same corpus through both, scored the same way. The internal side's numbers are in this file.
+3. The cost and dependency side an internal model does not have: latency per file at 10 000 files
+   (compare [STUDY-008](./008-classification-chunking-strategy.md)'s 0.17 s structure-read against
+   8.2 min classification), what leaves the machine, and what happens when it is unavailable.
+4. A `[D]` on adoption that says who owns it, kept separate from the `[A]`s about either model.
+
+Tracked in the same issues that cited it — see § Related.
 
 ---
 
@@ -231,6 +268,7 @@ All `[D]`. Someone owns these and it is not this study.
 | The tray-question volume attributable to this | Nothing was run end to end; no tray was opened. `[C]` | `upload-trace-report.ts` already counts `disambiguationGroups()` — measure before and after option 1. |
 | That deletion (option 4) is safe | No caller inventory was taken. `[C]` | `grep` every reader of `DisambiguationOutcome` and `CITY_REGISTRY` and check what depends on the shape. |
 | Anything about `distance-weighted` or `bayesian-context` in production | Neither is the shipped algorithm; they were read, not exercised. `[B]` | Only matters if `disambiguationAlgorithm` is ever changed. |
+| **Whether JEV System One should replace any of this** | The agent is not reachable from this environment, and the original evaluation was never filed. `[D]` — not even `[C]`: there is no evidence here, only an open question. | The redo described in § What `jev` was. It needs access to the agent and a restated scope, and it is the only part of the original citation this file does not recover. |
 
 ## How to re-run this
 
@@ -253,4 +291,5 @@ would have been a test that tests nothing. To reproduce, drive the shipped code 
 - [#242](https://github.com/matkleve/feldpost/issues/242) — F-1, F-2, F-4. Its table is reproduced exactly; its "never fires" is sharpened, and F-5 says its acceptance criteria are not sufficient.
 - [STUDY-009](./009-tray-question-budget-and-priority.md) — the tray-question volume this feeds
 - [STUDY-005](./005-upload-pipeline-trace-findings.md) F-18 — the 2 118-municipality gazetteer, against this model's 6-city registry
-- [STUDY-012](./012-study-system-audit.md) § S-03 — why this study had to be written from scratch
+- [STUDY-013](./013-study-system-audit.md) § S-03 — why this study had to be written from scratch, and the id cascade around it
+- **The JEV System One adoption evaluation — still owed.** Not in this repository, not recoverable from here, and not answered by this file. See § What `jev` was.

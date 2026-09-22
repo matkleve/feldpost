@@ -859,7 +859,7 @@ organization.roles.delete_confirm.message,This role will be removed permanently.
 organization.branding.title,Branding,organization branding section title,Branding,Branding,Branding
 organization.branding.subtitle,Logo and theme colors applied across your workspace.,organization branding section subtitle,Logo and theme colors applied across your workspace.,Logo und Designfarben für deinen Arbeitsbereich.,Logo e colori del tema applicati all'area di lavoro.
 organization.branding.logo_title,Logo,organization branding logo group title,Logo,Logo,Logo
-organization.branding.logo_hint,PNG JPG WebP or SVG. Max 2 MB. Shown in navigation and exports.,organization branding logo hint,PNG, JPG, WebP, or SVG. Max 2 MB. Shown in navigation and exports.,PNG, JPG, WebP oder SVG. Max. 2 MB. Wird in Navigation und Exporten angezeigt.,PNG, JPG, WebP o SVG. Max 2 MB. Mostrato in navigazione ed esportazioni.
+organization.branding.logo_hint,PNG JPG or WebP. Max 2 MB. Shown in navigation and exports.,organization branding logo hint,PNG, JPG, or WebP. Max 2 MB. Shown in navigation and exports.,PNG, JPG oder WebP. Max. 2 MB. Wird in Navigation und Exporten angezeigt.,PNG, JPG o WebP. Max 2 MB. Mostrato in navigazione ed esportazioni.
 organization.branding.logo_upload,Upload logo,organization branding logo upload action,Upload logo,Logo hochladen,Carica logo
 organization.branding.logo_uploading,Uploading…,organization branding logo uploading state,Uploading…,Wird hochgeladen…,Caricamento…
 organization.branding.logo_remove,Remove logo,organization branding logo remove action,Remove logo,Logo entfernen,Rimuovi logo
