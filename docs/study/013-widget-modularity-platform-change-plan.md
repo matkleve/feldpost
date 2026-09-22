@@ -62,7 +62,20 @@ Move Feldpost from **fixed route nav** (Map, Media, Projects, Colleagues, Organi
 | **Colleagues** | DMs, channels, invites |
 | **Bundle: Org + Colleagues** | Single install action; mutual dependency |
 
-Other current routes as candidate widgets (not decided): Map, Media, Projects, Upload, Settings, Profile, Shared media, Help, …
+Other current routes as candidate widgets (not decided): Media, Projects, Upload, Settings, Profile, Shared media, Help, … **Map = platform core** — see [STUDY-015](./015-map-as-platform-core.md).
+
+---
+
+## Owner decisions (2026-09-22, conversation) `[D]`
+
+| ID | Decision |
+| --- | --- |
+| **Q5** | **Bundle-only** — Org + Colleagues install together only ([STUDY-014](./014-org-colleagues-widget-bundle.md)) |
+| **Q1** | **Map always present** (platform core, not catalog widget) — confirm via [STUDY-015](./015-map-as-platform-core.md) |
+| **Q11** | **DB as modular as widgets** — needs substantial work ([STUDY-016](./016-database-modularization-for-widgets.md)) |
+| **Q20** | **Implementation order:** shell grid ([#257](https://github.com/matkleve/feldpost/issues/257) / STUDY-012) **first**, then widget platform ([#258](https://github.com/matkleve/feldpost/issues/258)) |
+
+**Q20 clarified:** Not “which design is more important” — **build sequence**. Ship four-track shell, content panels, hover rails before widget catalog/install engine.
 
 ---
 
@@ -71,7 +84,7 @@ Other current routes as candidate widgets (not decided): Map, Media, Projects, U
 | Area | Location | Widget candidate? |
 | --- | --- | --- |
 | Nav routes | `features/nav/nav.component.ts` | Becomes installed-widget list |
-| Map | `features/map/` | Core vs optional widget — **open** |
+| Map | `features/map/` | **Platform core** — not installable ([STUDY-015](./015-map-as-platform-core.md)) |
 | Media | `features/media/` | Widget |
 | Projects | `features/projects/` | Widget |
 | Colleagues | `features/colleagues/` | Bundled with Organization |
@@ -101,10 +114,11 @@ See issue for full Q1–Q20 table. Highlights:
 | ID | Title | Type | Blocks |
 | --- | --- | --- | --- |
 | **STUDY-013** | This document — platform scope + layers | proposal | Issue #258 |
-| **STUDY-014** | Widget dependency graph & bundle model (Org+Colleagues) | investigation | Install UX, DB |
-| **STUDY-015** | DB/RLS modularization patterns for widgets | investigation | Migrations, security |
-| **STUDY-016** | Widget catalog UI + left-rail list FSM | investigation | Shell + [#257](https://github.com/matkleve/feldpost/issues/257) |
-| **STUDY-017** | Feedback/request pipeline for widgets | proposal | Product ops |
+| **STUDY-014** | [Org + Colleagues bundle-only model](./014-org-colleagues-widget-bundle.md) | investigation | Q5 — **filed** |
+| **STUDY-015** | [Map as platform core](./015-map-as-platform-core.md) | investigation | Q1 — **filed** |
+| **STUDY-016** | [Database modularization for widgets](./016-database-modularization-for-widgets.md) | investigation | Q11 — **filed** |
+| **STUDY-017** | Widget catalog UI + left-rail list FSM | investigation | After #257 shell |
+| **STUDY-018** | Feedback/request pipeline for widgets | proposal | Q15–Q16 |
 
 **Reserved:** STUDY-010 — another workstream; do not use.
 
@@ -114,7 +128,7 @@ See issue for full Q1–Q20 table. Highlights:
 
 | Phase | Work |
 | --- | --- |
-| **0** | Issue #258 + studies 014–017; owner Q&A |
+| **0** | Issue #258 + STUDY-014–016; owner Q&A |
 | **1** | Widget manifest format (code); registry spec |
 | **2** | Install state store (DB + service); dependency resolver |
 | **3** | Catalog UI (+, search, cards, detail pages) |
