@@ -30,7 +30,7 @@
  * Usage: `node scripts/check-study-claim-deletion.mjs [--base <ref>]`
  *
  * @see docs/study/STUDY-FORMAT.md § Correcting a study
- * @see docs/study/011-study-system-audit.md § S-04
+ * @see docs/study/012-study-system-audit.md § S-04
  */
 
 import { execFileSync } from "node:child_process";
@@ -41,8 +41,20 @@ const ROOT = resolve(import.meta.dirname, "..");
 /** A line carrying an evidence grade. Grades appear inline, so anywhere in the line counts. */
 const GRADED = /\[[ABCD]\]/;
 
-/** The trailer that makes a deletion deliberate. Case-insensitive, anywhere in the commit body. */
-const TRAILER = /^\s*study-correction:\s*\S/im;
+/**
+ * The trailer that makes a deletion deliberate. Case-insensitive, anywhere in a commit body.
+ *
+ * The `[^<\s]` is not decoration. The first version of this gate accepted
+ * `\S`, and the very first commit it judged was the one that *introduced* it —
+ * whose message quotes the trailer's own placeholder as documentation:
+ *
+ *     study-correction: <why this claim was removed rather than superseded>
+ *
+ * The gate passed itself on its own example text. A placeholder is the one
+ * string guaranteed to appear in every document, template and commit that
+ * explains this rule, so it is the one string that must not satisfy it.
+ */
+const TRAILER = /^\s*study-correction:[ \t]*[^<\s][^\n]*$/im;
 
 const git = (...args) => execFileSync("git", args, { cwd: ROOT, encoding: "utf8" });
 
@@ -84,7 +96,17 @@ if (!base) {
 
 // Working tree against the base, so an uncommitted deletion is caught before it
 // is committed rather than after.
+//
+// Studies only — `docs/study/README.md` is deliberately out of scope. Its index
+// rows quote grades from the studies they summarise, so every ordinary row edit
+// would read as a deleted claim; a gate that fires on routine work is a gate
+// people learn to pass with a boilerplate trailer. The rows are guarded instead
+// by `check-study-format.mjs`, which requires one row per study with a matching
+// status — a summary cannot drift from its source without that failing.
 const diff = git("diff", "--unified=0", "--no-color", base.sha, "--", "docs/study");
+
+/** A study file, not the index or the format doc: `docs/study/NNN-slug.md`. */
+const isStudy = (path) => /^docs\/study\/\d{3}-.+\.md$/.test(path);
 
 /** Removed graded lines, grouped by file. `-` lines that are not `---` file headers. */
 const removals = new Map();
@@ -96,7 +118,7 @@ for (const line of diff.split("\n")) {
     continue;
   }
   if (line.startsWith("--- ") || line.startsWith("+")) continue;
-  if (!line.startsWith("-") || !file) continue;
+  if (!line.startsWith("-") || !file || !isStudy(file)) continue;
 
   const text = line.slice(1);
   if (!GRADED.test(text)) continue;

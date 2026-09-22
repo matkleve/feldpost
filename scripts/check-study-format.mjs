@@ -37,7 +37,7 @@
  * debt cannot be carried after it is paid. It may only go down.
  *
  * @see docs/study/STUDY-FORMAT.md
- * @see docs/study/011-study-system-audit.md — the audit that produced this gate
+ * @see docs/study/012-study-system-audit.md — the audit that produced this gate
  */
 
 import { readFileSync, readdirSync, existsSync } from "node:fs";
@@ -162,7 +162,7 @@ const CLOSED_FOLDER_BASELINE = new Set([
  * an entry that no longer matches fails too — so debt cannot outlive its fix,
  * which is how this list emptied instead of quietly going stale.
  *
- * @see docs/study/011-study-system-audit.md § S-01, § S-02
+ * @see docs/study/012-study-system-audit.md § S-01, § S-02
  */
 const KNOWN_DEBT = [];
 

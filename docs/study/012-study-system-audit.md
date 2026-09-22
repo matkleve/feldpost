@@ -1,5 +1,5 @@
 ---
-id: STUDY-011
+id: STUDY-012
 type: review
 status: proposed
 supersedes: none
@@ -365,7 +365,7 @@ tracked Markdown and cannot see GitHub.
 
 | Citation | Where | Reality |
 | --- | --- | --- |
-| `docs/study/010-exif-inheritance-grouping-unit.md`, described as **"now `accepted`"** | issue **#245** | **No such file.** Never existed: `git log --all -- 'docs/study/010*'` is empty, and `grep -rl "exif-inheritance-grouping"` over the tree returns nothing. |
+| `docs/study/011-exif-inheritance-grouping-unit.md`, described as **"now `accepted`"** | issue **#245** | **No such file.** Never existed: `git log --all -- 'docs/study/010*'` is empty, and `grep -rl "exif-inheritance-grouping"` over the tree returns nothing. |
 | `docs/study/009-jev-system-one-model-evaluation.md`, cited for **"§ F-1 / F-3 / F-4, graded `[A]`"** | issues **#241**, **#242** | **No such file** — and `STUDY-009` is taken, by `009-tray-question-budget-and-priority.md`. Two different documents are being cited under one id. |
 
 In-tree citations are clean by contrast: every `docs/study/NNN-…md` path referenced anywhere in the
@@ -384,6 +384,11 @@ otherwise require ("take the next free `STUDY-NNN`"). `STUDY-010` is unfree in t
 matters: it is publicly cited, in an open issue, as a specific accepted document. Taking it would
 create a *second* collision of exactly the kind § S-03 is about. The gap at 010 is deliberate and is
 recorded here so nobody closes it by accident. `[D]`
+
+> **The ids in the paragraph above are the ids as they stood when it was written, and this file is
+> now STUDY-012.** The paragraph is kept rather than corrected in place, because its reasoning is the
+> evidence for what happened next — see § Update 2026-09-22, *§ S-03 was right about the mechanism and
+> wrong about which id was safe*.
 
 **Recommend:** (b) for both — whoever owns #245 and #241/#242 either writes the study that was cited
 or corrects the citation. Reusing `STUDY-010` for anything else needs the owner's word first.
@@ -562,7 +567,7 @@ None of these were applied. Each is an owner call.
 | 1 | What status replaces STUDY-009's `decided` — or does `STUDY-FORMAT.md` gain a ninth value? | § S-01 |
 | 2 | Is `corrected-by: self` a legitimate shape, or does STUDY-009's measurement become its own study? | § S-02 |
 | 3 | Do STUDY-007 and STUDY-008 become `accepted`? | § 3 |
-| 4 | Who writes — or un-cites — `STUDY-010` and `009-jev-system-one-model-evaluation`? Is `STUDY-010` reserved? | § S-03 |
+| 4 | Who writes — or un-cites — `STUDY-011` and `009-jev-system-one-model-evaluation`? Is `STUDY-011` reserved? | § S-03 |
 | 5 | Is an in-place dated `Update` to an accepted study permitted, or must corrections be new studies? | § S-04, § 5.4 |
 | 6 | Should `.cursor/rules/` cite studies at all? | § 4 |
 | 7 | Does `CONTRIBUTING.md` § Known debt stop restating counts and point at `verify.mjs --list`? | § 3 |
@@ -579,7 +584,7 @@ where the text below supersedes a claim, it says which.
 | 1 | STUDY-009's `decided` | → `accepted`. No ninth status value. |
 | 2 | `corrected-by: self (…)` | → `none`, and the self-correction moved into a **banner** under the frontmatter pointing at § The measurement. The frontmatter says what a machine reads; the banner says what a reader needs. |
 | 3 | STUDY-007, STUDY-008 | → `accepted`. And the Definition of Done in [`idea-to-ship-pipeline.md`](../playbooks/idea-to-ship-pipeline.md) now requires the status to move in the same change that ships the recommendation, so it cannot rot the same way twice. |
-| 4 | STUDY-010 / jev | STUDY-010 **written** — see below. |
+| 4 | The dangling study citations | [STUDY-011](./011-exif-inheritance-grouping-unit.md) **written**; STUDY-010 (jev) reserved and still owed; this audit renumbered 011 → 012 to yield. See below — the ids had cascaded twice before the audit was committed. |
 | 5 | In-place update vs new study | Legalised with a line: **append in place, reverse in a new study**, and `## Update` sections are append-only. Backed by `scripts/check-study-claim-deletion.mjs`. |
 | 6 | `.cursor/rules/` citing studies | **No** — and the gap was real, so the index gained a § Read before touching routing table instead. STUDY-004 now has a route. |
 | 7 | `CONTRIBUTING.md` | Stops restating gate counts; points at `node scripts/verify.mjs --list`. |
@@ -587,32 +592,50 @@ where the text below supersedes a claim, it says which.
 
 ### § S-03 was right about the mechanism and wrong about which id was safe
 
-`[A]` § S-03 concluded: *"this is also why this study is STUDY-011 and not STUDY-010 … STUDY-010 is
-unfree in the only sense that matters"*. **That reasoning is superseded.** Re-reading #245 while
-filing the missing study showed it had been edited at 10:39 the same morning — the citation this
-audit found as `docs/study/010-exif-inheritance-grouping-unit.md` now reads
-`docs/study/011-exif-inheritance-grouping-unit.md`. `[A]` The id being claimed by an issue for a
-document that did not exist was **011**, which this study had already taken.
+§ S-03 reasoned that 010 was unfree and 011 was, and took 011. **Both halves were already out of
+date when it was written**, and finding out why is the most useful thing in this update.
 
-So the collision § S-03 predicted happened, to this study, within hours of it being written, and the
-only thing that prevented it was that the two edits did not overlap. `[A]` It is resolved the way
-§ S-03's own recommendation implies: the real document is filed at **STUDY-010**, which was free all
-along and which #245 used first; this audit keeps 011; and the citation in #245 is corrected.
-[STUDY-010](./010-exif-inheritance-grouping-unit.md) re-ran every measurement rather than copying the
-issue's table — the two agree.
+`[A]` All three dangling citations were **renumbered upward by their author between 10:37 and 10:39
+on 2026-09-22** — after this audit's evidence was gathered and before it was committed:
 
-The `009-jev-system-one-model-evaluation.md` citations in #241 and #242 are a different case: that
-measurement (28 280 input combinations against `resolveIssue`) may well have been run, but it was
-never filed and cannot be honestly reconstructed from here. `[C]` Those two issues carry the
-measurement output inline, so the fix is to cite the evidence where it actually is and stop claiming a
-study that does not exist.
+| Issue | Cited when the audit read it | Cites now | Note in the issue |
+| --- | --- | --- | --- |
+| #241 | `009-jev-system-one-model-evaluation.md` | `010-jev-…` | *"filed as STUDY-009 when the issue was opened; `main` already carried a different STUDY-009, so it became STUDY-010 on merge"* |
+| #242 | `009-jev-system-one-model-evaluation.md` | `010-jev-…` | same |
+| #245 | `010-exif-inheritance-grouping-unit.md` | `011-exif-…` | none |
+
+So the ids **cascaded**: jev moved 009 → 010 because 009 was taken, which pushed exif-inheritance
+010 → 011, which collided with the id this audit had just taken. `[A]` Three documents that do not
+exist were occupying three consecutive ids, and each renumber created the next collision. This is the
+failure mode § S-03 described, running faster than the audit describing it.
+
+**Resolved by yielding, not by renumbering again.** `[D]` The author's assignment is the live one and
+has a written rationale, so it wins:
+
+| id | Document | State |
+| --- | --- | --- |
+| **STUDY-010** | `010-jev-system-one-model-evaluation.md` | **Reserved. Still does not exist.** |
+| **STUDY-011** | [`011-exif-inheritance-grouping-unit.md`](./011-exif-inheritance-grouping-unit.md) | **Written** — this update's deliverable, matching #245 |
+| **STUDY-012** | this file | Renumbered from 011 |
+
+Renumbering *this* audit was the cheap move — its only inbound references were the ones written
+today, in this branch. Renumbering #241, #242 and #245 instead would have been a fourth cascade.
+
+**STUDY-010 stays empty, deliberately.** `[C]` The jev measurement — 28 280 input combinations
+against `resolveIssue`, and the ranker table in #242 — may well have been run, but it was never filed
+and cannot be honestly reconstructed from here. Writing a study to fill an id would be fabricating
+evidence to satisfy a citation, which is the inverse of the problem. Both issues carry their
+measurement output inline, so nothing is lost meanwhile; what is owed is the file, from whoever ran it.
+
+[STUDY-011](./011-exif-inheritance-grouping-unit.md) re-ran every measurement rather than copying
+#245's table — the two agree, which is the only reason either is trustworthy.
 
 ### A third dangling citation, found while fixing the second
 
 `[A]` #245 states the customer-segment ruling is *"now normative in
 `docs/specs/service/media-upload-service/upload-search-object.md` § Grouping identity is address
 identity"*. **That section does not exist**, and neither that spec nor its supplements mentions the
-customer segment. The *behaviour* is real — measured in STUDY-010 — but the decision has no normative
+customer segment. The *behaviour* is real — measured in STUDY-011 — but the decision has no normative
 home, so § Keys philosophy silently drops a leading segment with nothing saying that is intended.
 
 This strengthens § 7 § What a gate cannot do rather than contradicting it: `doc-links` passes on all
@@ -649,7 +672,7 @@ records what happened instead of only the number.
 ## Related
 
 - [`STUDY-FORMAT.md`](./STUDY-FORMAT.md) — the rules this audits, and its provenance warning
-- [STUDY-010](./010-exif-inheritance-grouping-unit.md) — the study this one found missing
+- [STUDY-011](./011-exif-inheritance-grouping-unit.md) — the study this one found missing
 - [`README.md`](./README.md) § Where new reasoning goes — the closed-folder rule
 - [STUDY-004](./004-organizational-redundancy-audit.md) — the previous audit of the instruction layers; § 4 C-01…C-03 are still open
 - [STUDY-005](./005-upload-pipeline-trace-findings.md) F-09, F-10, F-13 — the register/body disagreement
