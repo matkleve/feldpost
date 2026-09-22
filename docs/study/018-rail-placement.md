@@ -85,3 +85,7 @@ Read as a candidate only `[D]`: the overview lists the widgets the organization 
 The owner chose the overview as the empty-canvas widget, and the logo as the control that opens it `[D]`. The page contract is [widget-overview.md](../specs/page/widget-overview.md). `/` stays the map while the Map icon is on the rail `[D]`.
 
 The grant shape, chosen for modularity `[D]`: a code catalog, one organization install table, and new keys on the existing `org_permissions` catalog. Data scope is the organization. The contract is [widget-grants.md](../specs/system/widget-grants.md). The earlier "candidate only" paragraph stays.
+
+## Update 2026-09-22 — record audience
+
+The owner added a narrower audience `[D]`. A widget record can be limited to selected roles or selected groups, inside the organization. The sentence above that stops at the organization stays. Groups are the reserved organization groups, not workspace grouping `[A]` (`docs/specs/page/groups-feature.md`). The audience table is not named.

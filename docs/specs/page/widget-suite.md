@@ -31,7 +31,7 @@ suite widget page
 
 ## Data
 
-No table is named. A migration waits on [widget-grants.md](../system/widget-grants.md).
+No table is named. A migration waits on [widget-grants.md](../system/widget-grants.md). A record with no audience is visible across the organization. A record can also be limited to selected roles or groups.
 
 | Widget | English | German |
 | --- | --- | --- |

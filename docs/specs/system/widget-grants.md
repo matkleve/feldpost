@@ -44,7 +44,7 @@ Three modules, matching the roles system that already exists. No second grant en
 | Install | Whether the organization has added the widget | One table `organization_widgets (organization_id, widget_id)`, RLS by `user_org_id()` |
 | Role | Who may open it, and who may view, create, edit, or delete its records | New keys on `org_permissions`: `widget.<id>.open` and `widget.<id>.view`, `.create`, `.edit`, `.delete`. The roles screen already saves `org_role_permissions`. |
 
-Allowed data is the whole organization, the same cut as `projects.*` and `media.*`. A per-record or per-project grant is a later module. This spec still adds no migration.
+A role key says what a member may do. The audience says which records they may do it to. The organization is the outer boundary. A record with no audience is visible to every role in the organization that holds the data key. A record can also be limited to selected roles, or to selected groups. Groups are the reserved organization groups in [groups-feature.md](../page/groups-feature.md), not workspace grouping. This spec does not name the audience table and still adds no migration.
 
 ## State
 
