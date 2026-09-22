@@ -42,9 +42,9 @@ app-shell-control-container
 
 | File | Purpose |
 | --- | --- |
-| `layout/shell/shell-control-container.component.ts` | Box host <!-- planned --> |
-| `layout/shell/shell-control-container.component.html` | Projection <!-- planned --> |
-| `layout/shell/shell-control-container.component.scss` | `shell-box` <!-- planned --> |
+| `layout/shell/shell-control-container.component.ts` | Box host |
+| `layout/shell/shell-control-container.component.html` | Projection |
+| `layout/shell/shell-control-container.component.scss` | `shell-box` |
 
 ## Wiring
 

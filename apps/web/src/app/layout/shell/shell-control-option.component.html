@@ -1,0 +1,15 @@
+@if (option().kind === 'inert') {
+  <span class="shell-control-option__button" aria-disabled="true">
+    <span class="material-icons" aria-hidden="true">{{ option().icon }}</span>
+  </span>
+} @else {
+  <button
+    type="button"
+    class="shell-control-option__button"
+    [attr.aria-pressed]="option().kind === 'panel' ? open() : null"
+    [attr.aria-label]="t(option().labelKey, option().labelFallback)"
+  >
+    <span class="material-icons" aria-hidden="true">{{ option().icon }}</span>
+  </button>
+}
+<span class="shell-control-option__label">{{ t(option().labelKey, option().labelFallback) }}</span>

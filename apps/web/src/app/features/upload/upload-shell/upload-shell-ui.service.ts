@@ -1,4 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { FeatureFlagsService } from '../../../core/feature-flags/feature-flags.service';
+import { ShellLayoutService } from '../../../core/shell-layout/shell-layout.service';
 import { UploadResolverTrayOrchestratorService } from '../../../core/upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.service';
 import { UploadManagerService } from '../../../core/upload/upload-manager.service';
 import type { ExifCoords } from '../../../core/upload/upload.types';
@@ -10,6 +12,8 @@ import type { UploadPanelComponent } from '../upload-panel/upload-panel.componen
 @Injectable({ providedIn: 'root' })
 export class UploadShellUiService {
   private readonly uploadManager = inject(UploadManagerService);
+  private readonly featureFlags = inject(FeatureFlagsService);
+  private readonly shellLayout = inject(ShellLayoutService);
   private readonly trayOrchestrator = inject(UploadResolverTrayOrchestratorService);
 
   private placementPanel: UploadPanelComponent | null = null;
@@ -58,14 +62,26 @@ export class UploadShellUiService {
   );
 
   toggleUploadPanel(): void {
+    if (this.featureFlags.shellGridLayout()) {
+      this.shellLayout.setOpen('upload', !this.shellLayout.isOpen('upload'));
+      return;
+    }
     this._uploadPanelPinned.update((open) => !open);
   }
 
   closeUploadPanel(): void {
+    if (this.featureFlags.shellGridLayout()) {
+      this.shellLayout.close('upload');
+      return;
+    }
     this._uploadPanelPinned.set(false);
   }
 
   openUploadPanel(): void {
+    if (this.featureFlags.shellGridLayout()) {
+      this.shellLayout.open('upload');
+      return;
+    }
     this._uploadPanelPinned.set(true);
   }
 

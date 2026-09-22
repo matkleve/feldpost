@@ -45,9 +45,9 @@ This component does not read panel state or rail lists.
 
 | File | Purpose |
 | --- | --- |
-| `layout/shell/shell-main-canvas.component.ts` | Slot host <!-- planned --> |
-| `layout/shell/shell-main-canvas.component.html` | Projection <!-- planned --> |
-| `layout/shell/shell-main-canvas.component.scss` | Fill the track <!-- planned --> |
+| `layout/shell/shell-main-canvas.component.ts` | Slot host |
+| `layout/shell/shell-main-canvas.component.html` | Projection |
+| `layout/shell/shell-main-canvas.component.scss` | Fill the track |
 
 ## Wiring
 

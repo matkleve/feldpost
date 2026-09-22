@@ -1,0 +1,30 @@
+// Backgroundless rail column. Leftover space is space-between, not a gap token.
+// @see docs/specs/ui/shell/shell-control-area.md
+:host {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: var(--spacing-2);
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  padding: var(--spacing-2);
+  background: transparent;
+}
+
+// Logo is its own block and is not a button.
+// @see docs/specs/ui/shell/shell-control-area.md
+// Pushes the bottom group to the end of the rail. The space is leftover, not a token.
+// @see docs/specs/ui/shell/shell-control-area.md
+:host[data-side='left'] > app-shell-control-container:last-of-type {
+  margin-top: auto;
+}
+
+.shell-control-area__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+}

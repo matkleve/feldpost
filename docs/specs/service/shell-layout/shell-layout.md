@@ -54,12 +54,11 @@ Both states are reversible. There is no terminal state. Allowed transitions are 
 
 | File | Purpose |
 | --- | --- |
-| `core/shell-layout/shell-layout.service.ts` | Facade <!-- planned --> |
-| `core/shell-layout/shell-layout.service.spec.ts` | Transition tests <!-- planned --> |
-| `core/shell-layout/shell-layout.types.ts` | Panel id and stack row <!-- planned --> |
-| `core/shell-layout/shell-layout.helpers.ts` | Pure transitions <!-- planned --> |
-| `core/shell-layout/shell-layout-state.ts` | Guard <!-- planned --> |
-| `core/shell-layout/README.md` | Module index <!-- planned --> |
+| `core/shell-layout/shell-layout.service.ts` | Facade |
+| `core/shell-layout/shell-layout.service.spec.ts` | Transition tests |
+| `core/shell-layout/shell-layout.types.ts` | Panel id and stack row |
+| `core/shell-layout/shell-layout.helpers.ts` | Pure transitions |
+| `core/shell-layout/README.md` | Module index |
 
 ## Wiring
 

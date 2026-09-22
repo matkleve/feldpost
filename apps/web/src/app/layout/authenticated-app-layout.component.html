@@ -1,23 +1,62 @@
-<!-- Sidebar: only mounted when authGuard passes (this layout route). -->
-<app-nav />
+@if (shellGridLayout()) {
+  <app-grid-shell>
+    <app-shell-control-area side="left" data-shell-track="left" />
+    <app-shell-main-canvas data-shell-track="main">
+      <ng-container *ngTemplateOutlet="authenticatedMain" />
+    </app-shell-main-canvas>
+    <app-shell-panel-column data-shell-track="panels">
+      <app-shell-panel-surface
+        data-panel-id="upload"
+        panelId="upload"
+        [style.order]="shellLayout.orderOf('upload')"
+      >
+        <app-upload-panel
+          [visible]="true"
+          [embeddedInPane]="true"
+          (imageUploaded)="onImageUploadedFromWorkspacePane($event)"
+          (detailRequested)="openDetailView($event)"
+          (zoomToLocationRequested)="onZoomToLocationRequested($event)"
+          (placementRequested)="enterPlacementModeFromWorkspacePane($event)"
+          (locationPreviewRequested)="onUploadLocationPreviewRequestedFromWorkspacePane($event)"
+          (locationPreviewCleared)="onUploadLocationPreviewClearedFromWorkspacePane()"
+          (locationMapPickRequested)="onUploadLocationMapPickRequestedFromWorkspacePane($event)"
+        />
+      </app-shell-panel-surface>
+      <app-shell-panel-surface
+        data-panel-id="help"
+        panelId="help"
+        [style.order]="shellLayout.orderOf('help')"
+      >
+        <p>{{ t('shell.panel.help.body', 'Help is not available yet.') }}</p>
+      </app-shell-panel-surface>
+    </app-shell-panel-column>
+    <app-shell-control-area side="right" data-shell-track="right" />
+  </app-grid-shell>
+} @else {
+  <app-nav />
+  <ng-container *ngTemplateOutlet="authenticatedMain" />
+}
 
-<div class="authenticated-app-layout__main">
-  <!-- Upload chrome — top-right of main column only (does not cover workspace pane). -->
-  <app-upload-shell />
+<ng-template #authenticatedMain>
+  <div class="authenticated-app-layout__main">
+    @if (!shellGridLayout()) {
+      <app-upload-shell />
+    }
 
-  <div
-    class="authenticated-app-layout__map-host"
-    [class.authenticated-app-layout__map-host--visible]="mapShellVisible()"
-  >
-    <app-map-shell />
+    <div
+      class="authenticated-app-layout__map-host"
+      [class.authenticated-app-layout__map-host--visible]="mapShellVisible()"
+    >
+      <app-map-shell />
+    </div>
+    <div
+      class="authenticated-app-layout__shell-outlet"
+      [class.authenticated-app-layout__shell-outlet--map-active]="mapShellVisible()"
+    >
+      <router-outlet />
+    </div>
   </div>
-  <div
-    class="authenticated-app-layout__shell-outlet"
-    [class.authenticated-app-layout__shell-outlet--map-active]="mapShellVisible()"
-  >
-    <router-outlet />
-  </div>
-</div>
+</ng-template>
 
 @if (photoPanelOpen()) {
   <app-drag-divider
@@ -44,17 +83,19 @@
     (workspaceItemHoverStarted)="onWorkspaceItemHoverStartedFromPane($event)"
     (workspaceItemHoverEnded)="onWorkspaceItemHoverEndedFromPane($event)"
   >
-    <app-upload-panel
-      data-workspace-upload-tab
-      [visible]="true"
-      [embeddedInPane]="true"
-      (imageUploaded)="onImageUploadedFromWorkspacePane($event)"
-      (detailRequested)="openDetailView($event)"
-      (zoomToLocationRequested)="onZoomToLocationRequested($event)"
-      (placementRequested)="enterPlacementModeFromWorkspacePane($event)"
-      (locationPreviewRequested)="onUploadLocationPreviewRequestedFromWorkspacePane($event)"
-      (locationPreviewCleared)="onUploadLocationPreviewClearedFromWorkspacePane()"
-      (locationMapPickRequested)="onUploadLocationMapPickRequestedFromWorkspacePane($event)"
-    />
+    @if (!shellGridLayout()) {
+      <app-upload-panel
+        data-workspace-upload-tab
+        [visible]="true"
+        [embeddedInPane]="true"
+        (imageUploaded)="onImageUploadedFromWorkspacePane($event)"
+        (detailRequested)="openDetailView($event)"
+        (zoomToLocationRequested)="onZoomToLocationRequested($event)"
+        (placementRequested)="enterPlacementModeFromWorkspacePane($event)"
+        (locationPreviewRequested)="onUploadLocationPreviewRequestedFromWorkspacePane($event)"
+        (locationPreviewCleared)="onUploadLocationPreviewClearedFromWorkspacePane()"
+        (locationMapPickRequested)="onUploadLocationMapPickRequestedFromWorkspacePane($event)"
+      />
+    }
   </app-workspace-pane>
 }

@@ -1,0 +1,9 @@
+<header class="shell-panel-surface__header">
+  <h2>{{ title() }}</h2>
+  <button type="button" class="shell-panel-surface__close" (click)="close()">
+    {{ t('shell.panel.close', 'Close') }}
+  </button>
+</header>
+<div class="shell-panel-surface__body">
+  <ng-content />
+</div>

@@ -51,9 +51,9 @@ Open/closed is owned by `ShellLayoutService`, not this surface.
 
 | File | Purpose |
 | --- | --- |
-| `layout/shell/shell-panel-surface.component.ts` | Body switch <!-- planned --> |
-| `layout/shell/shell-panel-surface.component.html` | Header and body <!-- planned --> |
-| `layout/shell/shell-panel-surface.component.scss` | `shell-box` <!-- planned --> |
+| `layout/shell/shell-panel-surface.component.ts` | Body switch |
+| `layout/shell/shell-panel-surface.component.html` | Header and body |
+| `layout/shell/shell-panel-surface.component.scss` | `shell-box` |
 
 ## Wiring
 

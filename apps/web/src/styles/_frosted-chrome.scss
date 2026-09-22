@@ -30,6 +30,13 @@
   box-shadow: var(--shadow-md);
 }
 
+// Shared frosted box for rail containers and panel surfaces.
+// @see docs/specs/ui/shell/grid-shell.md
+@mixin shell-box {
+  @include panel;
+  border-radius: var(--container-radius-panel);
+}
+
 // Dropdown / popover shells and upload-resolver-tray (55%) — map overlay, tighter border.
 // @see docs/specs/component/upload/upload-resolver-tray.md
 // @see docs/design/tokens.md § Frosted chrome

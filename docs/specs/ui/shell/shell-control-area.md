@@ -55,9 +55,9 @@ No visual-state boolean inputs. Open panels are read from `ShellLayoutService`.
 
 | File | Purpose |
 | --- | --- |
-| `layout/shell/shell-control-area.component.ts` | Static lists <!-- planned --> |
-| `layout/shell/shell-control-area.component.html` | Groups <!-- planned --> |
-| `layout/shell/shell-control-area.component.scss` | Column flex <!-- planned --> |
+| `layout/shell/shell-control-area.component.ts` | Static lists |
+| `layout/shell/shell-control-area.component.html` | Groups |
+| `layout/shell/shell-control-area.component.scss` | Column flex |
 
 ## Wiring
 

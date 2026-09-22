@@ -37,6 +37,11 @@ function queryOverride(name: string, query: string | null): boolean | null {
   return found;
 }
 
+/** Nav writes the rail width until the grid shell is on. Then the grid host writes it. */
+export function sidebarWidthOwner(shellGridLayout: boolean): 'nav' | 'grid-shell' {
+  return shellGridLayout ? 'grid-shell' : 'nav';
+}
+
 function defaultFor(name: string): boolean {
   if ((FEATURE_FLAG_NAMES as readonly string[]).includes(name)) {
     return FEATURE_FLAG_DEFAULTS[name as FeatureFlagName];

@@ -53,6 +53,18 @@
   }
 }
 
+// In the grid track the rail participates in flow. Below 48rem it stays fixed.
+// @see docs/specs/ui/shell/grid-shell.md
+:host.nav--in-grid .sidebar {
+  @media (min-width: 48rem) {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: 100%;
+    height: 100%;
+  }
+}
+
 // ── Panel ─────────────────────────────────────────────────────────────────────
 
 .sidebar__panel {
@@ -67,11 +79,11 @@
     min-height: 0;
     padding-block: var(--spacing-2);
     padding-inline: var(--spacing-2);
-    border-radius: 0;
-    border-right: 1px solid var(--border);
     overflow: hidden;
 
-    @include frosted-chrome.panel;
+    // One existing surface adopts shell-box so the radius change is reviewable.
+    // @see docs/specs/ui/shell/grid-shell.md
+    @include frosted-chrome.shell-box;
   }
 
   @media (max-width: 767px) {

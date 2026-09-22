@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { FEATURE_FLAG_NAMES, resolveFlag } from './feature-flags.helpers';
+import { FEATURE_FLAG_NAMES, resolveFlag, sidebarWidthOwner } from './feature-flags.helpers';
 
 describe('resolveFlag', () => {
   it('lets ?ff=shellGridLayout win over a stored false', () => {
@@ -35,6 +35,14 @@ describe('resolveFlag', () => {
 
   it('keeps the union to one flag', () => {
     expect(FEATURE_FLAG_NAMES).toEqual(['shellGridLayout']);
+  });
+
+  it('leaves rail-width writing on nav while the grid flag is off', () => {
+    expect(sidebarWidthOwner(false)).toBe('nav');
+  });
+
+  it('moves rail-width writing to the grid host when the flag is on', () => {
+    expect(sidebarWidthOwner(true)).toBe('grid-shell');
   });
 
   it('returns the same value when read twice', () => {

@@ -1,0 +1,12 @@
+// Scrollable stack. No background. Width comes from the open surfaces.
+// @see docs/specs/ui/shell/shell-panel-column.md
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: auto;
+  background: transparent;
+}

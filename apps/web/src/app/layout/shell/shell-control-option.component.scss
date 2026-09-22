@@ -1,0 +1,72 @@
+@use '../../../styles/frosted-chrome';
+
+@layer components {
+  // Positions the label against the icon button.
+  // @see docs/specs/ui/shell/shell-control-option.md
+  :host {
+    position: relative;
+    display: block;
+  }
+
+  // 2.75rem hit target. Geometry stays here when the label shows.
+  // @see docs/specs/ui/shell/shell-control-option.md
+  .shell-control-option__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-full);
+    background: transparent;
+    color: var(--menu-item-text);
+    cursor: pointer;
+  }
+
+  span.shell-control-option__button {
+    cursor: default;
+  }
+
+  // Overlay label. Absolute so it does not change the rail width.
+  // @see docs/specs/ui/shell/shell-control-option.md
+  .shell-control-option__label {
+    position: absolute;
+    z-index: 200;
+    top: 50%;
+    inset-inline-start: calc(100% + var(--spacing-2));
+    transform: translateY(-50%);
+    margin: 0;
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--radius-full);
+    color: var(--menu-item-text);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    @include frosted-chrome.shell-box;
+  }
+
+  // Right-rail labels open toward the canvas.
+  // @see docs/specs/ui/shell/shell-control-option.md
+  :host[data-side='right'] .shell-control-option__label {
+    inset-inline-start: auto;
+    inset-inline-end: calc(100% + var(--spacing-2));
+  }
+}
+
+@layer states {
+  // Stable state: shown. @see docs/specs/ui/shell/shell-control-option.md
+  :host[data-state='shown'] .shell-control-option__label {
+    opacity: 1;
+  }
+
+  // Resting color lives in components. Hover and active live here.
+  // @see docs/specs/ui/shell/shell-control-option.md
+  .shell-control-option__button:hover,
+  .shell-control-option__button:focus-visible,
+  :host[data-active='true'] .shell-control-option__button,
+  :host[data-open='true'] .shell-control-option__button {
+    color: var(--primary);
+    background: var(--action-hover);
+  }
+}

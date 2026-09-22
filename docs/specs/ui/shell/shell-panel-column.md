@@ -45,9 +45,9 @@ This host does not keep a second copy of open state.
 
 | File | Purpose |
 | --- | --- |
-| `layout/shell/shell-panel-column.component.ts` | Reads the stack <!-- planned --> |
-| `layout/shell/shell-panel-column.component.html` | Stack <!-- planned --> |
-| `layout/shell/shell-panel-column.component.scss` | Scroll and gap <!-- planned --> |
+| `layout/shell/shell-panel-column.component.ts` | Reads the stack |
+| `layout/shell/shell-panel-column.component.html` | Stack |
+| `layout/shell/shell-panel-column.component.scss` | Scroll and gap |
 
 ## Wiring
 

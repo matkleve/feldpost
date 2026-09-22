@@ -51,10 +51,10 @@ Transitions: `hidden → shown` after the pointer rests; `shown → hidden` when
 
 | File | Purpose |
 | --- | --- |
-| `layout/shell/shell-control-option.component.ts` | Click and label state <!-- planned --> |
-| `layout/shell/shell-control-option.component.html` | Button and label <!-- planned --> |
-| `layout/shell/shell-control-option.component.scss` | Target and overlay label <!-- planned --> |
-| `layout/shell/shell-control-option-state.ts` | Transition guard <!-- planned --> |
+| `layout/shell/shell-control-option.component.ts` | Click and label state |
+| `layout/shell/shell-control-option.component.html` | Button and label |
+| `layout/shell/shell-control-option.component.scss` | Target and overlay label |
+| `layout/shell/shell-control-option-state.ts` | Transition guard |
 
 ## Wiring
 

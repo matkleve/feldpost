@@ -60,6 +60,9 @@
   --motion-duration-standard: 150ms;
   --motion-duration-slow: 250ms;
   --motion-duration-entrance: 300ms;
+  // Delay before a control-option hover label is shown.
+  // @see docs/specs/ui/shell/shell-control-option.md
+  --motion-duration-hover-label: 1000ms;
   --motion-ease-out: cubic-bezier(0, 0, 0.2, 1);
 
   // Defines keyboard focus-visible ring shadow (moved from legacy bridge Batch 47)

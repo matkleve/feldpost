@@ -12,6 +12,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router, RouterOutlet } from '@angular/router';
 import { filter, map, startWith } from 'rxjs/operators';
@@ -33,6 +34,13 @@ import { DragDividerComponent } from '../shared/workspace-pane/shell/drag-divide
 import { WorkspacePaneComponent } from '../shared/workspace-pane/shell/workspace-pane.component';
 import { UploadPanelComponent } from '../features/upload/upload-panel/upload-panel.component';
 import { UploadShellComponent } from '../features/upload/upload-shell/upload-shell.component';
+import { FeatureFlagsService } from '../core/feature-flags/feature-flags.service';
+import { ShellLayoutService } from '../core/shell-layout/shell-layout.service';
+import { GridShellComponent } from './shell/grid-shell.component';
+import { ShellMainCanvasComponent } from './shell/shell-main-canvas.component';
+import { ShellControlAreaComponent } from './shell/shell-control-area.component';
+import { ShellPanelColumnComponent } from './shell/shell-panel-column.component';
+import { ShellPanelSurfaceComponent } from './shell/shell-panel-surface.component';
 import { MapShellState } from '../features/map/map-shell/component/map-shell.state';
 import { WorkspacePaneObserverAdapter } from '../core/workspace-pane/workspace-pane-observer.adapter';
 import { MapZoomOrchestratorService } from '../core/map-zoom/map-zoom-orchestrator.service';
@@ -59,12 +67,18 @@ const WORKSPACE_PANE_WIDTH_STORAGE_KEY = 'sitesnap.settings.layout.workspacePane
   standalone: true,
   imports: [
     RouterOutlet,
+    NgTemplateOutlet,
     MapShellComponent,
     NavComponent,
     DragDividerComponent,
     WorkspacePaneComponent,
     UploadPanelComponent,
     UploadShellComponent,
+    GridShellComponent,
+    ShellMainCanvasComponent,
+    ShellControlAreaComponent,
+    ShellPanelColumnComponent,
+    ShellPanelSurfaceComponent,
   ],
   templateUrl: './authenticated-app-layout.component.html',
   styleUrl: './authenticated-app-layout.component.scss',
@@ -74,6 +88,9 @@ const WORKSPACE_PANE_WIDTH_STORAGE_KEY = 'sitesnap.settings.layout.workspacePane
 })
 export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
   private readonly shellState = inject(MapShellState);
+  private readonly featureFlags = inject(FeatureFlagsService);
+  readonly shellLayout = inject(ShellLayoutService);
+  readonly shellGridLayout = this.featureFlags.shellGridLayout;
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
   private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
@@ -86,6 +103,7 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
   private readonly shareUrlSyncService = inject(ShareUrlSyncService);
   private readonly toastService = inject(ToastService);
   private readonly i18nService = inject(I18nService);
+  readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
   private readonly organizationService = inject(OrganizationService);
   private readonly injector = inject(Injector);
 

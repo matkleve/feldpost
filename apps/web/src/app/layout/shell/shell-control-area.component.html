@@ -1,0 +1,14 @@
+@if (side() === 'left') {
+  <div class="shell-control-area__logo">
+    <img src="/assets/logo.svg" width="16" height="16" alt="" />
+  </div>
+}
+@for (group of groups(); track group.id) {
+  <app-shell-control-container
+    [options]="group.options"
+    [side]="side()"
+    [activeId]="activeId()"
+    [openIds]="openIds()"
+    (chosen)="onChosen($event)"
+  />
+}

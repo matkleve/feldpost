@@ -63,9 +63,9 @@ The panel track has no empty-state class. An `auto` track is zero when the colum
 
 | File | Purpose |
 | --- | --- |
-| `layout/shell/grid-shell.component.ts` | Grid host <!-- planned --> |
-| `layout/shell/grid-shell.component.html` | Four tracks <!-- planned --> |
-| `layout/shell/grid-shell.component.scss` | `grid-template-columns` <!-- planned --> |
+| `layout/shell/grid-shell.component.ts` | Grid host |
+| `layout/shell/grid-shell.component.html` | Four tracks |
+| `layout/shell/grid-shell.component.scss` | `grid-template-columns` |
 | `apps/web/src/styles/_frosted-chrome.scss` | `shell-box` mixin |
 
 ## Wiring

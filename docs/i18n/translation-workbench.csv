@@ -1594,3 +1594,15 @@ upload.error.existingRowMissing,Could not find the existing file,apps/web/src/ap
 upload.error.replaceRequiresPhoto,Only photos can replace a photo,apps/web/src/app/core/upload/support/upload-status-text.util.ts map:ERROR_TEXT,Only photos can replace a photo,Nur Fotos können ein Foto ersetzen,Solo le foto possono sostituire una foto
 upload.error.storageUploadFailed,File could not be stored,apps/web/src/app/core/upload/support/upload-status-text.util.ts map:ERROR_TEXT,File could not be stored,Datei konnte nicht gespeichert werden,Impossibile salvare il file
 upload.status.working,Working...,apps/web/src/app/core/upload/support/upload-status-text.util.ts map:PHASE_TEXT,Working...,Wird verarbeitet...,Elaborazione in corso...
+shell.control.map,Map,Grid shell left rail. Canvas destination.,Map,Karte,Mappa
+shell.control.projects,Projects,Grid shell left rail. Canvas destination.,Projects,Projekte,Progetti
+shell.control.media,Media,Grid shell left rail. Canvas destination.,Media,Medien,Media
+shell.control.more,More,Grid shell left rail. Inert until the widget page exists.,More,Mehr,Altro
+shell.control.account,Account,Grid shell left rail. Opens the account settings section.,Account,Konto,Account
+shell.control.settings,Settings,Grid shell left rail. Opens the settings overlay.,Settings,Einstellungen,Impostazioni
+shell.control.upload,Upload,Grid shell right rail. Opens the upload panel.,Upload,Hochladen,Carica
+shell.control.help,Help,Grid shell right rail. Opens the help panel.,Help,Hilfe,Aiuto
+shell.panel.upload.title,Upload,Upload panel surface title.,Upload,Hochladen,Carica
+shell.panel.help.title,Help,Help panel surface title.,Help,Hilfe,Aiuto
+shell.panel.help.body,Help is not available yet.,Help panel placeholder body.,Help is not available yet.,Hilfe ist noch nicht verfügbar.,L'aiuto non è ancora disponibile.
+shell.panel.close,Close,Panel surface close control.,Close,Schließen,Chiudi
