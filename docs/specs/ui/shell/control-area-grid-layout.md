@@ -84,6 +84,14 @@ AuthenticatedAppLayoutComponent
 
 [transition-plan supplement](./control-area-grid-layout.transition-plan.supplement.md) — includes **settings overlay → Settings panel** and **workspace pane → content panel column** migration.
 
+## Acceptance criteria (spec phase)
+
+- [ ] 🔴 open questions answered (**8/20** locked 2026-09-22)
+- [ ] Reference mock supplement reviewed by owner
+- [ ] STUDY-007 … 011 filed
+- [ ] Settings overlay retirement plan in settings-overlay.md
+- [ ] Glossary + layout.md updated after spec lock
+
 ## Owner decisions still needed
 
 **OQ-01**, **OQ-03**, **OQ-09**, **OQ-16**, **OQ-20**, plus 🟡 items. **Locked:** OQ-02, OQ-06, OQ-07, OQ-11, OQ-15, OQ-18.
