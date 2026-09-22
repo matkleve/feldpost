@@ -476,7 +476,7 @@
   | Input | Type | Values | Visual effect |
   |---|---|---|---|
   | internal panel state | signal | `list`, `detail`, `new-draft` | Which body the panel renders |
-- **Composed of**: `app-workspace-projects-toolbar`, `app-item-grid`, `app-project-item`, `app-project-color-picker`, `app-dropdown-shell`
+- **Composed of**: `app-workspace-projects-toolbar`, `app-item-grid`, `app-project-item`, `app-project-color-picker`, `app-dropdown-shell`, `app-confirm-dialog`
 - **Used in**: `app-workspace-pane`
 - **Gaps**: none
 

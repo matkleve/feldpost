@@ -217,17 +217,36 @@
             {{ t('workspace.projects.panel.restore', 'Restore') }}
           </button>
         }
-        <button
-          class="projects-panel-detail__action-btn projects-panel-detail__action-btn--danger"
-          type="button"
-          (click)="onDangerAction(project.id, 'delete')"
-        >
-          <span class="material-icons" aria-hidden="true">delete</span>
-          {{ t('workspace.projects.panel.delete', 'Delete') }}
-        </button>
+        <!-- Delete is archived-only: the RLS policy "projects: archived delete" and
+             ProjectsService.deleteProject both reject a row with archived_at is null.
+             @see docs/specs/ui/workspace/workspace-pane-projects-tab.destructive-actions.supplement.md -->
+        @if (project.status === 'archived') {
+          <button
+            class="projects-panel-detail__action-btn projects-panel-detail__action-btn--danger"
+            type="button"
+            (click)="requestDeleteProject(project.id)"
+          >
+            <span class="material-icons" aria-hidden="true">delete</span>
+            {{ t('workspace.projects.panel.delete', 'Delete') }}
+          </button>
+        }
       </div>
     </div>
   }
+}
+
+<!-- Destructive confirmation — registered shared dialog, same copy keys as the projects page.
+     @see docs/specs/component/confirm-dialog/confirm-dialog.md -->
+@if (pendingDeleteProject()) {
+  <app-confirm-dialog
+    [title]="pendingDeleteTitle()"
+    [message]="pendingDeleteMessage()"
+    [confirmLabel]="pendingDeleteConfirmLabel()"
+    [cancelLabel]="t('common.cancel', 'Cancel')"
+    [danger]="true"
+    (confirmed)="confirmPendingDelete()"
+    (cancelled)="cancelPendingDelete()"
+  />
 }
 
 <!-- Context menu for project row right-click -->

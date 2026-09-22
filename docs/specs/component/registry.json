@@ -1510,7 +1510,7 @@
         },
         {
           "label": "Used in",
-          "value": "projects, upload panel, media delete actions"
+          "value": "projects, upload panel, media delete actions, workspace projects panel delete"
         },
         {
           "label": "Gaps",
@@ -3621,7 +3621,7 @@
         },
         {
           "label": "Composed of",
-          "value": "`app-workspace-projects-toolbar`, `app-item-grid`, `app-project-item`, `app-project-color-picker`, `app-dropdown-shell`"
+          "value": "`app-workspace-projects-toolbar`, `app-item-grid`, `app-project-item`, `app-project-color-picker`, `app-dropdown-shell`, `app-confirm-dialog`"
         },
         {
           "label": "Used in",

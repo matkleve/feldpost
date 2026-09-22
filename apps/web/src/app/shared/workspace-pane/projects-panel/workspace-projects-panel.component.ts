@@ -22,6 +22,12 @@ import { ToastService } from '../../../core/toast/toast.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import type { ProjectListItem, ProjectColorKey } from '../../../core/projects/projects.types';
 import { ProjectColorPickerComponent } from '../../../features/projects/cards/project-color-picker.component';
+import {
+  pendingActionConfirmLabel,
+  pendingActionMessage,
+  pendingActionTitle,
+} from '../../../features/projects/logic/projects-formatters.logic';
+import { ConfirmDialogComponent } from '../../confirm-dialog/confirm-dialog.component';
 import { ProjectItemComponent } from '../../../features/projects/project-item.component';
 import type { ItemDisplayMode } from '../../item-grid/item.component';
 import { ItemGridComponent } from '../../item-grid/item-grid.component';
@@ -49,10 +55,17 @@ export const DRAG_MEDIA_IDS_MIME = 'application/x-feldpost-media-ids';
     DropdownShellComponent,
     HlmMenuItemDirective,
     WorkspaceProjectsToolbarComponent,
+    ConfirmDialogComponent,
   ],
   templateUrl: './workspace-projects-panel.component.html',
   styleUrl: './workspace-projects-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    // app-confirm-dialog closes its overlay on Escape (BrnDialog `disableClose` defaults to
+    // false) but emits `cancelled` only from its Cancel button, so the pending signal has to
+    // be cleared here or it outlives the closed dialog and Delete stops opening it again.
+    '(document:keydown.escape)': 'cancelPendingDelete()',
+  },
 })
 export class WorkspaceProjectsPanelComponent {
   private readonly projectsService = inject(ProjectsService);
@@ -85,6 +98,10 @@ export class WorkspaceProjectsPanelComponent {
   readonly contextMenuOpen = signal(false);
   readonly contextMenuPosition = signal<{ x: number; y: number } | null>(null);
   readonly contextMenuProjectId = signal<string | null>(null);
+
+  // Pending destructive confirmation — non-null means the confirm dialog is mounted.
+  // Delete is archived-only and irreversible: @see docs/specs/ui/workspace/workspace-pane-projects-tab.destructive-actions.supplement.md
+  readonly pendingDeleteProjectId = signal<string | null>(null);
 
   // Rename flow state for detail view
   readonly renameValue = signal('');
@@ -129,6 +146,10 @@ export class WorkspaceProjectsPanelComponent {
 
   readonly openProject = computed(() =>
     this.projects().find((p) => p.id === this.openProjectId()) ?? null,
+  );
+
+  readonly pendingDeleteProject = computed(() =>
+    this.projects().find((p) => p.id === this.pendingDeleteProjectId()) ?? null,
   );
 
   onProjectItemOpened(projectId: string): void {
@@ -281,10 +302,7 @@ export class WorkspaceProjectsPanelComponent {
 
   // --- Danger actions ---
 
-  async onDangerAction(
-    projectId: string,
-    action: 'archive' | 'restore' | 'delete',
-  ): Promise<void> {
+  async onDangerAction(projectId: string, action: 'archive' | 'restore'): Promise<void> {
     if (action === 'archive') {
       const ok = await this.projectsService.archiveProject(projectId);
       if (ok) {
@@ -307,13 +325,58 @@ export class WorkspaceProjectsPanelComponent {
         );
         this.backToList();
       }
-    } else if (action === 'delete') {
-      const ok = await this.projectsService.deleteProject(projectId);
-      if (ok) {
-        this.projects.update((prev) => prev.filter((p) => p.id !== projectId));
-        this.backToList();
-      }
     }
+  }
+
+  // --- Delete (archived only, confirmed) ---
+  // @see docs/specs/ui/workspace/workspace-pane-projects-tab.destructive-actions.supplement.md
+
+  /** Opens the confirmation. Nothing is deleted until `confirmPendingDelete()` runs. */
+  requestDeleteProject(projectId: string): void {
+    this.pendingDeleteProjectId.set(projectId);
+  }
+
+  cancelPendingDelete(): void {
+    this.pendingDeleteProjectId.set(null);
+  }
+
+  async confirmPendingDelete(): Promise<void> {
+    const projectId = this.pendingDeleteProjectId();
+    // Unmount first: app-confirm-dialog closes its own portal on click, so the
+    // signal must not outlive the visible dialog while the delete is in flight.
+    this.pendingDeleteProjectId.set(null);
+    if (!projectId) return;
+
+    const ok = await this.projectsService.deleteProject(projectId);
+    if (!ok) {
+      // docs/CONSTITUTION.md § no silent failure — a rejected delete must say so.
+      this.toastService.show({
+        message: this.t(
+          'projects.page.toast.deleteError',
+          'Could not delete archived project. Check permissions or refresh and try again.',
+        ),
+        type: 'error',
+      });
+      return;
+    }
+
+    this.projects.update((prev) => prev.filter((p) => p.id !== projectId));
+    this.backToList();
+  }
+
+  protected pendingDeleteTitle(): string {
+    return pendingActionTitle('delete', this.t);
+  }
+
+  protected pendingDeleteMessage(): string {
+    const name =
+      this.pendingDeleteProject()?.name ??
+      this.t('projects.page.pending.subject.thisProject', 'this project');
+    return pendingActionMessage('delete', name, this.t);
+  }
+
+  protected pendingDeleteConfirmLabel(): string {
+    return pendingActionConfirmLabel('delete', this.t);
   }
 
   // --- Context menu (right-click on project row) ---

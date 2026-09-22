@@ -621,7 +621,7 @@
   | `danger` | `boolean` | `true`, `false` | Destructive confirm button colour |
 - **Other inputs**: `title: string` (required), `message: string` (required), `confirmLabel`, `cancelLabel`
 - **Composed of**: standalone
-- **Used in**: projects, upload panel, media delete actions
+- **Used in**: projects, upload panel, media delete actions, workspace projects panel delete
 - **Gaps**: none
 
 ---
