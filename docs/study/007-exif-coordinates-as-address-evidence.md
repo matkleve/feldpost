@@ -1,7 +1,7 @@
 ---
 id: STUDY-007
 type: investigation
-status: proposed
+status: accepted
 supersedes: none
 corrected-by: none
 ---

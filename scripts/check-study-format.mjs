@@ -148,33 +148,23 @@ const CLOSED_FOLDER_BASELINE = new Set([
 ]);
 
 /**
- * Violations that predate this gate. Measured 2026-09-22 on
- * `claude/study-system-audit-enforce-4e6oov` at `318180e`: **2 violations in 1
- * file**, both in STUDY-009's frontmatter, both introduced by `cfc7c78`
- * (2026-09-21).
+ * Violations that predate this gate.
  *
- * Neither is fixable from here. `status: decided` can only become a documented
- * value by someone deciding which one — `accepted` is the obvious candidate and
- * it is the product owner's call, not a linter's and not an auditor's.
- * `corrected-by: self (…)` records a real in-file self-correction that the
- * format does not describe; resolving it means either amending `STUDY-FORMAT.md`
- * to allow self-correction or splitting the correction into its own study. Both
- * are owner decisions. See `docs/study/011-study-system-audit.md` § Findings
- * (S-01, S-02).
+ * **Empty, and that is the point.** It carried two entries when this check was
+ * written on 2026-09-22 — STUDY-009's `status: decided` and its
+ * `corrected-by: self (…)`, both introduced by `cfc7c78` (2026-09-21) — because
+ * fixing either needed a decision the product owner owns. The owner took both
+ * the same day: `decided` became `accepted`, and the self-correction moved out
+ * of the frontmatter into a banner at the top of the body, which is where a
+ * reader needed it and what a reference field could never have said.
+ *
+ * The list is a ratchet in both directions. A violation outside it fails, and
+ * an entry that no longer matches fails too — so debt cannot outlive its fix,
+ * which is how this list emptied instead of quietly going stale.
+ *
+ * @see docs/study/011-study-system-audit.md § S-01, § S-02
  */
-const KNOWN_DEBT = [
-  {
-    file: "009-tray-question-budget-and-priority.md",
-    rule: "status-vocabulary",
-    detail: 'status "decided" is not in the documented vocabulary',
-  },
-  {
-    file: "009-tray-question-budget-and-priority.md",
-    rule: "reference-shape",
-    detail:
-      'corrected-by "self (§ The measurement, 2026-09-21)" is not `none` or a list of STUDY-NNN ids',
-  },
-];
+const KNOWN_DEBT = [];
 
 const violations = [];
 const matchedDebt = new Set();
