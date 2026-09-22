@@ -56,13 +56,13 @@ Resolution order, highest wins: query parameter, then `localStorage`, then the d
 
 | File | Purpose |
 | --- | --- |
-| `core/feature-flags/feature-flags.service.ts` | Facade <!-- planned --> |
-| `core/feature-flags/feature-flags.service.spec.ts` | Resolution tests <!-- planned --> |
-| `core/feature-flags/feature-flags.types.ts` | Flag union and default <!-- planned --> |
-| `core/feature-flags/feature-flags.helpers.ts` | Pure resolution <!-- planned --> |
-| `core/feature-flags/adapters/feature-flags-query.adapter.ts` | `ff` reader <!-- planned --> |
-| `core/feature-flags/adapters/feature-flags-storage.adapter.ts` | `localStorage` <!-- planned --> |
-| `core/feature-flags/README.md` | Module index <!-- planned --> |
+| `core/feature-flags/feature-flags.service.ts` | Facade |
+| `core/feature-flags/feature-flags.service.spec.ts` | Resolution tests |
+| `core/feature-flags/feature-flags.types.ts` | Flag union and default |
+| `core/feature-flags/feature-flags.helpers.ts` | Pure resolution |
+| `core/feature-flags/adapters/feature-flags-query.adapter.ts` | `ff` reader |
+| `core/feature-flags/adapters/feature-flags-storage.adapter.ts` | `localStorage` |
+| `core/feature-flags/README.md` | Module index |
 
 ## Wiring
 
