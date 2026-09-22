@@ -568,9 +568,88 @@ None of these were applied. Each is an owner call.
 | 7 | Does `CONTRIBUTING.md` § Known debt stop restating counts and point at `verify.mjs --list`? | § 3 |
 | 8 | The `test` gate is 4 failures above its stated ratchet. Fix the four, or establish what regressed? | § S-06 |
 
+## Update 2026-09-22 — the owner decided all eight, and one of them bit back
+
+Appended, not rewritten, under the rule this study's § S-04 asked for and which
+[`STUDY-FORMAT.md`](./STUDY-FORMAT.md) § Correcting a study now carries. Nothing above is deleted;
+where the text below supersedes a claim, it says which.
+
+| # | Decision | Outcome |
+| --- | --- | --- |
+| 1 | STUDY-009's `decided` | → `accepted`. No ninth status value. |
+| 2 | `corrected-by: self (…)` | → `none`, and the self-correction moved into a **banner** under the frontmatter pointing at § The measurement. The frontmatter says what a machine reads; the banner says what a reader needs. |
+| 3 | STUDY-007, STUDY-008 | → `accepted`. And the Definition of Done in [`idea-to-ship-pipeline.md`](../playbooks/idea-to-ship-pipeline.md) now requires the status to move in the same change that ships the recommendation, so it cannot rot the same way twice. |
+| 4 | STUDY-010 / jev | STUDY-010 **written** — see below. |
+| 5 | In-place update vs new study | Legalised with a line: **append in place, reverse in a new study**, and `## Update` sections are append-only. Backed by `scripts/check-study-claim-deletion.mjs`. |
+| 6 | `.cursor/rules/` citing studies | **No** — and the gap was real, so the index gained a § Read before touching routing table instead. STUDY-004 now has a route. |
+| 7 | `CONTRIBUTING.md` | Stops restating gate counts; points at `node scripts/verify.mjs --list`. |
+| 8 | The four failing tests | **Fixed.** See below. |
+
+### § S-03 was right about the mechanism and wrong about which id was safe
+
+`[A]` § S-03 concluded: *"this is also why this study is STUDY-011 and not STUDY-010 … STUDY-010 is
+unfree in the only sense that matters"*. **That reasoning is superseded.** Re-reading #245 while
+filing the missing study showed it had been edited at 10:39 the same morning — the citation this
+audit found as `docs/study/010-exif-inheritance-grouping-unit.md` now reads
+`docs/study/011-exif-inheritance-grouping-unit.md`. `[A]` The id being claimed by an issue for a
+document that did not exist was **011**, which this study had already taken.
+
+So the collision § S-03 predicted happened, to this study, within hours of it being written, and the
+only thing that prevented it was that the two edits did not overlap. `[A]` It is resolved the way
+§ S-03's own recommendation implies: the real document is filed at **STUDY-010**, which was free all
+along and which #245 used first; this audit keeps 011; and the citation in #245 is corrected.
+[STUDY-010](./010-exif-inheritance-grouping-unit.md) re-ran every measurement rather than copying the
+issue's table — the two agree.
+
+The `009-jev-system-one-model-evaluation.md` citations in #241 and #242 are a different case: that
+measurement (28 280 input combinations against `resolveIssue`) may well have been run, but it was
+never filed and cannot be honestly reconstructed from here. `[C]` Those two issues carry the
+measurement output inline, so the fix is to cite the evidence where it actually is and stop claiming a
+study that does not exist.
+
+### A third dangling citation, found while fixing the second
+
+`[A]` #245 states the customer-segment ruling is *"now normative in
+`docs/specs/service/media-upload-service/upload-search-object.md` § Grouping identity is address
+identity"*. **That section does not exist**, and neither that spec nor its supplements mentions the
+customer segment. The *behaviour* is real — measured in STUDY-010 — but the decision has no normative
+home, so § Keys philosophy silently drops a leading segment with nothing saying that is intended.
+
+This strengthens § 7 § What a gate cannot do rather than contradicting it: `doc-links` passes on all
+three of these, because none is a Markdown link in a tracked file. They are prose citations inside
+GitHub issues, and the only thing that catches them is someone following them. `[C]`
+
+### S-06 closed: the tests were wrong, not the code
+
+`[A]` All four failures asserted the **letter-run collapse** that
+[`upload-search-object.street-fold.supplement.md`](../specs/service/media-upload-service/upload-search-object.street-fold.supplement.md)
+§ Rejected explicitly deleted — S3 forbids edit-distance and letter-run rules, and SF-05 names
+`Wasagasse` vs `Wasagase` as the exact pair that must **not** merge. `50979bf` reverted the behaviour
+on 2026-09-16 and its own message records that *"two existing specs had been red since"*; `1567cd4`
+then added a new spec asserting the deleted contract four days later.
+
+Spec → code → study says the code was right the whole time. The four assertions were corrected
+against the spec, and their **names** with them — *"folds the street into the key, so spelling twins
+do not ask twice"* was a Constitution § 3 violation in a test name, describing behaviour the repository
+had decided against. `[A]` Measured after: **0 failing of 1 710 tests**, cold. The gate's debt note now
+records what happened instead of only the number.
+
+### What is still open
+
+- **§ 3 / S-05** — STUDY-005's register still lists F-09, F-10 and F-13 as open while their bodies say
+  resolved. Left alone: it is a body edit to someone else's study, it needs the register rows to gain
+  grades, and it is the right first use of the append rule by whoever next edits that file.
+- **§ 3 — STUDY-004's C-01 and C-02.** `.github/copilot-instructions.md` (113 lines) and the nine
+  `.github/instructions/*.md` files still restate rules that ADR-0006 says must be pointers. C-03 is
+  closed.
+- **§ 5.1** — `STUDY-FORMAT.md` now names all four closed folders, but that line is part of the
+  unverified Grundriss port and still needs reconciling there.
+- The customer-segment ruling needs recording in a spec (above).
+
 ## Related
 
 - [`STUDY-FORMAT.md`](./STUDY-FORMAT.md) — the rules this audits, and its provenance warning
+- [STUDY-010](./010-exif-inheritance-grouping-unit.md) — the study this one found missing
 - [`README.md`](./README.md) § Where new reasoning goes — the closed-folder rule
 - [STUDY-004](./004-organizational-redundancy-audit.md) — the previous audit of the instruction layers; § 4 C-01…C-03 are still open
 - [STUDY-005](./005-upload-pipeline-trace-findings.md) F-09, F-10, F-13 — the register/body disagreement
