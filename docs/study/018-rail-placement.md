@@ -73,3 +73,9 @@ The owner accepted the readings in this study `[D]`. Signed off:
 - The directory rectangle in the page spec is the card.
 
 `LEFT_GROUPS` stays as measured above `[A]`. P1 is still open, so this sign-off does not remove an icon and does not add Workers or Organisation to the rail `[D]`.
+
+## Update 2026-09-22 — empty canvas
+
+The owner does not know what the canvas shows when it would otherwise be empty `[D]`. The candidate they named is an overview of "this and states." That is not a page, and it is not the projects dashboard at `/projects` `[A]` (`docs/specs/page/projects-dashboard.md`).
+
+Read as a candidate only `[D]`: the overview lists the widgets the organization has, and a state for each one — not allowed, allowed but not added, added. Which states, and whether this overview replaces `/` when the Map icon is absent, are not decided. Map stays on the rail until they are.
