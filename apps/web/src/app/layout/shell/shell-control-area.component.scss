@@ -13,6 +13,13 @@
   background: transparent;
 }
 
+// Hover labels overflow onto the canvas. This track paints above that cell.
+// @see docs/specs/ui/shell/shell-control-area.md
+:host[data-side='left'] {
+  position: relative;
+  z-index: 200;
+}
+
 // Logo is its own block and is not a button.
 // @see docs/specs/ui/shell/shell-control-area.md
 // Pushes the bottom group to the end of the rail. The space is leftover, not a token.
