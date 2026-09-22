@@ -65,6 +65,13 @@ For a given `batchId`, all of:
 
 One `dialogueUnitId` per user-facing question; **1A+1B** share one id. Carousel counts **units**, not raw items.
 
+### Question priority
+
+Every question carries a priority derived from its **kind**, not from how many metres a wrong answer
+would cost: [upload-tray-question-priority.supplement.md](./upload-tray-question-priority.supplement.md).
+Classification only today — nothing in the orchestrator reads it until the budget ([#233](https://github.com/matkleve/feldpost/issues/233))
+exists. Its invariant is already binding on that work: **a budget may only ever suppress `low`.**
+
 ### FSM
 
 ```mermaid

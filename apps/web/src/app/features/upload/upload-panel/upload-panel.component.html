@@ -65,6 +65,41 @@
       </div>
     }
 
+    <!--
+      Stable state: deferred location backlog (#232, STUDY-009 idea C).
+      Two figures, never blended — "has no location" and "could be more precise" are different
+      jobs, and one merged number is one the user cannot plan against. Sourced from media_items,
+      not from the current batch, so it outlives the upload session.
+      @see docs/specs/page/files-page.deferred-improvement.supplement.md
+    -->
+    @if (showDeferredBacklog()) {
+      @if (deferredBacklog(); as backlog) {
+        <div
+          class="upload-panel__deferred-backlog"
+          role="status"
+          aria-live="polite"
+          data-state="deferred-backlog"
+        >
+          <button
+            type="button"
+            class="upload-panel__deferred-backlog-line"
+            data-role="resolve-no-location"
+            (click)="onResolveDeferredBucket('no_location')"
+          >
+            {{ deferredNoLocationLabel(backlog.noLocation) }}
+          </button>
+          <button
+            type="button"
+            class="upload-panel__deferred-backlog-line"
+            data-role="resolve-improvable"
+            (click)="onResolveDeferredBucket('improvable')"
+          >
+            {{ deferredImprovableLabel(backlog.improvable) }}
+          </button>
+        </div>
+      }
+    }
+
     <!-- Drop zone shell: clickable dropzone + chip row (siblings — no nested interactives). -->
     <div
       class="upload-panel__dropzone-shell"
@@ -568,6 +603,22 @@
       (selectedIdChange)="actionHandlers.onProjectSelectionDialogSelected($event)"
       (confirmed)="actionHandlers.onProjectSelectionDialogConfirmed($event)"
       (cancelled)="actionHandlers.onProjectSelectionDialogCancelled()"
+    />
+  }
+
+  <!--
+    Stable state: bulk-resolution confirmation (#219). Mounted only while the flow is open —
+    BrnDialog opens its portal on mount, the same idiom as the other panel modals.
+    @see docs/specs/component/bulk-resolution-dialog/bulk-resolution-dialog.md
+  -->
+  @if (bulkFlowOpen()) {
+    <app-bulk-resolution-dialog
+      [plan]="bulkFlowPlan()"
+      [running]="bulkFlowRunning()"
+      [progress]="bulkFlowProgress()"
+      [report]="bulkFlowReport()"
+      (confirmed)="onBulkFlowConfirmed()"
+      (cancelled)="onBulkFlowCancelled()"
     />
   }
 </section>

@@ -2,7 +2,7 @@
 
 > **Parent:** [address-resolution-model.md](./address-resolution-model.md)
 > **Decision:** [STUDY-006 D-09](../../../study/006-upload-pipeline-correction-plan.md) · **Reasoning:** [STUDY-007](../../../study/007-exif-coordinates-as-address-evidence.md)
-> **Status:** decided, **not implemented**
+> **Status:** decided; **decision module implemented 2026-09-20, inert until the radius is chosen** — see § Status
 
 ## What It Is
 
@@ -58,14 +58,43 @@ so a wrong adoption is traceable afterwards and the tray can show where the numb
 write path, no special-casing — if a field cannot go through the evidence model, it is out of scope
 for this rule rather than exempt from it.
 
+## Status
+
+**Decision module implemented 2026-09-20** — `apps/web/src/app/core/upload/location/exif-house-number.ts`
+(`exifHouseNumberProposal`, `exifHouseNumberProposalKey`), 17 tests. It is pure: no I/O, no tray, no
+write. Callers hand it the evidence they already hold and act on the verdict, which keeps the guard —
+the load-bearing, easy-to-get-wrong part — testable without a geocoder.
+
+Two implementation choices worth stating, because both could reasonably have gone the other way:
+
+- **Street comparison folds.** `streetsMatch` runs both sides through
+  `normalizeStreetForGroupingKey`, the same fold the grouping key and the layer-package compare use
+  (street-fold S5). Raw `!==` would read `Wasagasse`/`Wasagase` and `Argentinierstr.`/`Argentinierstraße`
+  as different streets and drop legitimate proposals — silently, since that skip is indistinguishable
+  from a genuine mismatch.
+- **An unmeasurable distance is not a short one.** A missing `streetPosition` returns
+  `outside_radius`, not a pass.
+
+**The rule is inert and will stay inert until somebody chooses the radius.**
+`UploadLocationConfig.exifHouseNumberRadiusMeters` defaults to `null`, and `null` short-circuits the
+decision with `radius_not_configured`. This is the honest reading of the section above: this document
+declines to name a value because naming one without real device photos would be invention, and a
+guessed default in code would be that same invention with less visibility. Setting the number turns
+the rule on; it is a decision, tracked in [#221](https://github.com/matkleve/feldpost/issues/221).
+
+**Still to build:** the tray presentation and the write. The decision and the merge key exist; what
+consumes them does not. That is the remaining half of #221 and is blocked behind the same radius
+decision — building a tray for a rule that cannot fire would be untestable end to end.
+
 ## Acceptance Criteria
 
-- [ ] A path with street but no house number, plus GPS reverse-geocoding to the same street within
-      the radius, proposes the number and opens **one** confirmation.
-- [ ] Accepting writes the number with `origin: 'derived'` and `rule: 'exif→houseNumber'`.
-- [ ] Declining leaves the address exactly as the path established it.
-- [ ] A reverse-geocoded **different** street changes nothing and asks nothing.
-- [ ] A point outside the radius changes nothing.
-- [ ] Twenty files under one folder resolving to the same proposal ask **once**, not twenty times.
-- [ ] The radius constant is distinct from `exifAssistRadiusMeters`.
-- [ ] No file without GPS is affected in any way.
+- [x] A path with street but no house number, plus GPS reverse-geocoding to the same street within
+      the radius, **proposes** the number — *the decision half. Opening the confirmation is unbuilt.*
+- [x] The proposal carries `origin: 'derived'` and `rule: 'exif→houseNumber'` — *writing it is unbuilt.*
+- [ ] Declining leaves the address exactly as the path established it — *unbuilt (no tray yet).*
+- [x] A reverse-geocoded **different** street changes nothing and asks nothing.
+- [x] A point outside the radius changes nothing.
+- [x] Twenty files resolving to the same proposal share one `exifHouseNumberProposalKey` — *the
+      merge itself is the existing group merge and is unexercised until the tray exists.*
+- [x] The radius constant is distinct from `exifAssistRadiusMeters` — and unset, so the rule is inert.
+- [x] No file without GPS is affected in any way.

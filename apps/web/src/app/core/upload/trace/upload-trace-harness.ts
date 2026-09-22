@@ -13,6 +13,7 @@
  */
 
 import * as fs from 'node:fs';
+import { resolveTraceAssetsDir } from './upload-trace-assets';
 import * as path from 'node:path';
 import { Injectable, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
@@ -36,7 +37,7 @@ import { stubReverse, stubStructuredForward } from './upload-trace-geocoder.stub
 import { buildTraceSupabaseFake, TRACE_USER_ID } from './upload-trace-supabase.fake';
 import type { UploadTraceRecorder } from './upload-trace-recorder';
 
-const ASSETS_DIR = path.join(__dirname, '../../../../assets/geo');
+const ASSETS_DIR = resolveTraceAssetsDir();
 
 export interface RealGeoData {
   states: BundeslandRecord[];

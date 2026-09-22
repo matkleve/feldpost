@@ -233,6 +233,13 @@ export interface CorpusGenerateOptions {
    * defaults to 3 when this is omitted.
    */
   filesPerLocation?: number;
+  /**
+   * Share of files carrying EXIF GPS, 0–1. Defaults to `EXIF_SHARE`.
+   *
+   * `0` is the scanned-archive shape: no GPS anywhere, which is what makes it a control for
+   * every EXIF-derived question ([#229](https://github.com/matkleve/feldpost/issues/229)).
+   */
+  exifShare?: number;
 }
 
 function resolveFilesPerLocation(profile: CorpusProfile, override?: number): number {
@@ -372,7 +379,7 @@ export function buildGeneratedScenario(
   // recurses exactly one level.
   const exifCoords = isDuplicate
     ? buildGeneratedScenario(index - 1, seed, opts).exifCoords
-    : rng() < EXIF_SHARE
+    : rng() < (opts.exifShare ?? EXIF_SHARE)
       ? stubCityCoords(localityCity)
       : undefined;
 

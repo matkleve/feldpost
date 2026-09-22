@@ -20,6 +20,13 @@ When picking something up, promote relevant behavior back into the governing spe
 | How does this code mislead me? | [`docs/TRAPS.md`](../TRAPS.md) | The shapes that read correctly and are wrong. Read before your second attempt at a bug. |
 | What is deferred but planned? | this folder (**closed**) | Multi-step engineering plans too large for one issue. Each should still have an issue pointing at it. New plans are a study with `type: proposal`. |
 
+**Work an agent cannot finish carries the `needs-owner` label.** Not a second register and not a
+folder — a filter on the one register: `label:needs-owner` is the list to work through at a laptop.
+It means the blocker is a person, not a missing decision an agent could look up: a browser session
+against the live project, production DDL, a hardware measurement, or a judgement the owner has
+reserved. An agent adds the label when it hits such a wall, says in a comment exactly what it tried
+and why it stopped, and does not remove the label itself.
+
 Bulk-file issues from a JSON batch rather than one `gh issue create` at a time: `node scripts/create-github-issues.mjs path/to/issues.json` (schema in `scripts/create-github-issues.example.json`).
 
 The 2026-09-10 batch (`scripts/issues-2026-09-10-upload-and-cleanup.json`, 53 items) was filed as issues **#136–#188**. **#130–#135 are duplicates of #136–#141** from an interrupted first run and still need closing by hand — the agent token can create issues but not update them.

@@ -9,6 +9,14 @@
  */
 
 import { renderHeading } from './upload-trace-render';
+import type { QuestionScaleSample } from './upload-trace-question-scale';
+
+/** Column widths for the question-curve table. Named so the rows are not a wall of numbers. */
+const COL_SHAPE = 16;
+const COL_FILES = 7;
+const COL_GROUPS = 8;
+const COL_QUESTIONS = 11;
+const COL_RATIO = 16;
 import {
   JOB_STORE_WRITES_PER_JOB,
   type ClassifyScaleResult,
@@ -147,3 +155,57 @@ export const SCALE_CAVEAT = `
 `;
 
 export type { CorpusProfile };
+
+/**
+ * The question-per-file curve (#229): what a budget would actually have to work with.
+ *
+ * `f/q` is files per question — the merge-effectiveness ratio. A high number means group merge is
+ * doing the work and there is little for a budget to suppress.
+ */
+export function renderQuestionCurve(samples: readonly QuestionScaleSample[]): string {
+  const row = (
+    shape: string,
+    files: string,
+    groups: string,
+    questions: string,
+    ratio: string,
+    kinds: string,
+  ): string =>
+    '  ' +
+    shape.padEnd(COL_SHAPE) +
+    files.padStart(COL_FILES) +
+    groups.padStart(COL_GROUPS) +
+    questions.padStart(COL_QUESTIONS) +
+    ratio.padStart(COL_RATIO) +
+    '  ' +
+    kinds;
+
+  const lines = [
+    '  Question curve by corpus shape (questions counted AFTER group merge):',
+    row('shape', 'files', 'groups', 'questions', 'files/question', 'by kind'),
+  ];
+  for (const sample of samples) {
+    const kinds =
+      Object.entries(sample.byKind)
+        .sort((a, b) => b[1] - a[1])
+        .map(([kind, count]) => `${kind}=${count}`)
+        .join(' ') || '—';
+    lines.push(
+      row(
+        sample.shape,
+        String(sample.files),
+        String(sample.groups),
+        String(sample.questions),
+        sample.filesPerQuestion.toFixed(1),
+        kinds,
+      ),
+    );
+  }
+  lines.push(
+    '',
+    '  `source` and `containment_check` are NOT counted — the predictor cannot reach them, and',
+    '  this corpus cannot produce them: the generator gives a file EXIF for the same city its',
+    '  folder names, so text and GPS never disagree. See upload-trace-question-kind.ts.',
+  );
+  return lines.join('\n');
+}

@@ -74,15 +74,37 @@ Addresses are derived with `buildSearchObjectFromRelativePath`, the **same** fun
 pipeline uses. That is what makes a folder answered in bulk identical to the same folder answered one
 file at a time, rather than a second interpretation of the same path.
 
-**Still to wire:** the UI that builds the selection and shows the confirmation, and the adapters that
-supply `geocode` / `applyToItem` from the existing services. The decision logic is done; the
-plumbing is not.
+**Adapters, 2026-09-18** (`bulk-resolution.adapter.ts`). The only place bulk resolution touches
+`GeocodingService` or `MediaLocationUpdateService`. It guarantees two things the engine cannot:
+
+- **The whole geocode result passes through.** `updateFromAddressSuggestion` reads `city` /
+  `street` / `streetNumber` / `zip` / `country`; anything narrower writes coordinates with no
+  address. The runner is generic over the suggestion type for exactly this reason.
+- **Nothing thrown escapes.** A geocoder outage or a rejected row becomes a reported outcome, since
+  the engine's contract is that a failure never aborts the run.
+
+On the EXIF path the adapter carries the **photo's own coordinates** forward: `ReverseGeocodeResult`
+has no `lat`/`lng` because it names a point rather than locating one, and taking the geocoder's
+position instead would move the item to the address rather than to where the camera stood.
+
+**Dialog, 2026-09-20** (`apps/web/src/app/shared/bulk-resolution-dialog/`). The plan is now
+renderable: exact count, one row per address with its file count, skipped items grouped by reason,
+progress, and a report that states failures rather than rounding them away. Its first caller is the
+deferred-location backlog in the Upload tab ([#232](https://github.com/matkleve/feldpost/issues/232));
+the `/files` selection is the second, when that page exists.
+
+Building it surfaced one thing the engine's tests could not: a plan with `eligibleCount: 0` is a
+**normal outcome**, not an error. On this project's own database every unresolved item is a PDF with
+`relative_path` NULL and no EXIF, so the planner correctly skips all of them as
+`no_address_in_source`. A dialog that offered Apply there would write nothing and read as broken, so
+`nothing-to-do` is its own stable state with no Apply button.
 
 ## Acceptance Criteria
 
 - [x] Applying an address to a folder of 1 000 unresolved items issues **one** geocode request.
 - [x] Resolved items in the same folder are untouched unless overwrite mode was explicitly chosen (R2).
 - [ ] The written location carries human-origin evidence and survives a re-run of derivation (R3, R4).
+- [x] A confirmation renders the plan, and cancel writes nothing (5.4 dialog).
 - [ ] A city-only answer produces a city-precision location with no coordinates (D-10 parity).
 - [x] A forced mid-run failure leaves successful items written and reports the failures (R6).
 - [x] Confirmation states the exact item count and address before any write (R7) — the plan reports

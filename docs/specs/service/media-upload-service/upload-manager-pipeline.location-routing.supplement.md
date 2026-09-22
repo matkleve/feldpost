@@ -89,7 +89,7 @@ Canonical matrix: [search-tuning.distance-radii-contract.md](../search/search-tu
 | `exifAssistRadiusMeters` | [upload-location-config.md](./upload-location-config.md) | **80 m** | *(not in Search Tuning UI)* | Among **multiple** geocode hits, pick/nudge candidate near **EXIF** |
 | `sourceAgreementRadiusMeters` | upload-location-config | **150 m** | *(not in Search Tuning UI)* | **Text geocode coords** vs **EXIF metadata** → agree or source tray |
 
-`clusterAssistWeight.project` is a **ranking weight**, not a distance radius.
+There is no project/company cluster ranking weight in the upload path. A `clusterAssistWeight` config field claimed one and was read by nothing; removed 2026-09-21 ([#237](https://github.com/matkleve/feldpost/issues/237)).
 
 ### Phase 5 reference points (Prompt B)
 

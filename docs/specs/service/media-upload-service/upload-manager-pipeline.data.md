@@ -34,7 +34,7 @@ Deterministische Reihenfolge (first-match-wins):
 5. Nur den gemergten Kandidaten ab `titleConfidenceThreshold` weiterverarbeiten.
 6. Kandidat forward-geocoden und Mehrtreffer gegen `minMeaningfulScore` filtern.
 7. Bei genau einem sinnvollen Treffer: Titel als Standortquelle verwenden.
-8. Bei mehreren Treffern: Cluster-Disambiguierung mit `clusterAssistWeight` + `minTopGap` ausfuehren.
+8. Bei mehreren Treffern: nach `score` sortieren und gegen `disambiguationAutoAssignThreshold`, `minTopGap` und `disambiguationReviewLowerBound` pruefen (`classifySearchHits`). **Kein Projekt-/Firmen-Cluster-Gewicht** — siehe Hinweis unter dem Pseudocode.
 9. Wenn weiterhin mehrdeutig und EXIF vorhanden: EXIF als Assistenz mit `exifAssistRadiusMeters` pruefen.
 10. Wenn danach eindeutig: Titel-Treffer verwenden.
 11. Wenn weiter mehrdeutig: User-Prompt fuer Kandidatenauswahl.
@@ -49,8 +49,6 @@ Algorithmus-Parameter (`UploadLocationConfig`) mit Defaults:
 | `minMeaningfulScore`                        | `0.55`               | Untergrenze fuer geocoding Treffer, die als sinnvolle Kandidaten gelten                                               |
 | `minTopGap`                                 | `0.1`                | Mindestabstand zwischen Platz 1 und Platz 2, damit Cluster-Entscheid als eindeutig gilt                               |
 | `titleConfidenceThreshold`                  | `0.8`                | Mindestconfidence fuer Parser-Ergebnis, um als Titelkandidat in den Geocoding-Pfad zu gehen                           |
-| `clusterAssistWeight.project`               | `0.7`                | Gewicht fuer bereits bekannte Projektstandorte bei Mehrtreffer-Ranking                                                |
-| `clusterAssistWeight.company`               | `0.3`                | Gewicht fuer bekannte Unternehmenscluster bei Mehrtreffer-Ranking                                                     |
 | `folderHierarchyTraversalOrder`             | `'leaf-to-root'`     | Traversierungsrichtung der `directorySegments`; dateinahe Ordner haben Prioritaet                                     |
 | `folderHintRequireHighConfidence`           | `true`               | Nur high-confidence Segmenttreffer aus Ordnern duerfen als Folder-Kandidat gelten                                     |
 | `folderHintUseRootFallback`                 | `true`               | Root folder hint wird nur genutzt, wenn kein spezifischer Segmenttreffer gefunden wurde                               |
@@ -108,11 +106,7 @@ if (
   if (meaningful.length === 1) {
     useTitle(meaningful[0]);
   } else if (meaningful.length > 1) {
-    const ranked = rankWithClusters(meaningful, {
-      projectWeight: config.clusterAssistWeight.project,
-      companyWeight: config.clusterAssistWeight.company,
-      minTopGap: config.minTopGap,
-    });
+    const ranked = classifySearchHits(meaningful, config);
 
     if (ranked.isUnique) {
       useTitle(ranked.best);
@@ -168,6 +162,20 @@ else if (titleAddress && !coords) forwardGeocode();
 ### Data Flow (Mermaid)
 
 ```mermaid
+
+> **Korrektur 2026-09-21.** Der Pseudocode rief frueher `rankWithClusters(projectWeight,
+> companyWeight, minTopGap)` mit `config.clusterAssistWeight` auf. **Diese Funktion existiert
+> nicht**, und `clusterAssistWeight` wurde von nichts gelesen — nachgewiesen, indem die Gewichte
+> auf `{project: 0, company: 0}` gesetzt und der Trace erneut ausgefuehrt wurde: identische
+> 8 Reverse-Geocodes, 62 Forward-Geocodes und dieselben 27 Trays. Das Feld ist entfernt
+> ([#230](https://github.com/matkleve/feldpost/issues/230),
+> [#237](https://github.com/matkleve/feldpost/issues/237)).
+>
+> Cluster-Disambiguierung existiert, aber woanders: `runDisambiguation` in
+> `core/location-path-parser/disambiguation-algorithms.ts`, aufgerufen von
+> `location-path-parser.service.ts` fuer die **Stadt**-Aufloesung beim Parsen. Sie gewichtet
+> `zipMatch`, `countryMatch` und `parserConfidence` — nicht Projekt gegen Firma. Die Upload-Seite
+> ruft sie nicht auf.
 flowchart TD
   A[Submission via UploadPanel or MediaDetail] --> B[UploadManagerService]
   B --> C[UploadQueueService slot assignment max 3]

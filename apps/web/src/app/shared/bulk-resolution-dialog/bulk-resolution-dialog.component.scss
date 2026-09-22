@@ -1,0 +1,118 @@
+:host {
+  display: contents;
+}
+
+// Stacked plan sections — headline, cost, groups, skipped, overwrite (geometry only).
+// @see docs/specs/component/bulk-resolution-dialog/bulk-resolution-dialog.md
+.bulk-dialog__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  min-width: 0;
+}
+
+// The count R7 requires the user to read before confirming.
+// @see docs/specs/component/bulk-resolution-dialog/bulk-resolution-dialog.md
+.bulk-dialog__headline {
+  margin: 0;
+  font-size: var(--font-size-md);
+  color: var(--foreground);
+}
+
+// Secondary lines: geocode cost and the "run was cut short" note.
+// @see docs/specs/component/bulk-resolution-dialog/bulk-resolution-dialog.md
+.bulk-dialog__cost {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--muted-foreground);
+}
+
+// Scrollable address list — a 400-address plan must not push the footer off screen.
+// @see docs/specs/component/bulk-resolution-dialog/bulk-resolution-dialog.md
+.bulk-dialog__groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  max-height: 14rem;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+// One address and the number of files it covers, on one row.
+// @see docs/specs/component/bulk-resolution-dialog/bulk-resolution-dialog.md
+.bulk-dialog__group {
+  display: flex;
+  gap: var(--spacing-2);
+  align-items: baseline;
+  justify-content: space-between;
+  min-width: 0;
+  font-size: var(--font-size-xs);
+}
+
+// The address itself — truncates rather than wrapping the row into two lines.
+// @see docs/specs/component/bulk-resolution-dialog/bulk-resolution-dialog.md
+.bulk-dialog__group-address {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--foreground);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// File count for one address — never shrinks below its own text.
+// @see docs/specs/component/bulk-resolution-dialog/bulk-resolution-dialog.md
+.bulk-dialog__group-count {
+  flex: 0 0 auto;
+  color: var(--muted-foreground);
+}
+
+// What the run will NOT do, grouped by reason.
+// @see docs/specs/component/bulk-resolution-dialog/bulk-resolution-dialog.md
+.bulk-dialog__skipped {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  margin: 0;
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--font-size-xs);
+  color: var(--muted-foreground);
+  list-style: none;
+  background: var(--muted);
+  border-radius: var(--radius-sm);
+}
+
+// One skip reason line.
+// @see docs/specs/component/bulk-resolution-dialog/bulk-resolution-dialog.md
+.bulk-dialog__skip {
+  margin: 0;
+}
+
+// B3 opt-in row — label and checkbox as siblings, no nested interactive.
+// @see docs/specs/component/bulk-resolution-dialog/bulk-resolution-dialog.md
+.bulk-dialog__overwrite {
+  display: flex;
+  gap: var(--spacing-2);
+  align-items: center;
+  font-size: var(--font-size-xs);
+  color: var(--muted-foreground);
+}
+
+// Minimum tap target for the dismiss control (geometry only).
+// @see docs/specs/component/bulk-resolution-dialog/bulk-resolution-dialog.md
+.bulk-dialog__cancel {
+  min-height: 2.25rem;
+  padding-block: var(--spacing-2);
+  padding-inline: var(--spacing-4);
+  font-size: var(--font-size-md);
+}
+
+// Minimum tap target for the confirm control (geometry only).
+// @see docs/specs/component/bulk-resolution-dialog/bulk-resolution-dialog.md
+.bulk-dialog__confirm {
+  min-height: 2.25rem;
+  padding-block: var(--spacing-2);
+  padding-inline: var(--spacing-4);
+  font-size: var(--font-size-md);
+}

@@ -54,7 +54,7 @@ spec-level — the spec says what the code does, so a fix needs a contract decis
 | [F-09](#f-09) | The `test` gate compiles nothing, so it runs no specs | Medium | Repo |
 | [F-10](#f-10) | Two gate debt notes state numbers that no longer match | Low | Repo |
 | [F-11](#f-11) | ~~A meaningless folder segment outranks a valid address in the file name~~ **fixed** | High | Code |
-| [F-12](#f-12) | The unit suite is order-dependent; the count depends on a build cache | Medium | Repo |
+| [F-12](#f-12) | ~~The unit suite is order-dependent; the count depends on a build cache~~ **fixed** — 0 failing across three cold runs | Medium | Repo |
 | [F-13](#f-13) | `ng test` never loads `vitest.config.ts`, so its aliases are inert in CI | Medium | Repo |
 | [F-14](#f-14) | ~~An async tray gate is overwritten by the hashing step, stranding the job~~ **fixed** | High | Code |
 | [F-15](#f-15) | ~~A path carrying a complete address **twice** can yield an empty Search Object~~ **fixed** | High | **Spec** |
@@ -531,6 +531,15 @@ are stale tests that predate this work entirely.
 Two runners give the same answer, too: `nav` and `login` fail with identical counts under plain
 `npx vitest run` and under `ng test` `[A]`, so this is not [F-13](#f-13)'s configuration split
 either.
+
+**Closed 2026-09-20.** The gate is at **0 failing of 1 551, across three consecutive cold runs** —
+from 25 across 12 files on 09-13. The last file, `upload.service.spec.ts`, was the one genuinely
+order-dependent case, and it is now diagnosed rather than merely counted: four cold runs gave
+**0/0, 5/1, 0/0, 5/1** — all five assertions or none, decided by vitest's file-to-worker assignment,
+which is exactly why pairwise and whole-directory runs never reproduced it. Cause: `vi.mock()` binds
+per module registry while the Angular unit-test system bundles the whole suite, so the mock applied
+only when no other spec had loaded `upload.service.util` into that worker first. Fixed with an
+explicit reader seam, not a module mock — the pattern is now [TRAP-022](../TRAPS.md).
 
 **What this means.** The "order-dependent pollution" framing has been acting as a bucket that
 ordinary broken tests fell into and stopped being read. The order-dependence in the table above is
