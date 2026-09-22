@@ -14,7 +14,7 @@ corrected-by: none
 
 **Status `proposed`:** normative specs and code must not ship until [#257](https://github.com/matkleve/feldpost/issues/257) planning acceptance criteria are checked and this study is `accepted`.
 
-> **Before acting on § 2.3, § 3 or § 8, read § 13.** An update dated 2026-09-22 measures this plan against the live code and the repository's own gates. Two build-order claims above do not survive that measurement, and the strongest argument *for* the grid was missing from § 1. Nothing above has been edited — § 13 names what is superseded and why, per [`STUDY-FORMAT.md`](./STUDY-FORMAT.md) § Correcting a study.
+> **Read § 13 and § 14 before acting on anything above them.** Two updates dated 2026-09-22 were appended: **§ 13** measures the plan against the live code and the repository's gates, and supersedes two build-order claims; **§ 14** records the owner's decisions, which reorganise the plan — the left rail drives the **canvas**, the right rail drives the **panel column**, and Settings and Account are canvas content rather than panels, superseding § 5.3's panel roster. Nothing above has been edited. Both sections name what they supersede, per [`STUDY-FORMAT.md`](./STUDY-FORMAT.md) § Correcting a study; under its § Trust order the owner's answers in § 14 outrank everything else in this file.
 
 ---
 
@@ -427,3 +427,144 @@ Today's mobile shell, for the record: the nav becomes a `3.5rem` fixed bottom ba
 | Repoint #257's study link — its body still cites `docs/study/010-shell-grid-layout-change-plan.md`, a file that has never existed (STUDY-010 is the defensive security review) `[A]` | Issue edit |
 | Correct [`shell-layout-tokens.md`](../design/shell-layout-tokens.md) § Cross-sibling positioning (§ 13.2) | Own issue; Phase 1 |
 | Add `layout/` and `features/nav/` to the breakpoint gate's `targetDirs` (§ 13.7) | Phase 9 |
+
+---
+
+## 14 · Update 2026-09-22 — owner decisions
+
+**Source:** owner, in conversation, 2026-09-22. Under [`STUDY-FORMAT.md`](./STUDY-FORMAT.md) § Trust order an owner correction outranks everything else in this file, including § 13. Everything below is `[D]` by definition — these are decisions, not measurements.
+
+Appended, not edited in. Where a decision overrules an earlier `[D]`, the earlier text stays where it is and is named as superseded.
+
+### 14.1 · The rule that reorganises the whole plan
+
+> "The canvas is what changes when you click on another page or on the settings or whatever. So **left rail controls the canvas**, and the **right rail controls the panel column**." `[D]`
+
+This is the single most consequential answer, and it is simpler than what § 5 and § 7 assumed.
+
+| Rail | Drives | What its options do |
+| --- | --- | --- |
+| **Left** | The **canvas** | Swap what the canvas shows — map, projects, media, account, organisation, settings |
+| **Right** | The **panel column** | Open and close panels beside the canvas |
+
+**Superseded: § 5.3's panel roster.** It lists `settings`, `profile` and `workspace` as panel ids. They are not panels. Settings and Account are **canvas content** reached from the left rail, exactly like the map or the media page `[D]`. The panel column holds only what the right rail opens.
+
+This is a reduction in scope, not an addition. It removes the "Settings panel + Profile panel" migration from the panel stack entirely — what remains is a route-shaped change: settings stops being a floating overlay and becomes a thing the canvas shows.
+
+**Superseded: § 1's target table row "Settings overlay → Settings panel in panel column"** — the target is Settings *in the canvas* `[D]`.
+
+**The app is a one-pager.** `[D]` The canvas is the only thing that swaps; the rails and the panel column persist across every destination.
+
+### 14.2 · The structure, in the owner's own terms
+
+> "The page has a grid with those 4 columns, and then inside the columns are flex containers if needed that stretch." `[D]`
+
+```text
+div left rail
+  div  logo                                  ← its own div, not part of a container
+  div  widget container
+         map
+         projects
+         media
+         "+"   (opens the widget page for more widgets)
+  ─────  empty space  ─────                  ← flex, not a fixed gap
+  div  container: settings and people management
+         account
+         maybe mitarbeiter      ⎤ these two are widgets in their own right
+         maybe organisation     ⎦
+         settings
+```
+
+"Something like that is also on the right rail." `[D]`
+
+Three things this settles that were open:
+
+- **Q6 — left-rail contents:** map · projects · media · `+`. The `+` opens a widget page, so the container's contents are not a fixed list to be specced once `[D]`.
+- **Q7 — the logo** is its own div and stays non-interactive `[D]`. Confirms § 13's reading of today's code.
+- **Left-bottom contents:** account · *(mitarbeiter)* · *(organisation)* · settings `[D]`. Note **account**, not "profile" — § 5.3's `profile` panel id was wrong twice over.
+
+**The rails are not a fixed inventory.** Mitarbeiter and Organisation are widgets ([#258](https://github.com/matkleve/feldpost/issues/258)), so their rows are absent, not disabled, when the org has not installed them `[D]`. Phase 4's spec must describe the rail as a *render of an installed-widget list*, not as a hardcoded list of options. This is the point where this workstream and #258 stop being independent.
+
+### 14.3 · Superseded: the gap token, and the word "gap"
+
+§ 4.1 names **Gap** as a term of art and § 13.7 recommended a fixed `var(--spacing-*)` token over a flex spacer. **Both are overruled** `[D]`:
+
+> "Flex spacer — same with left rail. But container can stack with gap in top or bottom part, looking like separate elements."
+
+> "You can rework it, because gap is like fixed but it's actually just spacing because there is no more content."
+
+So there are two different things, and the earlier text conflated them `[D]`:
+
+| Thing | What it is | How it is built |
+| --- | --- | --- |
+| The space between the top group and the bottom group | **Not a gap.** It is what is left over when the content runs out. | Flex spacer / `space-between` on the rail column |
+| The space between two stacked containers inside the top or bottom group | A real, fixed separation that makes them read as separate elements | `gap` on that group's flex container |
+
+The vocabulary drops "Gap" as a fourth named concept. **Control area · container · option** stand `[D]`; the leftover space needs no name because it is an absence, and naming an absence is what made it look like a token.
+
+### 14.4 · Q1 — four tracks, with the panel column optional
+
+> "It's control area, then canvas, then optional panel column if needed, then rail. The canvas and panel can be filled with whatever's on hand." `[D]`
+
+Four tracks, and the panel column is **conditional** — present when something is open, absent otherwise. This matches § 13.3's replacement exactly: an `auto` track contributes zero width when the stack is empty, with no conditional class `[C]`. § 3's `minmax(0, var(--shell-panel-column-max))` stays superseded.
+
+"Filled with whatever's on hand" confirms § 2.1's slot principle `[D]`: neither the canvas nor the panel column knows what its occupant is.
+
+### 14.5 · Q9 — feature flag
+
+Named here because the owner delegated the choice: **`shellGridLayout`** `[D]`.
+
+**There is no feature-flag mechanism in this repository.** A search of `apps/web/src` for `featureFlag` / `FeatureFlag` / `FEATURE_FLAG` returns nothing, and `apps/web/src/app/core/` has no flag service `[A]`. So Phase 3 does not merely *use* a flag — it has to introduce whatever the flag is, and that is a design decision of its own that belongs in Phase 1's spec `[D]`. Left unstated, it becomes an ad-hoc boolean somewhere.
+
+### 14.6 · Q3 — upload is right-rail only
+
+> "ONLY right rail. We have no more workspace upload tab any more. This makes things a lot easier." `[D]`
+
+The workspace Upload tab is **deleted**, not kept in parallel. Today upload exists twice — as the fixed `app-upload-shell` and as a tab projected into the workspace pane (`authenticated-app-layout.component.html:47-58`) `[A]`. Both go; upload becomes one panel opened from the right rail `[D]`.
+
+### 14.7 · Q2 — selection is unified, and double-selection is removed
+
+> "We no longer have the ability to double select media. Right now you can select media on the map and then select again in the select tab. Now the select tab mirrors what's on the map, or the `/media` page/widget selected." `[D]`
+
+One selection, many views. The select surface **mirrors** the current selection — it does not hold a second, independent one that the user can add to.
+
+This is the largest behavioural change in the owner's answers, and it is not geometry `[C]`. It deletes a state that exists today, which means it can delete bugs and user expectations at the same time. It needs a red test before the change, and it is the one answer here that deserves its own spec section rather than a row in a table `[D]`.
+
+### 14.8 · Q4 — tablet yes, mobile still open
+
+> "I think on tablet it will work." `[D]`
+
+Tablet keeps the four-track layout. **Mobile was not answered and stays open** — it is the only question from § 9 still outstanding. Today's mobile shell is a `3.5rem` fixed bottom bar (`nav.component.scss:40-52`) `[A]`, and § 13.8 notes nobody has measured whether two rails plus a panel column fit at `48rem`. Phase 9 cannot start without an answer; nothing before it is blocked.
+
+### 14.9 · Answers in brief
+
+| # | Question | Decision |
+| --- | --- | --- |
+| Q1 | Track count | Four; panel column conditional (§ 14.4) `[D]` |
+| Q2 | Workspace / selection | Unified selection; select surface mirrors (§ 14.7) `[D]` |
+| Q3 | Upload | Right rail only; workspace tab deleted (§ 14.6) `[D]` |
+| Q4 | Tablet / mobile | Tablet works; **mobile open** (§ 14.8) `[D]` |
+| Q5 | Terminology | Control area · container · option; "gap" dropped (§ 14.3) `[D]` |
+| Q6 | Left-rail routes | map · projects · media · `+` (§ 14.2) `[D]` |
+| Q7 | Logo | Own div, non-interactive (§ 14.2) `[D]` |
+| Q8 | Rail spacing | Flex spacer between groups; `gap` inside a group (§ 14.3) `[D]` |
+| Q9 | Feature flag | `shellGridLayout`; mechanism does not yet exist (§ 14.5) `[D]` |
+| Q10 | Notifications, undo/history, tips | Deferred; not v1 `[D]` |
+
+Also confirmed: the shared `shell-box` surface (§ 2.2, § 13 banner) `[D]`; and the grid host owning all track widths, which § 14.2's "the page has a grid with those 4 columns" settles — it is the same thing § 13.1 asks for, arrived at from the other direction `[D]`.
+
+### 14.10 · What Phase 1 must now specify that it did not before
+
+1. **Rails render an installed-widget list**, not a fixed option list (§ 14.2) — the join with #258.
+2. **Left rail → canvas, right rail → panel column** as a contract, so no future option lands on the wrong side (§ 14.1).
+3. **Settings and account as canvas destinations**, and what becomes of `SettingsPaneService`'s eight section ids, subsection deep-links and the command-palette entry into invite management (`settings-pane.service.ts:26-44`) `[A]` when the overlay becomes canvas content (§ 14.1).
+4. **The unified selection model** and the removal of the second selection (§ 14.7).
+5. **A feature-flag mechanism**, since none exists (§ 14.5).
+6. **The leftover-space rule**: flex spacer between groups, `gap` within a group (§ 14.3).
+
+### 14.11 · Status
+
+Every § 10 criterion except the two below now has an owner answer. Remaining before `status: accepted`:
+
+- [ ] **Q4 mobile** — the one unanswered question (§ 14.8)
+- [ ] Implementation issues filed per phase
