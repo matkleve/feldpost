@@ -1,4 +1,5 @@
-import { afterNextRender, Component, DestroyRef, ElementRef, inject } from '@angular/core';
+import { afterNextRender, Component, computed, DestroyRef, ElementRef, inject } from '@angular/core';
+import { ShellLayoutService } from '../../core/shell-layout/shell-layout.service';
 import { WorkspacePaneLayoutMapEffectsService } from '../../core/workspace-pane/workspace-pane-layout-map-effects.service';
 import { scheduleMapInvalidation } from './schedule-map-invalidation';
 
@@ -11,11 +12,17 @@ import { scheduleMapInvalidation } from './schedule-map-invalidation';
   standalone: true,
   templateUrl: './grid-shell.component.html',
   styleUrl: './grid-shell.component.scss',
+  host: {
+    '[attr.data-panels]': 'panelsOpen() ? "open" : "closed"',
+  },
 })
 export class GridShellComponent {
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly mapLayoutEffects = inject(WorkspacePaneLayoutMapEffectsService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly shellLayout = inject(ShellLayoutService);
+
+  readonly panelsOpen = computed(() => this.shellLayout.openPanels().length > 0);
 
   constructor() {
     afterNextRender(() => {

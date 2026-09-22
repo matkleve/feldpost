@@ -6,7 +6,7 @@ The generic content track of the grid shell. It shows whatever route or widget i
 
 ## What It Looks Like
 
-A rounded page box in the `1fr` track. Every left-rail page (map, projects, media, and later pages) renders inside this one box. `@include shell-box` supplies the frost, the border, and `border-radius: var(--container-radius-panel)`. `margin: var(--spacing-3)` insets the box so the page background shows in the corners. `overflow: hidden` clips the page to that radius.
+A rounded page box in the `1fr` track. Every left-rail page (map, projects, media, and later pages) renders inside this one box. `@include shell-box` supplies the frost, the border, and `border-radius: var(--container-radius-panel)`. The grid host owns the gutter (`gap` and `padding`). This host has no margin. `overflow: hidden` clips the page to that radius.
 
 ## Where It Lives
 
@@ -63,7 +63,7 @@ flowchart LR
 
 | Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer | Test Oracle |
 | --- | --- | --- | --- | --- | --- | --- |
-| Page box | `app-shell-main-canvas` | `app-shell-main-canvas` | projected page | `:host` | content `0` | `shell-box`, radius `--container-radius-panel`, inset `--spacing-3` |
+| Page box | `app-shell-main-canvas` | `app-shell-main-canvas` | projected page | `:host` | content `0` | `shell-box`, radius `--container-radius-panel`, no margin |
 
 `:host` is a grid child and declares `min-width: 0` and `min-height: 0`. The projected page does not paint its own outer radius.
 
@@ -71,6 +71,6 @@ flowchart LR
 
 - [ ] `:host` includes `shell-box` and clips its page with `overflow: hidden`.
 - [ ] Radius is `var(--container-radius-panel)`.
-- [ ] The inset is `var(--spacing-3)`, so the corners read against the page background.
+- [ ] The host has no margin. The gutter is the grid's `gap` and `padding`.
 - [ ] Map, projects, and media all mount in this box. The canvas does not import Leaflet.
 - [ ] `:host` sets `min-width: 0` and `min-height: 0`.

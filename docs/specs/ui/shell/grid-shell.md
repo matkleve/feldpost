@@ -6,7 +6,7 @@ The authenticated page grid. Its host owns every track width. The left control a
 
 ## What It Looks Like
 
-Four columns in one grid. The left and right tracks size to their content. The canvas takes the remaining width (`1fr`). The panel column is an `auto` track and contributes no width when no panel is open. Rail tracks stay transparent. The main canvas is a `shell-box`: the rounded page slot for every left-rail route. Panel surfaces use the same mixin. `@mixin shell-box` in `apps/web/src/styles/_frosted-chrome.scss` wraps `@mixin panel` and `border-radius: var(--container-radius-panel)`. No `--shell-*` custom property.
+Four columns in one grid when a panel is open: `auto 1fr auto auto`. The gutter is `gap: var(--spacing-3)` and `padding: var(--spacing-3)` on this host, not margin on a child. When no panel is open the template is `auto 1fr auto` and the panel column is not a grid item, so one gap remains between the canvas and the right rail. The left and right tracks size to their content. The canvas takes the remaining width (`1fr`). Rail tracks stay transparent. The main canvas is a `shell-box`: the rounded page slot for every left-rail route. Panel surfaces use the same mixin. `@mixin shell-box` in `apps/web/src/styles/_frosted-chrome.scss` wraps `@mixin panel` and `border-radius: var(--container-radius-panel)`. No `--shell-*` custom property.
 
 ## Where It Lives
 
@@ -88,13 +88,15 @@ sequenceDiagram
 | Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer | Test Oracle |
 | --- | --- | --- | --- | --- | --- | --- |
 | Four tracks | `app-grid-shell` | `app-grid-shell` | child slots | `:host` | content `0` | columns match the template |
-| Panel track width | `app-grid-shell` | `app-grid-shell` | `app-shell-panel-column` | `:host` | content `0` | empty stack is `0` width |
+| Track gutter | `app-grid-shell` | `app-grid-shell` | none | `:host` | content `0` | `gap` and `padding` are `--spacing-3` |
+| Closed panel track | `app-grid-shell` | `app-grid-shell` | `app-shell-panel-column` | `:host[data-panels='closed']` | content `0` | template is `auto 1fr auto` |
 
 Geometry, state, and visuals for the tracks sit on `app-grid-shell`. Children do not set `grid-template-columns`.
 
 ## Acceptance Criteria
 
-- [ ] `grid-template-columns` is `auto 1fr auto auto` with the panel track `auto`, not a `--shell-*` max.
+- [ ] Open panels use `auto 1fr auto auto`. A closed panel column uses `auto 1fr auto`. Neither uses a `--shell-*` max.
+- [ ] `gap` and `padding` are `var(--spacing-3)`. Child tracks do not add margin for that gutter.
 - [ ] No component other than `app-grid-shell` writes `--feldpost-sidebar-width`.
 - [ ] A panel open and close with the map visible leaves no grey tile band.
 - [ ] `shell-box` uses `@mixin panel` and `var(--container-radius-panel)` only.

@@ -1,4 +1,4 @@
-// Scrollable stack. Block padding lines the cards up with the canvas box.
+// Scrollable stack. A closed column leaves the grid so the shell gap stays single.
 // @see docs/specs/ui/shell/shell-panel-column.md
 :host {
   display: flex;
@@ -6,7 +6,12 @@
   gap: var(--spacing-2);
   min-width: 0;
   min-height: 0;
-  padding-block: var(--spacing-3);
   overflow: auto;
   background: transparent;
+}
+
+// Not a grid item while nothing is open.
+// @see docs/specs/ui/shell/grid-shell.md
+:host[data-empty] {
+  display: none;
 }
