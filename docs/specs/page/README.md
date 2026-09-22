@@ -8,7 +8,7 @@ Folder-specific rules:
 - Page specs may link to ui/component/service/system specs but must not duplicate child ownership tables.
 - Route-level acceptance criteria must remain testable from page behavior.
 
-**Area index:** [auth-pages.md](auth-pages.md) · [map-page.md](map-page.md) · [settings-routes.md](settings-routes.md) · [account-feature.md](account-feature.md) · [groups-feature.md](groups-feature.md) · [projects-page.md](projects-page.md) · [projects-dashboard.md](projects-dashboard.md) · [media-page.md](media-page.md) · [files-page.md](files-page.md) · [widgets-page.md](widgets-page.md)
+**Area index:** [auth-pages.md](auth-pages.md) · [map-page.md](map-page.md) · [settings-routes.md](settings-routes.md) · [account-feature.md](account-feature.md) · [groups-feature.md](groups-feature.md) · [projects-page.md](projects-page.md) · [projects-dashboard.md](projects-dashboard.md) · [media-page.md](media-page.md) · [files-page.md](files-page.md) · [widgets-page.md](widgets-page.md) · [widget-directory.md](widget-directory.md) · [widget-explanation.md](widget-explanation.md) · [widget-suite.md](widget-suite.md)
 
 **Workspace layout (canonical vs interim):** [workspace-pane.md](../ui/workspace/workspace-pane.md) — [layout priorities backlog](../../backlog/workspace-pane-layout-and-spec-priorities.md).
 

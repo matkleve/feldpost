@@ -277,10 +277,13 @@ Canonical names for every visible piece of the interface. Use these in code, doc
   A 2.75rem icon button (`app-shell-control-option`) inside a control container. Its hover label overlays and does not change track size.
 
 - **Widget**  
-  An optional rail destination. Absent from the rail until installed. Mitarbeiter and Organisation are the two named so far. A role grant for widgets and their data, and a proposed GPS-and-media suite, are [STUDY-017](study/017-role-widget-grants.md). Not built.
+  An optional rail destination. Absent from the rail until the organization adds it and a role allows it. Specs: `docs/specs/page/widgets-page.md`, `docs/specs/system/widget-grants.md`. Not built.
 
 - **Widget page**  
-  The canvas journey opened by the left-rail `+`: a directory, then one explanation page per widget. Spec: `docs/specs/page/widgets-page.md`. Not built.
+  The canvas journey opened by the left-rail `+`: a directory of rectangles, then one explanation page per widget. Spec: `docs/specs/page/widgets-page.md`. Not built.
+
+- **Widget suite**  
+  Vehicles, Boats, Material, Storage locations, and Buildings. Each record has one place and media on `media_items`. Spec: `docs/specs/page/widget-suite.md`. Not built.
 
 - **Panel column**  
   The third grid track (`app-shell-panel-column`). It stacks open panel surfaces and contributes no width when nothing is open.

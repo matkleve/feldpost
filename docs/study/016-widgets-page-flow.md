@@ -45,3 +45,7 @@ The owner rejected the install-scope question as the rights model `[D]`. A role 
 The owner leaned yes on W3 and asked for a study rather than a decision `[D]`. W4 is both a canvas page and a right-rail panel in general, and Workers and Organisation join the bottom-left container `[D]`. Those two questions are [STUDY-018](018-rail-placement.md). The W3 and W4 rows above stay as they were written.
 
 W5, as asked, was who writes the explanation. The owner answered with the card `[D]`: a rectangle with the name, a short explanation, More, and Add, greyed out when the organization does not allow the widget. That shape is in [widgets-page.md](../specs/page/widgets-page.md). Who stores the sentences is still open. The W5 row above stays as it was written.
+
+## Update 2026-09-22 — specs
+
+The journey stays in [widgets-page.md](../specs/page/widgets-page.md). The directory, the explanation, the suite, placement, and grants are separate specs linked from that file `[A]`. Those specs add no route and no migration.

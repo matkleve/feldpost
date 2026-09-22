@@ -31,7 +31,7 @@ app-shell-control-area
 └── app-shell-control-container [bottom group]
 ```
 
-Left static list: logo, map, projects, media, `+` (inert), account, settings. The owner decided that Workers and Organisation join the bottom container, with account and settings, and that a widget may be a canvas page, a right-rail panel, or both ([STUDY-018](../../../study/018-rail-placement.md)). Neither decision is in the static list in this window. Right rail, three containers. Container 1 stays at the top: upload, selected items, shared media. The leftover sits above container 2, so container 2 and container 3 are bottom aligned. The gap between those two is `var(--spacing-3)`. Container 2: undo, activity history, redo (inert until a history product exists). Container 3: tips, help. Account and settings keep today's routes and the settings overlay.
+Left static list: logo, map, projects, media, `+` (inert), account, settings. Where a widget sits is [shell-widget-placement.md](shell-widget-placement.md). That contract is not in the static list in this window. Right rail, three containers. Container 1 stays at the top: upload, selected items, shared media. The leftover sits above container 2, so container 2 and container 3 are bottom aligned. The gap between those two is `var(--spacing-3)`. Container 2: undo, activity history, redo (inert until a history product exists). Container 3: tips, help. Account and settings keep today's routes and the settings overlay.
 
 ## Data
 

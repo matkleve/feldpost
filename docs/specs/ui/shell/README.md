@@ -11,6 +11,7 @@ Authenticated app geometry. The map is one tenant of the main canvas, not the sh
 | [shell-control-option.md](shell-control-option.md) | `app-shell-control-option` |
 | [shell-panel-column.md](shell-panel-column.md) | `app-shell-panel-column` |
 | [shell-panel-surface.md](shell-panel-surface.md) | `app-shell-panel-surface` |
+| [shell-widget-placement.md](shell-widget-placement.md) | where a widget sits; no selector yet |
 
 Panel stack state: [../../service/shell-layout/shell-layout.md](../../service/shell-layout/shell-layout.md).
 
