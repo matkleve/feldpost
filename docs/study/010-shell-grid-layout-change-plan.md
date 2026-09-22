@@ -11,7 +11,7 @@ corrected-by: none
 **Measured:** 2026-09-22, branch `cursor/control-area-grid-spec-9af8` conversation + owner mock screenshot in chat.  
 **How:** Read live layout code [`authenticated-app-layout.component.html`](../../apps/web/src/app/layout/authenticated-app-layout.component.html), [`nav.component.ts`](../../apps/web/src/app/features/nav/nav.component.ts), existing specs [`sidebar.md`](../specs/component/workspace/sidebar.md), [`workspace-pane.md`](../specs/ui/workspace/workspace-pane.md), [`settings-overlay.md`](../specs/ui/settings-overlay/settings-overlay.md). Owner corrections in chat on 2026-09-22.
 
-**GitHub issue (task register):** filed as part of remediation — see issue body linked from PR #253 comment.
+**GitHub issue (task register):** [#257](https://github.com/matkleve/feldpost/issues/257)
 
 **Process note:** An agent prematurely wrote normative files under `docs/specs/ui/shell/` before owner approved a change plan. Those files were **reverted**. This study + the issue are the correct home until the owner signs off; **no spec edits until then** ([`docs/study/README.md`](./README.md) · [`agent-daily-workflow.md`](../agent-workflows/agent-daily-workflow.md)).
 
