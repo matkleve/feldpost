@@ -60,21 +60,22 @@ Transitions:
 | `null` | Delete clicked (`requestDeleteProject`) | `<projectId>` | none — **no service call** |
 | `<projectId>` | Cancel (`cancelPendingDelete`) | `null` | none |
 | `<projectId>` | Confirm (`confirmPendingDelete`) | `null` | `deleteProject`; on success remove from `projects` + `backToList()`, on failure error toast |
-| `<projectId>` | Escape (`document:keydown.escape` host binding) | `null` | none |
+| `<projectId>` | Escape | `null` | none — arrives as `cancelled`, same as Cancel |
 
-**Escape needs its own handler.** `app-confirm-dialog` renders `brnDialog` without `disableClose`,
-which defaults to `false`, so BrnDialog subscribes to `keydownEvents` and closes the overlay on
-Escape — but the dialog emits `cancelled` only from its Cancel button. Without the host binding the
-signal would outlive the closed overlay, `@if` would stay truthy, the dialog component would not be
-re-created, and Delete would silently stop opening anything for the rest of the panel's life.
-This is a gap in the shared dialog, tracked in issue #254; **remove this host binding when #254
-lands** rather than copying it into further call sites.
+**Every dismissal arrives as `cancelled`.** `app-confirm-dialog` owns that mapping: it emits
+`cancelled` when BrnDialog closes itself on Escape, not only from its Cancel button
+([`confirm-dialog.md` § Actions](../../component/confirm-dialog/confirm-dialog.md), issue #254).
+The panel therefore needs no Escape handling of its own — clearing the signal in
+`cancelPendingDelete()` covers both paths.
 
 **`confirmPendingDelete()` reads and clears `pendingDeleteProjectId` before awaiting**, for two
-reasons: `app-confirm-dialog` closes its own CDK portal on click, so leaving the signal set would
-keep an invisible dialog mounted for the length of the request; and the cleared signal is the
-re-entry guard, so a second confirm click during an in-flight delete returns early —
-**one `deleteProject` per confirmation, no busy flag needed.**
+reasons. The dialog's buttons carry no `brnDialogClose`, so clearing the signal is what dismisses
+the dialog at all — leave it set and the modal stays on screen for the length of the request. And
+the cleared signal is the re-entry guard: a second confirm click during an in-flight delete returns
+early — **one `deleteProject` per confirmation, no `busy` flag needed.**
+
+The panel therefore does not pass `busy`. The projects page does, because it keeps its dialog
+mounted across the await to offer a retry when the delete fails.
 
 ## Acceptance Criteria
 
@@ -82,7 +83,8 @@ re-entry guard, so a second confirm click during an in-flight delete returns ear
 - [x] Clicking Delete opens `app-confirm-dialog` and does **not** call `ProjectsService.deleteProject`.
 - [x] Cancelling the dialog calls nothing and leaves the project in the list.
 - [x] Confirming calls `deleteProject(projectId)`, removes the row, and returns the panel to the list.
-- [x] Dismissing the dialog with Escape clears the pending delete and leaves Delete usable again.
+- [x] Dismissing the dialog with Escape clears the pending delete and leaves Delete usable again
+  (via the shared dialog's `cancelled`; covered by `confirm-dialog.component.spec.ts`).
 - [x] Double-clicking Confirm calls `deleteProject` exactly once.
 - [x] A failed delete shows an error toast instead of failing silently (CONSTITUTION § no silent failure).
 - [x] No new i18n keys — the panel reuses the projects page's delete-confirmation keys.

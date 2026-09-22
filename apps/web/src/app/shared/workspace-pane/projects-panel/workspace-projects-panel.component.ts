@@ -60,13 +60,6 @@ export const DRAG_MEDIA_IDS_MIME = 'application/x-feldpost-media-ids';
   templateUrl: './workspace-projects-panel.component.html',
   styleUrl: './workspace-projects-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    // app-confirm-dialog closes its overlay on Escape (BrnDialog `disableClose` defaults to
-    // false) but emits `cancelled` only from its Cancel button, so the pending signal has to
-    // be cleared here or it outlives the closed dialog and Delete stops opening it again. Shared-
-    // dialog gap, issue #254 — drop this binding when the dialog emits `cancelled` on Escape.
-    '(document:keydown.escape)': 'cancelPendingDelete()',
-  },
 })
 export class WorkspaceProjectsPanelComponent {
   private readonly projectsService = inject(ProjectsService);
@@ -343,8 +336,9 @@ export class WorkspaceProjectsPanelComponent {
 
   async confirmPendingDelete(): Promise<void> {
     const projectId = this.pendingDeleteProjectId();
-    // Unmount first: app-confirm-dialog closes its own portal on click, so the
-    // signal must not outlive the visible dialog while the delete is in flight.
+    // Clear first: app-confirm-dialog's buttons do not close it, so unmounting it is this
+    // signal's job — and the cleared signal doubles as the re-entry guard for a second
+    // confirm click. @see docs/specs/component/confirm-dialog/confirm-dialog.md § Actions
     this.pendingDeleteProjectId.set(null);
     if (!projectId) return;
 

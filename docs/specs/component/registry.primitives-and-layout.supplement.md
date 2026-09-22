@@ -614,14 +614,17 @@
 
 - **File**: `apps/web/src/app/shared/confirm-dialog/confirm-dialog.component.ts`
 - **Purpose**: Modal confirmation dialog with confirm/cancel actions; danger variant applies destructive styling.
+- **Not for**: A confirm that needs its own open-state input or bespoke width — use `size`/`busy` here instead of forking (issue #256).
 - **Spec**: [`docs/specs/component/confirm-dialog/confirm-dialog.md`](confirm-dialog/confirm-dialog.md)
 - **Variant axes**:
   | Input | Type | Values | Visual effect |
   |---|---|---|---|
   | `danger` | `boolean` | `true`, `false` | Destructive confirm button colour |
+  | `size` | `ConfirmDialogSize` | `sm` (default), `md` | Panel width — `max-w-[20rem]` vs `max-w-[26rem]` |
+  | `busy` | `boolean` | `true`, `false` | Both buttons disabled; dialog cannot self-close |
 - **Other inputs**: `title: string` (required), `message: string` (required), `confirmLabel`, `cancelLabel`
 - **Composed of**: standalone
-- **Used in**: projects, upload panel, media delete actions, workspace projects panel delete
+- **Used in**: projects page, workspace projects panel, account, upload panel, media delete actions, organization roles/integrations, search tuning
 - **Gaps**: none
 
 ---

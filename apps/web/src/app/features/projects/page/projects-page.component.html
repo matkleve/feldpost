@@ -70,14 +70,16 @@
   }
 </app-page-grid>
 
-<app-projects-confirm-dialog
-  [open]="hasPendingAction()"
-  [title]="pendingActionTitle()"
-  [message]="pendingActionMessage()"
-  [confirmLabel]="pendingActionConfirmLabel()"
-  [cancelLabel]="t('common.cancel', 'Cancel')"
-  [busy]="pendingActionBusy()"
-  [danger]="pendingProjectAction() === 'delete'"
-  (cancel)="cancelPendingAction()"
-  (confirm)="confirmPendingAction()"
-/>
+@if (hasPendingAction()) {
+  <app-confirm-dialog
+    [title]="pendingActionTitle()"
+    [message]="pendingActionMessage()"
+    [confirmLabel]="pendingActionConfirmLabel()"
+    [cancelLabel]="t('common.cancel', 'Cancel')"
+    [busy]="pendingActionBusy()"
+    [danger]="pendingProjectAction() === 'delete'"
+    [size]="'md'"
+    (cancelled)="cancelPendingAction()"
+    (confirmed)="confirmPendingAction()"
+  />
+}

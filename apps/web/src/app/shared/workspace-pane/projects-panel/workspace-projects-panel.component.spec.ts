@@ -143,27 +143,13 @@ describe('WorkspaceProjectsPanelComponent — delete needs confirmation', () => 
 
     expect(projectsServiceMock.deleteProject).not.toHaveBeenCalled();
     expect(fixture.componentInstance.projects()).toHaveLength(1);
+    // Any dismissal — Cancel or Escape — arrives as `cancelled`; the dialog owns that
+    // mapping since #254, so clearing the signal here is all the panel has to do.
+    expect(fixture.componentInstance.pendingDeleteProjectId()).toBeNull();
   });
 });
 
 describe('WorkspaceProjectsPanelComponent — dialog dismissal is idempotent', () => {
-  it('clears the pending delete when the dialog is dismissed with Escape', async () => {
-    const fixture = await openDetail(archivedProject());
-
-    deleteButton(fixture.nativeElement)?.click();
-    fixture.detectChanges();
-    expect(fixture.componentInstance.pendingDeleteProjectId()).toBe('project-archived');
-
-    // BrnDialog closes its overlay on Escape but app-confirm-dialog emits `cancelled`
-    // only from its Cancel button, so the panel has to clear the signal itself.
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-    fixture.detectChanges();
-    await fixture.whenStable();
-
-    expect(fixture.componentInstance.pendingDeleteProjectId()).toBeNull();
-    expect(projectsServiceMock.deleteProject).not.toHaveBeenCalled();
-  });
-
   it('deletes once when the confirm button is double-clicked', async () => {
     const fixture = await openDetail(archivedProject());
 

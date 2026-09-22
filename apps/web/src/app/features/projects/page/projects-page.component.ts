@@ -16,7 +16,7 @@ import type {
   ProjectListItem,
   ProjectMediaListItem,
 } from '../../../core/projects/projects.types';
-import { ProjectsConfirmDialogComponent } from '../dialogs/projects-confirm-dialog.component';
+import { ConfirmDialogComponent } from '../../../shared/confirm-dialog/confirm-dialog.component';
 import { ProjectsSidebarComponent } from '../sidebar/projects-sidebar.component';
 import { ProjectDashboardViewComponent } from '../dashboard/project-dashboard-view.component';
 import { ProjectDetailViewComponent } from '../detail/project-detail-view.component';
@@ -44,7 +44,7 @@ import type { PendingProjectAction } from './projects-page.config';
     ProjectDashboardViewComponent,
     ProjectDetailViewComponent,
     ProjectDetailsPanelComponent,
-    ProjectsConfirmDialogComponent,
+    ConfirmDialogComponent,
     ...HLM_BUTTON_IMPORTS,
   ],
   templateUrl: './projects-page.component.html',

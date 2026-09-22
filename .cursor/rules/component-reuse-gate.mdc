@@ -19,7 +19,7 @@ alwaysApply: true
 | --- | --- |
 | Inline title / text edit | `app-pane-header`, `app-media-detail-header` |
 | Click-to-edit metadata row | `app-media-detail-inline-section`, `app-metadata-section` |
-| Irreversible / destructive confirm | `app-confirm-dialog`, `app-projects-confirm-dialog` |
+| Irreversible / destructive confirm | `app-confirm-dialog` (`size`, `busy`, `danger`) |
 | One-shot name prompt (create flow) | `app-text-input-dialog` |
 | Toast / mutation feedback | `ToastService` + `ss-toast-container` |
 | Status badge | `app-chip` |

@@ -1494,11 +1494,11 @@
       "spec": "docs/specs/component/confirm-dialog/confirm-dialog.md",
       "specId": "component/confirm-dialog/confirm-dialog",
       "useFor": "Modal confirmation dialog with confirm/cancel actions; danger variant applies destructive styling.",
-      "notFor": null,
+      "notFor": "A confirm that needs its own open-state input or bespoke width — use `size`/`busy` here instead of forking (issue #256).",
       "fields": [
         {
           "label": "Variant axes",
-          "value": "\n  | Input | Type | Values | Visual effect |\n  |---|---|---|---|\n  | `danger` | `boolean` | `true`, `false` | Destructive confirm button colour |"
+          "value": "\n  | Input | Type | Values | Visual effect |\n  |---|---|---|---|\n  | `danger` | `boolean` | `true`, `false` | Destructive confirm button colour |\n  | `size` | `ConfirmDialogSize` | `sm` (default), `md` | Panel width — `max-w-[20rem]` vs `max-w-[26rem]` |\n  | `busy` | `boolean` | `true`, `false` | Both buttons disabled; dialog cannot self-close |"
         },
         {
           "label": "Other inputs",
@@ -1510,7 +1510,7 @@
         },
         {
           "label": "Used in",
-          "value": "projects, upload panel, media delete actions, workspace projects panel delete"
+          "value": "projects page, workspace projects panel, account, upload panel, media delete actions, organization roles/integrations, search tuning"
         },
         {
           "label": "Gaps",
