@@ -14,7 +14,7 @@ corrected-by: none
 
 **Status `proposed`:** normative specs and code must not ship until [#257](https://github.com/matkleve/feldpost/issues/257) planning acceptance criteria are checked and this study is `accepted`.
 
-> **Read § 13 and § 14 before acting on anything above them.** Two updates dated 2026-09-22 were appended: **§ 13** measures the plan against the live code and the repository's gates, and supersedes two build-order claims; **§ 14** records the owner's decisions, which reorganise the plan — the left rail drives the **canvas**, the right rail drives the **panel column**, and Settings and Account are canvas content rather than panels, superseding § 5.3's panel roster. Nothing above has been edited. Both sections name what they supersede, per [`STUDY-FORMAT.md`](./STUDY-FORMAT.md) § Correcting a study; under its § Trust order the owner's answers in § 14 outrank everything else in this file.
+> **Read § 13 and § 14 before acting on anything above them.** Two updates dated 2026-09-22 were appended: **§ 13** measures the plan against the live code and the repository's gates, and supersedes two build-order claims; **§ 14** records the owner's decisions, which reorganise the plan — the left rail drives the **canvas**, the right rail drives the **panel column**, and Settings and Account are canvas content rather than panels, superseding § 5.3's panel roster. Nothing above has been edited. **§ 15** then sets the delivery plan for the owner's "this week or next" goal, specifies the feature-flag module, and corrects § 13.1's own advice — the rail-width property cannot be deleted in the grid-scaffold phase, because the settings overlay still reads it. All three sections name what they supersede, per [`STUDY-FORMAT.md`](./STUDY-FORMAT.md) § Correcting a study; under its § Trust order the owner's answers in § 14 outrank everything else in this file.
 
 ---
 
@@ -568,3 +568,120 @@ Every § 10 criterion except the two below now has an owner answer. Remaining be
 
 - [ ] **Q4 mobile** — the one unanswered question (§ 14.8)
 - [ ] Implementation issues filed per phase
+
+---
+
+## 15 · Update 2026-09-22 — the delivery plan, and the flag system
+
+**Owner goal:** the new grid shell live "this week or next" `[D]`.
+**Measured:** 2026-09-22 at `dc37af2`; `path:line` claims re-read at that commit.
+
+This section answers Q9 concretely, corrects one of § 13's own recommendations, and reports a finding that makes the deadline more plausible than § 14.10 implied.
+
+### 15.1 · What "the grid shell" means for this deadline
+
+The plan above has ten phases. Not all ten fit in two weeks, and pretending otherwise is how a deadline turns into a half-migrated shell that nobody can revert `[C]`. So the scope is cut at the seam where the shell stops being geometry and starts being state:
+
+| In scope — this is "the grid shell" | Out of scope — follows after |
+| --- | --- |
+| Flag system (§ 15.2) | Unified selection (Q2, § 14.7) — deletes production state |
+| `shell-box` mixin | Mobile (Q4) — still unanswered |
+| Grid scaffold; nav into the left track | The widget page behind `+` (#258) |
+| Left and right control areas, containers, options, hover labels | Notifications, undo/history, tips (Q10 — already deferred) |
+| Panel column with **Upload** and **Help** | |
+
+**The old settings overlay keeps working, unchanged, inside the new shell for the whole window** `[D]`. That is the single decision that makes the date reachable: the shell migration and the settings migration stop being one change. § 15.3 is the price of that decision, and § 15.4 is the discount.
+
+### 15.2 · The flag system — Q9, answered
+
+There is no flag mechanism in this repository (§ 14.5) `[A]`, so one has to exist before Phase 3. Scope it as **a migration tool with a deletion date**, not a platform `[D]`. A general flag system is a larger project and is not what the shell needs.
+
+**Module** — `apps/web/src/app/core/feature-flags/`, mirrored by `docs/specs/service/feature-flags/`, per [`service-symmetry-standard.md`](../agent-workflows/service-symmetry-standard.md) `[A]`:
+
+```text
+feature-flags.service.ts        facade, signals only
+feature-flags.service.spec.ts   co-located
+feature-flags.types.ts          one central types file
+feature-flags.helpers.ts        pure resolution logic
+adapters/                       storage + query-param readers (local, never a global adapter folder)
+README.md
+```
+
+**Resolution order** `[D]`, highest wins:
+
+1. Query parameter — `?ff=shellGridLayout` to force on, `?ff=-shellGridLayout` to force off
+2. `localStorage` override, written by the query parameter so a link is sticky
+3. The default in `feature-flags.types.ts` — `shellGridLayout: false` until the last phase
+
+**Why not the alternatives** `[D]`:
+
+| Rejected | Why |
+| --- | --- |
+| Build-time `environment.ts` constant | Cloudflare Pages gives a per-branch preview URL (`[A]`, seen on #259 and #263). A build-time flag cannot be flipped on a preview, which is exactly where the owner will look at this. |
+| Supabase-backed per-org flag | Adds a network round trip before the shell can decide what to render. Per-org rollout is not needed for a migration one person is driving. |
+| An ad-hoc boolean in the layout component | What happens by default if nobody decides (§ 14.5). Unfindable, undeletable, and it never gets removed. |
+
+**Three rules that keep it from outliving its job** `[D]`:
+
+- **One flag.** `shellGridLayout` is the only member of the union until it is deleted. A second flag means someone is building a platform.
+- **The default flips once**, in the last phase, and the flag and every branch on it are deleted in that same PR.
+- **No flag in a spec's normative text.** Specs describe the target shell. The flag is migration scaffolding and lives in the migration plan only.
+
+The `localStorage` pattern already exists in nav (`COLLAPSED_STORAGE_KEY`, `nav.component.ts:57-60`) `[A]` — follow it rather than inventing a second storage convention.
+
+### 15.3 · Correction to § 13.1 — the rail-width writer cannot die in Phase 3
+
+§ 13.1 recommends deleting the `--feldpost-sidebar-width` writer and the flex spacer "in the same commit that introduces the grid". **That is wrong, and following it would break the settings overlay** `[A]`.
+
+The overlay positions itself with `left: calc(var(--feldpost-sidebar-width, 15rem) + var(--spacing-3))` (`settings-overlay.component.scss:40`) `[A]`. Delete the writer while the overlay still exists and the `var()` falls back to its `15rem` default — so the overlay would sit at 15rem from the edge while the new rail is an icon track a fraction of that width. A visible, obvious break, on a surface the migration was explicitly not touching yet.
+
+**Corrected sequencing** `[D]`:
+
+| Phase | What happens to the rail width |
+| --- | --- |
+| 3 (grid scaffold) | The **grid host** becomes the track owner and takes over writing `--feldpost-sidebar-width`. The name survives; the flex spacer goes, because the track replaces it. |
+| Later (settings → canvas) | The overlay stops existing, its reader goes with it, and the property is deleted. |
+
+So § 13.1's *diagnosis* stands — one fact in three places, and the grid reduces it to one — but the deletion is in two steps, not one. Three readers become one, then zero. This is the kind of coupling that only shows up when you read the consumer, and it is worth stating loudly because § 13.1 reads like permission to delete on sight.
+
+### 15.4 · Settings-to-canvas is cheaper than § 14.10 and § 13.8 imply
+
+Both sections treat moving settings into the canvas as a large state migration. Re-reading the code says otherwise: **settings is already URL-driven, and the overlay is only its renderer** `[A]`.
+
+| Evidence | Where |
+| --- | --- |
+| `AppComponent` parses the URL and opens settings from the route — `openFromRoute(section, subsection)` — and closes it when the URL leaves settings | `apps/web/src/app/app.component.ts:68-76` |
+| A full URL helper module: `parseSettingsUrl`, `buildSettingsUrl`, `resolveShellBasePath`, `resolveShellSegmentsFromUrl`, `stripSettingsSuffix`, `isLegacyTopLevelSettingsUrl` | `apps/web/src/app/core/settings-pane/settings-url.helpers.ts` |
+| Five call sites already depend on that module, including the layout's own shell matchers | `nav.component.ts`, `settings-overlay.component.ts`, `authenticated-shell-active.helpers.ts`, `authenticated-shell-matchers.ts`, `app.component.ts` |
+| `shellSegments` is preserved across a settings URL, so settings is already understood as *a thing layered over a shell route* rather than a route that replaces it | `settings-url.helpers.ts:3-8` |
+
+So the eight section ids, the subsection deep-links and the command-palette entry into invite management — the things § 14.10 item 3 asks Phase 1 to work out — **already survive a URL round trip today** `[A]`. Moving settings into the canvas is closer to *changing where the existing state renders* than to *inventing routing for it* `[C]`.
+
+This does not make it trivial, and it does not remove the Sensitive classification — an FSM table and adversarial review are still owed. It does mean it is a plausible third-week item rather than a multi-week unknown `[C]`. It also corrects my own earlier estimate, which was made without reading `settings-url.helpers.ts`.
+
+### 15.5 · The schedule
+
+One PR per row. Each merges before the next starts, so any row can be the stopping point without leaving a half-migrated shell `[D]`.
+
+| # | PR | Contains | Done when |
+| --- | --- | --- | --- |
+| 1 | **Specs + flag spec** | `docs/specs/ui/shell/` (grid, track ownership, `shell-box`, control area, panel stack) and `docs/specs/service/feature-flags/`. No code. | Specs name every selector Phase 3–5 will introduce — `check-spec-coverage` blocks them otherwise (§ 13.5) |
+| 2 | **Flag service** | The module in § 15.2, flag defaulting `false`, nothing reads it yet | Unit tests on resolution order |
+| 3 | **`shell-box` mixin** | The mixin, adopted on exactly one existing surface | Reviewed as a visual change — the nav rail's `border-radius: 0` and `border-right` make this a visible diff (§ 7) |
+| 4 | **Grid scaffold** | Layout becomes a grid behind the flag; nav moves into the left track; spacer deleted; grid host takes over the rail-width property (§ 15.3) | Flag off = pixel-identical to today. Flag on = same regions, grid-positioned. Map invalidates on track change (§ 13.6) |
+| 5 | **Control areas** | Left: logo · widget container · spacer · bottom container. Right: actions · history · help. 44×44 targets, hover labels that overlay without pushing layout | Rails render from a list, not hardcoded markup (§ 14.2) |
+| 6 | **Panel column** | Conditional `auto` track; Upload re-homed from `app-upload-shell`; Help; workspace Upload tab deleted (§ 14.6) | Upload and Help open together (§ 8) |
+| 7 | **Flip and delete** | Default to `true`, delete the flag, delete the old flex path | `npm run verify`, pasted |
+
+Rows 1–3 are a day or so of work each and carry near-zero risk. Row 4 is the one that can surprise — it is where Leaflet meets a grid for the first time (§ 13.8). Rows 5–6 are the visible ones.
+
+**What ships at row 7 is the shell the owner asked for, with settings still rendering as an overlay inside it.** Settings-to-canvas (§ 15.4) and unified selection (§ 14.7) are the following block of work `[D]`.
+
+### 15.6 · What would make this miss
+
+Stated now so it is recognisable early rather than on the last day `[C]`:
+
+- **Row 4 fights Leaflet.** The map already needs three invalidations on a width change (§ 13.6). If a grid track transition needs different handling, row 4 grows. This is the top risk and it is the reason row 4 is early rather than late.
+- **CI is not currently a signal.** Every workflow on `main` — `verify`, `i18n Check`, `Design System Check`, `Build & Test`, `Spec Lint` — has completed in roughly four seconds with `conclusion: failure` on each of the last four commits, and the job logs are not retrievable `[A]`. The failures predate this workstream and are not caused by any content change `[C]`. Until that is fixed, every row above is gated by whatever a developer runs locally, which is weaker than it looks and is worth fixing before row 4 rather than after.
+- **Spec coverage is discovered late.** If row 1's specs miss a selector that rows 5–6 introduce, those rows are blocked at the gate, not at review (§ 13.5). Name the components in row 1 even if their shape is still uncertain.
+- **The `+` widget page pulls #258 forward.** Row 5 renders the rail from a list. If that list has to be a real installed-widget query rather than a static array, row 5 absorbs part of #258. Keep it a static array for now `[D]`.
