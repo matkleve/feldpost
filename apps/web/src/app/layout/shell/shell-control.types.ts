@@ -1,3 +1,5 @@
+import type { ShellPanelId } from '../../core/shell-layout/shell-layout.types';
+
 export type ShellControlSide = 'left' | 'right';
 
 export type ShellControlKind = 'canvas' | 'panel' | 'inert' | 'settings' | 'account';
@@ -9,7 +11,7 @@ export interface ShellControlOptionModel {
   labelFallback: string;
   kind: ShellControlKind;
   route?: string;
-  panelId?: 'upload' | 'help';
+  panelId?: ShellPanelId;
 }
 
 export interface ShellControlGroup {
@@ -22,12 +24,75 @@ const RIGHT_GROUPS: readonly ShellControlGroup[] = [
     id: 'actions',
     options: [
       {
+        id: 'notifications',
+        icon: 'notifications',
+        labelKey: 'shell.control.notifications',
+        labelFallback: 'Notifications',
+        kind: 'panel',
+        panelId: 'notifications',
+      },
+      {
         id: 'upload',
         icon: 'upload',
         labelKey: 'shell.control.upload',
         labelFallback: 'Upload',
         kind: 'panel',
         panelId: 'upload',
+      },
+      {
+        id: 'download',
+        icon: 'download',
+        labelKey: 'shell.control.download',
+        labelFallback: 'Download',
+        kind: 'panel',
+        panelId: 'download',
+      },
+      {
+        id: 'shared-media',
+        icon: 'folder_shared',
+        labelKey: 'shell.control.sharedMedia',
+        labelFallback: 'Shared media',
+        kind: 'panel',
+        panelId: 'shared-media',
+      },
+    ],
+  },
+  {
+    id: 'history',
+    options: [
+      {
+        id: 'undo',
+        icon: 'undo',
+        labelKey: 'shell.control.undo',
+        labelFallback: 'Undo',
+        kind: 'inert',
+      },
+      {
+        id: 'history',
+        icon: 'history',
+        labelKey: 'shell.control.history',
+        labelFallback: 'Change history',
+        kind: 'inert',
+      },
+      {
+        id: 'redo',
+        icon: 'redo',
+        labelKey: 'shell.control.redo',
+        labelFallback: 'Redo',
+        kind: 'inert',
+      },
+    ],
+  },
+  {
+    id: 'help',
+    options: [
+      {
+        id: 'tips',
+        icon: 'lightbulb_outline',
+        labelKey: 'shell.control.tips',
+        labelFallback: 'Tips',
+        kind: 'panel',
+        panelId: 'tips',
       },
       {
         id: 'help',

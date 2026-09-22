@@ -1,4 +1,11 @@
-export const SHELL_PANEL_IDS = ['upload', 'help'] as const;
+export const SHELL_PANEL_IDS = [
+  'notifications',
+  'upload',
+  'download',
+  'shared-media',
+  'tips',
+  'help',
+] as const;
 
 export type ShellPanelId = (typeof SHELL_PANEL_IDS)[number];
 

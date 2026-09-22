@@ -2,11 +2,11 @@
 
 ## What It Is
 
-One frosted panel in the panel column. This window has two ids: `upload` and `help`.
+One frosted panel in the panel column. Ids are `notifications`, `upload`, `download`, `shared-media`, `tips`, and `help`.
 
 ## What It Looks Like
 
-`@include shell-box`, the same mixin as a control container. A title row and a projected body. Help has a placeholder body until a help product exists. Upload projects `UploadPanelComponent` and does not use `app-upload-shell`.
+`@include shell-box`, the same mixin as a control container. A title row and a projected body. Upload projects `UploadPanelComponent` and does not use `app-upload-shell`. Help, notifications, download, shared media, and tips use a placeholder body until those products exist.
 
 ## Where It Lives
 

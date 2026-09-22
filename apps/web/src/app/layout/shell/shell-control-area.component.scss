@@ -1,4 +1,4 @@
-// Backgroundless rail column. Leftover space is space-between, not a gap token.
+// Backgroundless rail. Labels paint above the page. The last group takes the leftover.
 // @see docs/specs/ui/shell/shell-control-area.md
 :host {
   display: flex;
@@ -10,24 +10,19 @@
   min-height: 0;
   height: 100%;
   padding: var(--spacing-2);
+  position: relative;
+  z-index: 200;
   background: transparent;
 }
 
-// Hover labels overflow onto the canvas. This track paints above that cell.
+// Pushes the last group to the end of the rail. The space is leftover, not a token.
 // @see docs/specs/ui/shell/shell-control-area.md
-:host[data-side='left'] {
-  position: relative;
-  z-index: 200;
+:host > app-shell-control-container:last-of-type {
+  margin-top: auto;
 }
 
 // Logo is its own block and is not a button.
 // @see docs/specs/ui/shell/shell-control-area.md
-// Pushes the bottom group to the end of the rail. The space is leftover, not a token.
-// @see docs/specs/ui/shell/shell-control-area.md
-:host[data-side='left'] > app-shell-control-container:last-of-type {
-  margin-top: auto;
-}
-
 .shell-control-area__logo {
   display: flex;
   align-items: center;

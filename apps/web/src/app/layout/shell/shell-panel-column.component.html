@@ -1,5 +1,17 @@
+@if (isOpen('notifications')) {
+  <ng-content select="[data-panel-id=notifications]" />
+}
 @if (isOpen('upload')) {
   <ng-content select="[data-panel-id=upload]" />
+}
+@if (isOpen('download')) {
+  <ng-content select="[data-panel-id=download]" />
+}
+@if (isOpen('shared-media')) {
+  <ng-content select="[data-panel-id=shared-media]" />
+}
+@if (isOpen('tips')) {
+  <ng-content select="[data-panel-id=tips]" />
 }
 @if (isOpen('help')) {
   <ng-content select="[data-panel-id=help]" />

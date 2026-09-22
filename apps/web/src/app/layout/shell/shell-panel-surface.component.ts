@@ -3,7 +3,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { ShellLayoutService } from '../../core/shell-layout/shell-layout.service';
 import type { ShellPanelId } from '../../core/shell-layout/shell-layout.types';
 
-/** One frosted panel. Upload and Help are the only ids in this window. */
+/** One frosted panel. The right rail chooses which ids are open. */
 @Component({
   selector: 'app-shell-panel-surface',
   standalone: true,
@@ -19,9 +19,16 @@ export class ShellPanelSurfaceComponent {
   readonly t = (key: string, fallback = ''): string => this.i18n.t(key, fallback);
 
   title(): string {
-    return this.panelId() === 'upload'
-      ? this.t('shell.panel.upload.title', 'Upload')
-      : this.t('shell.panel.help.title', 'Help');
+    const titles: Record<ShellPanelId, readonly [string, string]> = {
+      notifications: ['shell.panel.notifications.title', 'Notifications'],
+      upload: ['shell.panel.upload.title', 'Upload'],
+      download: ['shell.panel.download.title', 'Download'],
+      'shared-media': ['shell.panel.sharedMedia.title', 'Shared media'],
+      tips: ['shell.panel.tips.title', 'Tips'],
+      help: ['shell.panel.help.title', 'Help'],
+    };
+    const [key, fallback] = titles[this.panelId()];
+    return this.t(key, fallback);
   }
 
   close(): void {

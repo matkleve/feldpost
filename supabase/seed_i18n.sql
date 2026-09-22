@@ -45760,3 +45760,375 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 commit;
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.control.notifications', 'Notifications', 'en', 'Grid shell right rail. Opens the notifications panel.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Notifications', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.notifications'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Benachrichtigungen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.notifications'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Notifiche', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.notifications'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.control.download', 'Download', 'en', 'Grid shell right rail. Opens the download panel.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Download', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.download'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Herunterladen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.download'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Scarica', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.download'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.control.sharedMedia', 'Shared media', 'en', 'Grid shell right rail. Opens the shared media panel.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Shared media', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.sharedMedia'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Geteilte Medien', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.sharedMedia'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Media condivisi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.sharedMedia'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.control.undo', 'Undo', 'en', 'Grid shell right rail. Inert until a history product exists.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Undo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.undo'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Rückgängig', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.undo'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Annulla', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.undo'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.control.history', 'Change history', 'en', 'Grid shell right rail. Inert until a history product exists.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Change history', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.history'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Änderungsverlauf', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.history'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cronologia modifiche', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.history'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.control.redo', 'Redo', 'en', 'Grid shell right rail. Inert until a history product exists.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Redo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.redo'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Wiederholen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.redo'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ripeti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.redo'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.control.tips', 'Tips', 'en', 'Grid shell right rail. Opens the tips panel.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Tips', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.tips'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Tipps', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.tips'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Suggerimenti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.tips'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.panel.notifications.title', 'Notifications', 'en', 'Notifications panel surface title.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Notifications', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.notifications.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Benachrichtigungen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.notifications.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Notifiche', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.notifications.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.panel.download.title', 'Download', 'en', 'Download panel surface title.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Download', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.download.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Herunterladen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.download.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Scarica', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.download.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.panel.sharedMedia.title', 'Shared media', 'en', 'Shared media panel surface title.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Shared media', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.sharedMedia.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Geteilte Medien', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.sharedMedia.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Media condivisi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.sharedMedia.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.panel.tips.title', 'Tips', 'en', 'Tips panel surface title.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Tips', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.tips.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Tipps', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.tips.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Suggerimenti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.tips.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.panel.unavailable.body', 'This panel is not available yet.', 'en', 'Placeholder body for a right-rail panel that has no product yet.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'This panel is not available yet.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.unavailable.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Dieser Bereich ist noch nicht verfügbar.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.unavailable.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Questo pannello non è ancora disponibile.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.unavailable.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';

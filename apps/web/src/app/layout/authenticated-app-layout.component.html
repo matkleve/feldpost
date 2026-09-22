@@ -23,6 +23,34 @@
         />
       </app-shell-panel-surface>
       <app-shell-panel-surface
+        data-panel-id="notifications"
+        panelId="notifications"
+        [style.order]="shellLayout.orderOf('notifications')"
+      >
+        <p>{{ t('shell.panel.unavailable.body', 'This panel is not available yet.') }}</p>
+      </app-shell-panel-surface>
+      <app-shell-panel-surface
+        data-panel-id="download"
+        panelId="download"
+        [style.order]="shellLayout.orderOf('download')"
+      >
+        <p>{{ t('shell.panel.unavailable.body', 'This panel is not available yet.') }}</p>
+      </app-shell-panel-surface>
+      <app-shell-panel-surface
+        data-panel-id="shared-media"
+        panelId="shared-media"
+        [style.order]="shellLayout.orderOf('shared-media')"
+      >
+        <p>{{ t('shell.panel.unavailable.body', 'This panel is not available yet.') }}</p>
+      </app-shell-panel-surface>
+      <app-shell-panel-surface
+        data-panel-id="tips"
+        panelId="tips"
+        [style.order]="shellLayout.orderOf('tips')"
+      >
+        <p>{{ t('shell.panel.unavailable.body', 'This panel is not available yet.') }}</p>
+      </app-shell-panel-surface>
+      <app-shell-panel-surface
         data-panel-id="help"
         panelId="help"
         [style.order]="shellLayout.orderOf('help')"
