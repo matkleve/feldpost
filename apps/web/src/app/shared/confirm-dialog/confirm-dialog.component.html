@@ -3,12 +3,14 @@
   brnDialog
   [state]="'open'"
   [closeOnBackdropClick]="false"
+  [disableClose]="busy()"
   [aria-label]="title()"
   [aria-modal]="true"
+  (stateChanged)="onDialogState($event)"
 >
   <div hlmDialogOverlay></div>
   <ng-template brnDialogContent>
-    <div hlmDialogContent [class]="'max-w-[20rem]'">
+    <div hlmDialogContent [class]="contentClass()">
       <div hlmDialogHeader>
         <div brnDialogTitle hlmDialogTitle role="heading" aria-level="2">{{ title() }}</div>
         <p brnDialogDescription hlmDialogDescription>{{ message() }}</p>
@@ -19,7 +21,7 @@
           variant="ghost"
           class="dialog__cancel"
           type="button"
-          brnDialogClose
+          [disabled]="busy()"
           (click)="cancelled.emit()"
         >
           {{ cancelLabel() }}
@@ -29,7 +31,7 @@
           [variant]="danger() ? 'destructive' : 'default'"
           class="dialog__confirm"
           type="button"
-          brnDialogClose
+          [disabled]="busy()"
           (click)="confirmed.emit()"
         >
           {{ confirmLabel() }}

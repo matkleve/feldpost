@@ -55,7 +55,9 @@ A compact panel with three internal states:
 - Color chip (tappable → opens color picker anchored to chip)
 - Stats row: media count, last activity
 - Drag target zone: "Drop media here to assign to project" — accepts `DragTransferPayload` (see Drag Contract below)
-- "Archive" / "Restore" / "Delete" quick actions (same guard as project-card)
+- "Archive" / "Restore" quick actions, and "Delete" **for archived projects only**, behind a required
+  `app-confirm-dialog` confirmation — contract in
+  [`workspace-pane-projects-tab.destructive-actions.supplement.md`](./workspace-pane-projects-tab.destructive-actions.supplement.md)
 
 ### State C — New Project (inline draft)
 
@@ -169,6 +171,7 @@ All consumers that switch/guard on `WorkspacePaneTab` must be updated (search fo
 | `apps/web/src/app/shared/workspace-pane/projects-panel/workspace-projects-panel.component.scss` | New — compact row geometry, drop zone overlay |
 | `apps/web/src/app/layout/authenticated-app.routes.ts` | No change — tab is pane-level, not route-level |
 | `docs/i18n/translation-workbench.csv` | Add keys: `workspace.pane.tab.projects`, `workspace.pane.tab.media` (if label changes), `workspace.projects.panel.*` |
+| `docs/specs/ui/workspace/workspace-pane-projects-tab.destructive-actions.supplement.md` | Archive/Restore/Delete gating and the delete-confirmation contract |
 
 ## Acceptance Criteria
 
@@ -188,6 +191,8 @@ All consumers that switch/guard on `WorkspacePaneTab` must be updated (search fo
 - [ ] Project rows have a "Open in Projects page" context action that navigates to `/projects` with that project focused.
 - [ ] `ProjectsService.createProject(name)` method exists and creates a project with the provided name in one Supabase call.
 - [ ] `WorkspacePaneTab` type union includes `'projects'` and all consumers compile without type errors.
+- [x] Detail view offers "Delete" only for archived projects, and only through a confirmed
+  `app-confirm-dialog` — see the [destructive-actions supplement](./workspace-pane-projects-tab.destructive-actions.supplement.md).
 - [ ] All new UI strings are registered in `translation-workbench.csv` with EN/DE/IT.
 
 ## Decisions (Locked)

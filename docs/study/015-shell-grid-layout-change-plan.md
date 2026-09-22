@@ -1,5 +1,5 @@
 ---
-id: STUDY-014
+id: STUDY-015
 type: proposal
 status: proposed
 supersedes: none
@@ -248,7 +248,7 @@ Register new shared components in `registry.json` before implementation `[A]` (c
 
 | Phase | Deliverable | Gate |
 | --- | --- | --- |
-| **0** | This study + #257 Q&A | STUDY-014 → `accepted` |
+| **0** | This study + #257 Q&A | STUDY-015 → `accepted` |
 | **1** | Normative specs (`docs/specs/ui/shell/*`) | Spec-only PR |
 | **2** | Layer 0: `shell-box` mixin | Uses existing tokens; no new `--shell-*` |
 | **3** | Layer 1–2: `GridShell` + slot components + flag | Flag off = today unchanged |
@@ -288,7 +288,7 @@ Register new shared components in `registry.json` before implementation `[A]` (c
 - [ ] Owner confirms panel stack (§5.1)
 - [ ] Owner confirms primitive-first phases (§8)
 - [ ] Q1–Q10 answered or deferred
-- [ ] STUDY-014 → `accepted`
+- [ ] STUDY-015 → `accepted`
 
 ---
 
@@ -305,7 +305,7 @@ Register new shared components in `registry.json` before implementation `[A]` (c
 
 | Artifact | Path |
 | --- | --- |
-| This study | `docs/study/014-shell-grid-layout-change-plan.md` |
+| This study | `docs/study/015-shell-grid-layout-change-plan.md` |
 | Study index row | `docs/study/README.md` |
 | Owner mock (committed) | `docs/design/mockups/grid-shell-owner-mock-2026-09-22.png` |
 | PR | [#259](https://github.com/matkleve/feldpost/pull/259) |

@@ -15,7 +15,6 @@ features/projects/
   views/      projects-grid-view, projects-table-view
   chrome/     projects-page-header, projects-toolbar
   cards/      project-card, project-color-picker, project-location-picker
-  dialogs/    projects-confirm-dialog
   logic/      projects-*-fields|filter|sort|grouping|formatters.logic.ts
 ```
 
