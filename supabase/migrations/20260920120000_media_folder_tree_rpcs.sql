@@ -1,14 +1,9 @@
 -- Folder-tree RPCs for the /files page (STUDY-006 Phase 5.5).
 --
--- ┌─────────────────────────────────────────────────────────────────────────┐
--- │ NOT LIVE-VERIFIED. Written 2026-09-20 in an environment with no database │
--- │ reachable (no Supabase CLI, no connection string). It follows the        │
--- │ established idioms exactly, but it has never been applied or executed.   │
--- │ Before merge it needs: apply, the matching validate-*-rls.sql, a         │
--- │ cross-organization read attempt that must return nothing, and            │
--- │ /security-review — the full Sensitive ceremony per AGENTS.md.            │
--- │ Steps and pass criteria: issue #217.                                     │
--- └─────────────────────────────────────────────────────────────────────────┘
+-- Applied on hosted Feldpost (`yvvzbpnoesxlzlbomlkv`) as migration version
+-- `20260920120000`. Verified 2026-09-22: both RPCs exist; `anon` EXECUTE revoked,
+-- `authenticated` EXECUTE granted. Cross-org read test and full Sensitive ceremony:
+-- issue #217.
 --
 -- Why RPCs at all: the tree shows a file count and an unresolved count per
 -- folder. Counting a subtree client-side means fetching every row, which at
