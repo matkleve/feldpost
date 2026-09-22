@@ -32,6 +32,8 @@
 | share-set | `docs/specs/service/share-set/` | [share-set-service.md](../specs/service/share-set/share-set-service.md) |
 | workspace-selection | `docs/specs/service/workspace-selection/` | [workspace-selection-service.md](../specs/service/workspace-selection/workspace-selection-service.md) |
 | media-location-update | `docs/specs/service/media-location-update/` | [media-location-update-service.md](../specs/service/media-location-update/media-location-update-service.md) |
+| feature-flags | `docs/specs/service/feature-flags/` | [feature-flags.md](../specs/service/feature-flags/feature-flags.md) |
+| shell-layout | `docs/specs/service/shell-layout/` | [shell-layout.md](../specs/service/shell-layout/shell-layout.md) |
 
 **Upload** remains under **`docs/specs/service/media-upload-service/`** (name differs from `core/upload/` by convention).
 

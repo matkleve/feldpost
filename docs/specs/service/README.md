@@ -21,6 +21,7 @@ Symmetry tracker: [service-spec-symmetry-matrix](../../backlog/service-spec-symm
 | --- | --- |
 | auth | [auth/auth-service.md](auth/auth-service.md) |
 | chat | [chat/chat-service.md](chat/chat-service.md) |
+| feature-flags | [feature-flags/feature-flags.md](feature-flags/feature-flags.md) |
 | filter | [filter/filter-service.md](filter/filter-service.md) |
 | filename-parser | [filename-parser/filename-parser.md](filename-parser/filename-parser.md) |
 | folder-scan | [folder-scan/folder-scan.md](folder-scan/folder-scan.md) |
@@ -45,6 +46,7 @@ Symmetry tracker: [service-spec-symmetry-matrix](../../backlog/service-spec-symm
 | search | [search/search-bar-service.md](search/search-bar-service.md) |
 | settings-pane | [settings-pane/settings-pane-service.md](settings-pane/settings-pane-service.md) |
 | share-set | [share-set/share-set-service.md](share-set/share-set-service.md) — restore: [share-link-restore.md](share-set/share-link-restore.md) |
+| shell-layout | [shell-layout/shell-layout.md](shell-layout/shell-layout.md) |
 | supabase | [supabase/supabase-service.md](supabase/supabase-service.md) |
 | toast | [toast/toast-system.md](toast/toast-system.md) |
 | user-profile | [user-profile/user-profile-service.md](user-profile/user-profile-service.md) |

@@ -261,6 +261,27 @@ Canonical names for every visible piece of the interface. Use these in code, doc
 - **Sidebar Pill**  
   40×4 px visual pill affordance at 50 % height of the collapsed sidebar strip. Cues interactivity.
 
+- **Grid shell**  
+  The authenticated page grid (`app-grid-shell`). Four tracks: control area, main canvas, panel column, control area. The host owns every track width.
+
+- **Main canvas**  
+  The `1fr` track (`app-shell-main-canvas`). Route content mounts here. The map is one tenant of this track.
+
+- **Control area**  
+  A backgroundless rail column (`app-shell-control-area`). The left rail changes the main canvas. The right rail opens and closes the panel column.
+
+- **Control container**  
+  A frosted box (`app-shell-control-container`) grouping control options. The rail outside the box has no background.
+
+- **Control option**  
+  A 2.75rem icon button (`app-shell-control-option`) inside a control container. Its hover label overlays and does not change track size.
+
+- **Panel column**  
+  The third grid track (`app-shell-panel-column`). It stacks open panel surfaces and contributes no width when nothing is open.
+
+- **Panel surface**  
+  One frosted panel (`app-shell-panel-surface`) in the panel column. This window's ids are `upload` and `help`.
+
 - **Workspace Pane**  
   Right-side collapsible, resizable panel (320 px default, 280–640 px range). Houses group tabs + thumbnail gallery + inline detail view. Desktop: slides in from right. Mobile: bottom sheet.
 
