@@ -274,7 +274,13 @@ Canonical names for every visible piece of the interface. Use these in code, doc
   A frosted box (`app-shell-control-container`) grouping control options. The rail outside the box has no background.
 
 - **Control option**  
-  A 2.75rem icon button (`app-shell-control-option`) inside a control container. Its hover label overlays and does not change track size.
+  A `var(--shell-control-option-size)` icon button (`app-shell-control-option`) inside a control container. Its hover label overlays and does not change track size.
+
+- **Selected items panel**  
+  The `download` panel surface in the panel column. Product title **Selected items**. Shows unified media selection, toolbar, bulk footer, and inline detail. Spec: `docs/specs/ui/shell/selected-items-panel.md`. Replaces the Workspace Pane media tab when the grid shell is on.
+
+- **Unified selection**  
+  Single `selectedMediaIds` store shared by map, `/media`, and the selected items panel. No independent workspace-only selection when `shellGridLayout` is on. Spec: `docs/specs/ui/shell/unified-selection.md`.
 
 - **Widget**  
   An optional rail destination. Absent from the rail until the organization adds it and a role allows it. Specs: `docs/specs/page/widgets-page.md`, `docs/specs/system/widget-grants.md`. Not built.
@@ -292,10 +298,10 @@ Canonical names for every visible piece of the interface. Use these in code, doc
   The third grid track (`app-shell-panel-column`). It stacks open panel surfaces and contributes no width when nothing is open.
 
 - **Panel surface**  
-  One frosted panel (`app-shell-panel-surface`) in the panel column. This window's ids are `upload` and `help`.
+  One frosted panel (`app-shell-panel-surface`) in the panel column. Panel ids: `upload`, `download` (selected items), `shared-media`, `tips`, `help`.
 
 - **Workspace Pane**  
-  Right-side collapsible, resizable panel (320 px default, 280–640 px range). Houses group tabs + thumbnail gallery + inline detail view. Desktop: slides in from right. Mobile: bottom sheet.
+  **Legacy** right-side collapsible, resizable panel (drag divider). Houses Media + Upload tabs + thumbnail gallery + inline detail. **Superseded by grid shell panel column** when `shellGridLayout` is default on. See `docs/specs/ui/shell/workspace-pane-retirement.md`.
 
 - **Drag Divider**  
   4 px vertical (desktop) / horizontal (mobile) separator between map and workspace pane. `cursor: col-resize`. Shown only when workspace pane is open.

@@ -6,7 +6,15 @@ One frosted panel in the panel column. Ids are `upload`, `download`, `shared-med
 
 ## What It Looks Like
 
-`@include shell-box`, the same mixin as a control container. A title row and a projected body. Upload projects `UploadPanelComponent` and does not use `app-upload-shell`. Help, selected items, shared media, and tips use a placeholder body until those products exist.
+`@include shell-box`, the same mixin as a control container. A title row and a projected body.
+
+| `panelId` | Body | Spec |
+| --- | --- | --- |
+| `upload` | `UploadPanelComponent` (not `app-upload-shell`) | upload panel wiring in layout |
+| `download` | `SelectedItemsPanelComponent` | [selected-items-panel.md](./selected-items-panel.md) |
+| `shared-media` | Placeholder until product exists | — |
+| `tips` | Placeholder until product exists | — |
+| `help` | Placeholder until product exists | — |
 
 ## Where It Lives
 
@@ -27,16 +35,17 @@ app-shell-panel-surface
 ├── header
 │   ├── title
 │   └── close button
-└── body
+└── body (projected)
     ├── app-upload-panel [id upload]
-    └── placeholder [id help]
+    ├── app-selected-items-panel [id download]
+    ├── placeholder [id shared-media, tips, help]
 ```
 
 ## Data
 
 | Source | Contract | Operation |
 | --- | --- | --- |
-| Input `panelId` | `'upload' \| 'help'` | Read |
+| Input `panelId` | `ShellPanelId` | Read |
 | `I18nService` | title key | Read |
 
 ## State
@@ -57,13 +66,14 @@ Open/closed is owned by `ShellLayoutService`, not this surface.
 
 ## Wiring
 
-The workspace pane Upload tab is not a second host for this body. Upload has one home: this surface.
+The workspace pane Upload tab is not a second host for upload. Upload has one home: `upload` surface. Selected items has one home: `download` surface ([selected-items-panel.md](./selected-items-panel.md)).
 
 ```mermaid
 flowchart TB
   surface[app-shell-panel-surface]
   surface --> upload[app-upload-panel]
-  surface --> help[help placeholder]
+  surface --> download[app-selected-items-panel]
+  surface --> stubs[shared-media / tips / help placeholders]
 ```
 
 ## Visual Behavior Contract
@@ -76,6 +86,7 @@ flowchart TB
 ## Acceptance Criteria
 
 - [ ] `upload` renders `UploadPanelComponent` and not `app-upload-shell`.
-- [ ] `help` renders a placeholder and does not invent a help flow.
+- [ ] `download` renders `SelectedItemsPanelComponent` per [selected-items-panel.md](./selected-items-panel.md).
+- [ ] `help`, `tips`, `shared-media` render placeholders until those products exist.
 - [ ] Close calls `close(panelId)` once.
 - [ ] Title copy uses `t(key, fallback)`.
