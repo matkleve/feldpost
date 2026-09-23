@@ -2,6 +2,11 @@ export const environment = {
   production: false,
   /** Dev uses `window.location.origin` for auth redirects; production sets this via write-env.mjs */
   appUrl: undefined as string | undefined,
+  /**
+   * Free key from https://carto.com/basemaps/apikey — paste here for local dev.
+   * Without it, CARTO street tiles show an "API KEY REQUIRED" watermark.
+   */
+  cartoBasemapApiKey: '',
   i18n: {
     enableLegacyDomFallback: true,
   },
