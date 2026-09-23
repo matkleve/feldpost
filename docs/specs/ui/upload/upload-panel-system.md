@@ -10,7 +10,7 @@ The upload panel system is the `features/upload` surface: compact and embedded p
 
 ## What It Looks Like
 
-Users see a fixed-width panel (overlay or workspace-embedded) with intake, a Queue / Uploaded / Issues lane switch, and a scrollable row list with status, menus, and issue affordances. Modals/overlays cover duplicate resolution, address finder, and project selection. Visual layout, tokens, and row contracts live in the [upload-panel](../../component/upload/upload-panel.md) family; this system spec only names boundaries and wiring.
+Users see a fixed-width panel (overlay or workspace-embedded) with intake, a Waiting / Uploaded / Clarifications lane switch, and a scrollable row list with status, menus, and issue affordances. Modals/overlays cover duplicate resolution, address finder, and project selection. Visual layout, tokens, and row contracts live in the [upload-panel](../../component/upload/upload-panel.md) family; this system spec only names boundaries and wiring.
 
 ## Where It Lives
 
@@ -55,7 +55,7 @@ All job, batch, phase, and event payloads are defined and owned by [upload-manag
 | Kind | Owner | Spec |
 | --- | --- | --- |
 | `UploadPhase`, `issueKind`, concurrency, batch scanning | `core/upload` | [upload-manager.md](../../service/media-upload-service/upload-manager.md) |
-| Lane list mapping (`uploading` / `uploaded` / `issues`) | `features/upload` | `upload-phase.helpers` — must stay aligned with manager phases |
+| Lane list mapping (`uploading` / `uploaded` / `clarifications`) | `features/upload` | `upload-phase.helpers` — must stay aligned with manager phases |
 | Shell mode, `selectedLane`, embedded row selection, dialog open flags | `features/upload` | This document; visual FSM tables in [upload-panel.layout-and-states.md](../../component/upload/upload-panel.layout-and-states.md) |
 
 ### Panel UI transition choreography (summary)

@@ -156,7 +156,7 @@ SelectionActionBar (media / workspace contexts)
 - [ ] Using it on an unambiguous folder path writes a location without opening a tray.
 - [ ] An item that already has a location offers no add action.
 - [ ] A batch run over 100 selected items resolving to one address asks **one** question (B4).
-- [ ] A batch run reports per-item outcomes and leaves unresolvable items in Issues (B5, B6).
+- [ ] A batch run reports per-item outcomes and leaves unresolvable items in Clarifications (B5, B6).
 - [ ] Batch and folder-subtree resolution call the same engine (one implementation, two selections).
 - [ ] A second organization's items are never included (B7, RLS test).
 

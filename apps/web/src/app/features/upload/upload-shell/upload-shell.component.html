@@ -23,7 +23,7 @@
       "
       [class.map-upload-btn--active]="uploadPanelOpen()"
       [class.map-upload-btn--uploading]="uploadBatchActive()"
-      [class.map-upload-btn--issues]="uploadHasIssues() && !uploadPanelOpen()"
+      [class.map-upload-btn--clarifications]="uploadHasClarifications() && !uploadPanelOpen()"
       (click)="toggleUploadPanel()"
     >
       <span class="map-upload-btn__icon-shell" aria-hidden="true">

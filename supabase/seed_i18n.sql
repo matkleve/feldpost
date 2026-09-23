@@ -33049,14 +33049,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'upload.panel.lane.uploading', 'Queue', 'en', 'apps/web/src/app/features/upload/upload-panel.component.ts computed:laneSwitchOptions option label/title/aria base')
+values (null, 'upload.panel.lane.uploading', 'Waiting', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel-helpers.ts buildLaneSwitchOptions label for the uploading lane')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Queue', 'published'
+select t.id, 'en', 'Waiting', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.panel.lane.uploading'
 on conflict (app_text_id, lang) do update set
@@ -33064,7 +33064,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Warteschlange', 'published'
+select t.id, 'de', 'Wartend', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.panel.lane.uploading'
 on conflict (app_text_id, lang) do update set
@@ -33072,7 +33072,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Coda', 'published'
+select t.id, 'it', 'In attesa', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.panel.lane.uploading'
 on conflict (app_text_id, lang) do update set
@@ -33111,32 +33111,32 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'upload.panel.lane.issues', 'Issues', 'en', 'apps/web/src/app/features/upload/upload-panel.component.ts computed:laneSwitchOptions option label/title/aria base')
+values (null, 'upload.panel.lane.clarifications', 'Clarification', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel-helpers.ts buildLaneSwitchOptions label for the clarifications lane')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Issues', 'published'
+select t.id, 'en', 'Clarification', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'upload.panel.lane.issues'
+where t.organization_id is null and t.key = 'upload.panel.lane.clarifications'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Probleme', 'published'
+select t.id, 'de', 'Klärung', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'upload.panel.lane.issues'
+where t.organization_id is null and t.key = 'upload.panel.lane.clarifications'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Problemi', 'published'
+select t.id, 'it', 'Da chiarire', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'upload.panel.lane.issues'
+where t.organization_id is null and t.key = 'upload.panel.lane.clarifications'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -37110,14 +37110,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'upload.archive.import.hint', 'Import a company archive: resolve what can be resolved, ask nothing, park the rest in Issues.', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html title attr on archive intake button')
+values (null, 'upload.archive.import.hint', 'Import a company archive: resolve what can be resolved, ask nothing, park the rest in Clarifications.', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html title attr on archive intake button')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Import a company archive: resolve what can be resolved, ask nothing, park the rest in Issues.', 'published'
+select t.id, 'en', 'Import a company archive: resolve what can be resolved, ask nothing, park the rest in Clarifications.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.archive.import.hint'
 on conflict (app_text_id, lang) do update set
@@ -37125,7 +37125,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Firmenarchiv importieren: auflösen was möglich ist, nichts fragen, den Rest in Probleme ablegen.', 'published'
+select t.id, 'de', 'Firmenarchiv importieren: auflösen was möglich ist, nichts fragen, den Rest in Klärung ablegen.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.archive.import.hint'
 on conflict (app_text_id, lang) do update set
@@ -37133,7 +37133,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Importa un archivio aziendale: risolvi ciò che si può, non chiedere nulla, metti il resto in Problemi.', 'published'
+select t.id, 'it', 'Importa un archivio aziendale: risolvi ciò che si può, non chiedere nulla, metti il resto in Da chiarire.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.archive.import.hint'
 on conflict (app_text_id, lang) do update set
@@ -38939,14 +38939,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'upload.location.mode.subtitle.on', 'GPS and file names; missing location → Issues.', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html subtitle when auto-location on')
+values (null, 'upload.location.mode.subtitle.on', 'GPS and file names; missing location → Clarifications.', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html subtitle when auto-location on')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'GPS and file names; missing location → Issues.', 'published'
+select t.id, 'en', 'GPS and file names; missing location → Clarifications.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.location.mode.subtitle.on'
 on conflict (app_text_id, lang) do update set
@@ -38954,7 +38954,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'GPS und Dateinamen; fehlender Standort → Probleme.', 'published'
+select t.id, 'de', 'GPS und Dateinamen; fehlender Standort → Klärung.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.location.mode.subtitle.on'
 on conflict (app_text_id, lang) do update set
@@ -38962,7 +38962,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'GPS e nomi file; posizione mancante → Problemi.', 'published'
+select t.id, 'it', 'GPS e nomi file; posizione mancante → Da chiarire.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.location.mode.subtitle.on'
 on conflict (app_text_id, lang) do update set

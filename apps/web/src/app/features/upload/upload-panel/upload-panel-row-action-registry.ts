@@ -48,7 +48,7 @@ const ROW_ACTION_REGISTRY: readonly RowActionRegistryEntry[] = [
       if (ctx.lane === 'uploaded') {
         return !!ctx.job.mediaId;
       }
-      if (ctx.lane === 'issues' && ctx.issueKind !== null) {
+      if (ctx.lane === 'clarifications' && ctx.issueKind !== null) {
         return PLACEMENT_ISSUE_KINDS.includes(ctx.issueKind);
       }
       return false;
@@ -61,7 +61,7 @@ const ROW_ACTION_REGISTRY: readonly RowActionRegistryEntry[] = [
       if (ctx.lane === 'uploaded') {
         return !!ctx.job.mediaId;
       }
-      if (ctx.lane === 'issues' && ctx.issueKind !== null) {
+      if (ctx.lane === 'clarifications' && ctx.issueKind !== null) {
         return PLACEMENT_ISSUE_KINDS.includes(ctx.issueKind);
       }
       return false;
@@ -79,7 +79,7 @@ const ROW_ACTION_REGISTRY: readonly RowActionRegistryEntry[] = [
       if (ctx.lane === 'uploaded') {
         return !!ctx.job.mediaId;
       }
-      return ctx.lane === 'issues' && ctx.issueKind === 'document_unresolved';
+      return ctx.lane === 'clarifications' && ctx.issueKind === 'document_unresolved';
     },
   },
   {
@@ -105,20 +105,20 @@ const ROW_ACTION_REGISTRY: readonly RowActionRegistryEntry[] = [
     id: 'open_existing_media',
     order: 100,
     isAvailable: (ctx) =>
-      ctx.lane === 'issues' &&
+      ctx.lane === 'clarifications' &&
       ctx.issueKind === 'duplicate_file' &&
       !!ctx.job.existingMediaId,
   },
   {
     id: 'upload_anyway',
     order: 110,
-    isAvailable: (ctx) => ctx.lane === 'issues' && ctx.issueKind === 'duplicate_file',
+    isAvailable: (ctx) => ctx.lane === 'clarifications' && ctx.issueKind === 'duplicate_file',
   },
   {
     id: 'retry',
     order: 120,
     isAvailable: (ctx) => {
-      if (ctx.lane !== 'issues' || ctx.issueKind === null) {
+      if (ctx.lane !== 'clarifications' || ctx.issueKind === null) {
         return false;
       }
       if (ctx.issueKind === 'upload_error') {
@@ -133,19 +133,19 @@ const ROW_ACTION_REGISTRY: readonly RowActionRegistryEntry[] = [
     id: 'candidate_select',
     order: 130,
     isAvailable: (ctx) =>
-      ctx.lane === 'issues' &&
+      ctx.lane === 'clarifications' &&
       ctx.issueKind === 'address_ambiguous' &&
       (ctx.job.addressCandidates?.length ?? 0) > 0,
   },
   {
     id: 'manual_location_entry',
     order: 140,
-    isAvailable: (ctx) => ctx.lane === 'issues' && ctx.issueKind === 'address_ambiguous',
+    isAvailable: (ctx) => ctx.lane === 'clarifications' && ctx.issueKind === 'address_ambiguous',
   },
   {
     id: 'cancel_location_prompt',
     order: 150,
-    isAvailable: (ctx) => ctx.lane === 'issues' && ctx.issueKind === 'address_ambiguous',
+    isAvailable: (ctx) => ctx.lane === 'clarifications' && ctx.issueKind === 'address_ambiguous',
   },
   {
     id: 'remove_from_project',
@@ -161,7 +161,7 @@ const ROW_ACTION_REGISTRY: readonly RowActionRegistryEntry[] = [
   {
     id: 'dismiss',
     order: 180,
-    isAvailable: (ctx) => ctx.lane === 'issues' && ctx.issueKind !== null,
+    isAvailable: (ctx) => ctx.lane === 'clarifications' && ctx.issueKind !== null,
   },
 ];
 

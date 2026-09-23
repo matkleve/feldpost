@@ -215,7 +215,7 @@ async function runLocationOptionalFolderTrace(): Promise<void> {
 
 /**
  * Archive import: classification still runs, but no tray is ever registered, so everything the
- * pipeline cannot resolve on its own lands in Issues instead of parking for a question.
+ * pipeline cannot resolve on its own lands in Clarifications instead of parking for a question.
  * @see docs/specs/service/media-upload-service/upload-archive-import-mode.md
  */
 async function runArchiveImportTrace(): Promise<void> {

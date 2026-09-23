@@ -16,13 +16,16 @@
 -->
 
 <section
+  #panelRoot
   class="upload-panel"
   data-i18n-skip
   [class.upload-panel--visible]="visible()"
   [class.upload-panel--embedded]="embeddedInPane()"
+  [class.upload-panel--wide]="wideLayout()"
   role="region"
   [attr.aria-label]="panelTitleText()"
 >
+  <div class="upload-panel__workspace">
   <!-- ═══════════════════════════════════════════════════════════════════════════
     BLOCK 1: INTAKE ZONE
     Purpose: Drag-and-drop file selection + folder scanning progress feedback.
@@ -221,7 +224,7 @@
           ? t('upload.folder.unsupported.hint', 'Folder upload is not supported in this browser.')
           : t(
               'upload.archive.import.hint',
-              'Import a company archive: resolve what can be resolved, ask nothing, park the rest in Issues.'
+              'Import a company archive: resolve what can be resolved, ask nothing, park the rest in Clarifications.'
             )
       "
       (click)="inputHandlers.onSelectFolder($event, folderInput, 'archive')"
@@ -276,7 +279,7 @@
           }}</span>
           @let locationSubtitle = t(
             'upload.location.mode.subtitle.on',
-            'GPS and file names; missing location → Issues.'
+            'GPS and file names; missing location → Clarifications.'
           );
           <span
             class="upload-panel__location-mode-subtitle"
@@ -332,10 +335,17 @@
       tabindex="-1"
       (change)="inputHandlers.onFolderInputChange($event); laneHandlers.setSelectedLane('uploading')"
     />
-  </div>
+    </div>
 
+    <div class="upload-panel__lanes">
   @if (showProgressBoard()) {
-    <div class="upload-panel__area--switch upload-panel__segmented" hlmPillToggle fill>
+    <div class="upload-panel__lane-stage">
+    <div
+      class="upload-panel__area--switch upload-panel__segmented"
+      hlmPillToggle
+      [fill]="!wideLayout()"
+      [vertical]="wideLayout()"
+    >
       <div
         hlmToggleGroup
         class="upload-panel__lane-toggle-group w-full"
@@ -371,7 +381,16 @@
         }
       </div>
     </div>
-  }
+
+    <div class="upload-panel__lane-content">
+    @if (showClarificationTray()) {
+      <app-upload-resolver-tray
+        [panelOpen]="true"
+        [embeddedInPane]="false"
+        (previewLocation)="onTrayPreview($event)"
+        (previewLocationCleared)="onTrayPreviewCleared()"
+      />
+    }
 
   <!-- Per-file progress list -->
   @if (visibleLaneJobs().length > 0) {
@@ -406,6 +425,11 @@
       </ul>
     </div>
   }
+    </div>
+    </div>
+  }
+    </div>
+  </div>
 
   @if (embeddedInPane() && hasSelectedUploadJobs()) {
     <app-pane-footer>

@@ -18,7 +18,14 @@ export type UploadFileTypeChip = {
   descriptionFallback: string;
 };
 
-export const UPLOAD_LANES: ReadonlyArray<UploadLane> = ['uploading', 'uploaded', 'issues'];
+export const UPLOAD_LANES: ReadonlyArray<UploadLane> = ['uploading', 'clarifications', 'uploaded'];
+
+/**
+ * Panel width at which the grid-shell upload surface becomes two columns.
+ * Left: intake. Right: lane switch stacked top-to-bottom, beside the selected lane.
+ * Matches 42rem in upload-panel.component.scss (`:host.upload-panel-host--grid`).
+ */
+export const UPLOAD_PANEL_WIDE_MIN_PX = 672;
 
 export const DEFAULT_FILE_TYPE_EXTENSIONS: ReadonlyArray<string> = [
   'jpg',

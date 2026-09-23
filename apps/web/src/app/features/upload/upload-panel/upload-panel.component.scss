@@ -3,7 +3,16 @@
 @use '../../../../styles/interaction-emphasis-quiet-row' as emphasis;
 
 :host {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+// Grid-shell upload surface grows with the viewport until the wide layout fits.
+// @see docs/specs/component/upload/upload-panel.md
+:host.upload-panel-host--grid {
+  width: clamp(22rem, 50vw, 58rem);
 }
 
 .upload-panel {
@@ -50,6 +59,62 @@
       flex: 1;
       min-height: 0;
       max-height: none;
+    }
+  }
+
+  // Intake and lane column. Narrow: stacked. Wide: intake left, lanes right.
+  // @see docs/specs/component/upload/upload-panel.md
+  &__workspace {
+    display: flex;
+    flex-direction: column;
+    gap: var(--upload-area-gap);
+    min-width: 0;
+    min-height: 0;
+    flex: 1;
+  }
+
+  // Selected-lane column: one switch and one visible lane.
+  // @see docs/specs/component/upload/upload-panel.md
+  &__lanes {
+    display: flex;
+    flex-direction: column;
+    gap: var(--upload-area-gap);
+    min-width: 0;
+    min-height: 0;
+  }
+
+  // Switch plus the open lane. Wide mode places the switch in a vertical stack.
+  // @see docs/specs/component/upload/upload-panel.md
+  &__lane-stage {
+    display: flex;
+    flex-direction: column;
+    gap: var(--upload-area-gap);
+    min-width: 0;
+  }
+
+  // Tray and file rows for the selected lane only.
+  // @see docs/specs/component/upload/upload-panel.md
+  &__lane-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--upload-area-gap);
+    min-width: 0;
+    min-height: 0;
+  }
+
+  // Two columns once the grid-shell panel is at least 42rem wide.
+  // @see docs/specs/component/upload/upload-panel.md
+  &--wide {
+    .upload-panel__workspace {
+      display: grid;
+      grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr);
+      align-items: start;
+    }
+
+    .upload-panel__lane-stage {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: start;
     }
   }
 
