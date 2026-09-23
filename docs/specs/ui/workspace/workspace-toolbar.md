@@ -2,11 +2,11 @@
 
 ## What It Is
 
-A horizontal button bar at the top of the Workspace Pane that provides Grouping, Sorting, Filtering, and Project scoping controls. Each button opens a dropdown. The toolbar replaces the previous hardcoded "Selection" tab bar with a richer control surface inspired by Notion's database views.
+A horizontal button bar at the top of the selected-items surface. It provides Grouping, Sorting, Filtering, and Project scoping, plus one quiet **Deselect all** control. Menu buttons open dropdowns. Deselect all does not.
 
 ## What It Looks Like
 
-A single horizontal row of four ghost buttons: **Grouping**, **Filter**, **Sort**, **Projects**. Each button is `.btn-compact` height (1.75rem / 28px), ghost style (no background at rest, `--color-bg-elevated` fill at 35–45% on hover). When a control is active (has a grouping applied, filters set, sort order non-default, or project selected), the button receives a subtle `--color-primary` tint and shows a dot indicator. Sits directly below the pane header and above the thumbnail content area. `gap: 0.5rem` between buttons. Full width of the workspace pane with `padding-inline: var(--container-padding-inline-panel)`.
+A single horizontal row: **Grouping**, **Filter**, **Sort**, **Projects**, then a spacer, then **Deselect all** when a selection exists, then the thumbnail-size control. Menu triggers stay the existing toolbar buttons. **Deselect all** is quieter and smaller: `hlmBtn` ghost, size `xs`. Sits directly below the pane header and above the thumbnail content area.
 
 ## Where It Lives
 
@@ -24,7 +24,9 @@ A single horizontal row of four ghost buttons: **Grouping**, **Filter**, **Sort*
 | 5   | Clicks outside       | Closes any open dropdown                            | Dropdown closes    |
 | 6   | Presses Escape       | Closes any open dropdown                            | Dropdown closes    |
 | 7   | Active indicator dot | Visible when the toolbar button's feature is active | Derived from state |
-| 8   | Clicks **Deselect all** | Clears the canvas selection. The button is visible only while `selectedCount > 0` | `WorkspaceSelectionService.clearSelection()` |
+| 8   | Clicks **Deselect all** | Clears the canvas selection. Visible only while `selectedCount > 0`. Does not select, share, copy, or download | `WorkspaceSelectionService.clearSelection()` |
+
+**Deselect all** is `hlmBtn` `variant="ghost"` `size="xs"`, icon `deselect`, copy key `workspace.toolbar.action.deselectAll` (fallback `Deselect all`). It is the only selection control on this toolbar. `selectAllInScope()` is not offered here.
 
 ## Component Hierarchy
 
