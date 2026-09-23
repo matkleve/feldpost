@@ -8,6 +8,7 @@ import {
   resolveShellSegmentsFromUrl,
 } from '../../core/settings-pane/settings-url.helpers';
 import { ShellLayoutService } from '../../core/shell-layout/shell-layout.service';
+import { ThemeService } from '../../core/theme/theme.service';
 import { resolveAuthenticatedActiveShell } from '../authenticated-shell-active.helpers';
 import { ShellControlContainerComponent } from './shell-control-container.component';
 import {
@@ -30,6 +31,7 @@ import {
 export class ShellControlAreaComponent {
   private readonly router = inject(Router);
   private readonly shellLayout = inject(ShellLayoutService);
+  private readonly themeService = inject(ThemeService);
   private readonly i18n = inject(I18nService);
 
   readonly side = input.required<ShellControlSide>();
@@ -77,6 +79,10 @@ export class ShellControlAreaComponent {
       const segments = resolveShellSegmentsFromUrl(this.router.url);
       const section = option.kind === 'account' ? 'account' : null;
       void this.router.navigateByUrl(buildSettingsUrl(segments, section));
+      return;
+    }
+    if (option.kind === 'theme') {
+      this.themeService.cycle();
     }
   }
 }

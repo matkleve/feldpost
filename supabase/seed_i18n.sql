@@ -45979,6 +45979,130 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.control.theme', 'Theme', 'en', 'Grid shell right rail. Cycles the app theme.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Theme', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.theme'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Design', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.theme'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Tema', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.theme'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.control.theme.light', 'Light', 'en', 'Grid shell theme option label.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Light', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.theme.light'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Hell', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.theme.light'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Chiaro', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.theme.light'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.control.theme.dark', 'Dark', 'en', 'Grid shell theme option label.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Dark', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.theme.dark'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Dunkel', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.theme.dark'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Scuro', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.theme.dark'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.control.theme.sandstone', 'Sandstone', 'en', 'Grid shell theme option label.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Sandstone', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.theme.sandstone'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Sandstein', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.theme.sandstone'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Arenaria', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.theme.sandstone'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'shell.panel.notifications.title', 'Notifications', 'en', 'Notifications panel surface title.')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

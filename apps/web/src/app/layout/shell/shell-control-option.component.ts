@@ -1,5 +1,6 @@
-import { Component, DestroyRef, inject, input, signal } from '@angular/core';
+import { Component, DestroyRef, computed, inject, input, signal } from '@angular/core';
 import { I18nService } from '../../core/i18n/i18n.service';
+import { ThemeService } from '../../core/theme/theme.service';
 import { readMotionDurationMs } from './schedule-map-invalidation';
 import { goToHoverLabel, type HoverLabelState } from './shell-control-option-state';
 import type { ShellControlOptionModel, ShellControlSide } from './shell-control.types';
@@ -21,6 +22,7 @@ import type { ShellControlOptionModel, ShellControlSide } from './shell-control.
 })
 export class ShellControlOptionComponent {
   private readonly i18n = inject(I18nService);
+  private readonly themeService = inject(ThemeService);
   private readonly destroyRef = inject(DestroyRef);
   private timer: ReturnType<typeof setTimeout> | null = null;
 
@@ -32,6 +34,26 @@ export class ShellControlOptionComponent {
   readonly labelState = signal<HoverLabelState>('hidden');
 
   readonly t = (key: string, fallback = ''): string => this.i18n.t(key, fallback);
+
+  readonly displayIcon = computed(() => {
+    if (this.option().kind !== 'theme') {
+      return this.option().icon;
+    }
+    const mode = this.themeService.mode();
+    if (mode === 'dark') return 'dark_mode';
+    if (mode === 'sandstone') return 'palette';
+    return 'light_mode';
+  });
+
+  readonly displayLabel = computed(() => {
+    if (this.option().kind !== 'theme') {
+      return this.t(this.option().labelKey, this.option().labelFallback);
+    }
+    const mode = this.themeService.mode();
+    if (mode === 'dark') return this.t('shell.control.theme.dark', 'Dark');
+    if (mode === 'sandstone') return this.t('shell.control.theme.sandstone', 'Sandstone');
+    return this.t('shell.control.theme.light', 'Light');
+  });
 
   constructor() {
     this.destroyRef.onDestroy(() => this.clearTimer());

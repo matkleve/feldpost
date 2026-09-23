@@ -2,7 +2,7 @@ import type { ShellPanelId } from '../../core/shell-layout/shell-layout.types';
 
 export type ShellControlSide = 'left' | 'right';
 
-export type ShellControlKind = 'canvas' | 'panel' | 'inert' | 'settings' | 'account';
+export type ShellControlKind = 'canvas' | 'panel' | 'inert' | 'settings' | 'account' | 'theme';
 
 export interface ShellControlOptionModel {
   id: string;
@@ -85,6 +85,13 @@ const RIGHT_GROUPS: readonly ShellControlGroup[] = [
         labelFallback: 'Tips',
         kind: 'panel',
         panelId: 'tips',
+      },
+      {
+        id: 'theme',
+        icon: 'light_mode',
+        labelKey: 'shell.control.theme',
+        labelFallback: 'Theme',
+        kind: 'theme',
       },
       {
         id: 'help',
