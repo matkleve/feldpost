@@ -80,7 +80,7 @@ sequenceDiagram
 - [ ] Folder uploads inherit folder-name address as default location hint when files do not provide their own title address.
 - [ ] File-level title address overrides inherited folder-level address.
 - [ ] If queue has jobs, segmented lane switch appears under Drop Zone
-- [x] Lane switch contains exactly 3 options: Queue (`uploading`), Uploaded, Issues
+- [x] Lane switch contains exactly 3 options: Waiting (`uploading`), Clarification (`issues`), Uploaded — one lane visible
 - [x] Clicking a lane filters visible media list to that lane only
 - [x] Queue and Uploaded lane buttons use icon+label content for direct readability
 - [x] Issues lane button uses icon+label content and attention styling when unresolved items exist

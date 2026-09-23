@@ -118,11 +118,20 @@ export function buildLaneSwitchOptions(
   return [
     {
       id: 'uploading',
-      label: t('upload.panel.lane.uploading', 'Queue'),
+      label: t('upload.panel.lane.uploading', 'Waiting'),
       icon: 'cloud_upload',
       type: 'icon-with-text',
-      ariaLabel: `${t('upload.panel.lane.uploading', 'Queue')} (${counts.uploading})`,
-      title: t('upload.panel.lane.uploading', 'Queue'),
+      ariaLabel: `${t('upload.panel.lane.uploading', 'Waiting')} (${counts.uploading})`,
+      title: t('upload.panel.lane.uploading', 'Waiting'),
+    },
+    {
+      id: 'issues',
+      label: t('upload.panel.lane.issues', 'Clarification'),
+      icon: 'help',
+      type: 'icon-with-text',
+      ariaLabel: `${t('upload.panel.lane.issues', 'Clarification')} (${counts.issues})`,
+      title: t('upload.panel.lane.issues', 'Clarification'),
+      attention: issueAttentionPulse && counts.issues > 0 && effectiveLane !== 'issues',
     },
     {
       id: 'uploaded',
@@ -131,15 +140,6 @@ export function buildLaneSwitchOptions(
       type: 'icon-with-text',
       ariaLabel: `${t('upload.panel.lane.uploaded', 'Uploaded')} (${counts.uploaded})`,
       title: t('upload.panel.lane.uploaded', 'Uploaded'),
-    },
-    {
-      id: 'issues',
-      label: t('upload.panel.lane.issues', 'Issues'),
-      icon: 'warning_amber',
-      type: 'icon-with-text',
-      ariaLabel: `${t('upload.panel.lane.issues', 'Issues')} (${counts.issues})`,
-      attention: issueAttentionPulse && counts.issues > 0 && effectiveLane !== 'issues',
-      destructiveHint: counts.issues > 0,
     },
   ];
 }

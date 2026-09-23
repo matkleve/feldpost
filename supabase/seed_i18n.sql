@@ -33049,14 +33049,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'upload.panel.lane.uploading', 'Queue', 'en', 'apps/web/src/app/features/upload/upload-panel.component.ts computed:laneSwitchOptions option label/title/aria base')
+values (null, 'upload.panel.lane.uploading', 'Waiting', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel-helpers.ts buildLaneSwitchOptions label for the uploading lane')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Queue', 'published'
+select t.id, 'en', 'Waiting', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.panel.lane.uploading'
 on conflict (app_text_id, lang) do update set
@@ -33064,7 +33064,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Warteschlange', 'published'
+select t.id, 'de', 'Wartend', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.panel.lane.uploading'
 on conflict (app_text_id, lang) do update set
@@ -33072,7 +33072,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Coda', 'published'
+select t.id, 'it', 'In attesa', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.panel.lane.uploading'
 on conflict (app_text_id, lang) do update set
@@ -33111,14 +33111,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'upload.panel.lane.issues', 'Issues', 'en', 'apps/web/src/app/features/upload/upload-panel.component.ts computed:laneSwitchOptions option label/title/aria base')
+values (null, 'upload.panel.lane.issues', 'Clarification', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel-helpers.ts buildLaneSwitchOptions label for trays and unresolved jobs')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Issues', 'published'
+select t.id, 'en', 'Clarification', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.panel.lane.issues'
 on conflict (app_text_id, lang) do update set
@@ -33126,7 +33126,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Probleme', 'published'
+select t.id, 'de', 'Klärung', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.panel.lane.issues'
 on conflict (app_text_id, lang) do update set
@@ -33134,7 +33134,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Problemi', 'published'
+select t.id, 'it', 'Da chiarire', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.panel.lane.issues'
 on conflict (app_text_id, lang) do update set

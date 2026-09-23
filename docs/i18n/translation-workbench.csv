@@ -1065,9 +1065,9 @@ upload.placement.banner.placeImage,Click the map to place the image,apps/web/src
 upload.placement.banner.setNewLocation,Click the map to set the new location,apps/web/src/app/features/map/map-shell/map-shell.component.ts ts-prop:return,Click the map to set the new location,Klicke auf die Karte um den neuen Standort zu setzen,Clicca sulla mappa per impostare la nuova posizione
 upload.panel.title,Upload Panel,apps/web/src/app/features/upload/upload-panel.component.html text-node,Upload Panel,Upload-Panel,Pannello caricamento
 upload.panel.subtitle,You can upload things here.,apps/web/src/app/features/upload/upload-panel.component.html text-node,You can upload things here.,Du kannst hier Dinge hochladen.,Puoi caricare file qui.
-upload.panel.lane.uploading,Queue,apps/web/src/app/features/upload/upload-panel.component.ts computed:laneSwitchOptions option label/title/aria base,Queue,Warteschlange,Coda
+upload.panel.lane.uploading,Waiting,apps/web/src/app/features/upload/upload-panel/upload-panel-helpers.ts buildLaneSwitchOptions label for the uploading lane,Waiting,Wartend,In attesa
 upload.panel.lane.uploaded,Uploaded,apps/web/src/app/features/upload/upload-panel.component.ts computed:laneSwitchOptions option label/title/aria base,Uploaded,Hochgeladen,Caricato
-upload.panel.lane.issues,Issues,apps/web/src/app/features/upload/upload-panel.component.ts computed:laneSwitchOptions option label/title/aria base,Issues,Probleme,Problemi
+upload.panel.lane.issues,Clarification,apps/web/src/app/features/upload/upload-panel/upload-panel-helpers.ts buildLaneSwitchOptions label for trays and unresolved jobs,Clarification,Klärung,Da chiarire
 upload.panel.queue.aria,Upload queue,aria label for upload panel file list,Upload queue,Upload-Warteschlange,Coda caricamento
 upload.panel.scanning.status,Scanning... {count} file{suffix} found,upload panel batch scanning status line,Scanning... {count} file{suffix} found,Scanne… {count} Datei{suffix} gefunden,Scansione… {count} file{suffix} trovati
 upload.item.fileName.aria,File name,aria label for upload row file name,File name,Dateiname,Nome file
