@@ -22,7 +22,7 @@ import type { ShellControlOptionModel, ShellControlSide } from './shell-control.
 })
 export class ShellControlOptionComponent {
   private readonly i18n = inject(I18nService);
-  private readonly themeService = inject(ThemeService);
+  protected readonly themeService = inject(ThemeService);
   private readonly destroyRef = inject(DestroyRef);
   private timer: ReturnType<typeof setTimeout> | null = null;
 
