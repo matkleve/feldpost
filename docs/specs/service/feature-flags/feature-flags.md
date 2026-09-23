@@ -8,6 +8,10 @@ A migration flag reader. It resolves one boolean, `shellGridLayout`, from a quer
 
 No UI. Callers read a signal. A preview URL uses `?ff=shellGridLayout` to force on and `?ff=-shellGridLayout` to force off. The query writes `localStorage` so the choice sticks on the next load.
 
+**Requires the grid-shell preview branch** — `main` does not ship `app-grid-shell` yet; the flag has no effect there.
+
+The service re-reads on every `NavigationEnd` so `?ff=` changes apply without a full reload. Auth redirects preserve `ff` on the login hop.
+
 ## Where It Lives
 
 - **Code:** `apps/web/src/app/core/feature-flags/`.

@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { FEATURE_FLAG_NAMES, resolveFlag, sidebarWidthOwner } from './feature-flags.helpers';
+import {
+  FEATURE_FLAG_NAMES,
+  featureFlagRouterQueryParams,
+  resolveFlag,
+  sidebarWidthOwner,
+} from './feature-flags.helpers';
 
 describe('resolveFlag', () => {
   it('lets ?ff=shellGridLayout win over a stored false', () => {
@@ -48,5 +53,30 @@ describe('resolveFlag', () => {
   it('returns the same value when read twice', () => {
     const sources = { query: 'shellGridLayout', stored: 'false' as const };
     expect(resolveFlag('shellGridLayout', sources)).toEqual(resolveFlag('shellGridLayout', sources));
+  });
+});
+
+describe('featureFlagRouterQueryParams', () => {
+  it('returns ff when present in the location search', () => {
+    const original = window.location.href;
+    window.history.replaceState({}, '', '/?ff=shellGridLayout');
+    expect(featureFlagRouterQueryParams()).toEqual({ ff: 'shellGridLayout' });
+    window.history.replaceState({}, '', original);
+  });
+});
+
+describe('featureFlagRouterQueryParams', () => {
+  it('returns ff when present on window.location', () => {
+    const original = window.location.href;
+    window.history.replaceState({}, '', '/?ff=shellGridLayout');
+    expect(featureFlagRouterQueryParams()).toEqual({ ff: 'shellGridLayout' });
+    window.history.replaceState({}, '', original);
+  });
+
+  it('returns empty when ff is absent', () => {
+    const original = window.location.href;
+    window.history.replaceState({}, '', '/map');
+    expect(featureFlagRouterQueryParams()).toEqual({});
+    window.history.replaceState({}, '', original);
   });
 });

@@ -52,7 +52,7 @@ Active basemap is **tertiary** placement (violet dot) — same attention tier as
 | Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer | Test Oracle |
 | --- | --- | --- | --- | --- | --- | --- |
 | Control shell | `.map-style-switch` | `.map-style-switch` | `.map-style-switch__btn` | `.map-style-switch` | 200 | Fixed above GPS offset |
-| Circular button | `.map-style-switch__btn` | button | button | `:host button.map-style-switch__btn` | content | `--shell-control-option-size` circle |
+| Circular button | `.map-style-switch__btn` | button | button | `:host button.map-style-switch__btn` | content | `--map-floating-control-size` circle |
 | Icon + dots stack | `.map-style-switch__media` | button | button | `__media`, `__icon`, `__dots` | content | Fits inside circle |
 | Hover emphasis | button | button | button | `:hover`, `:focus-visible` | states | Gold ink + frosted hover |
 

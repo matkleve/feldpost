@@ -40,7 +40,7 @@ Unit note: button geometry uses rem for accessibility scaling; borders and shado
 ## Component Hierarchy
 
 ```
-GpsButton                                  ← --shell-control-option-size circle, floating bottom-right
+GpsButton                                  ← --map-floating-control-size circle, floating bottom-right
 ├── LocationIcon                           ← black when inactive, orange when active/seeking
 └── [seeking] Spinner                      ← shown while awaiting fix
 ```
@@ -49,7 +49,7 @@ GpsButton                                  ← --shell-control-option-size circl
 
 | Token                       | Value                       | Notes                     |
 | --------------------------- | --------------------------- | ------------------------- |
-| `--shell-control-option-size` | `4rem`                    | Shared map + shell floating control hit target |
+| `--map-floating-control-size` | `3rem`                    | Map GPS + basemap switch hit target |
 | `--radius-circle`           | `50%`                       | Makes it a circle         |
 | `--shadow-float`            | `0 2px 8px rgba(0,0,0,0.2)` | px fine for shadows       |
 | `--color-bg-surface`        | (from design system)        | Button background         |
@@ -158,7 +158,7 @@ sequenceDiagram
 ## Acceptance Criteria
 
 - [x] Floating bottom-right in Map Zone
-- [x] `--shell-control-option-size` (`4rem`) tap target
+- [x] `--map-floating-control-size` (`3rem`) tap target
 - [x] Button is a toggle: first click enables tracking, second click disables tracking
 - [x] Map recenters to user location only when GPS button is clicked (not on startup geolocation)
 - [x] While active, geolocation refresh runs roughly every 60 seconds

@@ -80,7 +80,8 @@ flowchart TB
 
 | Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer | Test Oracle |
 | --- | --- | --- | --- | --- | --- | --- |
-| Panel box | `app-shell-panel-surface` | `app-shell-panel-surface` | close button and body | `:host` | content `0` | `shell-box` |
+| Panel box | `app-shell-panel-surface` | `app-shell-panel-surface` | collapse button and body | `:host` | content `0` | `shell-box` |
+| Collapse control | collapse button | header | collapse button | `.shell-panel-surface__collapse` | content `0` | `chevron_right`, 2.75rem hit target |
 | Body | projected component | surface | projected controls | body | content `0` | upload panel visible |
 
 ## Acceptance Criteria

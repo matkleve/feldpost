@@ -42,6 +42,13 @@ export function sidebarWidthOwner(shellGridLayout: boolean): 'nav' | 'grid-shell
   return shellGridLayout ? 'grid-shell' : 'nav';
 }
 
+/** Preserves the `ff` query when auth redirects would otherwise drop it. */
+export function featureFlagRouterQueryParams(): { ff: string } | Record<string, never> {
+  if (typeof window === 'undefined') return {};
+  const ff = new URLSearchParams(window.location.search).get('ff');
+  return ff ? { ff } : {};
+}
+
 function defaultFor(name: string): boolean {
   if ((FEATURE_FLAG_NAMES as readonly string[]).includes(name)) {
     return FEATURE_FLAG_DEFAULTS[name as FeatureFlagName];
