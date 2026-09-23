@@ -1,6 +1,9 @@
 @if (entry(); as entry) {
-  <h1>{{ t(entry.nameKey, entry.nameFallback) }}</h1>
-  <p>{{ t(entry.bodyKey, entry.bodyFallback) }}</p>
+  <div class="widget-explanation__content">
+    <h1>{{ t(entry.nameKey, entry.nameFallback) }}</h1>
+    <p>{{ t(entry.summaryKey, entry.summaryFallback) }}</p>
+    <p>{{ t(entry.bodyKey, entry.bodyFallback) }}</p>
+  </div>
 } @else {
   <p>{{ t('widget.explanation.missing', 'This widget is not in the catalog.') }}</p>
 }

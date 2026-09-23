@@ -1634,6 +1634,7 @@ widget.catalog.material,Material,Suite widget name.,Material,Material,Materiale
 widget.catalog.storageLocations,Storage locations,Suite widget name. German Lagerorte.,Storage locations,Lagerorte,Luoghi di deposito
 widget.catalog.buildings,Buildings,Suite widget name. German Gebäude.,Buildings,Gebäude,Edifici
 widget.directory.title,Widgets,Directory page title.,Widgets,Widgets,Widget
+widget.directory.subtitle,Browse widgets you can add to your organization and the shell.,Directory page subtitle.,Browse widgets you can add to your organization and the shell.,Widgets durchsuchen, die Sie Ihrer Organisation und der Shell hinzufügen können.,Sfoglia i widget che puoi aggiungere all'organizzazione e alla shell.
 widget.directory.add,Add,Add control on a directory rectangle.,Add,Hinzufügen,Aggiungi
 widget.explanation.back,Back,Returns from a widget explanation to the directory.,Back,Zurück,Indietro
 widget.explanation.missing,This widget is not in the catalog.,Unknown widget id on the explanation route.,This widget is not in the catalog.,Dieses Widget ist nicht im Katalog.,Questo widget non è nel catalogo.

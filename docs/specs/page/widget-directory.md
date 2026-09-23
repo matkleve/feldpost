@@ -2,11 +2,11 @@
 
 ## What It Is
 
-The canvas page the left-rail `+` opens. It lists widgets as rectangles the organization can add.
+The canvas page the left-rail `+` opens. It lists widgets as cards the organization can add.
 
 ## What It Looks Like
 
-The page renders inside `app-shell-main-canvas` and adds no second gutter. Each widget is one rectangle. The rectangle shows the widget name, a short explanation, More, and Add. Gap between rectangles is `var(--spacing-3)`. A rectangle the organization does not allow is greyed out. The rectangle is not a button.
+The page renders inside `app-shell-main-canvas` and adds no second gutter. Copy is left-aligned. A page title and subtitle sit above a two-column grid of cards. Each card shows three lines: the widget name, the short explanation, and one body line from the catalog. More and a circular Add sit on the right. Gap between cards is `var(--spacing-3)`. A card the organization does not allow is greyed out. The card is not a button.
 
 ## Where It Lives
 
@@ -28,11 +28,14 @@ The page renders inside `app-shell-main-canvas` and adds no second gutter. Each 
 ```text
 app-shell-main-canvas
 └── widget directory
-    └── widget rectangle
-        ├── name
-        ├── short explanation
-        ├── More
-        └── Add
+    ├── title and subtitle
+    └── widget card grid
+        └── widget card
+            ├── name
+            ├── short explanation
+            ├── body line
+            ├── More
+            └── Add
 ```
 
 ## Data
@@ -60,7 +63,8 @@ The directory reads the catalog in [widget-suite.md](widget-suite.md) plus Mitar
 ## Acceptance Criteria
 
 - [ ] `+` opens `/widgets`.
-- [ ] A rectangle shows the name, a short explanation, More, and Add.
+- [ ] Cards render in a two-column grid with left-aligned copy.
+- [ ] A card shows the name, a short explanation, a body line, More, and Add.
 - [ ] Add on a greyed rectangle installs nothing.
 - [ ] Add on an allowed installable rectangle writes one `organization_widgets` row.
 
@@ -68,8 +72,8 @@ The directory reads the catalog in [widget-suite.md](widget-suite.md) plus Mitar
 
 | Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer | Test Oracle |
 | --- | --- | --- | --- | --- | --- | --- |
-| Rectangle | widget rectangle | widget rectangle | More, Add | rectangle | content `0` | name, short explanation, two controls |
-| Greyed | widget rectangle | same | Add does not install | rectangle | content `0` | muted; Add is a no-op |
+| Card | widget card | widget card | More, Add | card | content `0` | three text lines, two controls |
+| Greyed | widget card | same | Add does not install | card | content `0` | muted; Add is a no-op |
 
 ## Interaction emphasis
 

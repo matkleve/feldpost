@@ -6,7 +6,7 @@ The empty canvas. The left-rail logo opens it. It explains the shell and lists e
 
 ## What It Looks Like
 
-The page renders inside `app-shell-main-canvas`. One heading, one explanation, then one row per widget: name and state. Gap between rows is `var(--spacing-3)`. It does not add a second radius.
+The page renders inside `app-shell-main-canvas`. Copy is left-aligned. One heading, one explanation, then one row per widget: name and state. Gap between rows is `var(--spacing-3)`. It does not add a second radius.
 
 ## Where It Lives
 

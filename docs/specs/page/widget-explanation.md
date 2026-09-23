@@ -6,7 +6,7 @@ The canvas page for one widget. It is the longer explanation opened by More on a
 
 ## What It Looks Like
 
-The page renders inside `app-shell-main-canvas`. It shows the same widget name as the directory rectangle, then the longer explanation, then Back. It does not repeat Add. Spacing stays `var(--spacing-3)`.
+The page renders inside `app-shell-main-canvas`. Copy is left-aligned. It shows the widget name, the short explanation, the longer body, then Back. It does not repeat Add. Spacing stays `var(--spacing-3)`.
 
 ## Where It Lives
 

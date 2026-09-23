@@ -1,13 +1,32 @@
-<h1>{{ t('widget.directory.title', 'Widgets') }}</h1>
-@for (entry of entries; track entry.id) {
-  <article class="widget-directory__card" [attr.data-allowed]="entry.allowed ? 'true' : 'false'">
-    <h2>{{ t(entry.nameKey, entry.nameFallback) }}</h2>
-    <p>{{ t(entry.summaryKey, entry.summaryFallback) }}</p>
-    <div class="widget-directory__actions">
-      <button type="button" (click)="openMore(entry.id)">{{ t('shell.control.more', 'More') }}</button>
-      <button type="button" (click)="onAdd(entry)" [disabled]="!entry.allowed">
-        {{ t('widget.directory.add', 'Add') }}
-      </button>
-    </div>
-  </article>
-}
+<header class="widget-directory__header">
+  <h1>{{ t('widget.directory.title', 'Widgets') }}</h1>
+  <p class="widget-directory__subtitle">
+    {{ t('widget.directory.subtitle', 'Browse widgets you can add to your organization and the shell.') }}
+  </p>
+</header>
+
+<div class="widget-directory__grid">
+  @for (entry of entries; track entry.id) {
+    <article class="widget-directory__card" [attr.data-allowed]="entry.allowed ? 'true' : 'false'">
+      <div class="widget-directory__text">
+        <h2>{{ t(entry.nameKey, entry.nameFallback) }}</h2>
+        <p class="widget-directory__line">{{ t(entry.summaryKey, entry.summaryFallback) }}</p>
+        <p class="widget-directory__line widget-directory__line--detail">
+          {{ t(entry.bodyKey, entry.bodyFallback) }}
+        </p>
+      </div>
+      <div class="widget-directory__actions">
+        <button type="button" (click)="openMore(entry.id)">{{ t('shell.control.more', 'More') }}</button>
+        <button
+          type="button"
+          class="widget-directory__add"
+          (click)="onAdd(entry)"
+          [disabled]="!entry.allowed"
+          [attr.aria-label]="t('widget.directory.add', 'Add')"
+        >
+          <span class="material-icons" aria-hidden="true">add</span>
+        </button>
+      </div>
+    </article>
+  }
+</div>
