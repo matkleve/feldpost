@@ -6,7 +6,7 @@ A `var(--shell-control-option-size)` icon button in a control container. A hover
 
 ## What It Looks Like
 
-Square hit target, `4rem` by `4rem` (`--shell-control-option-size`), icon centered. Not an `hlmBtn` variant. Custom `app-shell-control-option` with class `shell-control-option__button`. The label is a pill (`var(--radius-full)`) on plane `200`, positioned beside the button. It does not participate in the rail's flex size. Canvas option uses the current route for emphasis. Panel option uses the open state from `ShellLayoutService`.
+Square hit target, `2.75rem` by `2.75rem` (`--shell-control-option-size`), icon centered. Not an `hlmBtn` variant. Custom `app-shell-control-option` with class `shell-control-option__button`. The label is a pill (`var(--radius-full)`) on plane `200`, positioned beside the button. It does not participate in the rail's flex size. Canvas option uses the current route for emphasis. Panel option uses the open state from `ShellLayoutService`.
 
 ## Where It Lives
 

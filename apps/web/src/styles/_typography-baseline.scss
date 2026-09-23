@@ -15,9 +15,9 @@
   --spacing-6: calc(0.25rem * 8);
   --spacing-8: calc(0.25rem * 16);
 
-  // Sets grid-shell rail icon hit target (above 2.75rem minimum)
+  // Sets grid-shell rail icon hit target (desktop minimum touch target)
   // @see docs/specs/ui/shell/shell-control-option.md
-  --shell-control-option-size: 4rem;
+  --shell-control-option-size: 2.75rem;
 
   // Sets map-zone floating controls (basemap switch + GPS), bottom-right of the map
   // @see docs/specs/component/map/gps-button.md

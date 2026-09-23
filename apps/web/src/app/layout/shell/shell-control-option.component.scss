@@ -33,9 +33,6 @@
   .shell-control-option__button--theme {
     flex-direction: column;
     gap: var(--spacing-1);
-    height: auto;
-    min-height: var(--shell-control-option-size);
-    padding-block: var(--spacing-1);
   }
 
   .shell-control-option__theme-media {
@@ -47,7 +44,7 @@
   }
 
   .shell-control-option__theme-icon {
-    font-size: var(--font-size-xl);
+    font-size: var(--font-size-lg);
     line-height: var(--line-height-solid);
   }
 
@@ -60,8 +57,8 @@
   }
 
   .shell-control-option__theme-dot {
-    width: var(--spacing-2);
-    height: var(--spacing-2);
+    width: var(--spacing-1);
+    height: var(--spacing-1);
     border-radius: var(--radius-full);
     background: color-mix(in srgb, var(--muted-foreground) 35%, transparent);
     transition: background var(--motion-duration-fast) var(--motion-ease-out);
