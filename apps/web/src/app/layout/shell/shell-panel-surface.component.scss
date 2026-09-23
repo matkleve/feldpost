@@ -22,17 +22,31 @@
   padding: var(--spacing-2);
 }
 
-// Dismiss control. Color hover is declared with the resting color.
+// Collapse control — chevron_right slides the panel column shut toward the right rail.
 // @see docs/specs/ui/shell/shell-panel-surface.md
-.shell-panel-surface__close {
+.shell-panel-surface__collapse {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
   border: 0;
+  border-radius: var(--radius-full);
   background: transparent;
   color: var(--menu-item-text);
   cursor: pointer;
 
+  .material-icons {
+    font-size: var(--font-size-xl);
+    line-height: var(--line-height-solid);
+  }
+
   &:hover,
   &:focus-visible {
     color: var(--primary);
+    background: var(--action-hover);
   }
 }
 

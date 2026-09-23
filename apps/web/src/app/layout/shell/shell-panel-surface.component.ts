@@ -30,7 +30,7 @@ export class ShellPanelSurfaceComponent {
     return this.t(key, fallback);
   }
 
-  close(): void {
+  collapse(): void {
     this.shellLayout.close(this.panelId());
   }
 }

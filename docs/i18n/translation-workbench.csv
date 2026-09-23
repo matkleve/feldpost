@@ -1605,7 +1605,7 @@ shell.control.help,Help,Grid shell right rail. Opens the help panel.,Help,Hilfe,
 shell.panel.upload.title,Upload,Upload panel surface title.,Upload,Hochladen,Carica
 shell.panel.help.title,Help,Help panel surface title.,Help,Hilfe,Aiuto
 shell.panel.help.body,Help is not available yet.,Help panel placeholder body.,Help is not available yet.,Hilfe ist noch nicht verfügbar.,L'aiuto non è ancora disponibile.
-shell.panel.close,Close,Panel surface close control.,Close,Schließen,Chiudi
+shell.panel.collapse,Collapse panel,Panel surface collapse control (chevron_right). Collapses the panel column toward the right rail.,Collapse panel,Panel einklappen,Comprimi pannello
 shell.control.notifications,Notifications,Grid shell right rail. Opens the notifications panel.,Notifications,Benachrichtigungen,Notifiche
 shell.control.download,Selected items,Grid shell right rail. Opens the selected-items panel.,Selected items,Ausgewählte Elemente,Elementi selezionati
 shell.control.sharedMedia,Shared media,Grid shell right rail. Opens the shared media panel.,Shared media,Geteilte Medien,Media condivisi

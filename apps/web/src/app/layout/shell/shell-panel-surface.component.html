@@ -1,7 +1,12 @@
 <header class="shell-panel-surface__header">
   <h2>{{ title() }}</h2>
-  <button type="button" class="shell-panel-surface__close" (click)="close()">
-    {{ t('shell.panel.close', 'Close') }}
+  <button
+    type="button"
+    class="shell-panel-surface__collapse"
+    (click)="collapse()"
+    [attr.aria-label]="t('shell.panel.collapse', 'Collapse panel')"
+  >
+    <span class="material-icons" aria-hidden="true">chevron_right</span>
   </button>
 </header>
 <div class="shell-panel-surface__body">

@@ -25,7 +25,7 @@ One frosted panel in the panel column. Ids are `upload`, `download`, `shared-med
 
 | # | User Action | System Response | Triggers |
 | --- | --- | --- | --- |
-| 1 | Clicks the surface close control | `ShellLayoutService.close(id)` | panel closes |
+| 1 | Clicks the surface collapse control (`chevron_right`) | `ShellLayoutService.close(id)` | panel column shrinks shut to the right |
 | 2 | Uses the upload body | Existing upload behavior | `UploadPanelComponent` |
 
 ## Component Hierarchy
@@ -34,7 +34,7 @@ One frosted panel in the panel column. Ids are `upload`, `download`, `shared-med
 app-shell-panel-surface
 ├── header
 │   ├── title
-│   └── close button
+│   └── collapse button (chevron_right)
 └── body (projected)
     ├── app-upload-panel [id upload]
     ├── app-selected-items-panel [id download]
@@ -88,5 +88,6 @@ flowchart TB
 - [ ] `upload` renders `UploadPanelComponent` and not `app-upload-shell`.
 - [ ] `download` renders `SelectedItemsPanelComponent` per [selected-items-panel.md](./selected-items-panel.md).
 - [ ] `help`, `tips`, `shared-media` render placeholders until those products exist.
-- [ ] Close calls `close(panelId)` once.
+- [ ] Collapse control is icon-only `chevron_right` with `shell.panel.collapse` aria-label (not a text Close button).
+- [ ] Collapse calls `close(panelId)` once.
 - [ ] Title copy uses `t(key, fallback)`.
