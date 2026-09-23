@@ -140,7 +140,7 @@ export const toggleGroupItemVariants = cva(
     'data-[state=on]:hover:bg-[color:color-mix(in_srgb,var(--brand-gold)_10%,transparent)] data-[state=on]:hover:text-[color:var(--brand-gold)] data-[state=on]:hover:[&_.material-icons]:text-inherit data-[state=on]:focus-visible:bg-[color:color-mix(in_srgb,var(--brand-gold)_10%,transparent)] data-[state=on]:focus-visible:text-[color:var(--brand-gold)] data-[state=on]:focus-visible:[&_.material-icons]:text-inherit',
     toggleOffEmphasis,
     'data-[attention=true]:data-[state=off]:text-[color:var(--warning)] data-[attention=true]:data-[state=off]:shadow-[0_0_0_1px_color-mix(in_srgb,var(--warning)_38%,transparent)]',
-  // Issues lane (and similar): keep destructive tone when selected — must follow generic `data-[state=on]` primary rules.
+  // Clarifications lane (and similar): keep destructive tone when selected — must follow generic `data-[state=on]` primary rules.
   // @see upload-panel.component.scss — &__area--switch.upload-panel__segmented
     'data-[destructive-hint=true]:text-destructive data-[destructive-hint=true]:[&_.material-icons]:text-destructive',
     'data-[destructive-hint=true]:data-[state=off]:hover:bg-[color:color-mix(in_srgb,var(--destructive)_10%,transparent)] data-[destructive-hint=true]:data-[state=off]:hover:text-destructive',

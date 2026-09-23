@@ -492,11 +492,11 @@ export const UPLOAD_PANEL_TRANSLATION_CATALOG: ReadonlyArray<TranslationEntry> =
   },
   {
     key: 'upload.location.mode.subtitle.on',
-    original: 'GPS and file names; missing location → Issues.',
+    original: 'GPS and file names; missing location → Clarifications.',
     context: 'Upload auto-location subtitle when on.',
-    en: 'GPS and file names; missing location → Issues.',
-    de: 'GPS und Dateinamen; fehlender Standort → Probleme.',
-    it: 'GPS e nomi file; posizione mancante → Problemi.',
+    en: 'GPS and file names; missing location → Clarifications.',
+    de: 'GPS und Dateinamen; fehlender Standort → Klärung.',
+    it: 'GPS e nomi file; posizione mancante → Da chiarire.',
   },
   {
     key: 'upload.location.mode.subtitle.off',

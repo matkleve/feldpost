@@ -57,8 +57,8 @@ export class UploadShellUiService {
       this.trayOrchestrator.hasActivePresentation() ||
       this.trayOrchestrator.hasPresentationBacklog(),
   );
-  readonly uploadHasIssues = computed(() =>
-    this.uploadManager.jobs().some((job) => getLaneForJob(job) === 'issues'),
+  readonly uploadHasClarifications = computed(() =>
+    this.uploadManager.jobs().some((job) => getLaneForJob(job) === 'clarifications'),
   );
 
   toggleUploadPanel(): void {

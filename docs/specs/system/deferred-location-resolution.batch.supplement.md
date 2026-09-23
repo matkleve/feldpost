@@ -17,7 +17,7 @@ time), select the results, and trigger resolution for all of them.
 | **B3** | Only items **without** a location are eligible by default; overwriting is a separate, explicitly chosen mode. | The common case must not rewrite work that was already correct. |
 | **B4** | Items resolving to the same address form **one** tray question, not one per item. | The existing group merge already does this; a batch path must not bypass it. |
 | **B5** | Chunked, resumable, and reports per-item outcome: resolved / needs a question / failed. | At thousands of items partial failure is normal; "it finished" is not an answer. |
-| **B6** | Items that cannot be resolved go to Issues; they do not fail the run. | One bad path must not abort the other 999. |
+| **B6** | Items that cannot be resolved go to Clarifications; they do not fail the run. | One bad path must not abort the other 999. |
 | **B7** | `organization_id`-scoped by the same RLS as a single-item write. | A batch path must not be a privilege path. |
 | **B8** | Shares one implementation with folder-subtree bulk resolution. | A folder is one way to pick items, a filter is another; two engines would drift. |
 
@@ -45,6 +45,6 @@ depends on the adapters, which are not wired yet. See the
 - [ ] Choosing "from EXIF" on items whose folder also has an address uses EXIF, and the report says so (B2).
 - [ ] Items with an existing location are excluded from the eligible count by default (B3).
 - [ ] A forced mid-run failure leaves earlier items written and names the failures (B5).
-- [ ] Unresolvable items appear in Issues afterwards, and the run reports success (B6).
+- [ ] Unresolvable items appear in Clarifications afterwards, and the run reports success (B6).
 - [ ] The batch engine and the folder-subtree engine are the same code path (B8).
 - [ ] A second organization's items are never included (B7, RLS test).

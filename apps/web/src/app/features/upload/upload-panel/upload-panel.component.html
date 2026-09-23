@@ -224,7 +224,7 @@
           ? t('upload.folder.unsupported.hint', 'Folder upload is not supported in this browser.')
           : t(
               'upload.archive.import.hint',
-              'Import a company archive: resolve what can be resolved, ask nothing, park the rest in Issues.'
+              'Import a company archive: resolve what can be resolved, ask nothing, park the rest in Clarifications.'
             )
       "
       (click)="inputHandlers.onSelectFolder($event, folderInput, 'archive')"
@@ -279,7 +279,7 @@
           }}</span>
           @let locationSubtitle = t(
             'upload.location.mode.subtitle.on',
-            'GPS and file names; missing location → Issues.'
+            'GPS and file names; missing location → Clarifications.'
           );
           <span
             class="upload-panel__location-mode-subtitle"

@@ -129,9 +129,9 @@ Context: User needs to inspect different subsets without scanning the whole matr
 stateDiagram-v2
   [*] --> Uploading
   Uploading --> Uploaded: click Uploaded lane
-  Uploading --> Issues: click Issues lane
+  Uploading --> Issues: click Clarifications lane
   Uploaded --> Uploading: click Uploading lane
-  Uploaded --> Issues: click Issues lane
+  Uploaded --> Issues: click Clarifications lane
   Issues --> Uploading: click Uploading lane
   Issues --> Uploaded: click Uploaded lane
 ```
@@ -154,7 +154,7 @@ sequenceDiagram
   participant Manager as UploadManagerService
   participant Resolver as AddressResolverService
 
-  User->>Panel: Select Issues lane
+  User->>Panel: Select Clarifications lane
   User->>Panel: Click issue item thumbnail
   Panel->>Editor: open(jobId)
   User->>Editor: Enter corrected address

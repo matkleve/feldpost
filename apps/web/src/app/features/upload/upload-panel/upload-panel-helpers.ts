@@ -15,7 +15,7 @@ import type { UploadLane } from '../upload-phase.helpers';
 export interface UploadLaneCounts {
   uploading: number;
   uploaded: number;
-  issues: number;
+  clarifications: number;
 }
 
 /**
@@ -78,9 +78,9 @@ export function uploadLocationModeSubtitle(
     ? nonEmptyLocalized(
         t(
           'upload.location.mode.subtitle.on',
-          'GPS and file names; missing location → Issues.',
+          'GPS and file names; missing location → Clarifications.',
         ),
-        'GPS and file names; missing location → Issues.',
+        'GPS and file names; missing location → Clarifications.',
       )
     : nonEmptyLocalized(
         t('upload.location.mode.subtitle.off', 'Uploads without a location.'),
@@ -125,13 +125,14 @@ export function buildLaneSwitchOptions(
       title: t('upload.panel.lane.uploading', 'Waiting'),
     },
     {
-      id: 'issues',
-      label: t('upload.panel.lane.issues', 'Clarification'),
+      id: 'clarifications',
+      label: t('upload.panel.lane.clarifications', 'Clarification'),
       icon: 'help',
       type: 'icon-with-text',
-      ariaLabel: `${t('upload.panel.lane.issues', 'Clarification')} (${counts.issues})`,
-      title: t('upload.panel.lane.issues', 'Clarification'),
-      attention: issueAttentionPulse && counts.issues > 0 && effectiveLane !== 'issues',
+      ariaLabel: `${t('upload.panel.lane.clarifications', 'Clarification')} (${counts.clarifications})`,
+      title: t('upload.panel.lane.clarifications', 'Clarification'),
+      attention:
+        issueAttentionPulse && counts.clarifications > 0 && effectiveLane !== 'clarifications',
     },
     {
       id: 'uploaded',

@@ -175,7 +175,7 @@ export class UploadPanelComponent implements OnDestroy {
   /** True when the grid-shell panel is wide enough for intake | vertical lanes. */
   readonly wideLayout = signal(false);
   readonly showClarificationTray = computed(
-    () => this.shellGridLayout() && this.signals.effectiveLane() === 'issues',
+    () => this.shellGridLayout() && this.signals.effectiveLane() === 'clarifications',
   );
   readonly actionHandlers = this.jobActions;
   readonly inputHandlers = this.inputs;

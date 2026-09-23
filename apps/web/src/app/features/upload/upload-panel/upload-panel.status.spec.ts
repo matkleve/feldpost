@@ -7,7 +7,7 @@ describe('UploadPanelComponent missing_data prompt', () => {
         makeUploadJob({ phase: 'missing_data', statusLabel: 'Missing location', issueKind: 'missing_gps' }),
       ],
     });
-    component.laneHandlers.setSelectedLane('issues');
+    component.laneHandlers.setSelectedLane('clarifications');
 
     expect(component.visibleLaneJobs()[0]?.statusLabel).toBe('Missing location');
   });
@@ -15,7 +15,7 @@ describe('UploadPanelComponent missing_data prompt', () => {
   it('enables row interaction for missing_data jobs', async () => {
     const job = makeUploadJob({ phase: 'missing_data', statusLabel: 'Missing location' });
     const { component } = await setupUploadPanel({ initialJobs: [job] });
-    component.laneHandlers.setSelectedLane('issues');
+    component.laneHandlers.setSelectedLane('clarifications');
 
     expect(component.rowHandlers.isRowInteractive(job)).toBe(true);
   });
@@ -50,7 +50,7 @@ describe('UploadPanelComponent error display', () => {
         }),
       ],
     });
-    component.laneHandlers.setSelectedLane('issues');
+    component.laneHandlers.setSelectedLane('clarifications');
 
     expect(component.visibleLaneJobs()[0]?.error).toBe('File too large');
   });

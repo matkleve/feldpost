@@ -124,7 +124,7 @@
     }
   }
 
-  &--issues:not(&--active) {
+  &--clarifications:not(&--active) {
     border: 2px solid color-mix(in srgb, var(--destructive) 72%, var(--card));
   }
 

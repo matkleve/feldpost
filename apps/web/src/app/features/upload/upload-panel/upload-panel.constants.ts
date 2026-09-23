@@ -18,7 +18,7 @@ export type UploadFileTypeChip = {
   descriptionFallback: string;
 };
 
-export const UPLOAD_LANES: ReadonlyArray<UploadLane> = ['uploading', 'issues', 'uploaded'];
+export const UPLOAD_LANES: ReadonlyArray<UploadLane> = ['uploading', 'clarifications', 'uploaded'];
 
 /**
  * Panel width at which the grid-shell upload surface becomes two columns.

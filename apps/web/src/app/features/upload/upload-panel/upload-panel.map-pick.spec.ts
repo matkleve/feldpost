@@ -85,7 +85,7 @@ describe('UploadPanelComponent embedded bulk selection', () => {
 
     component.laneHandlers.setSelectedLane('uploaded');
     component.selectedUploadJobIds.set(new Set([uploadedJob.id]));
-    component.laneHandlers.setSelectedLane('issues');
+    component.laneHandlers.setSelectedLane('clarifications');
 
     expect(component.selectedUploadJobIds().size).toBe(0);
   });

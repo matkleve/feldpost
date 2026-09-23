@@ -48,7 +48,7 @@ flowchart TD
   <SegmentedSwitch />                  <!-- ui-tab-list ONLY, no wrapping div -->
     <!-- Uploading (Icon only) -->
     <!-- Uploaded (Icon only) -->
-    <!-- Issues (Icon + Text, flex grow) -->
+    <!-- Clarifications (Icon + Text, flex grow) -->
 
   <!-- gap -->
 
