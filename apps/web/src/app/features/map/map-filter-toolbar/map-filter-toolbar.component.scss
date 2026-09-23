@@ -40,9 +40,9 @@
     align-items: center;
     min-height: 2.25rem;
     padding-block: 0;
-    border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+    border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-lg);
     color: var(--muted-foreground);
     font-family: inherit;
     font-size: var(--font-size-sm);

@@ -9,7 +9,7 @@ const outlineInteractionEmphasis = `border border-input bg-background hover:bord
 
 /** Destructive quiet control — destructive ink + wash (@see docs/design/state-visuals.md § Interaction emphasis). */
 const destructiveInteractionEmphasis =
-  'text-destructive bg-[color:color-mix(in_srgb,var(--destructive)_10%,transparent)] hover:bg-[color:color-mix(in_srgb,var(--destructive)_15%,transparent)] hover:text-destructive focus-visible:bg-[color:color-mix(in_srgb,var(--destructive)_15%,transparent)] focus-visible:text-destructive active:bg-[color:color-mix(in_srgb,var(--destructive)_18%,transparent)] active:text-destructive';
+  'text-destructive bg-[color:color-mix(in_srgb,var(--destructive)_10%,transparent)] hover:bg-[color:color-mix(in_srgb,var(--destructive)_15%,transparent)] hover:text-destructive focus-visible:bg-[color:color-mix(in_srgb,var(--destructive)_15%,transparent)] focus-visible:text-destructive active:bg-[color:color-mix(in_srgb,var(--destructive)_15%,transparent)] active:text-destructive';
 
 /**
  * Tailwind + shadcn-style button classes; colors resolve via tweakcn tokens (--primary, --ring, etc.).
@@ -19,7 +19,7 @@ const destructiveInteractionEmphasis =
 export const buttonVariants = cva(
   // Base row: flex row + gap between icon and label; inline padding uses spacing-2 only (design kernel).
   // @see docs/design/components/action-interaction-kernel.md#button-policy
-  'relative inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium leading-none ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_.material-icons]:inline-flex [&_.material-icons]:shrink-0 [&_.material-icons]:leading-none',
+  'relative inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium leading-none transition-colors focus-visible:outline-none focus-visible:shadow-[var(--interactive-focus-ring)] disabled:pointer-events-none disabled:opacity-50 [&_.material-icons]:inline-flex [&_.material-icons]:shrink-0 [&_.material-icons]:leading-none',
   {
     variants: {
       // Every variant carries all five states: default · hover · active ·
@@ -34,7 +34,7 @@ export const buttonVariants = cva(
       // visible on the saturated sandstone gold, and inverts on dark) is a
       // separate change: docs/audits/2026-09-08-design-system-adoption.md § S2.
       variant: {
-        default: 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80',
+        default: 'bg-primary text-primary-foreground hover:bg-[color:var(--primary-hover)] active:bg-primary/80',
         destructive: destructiveInteractionEmphasis,
         outline: outlineInteractionEmphasis,
         secondary:
@@ -49,7 +49,9 @@ export const buttonVariants = cva(
         xs: 'h-8 rounded-md ps-2 pe-2 [&_.material-icons]:text-lg',
         sm: 'h-9 rounded-md ps-2 pe-2 [&_.material-icons]:text-lg',
         lg: 'h-11 rounded-md ps-2 pe-2 [&_.material-icons]:text-lg',
-        icon: 'h-10 w-10',
+        // Circle. 2.5rem stays the dense hit target; panel chrome may grow the box.
+        // @see docs/design/components/action-interaction-kernel.md
+        icon: 'h-10 w-10 rounded-full',
         'icon-sm': 'h-8 w-8',
         'icon-xs': 'h-6 w-6',
         'icon-md': 'h-9 w-9',

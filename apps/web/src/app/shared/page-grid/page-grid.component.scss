@@ -86,3 +86,30 @@
   min-height: 0;
   overflow: hidden;
 }
+
+// Canvas pages start at the left inset. A page with a left rail keeps that rail;
+// a page without one (Media) uses the rest of the box.
+// @see docs/specs/ui/shell/shell-main-canvas.md
+:host-context(app-shell-main-canvas) {
+  padding-inline-start: var(--spacing-6);
+
+  .page-grid {
+    grid-template-columns: max-content minmax(0, var(--page-grid-center-max)) minmax(0, 1fr);
+  }
+
+  .page-grid:not(:has(.page-grid__rail--left)) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .page-grid:not(:has(.page-grid__rail--left)) .page-grid__rail--center {
+    grid-column: 1;
+  }
+
+  .page-grid:not(:has(.page-grid__rail--left)) .page-grid__rail--center-expanded {
+    grid-column: 1 / -1;
+  }
+
+  .page-grid__rail--left {
+    justify-self: start;
+  }
+}

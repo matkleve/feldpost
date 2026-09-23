@@ -25,11 +25,14 @@
 
 | Name pattern | Verdict | Owner | Notes |
 | ------------ | ------- | ----- | ----- |
+| `--layout-desk-background` | **Allowed** | `grid-shell.component.scss` `:host` | L0 desk — [`shell-surface-elevation.md`](../specs/ui/shell/shell-surface-elevation.md) |
+| `--layout-desk-background-subtle` | **Allowed** | `grid-shell.component.scss` `:host` | Optional L0 gradient stop |
+| `--layout-box-shadow` | **Allowed** | `@mixin shell-box` | L2 box shadow — canvas, panels, rail containers |
 | `--shell-*` | **Forbidden** (unless spec adds row) | — | No ad-hoc shell bridge globals |
 | `--overlay-rail-*` | **Forbidden** (removed) | — | Batch 34 → `--settings-overlay-left-*` on overlay `:host` |
 | `--layout-sidebar-*` | **Forbidden** (removed) | — | Batch 33 → nav `:host` / `--sidebar-width-*` |
 | `--settings-overlay-left-width`, `--settings-overlay-left-ratio`, … | **Allowed** | `settings-overlay.component.scss` `:host` | In-panel **rail column** geometry only |
-| `.settings-overlay` `left` / `transform` | **Allowed** (positioning) | `settings-overlay.component.scss` `.settings-overlay` | Fixed pane offset; spacing + collapsed rail literal |
+| `.settings-overlay` inside the canvas | **Allowed** (positioning) | `settings-overlay.component.scss` `:host-context(app-shell-main-canvas)` | `absolute; inset: 0`. No sidebar offset. |
 | `--sidebar-width-collapsed`, `--sidebar-width-expanded` | **Allowed** | `nav.component.scss` `app-nav` `:host` | Nav rail only; not visible to overlay sibling |
 | `--spacing-*`, `--container-radius-*`, tweakcn `--primary`, … | **Allowed** | Global layers | Parent contract + [token-layers.md](./token-layers.md) |
 
@@ -39,10 +42,10 @@
 
 | Concern | Correct token / selector | Wrong guess |
 | ------- | ------------------------ | ----------- |
-| **Panel fixed position** (gap after nav rail) | `.settings-overlay` → `left: calc(var(--spacing-3) + (0.25rem * 12) + var(--spacing-3))` | `var(--shell-settings-overlay-left)` |
-| **Left column width inside panel** | `var(--settings-overlay-left-width)` on rail flex child | `var(--overlay-rail-left-min)` (removed) |
+| **Canvas fill** | Inside `app-shell-main-canvas`, `.settings-overlay` is `position: absolute; inset: 0`. Width and height vars are `100%`. | A sidebar `left` offset, `top: 50%`, or `translateY(-50%)` on that path |
+| **Left column width inside panel** | `var(--settings-overlay-left-width)` on the rail flex child | `var(--overlay-rail-left-min)` (removed) |
 
-After nav or spacing changes, re-verify overlay alignment per [settings-overlay.md](../specs/ui/settings-overlay/settings-overlay.md) § Wiring (fixed `left` + `transform`).
+The product mount is the canvas. Do not reintroduce a fixed pane offset from `--feldpost-sidebar-width`.
 
 ---
 
@@ -57,23 +60,10 @@ not appear in the repository. An agent following the old text would have written
 into the one file this document exists to govern. Measured at `87385f2`; see
 [STUDY-015](../study/015-shell-grid-layout-change-plan.md) § 13.2.
 
-**What actually ships:** a global custom property, written imperatively from a feature component.
+**What ships now (2026-09-23):** the grid shell owns the tracks. Settings fills the canvas and does not read a rail width. `grid-shell.component.ts` still writes `--feldpost-sidebar-width` because the unscoped `.settings-overlay` rule still contains the old `left` calc. The canvas override (`:host-context(app-shell-main-canvas)`) wins for the product mount. Do not add a new reader of that property.
 
-| Step | Where |
-| ---- | ----- |
-| `NavComponent` effect writes `--feldpost-sidebar-width` on `document.documentElement` (`3rem` collapsed / `15rem` expanded) | `apps/web/src/app/features/nav/nav.component.ts` |
-| Settings overlay reads it back: `left: calc(var(--feldpost-sidebar-width, 15rem) + var(--spacing-3))` | `apps/web/src/app/features/settings-overlay/settings-overlay.component.scss` |
-| The layout reserves matching space with a third copy of the literal, because the real rail is `position: fixed` and outside the flex row | `apps/web/src/app/layout/authenticated-app-layout.component.scss` |
-
-`--feldpost-sidebar-width` is specced — [sidebar.collapse.supplement.md](../specs/component/workspace/sidebar.collapse.supplement.md),
-[sidebar.md](../specs/component/workspace/sidebar.md), [nav-system.md](../specs/ui/nav/nav-system.md) —
-so it is **not** an ad-hoc name. It is a legitimate mechanism with a real cost: one geometric fact
-lives in three places and is synchronised at runtime through the document element.
-
-- **Shipped:** `--feldpost-sidebar-width` on `document.documentElement`, written by `NavComponent`, read by settings-overlay.
-- **Forbidden:** `--shell-settings-overlay-left` and any other `--shell-*` bridge without a spec row + ownership matrix. Unchanged.
-- **Do not** add a fourth reader of the rail width. If you need the rail width somewhere new, that is a sign the geometry wants an owner — see below.
-- **Planned replacement:** [STUDY-015](../study/015-shell-grid-layout-change-plan.md) proposes a CSS Grid shell whose host owns every track width, which removes the writer, the reader and the spacer together. `proposed`, not accepted — do not build against it yet.
+- **Forbidden:** `--shell-settings-overlay-left` and any other `--shell-*` bridge without a spec row + ownership matrix.
+- **Do not** offset the canvas settings surface with `--feldpost-sidebar-width`.
 
 ---
 

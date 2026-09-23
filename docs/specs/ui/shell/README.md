@@ -11,6 +11,8 @@ Authenticated app geometry. The map is one tenant of the main canvas, not the sh
 | [shell-control-option.md](shell-control-option.md) | `app-shell-control-option` |
 | [shell-panel-column.md](shell-panel-column.md) | `app-shell-panel-column` |
 | [shell-panel-surface.md](shell-panel-surface.md) | `app-shell-panel-surface` |
+| [shell-panel-resize.md](shell-panel-resize.md) | `app-shell-column-divider`, `app-shell-panel-body-divider` |
+| [shell-surface-elevation.md](shell-surface-elevation.md) | desk ladder (`--layout-desk-background`) |
 | [selected-items-panel.md](selected-items-panel.md) | `app-selected-items-panel` (`download` panel body) |
 | [unified-selection.md](unified-selection.md) | selection store (no selector) |
 | [workspace-pane-retirement.md](workspace-pane-retirement.md) | migration checklist |

@@ -1,4 +1,5 @@
-// Shared frosted floating chrome — single opacity rule: ALL map-floating chrome uses 55% card.
+// Shared frosted floating chrome. Shell boxes stay on --chrome-surface (85%).
+// Map floats (search, filter triggers, GPS, style switch) use --map-chrome-surface (94%).
 // @see docs/design/tokens.md § Frosted chrome
 //
 // fill / surface are kept for non-map contexts (solid-surface shells off the map route).
@@ -20,24 +21,34 @@
   box-shadow: var(--shadow-md);
 }
 
-// Map overlay panel — sidebar, search bar, any floating panel over map tiles.
+// Shared map-chrome surface without a shadow, so panel and shell-box each own one shadow.
 // @see docs/design/tokens.md § Frosted chrome
-@mixin panel {
+@mixin chrome-panel-surface {
   background: var(--chrome-surface);
   backdrop-filter: blur(16px) saturate(1.2);
   -webkit-backdrop-filter: blur(16px) saturate(1.2);
   border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
-  box-shadow: var(--shadow-md);
 }
 
-// Shared frosted box for rail containers and panel surfaces.
-// @see docs/specs/ui/shell/grid-shell.md
+// Map overlay panel — sidebar, search bar, any floating panel over map tiles.
+// @see docs/design/tokens.md § Frosted chrome
+@mixin panel {
+  @include chrome-panel-surface;
+  background: var(--map-chrome-surface);
+  border-color: color-mix(in srgb, var(--border) 80%, transparent);
+  box-shadow: var(--shadow-lg);
+}
+
+// Shared frosted box for rail containers, main canvas, and panel surfaces.
+// One shadow for every L2 box — stronger and shorter than map-chrome --shadow-md.
+// @see docs/specs/ui/shell/shell-surface-elevation.md
 @mixin shell-box {
-  @include panel;
+  @include chrome-panel-surface;
   border-radius: var(--container-radius-panel);
+  box-shadow: var(--layout-box-shadow);
 }
 
-// Dropdown / popover shells and upload-resolver-tray (55%) — map overlay, tighter border.
+// Dropdown / popover shells and upload-resolver-tray — map overlay, tighter border.
 // @see docs/specs/component/upload/upload-resolver-tray.md
 // @see docs/design/tokens.md § Frosted chrome
 @mixin floating-panel-shell {
@@ -52,16 +63,16 @@
 // Quiet outline control on an already-frosted panel (map GPS, upload, filter triggers).
 // @see docs/design/tokens.md § Frosted chrome
 @mixin outline-control {
-  background: var(--chrome-surface);
+  background: var(--map-chrome-surface);
   backdrop-filter: blur(12px) saturate(1.15);
   -webkit-backdrop-filter: blur(12px) saturate(1.15);
-  border-color: color-mix(in srgb, var(--border) 50%, transparent);
+  border-color: color-mix(in srgb, var(--border) 80%, transparent);
 }
 
 // Hover/focus wash for outline-control — keeps blur while tinting attention (gold quiet emphasis).
 // @see docs/design/state-visuals.md § Interaction emphasis
 @mixin outline-control-hover {
-  background: color-mix(in srgb, var(--brand-gold) 12%, var(--chrome-surface));
+  background: color-mix(in srgb, var(--brand-gold) 10%, var(--map-chrome-surface));
   border-color: color-mix(in srgb, var(--brand-gold) 42%, var(--border));
   backdrop-filter: blur(12px) saturate(1.15);
   -webkit-backdrop-filter: blur(12px) saturate(1.15);
@@ -70,7 +81,7 @@
 // Persistent active/selected resting state for outline-control buttons on map overlay.
 // @see docs/specs/system/interaction-emphasis-ink-contract.md
 @mixin outline-control-selected {
-  background: color-mix(in srgb, var(--interaction-selected-ink) 12%, var(--chrome-surface));
+  background: color-mix(in srgb, var(--interaction-selected-ink) 12%, var(--map-chrome-surface));
   border-color: color-mix(in srgb, var(--interaction-selected-ink) 42%, var(--border));
   backdrop-filter: blur(12px) saturate(1.15);
   -webkit-backdrop-filter: blur(12px) saturate(1.15);

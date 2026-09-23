@@ -1,8 +1,11 @@
-@if (shellGridLayout()) {
-  <app-grid-shell>
+<app-grid-shell>
     <app-shell-control-area side="left" data-shell-track="left" />
     <app-shell-main-canvas data-shell-track="main">
       <ng-container *ngTemplateOutlet="authenticatedMain" />
+      <ss-settings-overlay
+        [open]="settingsOverlayOpen()"
+        (openChange)="onSettingsOverlayOpenChange($event)"
+      />
     </app-shell-main-canvas>
     <app-shell-panel-column data-shell-track="panels">
       <app-shell-panel-surface
@@ -25,9 +28,22 @@
       <app-shell-panel-surface
         data-panel-id="download"
         panelId="download"
+        [hideHeader]="detailMediaId() != null"
         [style.order]="shellLayout.orderOf('download')"
       >
-        <p>{{ t('shell.panel.unavailable.body', 'This panel is not available yet.') }}</p>
+        <app-selected-items-panel
+          [detailMediaId]="detailMediaId()"
+          [detailAddressSearchRequestMediaId]="detailAddressSearchRequest()?.mediaId ?? null"
+          [detailAddressSearchRequestId]="detailAddressSearchRequest()?.requestId ?? 0"
+          [linkedHoveredMediaIds]="linkedHoveredWorkspaceMediaIds()"
+          (detailClosed)="closeDetailView()"
+          (detailAddressSearchRequestConsumed)="onDetailAddressSearchRequestConsumed($event)"
+          (detailRequested)="openDetailView($event)"
+          (zoomToLocationRequested)="onZoomToLocationRequested($event)"
+          (uploadLocationMapPickRequested)="onUploadLocationMapPickRequestedFromWorkspacePane($event)"
+          (workspaceItemHoverStarted)="onWorkspaceItemHoverStartedFromPane($event)"
+          (workspaceItemHoverEnded)="onWorkspaceItemHoverEndedFromPane($event)"
+        />
       </app-shell-panel-surface>
       <app-shell-panel-surface
         data-panel-id="shared-media"
@@ -53,17 +69,13 @@
     </app-shell-panel-column>
     <app-shell-control-area side="right" data-shell-track="right" />
   </app-grid-shell>
-} @else {
-  <app-nav />
-  <ng-container *ngTemplateOutlet="authenticatedMain" />
-}
 
 <ng-template #authenticatedMain>
-  <div class="authenticated-app-layout__main">
-    @if (!shellGridLayout()) {
-      <app-upload-shell />
-    }
-
+  <div
+    class="authenticated-app-layout__main"
+    [class.authenticated-app-layout__main--covered]="settingsOverlayOpen()"
+    [attr.inert]="settingsOverlayOpen() ? '' : null"
+  >
     <div
       class="authenticated-app-layout__map-host"
       [class.authenticated-app-layout__map-host--visible]="mapShellVisible()"
@@ -78,45 +90,3 @@
     </div>
   </div>
 </ng-template>
-
-@if (photoPanelOpen()) {
-  <app-drag-divider
-    [currentWidth]="workspacePaneWidth()"
-    [minWidth]="workspacePaneMinWidth()"
-    [maxWidth]="workspacePaneMaxWidth()"
-    [defaultWidth]="workspacePaneDefaultWidth()"
-    (widthChange)="onWorkspaceWidthChange($event)"
-  />
-  <app-workspace-pane
-    [currentWidth]="workspacePaneWidth()"
-    [activeTab]="workspacePaneActiveTab()"
-    [detailMediaId]="detailMediaId()"
-    [detailAddressSearchRequestMediaId]="detailAddressSearchRequest()?.mediaId ?? null"
-    [detailAddressSearchRequestId]="detailAddressSearchRequest()?.requestId ?? 0"
-    [linkedHoveredMediaIds]="linkedHoveredWorkspaceMediaIds()"
-    (activeTabChange)="onWorkspacePaneActiveTabChange($event)"
-    (closed)="closeWorkspacePane()"
-    (detailClosed)="closeDetailView()"
-    (detailAddressSearchRequestConsumed)="onDetailAddressSearchRequestConsumed($event)"
-    (detailRequested)="openDetailView($event)"
-    (zoomToLocationRequested)="onZoomToLocationRequested($event)"
-    (uploadLocationMapPickRequested)="onUploadLocationMapPickRequestedFromWorkspacePane($event)"
-    (workspaceItemHoverStarted)="onWorkspaceItemHoverStartedFromPane($event)"
-    (workspaceItemHoverEnded)="onWorkspaceItemHoverEndedFromPane($event)"
-  >
-    @if (!shellGridLayout()) {
-      <app-upload-panel
-        data-workspace-upload-tab
-        [visible]="true"
-        [embeddedInPane]="true"
-        (imageUploaded)="onImageUploadedFromWorkspacePane($event)"
-        (detailRequested)="openDetailView($event)"
-        (zoomToLocationRequested)="onZoomToLocationRequested($event)"
-        (placementRequested)="enterPlacementModeFromWorkspacePane($event)"
-        (locationPreviewRequested)="onUploadLocationPreviewRequestedFromWorkspacePane($event)"
-        (locationPreviewCleared)="onUploadLocationPreviewClearedFromWorkspacePane()"
-        (locationMapPickRequested)="onUploadLocationMapPickRequestedFromWorkspacePane($event)"
-      />
-    }
-  </app-workspace-pane>
-}

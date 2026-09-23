@@ -1,6 +1,7 @@
 import { Component, inject, input } from '@angular/core';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { ShellLayoutService } from '../../core/shell-layout/shell-layout.service';
+import { SelectedItemsPanelCoordinatorService } from '../../core/selected-items-panel/selected-items-panel-coordinator.service';
 import type { ShellPanelId } from '../../core/shell-layout/shell-layout.types';
 
 /** One frosted panel. The right rail chooses which ids are open. */
@@ -12,9 +13,12 @@ import type { ShellPanelId } from '../../core/shell-layout/shell-layout.types';
 })
 export class ShellPanelSurfaceComponent {
   private readonly shellLayout = inject(ShellLayoutService);
+  private readonly selectedItemsPanelCoordinator = inject(SelectedItemsPanelCoordinatorService);
   private readonly i18n = inject(I18nService);
 
   readonly panelId = input.required<ShellPanelId>();
+  /** Hides surface title + collapse when body owns chrome (e.g. download detail mode). */
+  readonly hideHeader = input(false);
 
   readonly t = (key: string, fallback = ''): string => this.i18n.t(key, fallback);
 
@@ -31,6 +35,9 @@ export class ShellPanelSurfaceComponent {
   }
 
   collapse(): void {
+    if (this.panelId() === 'download') {
+      this.selectedItemsPanelCoordinator.onDownloadPanelUserDismissed();
+    }
     this.shellLayout.close(this.panelId());
   }
 }

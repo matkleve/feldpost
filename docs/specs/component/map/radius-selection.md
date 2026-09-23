@@ -8,7 +8,7 @@ A map interaction for selecting a geographic radius. The user right-clicks (desk
 
 ## What It Looks Like
 
-A semi-transparent circle overlay on the map with a `--color-clay` stroke (2px) and a very light fill (10% opacity). Center point marked with a small dot. Edge has a drag handle (small circle on the perimeter). Radius distance label shown near the edge (e.g., "250 m").
+A semi-transparent circle overlay on the map with a `--primary` stroke (2px) and a very light fill (10% opacity). Center point marked with a small dot. Edge has a drag handle (small circle on the perimeter). Radius distance label shown near the edge (e.g., "250 m").
 
 ## Where It Lives
 
@@ -144,7 +144,7 @@ sequenceDiagram
 
 - [ ] Right-click + drag draws a circle (desktop)
 - [ ] Long-press + drag draws a circle (mobile)
-- [ ] Circle uses `--color-clay` stroke with light fill
+- [ ] Circle uses `--primary` stroke with light fill
 - [ ] Radius label shown near the edge
 - [ ] Edge handle allows resizing after commit
 - [ ] Center dot allows repositioning after commit

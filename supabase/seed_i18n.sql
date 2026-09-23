@@ -11349,14 +11349,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.imageDetail.mediaResolution.aria', 'Displayed image resolution', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-media-viewer/media-detail-media-viewer.component.html bound-attr:aria-label')
+values (null, 'workspace.imageDetail.mediaResolution.aria', 'Original image resolution', 'en', 'apps/web/src/app/shared/media-item/media-item.component.html bound-attr:aria-label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Displayed image resolution', 'published'
+select t.id, 'en', 'Original image resolution', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.imageDetail.mediaResolution.aria'
 on conflict (app_text_id, lang) do update set
@@ -11364,7 +11364,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Angezeigte Bildauflösung', 'published'
+select t.id, 'de', 'Auflösung des Originalbilds', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.imageDetail.mediaResolution.aria'
 on conflict (app_text_id, lang) do update set
@@ -11372,7 +11372,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Risoluzione immagine visualizzata', 'published'
+select t.id, 'it', 'Risoluzione dell''immagine originale', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.imageDetail.mediaResolution.aria'
 on conflict (app_text_id, lang) do update set
@@ -33142,6 +33142,99 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.panel.lane.uploading.empty', 'Files that are uploading or still in line.', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html empty Waiting lane')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Files that are uploading or still in line.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.lane.uploading.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Dateien, die hochladen oder noch warten.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.lane.uploading.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'File in caricamento o ancora in coda.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.lane.uploading.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.panel.lane.clarifications.empty', 'Files that need a decision before they can finish.', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html empty Clarification lane')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Files that need a decision before they can finish.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.lane.clarifications.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Dateien, die eine Entscheidung brauchen, bevor sie fertig sind.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.lane.clarifications.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'File che richiedono una decisione prima di essere completati.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.lane.clarifications.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.panel.lane.uploaded.empty', 'Files that finished and are ready to use.', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html empty Uploaded lane')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Files that finished and are ready to use.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.lane.uploaded.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Dateien, die fertig sind und bereitstehen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.lane.uploaded.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'File completati e pronti all''uso.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.lane.uploaded.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'upload.panel.queue.aria', 'Upload queue', 'en', 'aria label for upload panel file list')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -36955,6 +37048,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.folder.subtitle', 'Every file in one folder, with the usual questions.', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html subtitle inside the folder intake button')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Every file in one folder, with the usual questions.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.folder.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Alle Dateien eines Ordners, mit den üblichen Fragen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.folder.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Tutti i file di una cartella, con le domande abituali.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.folder.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'upload.folder.picker.failed.title', 'Folder upload unavailable', 'en', 'apps/web/src/app/features/upload/upload-panel-input-handlers.ts toast title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -37136,6 +37260,37 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'Importa un archivio aziendale: risolvi ciò che si può, non chiedere nulla, metti il resto in Da chiarire.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.archive.import.hint'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.archive.import.subtitle', 'A company archive. Nothing is asked; the rest waits in Clarifications.', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html subtitle inside the archive intake button')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'A company archive. Nothing is asked; the rest waits in Clarifications.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.archive.import.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ein Firmenarchiv. Es wird nichts gefragt; der Rest wartet in Klärung.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.archive.import.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Un archivio aziendale. Non viene chiesto nulla; il resto attende in Da chiarire.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.archive.import.subtitle'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

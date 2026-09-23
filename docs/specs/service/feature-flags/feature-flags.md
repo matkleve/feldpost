@@ -2,7 +2,7 @@
 
 ## What It Is
 
-A migration flag reader. It resolves one boolean, `shellGridLayout`, from a query parameter, then `localStorage`, then a default of `false`. It is deleted in the same change that removes the old layout.
+A migration flag reader. It resolves one boolean, `shellGridLayout`, from a query parameter, then `localStorage`, then a default of `true`. The authenticated layout no longer branches on it.
 
 ## What It Looks Like
 
@@ -23,7 +23,7 @@ The service re-reads on every `NavigationEnd` so `?ff=` changes apply without a 
 | --- | --- | --- | --- |
 | 1 | Opens `?ff=shellGridLayout` | Resolves `true` and stores `true` | query adapter |
 | 2 | Opens `?ff=-shellGridLayout` | Resolves `false` and stores `false` | query adapter |
-| 3 | Opens a URL with no `ff` | Uses the stored value, else `false` | localStorage adapter |
+| 3 | Opens a URL with no `ff` | Uses the stored value, else `true` | localStorage adapter |
 | 4 | Asks for an unknown name | Resolves `false` and does not throw | helper |
 
 ## Component Hierarchy
@@ -40,7 +40,7 @@ FeatureFlagsService
 
 | Source | Contract | Operation |
 | --- | --- | --- |
-| `feature-flags.types.ts` | union of one name, default `false` | Read |
+| `feature-flags.types.ts` | union of one name, default `true` | Read |
 | URL search | `ff` | Read, then write storage |
 | `localStorage` | key beside the nav collapse key pattern | Read and write |
 
@@ -50,7 +50,7 @@ No `environment.ts` constant. No Supabase row.
 
 | Name | Type | Default | Effect |
 | --- | --- | --- | --- |
-| `shellGridLayout` | `Signal<boolean>` | `false` | Layout branch |
+| `shellGridLayout` | `Signal<boolean>` | `true` | Layout branch |
 
 There is no terminal state. Reading twice returns the same signal value. An unknown name resolves to `false`.
 
@@ -74,7 +74,7 @@ Resolution order, highest wins: query parameter, then `localStorage`, then the d
 flowchart LR
   url[query ff] --> helper[resolveFlag]
   store[localStorage] --> helper
-  types[default false] --> helper
+  types[default true] --> helper
   helper --> signal[shellGridLayout signal]
 ```
 
@@ -97,4 +97,4 @@ sequenceDiagram
 - [ ] A query value is written to `localStorage`.
 - [ ] An unknown name resolves to `false` and does not throw.
 - [ ] The union has one member, `shellGridLayout`.
-- [ ] The default in `feature-flags.types.ts` is `false`.
+- [x] The default in `feature-flags.types.ts` is `true`.

@@ -18,8 +18,8 @@ Use this file for concrete values; use `token-layers.md` for layering and overri
 | `--line-height-tight`, `--line-height-solid`, `--line-height-reading`, `--line-height-comfortable` |
 | `--font-size-2xs`, `--font-size-xs`, `--font-size-sm`, `--font-size-md`, `--font-size-lg`, `--font-size-xl`, `--font-size-2xl` |
 | `--font-weight-medium`, `--font-weight-semibold`, `--font-weight-bold` |
-| `--motion-duration-fast`, `--motion-ease-out` |
-| `--spacing-1` … `--spacing-6`, `--spacing-8` (the **48px** / **12×4px** step uses **`calc(0.25rem * 12)`** at callsites — **Batch 41** removed **`--spacing-7`**) |
+| `--motion-duration-fast`, `--motion-duration-standard`, `--motion-duration-slow`, `--motion-duration-entrance`, `--motion-duration-hover-label`, `--motion-ease-out` |
+| `--spacing-1` … `--spacing-6`, `--spacing-8` (the name is not the step index — see §3.3; there is no `--spacing-7`) |
 | `--radius-full`, `--container-radius-control`, `--container-radius-panel` |
 | **`--interactive-focus-ring`** (light + dark via **`_typography-baseline.scss`** selectors) |
 
@@ -38,27 +38,33 @@ Use this file for concrete values; use `token-layers.md` for layering and overri
 
 **Layer B (bridge):** **none on the removed legacy bridge file** after **Batch 47** — **`--interactive-focus-ring`** lives on **`_typography-baseline.scss`** (see subsection above).
 
-**Layer C (roles — not on `_legacy-design-tokens.scss` after Batch 48–50; file now absent)**
-
-| Note |
-| --- |
-| **Phase 7 Batch 49:** **`--action-*`** rows removed from **`_legacy-design-tokens.scss`** — use **`var(--primary)`**, per-component **`:host`** vars (ex-bridge **`color-mix`** / sandstone literals), or **`--settings-action-bg-hover`** — **`docs/migration/phase-7-token-migration.md`** §Batch 49. |
-
-**Phase 7 Batch 48** removed **`--menu-surface-border`**, **`--menu-item-bg-hover`**, **`--menu-item-text`** from the bridge; menu surfaces use **`var(--border)`**, **`var(--primary)`**, **`var(--foreground)`** in **`color-mix`** / per-component **`:host`** custom properties (see **`docs/migration/phase-7-token-migration.md`** §Batch 48). For dropdown shell / menu composition contracts, see [`docs/specs/component/filters/dropdown-system.md`](../specs/component/filters/dropdown-system.md).
+**Layer C.** The bridge file is gone. Current menu and action tokens live on `styles.scss`: `--menu-border-subtle`, `--menu-item-hover`, `--menu-item-text`, `--action-hover`, `--action-text`, `--section-text`. See `token-layers.md` § Layer C. Do not inline those mixes.
 
 ## Frosted chrome (map / floating shells)
 
-**Single token, single opacity:** every element floating over the map uses **`var(--chrome-surface)`** as its background base — defined in `styles.scss` as `color-mix(in srgb, var(--card) 85%, transparent)` for all themes. To change the opacity of all floating chrome at once, change `--chrome-surface` in `styles.scss`.
+**Two opacities.** Shell boxes (`shell-box`) stay on **`var(--chrome-surface)`** — `color-mix(in srgb, var(--card) 85%, transparent)`. Controls and panels that sit on the map photo use **`var(--map-chrome-surface)`** — card at 94% — so the satellite does not wash them out. Both are defined in `styles.scss` for every theme.
 
 Canonical **frosted floating chrome** is defined once in **`apps/web/src/styles/_frosted-chrome.scss`**:
 
 | Mixin | Background base | Blur | Use |
 | --- | --- | --- | --- |
-| `frosted-chrome.panel` | `var(--chrome-surface)` (85%) | 16px | Floating panels: nav sidebar, search bar, dropdowns, upload tray |
-| `frosted-chrome.floating-panel-shell` | `var(--chrome-surface)` (85%) | 16px | Same as `panel` + tighter border + padding |
-| `frosted-chrome.outline-control` | `var(--chrome-surface)` (85%) | 12px | Map overlay icon buttons at rest: GPS, upload, filter triggers |
-| `frosted-chrome.outline-control-hover` | `var(--chrome-surface)` + gold tint | 12px | Same buttons on hover/focus |
-| `frosted-chrome.outline-control-selected` | `var(--chrome-surface)` + selected-ink tint | 12px | Same buttons in persistent active/on state |
+| `frosted-chrome.panel` | `var(--map-chrome-surface)` (94%) | 16px | Search bar and other panels floating on the map |
+| `frosted-chrome.floating-panel-shell` | `var(--map-chrome-surface)` (94%) | 16px | Same as `panel` + tighter border + padding |
+| `frosted-chrome.outline-control` | `var(--map-chrome-surface)` (94%) | 12px | Map overlay controls at rest: GPS, style switch, filter triggers, upload |
+| `frosted-chrome.outline-control-hover` | `var(--map-chrome-surface)` + gold tint | 12px | Same buttons on hover/focus |
+| `frosted-chrome.outline-control-selected` | `var(--map-chrome-surface)` + selected-ink tint | 12px | Same buttons in persistent active/on state |
+
+### Grid shell desk elevation (implemented)
+
+Stepped background **behind** transparent rails and frosted `shell-box` surfaces — spec [`shell-surface-elevation.md`](../specs/ui/shell/shell-surface-elevation.md).
+
+| Token | Role | Shipped (`styles.scss`) |
+| --- | --- | --- |
+| `--layout-desk-background` | L0 desk on `app-grid-shell` | Light: `color-mix(in srgb, var(--foreground) 6%, var(--background))`; Sandstone: `color-mix(in srgb, var(--sandstone-text-dark) 5%, var(--background))`; Dark: `var(--background)` |
+| `--layout-desk-background-subtle` | L0 gradient stop on `:host` only | Light: 4% mix; Sandstone: 3% mix; Dark: `var(--background)` |
+| `--layout-box-shadow` | L2 `shell-box` (rails, canvas, panels) | `0 1px 3px hsl(15 6% 10% / 0.28), 0 2px 5px -1px hsl(15 6% 10% / 0.22)` |
+
+L2 boxes keep **`var(--chrome-surface)`** and **`var(--layout-box-shadow)`** via `shell-box`. Do not add `--shell-*` names.
 | `frosted-chrome.outline-control-selected-hover` | same as hover | 12px | Active button on hover/focus |
 | `frosted-chrome.fill` | `var(--card)` at 85% | 16px | Solid-surface shells off the map route (settings, colleagues panels) |
 | `frosted-chrome.surface` | `fill` (85%) + border + shadow | 16px | Same — upload panel shell, non-map frosted cards |
@@ -69,7 +75,7 @@ Component SCSS must `@use '../../../styles/frosted-chrome'` (adjust depth) and `
 
 **`@layer` ordering with `hlmBtn`:** When applying `frosted-chrome.outline-control` to an `hlmBtn`-based button, include it **outside any `@layer` block** in the component SCSS. Tailwind's `bg-background` utility (applied by `hlmBtn` for `variant="outline"`) is unlayered or in a higher layer than `@layer components`, so it wins over a layered `background` declaration. An unlayered rule beats all named `@layer` styles regardless of source order. See `map-filter-toolbar.component.scss` for the reference implementation.
 
-**No exceptions:** every element floating over the map uses 55%. If a new element seems to need a different value, bring it up as a design decision — do not invent a one-off inline override.
+Shell boxes stay on `--chrome-surface` (card at 85%). Map floats use `--map-chrome-surface` (card at 94%).
 
 ## 3.1 Color Tokens
 
@@ -79,11 +85,12 @@ Design tokens are CSS custom properties. All components use tokens — never raw
 
 **Runtime:** tweakcn semantics in `apps/web/src/styles.scss` on `:root` (light), `@mixin tweakcn-dark-semantic-palette` (dark / system dark). **Tailwind v4** `@theme inline` maps `--color-primary` → `var(--primary)` (`bg-primary`, `ring-ring`, etc.).
 
-| Tweakcn token | Role | Light (2026-05-27) | Dark |
-|---------------|------|--------------------|------|
-| `--primary` | Brand CTA, links, focus, charts | `#c9a84c` → `oklch(0.748 0.128 84.6)` | `#e6c364` → `oklch(0.796 0.134 80)` |
+| Tweakcn token | Role | Light | Dark |
+|---------------|------|-------|------|
+| `--primary` | Filled CTA and solid primary surfaces. Blue. Sandstone points this at `--brand-gold`. | `oklch(0.50 0.10 245)` | `oklch(0.62 0.12 245)` |
+| `--brand-gold` | High-attention ink (hover, focus, selection that needs the user now) | `oklch(0.748 0.128 84.6)` | `oklch(0.796 0.134 80)` |
 | `--primary-foreground` | Text on filled primary | white | `var(--background)` |
-| `--ring` | Focus rings | matches `--primary` | matches `--primary` |
+| `--ring` | Tailwind `ring-ring` color. Product focus on `hlm*` primitives uses `--interactive-focus-ring`. | matches `--primary` | matches `--primary` |
 | `--destructive` | Errors | see `styles.scss` | see dark mixin |
 | `--secondary` / `--muted` / `--accent` | Surfaces, chips, quiet fills | see `styles.scss` | see dark mixin |
 
@@ -251,7 +258,7 @@ Emitted on light `:root` and in `@mixin tweakcn-dark-semantic-palette`. Sandston
 | `--color-warning`            | `#C2610A`   | `#F59E0B`  | Missing GPS, low-confidence EXIF                              |
 | `--color-danger`             | `#DC2626`   | `#EF4444`  | Upload error, deletion confirmation                           |
 | `--color-accent`             | `#7C3AED`   | `#A78BFA`  | Named group tabs, badge accents                               |
-| `--color-clay`               | alias       | alias      | Deprecated compatibility alias -> `var(--color-accent-brand)` |
+| `--color-clay`               | removed     | removed    | Do not use. Warm accent is `--brand-gold`.                    |
 
 **Map marker colors (semantic):**
 
@@ -299,15 +306,15 @@ The tile URL is set by `MapAdapter.setTileStyle('light' | 'dark')` and changes w
 
 ## 3.2 Typography
 
-All UI text uses **Source Sans 3** via **`--font-sans`**. Headings (`h1`–`h6`) use **Libre Caslon Text** via **`--font-serif`**. Short metadata strings (timestamps, coordinates, toast code pointers) use **`--font-mono`** (Courier Prime).
+Body and UI text use **Source Sans 3** via **`--font-sans`**. **`h1`** (page titles) and the nav wordmark use **Libre Caslon Text** via **`--font-serif`**. Section and panel headings (**`h2`–`h6`**, including shell panel titles and rail titles) use **Source Sans 3** at **`600`**. **`700`** on that face at these sizes reads muddy. Short metadata strings (timestamps, coordinates, toast code pointers) use **`--font-mono`** (Courier Prime).
 
 ```
-font-family: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;   /* --font-sans / body + UI */
-font-family: "Libre Caslon Text", ui-serif, Georgia, serif;         /* --font-serif / headings */
+font-family: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;   /* --font-sans / body, UI, h2–h6 */
+font-family: "Libre Caslon Text", ui-serif, Georgia, serif;         /* --font-serif / h1 + nav wordmark */
 font-family: "Courier Prime", ui-monospace, monospace;              /* --font-mono / metadata only */
 ```
 
-**Weights:** body **`400`** (`styles.scss` `@layer base` on `body`); headings **`700`** (`--font-weight-bold` on `h1`–`h6` in `_typography-baseline.scss` — Libre Caslon Text has only 400/700, so heading levels differentiate by **size** only). Labels and buttons use **`500`** (`--font-weight-medium`) where a second UI weight is needed.
+**Weights:** body **`400`**. Source Sans 3 is loaded at **400, 500, 600, and 700** so `--font-weight-medium` (500), `--font-weight-semibold` (600), and `--font-weight-bold` (700) are real cuts, not synthesized. **`h2`–`h6`** use **`600`**. **`h1`** uses Caslon **`700`** (that family has only 400/700). Labels and buttons use **`500`** where a second UI weight is needed.
 
 **Type scale (rem, base 16px, ratio 1.13):** the modular steps are emitted on **`_typography-baseline.scss`** `:root` (Phase 7 **Batch 42** — moved from the legacy bridge; same **`calc(* * 1.13)`** chain). **Batch 31** removed the **`--font-size-ratio`** indirection — steps multiply by the literal **1.13** factor.
 
@@ -331,17 +338,17 @@ Minimum rendered text size: **12px / 0.75rem** (caption only). Body text is neve
 
 Feldpost uses a **0.25rem (4px) base unit** with a modular scale on `:root` (**Phase 7 Batch 31** inlined the former **`--spacing-unit`** indirection — spacing rows use **`calc(0.25rem * N)`** directly on **`apps/web/src/styles/_typography-baseline.scss` `:root`** after **Batch 44**; the legacy bridge no longer emits **`--spacing-*`**).
 
-| Token         | Value               |
-| ------------- | ------------------- |
-| `--spacing-1` | `calc(0.25rem * 1)` |
-| `--spacing-2` | `calc(0.25rem * 2)` |
-| `--spacing-3` | `calc(0.25rem * 3)` |
-| `--spacing-4` | `calc(0.25rem * 4)` |
-| `--spacing-5` | `calc(0.25rem * 6)` |
-| `--spacing-6` | `calc(0.25rem * 8)` |
-| `--spacing-8` | `calc(0.25rem * 16)` |
+| Token         | Value               | Resolves to |
+| ------------- | ------------------- | ----------- |
+| `--spacing-1` | `calc(0.25rem * 1)` | 0.25rem |
+| `--spacing-2` | `calc(0.25rem * 2)` | 0.5rem |
+| `--spacing-3` | `calc(0.25rem * 3)` | 0.75rem |
+| `--spacing-4` | `calc(0.25rem * 4)` | 1rem |
+| `--spacing-5` | `calc(0.25rem * 6)` | 1.5rem |
+| `--spacing-6` | `calc(0.25rem * 8)` | 2rem |
+| `--spacing-8` | `calc(0.25rem * 16)` | 4rem |
 
-**Batch 41:** the **12×4px** step (**48px**) is **`calc(0.25rem * 12)`** at callsites — **`--spacing-7`** is not a bridge `var()` anymore.
+The name is not the step index. There is no `--spacing-7`. Do not rename these variables.
 
 Key layout dimensions:
 
@@ -414,16 +421,16 @@ The UI uses a consistent "friendly but professional" radius system:
 
 ### Physical shadow scale
 
-Four physical shadows define elevation only. Components should consume **`--interactive-focus-ring`** from **`_typography-baseline.scss`** and the **`--shadow-sm|md|lg|xl`** scale from **tweakcn `styles.scss`** (**Batch 37** — former **`--elevation-*`** aliases removed; **Batch 45** — former **`--shadow-focus`** bridge alias removed — compose stacks at callsites per § *Focus stacks* below; **Batch 47** — focus ring definitions moved off **`_legacy-design-tokens.scss`**) instead of hardcoding physical levels directly.
+Four physical shadows define elevation only. **2026-09-23:** scale tightened globally — less blur, higher opacity, shorter negative spread (see shipped values in `styles.scss`). Components should consume **`--interactive-focus-ring`** from **`_typography-baseline.scss`** and the **`--shadow-sm|md|lg|xl`** scale from **tweakcn `styles.scss`** (**Batch 37** — former **`--elevation-*`** aliases removed; **Batch 45** — former **`--shadow-focus`** bridge alias removed — compose stacks at callsites per § *Focus stacks* below; **Batch 47** — focus ring definitions moved off **`_legacy-design-tokens.scss`**) instead of hardcoding physical levels directly.
 
 **Batch 39 — which file owns which name:** **`--shadow-sm`…`--shadow-2xl`** are **tweakcn** names on **`:root`** / dark palette in **`apps/web/src/styles.scss`** (**Batch 39** removed duplicate **`md|lg|xl`** rows from **`_legacy-design-tokens.scss`**; **Batch 45** removed warm **`--shadow-sm`** + **`--shadow-focus`** from the bridge file when it still emitted CSS). **`var(--shadow-md|lg|xl)`** in components resolves from **tweakcn** in the main stylesheet chain (**Batch 50:** legacy bridge **`load-css`** removed; file **deleted**). **`@include meta.load-css('styles/typography-baseline')`** is **last** in **`styles.scss`** for heading order and does **not** supply **`--shadow-*`**. The table below is the **documented physical reference** for product elevation steps; tweakcn theme values should stay aligned with it at review time.
 
 | Token                 | Light mode value                                                      | Purpose                              |
 | --------------------- | --------------------------------------------------------------------- | ------------------------------------ |
-| `--shadow-sm`         | `0 1px 3px rgba(15,14,12,.12), 0 1px 2px rgba(15,14,12,.08)` (reference — shipped tweakcn uses its own stack) | Lightest lift                        |
-| `--shadow-md`         | `0 4px 12px rgba(15,14,12,.15), 0 2px 4px rgba(15,14,12,.10)`         | Standard overlay                     |
-| `--shadow-lg`         | `0 8px 24px rgba(15,14,12,.18), 0 4px 8px rgba(15,14,12,.12)`         | Dropdown/popover                     |
-| `--shadow-xl`         | `0 16px 48px rgba(15,14,12,.22), 0 6px 16px rgba(15,14,12,.14)`       | Modal-level                          |
+| `--shadow-sm`         | `0 1px 2px hsl(15 6% 10% / 0.14), 0 1px 1px -0.5px hsl(15 6% 10% / 0.10)` | Lightest lift — tight, punchy        |
+| `--shadow-md`         | `0 2px 4px -1px hsl(15 6% 10% / 0.16), 0 1px 2px hsl(15 6% 10% / 0.12)` | Standard overlay                     |
+| `--shadow-lg`         | `0 4px 8px -2px hsl(15 6% 10% / 0.18), 0 2px 4px -1px hsl(15 6% 10% / 0.14)` | Dropdown/popover                     |
+| `--shadow-xl`         | `0 6px 12px -3px hsl(15 6% 10% / 0.20), 0 3px 6px -2px hsl(15 6% 10% / 0.16)` | Modal-level                          |
 
 **Phase 7 Batch 31:** the separate **`--shadow-focus-ring`** primitive was **removed** — **`--interactive-focus-ring`** is emitted on **`_typography-baseline.scss` `:root`** (light) and overridden via **`@mixin typography-baseline-dark-focus-ring`** for dark (**Batch 47** moved these rows off **`_legacy-design-tokens.scss`**).
 
@@ -473,14 +480,18 @@ Use the **numeric product ladder** below (literals in SCSS or Tailwind **`z-*`**
 
 ## 3.6 Motion and Micro-Interactions
 
-Motion tokens are the source of truth for interaction timing and easing. **`--motion-duration-slow`** was **removed from the bridge (Batch 40)** — use literal **`300ms`** where that duration is still required.
+Motion tokens ship on `_typography-baseline.scss` `:root`. Use these. Do not invent a nearby millisecond value.
 
-| Group          | Token                    | Value                                                     |
-| -------------- | ------------------------ | --------------------------------------------------------- |
-| Duration       | `--motion-duration-fast` | `100ms`                                                   |
-| Easing         | `--motion-ease-out`      | `cubic-bezier(0, 0, 0.2, 1)`                              |
+| Token | Value |
+| ----- | ----- |
+| `--motion-duration-fast` | 100ms |
+| `--motion-duration-standard` | 150ms |
+| `--motion-duration-slow` | 250ms |
+| `--motion-duration-entrance` | 300ms |
+| `--motion-duration-hover-label` | 1000ms |
+| `--motion-ease-out` | `cubic-bezier(0, 0, 0.2, 1)` |
 
-**Phase 7 Batch 36:** **`--motion-duration-base`** (`200ms`) and **`--motion-ease-standard`** (`cubic-bezier(0.4, 0, 0.2, 1)`) were **removed** from **`_legacy-design-tokens.scss`** — inline those literals at choreography callsites (see **`docs/migration/phase-7-token-migration.md`** §Batch 36) or use **`var(--motion-duration-fast)`** / **`var(--motion-ease-out)`** where Batch 31 already applies.
+There is no `--motion-standard`. Easing is `--motion-ease-out`. A duration with no matching token stays a literal at that callsite; do not round it onto a neighbour.
 
 **Phase 7 Batch 31:** **`--motion-ease-in`**, **`--transition-interactive`**, and **`--transition-emphasis`** were **removed from the bridge** — use **`var(--motion-duration-fast) var(--motion-ease-out)`** (interactive fades), literal **`200ms`** for skeleton / emphasis duration (same value as the former **`--motion-duration-base`**), and **`cubic-bezier(0.4, 0, 1, 1)`** inline for fade-out where needed.
 

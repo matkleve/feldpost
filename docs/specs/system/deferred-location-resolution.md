@@ -48,7 +48,10 @@ evidence; it writes a *location* alongside it, and the evidence stays as the aud
 **Read model, done 2026-09-15.** `relative_path` and `exif_raw` are selected on the single-row detail
 read; `relative_path` alone in the list reads. `exif_raw` is deliberately **not** in list selects — a
 jsonb blob per row across a large workspace is the cost Phase 3 removed. Shared prerequisite with
-[files-page](../page/files-page.md).
+[files-page](../page/files-page.md). The detail resolution badge reads original pixel size from this
+detail-only payload (`ExifImageWidth` / `ExifImageHeight`). Grid tiles must not show that badge,
+because list rows do not carry `exif_raw`. Contract:
+[media-detail-media-viewer.md § Resolution badge](../ui/media-detail/media-detail-media-viewer.md#resolution-badge).
 
 **What that surfaced.** *Original folder* was derived by splitting `original_filename`, a **leaf
 name** — for a directory upload it is `IMG_001.jpg` with no folder at all, so the row showed a folder

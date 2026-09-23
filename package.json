@@ -3,7 +3,7 @@
     "node": "^20.19.0 || ^22.12.0 || >=24.0.0"
   },
   "scripts": {
-    "dev": "cd apps/web && npx ng serve",
+    "dev": "node apps/web/scripts/sync-dev-environment.mjs && cd apps/web && npx ng serve",
     "verify": "node scripts/verify.mjs",
     "lint": "cd apps/web && npm run lint",
     "test": "cd apps/web && npx ng test --watch=false",

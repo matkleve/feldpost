@@ -1,7 +1,13 @@
 // Dashboard layout: pinned header + scrollable widget body.
 // Fill-column geometry + overflow clip are owned by the component `:host`
 // (see host class), so no extra wrapper element is needed.
+// Container query: stack when the canvas is narrow (rails/panel), not when the window is.
 // @see docs/specs/page/projects-dashboard.md
+:host {
+  container-type: inline-size;
+  container-name: project-dashboard;
+}
+
 .project-dashboard__header {
   display: flex;
   flex-direction: column;
@@ -88,7 +94,7 @@
   );
 }
 
-@media (max-width: 63.9375rem) {
+@container project-dashboard (max-width: 63.9375rem) {
   .project-dashboard__layout {
     grid-template-columns: 1fr;
   }

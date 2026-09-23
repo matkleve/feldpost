@@ -2,7 +2,9 @@
 
 ## What It Is
 
-The open/closed stack for the panel column. Ids are `upload`, `download`, `shared-media`, `tips`, and `help`. It does not route the canvas. Undo, activity history, and redo are not panel ids.
+The open/closed list for the panel column. Ids are `upload`, `download`, `shared-media`, `tips`, and `help`. It does not route the canvas. Undo, activity history, and redo are not panel ids.
+
+**Stack membership (this spec owns it).** `open(id)` never closes another id. Top-stack ids (`upload`, `download`, `shared-media`) and bottom-stack ids (`tips`, `help`) are groups for placement only — [shell-panel-column.md](../../ui/shell/shell-panel-column.md). A group is a list, not one slot. Upload stays open when Download opens, and Tips stays open when Help opens. The rail toggles only the id that was activated.
 
 ## What It Looks Like
 
@@ -22,6 +24,7 @@ No UI. The panel column and the right rail read the same signal.
 | 3 | `close(id)` while open | Panel leaves the stack | stack signal |
 | 4 | `close(id)` while closed | No change | idempotent |
 | 5 | `setOpen(id, value)` at the current value | No change | idempotent |
+| 6 | `open(id)` while a different id is open | Both stay open. The new id gets the next `order` | no sibling close |
 
 ## Component Hierarchy
 
@@ -83,6 +86,8 @@ stateDiagram-v2
 ## Acceptance Criteria
 
 - [ ] Upload and Help can be open at the same time.
+- [ ] Upload and Download can be open at the same time. Opening one does not close the other.
+- [ ] Tips and Help can be open at the same time. Opening one does not close the other.
 - [ ] A second `open('upload')` does not change `order`.
 - [ ] `close` on a closed id does not throw and does not emit a new list identity change beyond the no-op.
 - [ ] The service exposes no canvas route method.

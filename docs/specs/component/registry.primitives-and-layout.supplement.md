@@ -11,7 +11,7 @@
 ### `<app-page-grid>` — Page Grid
 
 - **File**: `apps/web/src/app/shared/page-grid/page-grid.component.ts`
-- **Purpose**: Centered page shell: fixed 52rem center column with `[pageGridLeft]` / `[pageGridRight]` rails in the outer gutters.
+- **Purpose**: Page shell inside the canvas. `/media` is one full-width track. Pages with a left rail keep that rail and give the center the remaining width. Outside the canvas the center stays 52rem.
 - **Spec**: [`docs/specs/component/page-rail/page-rail.md`](page-rail/page-rail.md)
 - **Variant axes**:
   | Input | Type | Values | Visual effect |

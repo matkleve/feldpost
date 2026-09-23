@@ -150,7 +150,7 @@ button.map-upload-btn {
       width: var(--upload-progress);
       border-radius: inherit;
       background: var(--primary);
-      transition: width 200ms var(--motion-standard, ease);
+      transition: width 200ms var(--motion-ease-out);
     }
   }
 

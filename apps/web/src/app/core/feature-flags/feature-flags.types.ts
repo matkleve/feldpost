@@ -5,7 +5,7 @@ export type FeatureFlagName = (typeof FEATURE_FLAG_NAMES)[number];
 
 /** Default until the last phase deletes the flag. */
 export const FEATURE_FLAG_DEFAULTS: Record<FeatureFlagName, boolean> = {
-  shellGridLayout: false,
+  shellGridLayout: true,
 };
 
 export interface FlagSources {

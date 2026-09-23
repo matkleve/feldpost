@@ -13,10 +13,11 @@ The right-rail **Selected items** surface in the panel column. Shows the current
 
 - **Chrome:** `app-shell-panel-surface` with `panelId="download"` — frosted `shell-box`, title **Selected items**, close control.
 - **Body:** full-height column inside the panel surface body:
-  - **Detail mode:** `MediaDetailViewComponent` (same contract as workspace pane today).
+  - **Detail mode:** `MediaDetailViewComponent` — full body height; **no** shell footer; **no** body divider. Shell surface title row hidden (detail header owns chrome). Requires panel width ≥ **480px** or panel-embedded layout override — see [shell-panel-resize.md](./shell-panel-resize.md) § Detail mode.
   - **Grid mode:** `WorkspaceToolbarComponent` + `ItemGridComponent` with projected domain items.
-  - **Footer:** `WorkspacePaneFooterComponent` when `selectedMediaIds.size > 0` (selection bar / export actions).
-- **Width:** panel column `auto` track — no `--shell-panel-column-max`; width follows panel surface intrinsic sizing (same order of magnitude as today's workspace pane default, not the drag-divider resize model).
+  - **Footer:** `WorkspacePaneFooterComponent` when `selectedMediaIds.size > 0` (export bar — intrinsic height, no resize divider).
+  - **Stack split:** when **another** panel stack is open (e.g. Upload + Tips), vertical space is split by the **stack divider** in `app-shell-panel-column` — see [shell-panel-resize.md](./shell-panel-resize.md) § Stack divider. **Not** between grid and footer inside this panel.
+- **Width:** panel column uses an explicit px width while open (stored default **400px**, clamped to **≥480px** on paint for detail layout), drag-resizable via `app-shell-column-divider` between canvas and panel column — see [shell-panel-resize.md](./shell-panel-resize.md).
 - **No tabs:** Upload and Projects are **not** in this panel. Upload is `upload` panel only; Projects is canvas `/projects`.
 
 ## Where It Lives
@@ -57,12 +58,12 @@ The right-rail **Selected items** surface in the panel column. Shows the current
 ```text
 app-shell-panel-surface [panelId=download]
 └── app-selected-items-panel
-    ├── app-pane-header (title + close delegates to surface)
     ├── @if detailMediaId
-    │   └── app-media-detail-view
+    │   └── app-media-detail-view [shellPanelEmbedded=true]
     └── @else
-        ├── app-workspace-toolbar
-        ├── app-item-grid (+ projected items)
+        ├── .selected-items-panel__body
+        │   ├── app-workspace-toolbar
+        │   └── app-workspace-selected-items-grid
         └── @if selection.size > 0
             └── app-workspace-pane-footer
 ```
@@ -100,10 +101,10 @@ Panel open/closed: `ShellLayoutService` FSM (`closed` ↔ `open`). Detail and se
 
 | File | Purpose |
 | --- | --- |
-| `layout/shell/selected-items-panel.component.ts` | Panel body orchestration |
-| `layout/shell/selected-items-panel.component.html` | Grid/detail/footer composition |
-| `layout/shell/selected-items-panel.component.scss` | Panel body geometry only |
-| `core/unified-selection/unified-selection.service.ts` | Single selection store (new) |
+| `layout/shell/selected-items-panel/selected-items-panel.component.ts` | Panel body orchestration + body resize observer |
+| `layout/shell/selected-items-panel/selected-items-panel.component.html` | Grid/detail/footer/divider composition |
+| `layout/shell/selected-items-panel/selected-items-panel.component.scss` | Panel body geometry only |
+| `core/unified-selection/unified-selection.service.ts` | Single selection store |
 | `core/unified-selection/unified-selection.types.ts` | Scope + mirror contract |
 | `authenticated-app-layout.component.html` | Project body into `download` surface |
 
@@ -142,10 +143,10 @@ sequenceDiagram
 | Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer | Test Oracle |
 | --- | --- | --- | --- | --- | --- | --- |
 | Panel box | `app-shell-panel-surface` | surface | close + body | `:host` | content `0` | `shell-box` |
-| Body column | `app-selected-items-panel` | selected-items-panel | scroll region | `.selected-items-panel` | content `0` | fills surface body |
+| Body column | `app-selected-items-panel` | selected-items-panel | scroll region | `.selected-items-panel`, `.selected-items-panel__body` | content `0` | fills surface body |
 | Toolbar | `app-workspace-toolbar` | toolbar host | controls | toolbar selectors | content `0` | unchanged from workspace |
-| Grid | `app-item-grid` | item-grid host | tiles | item-grid contract | content `0` | unchanged |
-| Footer | `app-workspace-pane-footer` | footer host | footer buttons | footer selectors | content `100` | pinned bottom of body |
+| Grid | `app-workspace-selected-items-grid` | grid host | tiles | item-grid contract | content `0` | unchanged |
+| Footer | `app-workspace-pane-footer` | footer host | footer buttons | footer selectors | content `100` | intrinsic height at panel bottom |
 
 ## Migration from Workspace Pane
 
@@ -157,7 +158,8 @@ sequenceDiagram
 | Upload tab | `upload` panel — **deleted** from workspace |
 | Projects tab | Canvas `/projects` — **not** in panel |
 | Independent workspace selection | **Removed** — [unified-selection.md](./unified-selection.md) |
-| Resizable width via divider | Panel column width (no divider) |
+| Resizable width via divider | `app-shell-column-divider` + persisted `panelColumnWidthPx` ([shell-panel-resize.md](./shell-panel-resize.md)) |
+| Single scroll column | Stack divider in `app-shell-panel-column` when top + bottom stacks open ([shell-panel-resize.md](./shell-panel-resize.md)) |
 
 **Deletion gate (PR 7):** remove `app-workspace-pane`, `app-drag-divider`, and `photoPanelOpen` path only when grid flag is default-on and this panel passes LIVE CHECK.
 
@@ -167,6 +169,7 @@ sequenceDiagram
 - [ ] No Upload or Projects tab in this panel.
 - [ ] Selection in panel grid mirrors map/`/media` selection (no second independent set).
 - [ ] Footer bulk actions match workspace footer behavior (export, share, delete).
+- [ ] Column divider resizes canvas ↔ panel width within clamps; preference persists ([shell-panel-resize.md](./shell-panel-resize.md)).
 - [ ] Detail view opens inside panel body, same as workspace pane today.
 - [ ] With `shellGridLayout` on, marker/cluster open flows mount this panel instead of `app-workspace-pane`.
 - [ ] With `shellGridLayout` off, legacy workspace pane unchanged.

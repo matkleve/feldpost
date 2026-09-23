@@ -19,4 +19,18 @@ describe('applySetOpen', () => {
     const both = applySetOpen(applySetOpen([], 'upload', true), 'help', true);
     expect(applySetOpen(both, 'upload', false).map((panel) => panel.id)).toEqual(['help']);
   });
+
+  it('keeps upload open when download opens', () => {
+    const download = applySetOpen([], 'download', true);
+    const both = applySetOpen(download, 'upload', true);
+    expect(both.map((panel) => panel.id)).toEqual(['download', 'upload']);
+    expect(both.every((panel) => panel.open)).toBe(true);
+  });
+
+  it('keeps tips open when help opens', () => {
+    const tips = applySetOpen([], 'tips', true);
+    const both = applySetOpen(tips, 'help', true);
+    expect(both.map((panel) => panel.id)).toEqual(['tips', 'help']);
+    expect(both.every((panel) => panel.open)).toBe(true);
+  });
 });

@@ -10,7 +10,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
  * @see docs/MIGRATION_PLAN.md
  */
 export const switchVariants = cva(
-  'peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input',
+  'peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:shadow-[var(--interactive-focus-ring)] disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input',
 );
 
 /**
@@ -27,7 +27,7 @@ export const switchThumbVariants = cva(
  * @see docs/MIGRATION_PLAN.md
  */
 export const switchLegacyShimTrackVariants = cva(
-  'peer inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50',
+  'peer inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:shadow-[var(--interactive-focus-ring)] disabled:cursor-not-allowed disabled:opacity-50',
 );
 
 /**
@@ -38,9 +38,9 @@ export const toggleRowVariants = cva('', {
   variants: {
     tone: {
       default:
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+        'focus-visible:outline-none focus-visible:shadow-[var(--interactive-focus-ring)]',
       error:
-        'border-destructive/50 bg-destructive/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+        'border-destructive/50 bg-destructive/[0.06] focus-visible:outline-none focus-visible:shadow-[var(--interactive-focus-ring)]',
       loading: 'pointer-events-none opacity-[0.72]',
     },
   },

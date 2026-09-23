@@ -9,7 +9,6 @@
  */
 
 import {
-  afterNextRender,
   Component,
   computed,
   DestroyRef,
@@ -17,6 +16,7 @@ import {
   HostListener,
   inject,
   input,
+  NgZone,
   output,
   signal,
   viewChild,
@@ -64,7 +64,6 @@ import {
   type UploadFileTypeChip,
 } from './upload-panel.constants';
 import { UploadResolverTrayComponent } from '../upload-resolver-tray/upload-resolver-tray.component';
-import { FeatureFlagsService } from '../../../core/feature-flags/feature-flags.service';
 import {
   fileTypeGroupPickAriaLabel,
   fileTypeMemberPickAriaLabel,
@@ -128,9 +127,6 @@ export type {
   ],
   templateUrl: './upload-panel.component.html',
   styleUrl: './upload-panel.component.scss',
-  host: {
-    '[class.upload-panel-host--grid]': 'shellGridLayout()',
-  },
 })
 /**
  * Upload panel — dual-mode floating/embedded surface.
@@ -168,15 +164,11 @@ export class UploadPanelComponent implements OnDestroy {
   private readonly rowInteractions = inject(UploadPanelRowInteractionsService);
   private readonly deferredCounts = inject(DeferredLocationCountService);
   private readonly deferredBulk = inject(DeferredLocationBulkFlowService);
-  private readonly featureFlags = inject(FeatureFlagsService);
+  private readonly zone = inject(NgZone);
   private readonly panelRoot = viewChild<ElementRef<HTMLElement>>('panelRoot');
 
-  readonly shellGridLayout = this.featureFlags.shellGridLayout;
-  /** True when the grid-shell panel is wide enough for intake | vertical lanes. */
+  /** True when this embedded panel is wide enough for intake | vertical lanes. */
   readonly wideLayout = signal(false);
-  readonly showClarificationTray = computed(
-    () => this.shellGridLayout() && this.signals.effectiveLane() === 'clarifications',
-  );
   readonly actionHandlers = this.jobActions;
   readonly inputHandlers = this.inputs;
   readonly laneHandlers = this.lanes;
@@ -188,6 +180,9 @@ export class UploadPanelComponent implements OnDestroy {
   // Component I/O
   readonly visible = input<boolean>(false);
   readonly embeddedInPane = input<boolean>(false);
+  readonly showClarificationTray = computed(
+    () => this.embeddedInPane() && this.signals.effectiveLane() === 'clarifications',
+  );
   readonly imageUploaded = output<MapMarkerImageUploadedEvent>();
   readonly placementRequested = output<string>();
   readonly detailRequested = output<string>();
@@ -333,20 +328,24 @@ export class UploadPanelComponent implements OnDestroy {
   }
 
   private bindWideLayoutObserver(): void {
-    afterNextRender(() => {
+    effect((onCleanup) => {
       const root = this.panelRoot()?.nativeElement;
       if (!root || typeof ResizeObserver === 'undefined') {
         return;
       }
-      const observer = new ResizeObserver((entries) => {
-        const width = entries[0]?.contentRect.width ?? 0;
-        const next = this.shellGridLayout() && width >= UPLOAD_PANEL_WIDE_MIN_PX;
+      const apply = (width: number) => {
+        const next = this.embeddedInPane() && width >= UPLOAD_PANEL_WIDE_MIN_PX;
         if (next !== this.wideLayout()) {
           this.wideLayout.set(next);
         }
+      };
+      apply(root.getBoundingClientRect().width);
+      const observer = new ResizeObserver((entries) => {
+        const width = entries[0]?.contentRect.width ?? 0;
+        this.zone.run(() => apply(width));
       });
       observer.observe(root);
-      this.destroyRef.onDestroy(() => observer.disconnect());
+      onCleanup(() => observer.disconnect());
     });
   }
 

@@ -22,8 +22,8 @@ export const UPLOAD_LANES: ReadonlyArray<UploadLane> = ['uploading', 'clarificat
 
 /**
  * Panel width at which the grid-shell upload surface becomes two columns.
- * Left: intake. Right: lane switch stacked top-to-bottom, beside the selected lane.
- * Matches 42rem in upload-panel.component.scss (`:host.upload-panel-host--grid`).
+ * Left: intake. Right: the three lanes in one horizontal row, and the selected lane under that row.
+ * The panel fills the shell column. Two columns start once that column is at least 42rem.
  */
 export const UPLOAD_PANEL_WIDE_MIN_PX = 672;
 

@@ -54,6 +54,12 @@ app-grid-shell {
   background: var(--background);
 }
 
+// Settings fills the canvas; the route underneath stays mounted for the URL suffix.
+// @see docs/specs/ui/shell/shell-main-canvas.md
+.authenticated-app-layout__main--covered {
+  visibility: hidden;
+}
+
 .authenticated-app-layout__main {
   display: flex;
   flex-direction: column;

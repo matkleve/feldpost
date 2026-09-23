@@ -295,7 +295,7 @@ Canonical names for every visible piece of the interface. Use these in code, doc
   Vehicles, Boats, Material, Storage locations, and Buildings. Each record has one place and media on `media_items`. Spec: `docs/specs/page/widget-suite.md`. Not built.
 
 - **Panel column**  
-  The third grid track (`app-shell-panel-column`). It stacks open panel surfaces and contributes no width when nothing is open.
+  The third grid track (`app-shell-panel-column`). It stacks every open panel surface. Top and bottom are lists, not single slots. Opening one panel does not close another. The track contributes no width when nothing is open.
 
 - **Panel surface**  
   One frosted panel (`app-shell-panel-surface`) in the panel column. Panel ids: `upload`, `download` (selected items), `shared-media`, `tips`, `help`.

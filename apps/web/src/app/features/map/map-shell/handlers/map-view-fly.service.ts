@@ -4,6 +4,7 @@ import { MapZoomHighlightOrchestratorService, DETAIL_LOCATION_FOCUS_ZOOM } from 
 import { MapZoomOrchestratorService } from '../../../../core/map-zoom/map-zoom-orchestrator.service';
 import { MapShellSearchService } from '../leaflet/map-shell-search.service';
 import { MapShellState } from '../component/map-shell.state';
+import { SelectedItemsPanelCoordinatorService } from '../../../../core/selected-items-panel/selected-items-panel-coordinator.service';
 import { MapShellInstanceService } from '../component/map-shell-instance.service';
 import type { MapInstance } from '../leaflet/map-leaflet.service';
 
@@ -16,6 +17,7 @@ export class MapViewFlyService {
   private readonly mapZoomOrchestrator = inject(MapZoomOrchestratorService);
   private readonly searchService = inject(MapShellSearchService);
   private readonly state = inject(MapShellState);
+  private readonly selectedItemsPanelCoordinator = inject(SelectedItemsPanelCoordinatorService);
   private readonly instance = inject(MapShellInstanceService);
 
   setViewWithPaneOffset(
@@ -26,7 +28,7 @@ export class MapViewFlyService {
   ): void {
     const map = this.instance.map;
     if (!map) return;
-    const paneOffset = this.state.photoPanelOpen() ? (this.state.workspacePaneWidth() / 2) : 0;
+    const paneOffset = this.selectedItemsPanelCoordinator.getMapPaneOffsetPx();
     if (paneOffset === 0) {
       map.setView([lat, lng], zoom, options);
       return;

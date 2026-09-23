@@ -78,6 +78,7 @@ The component never calls Supabase Storage directly. All signing is delegated to
 - **Tier 2:** `mediaDownload.getSignedUrl(thumbnail_path ?? storage_path, 'thumb')` → service applies `{ width: 256, height: 256, resize: 'cover' }` transform
 - **Tier 3:** `mediaDownload.getSignedUrl(storage_path, 'full')` → service returns original resolution (no transform)
 - **Preload:** `mediaDownload.preload(fullUrl)` → hidden `Image()` element confirms download before crossfade
+- **Resolution badge:** the lower-right label is the original file size from `exif_raw`, not the pixel size of Tier 2 or Tier 3. See [media-detail-media-viewer.md § Resolution badge](media-detail-media-viewer.md#resolution-badge).
 - **Caching:** Service handles cache lookup, staleness (50 min threshold), and re-signing — component does not manage URL expiry
 
 ### Replace Media — Loading Restart

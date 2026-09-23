@@ -1,15 +1,50 @@
-@if (isOpen('upload')) {
-  <ng-content select="[data-panel-id=upload]" />
+@if (hasTopStack()) {
+  <div
+    #topStack
+    class="shell-panel-column__top"
+    [attr.data-multi]="topStackMulti() ? '' : null"
+    [class.shell-panel-column__top--split]="needsStackSplit()"
+    [style.max-height.px]="needsStackSplit() ? topStackExtentPx() : null"
+  >
+    @if (isOpen('upload')) {
+      <ng-content select="[data-panel-id=upload]" />
+    }
+    @if (isOpen('download')) {
+      <ng-content select="[data-panel-id=download]" />
+    }
+    @if (isOpen('shared-media')) {
+      <ng-content select="[data-panel-id=shared-media]" />
+    }
+  </div>
 }
-@if (isOpen('download')) {
-  <ng-content select="[data-panel-id=download]" />
+
+@if (needsStackSplit()) {
+  <app-shell-panel-body-divider
+    [currentExtent]="topStackExtentPx()"
+    [minExtent]="stackResize.minStackPx()"
+    [maxExtent]="stackDividerMaxExtent()"
+    [defaultExtent]="stackDividerDefaultExtent()"
+    (extentChange)="onTopStackExtentChange($event)"
+  />
 }
-@if (isOpen('shared-media')) {
-  <ng-content select="[data-panel-id=shared-media]" />
+
+@if (showSpacer()) {
+  <div class="shell-panel-column__spacer" aria-hidden="true"></div>
 }
-@if (isOpen('tips')) {
-  <ng-content select="[data-panel-id=tips]" />
-}
-@if (isOpen('help')) {
-  <ng-content select="[data-panel-id=help]" />
+
+@if (hasBottomStack()) {
+  <div
+    #bottomStack
+    class="shell-panel-column__bottom"
+    [attr.data-multi]="bottomStackMulti() ? '' : null"
+    [class.shell-panel-column__bottom--split]="needsStackSplit()"
+    [style.max-height.px]="needsStackSplit() ? bottomStackMaxPx() : null"
+  >
+    @if (isOpen('tips')) {
+      <ng-content select="[data-panel-id=tips]" />
+    }
+    @if (isOpen('help')) {
+      <ng-content select="[data-panel-id=help]" />
+    }
+  </div>
 }

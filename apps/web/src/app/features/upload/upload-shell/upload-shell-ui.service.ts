@@ -1,5 +1,4 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
-import { FeatureFlagsService } from '../../../core/feature-flags/feature-flags.service';
+import { Injectable, computed, inject } from '@angular/core';
 import { ShellLayoutService } from '../../../core/shell-layout/shell-layout.service';
 import { UploadResolverTrayOrchestratorService } from '../../../core/upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.service';
 import { UploadManagerService } from '../../../core/upload/upload-manager.service';
@@ -12,22 +11,12 @@ import type { UploadPanelComponent } from '../upload-panel/upload-panel.componen
 @Injectable({ providedIn: 'root' })
 export class UploadShellUiService {
   private readonly uploadManager = inject(UploadManagerService);
-  private readonly featureFlags = inject(FeatureFlagsService);
   private readonly shellLayout = inject(ShellLayoutService);
   private readonly trayOrchestrator = inject(UploadResolverTrayOrchestratorService);
 
   private placementPanel: UploadPanelComponent | null = null;
 
-  // Was `readonly uploadPanelPinned = signal(false)` — a `readonly` class field
-  // only stops *reassignment*, not `.set()`/`.update()`; any external caller
-  // with a reference to this service could mutate panel-open state directly,
-  // bypassing toggleUploadPanel()/closeUploadPanel()/openUploadPanel() below.
-  // The other 171 @Injectable services in this app all follow the
-  // private-signal + public-.asReadonly() pattern already visible one line
-  // down for `uploadPanelOpen` itself — this was the one field that didn't.
-  // @see docs/audits/2026-09-10-spartan-and-state.md § State
-  private readonly _uploadPanelPinned = signal(false);
-  readonly uploadPanelOpen = this._uploadPanelPinned.asReadonly();
+  readonly uploadPanelOpen = computed(() => this.shellLayout.isOpen('upload'));
 
   readonly uploadBatch = this.uploadManager.activeBatch;
   readonly uploadBatchProgress = computed(() => this.uploadBatch()?.overallProgress ?? 0);
@@ -62,27 +51,15 @@ export class UploadShellUiService {
   );
 
   toggleUploadPanel(): void {
-    if (this.featureFlags.shellGridLayout()) {
-      this.shellLayout.setOpen('upload', !this.shellLayout.isOpen('upload'));
-      return;
-    }
-    this._uploadPanelPinned.update((open) => !open);
+    this.shellLayout.setOpen('upload', !this.shellLayout.isOpen('upload'));
   }
 
   closeUploadPanel(): void {
-    if (this.featureFlags.shellGridLayout()) {
-      this.shellLayout.close('upload');
-      return;
-    }
-    this._uploadPanelPinned.set(false);
+    this.shellLayout.close('upload');
   }
 
   openUploadPanel(): void {
-    if (this.featureFlags.shellGridLayout()) {
-      this.shellLayout.open('upload');
-      return;
-    }
-    this._uploadPanelPinned.set(true);
+    this.shellLayout.open('upload');
   }
 
   bindUploadPanel(panel: UploadPanelComponent | undefined): void {

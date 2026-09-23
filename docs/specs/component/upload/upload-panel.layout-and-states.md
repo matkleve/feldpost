@@ -8,7 +8,7 @@ Structural ASCII reference tree and **visual states** diagram for the Upload Pan
 
 ## What It Looks Like
 
-Narrow: intake, then a horizontal Waiting / Clarification / Uploaded switch, then the selected lane. Wide (grid shell, panel ≥ 42rem): intake on the left; the same three options stacked top to bottom on the right, beside that one lane. One lane is visible in both modes.
+Narrow: intake, then a horizontal Waiting / Clarification / Uploaded switch, then the selected lane. Wide (grid shell, panel ≥ 42rem): intake on the left; on the right the same three options in one horizontal row, and that one lane under the row. One lane is visible in both modes.
 
 ## Where It Lives
 

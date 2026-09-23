@@ -29,18 +29,17 @@ import { I18nService } from '../core/i18n/i18n.service';
 import { applyOrgBrandingToDocument } from '../core/organization/organization.helpers';
 import { OrganizationService } from '../core/organization/organization.service';
 import { ToastService } from '../core/toast/toast.service';
-import { NavComponent } from '../features/nav/nav.component';
-import { DragDividerComponent } from '../shared/workspace-pane/shell/drag-divider/drag-divider.component';
-import { WorkspacePaneComponent } from '../shared/workspace-pane/shell/workspace-pane.component';
 import { UploadPanelComponent } from '../features/upload/upload-panel/upload-panel.component';
-import { UploadShellComponent } from '../features/upload/upload-shell/upload-shell.component';
-import { FeatureFlagsService } from '../core/feature-flags/feature-flags.service';
+import { SettingsPaneService } from '../core/settings-pane/settings-pane.service';
 import { ShellLayoutService } from '../core/shell-layout/shell-layout.service';
+import { SettingsOverlayComponent } from '../features/settings-overlay/settings-overlay.component';
 import { GridShellComponent } from './shell/grid-shell.component';
 import { ShellMainCanvasComponent } from './shell/shell-main-canvas.component';
 import { ShellControlAreaComponent } from './shell/shell-control-area.component';
 import { ShellPanelColumnComponent } from './shell/shell-panel-column.component';
 import { ShellPanelSurfaceComponent } from './shell/shell-panel-surface.component';
+import { SelectedItemsPanelComponent } from './shell/selected-items-panel/selected-items-panel.component';
+import { SelectedItemsPanelCoordinatorService } from '../core/selected-items-panel/selected-items-panel-coordinator.service';
 import { MapShellState } from '../features/map/map-shell/component/map-shell.state';
 import { WorkspacePaneObserverAdapter } from '../core/workspace-pane/workspace-pane-observer.adapter';
 import { MapZoomOrchestratorService } from '../core/map-zoom/map-zoom-orchestrator.service';
@@ -69,16 +68,14 @@ const WORKSPACE_PANE_WIDTH_STORAGE_KEY = 'sitesnap.settings.layout.workspacePane
     RouterOutlet,
     NgTemplateOutlet,
     MapShellComponent,
-    NavComponent,
-    DragDividerComponent,
-    WorkspacePaneComponent,
     UploadPanelComponent,
-    UploadShellComponent,
     GridShellComponent,
     ShellMainCanvasComponent,
     ShellControlAreaComponent,
     ShellPanelColumnComponent,
     ShellPanelSurfaceComponent,
+    SelectedItemsPanelComponent,
+    SettingsOverlayComponent,
   ],
   templateUrl: './authenticated-app-layout.component.html',
   styleUrl: './authenticated-app-layout.component.scss',
@@ -88,12 +85,13 @@ const WORKSPACE_PANE_WIDTH_STORAGE_KEY = 'sitesnap.settings.layout.workspacePane
 })
 export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
   private readonly shellState = inject(MapShellState);
-  private readonly featureFlags = inject(FeatureFlagsService);
   readonly shellLayout = inject(ShellLayoutService);
-  readonly shellGridLayout = this.featureFlags.shellGridLayout;
+  private readonly settingsPane = inject(SettingsPaneService);
+  readonly settingsOverlayOpen = this.settingsPane.open;
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
   private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
+  private readonly selectedItemsPanelCoordinator = inject(SelectedItemsPanelCoordinatorService);
   private readonly mapLayoutEffects = inject(WorkspacePaneLayoutMapEffectsService);
   private readonly mapZoomOrchestrator = inject(MapZoomOrchestratorService);
   private readonly router = inject(Router);
@@ -132,12 +130,9 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
 
   private readonly preferredWorkspacePaneWidth = signal<number | null>(null);
 
-  readonly photoPanelOpen = this.shellState.photoPanelOpen;
-  readonly workspacePaneWidth = this.shellState.workspacePaneWidth;
   readonly detailMediaId = this.shellState.detailMediaId;
   readonly detailAddressSearchRequest = this.shellState.detailAddressSearchRequest;
   readonly linkedHoveredWorkspaceMediaIds = this.shellState.linkedHoveredWorkspaceMediaIds;
-  readonly workspacePaneActiveTab = this.workspacePaneObserver.activeTab$;
 
   private get viewportWidth(): number {
     return typeof window !== 'undefined' ? window.innerWidth : 1280;
@@ -199,9 +194,8 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
       // (e.g. media page) that calls workspacePaneObserver.setDetailImageId() directly
       // rather than going through openDetailView().
       // @see docs/specs/ui/workspace/workspace-view-system.md
-      if (id != null && !this.shellState.photoPanelOpen()) {
-        this.shellState.setWorkspacePaneWidth(this.getWorkspacePaneOpeningWidth());
-        this.shellState.setPhotoPanelOpen(true);
+      if (id != null && !this.selectedItemsPanelCoordinator.isOpen()) {
+        this.selectedItemsPanelCoordinator.open();
       }
     });
 
@@ -250,13 +244,15 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
       });
   }
 
+  onSettingsOverlayOpenChange(open: boolean): void {
+    this.settingsPane.setOpen(open);
+  }
+
   openDetailView(mediaId: string): void {
-    if (!this.shellState.photoPanelOpen()) {
-      this.shellState.setWorkspacePaneWidth(this.getWorkspacePaneOpeningWidth());
-    }
+    this.selectedItemsPanelCoordinator.resetUserDismissedDownloadPanel();
     this.shellState.setDetailMediaId(mediaId);
     this.workspacePaneObserver.setDetailImageId(mediaId);
-    this.shellState.setPhotoPanelOpen(true);
+    this.selectedItemsPanelCoordinator.open();
   }
 
   closeDetailView(): void {
@@ -267,7 +263,7 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
 
   closeWorkspacePane(): void {
     this.mapLayoutEffects.getMapEffects()?.onWorkspacePaneClosing();
-    this.shellState.setPhotoPanelOpen(false);
+    this.selectedItemsPanelCoordinator.close();
     this.shellState.setDetailMediaId(null);
     this.workspacePaneObserver.setDetailImageId(null);
     this.workspacePaneObserver.setOpen(false);
@@ -475,10 +471,8 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
         this.workspacePaneObserver.setActiveTab('selected-items');
         if (!result.detailMediaId) {
           this.closeDetailView();
-          if (!this.shellState.photoPanelOpen()) {
-            this.shellState.setWorkspacePaneWidth(this.getWorkspacePaneOpeningWidth());
-          }
-          this.shellState.setPhotoPanelOpen(true);
+          this.selectedItemsPanelCoordinator.resetUserDismissedDownloadPanel();
+          this.selectedItemsPanelCoordinator.open();
         }
         if (result.detailSkipped) {
           this.toastService.show({

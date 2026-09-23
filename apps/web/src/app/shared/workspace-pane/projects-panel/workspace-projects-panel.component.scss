@@ -225,7 +225,8 @@
   }
 }
 
-// Color picker shell — positioned relative to header
+// Color picker shell — positioned relative to the detail header.
+// z-index 50 is local to that header, not a product plane (0/100/200/300/302/400/500/501).
 // @see docs/specs/ui/workspace/workspace-pane-projects-tab.md § State B color
 .projects-panel-detail__color-picker-shell {
   position: absolute;

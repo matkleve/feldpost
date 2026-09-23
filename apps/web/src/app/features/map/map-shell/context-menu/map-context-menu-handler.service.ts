@@ -18,6 +18,7 @@ import { MapShellSearchService } from '../leaflet/map-shell-search.service';
 import { UploadShellUiService } from '../../../upload/upload-shell/upload-shell-ui.service';
 import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-view.service';
 import { WorkspaceSelectionService } from '../../../../core/workspace-selection/workspace-selection.service';
+import { SelectedItemsPanelCoordinatorService } from '../../../../core/selected-items-panel/selected-items-panel-coordinator.service';
 import { LocationResolverService } from '../../../../core/location-resolver/location-resolver.service';
 import { GeocodingService } from '../../../../core/geocoding/geocoding.service';
 import { MediaLocationUpdateService } from '../../../../core/media-location-update/media-location-update.service';
@@ -56,6 +57,7 @@ export class MapContextMenuHandlerService {
   private readonly uploadShellUi = inject(UploadShellUiService);
   private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
+  private readonly selectedItemsPanelCoordinator = inject(SelectedItemsPanelCoordinatorService);
   private readonly locationResolverService = inject(LocationResolverService);
   private readonly geocodingService = inject(GeocodingService);
   private readonly mediaLocationUpdateService = inject(MediaLocationUpdateService);
@@ -268,10 +270,9 @@ export class MapContextMenuHandlerService {
     this.photoMarkerLifecycleService.renderOrUpdateDraftMediaMarker([coords.lat, coords.lng]);
     this.searchService.setPlacementActive(false);
     this.state.setPlacementActive(false);
-    if (!this.state.photoPanelOpen()) {
-      this.state.setWorkspacePaneWidth(this.state.getWorkspacePaneOpeningWidth());
+    if (!this.selectedItemsPanelCoordinator.isOpen()) {
+      this.selectedItemsPanelCoordinator.openUploadSurface();
     }
-    this.state.setPhotoPanelOpen(true);
     this.patchDetailMediaId(null);
     this.markerSelectionService.setSelectedMarker(null);
     this.markerSelectionService.setSelectedMarkerKeys(new Set());
@@ -987,7 +988,7 @@ export class MapContextMenuHandlerService {
   private setViewWithPaneOffset(lat: number, lng: number, zoom: number): void {
     const map = this.instance.map;
     if (!map) return;
-    const paneOffset = this.state.photoPanelOpen() ? this.state.workspacePaneWidth() / 2 : 0;
+    const paneOffset = this.selectedItemsPanelCoordinator.getMapPaneOffsetPx();
     if (paneOffset === 0) {
       map.setView([lat, lng], zoom);
       return;
@@ -999,10 +1000,8 @@ export class MapContextMenuHandlerService {
   }
 
   private ensurePhotoPanelOpen(): void {
-    if (!this.state.photoPanelOpen()) {
-      this.state.setWorkspacePaneWidth(this.state.getWorkspacePaneOpeningWidth());
-    }
-    this.state.setPhotoPanelOpen(true);
+    this.selectedItemsPanelCoordinator.resetUserDismissedDownloadPanel();
+    this.selectedItemsPanelCoordinator.open();
   }
 
 }

@@ -66,7 +66,7 @@ Rare. Must be justified in the component spec (e.g. loading handoff). Visuals **
 
 **Rule:** Quiet interactive controls use a **three-tier attention budget** unless a **dedicated element spec** documents an exception with a test oracle. **`--brand-gold` is the high-attention tier** — pointer focus **and** any row/item **selected because it needs user attention now** (multi-select, in-panel choice, linked-hover). **Not** for passive “mode is on” context (toggle segment, toolbar `data-active`, sort preset).
 
-**Canonical tokens:** `--brand-gold` (high-attention tier), `--interaction-selected-ink` (secondary; cool blue — **not** `var(--primary)` when sandstone sets primary to gold), `--interaction-nav-ink` (tertiary; royal violet via `--app-violet-accent`), `--muted-foreground` (idle ink), `--menu-item-hover` (= gold 8%), `--action-hover` (= gold 12%). **Prefer the mixin/token — see Mandatory implementation contract below.**
+**Canonical tokens:** `--brand-gold` (high-attention tier), `--interaction-selected-ink` (secondary; cool blue — **not** `var(--primary)` when sandstone sets primary to gold), `--interaction-nav-ink` (tertiary; royal violet via `--app-violet-accent`), `--muted-foreground` (idle ink), `--menu-item-hover` (gold 8%, list rows), `--action-hover` (gold 10%, controls). **Prefer the mixin/token — see Mandatory implementation contract below.**
 
 ### Brand gold scope (blocker)
 
@@ -114,7 +114,7 @@ On any quiet host using the mixins above, **icon, label, and chevron slots must 
 | Need | Use | Never inline |
 | ---- | --- | ------------ |
 | List-row hover background (8%) | `var(--menu-item-hover)` | `color-mix(in srgb, var(--primary) 8%, transparent)` |
-| Action/control hover (12%) | `var(--action-hover)` | `color-mix(in srgb, var(--primary) 12%, transparent)` |
+| Action/control hover (10%) | `var(--action-hover)` | `color-mix(in srgb, var(--brand-gold) 10%, transparent)` |
 | Full hover treatment (bg + ink) | `@include emphasis.hover(X%)` from `_interaction-emphasis-quiet-row.scss` | raw `background:` + `color:` pair |
 | Persistent selected state (secondary) | `@include emphasis.selected(X%)` | `color-mix(in srgb, var(--interaction-selected-ink) X%, transparent)` |
 | Product nav at rest (tertiary) | `@include emphasis.nav(X%)` | `color-mix(in srgb, var(--interaction-nav-ink) X%, transparent)` |
@@ -132,7 +132,7 @@ On any quiet host using the mixins above, **icon, label, and chevron slots must 
 
 **Implementation owners:**
 
-- `apps/web/src/app/shared/ui/button/button-variants.ts` — `outline`, `ghost`, `destructive`
+- `apps/web/src/app/shared/ui/button/button-variants.ts` — `outline`, `ghost`, `destructive`; `size="icon"` is `rounded-full`
 - `apps/web/src/app/shared/ui/toggle-group/toggle-group-variants.ts` — lane items (**hover always gold**)
 - `apps/web/src/app/shared/ui/tabs/tabs-variants.ts` — tab triggers
 - `apps/web/src/app/features/nav/nav.component.scss` — route links

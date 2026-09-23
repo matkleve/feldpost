@@ -18,7 +18,7 @@ A vertical flex column with no background, no border, and no padding. The grid's
 | # | User Action | System Response | Triggers |
 | --- | --- | --- | --- |
 | 1 | Activates a left-rail canvas option | Canvas route changes | existing router links |
-| 2 | Activates a right-rail panel option | `ShellLayoutService.setOpen` flips that panel | [shell-layout.md](../../service/shell-layout/shell-layout.md) |
+| 2 | Activates a right-rail panel option | `ShellLayoutService.setOpen` toggles **that id only**. Other open panels stay | [shell-layout.md](../../service/shell-layout/shell-layout.md) |
 | 3 | Activates `+` | Canvas shows the widget directory | route `/widgets` |
 | 4 | Activates the logo | Canvas shows the overview | [widget-overview.md](../../page/widget-overview.md) |
 
@@ -32,7 +32,7 @@ app-shell-control-area
 └── app-shell-control-container [bottom group]
 ```
 
-Left static list: logo, map, projects, media, `+` (inert), account, settings. Where a widget sits is [shell-widget-placement.md](shell-widget-placement.md). That contract is not in the static list in this window. Right rail, three containers. Container 1 stays at the top: upload, selected items, shared media. The leftover sits above container 2, so container 2 and container 3 are bottom aligned. The gap between those two is `var(--spacing-3)`. Container 2: undo, activity history, redo (inert until a history product exists). Container 3: theme, tips, help (top to bottom). The theme option sits above tips in the same container. It cycles light, dark, and sandstone through `ThemeService`, the same as the classic nav utility control, including the three indicator dots under the icon. Account and settings keep today's routes and the settings overlay.
+Left static list: logo, map, projects, media, `+` (inert), account, settings. Where a widget sits is [shell-widget-placement.md](shell-widget-placement.md). That contract is not in the static list in this window. Right rail, three containers. Container 1 stays at the top: upload, selected items, shared media. The leftover sits above container 2, so container 2 and container 3 are bottom aligned. The gap between those two is `var(--spacing-3)`. Container 2: undo, activity history, redo (inert until a history product exists). Container 3: theme, tips, help (top to bottom). The theme option sits above tips in the same container. It cycles light, dark, and sandstone through `ThemeService`, the same as the classic nav utility control, including the three indicator dots under the icon. Account and settings navigate to the settings URL. The surface fills `app-shell-main-canvas`. The rail marks `account` when that section is open, and `settings` for every other open section.
 
 ## Data
 

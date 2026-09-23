@@ -1,12 +1,14 @@
+import { devSecretsLocal } from './environment.dev-secrets.local';
+
 export const environment = {
   production: false,
   /** Dev uses `window.location.origin` for auth redirects; production sets this via write-env.mjs */
   appUrl: undefined as string | undefined,
   /**
-   * Free key from https://carto.com/basemaps/apikey — paste here for local dev.
-   * Without it, CARTO street tiles show an "API KEY REQUIRED" watermark.
+   * Free key from https://carto.com/basemaps/apikey
+   * Loaded from repo-root `.env.local` → `CARTO_BASEMAP_API_KEY` via `sync-dev-environment.mjs` on `npm run dev`.
    */
-  cartoBasemapApiKey: '',
+  cartoBasemapApiKey: devSecretsLocal.cartoBasemapApiKey,
   i18n: {
     enableLegacyDomFallback: true,
   },

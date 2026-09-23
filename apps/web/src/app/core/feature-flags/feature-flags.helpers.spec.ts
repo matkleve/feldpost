@@ -30,8 +30,8 @@ describe('resolveFlag', () => {
     expect(resolveFlag('shellGridLayout', { query: null, stored: 'true' }).persist).toBeNull();
   });
 
-  it('defaults shellGridLayout to false', () => {
-    expect(resolveFlag('shellGridLayout', { query: null, stored: null }).value).toBe(false);
+  it('defaults shellGridLayout to true', () => {
+    expect(resolveFlag('shellGridLayout', { query: null, stored: null }).value).toBe(true);
   });
 
   it('resolves an unknown name to false and does not throw', () => {

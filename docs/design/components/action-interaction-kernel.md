@@ -108,7 +108,7 @@ Avoid accent for:
 - **Legacy filled secondary:** `variant="secondary"` — rare; prefer `outline` for new work.
 - Toolbar triggers may keep geometry/padding exceptions; colors follow interaction emphasis when open (selected ink) and on hover (**brand gold**).
 - Danger actions: semantic destructive styling, never ambiguous.
-- Icon + label on `hlmBtn`: horizontal padding locks to spacing-2 (`ps-2` / `pe-2`) on both edges for every size and `iconPlacement` (`start` / `end`); set `iconPlacement` for composition semantics; `size="icon"` stays square (`w-10 h-10`).
+- Icon + label on `hlmBtn`: horizontal padding locks to spacing-2 (`ps-2` / `pe-2`) on both edges for every size and `iconPlacement` (`start` / `end`); set `iconPlacement` for composition semantics. `size="icon"` is a circle (`rounded-full`) at `h-10 w-10` (2.5rem). Panel chrome may grow that box to 2.75rem without changing the radius. Dense detail-row actions keep their own `radius-sm` clamp. Smaller `icon-sm` / `icon-xs` / `icon-md` stay `rounded-md`.
 
 ## Reactive Integration Contract
 

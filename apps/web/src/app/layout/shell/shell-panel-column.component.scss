@@ -1,17 +1,90 @@
-// Scrollable stack. A closed column leaves the grid so the shell gap stays single.
-// @see docs/specs/ui/shell/shell-panel-column.md
+// Column is one grid-row box. Overflow stays visible so the panel shadow paints.
+// @see docs/specs/ui/shell/shell-surface-elevation.md
 :host {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-3);
   min-width: 0;
   min-height: 0;
-  overflow: auto;
+  height: 100%;
+  max-height: 100%;
+  overflow: visible;
   background: transparent;
 }
 
-// Not a grid item while nothing is open.
-// @see docs/specs/ui/shell/grid-shell.md
+:host:not([data-empty]) {
+  inline-size: var(--shell-panel-column-width, 400px);
+  max-inline-size: var(--shell-panel-column-width, 400px);
+  flex-shrink: 0;
+}
+
 :host[data-empty] {
   display: none;
+}
+
+// Actions-rail panels — top-aligned, never taller than the column.
+// @see docs/specs/ui/shell/shell-panel-resize.md § Stack divider
+.shell-panel-column__top {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  flex: 0 1 auto;
+  min-height: 0;
+  min-width: 0;
+  max-height: 100%;
+  overflow: visible;
+}
+
+.shell-panel-column__top--split {
+  flex: 0 0 auto;
+  overflow: visible;
+}
+
+// Pins the bottom stack to the column foot. Absent when only the top stack is open.
+// @see docs/specs/ui/shell/shell-panel-column.md
+.shell-panel-column__spacer {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+// Help-rail panels — bottom-aligned via flex spacer when not split.
+// @see docs/specs/ui/shell/shell-panel-resize.md § Stack divider
+.shell-panel-column__bottom {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  flex: 0 0 auto;
+  min-height: 0;
+  min-width: 0;
+}
+
+.shell-panel-column__bottom--split {
+  flex: 1 1 auto;
+  overflow: visible;
+}
+
+// Several surfaces in one stack scroll instead of shrinking a sibling to nothing.
+// @see docs/specs/ui/shell/shell-panel-column.md
+.shell-panel-column__top[data-multi],
+.shell-panel-column__bottom[data-multi] {
+  overflow: auto;
+  min-height: 0;
+}
+
+// A multi bottom stack can shrink to the column and scroll. A lone one stays at the foot.
+// @see docs/specs/ui/shell/shell-panel-column.md
+.shell-panel-column__bottom[data-multi] {
+  flex: 0 1 auto;
+  max-height: 100%;
+}
+
+// Split still assigns the leftover height. Scrolling stays on when that slice holds several surfaces.
+// @see docs/specs/ui/shell/shell-panel-resize.md
+.shell-panel-column__top--split[data-multi],
+.shell-panel-column__bottom--split[data-multi] {
+  overflow: auto;
+}
+
+.shell-panel-column__bottom--split[data-multi] {
+  flex: 1 1 auto;
 }

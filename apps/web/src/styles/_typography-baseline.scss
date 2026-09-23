@@ -99,6 +99,8 @@
   }
 }
 
+// Page title only. Panel and section headings (h2–h6) stay on the UI sans.
+// @see docs/design/tokens.md §3.2
 h1 {
   font-family: var(--font-serif), ui-serif, Georgia, serif;
   font-size: var(--font-size-lg);
@@ -107,16 +109,16 @@ h1 {
 }
 
 h2 {
-  font-family: var(--font-serif), ui-serif, Georgia, serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--font-size-md);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-tight);
 }
 
 h3 {
-  font-family: var(--font-serif), ui-serif, Georgia, serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-semibold);
   // Matches former `--line-height-snug` (1.1) — inlined Batch 41 (token removed from legacy bridge)
   // @see docs/migration/phase-7-token-migration.md §Batch 41
   line-height: 1.1;
@@ -125,9 +127,9 @@ h3 {
 h4,
 h5,
 h6 {
-  font-family: var(--font-serif), ui-serif, Georgia, serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-semibold);
   // Uses same snug line-height as h3 for dense heading rhythm
   // @see docs/migration/phase-7-token-migration.md §Batch 41 (h3 block)
   line-height: 1.1;

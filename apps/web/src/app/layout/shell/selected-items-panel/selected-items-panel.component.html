@@ -1,0 +1,35 @@
+<!-- Stable state: detail mode vs grid mode — @see docs/specs/ui/shell/selected-items-panel.md -->
+<div class="selected-items-panel">
+  @if (detailMediaId()) {
+    <app-media-detail-view
+      [mediaId]="detailMediaId()!"
+      [paneWidth]="panelWidthPx()"
+      [shellPanelEmbedded]="true"
+      [addressSearchRequestImageId]="detailAddressSearchRequestMediaId()"
+      [addressSearchRequestId]="detailAddressSearchRequestId()"
+      (closed)="onDetailClose()"
+      (addressSearchRequestConsumed)="onDetailAddressSearchRequestConsumed($event)"
+      (zoomToLocationRequested)="onZoomToLocation($event)"
+      (locationMapPickRequested)="onUploadLocationMapPickRequested($event)"
+    />
+  } @else {
+    <div class="selected-items-panel__body">
+      <app-workspace-toolbar />
+      <app-workspace-selected-items-grid
+        [linkedHoveredMediaIds]="linkedHoveredMediaIds()"
+        (thumbnailClicked)="onThumbnailClick($event)"
+        (zoomToLocationRequested)="onZoomToLocation($event)"
+        (locationMapPickRequested)="onUploadLocationMapPickRequested($event)"
+        (hoverStarted)="onWorkspaceItemHoverStarted($event)"
+        (hoverEnded)="onWorkspaceItemHoverEnded($event)"
+      />
+    </div>
+
+    @if (showFooter()) {
+      <app-workspace-pane-footer
+        [scopeIds]="exportScopeIds()"
+        [images]="exportScopeImages()"
+      />
+    }
+  }
+</div>

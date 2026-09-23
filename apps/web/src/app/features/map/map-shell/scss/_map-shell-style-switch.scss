@@ -26,7 +26,7 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
   transition:
     background var(--motion-duration-standard) var(--motion-ease-out),
     border-color var(--motion-duration-standard) var(--motion-ease-out),
@@ -73,8 +73,8 @@
 }
 
 .map-style-switch__dot {
-  width: var(--spacing-2);
-  height: var(--spacing-2);
+  width: var(--spacing-1);
+  height: var(--spacing-1);
   border-radius: var(--radius-full);
   background: color-mix(in srgb, var(--muted-foreground) 35%, transparent);
   transition: background var(--motion-duration-fast) var(--motion-ease-out);

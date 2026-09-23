@@ -58,13 +58,13 @@
   align-items: center;
   justify-content: center;
   gap: var(--spacing-2);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
   transition:
     background 120ms ease-out,
     border-color 120ms ease-out,
     color 120ms ease-out,
     transform 120ms ease-out,
-    width 180ms var(--motion-standard);
+    width 180ms var(--motion-ease-out);
   flex-shrink: 0;
   position: relative;
 
@@ -104,10 +104,7 @@
 
   &--active {
     color: var(--interaction-selected-ink);
-    background: color-mix(in srgb, var(--interaction-selected-ink) 12%, color-mix(in srgb, var(--card) 55%, transparent));
-    border-color: color-mix(in srgb, var(--interaction-selected-ink) 42%, var(--border));
-    backdrop-filter: blur(12px) saturate(1.15);
-    -webkit-backdrop-filter: blur(12px) saturate(1.15);
+    @include frosted-chrome.outline-control-selected;
 
     .material-icons {
       color: var(--interaction-selected-ink);

@@ -36,12 +36,7 @@
 // Reveals inline edit affordance on title hover without overlapping the type chip.
 // @see docs/specs/ui/media-detail/media-detail-inline-editing.md
 .detail-header__title-edit {
-  --icon-btn-size: 2rem;
-  --icon-btn-radius: var(--radius-sm);
-  --icon-btn-icon-size: 0.9375rem;
-
   flex-shrink: 0;
-  color: var(--muted-foreground);
   opacity: 0;
   pointer-events: none;
   transition: opacity 80ms ease-out;
@@ -64,17 +59,26 @@
   }
 }
 
+// Panel chrome grows the hlmBtn icon circle to the shell hit target. Shape and gold hover stay on the primitive.
+// @see docs/design/components/action-interaction-kernel.md
 .detail-back-btn,
 .detail-actions-btn {
-  --icon-btn-size: 2.75rem;
-  --icon-btn-radius: var(--radius-md);
-  --icon-btn-icon-size: 1.25rem;
-
-  color: var(--muted-foreground);
+  width: 2.75rem;
+  height: 2.75rem;
+  min-width: 2.75rem;
+  padding: 0;
   flex-shrink: 0;
 
+  .material-icons {
+    font-size: var(--font-size-xl);
+    line-height: var(--line-height-solid);
+    color: inherit;
+  }
+
   @media (max-width: 47.9375rem) {
-    --icon-btn-size: 3rem;
+    width: 3rem;
+    height: 3rem;
+    min-width: 3rem;
   }
 }
 

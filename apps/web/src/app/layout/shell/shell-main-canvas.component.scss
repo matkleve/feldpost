@@ -1,6 +1,6 @@
 @use '../../../styles/frosted-chrome';
 
-// Rounded page slot for every left-rail route. The map is one page inside it.
+// Rounded page slot. Same row height as the panel column, so the bottoms match.
 // @see docs/specs/ui/shell/shell-main-canvas.md
 :host {
   display: flex;
@@ -8,6 +8,8 @@
   position: relative;
   min-width: 0;
   min-height: 0;
+  height: 100%;
+  max-height: 100%;
   overflow: hidden;
   @include frosted-chrome.shell-box;
 }

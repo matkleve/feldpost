@@ -7,7 +7,9 @@ import {
   buildSettingsUrl,
   resolveShellSegmentsFromUrl,
 } from '../../core/settings-pane/settings-url.helpers';
+import { SettingsPaneService } from '../../core/settings-pane/settings-pane.service';
 import { ShellLayoutService } from '../../core/shell-layout/shell-layout.service';
+import { SelectedItemsPanelCoordinatorService } from '../../core/selected-items-panel/selected-items-panel-coordinator.service';
 import { ThemeService } from '../../core/theme/theme.service';
 import { resolveAuthenticatedActiveShell } from '../authenticated-shell-active.helpers';
 import { ShellControlContainerComponent } from './shell-control-container.component';
@@ -31,6 +33,8 @@ import {
 export class ShellControlAreaComponent {
   private readonly router = inject(Router);
   private readonly shellLayout = inject(ShellLayoutService);
+  private readonly settingsPane = inject(SettingsPaneService);
+  private readonly selectedItemsPanelCoordinator = inject(SelectedItemsPanelCoordinatorService);
   private readonly themeService = inject(ThemeService);
   private readonly i18n = inject(I18nService);
 
@@ -54,6 +58,9 @@ export class ShellControlAreaComponent {
 
   readonly activeId = computed(() => {
     if (this.side() !== 'left') return null;
+    if (this.settingsPane.open()) {
+      return this.settingsPane.selectedSectionId() === 'account' ? 'account' : 'settings';
+    }
     const shell = this.shell();
     if (shell === 'widgets') return 'more';
     if (shell === 'overview') return null;
@@ -68,7 +75,11 @@ export class ShellControlAreaComponent {
 
   onChosen(option: ShellControlOptionModel): void {
     if (option.kind === 'panel' && option.panelId) {
-      this.shellLayout.setOpen(option.panelId, !this.shellLayout.isOpen(option.panelId));
+      const opening = !this.shellLayout.isOpen(option.panelId);
+      if (option.panelId === 'download' && opening) {
+        this.selectedItemsPanelCoordinator.resetUserDismissedDownloadPanel();
+      }
+      this.shellLayout.setOpen(option.panelId, opening);
       return;
     }
     if (option.kind === 'canvas' && option.route) {

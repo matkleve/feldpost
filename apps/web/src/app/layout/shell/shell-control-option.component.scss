@@ -106,7 +106,7 @@
   .shell-control-option__button:focus-visible,
   :host[data-active='true'] .shell-control-option__button,
   :host[data-open='true'] .shell-control-option__button {
-    color: var(--primary);
+    color: var(--brand-gold);
     background: var(--action-hover);
   }
 }

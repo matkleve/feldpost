@@ -14,16 +14,13 @@ Scope:
 
 Building blocks:
 
-- `ui-container` (panel/surface shell)
-- `ui-item` (row shell)
-- `ui-item-media`
-- `ui-item-label`
-- `ui-spacer`
-- `ui-button*` family (`primary`, `secondary`, `ghost`, `danger`)
-- `icon-btn-ghost`
-- Focus-ring and interaction-state aliases (`focus-visible`, `hover`, `active`, `disabled`)
+- `hlmBtn` (`button-variants.ts`) — filled, outline, ghost, destructive, link
+- `hlmInput`, `hlmBadge`, `hlmTabs`, `hlmToggleGroup`
+- Focus ring: `--interactive-focus-ring` on those primitives
 
-Status: `stable`
+The `ui-button` / `ui-container` / `ui-item` names in older notes are historical. See [primitive-variants-registry.md](./primitive-variants-registry.md).
+
+Status: `stable` for `hlmBtn` and the focus ring. The `ui-*` shell names are not in the runtime.
 
 ### 2) Inputs and Selection Controls
 
@@ -33,9 +30,9 @@ Scope:
 
 Building blocks:
 
-- Text input control primitive (`ui-input-control`)
-- Select/dropdown trigger primitive (`ui-select-control`)
-- Segmented switch (`app-segmented-switch`)
+- Text input (`hlmInput`)
+- Select trigger (`select-variants` / `hlmSelect`)
+- Segmented switch (`hlmToggleGroup` / `hlmPillToggle`; `app-segmented-switch` was removed)
 - Toggle/switch row primitive
 - Slider/range primitive (`app-snap-size-slider`)
 - Checkbox/radio primitive family

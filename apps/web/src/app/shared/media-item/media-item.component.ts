@@ -34,6 +34,7 @@ import { probeImageAspectRatio } from '../../core/media/probe-image-aspect-ratio
 import { MediaDownloadService } from '../../core/media-download/media-download.service';
 import { MediaDisplayComponent } from '../media-display/media-display.component';
 import type { MediaContentResolution } from '../media-display/media-display.component';
+import { originalPixelSizeFromExif } from './media-item-original-resolution.helpers';
 
 export type { MediaContentResolution };
 import { ChipComponent, type ChipVariant } from '../components/chip/chip.component';
@@ -116,8 +117,18 @@ export class MediaItemComponent {
   readonly detailSlotRatioPending = computed(
     () => !this.showInteractionChrome() && !this.detailSlotRatioCommitted(),
   );
-  /** Detail embed: decoded sharp layer size for in-slot resolution badge. */
+  /** Detail embed: decoded preview bitmap size. Fallback when ingest EXIF has no pixel size. */
   readonly detailContentResolution = signal<MediaContentResolution | null>(null);
+  /**
+   * Detail badge: original file pixels from `exif_raw`, not the downscaled preview.
+   * @see docs/specs/ui/media-detail/media-detail-media-viewer.md#what-it-looks-like
+   */
+  readonly resolutionBadge = computed(() => {
+    if (this.showInteractionChrome()) {
+      return null;
+    }
+    return originalPixelSizeFromExif(this.item()?.exif_raw) ?? this.detailContentResolution();
+  });
   readonly usesFillSlotGeometry = computed(() => this.mode() === 'row');
   readonly isRowMode = computed(() => this.mode() === 'row' && this.showInteractionChrome());
   private readonly mediaPreview = viewChild(MediaDisplayComponent);
