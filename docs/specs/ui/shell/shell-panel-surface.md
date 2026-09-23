@@ -91,7 +91,7 @@ flowchart TB
 ## Acceptance Criteria
 
 - [ ] `upload` renders `UploadPanelComponent` and not `app-upload-shell`.
-- [ ] `download` renders `SelectedItemsPanelComponent` per [selected-items-panel.md](./selected-items-panel.md).
+- [x] `download` renders `SelectedItemsPanelComponent` per [selected-items-panel.md](./selected-items-panel.md).
 - [ ] `help`, `tips`, `shared-media` render placeholders until those products exist.
 - [ ] Collapse control is icon-only `right_panel_close` with `shell.panel.collapse` aria-label (not a text Close button).
 - [ ] Collapse calls `close(panelId)` once.

@@ -1,0 +1,25 @@
+<!-- Stable state: detail — one focused media id inside the download panel. -->
+<!-- @see docs/specs/ui/shell/selected-items-panel.md -->
+@if (detailMediaId(); as mediaId) {
+  <app-media-detail-view
+    [mediaId]="mediaId"
+    [addressSearchRequestImageId]="detailAddressSearchRequestMediaId()"
+    [addressSearchRequestId]="detailAddressSearchRequestId()"
+    (closed)="detailClosed.emit()"
+    (addressSearchRequestConsumed)="detailAddressSearchRequestConsumed.emit($event)"
+    (zoomToLocationRequested)="zoomToLocationRequested.emit($event)"
+    (locationMapPickRequested)="uploadLocationMapPickRequested.emit($event)"
+  />
+} @else {
+  <!-- Stable state: grid — toolbar and the canvas selection. -->
+  <!-- @see docs/specs/ui/shell/selected-items-panel.md -->
+  <app-workspace-toolbar />
+  <app-workspace-selected-items-grid
+    [linkedHoveredMediaIds]="linkedHoveredMediaIds()"
+    (thumbnailClicked)="detailRequested.emit($event)"
+    (zoomToLocationRequested)="zoomToLocationRequested.emit($event)"
+    (locationMapPickRequested)="uploadLocationMapPickRequested.emit($event)"
+    (hoverStarted)="workspaceItemHoverStarted.emit($event)"
+    (hoverEnded)="workspaceItemHoverEnded.emit($event)"
+  />
+}

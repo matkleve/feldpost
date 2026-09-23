@@ -1,9 +1,13 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+import { ShellLayoutService } from '../../../../core/shell-layout/shell-layout.service';
 import type { ProjectSelectOption } from '../../../../shared/project-select-dialog/project-select-dialog.component';
 import type { UploadLocationMapPickRequest } from '../../../../core/workspace-pane/workspace-pane-shell-events.types';
+import { routePhotoPanelOpen, workspacePaneOpeningWidth } from './map-shell-photo-panel';
 
 @Injectable({ providedIn: 'root' })
 export class MapShellState {
+  private readonly shellLayout = inject(ShellLayoutService);
+
   private readonly _placementActive = signal(false);
   readonly placementActive = this._placementActive.asReadonly();
 
@@ -113,7 +117,7 @@ export class MapShellState {
   readonly pendingUploadedLocationMapPick = this._pendingUploadedLocationMapPick.asReadonly();
 
   setPhotoPanelOpen(value: boolean): void {
-    this._photoPanelOpen.set(value);
+    routePhotoPanelOpen(value, this._photoPanelOpen, this.shellLayout);
   }
 
   setWorkspacePaneWidth(value: number): void {
@@ -137,8 +141,7 @@ export class MapShellState {
   }
 
   getWorkspacePaneOpeningWidth(): number {
-    const vw = typeof window !== 'undefined' ? window.innerWidth : 1280;
-    return Math.min(Math.max(this._workspacePaneWidth(), vw * 0.25), vw * 0.75);
+    return workspacePaneOpeningWidth(this._workspacePaneWidth());
   }
 
   closeAllContextMenus(): void {

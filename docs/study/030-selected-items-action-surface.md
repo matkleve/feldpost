@@ -59,3 +59,14 @@ Not permission to build past step 1. Step 1 is the spec and code change already 
 - Whether step 2 should land before or after STUDY-015's flagged shell is the default. The panel spec already says the legacy pane stays while `shellGridLayout` is off `[A]`.
 
 What would settle the open menu question: one owner sentence on the thumbnail context menu, keep or remove.
+
+## Update 2026-09-23 — step 2
+
+The owner said go. Step 2 is in this branch `[A]`.
+
+- `panelId="download"` projects `app-selected-items-panel` (toolbar, grid, detail). The placeholder paragraph is gone `[A]`.
+- The surface header keeps the title and the collapse control. There is no second `app-pane-header` `[A]`.
+- With `shellGridLayout` on, `MapShellState.setPhotoPanelOpen` opens or closes `download` and leaves `photoPanelOpen` false. The drag divider and `app-workspace-pane` stay unmounted `[A]`.
+- Collapse closes the panel only. It does not call `closeWorkspacePane()`, so it does not clear the selection `[A]`.
+- The grid still reads `WorkspaceSelectionService`. No second store `[A]`.
+- Step 3 (matrix columns) and step 4 (thumbnail context menu) are unchanged. The red-test for a workspace-only selection is still open.

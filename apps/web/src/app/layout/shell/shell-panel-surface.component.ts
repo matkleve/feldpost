@@ -10,6 +10,9 @@ import type { ShellPanelId } from '../../core/shell-layout/shell-layout.types';
   standalone: true,
   templateUrl: './shell-panel-surface.component.html',
   styleUrl: './shell-panel-surface.component.scss',
+  host: {
+    '[class.shell-panel-surface--fill]': 'panelId() === "download"',
+  },
 })
 export class ShellPanelSurfaceComponent {
   private readonly shellLayout = inject(ShellLayoutService);

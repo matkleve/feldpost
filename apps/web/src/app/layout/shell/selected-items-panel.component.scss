@@ -1,0 +1,19 @@
+// Column that fills the download surface. 32rem stays above the detail narrow overlay.
+// @see docs/specs/ui/shell/selected-items-panel.md
+:host {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: clamp(32rem, 38vw, 56rem);
+  min-width: 0;
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+// Grid scrolls under the toolbar. Detail already fills this column on its own host.
+// @see docs/specs/ui/shell/selected-items-panel.md
+:host > app-workspace-selected-items-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+}
