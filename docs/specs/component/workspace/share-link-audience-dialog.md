@@ -11,7 +11,7 @@ A fixed-position panel with radio options, optional multi-line UUID field for `n
 ## Where It Lives
 
 - **Code:** `apps/web/src/app/shared/share-link-audience-dialog/`
-- **Consumers:** `WorkspacePaneFooterComponent`, `WorkspaceSelectedItemsGridComponent`
+- **Consumers:** `WorkspaceSelectedItemsGridComponent`
 
 ## Actions
 

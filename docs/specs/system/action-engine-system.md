@@ -11,7 +11,7 @@ No UI of its own; consumers render icons/labels returned by `resolveActions`. Se
 ## Where It Lives
 
 - **Code**: `apps/web/src/app/features/action-system/action-engine.service.ts`, `action-types.ts`, `action-context-ids.ts`.
-- **Consumers**: `MapShellComponent`, `MediaDetailViewComponent`, `WorkspacePaneFooterComponent` (inject `ActionEngineService`).
+- **Consumers**: `MapShellComponent`, `MediaDetailViewComponent` (inject `ActionEngineService`).
 - **Cross-surface action semantics**: [action-context-matrix.md](action-context-matrix.md) (which actions exist where); this spec covers only the **resolution engine**, not per-action matrix cells.
 
 ## Actions
@@ -28,8 +28,7 @@ No UI of its own; consumers render icons/labels returned by `resolveActions`. Se
 ```text
 ActionEngineService (root-provided)
 ├── consumed by MapShellComponent
-├── consumed by MediaDetailViewComponent
-└── consumed by WorkspacePaneFooterComponent
+└── consumed by MediaDetailViewComponent
 ```
 
 Menu shells and hit targets remain owned by each consumer’s component spec.

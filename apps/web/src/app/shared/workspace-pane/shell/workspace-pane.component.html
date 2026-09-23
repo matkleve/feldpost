@@ -89,13 +89,6 @@
           (hoverStarted)="onWorkspaceItemHoverStarted($event)"
           (hoverEnded)="onWorkspaceItemHoverEnded($event)"
         />
-
-        @if (selectionService.selectedCount() > 0) {
-          <app-workspace-pane-footer
-            [scopeIds]="exportScopeIds()"
-            [images]="exportScopeImages()"
-          ></app-workspace-pane-footer>
-        }
       </div>
 
       <!-- Projects tab panel -->

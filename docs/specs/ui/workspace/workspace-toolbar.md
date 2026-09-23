@@ -24,6 +24,7 @@ A single horizontal row of four ghost buttons: **Grouping**, **Filter**, **Sort*
 | 5   | Clicks outside       | Closes any open dropdown                            | Dropdown closes    |
 | 6   | Presses Escape       | Closes any open dropdown                            | Dropdown closes    |
 | 7   | Active indicator dot | Visible when the toolbar button's feature is active | Derived from state |
+| 8   | Clicks **Deselect all** | Clears the canvas selection. The button is visible only while `selectedCount > 0` | `WorkspaceSelectionService.clearSelection()` |
 
 ## Component Hierarchy
 
@@ -35,8 +36,9 @@ WorkspaceToolbar                           ← horizontal flex row, gap-2, paddi
 │   └── [active] ActiveDot
 ├── ToolbarButton "Sort"                   ← .btn-compact ghost, opens SortDropdown
 │   └── [active] ActiveDot
-└── ToolbarButton "Projects"               ← .btn-compact ghost, opens ProjectsDropdown
-    └── [active] ActiveDot
+├── ToolbarButton "Projects"               ← .btn-compact ghost, opens ProjectsDropdown
+│   └── [active] ActiveDot
+└── [selectedCount > 0] Deselect all       ← `hlmBtn` ghost, size `xs`, icon `deselect`
 ```
 
 ## Data

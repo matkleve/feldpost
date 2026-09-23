@@ -74,7 +74,6 @@ Error handling is uniform: missing path resolves to no-media, signing/fetch fail
 | `apps/web/src/app/shared/media-item/media-item.component.ts`                                               | Grid preview consumer                 | Facade preview and state binding                 |
 | `apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view.component.ts`                           | Detail thumb/full preview consumer    | Facade preview/state calls                       |
 | `apps/web/src/app/shared/workspace-pane/selected-items/workspace-selected-items-grid.component.ts`                              | ZIP export trigger                    | Facade edge export call                          |
-| `apps/web/src/app/shared/workspace-pane/footer/workspace-pane-footer/workspace-pane-footer.component.ts` | ZIP export dialog trigger             | Facade edge export call                          |
 | `apps/web/src/app/features/upload/upload-panel/upload-panel-job-file-actions.service.ts`                             | Single-file download action           | Facade download API                              |
 
 ## Phase 2 - Spec Restructure and Archive Status
@@ -241,7 +240,6 @@ stateDiagram-v2
 | `apps/web/src/app/shared/media-item/media-item.component.ts`                                               | `/media` preview consumer                                                           |
 | `apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view.component.ts`                           | Detail preview consumer                                                           |
 | `apps/web/src/app/shared/workspace-pane/selected-items/workspace-selected-items-grid.component.ts`                              | ZIP export trigger consumer                                                         |
-| `apps/web/src/app/shared/workspace-pane/footer/workspace-pane-footer/workspace-pane-footer.component.ts` | ZIP export dialog and trigger consumer                                              |
 | `apps/web/src/app/core/media-download/media-download.types.ts`                                         | Shared `MediaLoadState`, delivery, and export types                                 |
 | `apps/web/src/app/core/media-download/media-download.service.spec.ts`                                   | Facade + adapter contract tests                                                     |
 
@@ -265,7 +263,6 @@ stateDiagram-v2
 | `apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view.component.ts`                           | Facade calls for thumb/full + state                                                                                                                    | Done             | Detail flow now uses unified facade dependency                                                                          |
 | `apps/web/src/app/core/media-detail-data/media-detail-data.facade.ts`                              | Facade calls for thumb/full signing                                                                                                                    | Done             | Direct typed dependency now points to `MediaDownloadService`                                                            |
 | `apps/web/src/app/shared/workspace-pane/selected-items/workspace-selected-items-grid.component.ts`                              | Facade edge export call                                                                                                                                | Done             | `ZipExportService` dependency removed                                                                                   |
-| `apps/web/src/app/shared/workspace-pane/footer/workspace-pane-footer/workspace-pane-footer.component.ts` | Facade edge export call                                                                                                                                | Done             | `ZipExportService` dependency removed                                                                                   |
 | `apps/web/src/app/features/upload/upload-panel/upload-panel-job-file-actions.service.ts`                             | Facade single-file download call                                                                                                                       | Pending          | `uploadService.downloadFile` replaced by unified media download API                                                     |
 
 ## Wiring

@@ -9,7 +9,7 @@
   inline-size: 100%;
 }
 
-// Flex column for toolbar, grid, and footer.
+// Flex column for toolbar and grid.
 // @see docs/specs/ui/shell/selected-items-panel.md
 .selected-items-panel {
   display: flex;
@@ -20,7 +20,7 @@
   overflow: hidden;
 }
 
-// Scroll region — grid fills remaining space above footer.
+// Scroll region — grid fills the remaining space.
 // @see docs/specs/ui/shell/selected-items-panel.md
 .selected-items-panel__body {
   display: flex;
@@ -33,11 +33,6 @@
 
 .selected-items-panel__body app-workspace-selected-items-grid {
   flex: 1 1 auto;
-  min-height: 0;
-}
-
-app-workspace-pane-footer {
-  flex: 0 0 auto;
   min-height: 0;
 }
 

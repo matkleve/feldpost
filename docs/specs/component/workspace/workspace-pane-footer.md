@@ -1,5 +1,7 @@
 # Workspace Pane Footer
 
+> **Retired.** The selected-items surface does not mount this bar. Canvas owns selection. The toolbar hosts one quiet **Deselect all** control ([workspace-toolbar.md](../../ui/workspace/workspace-toolbar.md)). Component files are removed. Sections below are the retired contract.
+
 > **Feature surface (selection bar):** [workspace-actions-bar.md](../../ui/workspace/workspace-actions-bar.md)  
 > **Destructive bulk delete contract:** [workspace-pane-footer.destructive-actions.supplement.md](./workspace-pane-footer.destructive-actions.supplement.md)  
 > **Action matrix:** [action-context-matrix.md](../../system/action-context-matrix.md)  
@@ -28,8 +30,8 @@ Section order from action engine: `primary` → `secondary` → `destructive` �
 
 ## Where It Lives
 
-- **Code:** `apps/web/src/app/shared/workspace-pane/footer/workspace-pane-footer/`
-- **Parent:** `WorkspacePaneComponent` when selection non-empty
+- **Code:** removed. The selected-items surface does not host this bar ([selected-items-panel.md](../../ui/shell/selected-items-panel.md)).
+- **Parent:** none.
 - **Inputs:** `scopeIds: string[]`, `images: WorkspaceImage[]`
 
 ## Actions & Interactions

@@ -1,6 +1,6 @@
 # Workspace Actions Bar
 
-> **Grid shell:** Footer hosts in the **selected items panel** (`download`) when `shellGridLayout` is on. Same component (`app-workspace-pane-footer`); parent changes from Workspace Pane to [selected-items-panel.md](../shell/selected-items-panel.md).
+> **Selected items surface:** does not mount this bar. The panel mirrors canvas selection. Its only selection control is the quiet **Deselect all** button on [workspace-toolbar.md](./workspace-toolbar.md). Export, share, and bulk delete are not on that panel.
 >
 > **Implementation contract:** [workspace-pane-footer.md](../../component/workspace/workspace-pane-footer.md)  
 > **Destructive bulk actions:** [workspace-pane-footer.destructive-actions.supplement.md](../../component/workspace/workspace-pane-footer.destructive-actions.supplement.md)  
@@ -168,9 +168,7 @@ Share-set SQL, RLS, RPC stubs, and ER diagram (after Schema notes table): **[wor
 
 | File                                                                                     | Purpose                                                      |
 | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| `apps/web/src/app/shared/workspace-pane/footer/workspace-pane-footer/workspace-pane-footer.component.ts`   | Bottom action bar component                                  |
-| `apps/web/src/app/shared/workspace-pane/footer/workspace-pane-footer/workspace-pane-footer.component.html` | Template for selection, export, and inline dialogs                    |
-| `apps/web/src/app/shared/workspace-pane/footer/workspace-pane-footer/workspace-pane-footer.component.scss` | Bar layout, transitions, responsive behavior                 |
+| `apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component.ts` | Quiet **Deselect all** on the selected-items toolbar |
 | `apps/web/src/app/shared/project-select-dialog/project-select-dialog.component.ts`       | Project picker dialog (assign project)                      |
 | `apps/web/src/app/shared/text-input-dialog/text-input-dialog.component.ts`              | Text input dialog (bulk address change)                      |
 | `apps/web/src/app/features/map/map-shell/component/map-shell.component.ts`                                          | Host wiring for `?share` URL token resolve and pane opening  |

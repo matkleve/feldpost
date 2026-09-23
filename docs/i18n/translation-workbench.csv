@@ -1039,6 +1039,7 @@ workspace.toolbar.size.row,List,apps/web/src/app/shared/ui-primitives/card-varia
 workspace.toolbar.size.small,Small,apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content,Small,Klein,Piccolo
 workspace.toolbar.size.medium,Medium,apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content,Medium,Mittel,Medio
 workspace.toolbar.size.large,Large,apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content,Large,Groß,Grande
+workspace.toolbar.action.deselectAll,Deselect all,apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component.html text-node,Deselect all,Alle abwählen,Deseleziona tutto
 media.page.header.item,item,apps/web/src/app/features/media/media-page-header.component.ts ts:content,item,Element,elemento
 media.page.header.items,items,apps/web/src/app/features/media/media-page-header.component.ts ts:content,items,Elemente,elementi
 media.page.header.loadedOfTotal,{loaded} of {total} items loaded,apps/web/src/app/features/media/media-page-header.component.ts inline-template text-node,{loaded} of {total} items loaded,{loaded} von {total} Elementen geladen,{loaded} di {total} elementi caricati

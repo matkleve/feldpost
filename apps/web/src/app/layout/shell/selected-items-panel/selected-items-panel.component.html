@@ -24,12 +24,5 @@
         (hoverEnded)="onWorkspaceItemHoverEnded($event)"
       />
     </div>
-
-    @if (showFooter()) {
-      <app-workspace-pane-footer
-        [scopeIds]="exportScopeIds()"
-        [images]="exportScopeImages()"
-      />
-    }
   }
 </div>

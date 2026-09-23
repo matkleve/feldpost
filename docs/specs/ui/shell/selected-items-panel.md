@@ -7,7 +7,7 @@
 
 ## What It Is
 
-The right-rail **Selected items** surface in the panel column. Shows the current unified media selection (grid, toolbar filters, bulk actions footer) and inline media detail when one item is focused. Opens from the right-rail download icon and from selection-driven flows that today open the Workspace Pane.
+The right-rail **Selected items** surface in the panel column. Shows the current unified media selection (grid, toolbar filters) and inline media detail when one item is focused. Selecting happens on the canvas. This panel mirrors that selection. Opens from the right-rail download icon and from selection-driven flows that today open the Workspace Pane.
 
 ## What It Looks Like
 
@@ -15,8 +15,8 @@ The right-rail **Selected items** surface in the panel column. Shows the current
 - **Body:** full-height column inside the panel surface body:
   - **Detail mode:** `MediaDetailViewComponent` — full body height; **no** shell footer; **no** body divider. Shell surface title row hidden (detail header owns chrome). Requires panel width ≥ **480px** or panel-embedded layout override — see [shell-panel-resize.md](./shell-panel-resize.md) § Detail mode.
   - **Grid mode:** `WorkspaceToolbarComponent` + `ItemGridComponent` with projected domain items.
-  - **Footer:** `WorkspacePaneFooterComponent` when `selectedMediaIds.size > 0` (export bar — intrinsic height, no resize divider).
-  - **Stack split:** when **another** panel stack is open (e.g. Upload + Tips), vertical space is split by the **stack divider** in `app-shell-panel-column` — see [shell-panel-resize.md](./shell-panel-resize.md) § Stack divider. **Not** between grid and footer inside this panel.
+  - **Deselect:** one quiet `hlmBtn` `ghost` `xs` on the toolbar, visible when `selectedMediaIds.size > 0`. Label **Deselect all**. Calls `UnifiedSelectionService.clearSelection()`. No export, share, or select-all bar.
+  - **Stack split:** when **another** panel stack is open (e.g. Upload + Tips), vertical space is split by the **stack divider** in `app-shell-panel-column` — see [shell-panel-resize.md](./shell-panel-resize.md) § Stack divider. **Not** inside this panel.
 - **Width:** panel column uses an explicit px width while open (stored default **400px**, clamped to **≥480px** on paint for detail layout), drag-resizable via `app-shell-column-divider` between canvas and panel column — see [shell-panel-resize.md](./shell-panel-resize.md).
 - **No tabs:** Upload and Projects are **not** in this panel. Upload is `upload` panel only; Projects is canvas `/projects`.
 
@@ -39,8 +39,8 @@ The right-rail **Selected items** surface in the panel column. Shows the current
 | 4 | Clicks item in grid | Opens inline detail for that media id | `detailMediaId` set |
 | 5 | Closes detail | Returns to grid mode | `detailMediaId` cleared |
 | 6 | Uses toolbar filter/sort/group | Scoped grid updates; selection kept by id | existing workspace toolbar |
-| 7 | Uses footer bulk actions | Same as [workspace-actions-bar.md](../workspace/workspace-actions-bar.md) | `WorkspacePaneFooterComponent` |
-| 8 | Clears all selection | Footer hides; panel may stay open showing empty state | `selectedMediaIds` empty |
+| 7 | Clicks **Deselect all** | Clears the canvas selection | `WorkspaceSelectionService.clearSelection()` |
+| 8 | Selection becomes empty | Deselect control hides; panel may stay open showing empty state | `selectedMediaIds` empty |
 | 9 | Opens share URL with media set | Resolves token; selection becomes resolved ids; panel opens | share restore flow |
 | 10 | Grid shell **off** | Legacy Workspace Pane still handles these flows | `shellGridLayout === false` |
 
@@ -63,9 +63,10 @@ app-shell-panel-surface [panelId=download]
     └── @else
         ├── .selected-items-panel__body
         │   ├── app-workspace-toolbar
+        │   │   └── @if selection.size > 0
+        │   │       └── Deselect all (`hlmBtn` ghost xs)
         │   └── app-workspace-selected-items-grid
-        └── @if selection.size > 0
-            └── app-workspace-pane-footer
+        └── no footer
 ```
 
 ## Data
@@ -93,7 +94,7 @@ erDiagram
 | --- | --- | --- | --- |
 | `panelOpen` | per `download` id | `closed` | Body mounted in panel column |
 | `detailMediaId` | `string \| null` | `null` | Grid vs detail layout |
-| `selection` | `Set<string>` | empty | Grid selection + footer visibility |
+| `selection` | `Set<string>` | empty | Grid selection + Deselect all visibility |
 
 Panel open/closed: `ShellLayoutService` FSM (`closed` ↔ `open`). Detail and selection are orthogonal to panel FSM.
 
@@ -102,7 +103,7 @@ Panel open/closed: `ShellLayoutService` FSM (`closed` ↔ `open`). Detail and se
 | File | Purpose |
 | --- | --- |
 | `layout/shell/selected-items-panel/selected-items-panel.component.ts` | Panel body orchestration + body resize observer |
-| `layout/shell/selected-items-panel/selected-items-panel.component.html` | Grid/detail/footer/divider composition |
+| `layout/shell/selected-items-panel/selected-items-panel.component.html` | Grid/detail composition |
 | `layout/shell/selected-items-panel/selected-items-panel.component.scss` | Panel body geometry only |
 | `core/unified-selection/unified-selection.service.ts` | Single selection store |
 | `core/unified-selection/unified-selection.types.ts` | Scope + mirror contract |
@@ -112,7 +113,6 @@ Reused unchanged (composition only):
 
 - `shared/workspace-pane/workspace-toolbar/`
 - `shared/workspace-pane/selected-items/`
-- `shared/workspace-pane/footer/workspace-pane-footer/`
 - `shared/workspace-pane/media-detail/`
 
 ## Wiring
@@ -127,7 +127,7 @@ sequenceDiagram
   Sel-->>Panel: selected ids
   Map->>Shell: open(download) on scope open
   Shell-->>Panel: mount body
-  Panel->>Sel: footer actions mutate selection
+  Panel->>Sel: Deselect all clears selection
 ```
 
 ## Interaction emphasis
@@ -136,7 +136,7 @@ sequenceDiagram
 | --- | --- | --- |
 | Panel close | Muted ink | Primary ink + action hover |
 | Grid tiles | Item grid contract | Same as workspace today |
-| Footer actions | [workspace-actions-bar.md](../workspace/workspace-actions-bar.md) | unchanged |
+| Deselect all | muted ghost | gold quiet emphasis on hover |
 
 ## Visual Behavior Contract
 
@@ -146,7 +146,7 @@ sequenceDiagram
 | Body column | `app-selected-items-panel` | selected-items-panel | scroll region | `.selected-items-panel`, `.selected-items-panel__body` | content `0` | fills surface body |
 | Toolbar | `app-workspace-toolbar` | toolbar host | controls | toolbar selectors | content `0` | unchanged from workspace |
 | Grid | `app-workspace-selected-items-grid` | grid host | tiles | item-grid contract | content `0` | unchanged |
-| Footer | `app-workspace-pane-footer` | footer host | footer buttons | footer selectors | content `100` | intrinsic height at panel bottom |
+| Deselect all | `hlmBtn` host | toolbar host | the button | toolbar ghost `xs` | content `0` | visible only when selection is non-empty |
 
 ## Migration from Workspace Pane
 
@@ -168,7 +168,7 @@ sequenceDiagram
 - [ ] `download` surface renders `app-selected-items-panel`, not a placeholder paragraph.
 - [ ] No Upload or Projects tab in this panel.
 - [ ] Selection in panel grid mirrors map/`/media` selection (no second independent set).
-- [ ] Footer bulk actions match workspace footer behavior (export, share, delete).
+- [ ] Toolbar shows one quiet **Deselect all** button when the selection is non-empty, and no bottom export bar.
 - [ ] Column divider resizes canvas ↔ panel width within clamps; preference persists ([shell-panel-resize.md](./shell-panel-resize.md)).
 - [ ] Detail view opens inside panel body, same as workspace pane today.
 - [ ] With `shellGridLayout` on, marker/cluster open flows mount this panel instead of `app-workspace-pane`.

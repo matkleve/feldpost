@@ -10,6 +10,7 @@ import { FilterDropdownComponent } from '../../../dropdown-trigger/filter/filter
 import { SortDropdownComponent } from '../../../dropdown-trigger/sort/sort-dropdown.component';
 import { ProjectsDropdownComponent } from './projects-dropdown.component';
 import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-view.service';
+import { WorkspaceSelectionService } from '../../../../core/workspace-selection/workspace-selection.service';
 import { FilterService } from '../../../../core/filter/filter.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { MetadataService } from '../../../../core/metadata/metadata.service';
@@ -52,6 +53,7 @@ export type ToolbarDropdown = 'grouping' | 'filter' | 'sort' | 'projects' | null
 export class WorkspaceToolbarComponent implements OnInit {
 
   private readonly viewService = inject(WorkspaceViewService);
+  private readonly selectionService = inject(WorkspaceSelectionService);
   private readonly filterService = inject(FilterService);
   private readonly i18nService = inject(I18nService);
   private readonly metadata = inject(MetadataService);
@@ -102,6 +104,7 @@ export class WorkspaceToolbarComponent implements OnInit {
   readonly hasGrouping = computed(() => this.viewService.activeGroupings().length > 0);
   readonly hasFilters = computed(() => this.filterService.activeCount() > 0);
   readonly filterActiveCount = computed(() => this.filterService.activeCount());
+  readonly selectedCount = computed(() => this.selectionService.selectedCount());
   readonly hasCustomSort = computed(() => {
     const sorts = this.viewService.activeSorts();
     return sorts.length !== 1 || sorts[0].key !== 'date-captured' || sorts[0].direction !== 'desc';
@@ -181,6 +184,10 @@ export class WorkspaceToolbarComponent implements OnInit {
   closeDropdown(): void {
     this.activeDropdown.set(null);
     this.dropdownAnchor.set(null);
+  }
+
+  deselectAll(): void {
+    this.selectionService.clearSelection();
   }
 
   onThumbnailSizeToggleChange(raw: ToggleValue<string>): void {

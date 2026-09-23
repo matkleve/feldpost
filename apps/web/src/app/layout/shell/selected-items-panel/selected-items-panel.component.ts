@@ -12,15 +12,12 @@ import {
 import { WorkspaceToolbarComponent } from '../../../shared/workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component';
 import { WorkspaceSelectedItemsGridComponent } from '../../../shared/workspace-pane/selected-items/workspace-selected-items-grid.component';
 import { MediaDetailViewComponent } from '../../../shared/workspace-pane/media-detail/media-detail-view.component';
-import { WorkspacePaneFooterComponent } from '../../../shared/workspace-pane/footer/workspace-pane-footer/workspace-pane-footer.component';
 import type { UploadLocationMapPickRequest } from '../../../core/workspace-pane/workspace-pane-shell-events.types';
-import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
-import { UnifiedSelectionService } from '../../../core/unified-selection/unified-selection.service';
 import { ShellPanelColumnResizeService } from '../../../core/shell-layout/shell-panel-column-resize.service';
 import type { ThumbnailCardHoverEvent } from '../../../core/workspace-pane/workspace-pane-thumbnail-hover.types';
 
 /**
- * Selected items panel body — grid, toolbar, footer, and inline detail for grid shell download surface.
+ * Selected items panel body — grid, toolbar, and inline detail for the grid shell download surface.
  * @see docs/specs/ui/shell/selected-items-panel.md
  */
 @Component({
@@ -29,7 +26,6 @@ import type { ThumbnailCardHoverEvent } from '../../../core/workspace-pane/works
     WorkspaceToolbarComponent,
     WorkspaceSelectedItemsGridComponent,
     MediaDetailViewComponent,
-    WorkspacePaneFooterComponent,
   ],
   templateUrl: './selected-items-panel.component.html',
   styleUrl: './selected-items-panel.component.scss',
@@ -38,8 +34,6 @@ import type { ThumbnailCardHoverEvent } from '../../../core/workspace-pane/works
   },
 })
 export class SelectedItemsPanelComponent {
-  private readonly workspaceViewService = inject(WorkspaceViewService);
-  protected readonly selectionService = inject(UnifiedSelectionService);
   private readonly panelColumnResize = inject(ShellPanelColumnResizeService);
 
   readonly detailMediaId = input<string | null>(null);
@@ -61,15 +55,6 @@ export class SelectedItemsPanelComponent {
   readonly workspaceItemHoverEnded = output<string>();
 
   readonly panelWidthPx = this.panelColumnResize.panelColumnWidthPx;
-
-  readonly showFooter = computed(
-    () => !this.detailMediaId() && this.selectionService.selectedCount() > 0,
-  );
-
-  readonly exportScopeIds = computed(() =>
-    this.workspaceViewService.rawImages().map((img) => img.id),
-  );
-  readonly exportScopeImages = computed(() => this.workspaceViewService.rawImages());
 
   onThumbnailClick(imageId: string): void {
     this.detailRequested.emit(imageId);

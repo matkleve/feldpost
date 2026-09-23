@@ -1612,7 +1612,7 @@
         },
         {
           "label": "Used in",
-          "value": "`app-workspace-pane-footer`, `app-workspace-selected-items-grid`"
+          "value": "`app-workspace-selected-items-grid`"
         },
         {
           "label": "Gaps",
@@ -1676,7 +1676,7 @@
         },
         {
           "label": "Used in",
-          "value": "`app-workspace-pane-footer`"
+          "value": "`app-workspace-selected-items-grid`"
         },
         {
           "label": "Gaps",
@@ -1881,7 +1881,7 @@
         },
         {
           "label": "Composed of",
-          "value": "`app-workspace-pane-header`, `app-workspace-pane-toolbar`, `app-workspace-selected-items-grid`, `app-media-detail-view`, `app-workspace-pane-footer`, `app-group-tab-bar`"
+          "value": "`app-workspace-pane-header`, `app-workspace-pane-toolbar`, `app-workspace-selected-items-grid`, `app-media-detail-view`, `app-group-tab-bar`"
         },
         {
           "label": "Used in",
@@ -2073,41 +2073,7 @@
         },
         {
           "label": "Used in",
-          "value": "workspace pane footer area"
-        },
-        {
-          "label": "Gaps",
-          "value": "none"
-        }
-      ]
-    },
-    {
-      "slice": "workspace-pane",
-      "section": "workspace-pane-footer",
-      "selector": "app-workspace-pane-footer",
-      "name": "Workspace Pane Footer",
-      "status": "active",
-      "path": "apps/web/src/app/shared/workspace-pane/footer/workspace-pane-footer/workspace-pane-footer.component.ts",
-      "spec": "docs/specs/component/workspace/workspace-pane-footer.md",
-      "specId": "component/workspace/workspace-pane-footer",
-      "useFor": "Footer action bar for the workspace pane; compact toolbar for selection, export/share, bulk location delete, and bulk media delete.",
-      "notFor": null,
-      "fields": [
-        {
-          "label": "Variant axes",
-          "value": "none"
-        },
-        {
-          "label": "Other inputs",
-          "value": "`scopeIds: string[]` (required), `images: WorkspaceImage[]` (required)"
-        },
-        {
-          "label": "Composed of",
-          "value": "`app-project-select-dialog`, `app-share-link-audience-dialog`, `app-confirm-dialog`"
-        },
-        {
-          "label": "Used in",
-          "value": "`app-workspace-pane`"
+          "value": "`app-upload-panel`"
         },
         {
           "label": "Gaps",

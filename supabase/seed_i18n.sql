@@ -32243,6 +32243,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.toolbar.action.deselectAll', 'Deselect all', 'en', 'apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Deselect all', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.toolbar.action.deselectAll'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Alle abwählen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.toolbar.action.deselectAll'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Deseleziona tutto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.toolbar.action.deselectAll'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'media.page.header.item', 'item', 'en', 'apps/web/src/app/features/media/media-page-header.component.ts ts:content')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,

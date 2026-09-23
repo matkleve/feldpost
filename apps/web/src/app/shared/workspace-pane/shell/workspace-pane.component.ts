@@ -7,11 +7,8 @@ import { HLM_TABS_IMPORTS } from '../../ui/tabs';
 import { WorkspaceToolbarComponent } from '../toolbar/workspace-toolbar/workspace-toolbar.component';
 import { WorkspaceSelectedItemsGridComponent } from '../selected-items/workspace-selected-items-grid.component';
 import { MediaDetailViewComponent } from '../media-detail/media-detail-view.component';
-import { WorkspacePaneFooterComponent } from '../footer/workspace-pane-footer/workspace-pane-footer.component';
 import { WorkspaceProjectsPanelComponent } from '../projects-panel/workspace-projects-panel.component';
 import type { UploadLocationMapPickRequest } from '../../../core/workspace-pane/workspace-pane-shell-events.types';
-import { WorkspaceViewService } from '../../../core/workspace-view/workspace-view.service';
-import { WorkspaceSelectionService } from '../../../core/workspace-selection/workspace-selection.service';
 import type { ThumbnailCardHoverEvent } from '../../../core/workspace-pane/workspace-pane-thumbnail-hover.types';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { FeatureFlagsService } from '../../../core/feature-flags/feature-flags.service';
@@ -32,7 +29,6 @@ import type { WorkspacePaneTab } from '../../../core/workspace-pane/workspace-pa
     WorkspaceToolbarComponent,
     WorkspaceSelectedItemsGridComponent,
     MediaDetailViewComponent,
-    WorkspacePaneFooterComponent,
     WorkspaceProjectsPanelComponent,
   ],
   templateUrl: './workspace-pane.component.html',
@@ -44,8 +40,6 @@ import type { WorkspacePaneTab } from '../../../core/workspace-pane/workspace-pa
 })
 export class WorkspacePaneComponent {
   private readonly i18nService = inject(I18nService);
-  private readonly workspaceViewService = inject(WorkspaceViewService);
-  protected readonly selectionService = inject(WorkspaceSelectionService);
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
   private readonly featureFlags = inject(FeatureFlagsService);
   readonly shellGridLayout = this.featureFlags.shellGridLayout;
@@ -98,10 +92,6 @@ export class WorkspacePaneComponent {
   readonly workspaceItemHoverEnded = output<string>();
 
   // ── Internal state ───────────────────────────────────────────────────────
-  readonly exportScopeIds = computed(() =>
-    this.workspaceViewService.rawImages().map((img) => img.id),
-  );
-  readonly exportScopeImages = computed(() => this.workspaceViewService.rawImages());
   readonly resolvedTitle = computed(
     () => this.title() || this.t('workspace.pane.title', 'Workspace'),
   );

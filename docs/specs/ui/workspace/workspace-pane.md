@@ -135,10 +135,8 @@ Normative service contract: [`docs/specs/service/share-set/share-link-restore.md
 
 ### Share affordance contract
 
-- The workspace footer keeps a share/copy affordance whenever footer actions are visible.
-- Footer primary share copy uses scope-aware labels:
-  - `Share All` when footer scope exists but explicit selection is empty.
-  - `Share Selected` when one or more media items are explicitly selected.
+- The selected-items surface does not host a bottom share, copy, or ZIP bar. Selection belongs to the canvas. The toolbar exposes one quiet **Deselect all** control while the selection is non-empty.
+- Share and copy stay on the thumbnail context menu.
 - Generated URL shape follows the canonical matrix from [`share-link-restore.md`](../../service/share-set/share-link-restore.md):
   - one selected detail target: `share + media`
   - many selected without detail target: `share`
@@ -205,7 +203,7 @@ AuthenticatedAppLayout (canonical)       ← owns flex split: main + pane; wraps
 
         [In both tabs]
         ├── [detailMediaId set] MediaDetailViewComponent (overlay on top, full-pane modal)
-        └── [selectionService.selectedCount() > 0] WorkspaceExportBarComponent (slot-based footer)
+        └── [selectedCount > 0] Deselect all on the workspace toolbar (quiet ghost `xs`)
 ```
 
 ### Bottom Sheet (mobile variant)
@@ -322,20 +320,17 @@ sequenceDiagram
   participant Ctx as SelectedItemsContextPort
   participant View as WorkspaceViewService
   participant Sel as WorkspaceSelectionService
-  participant Export as WorkspaceExportBarComponent
 
   User->>Shell: Enter route (/map, /media, /projects)
   Shell->>Ctx: Resolve selected-items provider for route
   Shell->>Pane: bindSelectedItemsContext(Ctx)
   Shell->>Pane: isOpen=true, width=320
-  User->>Pane: Select one media item
-  Pane->>Sel: toggleSelection(mediaId)
-  Sel-->>Export: selectedCount=1
-  Export-->>Pane: bottom export bar visible
-  User->>Pane: Use workspace toolbar / detail / selection flows
+  User->>Pane: Select one media item on the canvas
+  Pane->>Sel: selection mirrors canvas
+  Sel-->>Pane: selectedCount=1, Deselect all visible
+  User->>Pane: Deselect all
+  Pane->>Sel: clearSelection()
   Pane->>View: Read reactive workspace content
-  Sel-->>Export: selectedCount > 0
-  Export-->>Pane: export actions become visible
 ```
 
 ### Hover Link Flow (Map ↔ Workspace)

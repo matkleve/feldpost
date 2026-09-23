@@ -668,7 +668,7 @@
 - **Variant axes**: none
 - **Other inputs**: `title: string` (required), `options: ProjectSelectOption[]` (required), `message`, `confirmLabel`, `cancelLabel`
 - **Composed of**: standalone
-- **Used in**: `app-workspace-pane-footer`, `app-workspace-selected-items-grid`
+- **Used in**: `app-workspace-selected-items-grid`
 - **Gaps**: none
 
 ---
@@ -693,7 +693,7 @@
 - **Spec**: [`docs/specs/component/workspace/share-link-audience-dialog.md`](workspace/share-link-audience-dialog.md)
 - **Variant axes**: none (single audience-selection flow)
 - **Composed of**: standalone
-- **Used in**: `app-workspace-pane-footer`
+- **Used in**: `app-workspace-selected-items-grid`
 - **Gaps**: none
 
 ---
