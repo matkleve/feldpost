@@ -79,19 +79,19 @@ const RIGHT_GROUPS: readonly ShellControlGroup[] = [
     id: 'help',
     options: [
       {
+        id: 'theme',
+        icon: 'light_mode',
+        labelKey: 'shell.control.theme',
+        labelFallback: 'Theme',
+        kind: 'theme',
+      },
+      {
         id: 'tips',
         icon: 'lightbulb_outline',
         labelKey: 'shell.control.tips',
         labelFallback: 'Tips',
         kind: 'panel',
         panelId: 'tips',
-      },
-      {
-        id: 'theme',
-        icon: 'light_mode',
-        labelKey: 'shell.control.theme',
-        labelFallback: 'Theme',
-        kind: 'theme',
       },
       {
         id: 'help',
