@@ -15,6 +15,11 @@
   --spacing-6: calc(0.25rem * 8);
   --spacing-8: calc(0.25rem * 16);
 
+  // Sets circular floating map + grid-shell icon hit targets (above 2.75rem minimum)
+  // @see docs/specs/ui/shell/shell-control-option.md
+  // @see docs/specs/component/map/gps-button.md
+  --shell-control-option-size: 4rem;
+
   // Defines full pill radius for chips and circular controls (not in Tailwind @theme radius ladder)
   // @see docs/design/tokens.md §3.3
   --radius-full: 9999px;

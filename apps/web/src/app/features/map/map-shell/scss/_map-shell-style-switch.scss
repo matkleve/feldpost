@@ -5,25 +5,18 @@
 @use '../../../../../styles/interaction-emphasis-quiet-row' as emphasis;
 
 .map-style-switch {
-  --touch-target-base: 2.75rem;
-  --touch-target-mobile: 3rem;
-
   position: absolute;
-  bottom: calc(var(--spacing-5) + 2.75rem + var(--spacing-2));
+  bottom: calc(var(--spacing-5) + var(--shell-control-option-size) + var(--spacing-2));
   right: var(--spacing-4);
   z-index: 200;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
-  @media (max-width: 47.9375rem) {
-    bottom: calc(var(--spacing-5) + 3rem + var(--spacing-2));
-  }
 }
 
 :host button.map-style-switch__btn {
-  width: var(--touch-target-base);
-  height: var(--touch-target-base);
+  width: var(--shell-control-option-size);
+  height: var(--shell-control-option-size);
   border: 1px solid var(--border);
   border-radius: var(--radius-full);
   @include frosted-chrome.outline-control;
@@ -52,10 +45,6 @@
     box-shadow: var(--interactive-focus-ring);
   }
 
-  @media (max-width: 47.9375rem) {
-    width: var(--touch-target-mobile);
-    height: var(--touch-target-mobile);
-  }
 }
 
 // Icon + basemap indicator dots stacked inside the circular hit target
@@ -65,11 +54,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.18rem;
+  gap: var(--spacing-1);
 }
 
 .map-style-switch__icon {
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-xl);
   line-height: var(--line-height-solid);
   color: inherit;
 }
@@ -79,13 +68,13 @@
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 0.2rem;
+  gap: var(--spacing-1);
   width: 100%;
 }
 
 .map-style-switch__dot {
-  width: 0.25rem;
-  height: 0.25rem;
+  width: var(--spacing-2);
+  height: var(--spacing-2);
   border-radius: var(--radius-full);
   background: color-mix(in srgb, var(--muted-foreground) 35%, transparent);
   transition: background var(--motion-duration-fast) var(--motion-ease-out);

@@ -32,8 +32,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: var(--shell-control-option-size);
+  height: var(--shell-control-option-size);
   padding: 0;
   border: 0;
   border-radius: var(--radius-full);

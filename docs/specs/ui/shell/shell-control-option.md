@@ -2,11 +2,11 @@
 
 ## What It Is
 
-A 2.75rem icon button in a control container. A hover label overlays beside it and does not change track size.
+A `var(--shell-control-option-size)` icon button in a control container. A hover label overlays beside it and does not change track size.
 
 ## What It Looks Like
 
-Square hit target, 2.75rem by 2.75rem, icon centered. The label is a pill (`var(--radius-full)`) on plane `200`, positioned beside the button. It does not participate in the rail's flex size. Canvas option uses the current route for emphasis. Panel option uses the open state from `ShellLayoutService`.
+Square hit target, `4rem` by `4rem` (`--shell-control-option-size`), icon centered. Not an `hlmBtn` variant. Custom `app-shell-control-option` with class `shell-control-option__button`. The label is a pill (`var(--radius-full)`) on plane `200`, positioned beside the button. It does not participate in the rail's flex size. Canvas option uses the current route for emphasis. Panel option uses the open state from `ShellLayoutService`.
 
 ## Where It Lives
 
@@ -75,14 +75,14 @@ sequenceDiagram
 
 | Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer | Test Oracle |
 | --- | --- | --- | --- | --- | --- | --- |
-| Hit target | button | `app-shell-control-option` | button | `button` | content `0` | 2.75rem square |
+| Hit target | button | `app-shell-control-option` | button | `button` | content `0` | `--shell-control-option-size` square |
 | Hover label | label span | `app-shell-control-option` | none | `.shell-control-option__label` | `200` | rail width unchanged |
 
 The label is `position: absolute` against the option host. Showing it does not change the button's box.
 
 ## Acceptance Criteria
 
-- [ ] The button is 2.75rem square.
+- [ ] The button is `--shell-control-option-size` square.
 - [ ] Showing the label does not change the grid track widths.
 - [ ] Copy uses `t(key, fallback)` with an English fallback.
 - [ ] `+` has no `routerLink` and no panel id.
