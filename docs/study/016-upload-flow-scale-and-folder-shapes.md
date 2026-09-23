@@ -153,3 +153,13 @@ One run: `--count=100000 --profile=flat --answer-trays`. Wall clock 1 204 s. Exi
 ## What this does not decide
 
 Nothing here is a proposal to change chunk size, concurrency, or the tokenizer. The measurements stand on their own. The three dropped towns and the Klagenfurt alias conflict are defects in the current classifier. The 100 000-file full run does not finish inside the harness budgets, and a few jobs attempt a phase edge the map does not list.
+
+## Update 2026-09-23 — the one `upload_error`
+
+The paragraph in § 3 that says the cause was not recovered still stands as the state of the first run (`--detail=0`). This section adds the re-run. It does not delete that sentence. The ordered work is [STUDY-017](./017-upload-scale-action-plan.md).
+
+`[A]` Same harness, `--count=1000 --profile=company_street --answer-trays --detail=0`, seed 7, `UPLOAD_TRACE_COMPARE_PROFILES=0`, Vitest filter `location required`. Exit 0 in 6.4 s. Phases matched the first run: `awaiting_disambiguation=60 complete=279 error=1 missing_data=653 skipped=7`.
+
+`[A]` The error job is `Wiener Neustadt/2700/Maria-Theresien-Straße 31/IMG_2901.jpg`, `issueKind=upload_error`, `failedAt=awaiting_disambiguation`, `errorKey` empty. Message: `[upload-phase] illegal transition awaiting_disambiguation → skipped (channel=pipeline, job=2fa2184f-0e46-47fe-bf5d-4b4b15397936)`. The job id belongs to that process.
+
+`[A]` That edge is not in the map. `skipped` is legal from `dedup_check` only (`upload-phase-transitions.ts:79`). The only writer of `skipped` is `handleDedupSkip` (`upload-dedup-skip.util.ts:17`). Vitest throws on the violation (`vitest.setup.ts:19-21`), and `handleUploadPipelineError` stores the throw as `job.error` (`upload-manager-error.util.ts:42`). In the app the same call logs and then writes the new phase (`upload-job-state.service.ts:216-222`). `[C]` In the browser this file is a skipped duplicate, not a failed upload.

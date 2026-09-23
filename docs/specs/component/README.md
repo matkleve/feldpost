@@ -81,7 +81,7 @@ Project list and details UI.
 Upload entry points and upload panel contract splits.
 
 - [upload-button-zone](upload/upload-button-zone.md)
-- [upload-panel](upload/upload-panel.md)
+- [upload-panel](upload/upload-panel.md) (+ [folder-shape tips](upload/upload-panel.folder-shape-tips.supplement.md))
 - [upload-panel.acceptance-criteria](upload/upload-panel.acceptance-criteria.md)
 - [upload-panel.feedback-triage](upload/upload-panel.feedback-triage.md)
 - [upload-panel.lane-and-row-actions](upload/upload-panel.lane-and-row-actions.md)
