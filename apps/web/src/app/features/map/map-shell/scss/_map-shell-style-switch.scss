@@ -6,7 +6,7 @@
 
 .map-style-switch {
   position: absolute;
-  bottom: calc(var(--spacing-5) + var(--shell-control-option-size) + var(--spacing-2));
+  bottom: calc(var(--spacing-5) + var(--map-floating-control-size) + var(--spacing-2));
   right: var(--spacing-4);
   z-index: 200;
   display: inline-flex;
@@ -15,8 +15,8 @@
 }
 
 :host button.map-style-switch__btn {
-  width: var(--shell-control-option-size);
-  height: var(--shell-control-option-size);
+  width: var(--map-floating-control-size);
+  height: var(--map-floating-control-size);
   border: 1px solid var(--border);
   border-radius: var(--radius-full);
   @include frosted-chrome.outline-control;

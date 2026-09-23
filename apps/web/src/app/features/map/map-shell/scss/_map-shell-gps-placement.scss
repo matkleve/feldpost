@@ -10,8 +10,8 @@
   bottom: var(--spacing-5);
   right: var(--spacing-4);
   z-index: 200;
-  width: var(--shell-control-option-size);
-  height: var(--shell-control-option-size);
+  width: var(--map-floating-control-size);
+  height: var(--map-floating-control-size);
   border: 1px solid var(--border);
   border-radius: var(--radius-full);
   @include frosted-chrome.outline-control;

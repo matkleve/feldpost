@@ -6,7 +6,7 @@ A floating toggle button in Map Zone that controls GPS tracking mode. On activat
 
 ## What It Looks Like
 
-`var(--shell-control-option-size)` circle (`4rem`). Not an `hlmBtn` variant — custom `button.map-gps-btn` with `frosted-chrome.outline-control`. Background stays color-bg-surface. Crosshair icon color is text-primary (black/dark) when inactive and color-clay (orange) while active or seeking. Inactive icon is `gps_not_fixed` (no center dot); active icon is `gps_fixed` (center dot). Spinner replaces the icon while seeking. Subtle elevation-overlay shadow.
+`var(--map-floating-control-size)` circle (`3rem`). **Not** `hlmBtn` and **not** `app-shell-control-option` — custom `button.map-gps-btn` in `MapShellComponent` with `frosted-chrome.outline-control`. Background stays color-bg-surface. Crosshair icon color is text-primary (black/dark) when inactive and color-clay (orange) while active or seeking. Inactive icon is `gps_not_fixed` (no center dot); active icon is `gps_fixed` (center dot). Spinner replaces the icon while seeking. Subtle elevation-overlay shadow.
 
 User marker visual contract:
 
@@ -158,7 +158,7 @@ sequenceDiagram
 ## Acceptance Criteria
 
 - [x] Floating bottom-right in Map Zone
-- [x] `2.75rem` (≈44px) desktop, `3rem` (≈48px) mobile tap target
+- [x] `--shell-control-option-size` (`4rem`) tap target
 - [x] Button is a toggle: first click enables tracking, second click disables tracking
 - [x] Map recenters to user location only when GPS button is clicked (not on startup geolocation)
 - [x] While active, geolocation refresh runs roughly every 60 seconds
