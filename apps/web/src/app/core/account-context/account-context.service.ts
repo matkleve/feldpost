@@ -49,6 +49,7 @@ export class AccountContextService {
       });
     }
     this.memberships.set(memberships);
+    await this.widgetInstall.load();
   }
 
   async setContext(organizationId: string | null): Promise<void> {

@@ -3,11 +3,11 @@ import { FormsModule } from '@angular/forms';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { SupabaseService } from '../../core/supabase/supabase.service';
 
-interface AccountMessageRow {
+interface ThreadMessage {
   id: string;
   body: string;
   created_at: string;
-  sender_id: string;
+  mine: boolean;
 }
 
 @Component({
@@ -21,6 +21,12 @@ interface AccountMessageRow {
         {{ t('account.chat.email', 'Email') }}
         <input [(ngModel)]="email" name="email" type="email" />
       </label>
+      <button type="button" (click)="load()">{{ t('account.chat.open', 'Open') }}</button>
+      <ul>
+        @for (message of messages(); track message.id) {
+          <li>{{ message.mine ? t('account.chat.you', 'You') : email }}: {{ message.body }}</li>
+        }
+      </ul>
       <label>
         {{ t('account.chat.body', 'Message') }}
         <input [(ngModel)]="body" name="body" />
@@ -29,11 +35,6 @@ interface AccountMessageRow {
       @if (error()) {
         <p role="alert">{{ error() }}</p>
       }
-      <ul>
-        @for (message of messages(); track message.id) {
-          <li>{{ message.body }}</li>
-        }
-      </ul>
     </section>
   `,
 })
@@ -44,22 +45,18 @@ export class AccountChatComponent {
   email = '';
   body = '';
   readonly error = signal<string | null>(null);
-  readonly messages = signal<AccountMessageRow[]>([]);
-
-  constructor() {
-    void this.load();
-  }
+  readonly messages = signal<ThreadMessage[]>([]);
 
   async load(): Promise<void> {
-    const { data, error } = await this.supabase.client
-      .from('account_messages')
-      .select('id, body, created_at, sender_id')
-      .order('created_at', { ascending: false });
+    this.error.set(null);
+    const { data, error } = await this.supabase.client.rpc('list_account_thread', {
+      p_email: this.email.trim(),
+    });
     if (error) {
       this.error.set(error.message);
       return;
     }
-    this.messages.set((data ?? []) as AccountMessageRow[]);
+    this.messages.set((data ?? []) as ThreadMessage[]);
   }
 
   async send(): Promise<void> {

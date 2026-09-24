@@ -36,6 +36,11 @@ export const AUTHENTICATED_APP_ROUTES: Routes = [
     component: AuthenticatedAppLayoutComponent,
     children: [
       {
+        path: 'join',
+        loadComponent: () =>
+          import('../features/account-join/account-join.component').then((m) => m.AccountJoinComponent),
+      },
+      {
         path: 'chat',
         loadComponent: () =>
           import('../features/account-chat/account-chat.component').then((m) => m.AccountChatComponent),
