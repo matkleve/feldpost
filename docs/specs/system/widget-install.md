@@ -2,15 +2,15 @@
 
 ## What It Is
 
-A widget is an addable app on the left nav. This spec says who has one installed, and what hiding it must not delete. It does not name tables and it does not change signup or the map mount.
+A widget is an addable app on the left nav. Install is stored per user in the organization `user_org_id()` returns. Hiding a widget does not delete subject data.
 
 ## What It Looks Like
 
-The left nav shows the widgets installed for the user in the organization they have entered. A new signup shows Map and Media. Someone who already uses Projects, Colleagues, or Organization keeps those rows unless that organization turned them off. Settings and Account stay on the shell. Upload is present when Media is present. The right side is not an install list.
+The left nav shows the widgets installed for this user. A profile with no install rows shows Map and Media. A profile that already had Projects, Colleagues, or Organization keeps them unless that widget's `installed` value is false or the organization set `allowed` false. Settings and Account stay on the shell. The map host stays mounted.
 
 ## Where It Lives
 
-Nav rows are built today from the fixed array in `apps/web/src/app/features/nav/nav.component.ts`. This spec does not replace that array. The layout still mounts `app-map-shell` and `app-upload-shell` on every authenticated route (`authenticated-app-layout.component.html`).
+Nav rows come from `WidgetInstallService.installedIds`. The catalog of ids is `map`, `media`, `projects`, `colleagues`, `organization`. Chat stays on `/colleagues` until a later page spec. `/`, `/map`, `/media`, `/projects`, `/colleagues`, and `/organization` are the link names. Opening one does not write an install row. `handle_new_user()` is unchanged.
 
 ## Actions
 
@@ -23,11 +23,11 @@ Nav rows are built today from the fixed array in `apps/web/src/app/features/nav/
 | 5 | Organization pushes a widget to all users | That push turns it on, including for users who had turned it off. |
 | 6 | Organization locks a preinstalled widget | The user cannot turn it off. |
 | 7 | Organization does not allow a widget | The user cannot install it. |
-| 8 | Shared link to an app the user has not installed | Opens until logout. Not a durable install. Does not bypass RLS. How the link names the app is not specified. Do not build this until it is. |
-| 9 | Map is not the active route | The map host stays mounted and may be hidden. Do not destroy `app-map-shell` in the install change. |
-| 10 | Signup | `handle_new_user()` is unchanged by this spec. Invite-less registration and several organizations per email are out of scope here. |
+| 8 | Shared link | The path is the widget name. Opening it does not write `user_widget_installs`. It does not bypass RLS. |
+| 9 | Map is not the active route | `app-map-shell` stays mounted. |
+| 10 | Signup | `handle_new_user()` does not write install rows. No rows means Map and Media. |
 
-Widget ids in this spec: `map`, `media`, `projects`, `colleagues`, `organization`, `chat`. Files is not one of them. Do not add a `/files` route from this spec.
+Widget ids: `map`, `media`, `projects`, `colleagues`, `organization`. Files is not one of them. `chat` is not a separate id in this change.
 
 ## Component Hierarchy
 
@@ -54,16 +54,16 @@ sequenceDiagram
 
 ## Data
 
-No install table is created by this spec. A later migration may add one only after this file names the permission key and the table shape. Until then, agents must not invent columns.
+Two tables. Both are scoped by `organization_id = user_org_id()`. `user_org_id()` is unchanged.
 
-| Fact the future store must answer | Rule already locked |
-| --- | --- |
-| Is this widget installed for this user in the organization they entered? | Per user, inside that organization. |
-| Did the organization preinstall it, allow it, or lock it? | All three may be true. Lock means the user cannot turn it off. |
-| Did the organization push it? | Push is its own action. It turns the widget on again. |
-| What must uninstall not delete? | `locations`, `media_item_location_links`, `media_items`, chat rows, `projects`, `media_projects`. |
+| Table | Columns | Who writes |
+| --- | --- | --- |
+| `organization_widget_policies` | `widget_id`, `allowed`, `preinstalled`, `locked` | `has_permission('org.settings.edit')` |
+| `user_widget_installs` | `widget_id`, `installed` | The user, through `set_own_widget_installed`. Push uses `push_organization_widget`. |
 
-`user_org_id()` still returns one uuid from `profiles.organization_id`. This spec does not change it. See STUDY-018.
+`locked` requires `preinstalled` and `allowed`. Push sets `installed` true for every profile in the organization. Saving `preinstalled` does not. Uninstall does not delete `locations`, `media_item_location_links`, `media_items`, chat rows, `projects`, or `media_projects`.
+
+Several organizations per email are not in these tables.
 
 ```mermaid
 flowchart TD
@@ -82,36 +82,30 @@ flowchart TD
 | locked | User cannot turn a preinstalled widget off | not set |
 | temporary | Open from a shared link until logout | not a stored install |
 
-Chat is its own widget. What `/colleagues` shows once chat is split off that page is not specified. Do not move the chat UI from this spec.
+Chat stays on the colleagues route. This spec does not add a `chat` widget id.
 
 ## File Map
 
 | File | Purpose |
 | --- | --- |
 | `docs/specs/system/widget-install.md` | This contract. |
-| `apps/web/src/app/features/nav/nav.component.ts` | Still the fixed list. A later phase reads installs. Not in this change. |
-| `supabase/migrations/` | No install migration until the blocks below are closed in this file. |
+| `supabase/migrations/20260924120000_widget_install.sql` | Tables, RLS, backfill, push, and own-install function. |
+| `apps/web/src/app/core/widget-install/` | Read model and `effectiveWidgetIds`. |
+| `apps/web/src/app/features/nav/nav.component.ts` | Renders `installedIds`. |
 
 ## Wiring
 
-The nav does not read an install store yet. When it does, the component calls `SupabaseService`, not the Supabase client. RLS uses `user_org_id()`. The client must not decide that a widget is installed.
+The nav calls `WidgetInstallService`, which calls `SupabaseService`. A failed read keeps the five current apps so a database without this migration does not go blank. A successful read with no user rows shows Map and Media.
 
-Blocks that close before any migration:
-
-- The permission key that may preinstall, allow, lock, and push. No `org.widgets.manage` key exists.
-- Whether user install and organization flags are one table or two, and the column names.
-- How a shared link names the app.
-- What `/colleagues` shows once Chat is its own widget.
-- The membership change that replaces one `profiles.organization_id`. That is STUDY-018 and STUDY-020, not this file.
+Permission key: `org.settings.edit`. Tables: `organization_widget_policies` and `user_widget_installs`. Link name: the existing path. Colleagues keeps chat. Membership stays one `profiles.organization_id`.
 
 ## Acceptance Criteria
 
-- [ ] A new signup's nav shows Map and Media, and does not show Projects, Colleagues, Organization, or Chat until one of the turn-on rules in Actions row 1 happens.
-- [ ] A person who already had Projects, Colleagues, or Organization still has them after the install migration, unless that organization turned them off.
-- [ ] Turning Map off does not delete `locations`, `media_item_location_links`, or `media_items`.
-- [ ] Turning Chat off does not delete chat rows.
-- [ ] Saving preinstall again leaves a user who turned that widget off still off. A push turns it on.
-- [ ] A widget the organization does not allow cannot be installed by the user.
-- [ ] `app-map-shell` is still mounted when the install list is first read by the nav.
-- [ ] `handle_new_user()` is unchanged by the install migration.
-- [ ] No install table ships while any block in Wiring is still open.
+- [ ] A profile with no `user_widget_installs` rows resolves to Map and Media.
+- [ ] The backfill inserts `installed = true` for existing profiles for all five ids.
+- [ ] `set_own_widget_installed` does not delete subject tables.
+- [ ] `push_organization_widget` sets `installed` true. Updating `preinstalled` does not.
+- [ ] A widget with `allowed = false` is not in `effectiveWidgetIds`.
+- [ ] `authenticated-app-layout.component.html` still contains `app-map-shell`.
+- [ ] `handle_new_user()` is not in `20260924120000_widget_install.sql`.
+- [ ] `effectiveWidgetIds` tests cover the rows above.

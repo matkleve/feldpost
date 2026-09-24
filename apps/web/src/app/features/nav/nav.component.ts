@@ -3,6 +3,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter, map, startWith } from 'rxjs/operators';
 import { AuthService } from '../../core/auth/auth.service';
+import { WidgetInstallService } from '../../core/widget-install/widget-install.service';
+import type { WidgetId } from '../../core/widget-install/widget-install.types';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { ThemeService } from '../../core/theme/theme.service';
 import { SettingsPaneService } from '../../core/settings-pane/settings-pane.service';
@@ -37,6 +39,7 @@ const SIDEBAR_WIDTH_TRANSITION_MS = 200;
 })
 export class NavComponent {
   private readonly router = inject(Router);
+  private readonly widgetInstall = inject(WidgetInstallService);
   private readonly authService = inject(AuthService);
   private readonly i18nService = inject(I18nService);
   private readonly settingsPaneService = inject(SettingsPaneService);
@@ -120,13 +123,21 @@ export class NavComponent {
     return this.t('nav.theme.light', 'Light');
   });
 
-  readonly navItems = computed<NavItem[]>(() => [
-    { icon: 'map', label: this.t('nav.item.map', 'Map'), route: '/' },
-    { icon: 'perm_media', label: this.t('nav.item.media', 'Media'), route: '/media' },
-    { icon: 'folder', label: this.t('nav.item.projects', 'Projects'), route: '/projects' },
-    { icon: 'groups', label: this.t('nav.item.colleagues', 'Colleagues'), route: '/colleagues' },
-    { icon: 'business', label: this.t('nav.item.organization', 'Organization'), route: '/organization' },
-  ]);
+  constructor() {
+    void this.widgetInstall.load();
+  }
+
+  readonly navItems = computed<NavItem[]>(() => {
+    const installed = new Set(this.widgetInstall.installedIds());
+    const items: NavItem[] = [
+      { icon: 'map', label: this.t('nav.item.map', 'Map'), route: '/' },
+      { icon: 'perm_media', label: this.t('nav.item.media', 'Media'), route: '/media' },
+      { icon: 'folder', label: this.t('nav.item.projects', 'Projects'), route: '/projects' },
+      { icon: 'groups', label: this.t('nav.item.colleagues', 'Colleagues'), route: '/colleagues' },
+      { icon: 'business', label: this.t('nav.item.organization', 'Organization'), route: '/organization' },
+    ];
+    return items.filter((item) => installed.has(routeWidgetId(item.route)));
+  });
 
   isNavItemActive(item: NavItem): boolean {
     const shell = this.activeShell();
@@ -185,4 +196,12 @@ export class NavComponent {
       if (parseSettingsUrl(url)) void this.router.navigateByUrl(stripSettingsSuffix(url));
     }
   }
+}
+
+function routeWidgetId(route: string): WidgetId {
+  if (route === '/media') return 'media';
+  if (route === '/projects') return 'projects';
+  if (route === '/colleagues') return 'colleagues';
+  if (route === '/organization') return 'organization';
+  return 'map';
 }

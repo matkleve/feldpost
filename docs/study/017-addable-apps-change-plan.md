@@ -284,3 +284,7 @@ Three investigations measure the parts this plan can break. They do not add deci
 ## Update 2026-09-24 — spec started
 
 Phase 2 has a first draft: `docs/specs/system/widget-install.md`. `[A]` once this commit lands. It records the locked install rules and names the blocks that still forbid a migration: permission key, table shape, shared-link name, colleagues after chat splits, and the membership change. It does not change `user_org_id()`, the map host, or `handle_new_user()`. `[D]` do not start Phase 3 while those blocks are open.
+
+## Update 2026-09-24 — install rows
+
+The blocks in the sentence above are closed in `docs/specs/system/widget-install.md` and `supabase/migrations/20260924120000_widget_install.sql`. `[A]` for those paths. Permission is `org.settings.edit`. Tables are `organization_widget_policies` and `user_widget_installs`. The path is the link name. Colleagues keeps chat. `user_org_id()` and `handle_new_user()` are unchanged. The nav reads `effectiveWidgetIds`. `[D]` several organizations per email are still not in this migration.
