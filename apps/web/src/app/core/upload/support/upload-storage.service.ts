@@ -49,7 +49,7 @@ export class UploadStorageService {
 
       const profileQuery = this.supabase.client
         .from('profiles')
-        .select('organization_id')
+        .select('active_organization_id')
         .eq('id', user.id);
       const { data: profile, error: profileError } = await this.withAbort(
         profileQuery,
@@ -66,7 +66,8 @@ export class UploadStorageService {
 
       const uuid = crypto.randomUUID();
       const ext = sanitizeStorageFileExtension(file.name);
-      const storagePath = `${profile.organization_id}/${user.id}/${uuid}.${ext}`;
+      const storageRoot = profile.active_organization_id ?? 'personal';
+      const storagePath = `${storageRoot}/${user.id}/${uuid}.${ext}`;
       ev.set({ storagePath, bytesWritten: file.size });
 
       const { error } = await this.supabase.client.storage.from('media').upload(storagePath, file, {

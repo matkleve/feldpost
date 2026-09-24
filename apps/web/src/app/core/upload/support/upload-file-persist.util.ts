@@ -70,7 +70,7 @@ export async function persistUploadFile(
 
   const profileQuery = deps.supabaseClient
     .from('profiles')
-    .select('organization_id')
+    .select('active_organization_id')
     .eq('id', user.id);
 
   const { data: profile, error: profileError } = await deps
@@ -81,11 +81,12 @@ export async function persistUploadFile(
     return { error: profileError ?? new Error('Profile not found.') };
   }
 
-  const orgId: string = profile.organization_id;
+  const orgId: string | null = profile.active_organization_id ?? null;
+  const storageRoot = orgId ?? 'personal';
 
   const uuid = crypto.randomUUID();
   const ext = sanitizeStorageFileExtension(input.file.name);
-  const storagePath = `${orgId}/${user.id}/${uuid}.${ext}`;
+  const storagePath = `${storageRoot}/${user.id}/${uuid}.${ext}`;
 
   if (input.abortSignal?.aborted) {
     return { error: 'Upload cancelled by user.' };
@@ -153,7 +154,7 @@ async function insertUploadMediaRow(args: {
   file: File;
   resolvedMimeType: string;
   user: User;
-  orgId: string;
+  orgId: string | null;
   storagePath: string;
   manualCoords?: ExifCoords;
   parsedExif?: ParsedExif;
