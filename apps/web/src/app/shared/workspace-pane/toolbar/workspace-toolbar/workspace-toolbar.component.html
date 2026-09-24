@@ -50,6 +50,19 @@
 
   <span class="workspace-toolbar__spacer" aria-hidden="true"></span>
 
+  @if (selectedCount() > 0) {
+    <button
+      type="button"
+      hlmBtn
+      variant="ghost"
+      size="xs"
+      (click)="deselectAll()"
+    >
+      <span class="material-icons" aria-hidden="true">deselect</span>
+      {{ t('workspace.toolbar.action.deselectAll', 'Deselect all') }}
+    </button>
+  }
+
   <div class="workspace-toolbar__size-control workspace-toolbar__size-control--full" hlmPillToggle size="sm">
     <div
       hlmToggleGroup

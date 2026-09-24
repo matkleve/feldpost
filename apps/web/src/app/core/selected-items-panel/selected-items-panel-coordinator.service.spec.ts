@@ -34,7 +34,7 @@ describe('SelectedItemsPanelCoordinatorService', () => {
 
     coordinator.open();
 
-    expect(shellLayout.isOpen('download')).toBe(true);
+    expect(shellLayout.isOpen('share')).toBe(true);
     expect(coordinator.isOpen()).toBe(true);
   });
 
@@ -44,17 +44,17 @@ describe('SelectedItemsPanelCoordinatorService', () => {
     coordinator.onDownloadPanelUserDismissed();
     coordinator.open({ respectUserDismiss: true });
 
-    expect(shellLayout.isOpen('download')).toBe(false);
+    expect(shellLayout.isOpen('share')).toBe(false);
 
     coordinator.open();
 
-    expect(shellLayout.isOpen('download')).toBe(true);
+    expect(shellLayout.isOpen('share')).toBe(true);
   });
 
   it('reports map offset from download panel width', () => {
     const { coordinator, shellLayout } = setup();
 
-    shellLayout.open('download');
+    shellLayout.open('share');
 
     expect(coordinator.getMapPaneOffsetPx()).toBe(SHELL_PANEL_COLUMN_DEFAULT_WIDTH_PX / 2);
   });

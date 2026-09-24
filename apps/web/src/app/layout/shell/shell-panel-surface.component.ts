@@ -10,6 +10,9 @@ import type { ShellPanelId } from '../../core/shell-layout/shell-layout.types';
   standalone: true,
   templateUrl: './shell-panel-surface.component.html',
   styleUrl: './shell-panel-surface.component.scss',
+  host: {
+    '[class.shell-panel-surface--fill]': 'panelId() === "share"',
+  },
 })
 export class ShellPanelSurfaceComponent {
   private readonly shellLayout = inject(ShellLayoutService);
@@ -25,7 +28,7 @@ export class ShellPanelSurfaceComponent {
   title(): string {
     const titles: Record<ShellPanelId, readonly [string, string]> = {
       upload: ['shell.panel.upload.title', 'Upload'],
-      download: ['shell.panel.download.title', 'Selected items'],
+      share: ['shell.panel.share.title', 'Share'],
       'shared-media': ['shell.panel.sharedMedia.title', 'Shared media'],
       tips: ['shell.panel.tips.title', 'Tips'],
       help: ['shell.panel.help.title', 'Help'],
@@ -35,7 +38,7 @@ export class ShellPanelSurfaceComponent {
   }
 
   collapse(): void {
-    if (this.panelId() === 'download') {
+    if (this.panelId() === 'share') {
       this.selectedItemsPanelCoordinator.onDownloadPanelUserDismissed();
     }
     this.shellLayout.close(this.panelId());

@@ -2,7 +2,7 @@
 
 > **Owner decision:** [STUDY-015 §14.7](../../../study/015-shell-grid-layout-change-plan.md)  
 > **Change class:** Sensitive — deletes independent workspace selection state.  
-> **Consumers:** map shell, `/media`, selected items panel (`download`).
+> **Consumers:** map shell, `/media`, share panel (`share`).
 
 ## What It Is
 
@@ -14,7 +14,7 @@ No dedicated UI. Effects are visible on:
 
 - Map marker selected styling
 - `/media` page tile selection
-- Selected items panel grid + footer count
+- Selected items panel grid + toolbar Deselect all
 
 ## Where It Lives
 
@@ -29,7 +29,7 @@ No dedicated UI. Effects are visible on:
 | 1 | Toggle tile on map | Updates global set; panel grid reflects same ids |
 | 2 | Toggle tile on `/media` | Same set |
 | 3 | Toggle tile in selected items panel | Same set (not a copy) |
-| 4 | Select all in scope (footer) | Adds all scoped ids to global set |
+| 4 | Deselect all on the toolbar | Empties the global set |
 | 5 | Clear selection | Empties global set everywhere |
 | 6 | Delete selected media | Removes ids from set after delete |
 | 7 | Route leave | Scope may change; ids persist unless context reset rules say otherwise |
@@ -105,6 +105,6 @@ sequenceDiagram
 
 - [ ] Red test fails before implementation: panel can select id not on map when flag on.
 - [ ] Green after: one shared store; panel toggle updates map styling.
-- [ ] Share-link restore sets global selection, opens `download` panel.
+- [ ] Share-link restore sets global selection, opens `share` panel.
 - [ ] `shellGridLayout` off: legacy dual-path allowed until PR 7 deletes it.
 - [ ] Service spec + types mirror `docs/specs/service/unified-selection/`.

@@ -12,7 +12,7 @@
 | Upload tab in workspace | Hidden | **Deleted** |
 | Media/Selected tab | Legacy workspace | → [selected-items-panel.md](./selected-items-panel.md) |
 | Projects tab in workspace | Still in legacy pane | Canvas `/projects` only |
-| `photoPanelOpen` | Opens legacy pane | → `ShellLayoutService.open('download')` |
+| `photoPanelOpen` | Opens legacy pane | → `ShellLayoutService.open('share')` |
 | `WorkspacePaneObserverAdapter` | Active | Slimmed or replaced by unified selection |
 
 ## Build order (next on branch)
@@ -20,9 +20,9 @@
 ```text
 1. Specs (this folder) — selected-items-panel, unified-selection  ← done
 2. UnifiedSelectionService + red tests                            ← done
-3. app-selected-items-panel body wired into download surface      ← done
-4. Layout: shellGridLayout on → open download instead of workspace  ← done
-5. LIVE CHECK: map select → panel grid mirrors; footer ZIP works  ← owner 2026-09-23
+3. app-selected-items-panel body wired into share surface         ← done
+4. Layout: shellGridLayout on → open share instead of workspace   ← done
+5. LIVE CHECK: map select → share panel grid mirrors; no footer   ← owner 2026-09-23
 6. Remove parallel workspace mount when flag on                   ← done
 7. Shell panel resize — spec: shell-panel-resize.md                 ← done
    7a. Column divider: canvas ↔ panel column (reuse drag-divider UX) ← done
@@ -55,7 +55,7 @@ Grep gate before merge — must be **0** references:
 
 ## LIVE CHECK block (required before step 9 / flag default)
 
-1. Map: select 4 items → download panel shows same 4 with footer.
+1. Map: select 4 items → share panel shows the same 4. No footer. Deselect all is on the toolbar.
 2. `/media`: toggle selection → panel updates without reopening workspace pane.
 3. Panel: deselect one → map marker deselects.
 4. Detail: open item from panel → detail inline; close returns to grid.

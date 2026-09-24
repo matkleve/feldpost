@@ -32243,6 +32243,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'workspace.toolbar.action.deselectAll', 'Deselect all', 'en', 'apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component.html text-node')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Deselect all', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.toolbar.action.deselectAll'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Alle abwählen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.toolbar.action.deselectAll'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Deseleziona tutto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'workspace.toolbar.action.deselectAll'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'media.page.header.item', 'item', 'en', 'apps/web/src/app/features/media/media-page-header.component.ts ts:content')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -45170,32 +45201,32 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'shell.control.download', 'Selected items', 'en', 'Grid shell right rail. Opens the selected-items panel.')
+values (null, 'shell.control.share', 'Share', 'en', 'Grid shell right rail. Opens the panel that passes the current media set on.')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Selected items', 'published'
+select t.id, 'en', 'Share', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'shell.control.download'
+where t.organization_id is null and t.key = 'shell.control.share'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Ausgewählte Elemente', 'published'
+select t.id, 'de', 'Teilen', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'shell.control.download'
+where t.organization_id is null and t.key = 'shell.control.share'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Elementi selezionati', 'published'
+select t.id, 'it', 'Condividi', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'shell.control.download'
+where t.organization_id is null and t.key = 'shell.control.share'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -45511,32 +45542,218 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'shell.panel.download.title', 'Selected items', 'en', 'Selected items panel surface title.')
+values (null, 'shell.panel.share.title', 'not photographs only.', 'en', 'Share panel surface title. The set is any media file')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Selected items', 'published'
+select t.id, 'en', 'not photographs only.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'shell.panel.download.title'
+where t.organization_id is null and t.key = 'shell.panel.share.title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Ausgewählte Elemente', 'published'
+select t.id, 'de', 'Share', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'shell.panel.download.title'
+where t.organization_id is null and t.key = 'shell.panel.share.title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Elementi selezionati', 'published'
+select t.id, 'it', 'Teilen', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'shell.panel.download.title'
+where t.organization_id is null and t.key = 'shell.panel.share.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'share.sheet.open', 'Share', 'en', 'Opens the desktop share sheet, or the system sheet on a phone.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Share', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.sheet.open'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Teilen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.sheet.open'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Condividi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.sheet.open'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'share.sheet.search', 'Search people', 'en', 'Search field in the share sheet people band.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Search people', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.sheet.search'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Personen suchen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.sheet.search'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cerca persone', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.sheet.search'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'share.sheet.copy', 'Copy link', 'en', 'Copies the public share link.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Copy link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.sheet.copy'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Link kopieren', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.sheet.copy'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Copia link', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.sheet.copy'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'share.sheet.email', 'Email', 'en', 'Opens the mail app with the public share link.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Email', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.sheet.email'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'E-Mail', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.sheet.email'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Email', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.sheet.email'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'share.sheet.whatsapp', 'WhatsApp', 'en', 'Opens WhatsApp with the public share link.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'WhatsApp', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.sheet.whatsapp'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'WhatsApp', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.sheet.whatsapp'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'WhatsApp', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.sheet.whatsapp'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'share.sheet.system', 'System share', 'en', 'Opens the browser share sheet with the public link.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'System share', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.sheet.system'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'System-Teilen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.sheet.system'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Condivisione di sistema', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'share.sheet.system'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

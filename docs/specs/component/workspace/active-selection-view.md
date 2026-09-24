@@ -59,11 +59,12 @@ Fills the entire content area of the Workspace Pane below the pane header. Three
 
 ```
 ActiveSelectionView                        ← content area within WorkspacePane, flex column, overflow hidden
-├── WorkspaceToolbar                       ← sticky top, 4 ghost buttons (see workspace-toolbar spec)
+├── WorkspaceToolbar                       ← sticky top (see workspace-toolbar spec)
 │   ├── ToolbarButton "Grouping ▾"         ← opens GroupingDropdown
 │   ├── ToolbarButton "Filter ▾"           ← opens FilterDropdown
 │   ├── ToolbarButton "Sort ▾"             ← opens SortDropdown
-│   └── ToolbarButton "Projects ▾"         ← opens ProjectsDropdown
+│   ├── ToolbarButton "Projects ▾"         ← opens ProjectsDropdown
+│   └── [selectedCount > 0] Deselect all   ← quiet ghost xs; clears canvas selection
 │
 ├── [loading] SkeletonGrid                 ← pulsing placeholder cards during cluster RPC
 │
@@ -83,7 +84,7 @@ ActiveSelectionView                        ← content area within WorkspacePane
         ├── ItemGrid (section)               ← grid of this section's media items
         └── [nested] GroupedSection × N    ← multi-level grouping (indented 1.5rem per level)
 
-    [selectedMediaIds.size > 0] WorkspaceExportBar  ← bottom action surface for share/copy/download
+    (no bottom export bar — selection is owned by the canvas)
 ```
 
 ## Data

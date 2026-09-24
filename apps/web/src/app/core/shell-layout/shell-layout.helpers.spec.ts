@@ -20,10 +20,10 @@ describe('applySetOpen', () => {
     expect(applySetOpen(both, 'upload', false).map((panel) => panel.id)).toEqual(['help']);
   });
 
-  it('keeps upload open when download opens', () => {
-    const download = applySetOpen([], 'download', true);
-    const both = applySetOpen(download, 'upload', true);
-    expect(both.map((panel) => panel.id)).toEqual(['download', 'upload']);
+  it('keeps upload open when share opens', () => {
+    const share = applySetOpen([], 'share', true);
+    const both = applySetOpen(share, 'upload', true);
+    expect(both.map((panel) => panel.id)).toEqual(['share', 'upload']);
     expect(both.every((panel) => panel.open)).toBe(true);
   });
 

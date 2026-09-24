@@ -9,13 +9,14 @@
     @if (isOpen('upload')) {
       <ng-content select="[data-panel-id=upload]" />
     }
-    @if (isOpen('download')) {
-      <ng-content select="[data-panel-id=download]" />
+    @if (isOpen('share')) {
+      <ng-content select="[data-panel-id=share]" />
     }
     @if (isOpen('shared-media')) {
       <ng-content select="[data-panel-id=shared-media]" />
     }
   </div>
+}
 }
 
 @if (needsStackSplit()) {

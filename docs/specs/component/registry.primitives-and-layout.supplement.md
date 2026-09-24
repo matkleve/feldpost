@@ -668,7 +668,7 @@
 - **Variant axes**: none
 - **Other inputs**: `title: string` (required), `options: ProjectSelectOption[]` (required), `message`, `confirmLabel`, `cancelLabel`
 - **Composed of**: standalone
-- **Used in**: `app-workspace-pane-footer`, `app-workspace-selected-items-grid`
+- **Used in**: `app-workspace-selected-items-grid`
 - **Gaps**: none
 
 ---
@@ -693,7 +693,20 @@
 - **Spec**: [`docs/specs/component/workspace/share-link-audience-dialog.md`](workspace/share-link-audience-dialog.md)
 - **Variant axes**: none (single audience-selection flow)
 - **Composed of**: standalone
-- **Used in**: `app-workspace-pane-footer`
+- **Used in**: `app-workspace-selected-items-grid`
+- **Gaps**: none
+
+---
+
+### `<app-share-sheet>` — Share Sheet
+
+- **File**: `apps/web/src/app/shared/share-sheet/share-sheet.component.ts`
+- **Purpose**: Desktop handoff for the current media set. People band, then methods.
+- **Not for**: Phone share. The phone opens the system sheet.
+- **Spec**: [`docs/specs/component/workspace/share-sheet.md`](workspace/share-sheet.md)
+- **Variant axes**: none
+- **Composed of**: standalone
+- **Used in**: `app-selected-items-panel`
 - **Gaps**: none
 
 ---

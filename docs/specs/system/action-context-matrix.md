@@ -37,8 +37,8 @@ The visual shell is still the shared dropdown/action-sheet shell ([`docs/specs/c
 | `map_point`         | Right-click on empty map surface                            |
 | `media_detail`      | 3-dot menu in the open Media Detail View                    |
 | `ws_grid_thumbnail` | Tap / right-click on a thumbnail in the Workspace Pane grid |
-| `ws_footer_single`  | Footer toolbar for a single selection in Workspace          |
-| `ws_footer_multi`   | Footer toolbar for a multi-selection in Workspace           |
+| `ws_footer_single`  | Retired. No mounted footer. Do not rebuild one to satisfy this column. |
+| `ws_footer_multi`   | Retired. No mounted footer. Do not rebuild one to satisfy this column. |
 | `upload_row`        | 3-dot menu in the Upload Panel row                          |
 | `media_page`        | Actions in the `/media` library view                        |
 

@@ -24,7 +24,7 @@
 - **Spec**: [`docs/specs/component/workspace/sidebar.md`](workspace/sidebar.md)
 - **Variant axes**: none (tab switching is functional, not visual variant)
 - **Other inputs**: `title`, `titleEditable`, `titleEditEnabled`, `titleEditValue`, `colorPickerEnabled`, `colorPickerOpen`, `detailAddressSearchRequestId`
-- **Composed of**: `app-workspace-pane-header`, `app-workspace-pane-toolbar`, `app-workspace-selected-items-grid`, `app-media-detail-view`, `app-workspace-pane-footer`, `app-group-tab-bar`
+- **Composed of**: `app-workspace-pane-header`, `app-workspace-pane-toolbar`, `app-workspace-selected-items-grid`, `app-media-detail-view`, `app-group-tab-bar`
 - **Used in**: `app-workspace-pane`
 - **Gaps**: none
 
@@ -105,20 +105,7 @@
 - **Spec**: [`docs/specs/component/workspace/pane-footer.md`](workspace/pane-footer.md)
 - **Variant axes**: none
 - **Composed of**: standalone
-- **Used in**: workspace pane footer area
-- **Gaps**: none
-
----
-
-### `<app-workspace-pane-footer>` — Workspace Pane Footer
-
-- **File**: `apps/web/src/app/shared/workspace-pane/footer/workspace-pane-footer/workspace-pane-footer.component.ts`
-- **Purpose**: Footer action bar for the workspace pane; compact toolbar for selection, export/share, bulk location delete, and bulk media delete.
-- **Spec**: [`docs/specs/component/workspace/workspace-pane-footer.md`](workspace/workspace-pane-footer.md)
-- **Variant axes**: none
-- **Other inputs**: `scopeIds: string[]` (required), `images: WorkspaceImage[]` (required)
-- **Composed of**: `app-project-select-dialog`, `app-share-link-audience-dialog`, `app-confirm-dialog`
-- **Used in**: `app-workspace-pane`
+- **Used in**: `app-upload-panel`
 - **Gaps**: none
 
 ---

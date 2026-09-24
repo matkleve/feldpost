@@ -1,5 +1,7 @@
 # Workspace Pane Footer — Destructive Bulk Actions (Supplement)
 
+> **Parked.** The footer this supplement targets is retired ([workspace-pane-footer.md](./workspace-pane-footer.md)). Do not add `delete_locations` or `delete_media` to the selected-items surface. The only selection control there is **Deselect all** on the toolbar.
+
 > **Parent:** [workspace-pane-footer.md](./workspace-pane-footer.md)  
 > **Service:** [media-locations-service.md](../../service/media-locations/media-locations-service.md), `MediaDeleteUndoService` (no dedicated spec — behavior from matrix + existing delete flows)
 

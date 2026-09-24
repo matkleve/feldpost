@@ -1,0 +1,48 @@
+<div class="share-sheet option-menu-surface" (keydown.escape)="searchOpen.set(false)">
+  @for (person of faces(); track person.id) {
+    <button type="button" class="share-sheet__person" (click)="shareWith(person)">
+      @if (person.avatarUrl) {
+        <img [src]="person.avatarUrl" [alt]="person.fullName" />
+      } @else {
+        {{ initials(person) }}
+      }
+    </button>
+  }
+  <label class="share-sheet__search">
+    <span class="material-icons" aria-hidden="true">search</span>
+    <input
+      type="search"
+      [value]="query()"
+      [attr.aria-label]="t('share.sheet.search', 'Search people')"
+      [placeholder]="t('share.sheet.search', 'Search people')"
+      (focus)="searchOpen.set(true)"
+      (input)="query.set($any($event.target).value); searchOpen.set(true)"
+    />
+  </label>
+  @if (searchOpen()) {
+    @for (person of searchHits(); track person.id) {
+      <button type="button" class="share-sheet__result" (click)="shareWith(person)">
+        {{ person.fullName }}
+      </button>
+    }
+  }
+  <span class="share-sheet__band-break" aria-hidden="true"></span>
+  <button type="button" class="share-sheet__method" (click)="copyLink()">
+    <span class="material-icons" aria-hidden="true">link</span>
+    {{ t('share.sheet.copy', 'Copy link') }}
+  </button>
+  <button type="button" class="share-sheet__method" (click)="email()">
+    <span class="material-icons" aria-hidden="true">mail</span>
+    {{ t('share.sheet.email', 'Email') }}
+  </button>
+  <button type="button" class="share-sheet__method" (click)="whatsapp()">
+    <span class="material-icons" aria-hidden="true">chat</span>
+    {{ t('share.sheet.whatsapp', 'WhatsApp') }}
+  </button>
+  @if (hasSystemShare) {
+    <button type="button" class="share-sheet__method" (click)="openSystemShare()">
+      <span class="material-icons" aria-hidden="true">ios_share</span>
+      {{ t('share.sheet.system', 'System share') }}
+    </button>
+  }
+</div>

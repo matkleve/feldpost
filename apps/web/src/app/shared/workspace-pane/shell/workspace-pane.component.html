@@ -88,13 +88,10 @@
           (locationMapPickRequested)="onUploadLocationMapPickRequested($event)"
           (hoverStarted)="onWorkspaceItemHoverStarted($event)"
           (hoverEnded)="onWorkspaceItemHoverEnded($event)"
+          (shareRequested)="openShare()"
         />
-
-        @if (selectionService.selectedCount() > 0) {
-          <app-workspace-pane-footer
-            [scopeIds]="exportScopeIds()"
-            [images]="exportScopeImages()"
-          ></app-workspace-pane-footer>
+        @if (shareOpen()) {
+          <app-share-sheet />
         }
       </div>
 

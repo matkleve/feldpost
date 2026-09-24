@@ -1,5 +1,7 @@
 # Share link audience dialog
 
+> **Replacement UI:** [share-sheet.md](share-sheet.md). The grid no longer mounts this dialog. Do not add people or methods here.
+
 ## What It Is
 
 Modal shell for choosing **share link audience** (`public`, `organization`, or `named`) before `ShareSetService.createOrReuseShareSet` runs. Named audience collects comma-separated recipient user UUIDs (same organization); the server validates membership.
@@ -11,7 +13,7 @@ A fixed-position panel with radio options, optional multi-line UUID field for `n
 ## Where It Lives
 
 - **Code:** `apps/web/src/app/shared/share-link-audience-dialog/`
-- **Consumers:** `WorkspacePaneFooterComponent`, `WorkspaceSelectedItemsGridComponent`
+- **Consumers:** none. The share sheet is the creation UI.
 
 ## Actions
 

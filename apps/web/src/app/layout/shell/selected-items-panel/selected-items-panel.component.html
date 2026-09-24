@@ -1,5 +1,13 @@
 <!-- Stable state: detail mode vs grid mode — @see docs/specs/ui/shell/selected-items-panel.md -->
 <div class="selected-items-panel">
+  @if (selectedCount() > 0) {
+    <button type="button" hlmBtn variant="ghost" size="xs" (click)="share()">
+      {{ t('share.sheet.open', 'Share') }}
+    </button>
+    @if (shareOpen()) {
+      <app-share-sheet />
+    }
+  }
   @if (detailMediaId()) {
     <app-media-detail-view
       [mediaId]="detailMediaId()!"
@@ -22,14 +30,8 @@
         (locationMapPickRequested)="onUploadLocationMapPickRequested($event)"
         (hoverStarted)="onWorkspaceItemHoverStarted($event)"
         (hoverEnded)="onWorkspaceItemHoverEnded($event)"
+        (shareRequested)="openShare()"
       />
     </div>
-
-    @if (showFooter()) {
-      <app-workspace-pane-footer
-        [scopeIds]="exportScopeIds()"
-        [images]="exportScopeImages()"
-      />
-    }
   }
 </div>

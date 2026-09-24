@@ -158,7 +158,7 @@ See [zoomable-map-contract supplement](./media-locations.zoomable-map-contract.s
 - **Read:** assemble + sort by link `sort_order`. If `refs.length !==` count of resolved cores → **cache miss** (data integrity; never return partial list).
 - **Update:** `updateLocation` → `updateCachedLocation` only (no full clear).
 - **Delete (single location id):** `deleteLocation` → `invalidateByLocationId`.
-- **Bulk unlink (workspace footer):** `WorkspaceBulkActionService.deleteLocationsForSelection` loops `listForMedia` + `unlink` per selected media item — see [workspace-pane-footer.destructive-actions.supplement.md](../../component/workspace/workspace-pane-footer.destructive-actions.supplement.md).
+- **Bulk unlink:** the workspace footer that was going to call `deleteLocationsForSelection` is retired. The write-up is parked in [workspace-pane-footer.destructive-actions.supplement.md](../../component/workspace/workspace-pane-footer.destructive-actions.supplement.md) and is not a selected-items control.
 - **Per-media invalidate:** `invalidateListCache(mediaItemId)` removes `mediaToLinks` entry only.
 
 ## Floor edit rule

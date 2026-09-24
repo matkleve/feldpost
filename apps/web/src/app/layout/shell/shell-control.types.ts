@@ -32,12 +32,12 @@ const RIGHT_GROUPS: readonly ShellControlGroup[] = [
         panelId: 'upload',
       },
       {
-        id: 'download',
-        icon: 'download',
-        labelKey: 'shell.control.download',
-        labelFallback: 'Selected items',
+        id: 'share',
+        icon: 'share',
+        labelKey: 'shell.control.share',
+        labelFallback: 'Share',
         kind: 'panel',
-        panelId: 'download',
+        panelId: 'share',
       },
       {
         id: 'shared-media',

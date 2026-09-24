@@ -1039,6 +1039,7 @@ workspace.toolbar.size.row,List,apps/web/src/app/shared/ui-primitives/card-varia
 workspace.toolbar.size.small,Small,apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content,Small,Klein,Piccolo
 workspace.toolbar.size.medium,Medium,apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content,Medium,Mittel,Medio
 workspace.toolbar.size.large,Large,apps/web/src/app/shared/ui-primitives/card-variant-switch.component.ts ts:content,Large,Groß,Grande
+workspace.toolbar.action.deselectAll,Deselect all,apps/web/src/app/shared/workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component.html text-node,Deselect all,Alle abwählen,Deseleziona tutto
 media.page.header.item,item,apps/web/src/app/features/media/media-page-header.component.ts ts:content,item,Element,elemento
 media.page.header.items,items,apps/web/src/app/features/media/media-page-header.component.ts ts:content,items,Elemente,elementi
 media.page.header.loadedOfTotal,{loaded} of {total} items loaded,apps/web/src/app/features/media/media-page-header.component.ts inline-template text-node,{loaded} of {total} items loaded,{loaded} von {total} Elementen geladen,{loaded} di {total} elementi caricati
@@ -1612,7 +1613,7 @@ shell.panel.help.title,Help,Help panel surface title.,Help,Hilfe,Aiuto
 shell.panel.help.body,Help is not available yet.,Help panel placeholder body.,Help is not available yet.,Hilfe ist noch nicht verfügbar.,L'aiuto non è ancora disponibile.
 shell.panel.collapse,Collapse panel,Panel surface collapse control (chevron_right). Collapses the panel column toward the right rail.,Collapse panel,Panel einklappen,Comprimi pannello
 shell.control.notifications,Notifications,Grid shell right rail. Opens the notifications panel.,Notifications,Benachrichtigungen,Notifiche
-shell.control.download,Selected items,Grid shell right rail. Opens the selected-items panel.,Selected items,Ausgewählte Elemente,Elementi selezionati
+shell.control.share,Share,Grid shell right rail. Opens the panel that passes the current media set on.,Share,Teilen,Condividi
 shell.control.sharedMedia,Shared media,Grid shell right rail. Opens the shared media panel.,Shared media,Geteilte Medien,Media condivisi
 shell.control.undo,Undo,Grid shell right rail. Inert until a history product exists.,Undo,Rückgängig,Annulla
 shell.control.history,Activity history,Grid shell right rail. Inert until a history product exists.,Activity history,Aktivitätsverlauf,Cronologia attività
@@ -1623,7 +1624,13 @@ shell.control.theme.light,Light,Grid shell theme option label.,Light,Hell,Chiaro
 shell.control.theme.dark,Dark,Grid shell theme option label.,Dark,Dunkel,Scuro
 shell.control.theme.sandstone,Sandstone,Grid shell theme option label.,Sandstone,Sandstein,Arenaria
 shell.panel.notifications.title,Notifications,Notifications panel surface title.,Notifications,Benachrichtigungen,Notifiche
-shell.panel.download.title,Selected items,Selected items panel surface title.,Selected items,Ausgewählte Elemente,Elementi selezionati
+shell.panel.share.title,Share,Share panel surface title. The set is any media file, not photographs only.,Share,Teilen,Condividi
+share.sheet.open,Share,"Opens the desktop share sheet, or the system sheet on a phone.",Share,Teilen,Condividi
+share.sheet.search,Search people,Search field in the share sheet people band.,Search people,Personen suchen,Cerca persone
+share.sheet.copy,Copy link,Copies the public share link.,Copy link,Link kopieren,Copia link
+share.sheet.email,Email,Opens the mail app with the public share link.,Email,E-Mail,Email
+share.sheet.whatsapp,WhatsApp,Opens WhatsApp with the public share link.,WhatsApp,WhatsApp,WhatsApp
+share.sheet.system,System share,Opens the browser share sheet with the public link.,System share,System-Teilen,Condivisione di sistema
 shell.panel.sharedMedia.title,Shared media,Shared media panel surface title.,Shared media,Geteilte Medien,Media condivisi
 shell.panel.tips.title,Tips,Tips panel surface title.,Tips,Tipps,Suggerimenti
 shell.panel.unavailable.body,This panel is not available yet.,Placeholder body for a right-rail panel that has no product yet.,This panel is not available yet.,Dieser Bereich ist noch nicht verfügbar.,Questo pannello non è ancora disponibile.
