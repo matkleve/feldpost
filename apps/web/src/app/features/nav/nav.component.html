@@ -65,6 +65,35 @@
 
     <div class="sidebar__spacer" aria-hidden="true"></div>
 
+    <div class="nav__utility-row">
+      <label class="nav__label text-sm" for="account-context">
+        {{ t('nav.context.label', 'Context') }}
+      </label>
+      <select
+        id="account-context"
+        [value]="accountContext.organizationId() ?? ''"
+        (change)="onContextChange($any($event.target).value)"
+      >
+        <option value="">{{ t('nav.context.personal', 'Personal') }}</option>
+        @for (membership of accountContext.memberships(); track membership.organizationId) {
+          <option [value]="membership.organizationId">{{ membership.name }}</option>
+        }
+      </select>
+      <button type="button" (click)="openCreateOrganization()">
+        {{ t('nav.context.create', 'Create organization') }}
+      </button>
+      @if (accountContext.confirmOpen()) {
+        <p>{{ t('nav.context.separate', 'Existing data stays where it is. The new organization starts empty.') }}</p>
+        <input [(ngModel)]="orgName" [attr.aria-label]="t('nav.context.name', 'Organization name')" />
+        <button type="button" (click)="confirmCreateOrganization()">
+          {{ t('nav.context.confirm', 'Create separate organization') }}
+        </button>
+      }
+      @if (accountContext.errorMessage(); as message) {
+        <p>{{ message }}</p>
+      }
+    </div>
+
     <!-- Utility row: theme cycle -->
     <div class="nav__utility-row">
       <button

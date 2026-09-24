@@ -72,7 +72,7 @@ export class RegisterComponent {
     {
       fullName: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
-      inviteCode: ['', [Validators.required, inviteCodeFormat]],
+      inviteCode: ['', [inviteCodeFormat]],
       password: ['', passwordStrengthValidators()],
       confirmPassword: ['', Validators.required],
     },

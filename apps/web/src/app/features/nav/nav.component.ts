@@ -1,8 +1,10 @@
 import { Component, HostListener, computed, effect, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter, map, startWith } from 'rxjs/operators';
 import { AuthService } from '../../core/auth/auth.service';
+import { AccountContextService } from '../../core/account-context/account-context.service';
 import { WidgetInstallService } from '../../core/widget-install/widget-install.service';
 import type { WidgetId } from '../../core/widget-install/widget-install.types';
 import { I18nService } from '../../core/i18n/i18n.service';
@@ -30,7 +32,7 @@ const SIDEBAR_WIDTH_TRANSITION_MS = 200;
 @Component({
   selector: 'app-nav',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, FormsModule],
   templateUrl: './nav.component.html',
   styleUrl: './nav.component.scss',
   host: {
@@ -40,6 +42,7 @@ const SIDEBAR_WIDTH_TRANSITION_MS = 200;
 export class NavComponent {
   private readonly router = inject(Router);
   private readonly widgetInstall = inject(WidgetInstallService);
+  readonly accountContext = inject(AccountContextService);
   private readonly authService = inject(AuthService);
   private readonly i18nService = inject(I18nService);
   private readonly settingsPaneService = inject(SettingsPaneService);
@@ -125,6 +128,7 @@ export class NavComponent {
 
   constructor() {
     void this.widgetInstall.load();
+    void this.accountContext.load();
   }
 
   readonly navItems = computed<NavItem[]>(() => {
@@ -136,7 +140,12 @@ export class NavComponent {
       { icon: 'groups', label: this.t('nav.item.colleagues', 'Colleagues'), route: '/colleagues' },
       { icon: 'business', label: this.t('nav.item.organization', 'Organization'), route: '/organization' },
     ];
-    return items.filter((item) => installed.has(routeWidgetId(item.route)));
+    return items.filter((item) => {
+      if (this.accountContext.personal() && item.route === '/colleagues') {
+        return false;
+      }
+      return installed.has(routeWidgetId(item.route));
+    });
   });
 
   isNavItemActive(item: NavItem): boolean {
@@ -181,6 +190,25 @@ export class NavComponent {
     }
     const shellSegments = resolveShellSegmentsFromUrl(url);
     void this.router.navigateByUrl(buildSettingsUrl(shellSegments));
+  }
+
+  orgName = '';
+
+  onContextChange(value: string): void {
+    void this.accountContext.setContext(value === '' ? null : value);
+  }
+
+  openCreateOrganization(): void {
+    this.accountContext.confirmOpen.set(true);
+  }
+
+  confirmCreateOrganization(): void {
+    const name = this.orgName.trim();
+    if (!name) {
+      return;
+    }
+    void this.accountContext.createOrganization(name);
+    this.orgName = '';
   }
 
   @HostListener('document:pointerdown', ['$event'])

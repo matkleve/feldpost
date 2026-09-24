@@ -2,7 +2,7 @@
 
 ## What It Is
 
-An account is one person. An organization is optional. The canvas shows an overview when no organization is on screen. This spec does not change the database yet.
+An account is one person. An organization is optional. The canvas shows an overview when no organization is on screen.
 
 ## What It Looks Like
 
@@ -10,7 +10,7 @@ A self-employed person sees the overview and Map and Media. “Create an organiz
 
 ## Where It Lives
 
-Signup is `handle_new_user()` in `supabase/migrations/20260616085726_invite_signups_display_name.sql`. It rejects a missing invite and writes one `profiles.organization_id`. That column is `not null`. The overview and the switcher do not exist yet. Widget settings will hold “create new organization” when that screen is built.
+Signup without an invite is allowed in `handle_new_user()` as replaced by `supabase/migrations/20260924130000_account_context.sql`. `profiles.organization_id` may be null. `user_org_id()` reads `profiles.active_organization_id`. The shell switcher calls `set_account_context`. Create calls `create_organization` and does not copy rows.
 
 ## Actions
 
@@ -80,12 +80,12 @@ flowchart TD
 | File | Purpose |
 | --- | --- |
 | `docs/specs/system/account-context.md` | This contract. |
-| `supabase/migrations/20260616085726_invite_signups_display_name.sql` | Current trigger. Not changed here. |
+| `supabase/migrations/20260924130000_account_context.sql` | Nullable organization, membership, context functions. |
 | `docs/specs/page/files-page.md` | Still cited by Media folder code. Not a product app. |
 
 ## Wiring
 
-No client call and no migration ship with this file. The next change is the migration that lets a profile exist with no organization, and RLS that matches the table above. `20260924120000_widget_install.sql` assumes every profile has one organization. Do not add columns to those tables in that migration.
+The migration is `20260924130000_account_context.sql`. It does not add columns to the widget install tables. Personal rows on subject tables are still organization-scoped: a personal context sees no organization rows. Creating an organization does not move those rows.
 
 ## Acceptance Criteria
 

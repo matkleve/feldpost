@@ -5,6 +5,13 @@
   <!-- Upload chrome — top-right of main column only (does not cover workspace pane). -->
   <app-upload-shell />
 
+  @if (accountContext.personal()) {
+    <section class="authenticated-app-layout__overview">
+      <h1>{{ t('account.overview.title', 'Your overview') }}</h1>
+      <p>{{ t('account.overview.body', 'This is your personal account. Map and Media are here. An organization is optional.') }}</p>
+    </section>
+  }
+
   <div
     class="authenticated-app-layout__map-host"
     [class.authenticated-app-layout__map-host--visible]="mapShellVisible()"
