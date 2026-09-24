@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { AccountContextService } from '../../../../core/account-context/account-context.service';
 import { I18nService } from '../../../../core/i18n/i18n.service';
 import { WidgetInstallService } from '../../../../core/widget-install/widget-install.service';
@@ -8,6 +9,7 @@ import type { WidgetId, WidgetPolicyRow } from '../../../../core/widget-install/
 @Component({
   selector: 'app-organization-apps-section',
   standalone: true,
+  imports: [FormsModule],
   templateUrl: './organization-apps-section.component.html',
   styleUrl: './organization-apps-section.component.scss',
 })
@@ -18,6 +20,7 @@ export class OrganizationAppsSectionComponent {
   readonly t = (key: string, fallback = '') => this.i18n.t(key, fallback);
   readonly widgetIds = WIDGET_IDS;
   readonly errorMessage = signal<string | null>(null);
+  organizationName = '';
 
   constructor() {
     void this.widgets.load();
@@ -52,6 +55,16 @@ export class OrganizationAppsSectionComponent {
     if (!error) {
       await this.widgets.load();
     }
+  }
+
+  async createOrganization(): Promise<void> {
+    const name = this.organizationName.trim();
+    if (!name) {
+      return;
+    }
+    await this.account.createOrganization(name);
+    this.organizationName = '';
+    this.errorMessage.set(this.account.errorMessage());
   }
 
   async push(widgetId: WidgetId): Promise<void> {

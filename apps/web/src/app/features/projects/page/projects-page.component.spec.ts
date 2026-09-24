@@ -3,6 +3,7 @@ import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { ProjectsService } from '../../../core/projects/projects.service';
 import { ToastService } from '../../../core/toast/toast.service';
+import { SupabaseService } from '../../../core/supabase/supabase.service';
 import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane/workspace-pane-observer.adapter';
 import { ProjectsPageComponent } from './projects-page.component';
 import type { ProjectListItem } from '../../../core/projects/projects.types';
@@ -79,6 +80,7 @@ describe('ProjectsPageComponent', () => {
           },
         },
         { provide: ProjectsService, useValue: projectsServiceMock },
+        { provide: SupabaseService, useValue: { client: { rpc: vi.fn() } } },
         {
           provide: ToastService,
           useValue: {

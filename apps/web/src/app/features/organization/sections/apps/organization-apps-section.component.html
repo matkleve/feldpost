@@ -1,5 +1,14 @@
 <section>
   <h2>{{ t('organization.apps.title', 'Apps') }}</h2>
+  <h3>{{ t('organization.apps.createTitle', 'New organization') }}</h3>
+  <p>{{ t('nav.context.separate', 'Existing data stays where it is. The new organization starts empty.') }}</p>
+  <label>
+    {{ t('nav.context.name', 'Organization name') }}
+    <input [(ngModel)]="organizationName" name="organizationName" />
+  </label>
+  <button type="button" (click)="createOrganization()">
+    {{ t('nav.context.confirm', 'Create separate organization') }}
+  </button>
   <p>{{ t('organization.apps.body', 'Allow an app, preinstall it for people with no choice yet, or lock it on. Push turns it on for everyone. Saving a preinstall does not turn someone back on.') }}</p>
   @if (errorMessage(); as message) {
     <p role="alert">{{ message }}</p>

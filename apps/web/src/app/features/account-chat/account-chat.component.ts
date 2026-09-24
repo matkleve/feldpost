@@ -3,6 +3,12 @@ import { FormsModule } from '@angular/forms';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { SupabaseService } from '../../core/supabase/supabase.service';
 
+interface InboxThread {
+  email: string;
+  body: string;
+  created_at: string;
+}
+
 interface ThreadMessage {
   id: string;
   body: string;
@@ -17,6 +23,14 @@ interface ThreadMessage {
   template: `
     <section>
       <h1>{{ t('account.chat.title', 'Messages') }}</h1>
+      <h2>{{ t('account.chat.inbox', 'Inbox') }}</h2>
+      <ul>
+        @for (thread of inbox(); track thread.email) {
+          <li>
+            <button type="button" (click)="open(thread.email)">{{ thread.email }}: {{ thread.body }}</button>
+          </li>
+        }
+      </ul>
       <label>
         {{ t('account.chat.email', 'Email') }}
         <input [(ngModel)]="email" name="email" type="email" />
@@ -46,6 +60,25 @@ export class AccountChatComponent {
   body = '';
   readonly error = signal<string | null>(null);
   readonly messages = signal<ThreadMessage[]>([]);
+  readonly inbox = signal<InboxThread[]>([]);
+
+  constructor() {
+    void this.loadInbox();
+  }
+
+  async loadInbox(): Promise<void> {
+    const { data, error } = await this.supabase.client.rpc('list_account_inbox');
+    if (error) {
+      this.error.set(error.message);
+      return;
+    }
+    this.inbox.set((data ?? []) as InboxThread[]);
+  }
+
+  async open(email: string): Promise<void> {
+    this.email = email;
+    await this.load();
+  }
 
   async load(): Promise<void> {
     this.error.set(null);
@@ -71,5 +104,6 @@ export class AccountChatComponent {
     }
     this.body = '';
     await this.load();
+    await this.loadInbox();
   }
 }

@@ -7,6 +7,7 @@ import { FilterService } from '../../../core/filter/filter.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { ProjectsService } from '../../../core/projects/projects.service';
 import type { SortConfig } from '../../../core/workspace-view/workspace-view.types';
+import { SupabaseService } from '../../../core/supabase/supabase.service';
 import { ToastService } from '../../../core/toast/toast.service';
 import { UploadManagerService } from '../../../core/upload/upload-manager.service';
 import { WorkspacePaneObserverAdapter } from '../../../core/workspace-pane/workspace-pane-observer.adapter';
@@ -56,6 +57,7 @@ export class ProjectsPageComponent implements OnDestroy {
   private readonly filterService = inject(FilterService);
   private readonly projectsService = inject(ProjectsService);
   private readonly toastService = inject(ToastService);
+  private readonly supabase = inject(SupabaseService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly uploadManager = inject(UploadManagerService);
@@ -88,6 +90,7 @@ export class ProjectsPageComponent implements OnDestroy {
 
   readonly loading = signal(false);
   readonly loadError = signal<string | null>(null);
+  readonly shareLink = signal<string | null>(null);
   readonly projects = signal<ProjectListItem[]>([]);
   readonly searchQuery = signal('');
   readonly activeSorts = signal<SortConfig[]>([]);
@@ -356,6 +359,18 @@ export class ProjectsPageComponent implements OnDestroy {
 
   onColorPickerToggled(): void {
     this.colorPickerOpen.update((value) => !value);
+  }
+
+  async onShareProject(projectId: string): Promise<void> {
+    const { data, error } = await this.supabase.client.rpc('create_project_share_link', {
+      p_project_id: projectId,
+    });
+    if (error || typeof data !== 'string') {
+      this.shareLink.set(error?.message ?? this.t('projects.share.failed', 'Could not create a link.'));
+      return;
+    }
+    const origin = typeof window === 'undefined' ? '' : window.location.origin;
+    this.shareLink.set(`${origin}/projects/receive?token=${encodeURIComponent(data)}`);
   }
 
   async onNewProject(): Promise<void> {
