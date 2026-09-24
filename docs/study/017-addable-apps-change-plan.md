@@ -170,3 +170,15 @@ Answer in the issue or on the PR. The spec in Phase 2 cannot be written until th
 8. **Deep link when not installed.** User opens `/media` and Media is off. Redirect to the first installed app, show a “not installed” page, or 404?
 9. **One list.** STUDY-015’s rail and this nav must not each store install state. Confirm they read the same install facts.
 10. **Files.** The `/files` spec exists and the route does not. Is Files a sixth widget later, or out of this plan?
+
+## Update 2026-09-24 — answers 1–3
+
+The questions above stay. These answers supersede Q1–Q3 only. Q4–Q10 are still open. `[D]` unless marked `[A]`.
+
+1. **Allow and preinstall can both be true.** A preinstalled widget can also be locked so the user cannot turn it off. `[D]`
+2. **Organization is a widget.** `[D]` It is not the thing that creates the first organization. Signup does not insert `organizations`. `handle_new_user()` rejects registration without an invite and attaches the new profile to `qr_invites.organization_id` `[A]` `supabase/migrations/20260616085726_invite_signups_display_name.sql` lines 51–77. The only `INSERT` into `organizations` in this repo is seed SQL (`supabase/migrations/20260303000006_seed.sql` and `scripts/local-verify/seed-rls-actors.sql`) `[A]`. The pattern that exists is: an organization already exists, then an invite joins a user to it. A “create my company” step is not in the product.
+3. **Preinstall again does not override a user who turned the widget off.** `[D]` The organization can separately push a widget to all users, and that push does turn it on again for people who had turned it off. Push is an action, not a side effect of saving the preinstall flag.
+
+Bootstrap, which Q2 forces: the first organization and the first admin are outside the widget list. The Organization widget is the admin UI after that row exists. Making the widget itself create the organization would be a new flow. It is not designed here.
+
+**B1.** The first organization stays outside the widget system (seed or a later founder step that is not an installable app). The Organization widget only edits an organization that already exists. Is that the split you want?
