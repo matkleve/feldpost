@@ -15,7 +15,8 @@ The right-rail **Share** surface in the panel column. Shows the current unified 
 - **Body:** full-height column inside the panel surface body:
   - **Detail mode:** `MediaDetailViewComponent` — full body height; **no** shell footer; **no** body divider. Shell surface title row hidden (detail header owns chrome). Requires panel width ≥ **480px** or panel-embedded layout override — see [shell-panel-resize.md](./shell-panel-resize.md) § Detail mode.
   - **Grid mode:** `WorkspaceToolbarComponent` + `ItemGridComponent` with projected domain items.
-  - **Deselect:** one quiet `hlmBtn` `ghost` `xs` on the toolbar, visible when `selectedMediaIds.size > 0`. Label **Deselect all**. Calls `UnifiedSelectionService.clearSelection()`. No export, share, or select-all bar.
+  - **Deselect:** one quiet `hlmBtn` `ghost` `xs` on the toolbar, visible when `selectedMediaIds.size > 0`. Label **Deselect all**. Calls `UnifiedSelectionService.clearSelection()`. No select-all bar.
+  - **Handoff:** desktop Share opens [share-sheet.md](../../component/workspace/share-sheet.md). Not a footer.
   - **Stack split:** when **another** panel stack is open (e.g. Upload + Tips), vertical space is split by the **stack divider** in `app-shell-panel-column` — see [shell-panel-resize.md](./shell-panel-resize.md) § Stack divider. **Not** inside this panel.
 - **Width:** panel column uses an explicit px width while open (stored default **400px**, clamped to **≥480px** on paint for detail layout), drag-resizable via `app-shell-column-divider` between canvas and panel column — see [shell-panel-resize.md](./shell-panel-resize.md).
 - **No tabs:** Upload and Projects are **not** in this panel. Upload is `upload` panel only; Projects is canvas `/projects`.
