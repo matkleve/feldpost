@@ -2,7 +2,7 @@
 
 ## What It Is
 
-The open/closed list for the panel column. Ids are `upload`, `download`, `shared-media`, `tips`, and `help`. It does not route the canvas. Undo, activity history, and redo are not panel ids.
+The open/closed list for the panel column. Ids are `upload`, `download`, `shared-media`, `tips`, and `help`. It does not route the canvas. Undo, activity history, and redo are not panel ids. User scenarios: [UC-022](../../../use-cases/UC-022-panel-stacks.md).
 
 **Stack membership (this spec owns it).** `open(id)` never closes another id. Top-stack ids (`upload`, `download`, `shared-media`) and bottom-stack ids (`tips`, `help`) are groups for placement only — [shell-panel-column.md](../../ui/shell/shell-panel-column.md). A group is a list, not one slot. Upload stays open when Download opens, and Tips stays open when Help opens. The rail toggles only the id that was activated.
 

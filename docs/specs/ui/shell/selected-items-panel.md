@@ -33,7 +33,7 @@ The right-rail **Selected items** surface in the panel column. Shows the current
 
 | # | User action | System response | Triggers |
 | --- | --- | --- | --- |
-| 1 | Clicks right-rail download icon | Toggles `download` panel open/closed | `ShellLayoutService.setOpen('download', !open)` |
+| 1 | Clicks right-rail download icon | Toggles `download` only. Other open panels stay | `ShellLayoutService.setOpen('download', !open)` |
 | 2 | Selects media on map or `/media` | Selection updates; panel may auto-open (see auto-open rules) | unified selection store |
 | 3 | Clicks close on panel surface | `ShellLayoutService.close('download')` | panel unmounts |
 | 4 | Clicks item in grid | Opens inline detail for that media id | `detailMediaId` set |

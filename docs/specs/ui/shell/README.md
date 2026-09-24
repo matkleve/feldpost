@@ -18,6 +18,6 @@ Authenticated app geometry. The map is one tenant of the main canvas, not the sh
 | [workspace-pane-retirement.md](workspace-pane-retirement.md) | migration checklist |
 | [shell-widget-placement.md](shell-widget-placement.md) | where a widget sits; no selector yet |
 
-Panel stack state: [../../service/shell-layout/shell-layout.md](../../service/shell-layout/shell-layout.md).
+Panel stack state: [../../service/shell-layout/shell-layout.md](../../service/shell-layout/shell-layout.md). User scenarios: [UC-022](../../../use-cases/UC-022-panel-stacks.md).
 
 Parent index: [../README.md](../README.md).
