@@ -198,3 +198,16 @@ Supersedes Q4–Q8 only. Q9, Q10, and B1 are still open. `[D]` unless marked `[A
 8. **A shared link opens a temporary widget.** `[D]` The page does not appear as a normal install. The temporary widget lasts until logout, then it is gone. It is not a durable install row. It does not bypass RLS. Share-set tokens (`resolve_share_set`) are a different door for a selection of media `[A]` `docs/specs/service/share-set/share-set-access-model.md`. This answer is about opening an app the user has not installed. How the link names the app is not specified.
 
 **B2.** “Only Map and Media” — does that apply to people who already use Projects, Colleagues, and Organization on the day this ships, or only to accounts created after it ships?
+
+## Update 2026-09-24 — answers 9–10
+
+9. **Not answered.** The owner does not have the two lists in the chat. They are written here so the next answer can be yes or no. `[A]` for the quotes. `[D]` that they must be one install store is still this plan’s proposal, not an owner decision.
+
+| List | What it is |
+| --- | --- |
+| Nav today | `nav.component.ts` lines 123–129: Map `/`, Media `/media`, Projects `/projects`, Colleagues `/colleagues`, Organization `/organization`. One fixed array. |
+| STUDY-015 §14.2 rail | Left rail, owner sketch 2026-09-22: map, projects, media, `+`, then account, maybe Mitarbeiter, maybe Organisation, settings. That study is `proposed`. It is not built. |
+
+There is one nav in code. The rail list is a drawing in STUDY-015. Q9 asks that a future install store feed both, so they do not each keep their own “what is installed” rows.
+
+10. **Files is not a widget in this plan.** `[D]` The `/files` page was a mistake to treat as a product app. Do not add the route. Do not delete `docs/specs/page/files-page.md` or the folder RPCs. Whether that tree later folds into Media is undecided. Leave it warm.
