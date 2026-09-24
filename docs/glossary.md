@@ -292,7 +292,7 @@ Canonical names for every visible piece of the interface. Use these in code, doc
   The `share` panel surface in the panel column. Product title **Share**. Shows the current media set (any file, not photographs only) and passes that set on. Spec: `docs/specs/ui/shell/selected-items-panel.md`. Replaces the Workspace Pane media tab when the grid shell is on.
 
 - **Share sheet**  
-  Desktop handoff for that set. People band, then methods band. Internal people are organization members (`named`). An external person is not a stored face; they receive a `public` link through a method. Spec: `docs/specs/component/workspace/share-sheet.md`. Not built.
+  Desktop handoff for that set. People band, then methods band. Internal people are organization members (`named`). An external person is not a stored face; they receive a `public` link through a method. Spec: `docs/specs/component/workspace/share-sheet.md`. Code: `apps/web/src/app/shared/share-sheet/`.
 
 - **Unified selection**  
   Single `selectedMediaIds` store shared by map, `/media`, and the selected items panel. No independent workspace-only selection when `shellGridLayout` is on. Spec: `docs/specs/ui/shell/unified-selection.md`.

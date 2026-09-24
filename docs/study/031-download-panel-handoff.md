@@ -141,3 +141,7 @@ The owner rejected the flat list `[D]`. The desktop sheet follows the iPhone ord
 | Methods | System share, last | The browser’s own sheet, when it exists | `public` `[D]` |
 
 The phone still skips this sheet `[D]`. The system sheet already shows people and apps.
+
+## Update 2026-09-24 — the sheet is in the share panel
+
+`app-share-sheet` mounts from the share panel when the selection is non-empty and the viewport is wider than `48rem` `[A]`. The people band is at most six round faces plus a search dropdown `[A]`. A face tap creates a `named` link; a method creates a `public` link `[A]`. Narrower viewports skip the sheet and call `navigator.share` after a public link `[A]`.

@@ -698,6 +698,19 @@
 
 ---
 
+### `<app-share-sheet>` — Share Sheet
+
+- **File**: `apps/web/src/app/shared/share-sheet/share-sheet.component.ts`
+- **Purpose**: Desktop handoff for the current media set. People band, then methods.
+- **Not for**: Phone share. The phone opens the system sheet.
+- **Spec**: [`docs/specs/component/workspace/share-sheet.md`](workspace/share-sheet.md)
+- **Variant axes**: none
+- **Composed of**: standalone
+- **Used in**: `app-selected-items-panel`
+- **Gaps**: none
+
+---
+
 ### `<app-photo-lightbox>` — Photo Lightbox
 
 - **File**: `apps/web/src/app/shared/photo-lightbox/photo-lightbox.component.ts`

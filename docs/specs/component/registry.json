@@ -1687,6 +1687,36 @@
     {
       "slice": "primitives-and-layout",
       "section": "dialogs",
+      "selector": "app-share-sheet",
+      "name": "Share Sheet",
+      "status": "active",
+      "path": "apps/web/src/app/shared/share-sheet/share-sheet.component.ts",
+      "spec": "docs/specs/component/workspace/share-sheet.md",
+      "specId": "component/workspace/share-sheet",
+      "useFor": "Desktop handoff for the current media set. People band, then methods.",
+      "notFor": "Phone share. The phone opens the system sheet.",
+      "fields": [
+        {
+          "label": "Variant axes",
+          "value": "none"
+        },
+        {
+          "label": "Composed of",
+          "value": "standalone"
+        },
+        {
+          "label": "Used in",
+          "value": "`app-selected-items-panel`"
+        },
+        {
+          "label": "Gaps",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "slice": "primitives-and-layout",
+      "section": "dialogs",
       "selector": "app-photo-lightbox",
       "name": "Photo Lightbox",
       "status": "active",

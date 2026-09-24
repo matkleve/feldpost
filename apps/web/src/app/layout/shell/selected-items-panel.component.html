@@ -1,4 +1,12 @@
-<!-- Stable state: detail — one focused media id inside the download panel. -->
+@if (selectedCount() > 0) {
+  <button type="button" hlmBtn variant="ghost" size="xs" (click)="share()">
+    {{ t('share.sheet.open', 'Share') }}
+  </button>
+  @if (shareOpen()) {
+    <app-share-sheet />
+  }
+}
+<!-- Stable state: detail — one focused media id inside the share panel. -->
 <!-- @see docs/specs/ui/shell/selected-items-panel.md -->
 @if (detailMediaId(); as mediaId) {
   <app-media-detail-view

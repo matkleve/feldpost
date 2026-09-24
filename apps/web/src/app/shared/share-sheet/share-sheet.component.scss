@@ -1,0 +1,137 @@
+// Flex child of the share panel. Chrome comes from `.option-menu-surface`.
+// @see docs/specs/component/workspace/share-sheet.md
+:host {
+  display: block;
+  min-width: 0;
+  min-height: 0;
+}
+
+@layer components {
+  // Two bands. People sit above the ways the link leaves.
+  // @see docs/specs/component/workspace/share-sheet.md
+  .share-sheet {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+    min-width: 0;
+  }
+
+  // Short face row plus the search that opens the member list.
+  // @see docs/specs/component/workspace/share-sheet.md
+  .share-sheet__people {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-2);
+    min-width: 0;
+  }
+
+  // One organization member. The circle is the hit target.
+  // @see docs/specs/component/workspace/share-sheet.md
+  .share-sheet__person {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    border-radius: var(--radius-full);
+    background: var(--action-hover);
+    color: var(--menu-item-text);
+    cursor: pointer;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  // Search field. The dropdown hangs from the people band.
+  // @see docs/specs/component/workspace/share-sheet.md
+  .share-sheet__search {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    flex: 1 1 var(--spacing-8);
+    min-width: 0;
+    color: var(--menu-item-text);
+
+    input {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      background: transparent;
+      color: inherit;
+    }
+  }
+
+  // Member list opened by the search field.
+  // @see docs/specs/component/workspace/share-sheet.md
+  .share-sheet__results {
+    position: absolute;
+    z-index: 0;
+    top: calc(2.75rem + var(--spacing-2));
+    right: 0;
+    left: 0;
+    margin: 0;
+    padding: var(--spacing-1);
+    list-style: none;
+    border-radius: var(--radius-md);
+    background: var(--chrome-surface);
+    box-shadow: var(--shadow-md);
+  }
+
+  // One row in the search dropdown.
+  // @see docs/specs/component/workspace/share-sheet.md
+  .share-sheet__result {
+    display: block;
+    width: 100%;
+    padding: var(--spacing-2);
+    border: 0;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--menu-item-text);
+    text-align: start;
+    cursor: pointer;
+  }
+
+  // Ways the public link leaves. System share is omitted when the browser has none.
+  // @see docs/specs/component/workspace/share-sheet.md
+  .share-sheet__methods {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+  }
+
+  // One method. Icon and label share the button.
+  // @see docs/specs/component/workspace/share-sheet.md
+  .share-sheet__method {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    padding: var(--spacing-2);
+    border: 0;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--menu-item-text);
+    cursor: pointer;
+  }
+}
+
+@layer states {
+  // Hover and keyboard focus on a face, a search row, or a method.
+  // @see docs/specs/component/workspace/share-sheet.md
+  .share-sheet__person:hover,
+  .share-sheet__person:focus-visible,
+  .share-sheet__result:hover,
+  .share-sheet__result:focus-visible,
+  .share-sheet__method:hover,
+  .share-sheet__method:focus-visible {
+    background: var(--menu-item-hover);
+    color: var(--primary);
+  }
+}

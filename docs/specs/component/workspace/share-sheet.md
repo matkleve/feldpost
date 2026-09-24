@@ -14,7 +14,7 @@ The set is any media file.
 
 One panel, same chrome as the media right-click menu (`option-menu-surface`). Two bands:
 
-1. **People.** A horizontal row of organization members. One face is one internal person. Tapping a face creates a `named` share set for that user id.
+1. **People.** A short horizontal row of round faces (at most six organization members, not the current user). A search field opens a dropdown list of matching members. Tapping a face creates a `named` share set for that user id.
 2. **Methods.** A horizontal row of ways the link leaves the company: Copy link, Email, WhatsApp, and System share when `navigator.share` exists.
 
 There is no external address book. An outside person is not a face in the people band. They receive a `public` link through a method. A stored external contact is out of scope.
@@ -22,14 +22,14 @@ There is no external address book. An outside person is not a face in the people
 ## Where It Lives
 
 - **Spec:** this file.
-- **Code (not built):** `apps/web/src/app/shared/share-sheet/`.
+- **Code:** `apps/web/src/app/shared/share-sheet/`.
 - **Host:** Share panel (`panelId="share"`).
 
 ## Actions
 
 | # | User action | System response |
 | --- | --- | --- |
-| 1 | Opens Share on desktop with a set | Sheet opens. People load from organization members. |
+| 1 | Opens Share on desktop with a set | Sheet opens. A short face row loads. Search filters the member list in a dropdown. |
 | 2 | Taps an internal person | `createOrReuseShareSet` with `audience: named` and that user id. |
 | 3 | Taps Copy link | `audience: public`, then the URL is copied. |
 | 4 | Taps Email | `audience: public`, then the mail app opens with the URL in the body. |
@@ -44,7 +44,9 @@ ZIP is not a method. It downloads files and does not hand the set to a person.
 
 ```text
 app-share-sheet
-├── people band (organization members)
+├── people band
+│   ├── round faces (at most six)
+│   └── search dropdown
 └── methods band (copy, email, WhatsApp, system share)
 ```
 
@@ -66,9 +68,9 @@ app-share-sheet
 
 ## Acceptance Criteria
 
-- [ ] Desktop Share opens this sheet, not a single column of text rows.
-- [ ] People band lists organization members and creates a `named` set.
-- [ ] No external face is shown. External handoff is a method with a `public` link.
-- [ ] Methods are Copy link, Email, WhatsApp, and System share when the browser has it.
-- [ ] Phone Share does not mount this sheet.
-- [ ] Empty selection does not open the sheet.
+- [x] Desktop Share opens this sheet, not a single column of text rows.
+- [x] People band shows at most six round faces, and search opens a dropdown list. A tap creates a `named` set.
+- [x] No external face is shown. External handoff is a method with a `public` link.
+- [x] Methods are Copy link, Email, WhatsApp, and System share when the browser has it.
+- [x] Phone Share does not mount this sheet.
+- [x] Empty selection does not open the sheet.

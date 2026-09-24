@@ -1625,6 +1625,12 @@ shell.control.theme.dark,Dark,Grid shell theme option label.,Dark,Dunkel,Scuro
 shell.control.theme.sandstone,Sandstone,Grid shell theme option label.,Sandstone,Sandstein,Arenaria
 shell.panel.notifications.title,Notifications,Notifications panel surface title.,Notifications,Benachrichtigungen,Notifiche
 shell.panel.share.title,Share,Share panel surface title. The set is any media file, not photographs only.,Share,Teilen,Condividi
+share.sheet.open,Share,"Opens the desktop share sheet, or the system sheet on a phone.",Share,Teilen,Condividi
+share.sheet.search,Search people,Search field in the share sheet people band.,Search people,Personen suchen,Cerca persone
+share.sheet.copy,Copy link,Copies the public share link.,Copy link,Link kopieren,Copia link
+share.sheet.email,Email,Opens the mail app with the public share link.,Email,E-Mail,Email
+share.sheet.whatsapp,WhatsApp,Opens WhatsApp with the public share link.,WhatsApp,WhatsApp,WhatsApp
+share.sheet.system,System share,Opens the browser share sheet with the public link.,System share,System-Teilen,Condivisione di sistema
 shell.panel.sharedMedia.title,Shared media,Shared media panel surface title.,Shared media,Geteilte Medien,Media condivisi
 shell.panel.tips.title,Tips,Tips panel surface title.,Tips,Tipps,Suggerimenti
 shell.panel.unavailable.body,This panel is not available yet.,Placeholder body for a right-rail panel that has no product yet.,This panel is not available yet.,Dieser Bereich ist noch nicht verfügbar.,Questo pannello non è ancora disponibile.
