@@ -35,7 +35,7 @@ If that is not possible for a given field, the field is out of scope for bulk â€
 
 ## What bulk apply does NOT do
 
-- It does not open trays. Items needing a question stay unresolved and remain in Issues.
+- It does not open trays. Items needing a question stay unresolved and remain in Clarifications.
 - It does not invent precision. A folder-level answer that names only a city yields a city-precision
   location **without coordinates**, exactly as the area-only path does (D-10) â€” it does not borrow a
   house number from a sibling file.

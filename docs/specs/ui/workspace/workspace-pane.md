@@ -1,5 +1,7 @@
 # Workspace Pane
 
+> **Grid shell migration:** When `shellGridLayout` is on, the **Media / Selected items** content moves to the `download` panel ([`selected-items-panel.md`](../shell/selected-items-panel.md)). Upload moves to the `upload` panel. This pane is retired in [workspace-pane-retirement.md](../shell/workspace-pane-retirement.md). **Until PR 7**, the legacy pane may still mount beside the grid for fallback — that is interim debt, not the target architecture.
+>
 > **Projects tab spec (child):** [`workspace-pane-projects-tab.md`](./workspace-pane-projects-tab.md)
 
 ## Layout host (canonical)

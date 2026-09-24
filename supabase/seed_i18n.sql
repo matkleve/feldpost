@@ -11349,14 +11349,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.imageDetail.mediaResolution.aria', 'Displayed image resolution', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-media-viewer/media-detail-media-viewer.component.html bound-attr:aria-label')
+values (null, 'workspace.imageDetail.mediaResolution.aria', 'Original image resolution', 'en', 'apps/web/src/app/shared/media-item/media-item.component.html bound-attr:aria-label')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Displayed image resolution', 'published'
+select t.id, 'en', 'Original image resolution', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.imageDetail.mediaResolution.aria'
 on conflict (app_text_id, lang) do update set
@@ -11364,7 +11364,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Angezeigte Bildauflösung', 'published'
+select t.id, 'de', 'Auflösung des Originalbilds', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.imageDetail.mediaResolution.aria'
 on conflict (app_text_id, lang) do update set
@@ -11372,7 +11372,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Risoluzione immagine visualizzata', 'published'
+select t.id, 'it', 'Risoluzione dell''immagine originale', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'workspace.imageDetail.mediaResolution.aria'
 on conflict (app_text_id, lang) do update set
@@ -33049,14 +33049,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'upload.panel.lane.uploading', 'Queue', 'en', 'apps/web/src/app/features/upload/upload-panel.component.ts computed:laneSwitchOptions option label/title/aria base')
+values (null, 'upload.panel.lane.uploading', 'Waiting', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel-helpers.ts buildLaneSwitchOptions label for the uploading lane')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Queue', 'published'
+select t.id, 'en', 'Waiting', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.panel.lane.uploading'
 on conflict (app_text_id, lang) do update set
@@ -33064,7 +33064,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Warteschlange', 'published'
+select t.id, 'de', 'Wartend', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.panel.lane.uploading'
 on conflict (app_text_id, lang) do update set
@@ -33072,7 +33072,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Coda', 'published'
+select t.id, 'it', 'In attesa', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.panel.lane.uploading'
 on conflict (app_text_id, lang) do update set
@@ -33111,32 +33111,125 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'upload.panel.lane.issues', 'Issues', 'en', 'apps/web/src/app/features/upload/upload-panel.component.ts computed:laneSwitchOptions option label/title/aria base')
+values (null, 'upload.panel.lane.clarifications', 'Clarification', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel-helpers.ts buildLaneSwitchOptions label for the clarifications lane')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Issues', 'published'
+select t.id, 'en', 'Clarification', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'upload.panel.lane.issues'
+where t.organization_id is null and t.key = 'upload.panel.lane.clarifications'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Probleme', 'published'
+select t.id, 'de', 'Klärung', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'upload.panel.lane.issues'
+where t.organization_id is null and t.key = 'upload.panel.lane.clarifications'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Problemi', 'published'
+select t.id, 'it', 'Da chiarire', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'upload.panel.lane.issues'
+where t.organization_id is null and t.key = 'upload.panel.lane.clarifications'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.panel.lane.uploading.empty', 'Files that are uploading or still in line.', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html empty Waiting lane')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Files that are uploading or still in line.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.lane.uploading.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Dateien, die hochladen oder noch warten.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.lane.uploading.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'File in caricamento o ancora in coda.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.lane.uploading.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.panel.lane.clarifications.empty', 'Files that need a decision before they can finish.', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html empty Clarification lane')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Files that need a decision before they can finish.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.lane.clarifications.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Dateien, die eine Entscheidung brauchen, bevor sie fertig sind.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.lane.clarifications.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'File che richiedono una decisione prima di essere completati.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.lane.clarifications.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.panel.lane.uploaded.empty', 'Files that finished and are ready to use.', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html empty Uploaded lane')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Files that finished and are ready to use.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.lane.uploaded.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Dateien, die fertig sind und bereitstehen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.lane.uploaded.empty'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'File completati e pronti all''uso.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.panel.lane.uploaded.empty'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -36955,6 +37048,37 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.folder.subtitle', 'Every file in one folder, with the usual questions.', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html subtitle inside the folder intake button')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Every file in one folder, with the usual questions.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.folder.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Alle Dateien eines Ordners, mit den üblichen Fragen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.folder.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Tutti i file di una cartella, con le domande abituali.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.folder.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
 values (null, 'upload.folder.picker.failed.title', 'Folder upload unavailable', 'en', 'apps/web/src/app/features/upload/upload-panel-input-handlers.ts toast title')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
@@ -37110,14 +37234,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'upload.archive.import.hint', 'Import a company archive: resolve what can be resolved, ask nothing, park the rest in Issues.', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html title attr on archive intake button')
+values (null, 'upload.archive.import.hint', 'Import a company archive: resolve what can be resolved, ask nothing, park the rest in Clarifications.', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html title attr on archive intake button')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Import a company archive: resolve what can be resolved, ask nothing, park the rest in Issues.', 'published'
+select t.id, 'en', 'Import a company archive: resolve what can be resolved, ask nothing, park the rest in Clarifications.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.archive.import.hint'
 on conflict (app_text_id, lang) do update set
@@ -37125,7 +37249,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Firmenarchiv importieren: auflösen was möglich ist, nichts fragen, den Rest in Probleme ablegen.', 'published'
+select t.id, 'de', 'Firmenarchiv importieren: auflösen was möglich ist, nichts fragen, den Rest in Klärung ablegen.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.archive.import.hint'
 on conflict (app_text_id, lang) do update set
@@ -37133,9 +37257,40 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Importa un archivio aziendale: risolvi ciò che si può, non chiedere nulla, metti il resto in Problemi.', 'published'
+select t.id, 'it', 'Importa un archivio aziendale: risolvi ciò che si può, non chiedere nulla, metti il resto in Da chiarire.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.archive.import.hint'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'upload.archive.import.subtitle', 'A company archive. Nothing is asked; the rest waits in Clarifications.', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html subtitle inside the archive intake button')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'A company archive. Nothing is asked; the rest waits in Clarifications.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.archive.import.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ein Firmenarchiv. Es wird nichts gefragt; der Rest wartet in Klärung.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.archive.import.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Un archivio aziendale. Non viene chiesto nulla; il resto attende in Da chiarire.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'upload.archive.import.subtitle'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -37229,533 +37384,6 @@ insert into public.app_text_translations (app_text_id, lang, translated_text, st
 select t.id, 'it', 'In attesa di risoluzione: {count}', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.archive.progress.awaitingResolution'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'bulk.resolution.dialog.title', 'Apply addresses in bulk', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Apply addresses in bulk', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.title'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Adressen gesammelt zuweisen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.title'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Assegna indirizzi in blocco', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.title'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'bulk.resolution.dialog.applyCount', '{count} items will get an address', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', '{count} items will get an address', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.applyCount'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', '{count} Objekte erhalten eine Adresse', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.applyCount'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', '{count} elementi riceveranno un indirizzo', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.applyCount'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'bulk.resolution.dialog.geocodeCount', 'Address lookups: {count}', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Address lookups: {count}', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.geocodeCount'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Adressabfragen: {count}', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.geocodeCount'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Ricerche di indirizzi: {count}', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.geocodeCount'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'bulk.resolution.dialog.groupCount', '{count} files', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', '{count} files', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.groupCount'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', '{count} Dateien', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.groupCount'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', '{count} file', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.groupCount'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'bulk.resolution.dialog.skip.alreadyResolved', '{count} skipped: they already have a location', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', '{count} skipped: they already have a location', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.skip.alreadyResolved'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', '{count} uebersprungen: sie haben bereits einen Standort', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.skip.alreadyResolved'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', '{count} saltati: hanno gia una posizione', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.skip.alreadyResolved'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'bulk.resolution.dialog.skip.noAddressInSource', '{count} skipped: no address in the folder path or file name', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', '{count} skipped: no address in the folder path or file name', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.skip.noAddressInSource'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', '{count} uebersprungen: keine Adresse im Ordnerpfad oder Dateinamen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.skip.noAddressInSource'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', '{count} saltati: nessun indirizzo nel percorso della cartella o nel nome del file', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.skip.noAddressInSource'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'bulk.resolution.dialog.overwrite', 'Also overwrite items that already have a location', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Also overwrite items that already have a location', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.overwrite'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Auch Objekte ueberschreiben, die bereits einen Standort haben', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.overwrite'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Sovrascrivi anche gli elementi che hanno gia una posizione', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.overwrite'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'bulk.resolution.dialog.nothingToDo', 'Nothing here can be given an address automatically.', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Nothing here can be given an address automatically.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.nothingToDo'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Hier kann nichts automatisch eine Adresse erhalten.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.nothingToDo'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Nulla qui puo ricevere un indirizzo automaticamente.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.nothingToDo'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'bulk.resolution.dialog.progress', 'Writing {done} of {total}…', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Writing {done} of {total}…', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.progress'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Schreibe {done} von {total}…', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.progress'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Scrittura {done} di {total}…', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.progress'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'bulk.resolution.dialog.starting', 'Starting…', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Starting…', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.starting'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Startet…', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.starting'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Avvio…', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.starting'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'bulk.resolution.dialog.report', '{resolved} written, {failed} failed, {geocodes} address lookups', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', '{resolved} written, {failed} failed, {geocodes} address lookups', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.report'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', '{resolved} geschrieben, {failed} fehlgeschlagen, {geocodes} Adressabfragen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.report'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', '{resolved} scritti, {failed} non riusciti, {geocodes} ricerche di indirizzi', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.report'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'bulk.resolution.dialog.incomplete', 'The run was stopped before every item was written.', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'The run was stopped before every item was written.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.incomplete'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Der Durchlauf wurde gestoppt, bevor alle Objekte geschrieben wurden.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.incomplete'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'L esecuzione e stata interrotta prima che tutti gli elementi fossero scritti.', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.incomplete'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'bulk.resolution.dialog.cancel', 'Cancel', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Cancel', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.cancel'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Abbrechen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.cancel'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Annulla', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.cancel'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'bulk.resolution.dialog.close', 'Close', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Close', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.close'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Schliessen', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.close'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Chiudi', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.close'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'bulk.resolution.dialog.confirm', 'Apply', 'en', 'apps/web/src/app/shared/bulk-resolution-dialog/bulk-resolution-dialog.component.html bulk resolution confirmation')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Apply', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.confirm'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Anwenden', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.confirm'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Applica', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'bulk.resolution.dialog.confirm'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'upload.deferred.backlog.noLocation', '{count} items have no location', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html deferred location backlog figure')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', '{count} items have no location', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'upload.deferred.backlog.noLocation'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', '{count} Objekte haben keinen Standort', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'upload.deferred.backlog.noLocation'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', '{count} elementi non hanno una posizione', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'upload.deferred.backlog.noLocation'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'upload.deferred.backlog.improvable', '{count} items could be located more precisely', 'en', 'apps/web/src/app/features/upload/upload-panel/upload-panel.component.html deferred location backlog figure')
-on conflict (scope_key) do update set
-  source_text = excluded.source_text,
-  source_lang = excluded.source_lang,
-  context = excluded.context;
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', '{count} items could be located more precisely', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'upload.deferred.backlog.improvable'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', '{count} Objekte koennten genauer verortet werden', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'upload.deferred.backlog.improvable'
-on conflict (app_text_id, lang) do update set
-  translated_text = excluded.translated_text,
-  status = 'published';
-
-insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', '{count} elementi potrebbero essere localizzati con maggiore precisione', 'published'
-from public.app_texts t
-where t.organization_id is null and t.key = 'upload.deferred.backlog.improvable'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -39466,14 +39094,14 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'upload.location.mode.subtitle.on', 'GPS and file names; missing location → Issues.', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html subtitle when auto-location on')
+values (null, 'upload.location.mode.subtitle.on', 'GPS and file names; missing location → Clarifications.', 'en', 'apps/web/src/app/features/upload/upload-panel.component.html subtitle when auto-location on')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'GPS and file names; missing location → Issues.', 'published'
+select t.id, 'en', 'GPS and file names; missing location → Clarifications.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.location.mode.subtitle.on'
 on conflict (app_text_id, lang) do update set
@@ -39481,7 +39109,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'GPS und Dateinamen; fehlender Standort → Probleme.', 'published'
+select t.id, 'de', 'GPS und Dateinamen; fehlender Standort → Klärung.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.location.mode.subtitle.on'
 on conflict (app_text_id, lang) do update set
@@ -39489,7 +39117,7 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'GPS e nomi file; posizione mancante → Problemi.', 'published'
+select t.id, 'it', 'GPS e nomi file; posizione mancante → Da chiarire.', 'published'
 from public.app_texts t
 where t.organization_id is null and t.key = 'upload.location.mode.subtitle.on'
 on conflict (app_text_id, lang) do update set
@@ -45139,249 +44767,2047 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.imageDetail.action.addFolderToLocations', 'Compact button on the Original folder row that resolves a location from the folder path', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-inline-section/media-detail-inline-section.component.html')
+values (null, 'shell.control.map', 'Map', 'en', 'Grid shell left rail. Canvas destination.')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Add as location', 'published'
+select t.id, 'en', 'Map', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.imageDetail.action.addFolderToLocations'
+where t.organization_id is null and t.key = 'shell.control.map'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Als Standort hinzufügen', 'published'
+select t.id, 'de', 'Karte', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.imageDetail.action.addFolderToLocations'
+where t.organization_id is null and t.key = 'shell.control.map'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Aggiungi come posizione', 'published'
+select t.id, 'it', 'Mappa', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.imageDetail.action.addFolderToLocations'
+where t.organization_id is null and t.key = 'shell.control.map'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.imageDetail.action.addFolderToLocations.aria', 'Aria label for the Original folder add-as-location button', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-inline-section/media-detail-inline-section.component.html')
+values (null, 'shell.control.projects', 'Projects', 'en', 'Grid shell left rail. Canvas destination.')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Resolve a location from this folder path and add it', 'published'
+select t.id, 'en', 'Projects', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.imageDetail.action.addFolderToLocations.aria'
+where t.organization_id is null and t.key = 'shell.control.projects'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Aus diesem Ordnerpfad einen Standort ermitteln und hinzufügen', 'published'
+select t.id, 'de', 'Projekte', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.imageDetail.action.addFolderToLocations.aria'
+where t.organization_id is null and t.key = 'shell.control.projects'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Ricava una posizione da questo percorso di cartella e aggiungila', 'published'
+select t.id, 'it', 'Progetti', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.imageDetail.action.addFolderToLocations.aria'
+where t.organization_id is null and t.key = 'shell.control.projects'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.imageDetail.action.addFilenameToLocations', 'Compact button on the Original file name row that resolves a location from the file name', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-inline-section/media-detail-inline-section.component.html')
+values (null, 'shell.control.media', 'Media', 'en', 'Grid shell left rail. Canvas destination.')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Add as location', 'published'
+select t.id, 'en', 'Media', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.imageDetail.action.addFilenameToLocations'
+where t.organization_id is null and t.key = 'shell.control.media'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Als Standort hinzufügen', 'published'
+select t.id, 'de', 'Medien', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.imageDetail.action.addFilenameToLocations'
+where t.organization_id is null and t.key = 'shell.control.media'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Aggiungi come posizione', 'published'
+select t.id, 'it', 'Media', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.imageDetail.action.addFilenameToLocations'
+where t.organization_id is null and t.key = 'shell.control.media'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.imageDetail.action.addFilenameToLocations.aria', 'Aria label for the Original file name add-as-location button', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-inline-section/media-detail-inline-section.component.html')
+values (null, 'shell.control.more', 'More', 'en', 'Grid shell left rail. Inert until the widget page exists.')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Resolve a location from this file name and add it', 'published'
+select t.id, 'en', 'More', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.imageDetail.action.addFilenameToLocations.aria'
+where t.organization_id is null and t.key = 'shell.control.more'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Aus diesem Dateinamen einen Standort ermitteln und hinzufügen', 'published'
+select t.id, 'de', 'Mehr', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.imageDetail.action.addFilenameToLocations.aria'
+where t.organization_id is null and t.key = 'shell.control.more'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Ricava una posizione da questo nome file e aggiungila', 'published'
+select t.id, 'it', 'Altro', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.imageDetail.action.addFilenameToLocations.aria'
+where t.organization_id is null and t.key = 'shell.control.more'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.imageDetail.toast.pathLocationAdded', 'Toast after a path-derived location add succeeds', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view.component.ts')
+values (null, 'shell.control.account', 'Account', 'en', 'Grid shell left rail. Opens the account settings section.')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Location added', 'published'
+select t.id, 'en', 'Account', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.imageDetail.toast.pathLocationAdded'
+where t.organization_id is null and t.key = 'shell.control.account'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Standort hinzugefügt', 'published'
+select t.id, 'de', 'Konto', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.imageDetail.toast.pathLocationAdded'
+where t.organization_id is null and t.key = 'shell.control.account'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Posizione aggiunta', 'published'
+select t.id, 'it', 'Account', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.imageDetail.toast.pathLocationAdded'
+where t.organization_id is null and t.key = 'shell.control.account'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.imageDetail.toast.pathLocationNoAddress', 'Toast when the chosen path carries no readable address', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view.component.ts')
+values (null, 'shell.control.settings', 'Settings', 'en', 'Grid shell left rail. Opens the settings overlay.')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'No address could be read from this path', 'published'
+select t.id, 'en', 'Settings', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.imageDetail.toast.pathLocationNoAddress'
+where t.organization_id is null and t.key = 'shell.control.settings'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Aus diesem Pfad konnte keine Adresse gelesen werden', 'published'
+select t.id, 'de', 'Einstellungen', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.imageDetail.toast.pathLocationNoAddress'
+where t.organization_id is null and t.key = 'shell.control.settings'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Da questo percorso non è stato possibile leggere alcun indirizzo', 'published'
+select t.id, 'it', 'Impostazioni', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.imageDetail.toast.pathLocationNoAddress'
+where t.organization_id is null and t.key = 'shell.control.settings'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.imageDetail.toast.pathLocationAlreadyResolved', 'Toast when the item already has a location, so the add action is declined', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view.component.ts')
+values (null, 'shell.control.upload', 'Upload', 'en', 'Grid shell right rail. Opens the upload panel.')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'This item already has a location', 'published'
+select t.id, 'en', 'Upload', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.imageDetail.toast.pathLocationAlreadyResolved'
+where t.organization_id is null and t.key = 'shell.control.upload'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Dieses Element hat bereits einen Standort', 'published'
+select t.id, 'de', 'Hochladen', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.imageDetail.toast.pathLocationAlreadyResolved'
+where t.organization_id is null and t.key = 'shell.control.upload'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Questo elemento ha già una posizione', 'published'
+select t.id, 'it', 'Carica', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.imageDetail.toast.pathLocationAlreadyResolved'
+where t.organization_id is null and t.key = 'shell.control.upload'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'workspace.imageDetail.toast.pathLocationFailed', 'Toast when resolving a location from the path fails', 'en', 'apps/web/src/app/shared/workspace-pane/media-detail/media-detail-view.component.ts')
+values (null, 'shell.control.help', 'Help', 'en', 'Grid shell right rail. Opens the help panel.')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Location could not be resolved from this path', 'published'
+select t.id, 'en', 'Help', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.imageDetail.toast.pathLocationFailed'
+where t.organization_id is null and t.key = 'shell.control.help'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Aus diesem Pfad konnte kein Standort ermittelt werden', 'published'
+select t.id, 'de', 'Hilfe', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.imageDetail.toast.pathLocationFailed'
+where t.organization_id is null and t.key = 'shell.control.help'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Non è stato possibile ricavare una posizione da questo percorso', 'published'
+select t.id, 'it', 'Aiuto', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'workspace.imageDetail.toast.pathLocationFailed'
+where t.organization_id is null and t.key = 'shell.control.help'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.panel.upload.title', 'Upload', 'en', 'Upload panel surface title.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Upload', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.upload.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Hochladen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.upload.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Carica', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.upload.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.panel.help.title', 'Help', 'en', 'Help panel surface title.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Help', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.help.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Hilfe', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.help.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Aiuto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.help.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.panel.help.body', 'Help is not available yet.', 'en', 'Help panel placeholder body.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Help is not available yet.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.help.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Hilfe ist noch nicht verfügbar.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.help.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'L''aiuto non è ancora disponibile.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.help.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.panel.collapse', 'Collapse panel', 'en', 'Panel surface collapse control (chevron_right). Collapses the panel column toward the right rail.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Collapse panel', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.collapse'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Panel einklappen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.collapse'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Comprimi pannello', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.collapse'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.control.notifications', 'Notifications', 'en', 'Grid shell right rail. Opens the notifications panel.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Notifications', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.notifications'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Benachrichtigungen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.notifications'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Notifiche', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.notifications'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.control.download', 'Selected items', 'en', 'Grid shell right rail. Opens the selected-items panel.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Selected items', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.download'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ausgewählte Elemente', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.download'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Elementi selezionati', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.download'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.control.sharedMedia', 'Shared media', 'en', 'Grid shell right rail. Opens the shared media panel.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Shared media', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.sharedMedia'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Geteilte Medien', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.sharedMedia'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Media condivisi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.sharedMedia'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.control.undo', 'Undo', 'en', 'Grid shell right rail. Inert until a history product exists.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Undo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.undo'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Rückgängig', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.undo'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Annulla', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.undo'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.control.history', 'Activity history', 'en', 'Grid shell right rail. Inert until a history product exists.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Activity history', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.history'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Aktivitätsverlauf', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.history'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cronologia attività', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.history'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.control.redo', 'Redo', 'en', 'Grid shell right rail. Inert until a history product exists.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Redo', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.redo'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Wiederholen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.redo'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Ripeti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.redo'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.control.tips', 'Tips', 'en', 'Grid shell right rail. Opens the tips panel.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Tips', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.tips'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Tipps', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.tips'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Suggerimenti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.tips'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.control.theme', 'Theme', 'en', 'Grid shell right rail. Cycles the app theme.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Theme', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.theme'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Design', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.theme'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Tema', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.theme'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.control.theme.light', 'Light', 'en', 'Grid shell theme option label.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Light', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.theme.light'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Hell', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.theme.light'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Chiaro', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.theme.light'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.control.theme.dark', 'Dark', 'en', 'Grid shell theme option label.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Dark', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.theme.dark'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Dunkel', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.theme.dark'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Scuro', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.theme.dark'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.control.theme.sandstone', 'Sandstone', 'en', 'Grid shell theme option label.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Sandstone', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.theme.sandstone'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Sandstein', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.theme.sandstone'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Arenaria', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.control.theme.sandstone'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.panel.notifications.title', 'Notifications', 'en', 'Notifications panel surface title.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Notifications', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.notifications.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Benachrichtigungen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.notifications.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Notifiche', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.notifications.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.panel.download.title', 'Selected items', 'en', 'Selected items panel surface title.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Selected items', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.download.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ausgewählte Elemente', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.download.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Elementi selezionati', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.download.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.panel.sharedMedia.title', 'Shared media', 'en', 'Shared media panel surface title.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Shared media', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.sharedMedia.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Geteilte Medien', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.sharedMedia.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Media condivisi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.sharedMedia.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.panel.tips.title', 'Tips', 'en', 'Tips panel surface title.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Tips', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.tips.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Tipps', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.tips.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Suggerimenti', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.tips.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'shell.panel.unavailable.body', 'This panel is not available yet.', 'en', 'Placeholder body for a right-rail panel that has no product yet.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'This panel is not available yet.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.unavailable.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Dieser Bereich ist noch nicht verfügbar.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.unavailable.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Questo pannello non è ancora disponibile.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'shell.panel.unavailable.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.overview.title', 'Overview', 'en', 'Canvas page opened by the left-rail logo.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Overview', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.overview.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Übersicht', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.overview.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Panoramica', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.overview.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.overview.body', 'This canvas is the overview. It explains the shell and lists each widget with its state.', 'en', 'Overview page explanation.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'This canvas is the overview. It explains the shell and lists each widget with its state.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.overview.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Diese Fläche ist die Übersicht. Sie erklärt die Oberfläche und listet jedes Widget mit seinem Zustand.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.overview.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Questa area è la panoramica. Spiega la superficie ed elenca ogni widget con il suo stato.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.overview.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.overview.state.onRail', 'On the rail', 'en', 'Overview row when the widget icon is on the rail.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'On the rail', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.overview.state.onRail'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'In der Leiste', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.overview.state.onRail'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Nella barra', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.overview.state.onRail'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.overview.state.notAdded', 'Not added', 'en', 'Overview row when the organization has not added the widget.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Not added', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.overview.state.notAdded'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Nicht hinzugefügt', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.overview.state.notAdded'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Non aggiunto', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.overview.state.notAdded'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.catalog.workers', 'Workers', 'en', 'Widget name for Mitarbeiter.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Workers', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.workers'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Mitarbeiter', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.workers'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Collaboratori', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.workers'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.catalog.organisation', 'Organisation', 'en', 'Widget name for the organisation widget.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Organisation', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.organisation'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Organisation', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.organisation'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Organizzazione', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.organisation'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.catalog.vehicles', 'Vehicles', 'en', 'Suite widget name.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Vehicles', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.vehicles'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Fahrzeuge', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.vehicles'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Veicoli', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.vehicles'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.catalog.boats', 'Boats', 'en', 'Suite widget name.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Boats', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.boats'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Boote', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.boats'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Barche', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.boats'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.catalog.material', 'Material', 'en', 'Suite widget name.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Material', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.material'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Material', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.material'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Materiale', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.material'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.catalog.storageLocations', 'Storage locations', 'en', 'Suite widget name. German Lagerorte.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Storage locations', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.storageLocations'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Lagerorte', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.storageLocations'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Luoghi di deposito', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.storageLocations'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.catalog.buildings', 'Buildings', 'en', 'Suite widget name. German Gebäude.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Buildings', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.buildings'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Gebäude', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.buildings'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Edifici', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.buildings'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.directory.title', 'Widgets', 'en', 'Directory page title.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Widgets', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.directory.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Widgets', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.directory.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Widget', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.directory.title'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.directory.subtitle', 'Browse widgets you can add to your organization and the shell.', 'en', 'Directory page subtitle.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Browse widgets you can add to your organization and the shell.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.directory.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Widgets durchsuchen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.directory.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'die Sie Ihrer Organisation und der Shell hinzufügen können.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.directory.subtitle'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.directory.add', 'Add', 'en', 'Add control on a directory rectangle.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Add', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.directory.add'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Hinzufügen', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.directory.add'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Aggiungi', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.directory.add'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.explanation.back', 'Back', 'en', 'Returns from a widget explanation to the directory.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Back', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.explanation.back'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Zurück', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.explanation.back'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Indietro', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.explanation.back'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.explanation.missing', 'This widget is not in the catalog.', 'en', 'Unknown widget id on the explanation route.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'This widget is not in the catalog.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.explanation.missing'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Dieses Widget ist nicht im Katalog.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.explanation.missing'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Questo widget non è nel catalogo.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.explanation.missing'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.catalog.map.summary', 'The map of places and media.', 'en', 'Directory card summary.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'The map of places and media.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.map.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Die Karte der Orte und Medien.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.map.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'La mappa dei luoghi e dei media.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.map.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.catalog.map.body', 'The map is the home page. Its icon stays on the rail.', 'en', 'Explanation page body.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'The map is the home page. Its icon stays on the rail.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.map.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Die Karte ist die Startseite. Ihr Symbol bleibt in der Leiste.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.map.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'La mappa è la pagina iniziale. La sua icona resta nella barra.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.map.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.catalog.projects.summary', 'Projects for the organization.', 'en', 'Directory card summary.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Projects for the organization.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.projects.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projekte der Organisation.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.projects.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Progetti dell''organizzazione.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.projects.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.catalog.projects.body', 'Projects stay on the rail.', 'en', 'Explanation page body.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Projects stay on the rail.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.projects.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Projekte bleiben in der Leiste.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.projects.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'I progetti restano nella barra.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.projects.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.catalog.media.summary', 'The media library.', 'en', 'Directory card summary.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'The media library.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.media.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Die Medienbibliothek.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.media.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'La libreria dei media.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.media.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.catalog.media.body', 'Media stays on the rail.', 'en', 'Explanation page body.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Media stays on the rail.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.media.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Medien bleiben in der Leiste.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.media.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'I media restano nella barra.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.media.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.catalog.workers.summary', 'People who work in the organization.', 'en', 'Directory card summary.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'People who work in the organization.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.workers.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Personen, die in der Organisation arbeiten.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.workers.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Persone che lavorano nell''organizzazione.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.workers.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.catalog.workers.body', 'Workers join the bottom of the left rail after the organization adds them.', 'en', 'Explanation page body.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Workers join the bottom of the left rail after the organization adds them.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.workers.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Mitarbeiter kommen unten in die linke Leiste, nachdem die Organisation sie hinzufügt.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.workers.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'I collaboratori vanno in basso nella barra sinistra dopo che l''organizzazione li aggiunge.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.workers.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.catalog.organisation.summary', 'The organization, its roles, and its settings.', 'en', 'Directory card summary.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'The organization, its roles, and its settings.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.organisation.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Die Organisation, ihre Rollen und ihre Einstellungen.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.organisation.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'L''organizzazione, i suoi ruoli e le sue impostazioni.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.organisation.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.catalog.organisation.body', 'Organisation joins the bottom of the left rail after the organization adds it.', 'en', 'Explanation page body.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Organisation joins the bottom of the left rail after the organization adds it.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.organisation.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Die Organisation kommt unten in die linke Leiste, nachdem sie hinzugefügt wurde.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.organisation.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'L''organizzazione va in basso nella barra sinistra dopo essere stata aggiunta.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.organisation.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.catalog.vehicles.summary', 'Vehicles and the media attached to them.', 'en', 'Directory card summary.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Vehicles and the media attached to them.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.vehicles.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Fahrzeuge und die Medien daran.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.vehicles.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Veicoli e i media collegati.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.vehicles.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.catalog.vehicles.body', 'A vehicle has one place on the map and any number of media items.', 'en', 'Explanation page body.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'A vehicle has one place on the map and any number of media items.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.vehicles.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ein Fahrzeug hat einen Ort auf der Karte und beliebig viele Medien.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.vehicles.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Un veicolo ha un luogo sulla mappa e qualsiasi numero di media.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.vehicles.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.catalog.boats.summary', 'Boats and the media attached to them.', 'en', 'Directory card summary.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Boats and the media attached to them.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.boats.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Boote und die Medien daran.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.boats.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Barche e i media collegati.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.boats.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.catalog.boats.body', 'A boat has one place on the map and any number of media items.', 'en', 'Explanation page body.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'A boat has one place on the map and any number of media items.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.boats.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ein Boot hat einen Ort auf der Karte und beliebig viele Medien.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.boats.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Una barca ha un luogo sulla mappa e qualsiasi numero di media.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.boats.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.catalog.material.summary', 'Material and where it sits.', 'en', 'Directory card summary.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Material and where it sits.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.material.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Material und wo es liegt.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.material.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Materiale e dove si trova.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.material.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.catalog.material.body', 'A material stock has one place on the map and any number of media items.', 'en', 'Explanation page body.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'A material stock has one place on the map and any number of media items.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.material.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ein Materialbestand hat einen Ort auf der Karte und beliebig viele Medien.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.material.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Una scorta di materiale ha un luogo sulla mappa e qualsiasi numero di media.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.material.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.catalog.storageLocations.summary', 'Yards, warehouses, containers, and rooms.', 'en', 'Directory card summary.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Yards, warehouses, containers, and rooms.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.storageLocations.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Höfe, Lager, Container und Räume.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.storageLocations.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Cortili, magazzini, container e stanze.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.storageLocations.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.catalog.storageLocations.body', 'A storage location has one place on the map and any number of media items.', 'en', 'Explanation page body.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'A storage location has one place on the map and any number of media items.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.storageLocations.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ein Lagerort hat einen Ort auf der Karte und beliebig viele Medien.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.storageLocations.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Un luogo di deposito ha un luogo sulla mappa e qualsiasi numero di media.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.storageLocations.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.catalog.buildings.summary', 'Buildings and the media attached to them.', 'en', 'Directory card summary.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Buildings and the media attached to them.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.buildings.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Gebäude und die Medien daran.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.buildings.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Edifici e i media collegati.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.buildings.summary'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.catalog.buildings.body', 'A building has one place on the map and any number of media items.', 'en', 'Explanation page body.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'A building has one place on the map and any number of media items.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.buildings.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Ein Gebäude hat einen Ort auf der Karte und beliebig viele Medien.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.buildings.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Un edificio ha un luogo sulla mappa e qualsiasi numero di media.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.catalog.buildings.body'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.directory.added', 'Widget added.', 'en', 'Success after Add stores an install row.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Widget added.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.directory.added'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Widget hinzugefügt.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.directory.added'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Widget aggiunto.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.directory.added'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_texts (organization_id, key, source_text, source_lang, context)
+values (null, 'widget.directory.addFailed', 'Could not add the widget.', 'en', 'Error when the install row was not stored.')
+on conflict (scope_key) do update set
+  source_text = excluded.source_text,
+  source_lang = excluded.source_lang,
+  context = excluded.context;
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'en', 'Could not add the widget.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.directory.addFailed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'de', 'Das Widget konnte nicht hinzugefügt werden.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.directory.addFailed'
+on conflict (app_text_id, lang) do update set
+  translated_text = excluded.translated_text,
+  status = 'published';
+
+insert into public.app_text_translations (app_text_id, lang, translated_text, status)
+select t.id, 'it', 'Impossibile aggiungere il widget.', 'published'
+from public.app_texts t
+where t.organization_id is null and t.key = 'widget.directory.addFailed'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

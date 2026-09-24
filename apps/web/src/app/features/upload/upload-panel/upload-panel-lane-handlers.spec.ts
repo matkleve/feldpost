@@ -30,13 +30,13 @@ describe('UploadPanelLaneHandlersService', () => {
         {
           provide: UploadPanelStateService,
           useValue: {
-            laneCounts: signal({ uploading: 0, uploaded: 0, issues: 0 }),
+            laneCounts: signal({ uploading: 0, uploaded: 0, clarifications: 0 }),
             scanning: signal(false),
             scanningLabel: signal(null),
             archiveImportProgress: signal(null),
             hasAwaitingPlacement: signal(false),
             showProgressBoard: signal(false),
-            laneBuckets: signal({ uploading: [], uploaded: [], issues: [] }),
+            laneBuckets: signal({ uploading: [], uploaded: [], clarifications: [] }),
           },
         },
         {
@@ -62,10 +62,10 @@ describe('UploadPanelLaneHandlersService', () => {
     handlers.register({ clearSelection });
 
     signals.setSelectedLane('uploaded');
-    handlers.setSelectedLane('issues');
+    handlers.setSelectedLane('clarifications');
 
     expect(clearSelection).toHaveBeenCalledTimes(1);
-    expect(signals.selectedLane()).toBe('issues');
+    expect(signals.selectedLane()).toBe('clarifications');
   });
 
   it('does not clear selection when setSelectedLane receives the same lane', () => {

@@ -1,5 +1,7 @@
 # Workspace Actions Bar
 
+> **Grid shell:** Footer hosts in the **selected items panel** (`download`) when `shellGridLayout` is on. Same component (`app-workspace-pane-footer`); parent changes from Workspace Pane to [selected-items-panel.md](../shell/selected-items-panel.md).
+>
 > **Implementation contract:** [workspace-pane-footer.md](../../component/workspace/workspace-pane-footer.md)  
 > **Destructive bulk actions:** [workspace-pane-footer.destructive-actions.supplement.md](../../component/workspace/workspace-pane-footer.destructive-actions.supplement.md)  
 > **Service contracts:** [upload-manager](../../service/media-upload-service/upload-manager.md), [upload-manager-pipeline](../../service/media-upload-service/upload-manager-pipeline.md)  

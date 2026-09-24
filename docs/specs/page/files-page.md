@@ -20,7 +20,7 @@ The upload pipeline treats a folder path as *evidence for an address* and then o
 by address. That is right for a photo of a building, and wrong for an operator who has just imported
 an archive and needs to find what did not resolve. At archive scale the per-file tray model does not
 survive its own arithmetic — ~45 000 questions for 100 000 files
-([F-08](../../study/005-upload-pipeline-trace-findings.md#f-08)) — so D-04 defers those to Issues and
+([F-08](../../study/005-upload-pipeline-trace-findings.md#f-08)) — so D-04 defers those to Clarifications and
 resolves them in bulk afterwards. This page is that "afterwards".
 
 ## What It Looks Like

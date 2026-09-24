@@ -62,7 +62,7 @@ Object's four area fields (`country`, `state`, `postcode`, `city`) are not ident
 were before the answer was applied.
 
 If an answer leaves that tuple unchanged and a conflict still stands, the pipeline MUST NOT
-re-register the tray. The jobs go to Issues (`phase: 'missing_data'`,
+re-register the tray. The jobs go to Clarifications (`phase: 'missing_data'`,
 `issueKind: 'address_deferred'`) where a human can set the address directly.
 
 **Why not key on the conflict signature.** The obvious guard — "never ask the same
@@ -90,7 +90,7 @@ shown in the **Active** lane, never uploading
 | --- | --- |
 | `'continue'` | placement decided → `setPhase('queued')`, drain |
 | `'held'` | a further tray opened → leave the job parked, it is waiting on a real question |
-| `'partial'` | routed to Issues → leave it |
+| `'partial'` | routed to Clarifications → leave it |
 
 This applies to `applyLayerPackageChoice` and `applyAreaConflictChoice`. The plain candidate path,
 both source-conflict paths, and `containment_check`'s "Keep" already do it explicitly.
@@ -101,7 +101,7 @@ both source-conflict paths, and `containment_check`'s "Keep" already do it expli
       clears the conflict in **one** round: `state` becomes `Niederösterreich` (derived, `city→state`),
       the contradicting `1160` is dropped, `areaConflicts` is empty.
 - [x] The derived `state` carries `origin: 'derived'`, `rule: 'city→state'`, `derivedFrom`.
-- [x] An answer that leaves the four area fields unchanged routes to Issues instead of re-registering
+- [x] An answer that leaves the four area fields unchanged routes to Clarifications instead of re-registering
       a tray.
 - [x] An answer that moves the area fields still opens its follow-up tray, even when the conflict
       signature is unchanged (cascade preserved).

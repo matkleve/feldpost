@@ -4,12 +4,12 @@ Back to master: [master-spec.md](./master-spec.md)
 
 Purpose:
 
-- One table for all canonical primitives with size/state/layout/icon-text variants.
-- This page is the quick reference for implementation and review.
+- Historical matrix of the `ui-*` primitive names from 2026-03.
+- **Not the runtime catalog.** Shipped controls are `hlmBtn`, `hlmInput`, `hlmSelect` (`select-variants`), `hlmToggleGroup` / `hlmPillToggle`, `hlmTabs`, `app-chip`, `hlmBadge`. `app-segmented-switch` and `ui-button` are gone. The live index is [`docs/specs/component/registry.md`](../../specs/component/registry.md).
 
 Status key:
 
-- `implemented`: primitive exists in runtime and Angular primitive layer.
+- `implemented` below means "was marked implemented on 2026-03-21". Treat the row as historical unless the runtime map above names it.
 - `planned`: defined but not yet wired broadly in runtime.
 
 ## Primitive Matrix

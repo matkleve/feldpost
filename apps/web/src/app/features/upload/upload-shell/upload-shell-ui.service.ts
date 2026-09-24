@@ -1,4 +1,5 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, computed, inject } from '@angular/core';
+import { ShellLayoutService } from '../../../core/shell-layout/shell-layout.service';
 import { UploadResolverTrayOrchestratorService } from '../../../core/upload-resolver-tray-orchestrator/upload-resolver-tray-orchestrator.service';
 import { UploadManagerService } from '../../../core/upload/upload-manager.service';
 import type { ExifCoords } from '../../../core/upload/upload.types';
@@ -10,20 +11,12 @@ import type { UploadPanelComponent } from '../upload-panel/upload-panel.componen
 @Injectable({ providedIn: 'root' })
 export class UploadShellUiService {
   private readonly uploadManager = inject(UploadManagerService);
+  private readonly shellLayout = inject(ShellLayoutService);
   private readonly trayOrchestrator = inject(UploadResolverTrayOrchestratorService);
 
   private placementPanel: UploadPanelComponent | null = null;
 
-  // Was `readonly uploadPanelPinned = signal(false)` — a `readonly` class field
-  // only stops *reassignment*, not `.set()`/`.update()`; any external caller
-  // with a reference to this service could mutate panel-open state directly,
-  // bypassing toggleUploadPanel()/closeUploadPanel()/openUploadPanel() below.
-  // The other 171 @Injectable services in this app all follow the
-  // private-signal + public-.asReadonly() pattern already visible one line
-  // down for `uploadPanelOpen` itself — this was the one field that didn't.
-  // @see docs/audits/2026-09-10-spartan-and-state.md § State
-  private readonly _uploadPanelPinned = signal(false);
-  readonly uploadPanelOpen = this._uploadPanelPinned.asReadonly();
+  readonly uploadPanelOpen = computed(() => this.shellLayout.isOpen('upload'));
 
   readonly uploadBatch = this.uploadManager.activeBatch;
   readonly uploadBatchProgress = computed(() => this.uploadBatch()?.overallProgress ?? 0);
@@ -53,20 +46,20 @@ export class UploadShellUiService {
       this.trayOrchestrator.hasActivePresentation() ||
       this.trayOrchestrator.hasPresentationBacklog(),
   );
-  readonly uploadHasIssues = computed(() =>
-    this.uploadManager.jobs().some((job) => getLaneForJob(job) === 'issues'),
+  readonly uploadHasClarifications = computed(() =>
+    this.uploadManager.jobs().some((job) => getLaneForJob(job) === 'clarifications'),
   );
 
   toggleUploadPanel(): void {
-    this._uploadPanelPinned.update((open) => !open);
+    this.shellLayout.setOpen('upload', !this.shellLayout.isOpen('upload'));
   }
 
   closeUploadPanel(): void {
-    this._uploadPanelPinned.set(false);
+    this.shellLayout.close('upload');
   }
 
   openUploadPanel(): void {
-    this._uploadPanelPinned.set(true);
+    this.shellLayout.open('upload');
   }
 
   bindUploadPanel(panel: UploadPanelComponent | undefined): void {

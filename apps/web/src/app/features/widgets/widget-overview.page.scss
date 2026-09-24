@@ -1,0 +1,36 @@
+@use './widget-canvas-page';
+
+// Overview column inside the canvas. The canvas owns the radius.
+// @see docs/specs/page/widget-overview.md
+:host {
+  @include widget-canvas-page.widget-canvas-page-host;
+}
+
+// Widget rows. Gap matches the shell gutter.
+// @see docs/specs/page/widget-overview.md
+.widget-overview__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+
+// One widget and its state. No second radius.
+// @see docs/specs/page/widget-overview.md
+.widget-overview__row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+  width: 100%;
+  text-align: left;
+}
+
+// State is secondary to the name.
+// @see docs/specs/page/widget-overview.md
+.widget-overview__state {
+  color: var(--muted-foreground);
+}

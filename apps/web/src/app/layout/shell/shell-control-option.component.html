@@ -1,0 +1,36 @@
+@if (option().kind === 'inert') {
+  <span class="shell-control-option__button" aria-disabled="true">
+    <span class="material-icons" aria-hidden="true">{{ option().icon }}</span>
+  </span>
+} @else {
+  <button
+    type="button"
+    class="shell-control-option__button"
+    [class.shell-control-option__button--theme]="option().kind === 'theme'"
+    [attr.aria-pressed]="option().kind === 'panel' ? open() : null"
+    [attr.aria-label]="displayLabel()"
+  >
+    @if (option().kind === 'theme') {
+      <span class="shell-control-option__theme-media">
+        <span class="material-icons shell-control-option__theme-icon" aria-hidden="true">{{ displayIcon() }}</span>
+        <span class="shell-control-option__theme-dots" aria-hidden="true">
+          <span
+            class="shell-control-option__theme-dot"
+            [class.shell-control-option__theme-dot--active]="themeService.mode() === 'light'"
+          ></span>
+          <span
+            class="shell-control-option__theme-dot"
+            [class.shell-control-option__theme-dot--active]="themeService.mode() === 'dark'"
+          ></span>
+          <span
+            class="shell-control-option__theme-dot"
+            [class.shell-control-option__theme-dot--active]="themeService.mode() === 'sandstone'"
+          ></span>
+        </span>
+      </span>
+    } @else {
+      <span class="material-icons" aria-hidden="true">{{ displayIcon() }}</span>
+    }
+  </button>
+}
+<span class="shell-control-option__label">{{ displayLabel() }}</span>

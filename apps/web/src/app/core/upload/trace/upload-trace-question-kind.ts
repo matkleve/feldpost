@@ -71,8 +71,8 @@ export type NoQuestionReason =
   | 'resolved'
   /** Area precision is a deliberate result, not a failure (D-10). */
   | 'area_only'
-  /** Nothing usable; the job goes to Issues rather than to a tray. */
-  | 'issues';
+  /** Nothing usable; the job goes to the Clarifications lane rather than to a tray. */
+  | 'clarifications';
 
 export type GroupQuestion =
   | { asks: false; reason: NoQuestionReason }
@@ -151,7 +151,7 @@ export function classifyGroupQuestion(
 
   const gate = evaluateLocalResolution(so, null);
   if (gate === 'incomplete' || gate === 'postcode_blocked') {
-    return { asks: false, reason: 'issues' };
+    return { asks: false, reason: 'clarifications' };
   }
   if (gate === 'area_only') {
     return { asks: false, reason: 'area_only' };
@@ -171,9 +171,9 @@ export function classifyGroupQuestion(
       : { asks: false, reason: 'resolved' };
   }
   // failed / none. Only the street-first branches fall back to a tray; a `street_locality` group
-  // whose geocode came back empty goes partial and asks nothing — the item lands in Issues.
+  // whose geocode came back empty goes partial and asks nothing — the item lands in Clarifications.
   return branch === 'street_locality'
-    ? { asks: false, reason: 'issues' }
+    ? { asks: false, reason: 'clarifications' }
     : { asks: true, kind: 'city_step' };
 }
 
@@ -233,7 +233,7 @@ export function predictTrayQuestionsForCorpus(
   }
 
   const kinds: UploadDisambiguationKind[] = [];
-  const silent: Record<NoQuestionReason, number> = { resolved: 0, area_only: 0, issues: 0 };
+  const silent: Record<NoQuestionReason, number> = { resolved: 0, area_only: 0, clarifications: 0 };
 
   for (const [key, entry] of groups) {
     const question = key.startsWith('layer_conflict|')

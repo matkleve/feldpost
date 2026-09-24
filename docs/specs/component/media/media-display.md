@@ -154,6 +154,10 @@ Layer opacity follows `[attr.data-state]` on `.media-display__viewport`. The sha
 
 Implementation: `media-display-sharp-content-gate.helpers.ts`, `shouldMountSharpContentLayer()`. Report: [`docs/migration/reports/media-grid-warm-revisit-regression-2026-05-27.md`](../../../migration/reports/media-grid-warm-revisit-regression-2026-05-27.md).
 
+### Decoded size is not the file size
+
+`contentResolutionChange` emits `naturalWidth` × `naturalHeight` of the sharp `<img>`. That bitmap is the signed preview (persisted thumb or a transform), so a 3:4 camera photo often reports **96×128**. Callers that need the original file size MUST read `exif_raw` (`ExifImageWidth` / `ExifImageHeight`). The detail badge does this in `media-item-original-resolution.helpers.ts`. Contract: [media-detail-media-viewer.md § Resolution badge](../../ui/media-detail/media-detail-media-viewer.md#resolution-badge).
+
 `icon-only` is a service-level signal. The component renders `icon-only` only when explicitly returned by `MediaDownloadService`.
 
 ## Geometry Ownership Between MediaDisplay and Parent

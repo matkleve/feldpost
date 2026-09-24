@@ -14,11 +14,11 @@ import { displayLocationFromRows } from '../media-locations/media-locations.help
 import { isLocationUnresolvedStatus } from '../location-resolver/location-resolver.helpers';
 import type { MediaItemLocationRow } from '../media-locations/media-locations.types';
 import {
-  MEDIA_ITEM_DETAIL_SELECT_BASE,
-  MEDIA_ITEM_DETAIL_SELECT_WITH_META,
+  MEDIA_ITEM_DETAIL_SELECT_FALLBACK_CHAIN,
   MEDIA_ITEM_LOCATION_SELECT_BASE,
   MEDIA_ITEM_LOCATION_SELECT_WITH_META,
   isMissingAddressFieldMetaColumn,
+  isMissingMediaDetailColumn,
 } from './media-detail-data.helpers';
 
 interface MediaDetailRow {
@@ -221,10 +221,10 @@ export class MediaDetailDataFacade {
         .limit(1)
         .maybeSingle();
 
-    let mediaResult = await fetchRow(MEDIA_ITEM_DETAIL_SELECT_WITH_META);
+    let mediaResult = await fetchRow(MEDIA_ITEM_DETAIL_SELECT_FALLBACK_CHAIN[0]);
 
-    if (mediaResult.error && isMissingAddressFieldMetaColumn(mediaResult.error.message)) {
-      mediaResult = await fetchRow(MEDIA_ITEM_DETAIL_SELECT_BASE);
+    for (let index = 1; mediaResult.error && isMissingMediaDetailColumn(mediaResult.error.message) && index < MEDIA_ITEM_DETAIL_SELECT_FALLBACK_CHAIN.length; index++) {
+      mediaResult = await fetchRow(MEDIA_ITEM_DETAIL_SELECT_FALLBACK_CHAIN[index]);
     }
 
     if (mediaResult.error || !mediaResult.data) {

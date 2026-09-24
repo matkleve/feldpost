@@ -1,0 +1,13 @@
+<ng-content select="[data-shell-track=left]" />
+<ng-content select="[data-shell-track=main]" />
+@if (panelsOpen()) {
+  <app-shell-column-divider
+    [currentWidth]="panelColumnWidthPx()"
+    [minWidth]="panelColumnResize.minWidthPx()"
+    [maxWidth]="panelColumnResize.maxWidthPx()"
+    [defaultWidth]="panelColumnResize.defaultWidthPx()"
+    (widthChange)="onPanelColumnWidthChange($event)"
+  />
+}
+<ng-content select="[data-shell-track=panels]" />
+<ng-content select="[data-shell-track=right]" />

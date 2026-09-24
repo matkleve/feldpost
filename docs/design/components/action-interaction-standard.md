@@ -83,7 +83,7 @@ Concrete defaults from user feedback:
 Token and geometry policy:
 
 - Borders: var(--color-border), var(--color-border-strong)
-- Accent: var(--color-clay) and semantic accents only where stateful
+- Accent: `var(--brand-gold)` for high-attention emphasis, plus semantic state tokens
 - Radius: use existing radius tokens from tokens.md
 - Elevation: keep semantic elevation layers, avoid ad-hoc shadows
 

@@ -8,6 +8,7 @@ const envFilePath = path.resolve(__dirname, '../src/environments/environment.ts'
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+const cartoBasemapApiKey = process.env.CARTO_BASEMAP_API_KEY?.trim() ?? '';
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error(
@@ -39,6 +40,7 @@ const appUrl = resolveAppUrl();
 const fileContent = `export const environment = {
     production: true,
     appUrl: '${appUrl}',
+    cartoBasemapApiKey: ${JSON.stringify(cartoBasemapApiKey)},
     i18n: {
         enableLegacyDomFallback: false,
     },

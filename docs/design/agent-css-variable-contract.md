@@ -20,9 +20,10 @@
 | `--overlay-rail-*` | **Removed** (Batch 34) → `--settings-overlay-*` on settings overlay `:host` |
 | `--layout-sidebar-*` | **Removed** (Batch 33) → `--sidebar-width-*` on nav `:host` |
 | `var(--fp-*)` (retired Figma prefixes) in runtime SCSS | **Forbidden** — tonal tables in `tokens.md` §3.1a are **design reference only**; retired names: [`docs/archive/design-retired-reference-tokens.md`](../archive/design-retired-reference-tokens.md) |
-| Feldpost v1 `var(--color-bg-base)`, `var(--color-clay)`, … in **component** SCSS | **Forbidden** — use tweakcn semantics (`--primary`, `--background`, …) |
+| Feldpost v1 `var(--color-bg-base)`, `var(--color-clay)`, … in **component** SCSS | **Forbidden** — warm accent is `--brand-gold`; surfaces use tweakcn (`--primary`, `--background`, …) |
 | New ad-hoc `--shell-*` on `:root` or layout hosts | **Forbidden** without spec row + ownership matrix |
-| Copying removed bridge names (`--menu-*`, `--action-*`, `--field-*`, `--interactive-transition-standard`, …) | **Forbidden** — see [token-layers.md](./token-layers.md) Layer C notes |
+| Re-adding the bridge file, `--field-*`, or `--interactive-transition-standard` | **Forbidden** — Phase 7 deleted them |
+| Per-component menu/action mixes, or `:host-context([data-theme='sandstone'])` | **Forbidden** — use `--menu-item-hover`, `--menu-item-text`, `--menu-border-subtle`, `--action-hover`, `--action-text`, `--section-text` on `styles.scss` |
 
 **Not “legacy” (keep):** `styles.scss` `@theme inline` **`--color-primary`**, **`--color-background`**, … — Tailwind v4 utility keys bound to tweakcn; **not** Feldpost v1 `var(--color-clay)` in app SCSS.
 

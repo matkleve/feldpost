@@ -11,7 +11,7 @@ Jobs in these phases leave the active upload queue until user or system action r
 | --- | --- |
 | `complete` | Persisted media row exists; uploaded lane |
 | `error` | Hard failure or user cancel (`wasCancelled` distinguishes cancel) |
-| `missing_data` | Issues lane — GPS, duplicate review, deferred address, etc. |
+| `missing_data` | Clarifications lane — GPS, duplicate review, deferred address, etc. |
 | `skipped` | Same-user dedup auto-skip |
 
 ## Idempotency rules

@@ -4,20 +4,25 @@
 
 ## Model
 
-The **center column is always `52rem`** (`content-clamp--list` width) in the same grid position on every page. Side rails sit in the outer gutter tracks and do **not** push the center column sideways.
+Product pages render inside `app-shell-main-canvas`. Host padding is `var(--spacing-6)` on every side. The map does not use this grid. See [shell-main-canvas.md](../specs/ui/shell/shell-main-canvas.md).
 
 ```text
-[ host padding: spacing-6 + nav 4.5rem start ]
+[ host padding: spacing-6 ]
 
-| 1fr left gutter | 52rem CENTER | 1fr right gutter |
+/media (no left rail)
+| minmax(0, 1fr) title + toolbar + grid |
 
-  [sidebar end-aligned]     [title + content]     [details start-aligned]
+/projects (left rail, center expanded)
+| max-content list | remaining width: dashboard or detail |
 ```
 
-| Page | Left gutter | Center | Right gutter |
-| --- | --- | --- | --- |
-| `/media` | empty | header + grid | empty |
-| `/projects` | project list | dashboard / detail | details panel (optional) |
+| Page | Inside the canvas |
+| --- | --- |
+| `/media` | One track. Title, toolbar, and grid fill the box. |
+| `/projects` | Project list on the left (`--page-grid-left-width`, 17.5rem). The dashboard or detail uses the width beside it. |
+| `/projects` with the details panel open | List, then a `52rem` center (`--page-grid-center-max`), then the details track. |
+
+Outside the canvas the host still starts with `4.5rem` and three tracks (`1fr` | `52rem` | `1fr`). The authenticated layout always mounts the canvas, so `/media` and `/projects` use the table above.
 
 ## Component
 
@@ -52,9 +57,9 @@ Feature sidebars project into `[pageGridLeft]` using **`app-page-rail`** and chi
 
 | Mode | `centerExpanded` | `rightRailOpen` | Center width |
 | --- | --- | --- | --- |
-| `/media` | `false` | `false` | fixed `52rem` (column 2) |
-| `/projects` dashboard / detail | `true` | `false` | columns 2–3 (center + right gutter) |
-| `/projects` with details | `false` | `true` | fixed `52rem` + details in column 3 |
+| `/media` inside the canvas | `false` | `false` | one `minmax(0, 1fr)` track, full box width |
+| `/projects` dashboard / detail | `true` | `false` | width beside the left list |
+| `/projects` with details | `false` | `true` | `52rem` center + details track |
 
 ## Ownership
 
@@ -66,4 +71,4 @@ Feature sidebars project into `[pageGridLeft]` using **`app-page-rail`** and chi
 
 ## Anti-pattern
 
-Do **not** use a growing `1fr` center track — it breaks alignment with `/media`. Do **not** add extra horizontal padding on dashboard/detail wrappers; host + fixed center define the title column.
+Outside the canvas, do **not** use a growing `1fr` center track — the center stays `52rem` so pages share one column. Inside `app-shell-main-canvas`, `/media` is the exception: no left rail, one full-width track. Do **not** add extra horizontal padding on dashboard/detail wrappers.

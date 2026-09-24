@@ -1,4 +1,4 @@
-// Reserves the detail hero band (~⅓ viewport) and centers embedded media-item.
+// Reserves the detail hero band (max ~⅓ viewport) and centers embedded media-item.
 // @see docs/specs/ui/media-detail/media-detail-media-viewer.md#what-it-looks-like
 :host {
   display: flex;
@@ -7,12 +7,13 @@
   justify-content: center;
   position: relative;
   box-sizing: border-box;
-  block-size: 33vh;
+  max-block-size: 33vh;
+  block-size: auto;
   padding-block-start: var(--spacing-3);
   min-block-size: 0;
   min-inline-size: 0;
   max-inline-size: 100%;
-  overflow: hidden;
+  overflow: visible;
 
   &:hover .detail-media__edit-btn,
   &:focus-within .detail-media__edit-btn {
@@ -25,20 +26,20 @@
 .detail-media__preview-wrap {
   position: relative;
   display: block;
-  block-size: 100%;
-  min-block-size: 0;
+  block-size: auto;
+  max-block-size: 33vh;
   inline-size: min(calc(100% - var(--spacing-4) * 2), calc(40rem / 1.618));
   max-inline-size: 100%;
   margin-inline: auto;
   overflow: hidden;
 }
 
-// Constrained to hero band height; slot shrink-wraps width from aspect-ratio.
-// @see docs/specs/component/media/media-item.md#visual-behavior-contract
+// Width-first hero; slot aspect-ratio + max-block-size produce contain fit (not crop).
+// @see docs/specs/ui/media-detail/media-detail-media-viewer.md#what-it-looks-like
 .detail-media__preview-wrap app-media-item {
   display: block;
-  block-size: 100%;
-  max-block-size: 100%;
+  block-size: auto;
+  max-block-size: 33vh;
   min-block-size: 0;
   inline-size: 100%;
   max-inline-size: 100%;
@@ -117,7 +118,9 @@
   justify-content: center;
   gap: var(--spacing-3);
   box-sizing: border-box;
-  block-size: 100%;
+  block-size: auto;
+  max-block-size: 33vh;
+  min-block-size: 8rem;
   margin-inline: auto;
   padding: var(--spacing-6) var(--spacing-4);
   inline-size: min(calc(100% - var(--spacing-4) * 2), calc(40rem / 1.618));

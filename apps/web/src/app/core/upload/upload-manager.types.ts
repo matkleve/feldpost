@@ -110,7 +110,7 @@ export type UploadLocationRequirementMode = 'required' | 'optional';
  *
  * `archive` is the import mode for an existing archive: classification still runs, but **no
  * disambiguation group is ever registered**, so nothing can reach `awaiting_disambiguation` and
- * everything unresolved lands in Issues as `address_deferred` instead.
+ * everything unresolved lands in Clarifications as `address_deferred` instead.
  *
  * It is not `locationRequirementMode: 'optional'` with more files — that one skips classification
  * altogether because the user wants no location at all. Archive import wants every location it can

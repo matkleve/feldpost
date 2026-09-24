@@ -27,8 +27,8 @@ If guidance conflicts, this file defines layer ownership; `tokens.md` defines va
 | `--line-height-tight`, `--line-height-solid`, `--line-height-reading`, `--line-height-comfortable` |
 | `--font-size-2xs`, `--font-size-xs`, `--font-size-sm`, `--font-size-md`, `--font-size-lg`, `--font-size-xl`, `--font-size-2xl` |
 | `--font-weight-medium`, `--font-weight-semibold`, `--font-weight-bold` |
-| `--motion-duration-fast`, `--motion-ease-out` |
-| `--spacing-1` … `--spacing-6`, `--spacing-8` (the former **12×4px** step is **`calc(0.25rem * 12)`** at callsites — **Batch 41** removed **`--spacing-7`**) |
+| `--motion-duration-fast`, `--motion-duration-standard`, `--motion-duration-slow`, `--motion-duration-entrance`, `--motion-duration-hover-label`, `--motion-ease-out` |
+| `--spacing-1` … `--spacing-6`, `--spacing-8` (names are not the step index; there is no `--spacing-7` — see `tokens.md` §3.3) |
 | `--radius-full`, `--container-radius-control`, `--container-radius-panel` |
 | **`--interactive-focus-ring`** (light on **`:root`**; dark via **`typography-baseline-dark-focus-ring`**) |
 
@@ -47,13 +47,7 @@ If guidance conflicts, this file defines layer ownership; `tokens.md` defines va
 
 **Layer B (bridge):** **none on the removed legacy bridge path** after **Batch 47** — **`--interactive-focus-ring`** lives on **`_typography-baseline.scss`** (see subsection above).
 
-**Layer C (roles — historical bridge batches 48–50; file now absent)**
-
-| Note |
-| --- |
-| **Phase 7 Batch 49:** no **`--action-*`** rows on the bridge file — primary-hover / default action ink live on component **`:host`** / **`:host-context([data-theme='sandstone'])`** (or **`--settings-action-bg-hover`** on settings) — see **`docs/migration/phase-7-token-migration.md`** §Batch 49. |
-
-Optional **`[data-theme='sandstone']`** overrides for former Layer C **action** names are **not** global on the bridge after **Batch 49**; Sandstone-specific mixes mirror the pre-removal **`_legacy-design-tokens.scss`** values on the same per-component hosts. **Phase 7 Batch 48** removed **`--menu-*`** bridge rows; menu surfaces bind **`color-mix(in srgb, var(--border) …)`**, **`color-mix(in srgb, var(--primary) …)`**, and **`var(--foreground)`** on component **`:host`** (sandstone literals preserved via **`:host-context([data-theme='sandstone'])`** — see **`docs/migration/phase-7-token-migration.md`** §Batch 48). Dropdown shell and menu surface contracts: [`docs/specs/component/filters/dropdown-system.md`](../specs/component/filters/dropdown-system.md).
+**Layer C (bridge file — historical).** Batch 48–49 removed `--menu-*` and `--action-*` from the deleted bridge file. Those names now live on `styles.scss`. The callsite recipe is [the current-names table](#layer-c-component-role-aliases) below. Do not inline `color-mix` and do not add `:host-context([data-theme='sandstone'])`.
 
 ### Layer A: Foundation Tokens
 
@@ -69,23 +63,36 @@ Global design primitives that represent raw design values.
 Cross-component aliases for shared interaction behavior.
 
 - **`--interactive-border-muted`** and **`--interactive-surface-hover`** were **removed from `:root`** in **Phase 7 Batch 36** — they are **not** bridge names to bind in new work. Equivalent mixes are **inlined** at the few Layer C / feature callsites (for example **`color-mix(in srgb, var(--border) 72%, transparent)`** on settings **`--settings-border-muted`**, **`color-mix(in srgb, var(--primary) 12%, transparent)`** on **`--settings-hover-focus`** / **`--settings-action-bg-hover`**) — see **`docs/migration/phase-7-token-migration.md`** §Batch 36 / §Batch 49.
-- **`--interactive-focus-ring`** — **Batch 47** moved this name to **`_typography-baseline.scss`** (not the legacy bridge file). **Batch 41** removed **`--interactive-transition-standard`** — inline the same multi-property timing (for example **`120ms ease-out`**) or use **`var(--motion-duration-fast) var(--motion-ease-out)`** per **`docs/design/motion.md`** / callsite SCSS.
+- **`--interactive-focus-ring`** — **Batch 47** moved this name to **`_typography-baseline.scss`**. Multi-property timing uses **`var(--motion-duration-fast)`** or **`var(--motion-duration-standard)`** with **`var(--motion-ease-out)`**. Do not write `120ms`.
 
 ### Layer C: Component-Role Aliases
+
+**Current names (2026-09-23).** Defined on `apps/web/src/styles.scss` for light, dark, and sandstone. Use these. Do not inline the mix. Do not add `:host-context([data-theme='sandstone'])`.
+
+| Token | Role |
+| --- | --- |
+| `--menu-border-subtle` | Menu edge |
+| `--menu-item-hover` | List-row hover wash (gold 8%) |
+| `--menu-item-text` | Menu label ink |
+| `--action-text` | Quiet control idle ink |
+| `--action-hover` | Control hover wash (gold 10%) |
+| `--section-text` | Section label ink. Light and dark follow `--muted-foreground`. Sandstone overrides. |
+
+The paragraphs below record the Phase 7 bridge deletion. They are history. The callsite recipe is the table above.
 
 Role-level aliases consumed by reusable UI primitives and feature components. **Historical:** **`_legacy-design-tokens.scss`** (**Batch 50** zero-emit, then **deleted**) defined **no** Layer C **action** or **menu** names after **Batch 48–49** (**`--interactive-focus-ring`** is **not** on that path — **Batch 47**). **Batch 49** removed **`--action-bg-hover`**, **`--action-text-default`**, **`--action-text-active`** (and the sandstone **`[data-theme='sandstone']`** mirror) from the bridge; callsites use **`var(--primary)`**, per-component **`:host`** custom properties (ex-bridge values), or **`--settings-action-bg-hover`** — **`docs/migration/phase-7-token-migration.md`** §Batch 49. **Batch 48** removed **`--menu-*`** from the bridge; menu surfaces use tweakcn **`var(--border|primary|foreground)`** in **`color-mix`** / per-component **`:host`** custom properties (see subsection above + **`docs/migration/phase-7-token-migration.md`** §Batch 48 + [`docs/specs/component/filters/dropdown-system.md`](../specs/component/filters/dropdown-system.md).
 
 1. Action controls
 
-- **`--action-bg-hover`**, **`--action-text-default`**, **`--action-text-active`** — **removed Batch 49** — use **`var(--primary)`** where the bridge aliased **`--action-text-active`**, and per-component **`:host`** / **`:host-context([data-theme='sandstone'])`** custom properties for the former **`color-mix(in srgb, var(--primary) 12%, transparent)`** / **`#c59f63` sandstone** hover wash and **`var(--muted-foreground)`** / **`#6b5a47`** default ink (see **`metadata-section`**, **`captured-date-editor`**, **`media-detail-view.component.part2`**, **`project-card`**) or **`--settings-action-bg-hover`** on **`settings-overlay`** — **`docs/migration/phase-7-token-migration.md`** §Batch 49.
+- **`--action-bg-hover`**, **`--action-text-default`**, **`--action-text-active`** — removed from the bridge in Batch 49. Current names are `--action-hover` and `--action-text` in the table above.
 - **`--action-bg-default`** — **removed Batch 40** — use literal **`transparent`** or omit background at callsites.
 - **`--action-border-active`** — **removed Batch 39** — inlined at **`project-card.component.scss`** (default + Sandstone branch).
 
 2. Menu and option surfaces
 
 - **`--menu-surface-bg`** — **removed Batch 39** — use **`var(--popover)`** (or **`var(--card)`**) at callsites.
-- **`--menu-surface-border`**, **`--menu-item-bg-hover`**, **`--menu-item-text`** — **removed from bridge Batch 48** — use **`color-mix(in srgb, var(--border) 72%, transparent)`**, **`color-mix(in srgb, var(--primary) 8%, transparent)`**, **`var(--foreground)`** (and per-component **`:host`** + sandstone **`:host-context`** where the old **`[data-theme='sandstone']`** bridge differed) — **`docs/migration/phase-7-token-migration.md`** §Batch 48.
-- **`--menu-item-bg-active`** — **removed Batch 39** — inline **`color-mix(in srgb, var(--primary) 12%, transparent)`** ([**`docs/migration/phase-7-token-migration.md`**](../migration/phase-7-token-migration.md) §Batch 39).
+- **`--menu-surface-border`**, **`--menu-item-bg-hover`**, **`--menu-item-text`** — removed from the bridge in Batch 48. Current names are `--menu-border-subtle`, `--menu-item-hover`, `--menu-item-text` in the table above.
+- **`--menu-item-bg-active`** — removed Batch 39. Active menu label ink is `var(--primary)` only where a spec still says so; row hover is `--menu-item-hover`.
 - **Active menu item label ink:** **`var(--primary)`** at callsites (**Batch 38** removed **`--menu-item-text-active`**).
 
 3. Form controls
@@ -96,7 +103,7 @@ Role-level aliases consumed by reusable UI primitives and feature components. **
 
 - **`--overlay-rail-left-*`** — **removed Batch 34** — settings overlay rail width/ratio is **`:host`** custom properties on **`settings-overlay.component.scss`** (`--settings-overlay-left-ratio`, `--settings-overlay-left-width`, …) — see **`docs/migration/phase-7-token-migration.md`** §Batch 34 and [`settings-overlay.md`](../specs/ui/settings-overlay/settings-overlay.md).
 - **`--section-bg`** — **removed Batch 39** — use **`var(--card)`** (often inside **`color-mix`**) at callsites.
-- **`--section-text`** — **removed Batch 40** — use **`var(--muted-foreground)`** (or theme-specific literals where Sandstone required) at callsites.
+- **`--section-text`** — lives on `styles.scss` (see the table above). Batch 40 removed it from the bridge only.
 
 5. Feedback states
 

@@ -12,7 +12,7 @@ describe('upload-panel-row-action-registry', () => {
 
     const actions = resolveUploadRowMenuActions({
       job,
-      lane: 'issues',
+      lane: 'clarifications',
       issueKind: getIssueKind(job),
       showOpenProject: false,
       priorityEnabled: false,
@@ -50,7 +50,7 @@ describe('upload-panel-row-action-registry', () => {
 
     const actions = resolveUploadRowMenuActions({
       job,
-      lane: 'issues',
+      lane: 'clarifications',
       issueKind: 'duplicate_file',
       showOpenProject: false,
       priorityEnabled: false,

@@ -11,7 +11,7 @@
  *
  * Banned token duplications:
  *   color-mix(in srgb, var(--primary) 8%, transparent)   → use var(--menu-item-hover)
- *   color-mix(in srgb, var(--primary) 12%, transparent)  → use var(--action-hover)
+ *   color-mix(in srgb, var(--primary) 12%, transparent)  → use var(--action-hover) (the token is gold 10%)
  *
  * Canonical references:
  *   @see docs/design/state-visuals.md § Interaction emphasis

@@ -1,0 +1,38 @@
+@use './widget-canvas-page';
+
+// Explanation column inside the canvas.
+// @see docs/specs/page/widget-explanation.md
+:host {
+  @include widget-canvas-page.widget-canvas-page-host;
+}
+
+// Name, summary, and body stay left-aligned.
+// @see docs/specs/page/widget-explanation.md
+.widget-explanation__content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-1);
+  width: 100%;
+  text-align: left;
+}
+
+.widget-explanation__content p {
+  margin: 0;
+  color: var(--muted-foreground);
+}
+
+// Back control. Resting color is declared with the hover color.
+// @see docs/specs/page/widget-explanation.md
+button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  cursor: pointer;
+}
+
+button:hover,
+button:focus-visible {
+  color: var(--primary);
+}

@@ -1,0 +1,12 @@
+@use '../../../styles/frosted-chrome';
+
+// Frosted group. Does not stretch into the rail's leftover space.
+// @see docs/specs/ui/shell/shell-control-container.md
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  padding: var(--spacing-1);
+  width: fit-content;
+  @include frosted-chrome.shell-box;
+}

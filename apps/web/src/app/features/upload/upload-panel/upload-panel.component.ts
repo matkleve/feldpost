@@ -13,15 +13,15 @@ import {
   computed,
   DestroyRef,
   effect,
-  ElementRef,
   HostListener,
   inject,
   input,
-  OnDestroy,
+  NgZone,
   output,
   signal,
   viewChild,
 } from '@angular/core';
+import type { ElementRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UploadPanelItemComponent } from './upload-panel-item.component';
 import type { ExifCoords } from '../../../core/upload/upload.service';
@@ -59,7 +59,11 @@ import type {
   UploadFileTypeGroupId,
 } from './upload-panel-file-type-groups';
 import { DEFAULT_UPLOAD_FILE_INPUT_ACCEPT } from './upload-panel-file-accept';
-import type { UploadFileTypeChip } from './upload-panel.constants';
+import {
+  UPLOAD_PANEL_WIDE_MIN_PX,
+  type UploadFileTypeChip,
+} from './upload-panel.constants';
+import { UploadResolverTrayComponent } from '../upload-resolver-tray/upload-resolver-tray.component';
 import {
   fileTypeGroupPickAriaLabel,
   fileTypeMemberPickAriaLabel,
@@ -107,6 +111,7 @@ export type {
     HlmMenuItemDirective,
     ProjectSelectDialogComponent,
     PaneFooterComponent,
+    UploadResolverTrayComponent,
   ],
   providers: [
     UploadPanelDialogSignals,
@@ -159,6 +164,11 @@ export class UploadPanelComponent implements OnDestroy {
   private readonly rowInteractions = inject(UploadPanelRowInteractionsService);
   private readonly deferredCounts = inject(DeferredLocationCountService);
   private readonly deferredBulk = inject(DeferredLocationBulkFlowService);
+  private readonly zone = inject(NgZone);
+  private readonly panelRoot = viewChild<ElementRef<HTMLElement>>('panelRoot');
+
+  /** True when this embedded panel is wide enough for intake | vertical lanes. */
+  readonly wideLayout = signal(false);
   readonly actionHandlers = this.jobActions;
   readonly inputHandlers = this.inputs;
   readonly laneHandlers = this.lanes;
@@ -170,6 +180,9 @@ export class UploadPanelComponent implements OnDestroy {
   // Component I/O
   readonly visible = input<boolean>(false);
   readonly embeddedInPane = input<boolean>(false);
+  readonly showClarificationTray = computed(
+    () => this.embeddedInPane() && this.signals.effectiveLane() === 'clarifications',
+  );
   readonly imageUploaded = output<MapMarkerImageUploadedEvent>();
   readonly placementRequested = output<string>();
   readonly detailRequested = output<string>();
@@ -310,6 +323,36 @@ export class UploadPanelComponent implements OnDestroy {
     this.deferredBulk.cancel();
   }
 
+  onTrayPreview(event: UploadLocationPreviewEvent): void {
+    this.locationPreviewRequested.emit(event);
+  }
+
+  private bindWideLayoutObserver(): void {
+    effect((onCleanup) => {
+      const root = this.panelRoot()?.nativeElement;
+      if (!root || typeof ResizeObserver === 'undefined') {
+        return;
+      }
+      const apply = (width: number) => {
+        const next = this.embeddedInPane() && width >= UPLOAD_PANEL_WIDE_MIN_PX;
+        if (next !== this.wideLayout()) {
+          this.wideLayout.set(next);
+        }
+      };
+      apply(root.getBoundingClientRect().width);
+      const observer = new ResizeObserver((entries) => {
+        const width = entries[0]?.contentRect.width ?? 0;
+        this.zone.run(() => apply(width));
+      });
+      observer.observe(root);
+      onCleanup(() => observer.disconnect());
+    });
+  }
+
+  onTrayPreviewCleared(): void {
+    this.locationPreviewCleared.emit();
+  }
+
   readonly takePhotoLabelText = (): string =>
     nonEmptyLocalized(this.t('auto.0349.take_photo', 'Take photo'), 'Take photo');
 
@@ -348,6 +391,7 @@ export class UploadPanelComponent implements OnDestroy {
     // Count once when the panel is constructed. The tab is persistent, so this is per session, not
     // per render — `refresh()` also collapses concurrent callers into one run.
     void this.deferredCounts.refresh();
+    this.bindWideLayoutObserver();
 
     effect(() => {
       if (!this.visible()) {

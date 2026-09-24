@@ -18,6 +18,7 @@ Set these variables in Vercel project settings:
 
 - `SUPABASE_URL`
 - `SUPABASE_ANON_KEY`
+- `CARTO_BASEMAP_API_KEY` (optional but recommended — removes the CARTO street-tile watermark)
 
 Build integration:
 

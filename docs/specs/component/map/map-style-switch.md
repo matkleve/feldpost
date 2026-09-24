@@ -7,8 +7,8 @@ Single **cycle/toggle** basemap control in the map zone: switches between **stre
 ## What It Looks Like
 
 - **Position:** bottom-right of map zone, above GPS button (`z-index: 200`)
-- **Shape:** circular frosted outline button `2.75rem` (desktop) / `3rem` (mobile)
-- **Icon:** shows the **target** mode (`satellite_alt` when on street, `map` when on photo) at `var(--font-size-lg)`
+- **Shape:** circular frosted outline button `var(--map-floating-control-size)` (`3rem`). **Not** `hlmBtn` / **not** shell rail — custom `button.map-style-switch__btn` with `frosted-chrome.outline-control`.
+- **Icon:** shows the **target** mode (`satellite_alt` when on street, `map` when on photo) at `var(--font-size-xl)`
 - **Dots:** two dots under icon — left = street, right = photo; active dot uses `var(--interaction-nav-ink)`
 - **Rest:** muted icon + frosted `outline-control` chrome
 - **Hover / focus-visible:** brand gold ink + gold frosted wash (`outline-control-hover`)
@@ -52,7 +52,7 @@ Active basemap is **tertiary** placement (violet dot) — same attention tier as
 | Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer | Test Oracle |
 | --- | --- | --- | --- | --- | --- | --- |
 | Control shell | `.map-style-switch` | `.map-style-switch` | `.map-style-switch__btn` | `.map-style-switch` | 200 | Fixed above GPS offset |
-| Circular button | `.map-style-switch__btn` | button | button | `:host button.map-style-switch__btn` | content | 2.75rem circle |
+| Circular button | `.map-style-switch__btn` | button | button | `:host button.map-style-switch__btn` | content | `--map-floating-control-size` circle |
 | Icon + dots stack | `.map-style-switch__media` | button | button | `__media`, `__icon`, `__dots` | content | Fits inside circle |
 | Hover emphasis | button | button | button | `:hover`, `:focus-visible` | states | Gold ink + frosted hover |
 

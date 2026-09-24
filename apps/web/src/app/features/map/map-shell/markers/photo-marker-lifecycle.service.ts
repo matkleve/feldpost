@@ -15,6 +15,7 @@ import { MapMarkerSelectionService } from './map-marker-selection.service';
 import { MapMarkerBindingService } from './map-marker-binding.service';
 import { MapShellState } from '../component/map-shell.state';
 import { MapShellInstanceService } from '../component/map-shell-instance.service';
+import { SelectedItemsPanelCoordinatorService } from '../../../../core/selected-items-panel/selected-items-panel-coordinator.service';
 import { WorkspacePaneObserverAdapter } from '../../../../core/workspace-pane/workspace-pane-observer.adapter';
 import {
   registerMarkerKeyForMedia,
@@ -35,6 +36,7 @@ export class PhotoMarkerLifecycleService {
   private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
   private readonly state = inject(MapShellState);
+  private readonly selectedItemsPanelCoordinator = inject(SelectedItemsPanelCoordinatorService);
   private readonly instance = inject(MapShellInstanceService);
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
 
@@ -180,7 +182,7 @@ export class PhotoMarkerLifecycleService {
 
       if (nextCount > 1 && this.state.selectedMarkerKey() === markerKey) {
         this.markerSelectionService.setSelectedMarker(null);
-        this.state.setPhotoPanelOpen(false);
+        this.selectedItemsPanelCoordinator.close();
       }
 
       existing.marker.setIcon(this.markerRenderService.buildPhotoMarkerIcon(markerKey));
@@ -250,10 +252,8 @@ export class PhotoMarkerLifecycleService {
   }
 
   ensurePhotoPanelOpen(): void {
-    if (!this.state.photoPanelOpen()) {
-      this.state.setWorkspacePaneWidth(this.state.getWorkspacePaneOpeningWidth());
-    }
-    this.state.setPhotoPanelOpen(true);
+    this.selectedItemsPanelCoordinator.resetUserDismissedDownloadPanel();
+    this.selectedItemsPanelCoordinator.open();
   }
 
   private isAdditiveMarkerSelection(clickEvent?: MapMouseEvent): boolean {
@@ -297,6 +297,7 @@ export class PhotoMarkerLifecycleService {
     zoom: number,
   ): Promise<void> {
     const images = await this.workspaceViewService.fetchClusterImages(cells, zoom);
+    this.workspaceViewService.setActiveSelectionImages(images);
     this.workspaceSelectionService.selectAllInScope(images.map((image) => image.id));
   }
 }

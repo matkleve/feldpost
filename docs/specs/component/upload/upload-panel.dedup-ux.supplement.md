@@ -7,8 +7,8 @@
 
 | State | Lane | Status label (en) | User meaning |
 | --- | --- | --- | --- |
-| Same-user resume skip | `issues` (skipped row) | Already uploaded | Your prior upload finished; bytes not sent again |
-| Colleague duplicate | `issues` | File already in workspace | Someone in your org uploaded this file; choose next step |
+| Same-user resume skip | `clarifications` (skipped row) | Already uploaded | Your prior upload finished; bytes not sent again |
+| Colleague duplicate | `clarifications` | File already in workspace | Someone in your org uploaded this file; choose next step |
 | Upload in progress | `uploading` | Checking duplicates… | Hash lookup (all dedup-eligible types) |
 
 **Skipped ≠ failed.** Skipped rows stay visible with muted/check styling.
@@ -18,7 +18,7 @@
 - Normative: `duplicate_file` (photos, PDFs, documents, videos with byte match).
 - Legacy alias: `duplicate_photo` — treat identically in row actions until fully removed from code.
 
-## Row actions (`issues` + duplicate)
+## Row actions (`clarifications` + duplicate)
 
 | Action | Effect |
 | --- | --- |

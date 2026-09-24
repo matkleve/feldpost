@@ -31,6 +31,15 @@ app-nav.nav--collapsed {
 // Flex row split owner: main content vs workspace pane. Fixed app-nav sits outside flow.
 // overflow-x clip prevents horizontal scroll; overflow-y visible keeps map chrome shadows unclipped.
 // @see docs/design/tokens.md §3.5 — map chrome uses --shadow-md
+// Grid host fills the row beside the workspace pane when the flag is on.
+// @see docs/specs/ui/shell/grid-shell.md
+app-grid-shell {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+
 :host {
   display: flex;
   flex-direction: row;
@@ -43,6 +52,12 @@ app-nav.nav--collapsed {
   overflow-x: clip;
   overflow-y: visible;
   background: var(--background);
+}
+
+// Settings fills the canvas; the route underneath stays mounted for the URL suffix.
+// @see docs/specs/ui/shell/shell-main-canvas.md
+.authenticated-app-layout__main--covered {
+  visibility: hidden;
 }
 
 .authenticated-app-layout__main {

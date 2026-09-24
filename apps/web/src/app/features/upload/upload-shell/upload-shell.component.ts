@@ -45,7 +45,7 @@ export class UploadShellComponent {
   readonly uploadPanelOpen = this.uploadShellUi.uploadPanelOpen;
   readonly uploadBatchActive = this.uploadShellUi.uploadBatchActive;
   readonly uploadBatchProgress = this.uploadShellUi.uploadBatchProgress;
-  readonly uploadHasIssues = this.uploadShellUi.uploadHasIssues;
+  readonly uploadHasClarifications = this.uploadShellUi.uploadHasClarifications;
   readonly showUploadDock = this.uploadShellUi.showUploadDock;
   readonly uploadResolverTrayActive = this.uploadShellUi.uploadResolverTrayActive;
 

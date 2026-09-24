@@ -21,6 +21,7 @@ import { provideRouter, Router } from '@angular/router';
 import { signal } from '@angular/core';
 import { NavComponent } from './nav.component';
 import { AuthService } from '../../core/auth/auth.service';
+import { FeatureFlagsService } from '../../core/feature-flags/feature-flags.service';
 import { WorkspacePaneLayoutMapEffectsService } from '../../core/workspace-pane/workspace-pane-layout-map-effects.service';
 
 function collectCssRules(): CSSStyleRule[] {
@@ -401,6 +402,10 @@ describe('NavComponent', () => {
             loading: signal(false),
             initialize: vi.fn().mockResolvedValue(undefined),
           },
+        },
+        {
+          provide: FeatureFlagsService,
+          useValue: { shellGridLayout: signal(false) },
         },
         {
           provide: WorkspacePaneLayoutMapEffectsService,

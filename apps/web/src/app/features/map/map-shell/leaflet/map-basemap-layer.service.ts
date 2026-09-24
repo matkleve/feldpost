@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as L from 'leaflet';
+import { environment } from '../../../../../environments/environment';
+import { buildCartoStreetTileUrlTemplate } from './map-basemap-layer.helpers';
 
 export type MapBasemapPreference = 'default' | 'satellite';
 
@@ -51,7 +53,8 @@ export class MapBasemapLayerService {
     // sandstone (warm theme) uses the cream-toned Voyager style. Satellite
     // imagery is theme-agnostic, so it is left untouched.
     const variant = this.resolveStreetTilePath();
-    return L.tileLayer(`https://{s}.basemaps.cartocdn.com/${variant}/{z}/{x}/{y}{r}.png`, {
+    const url = buildCartoStreetTileUrlTemplate(variant, environment.cartoBasemapApiKey);
+    return L.tileLayer(url, {
       maxNativeZoom: 19,
       maxZoom: 22,
       attribution:

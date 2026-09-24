@@ -23,6 +23,8 @@ It uses the same `MediaDownloadService` cache namespace as map markers and `/med
 
 A rounded-corner media surface (`--radius-lg`) centered with side margins (`--spacing-4`). Fixed to approximately **1/3 of viewport height** (`max-height: 33vh`), 4:3 aspect ratio. On hover, a subtle `--color-primary` ring appears. A replace-media edit-icon button sits in the **top-right corner**, overlaid with a semi-transparent dark scrim (`rgba(0,0,0,0.5)`), visible on hover (desktop) or always (touch). When `storage_path IS NULL`, an upload prompt/placeholder is shown instead.
 
+A resolution badge sits in the **lower-right** of the preview, on the photo. It shows the original file’s pixel size (`4032 × 3024`), not the downscaled bitmap currently on screen. Contract: [§ Resolution badge](#resolution-badge).
+
 ## Where It Lives
 
 - **Parent**: `MediaDetailViewComponent` — placed in MediaColumn (wide layout) or top of SingleColumnLayout (narrow)
@@ -48,14 +50,41 @@ A rounded-corner media surface (`--radius-lg`) centered with side margins (`--sp
 
 ```
 MediaViewer                                ← object-fit: contain, dark neutral letterbox background (implementation detail; not a product token)
-├── [not loaded] Placeholder               ← neutral surface placeholder
-├── [tier 2] ThumbnailPreview              ← 256×256 signed URL (blurred via CSS filter)
-├── [tier 3] FullResPreview                ← original res, crossfades over thumbnail
+├── app-media-item                         ← detail embed, interaction chrome off
+│   ├── MediaDisplay                       ← signed preview (thumbnail or transform), not the size label
+│   └── .media-item__resolution-badge      ← original pixel size, lower-right, on the photo
 ├── [hover / touch] ReplaceMediaButton     ← edit icon, scrim overlay, top-right
 ├── [no storage_path] UploadPrompt         ← Placeholder with file picker button
 └── [lightbox open] LightboxOverlay        ← fixed, dark backdrop, z-modal
     ├── FullResPreview                     ← 95vw / 95vh, object-fit: contain
     └── CloseButton (X)                    ← top-right
+```
+
+## Resolution badge
+
+The preview on screen is a downscale: a persisted thumb (long edge 128px, so a 3:4 photo decodes as **96×128**) or a signed transform (`thumb` 256px, `detail` 1280px). The badge MUST NOT report that bitmap.
+
+| Priority | Source | Rule |
+| --- | --- | --- |
+| 1 | `item.exif_raw.ExifImageWidth` × `ExifImageHeight` | Both present and > 0. This is the ingest EXIF pair from `exifr` (`translateKeys`). |
+| 2 | `item.exif_raw.ImageWidth` × `ImageHeight` | Same rule, only when pair 1 is incomplete. Do not mix keys across pairs. |
+| 3 | Decoded sharp `<img>` `naturalWidth` × `naturalHeight` | Fallback only when ingest EXIF has no complete pair. This is the preview size and is known to be wrong for camera photos. |
+
+Orientation: when `exif_raw.Orientation` is EXIF 5, 6, 7, or 8 (including exifr strings `Rotate 90 CW`, `Rotate 270 CW`, `Mirror horizontal and rotate 90 CW`, `Mirror horizontal and rotate 270 CW`), swap the axes so a portrait photo stays portrait. Other orientations keep the stored pair.
+
+The label is `{width} × {height}` with tabular numerals. Accessible name: `workspace.imageDetail.mediaResolution.aria` (“Original image resolution”). `pointer-events: none`. Hidden when there is no size, and hidden on grid tiles (`showInteractionChrome` true — that corner is the file-type chip).
+
+`exif_raw` is on the detail read only. Grid list rows do not carry it. See [deferred-location-resolution.md](../../system/deferred-location-resolution.md) § read model.
+
+```mermaid
+flowchart TD
+  A[Detail row exif_raw] --> B{ExifImageWidth and ExifImageHeight}
+  B -->|both positive| C[Oriented pixel pair]
+  B -->|incomplete| D{ImageWidth and ImageHeight}
+  D -->|both positive| C
+  D -->|incomplete| E[Decoded preview naturalWidth x naturalHeight]
+  C --> F[Badge]
+  E --> F
 ```
 
 ## State Machine
@@ -169,6 +198,7 @@ stateDiagram-v2
 | `replacing`               | `boolean`                | `false` | Whether a replace operation is in progress                                         |
 | `replaceError`            | `string \| null`         | `null`  | Error message if replace failed                                                    |
 | `documentPreviewEligible` | `boolean`                | `false` | Whether viewer slot size and file type allow first-page document preview rendering |
+| `resolutionBadge`         | `{ width: number; height: number } \| null` | `null` | Lower-right original pixel size. Owned by the embedded `app-media-item`. See [§ Resolution badge](#resolution-badge). |
 
 > **Removed:** `fullResLoaded`, `thumbLoaded`, `heroSrc` — replaced by `MediaLoadState` signals from `MediaDownloadService`. The component no longer manages signed URLs or loading booleans directly.
 
@@ -237,4 +267,12 @@ sequenceDiagram
 
 - [x] Lightbox opens on media-preview click with dark backdrop
 - [x] Lightbox closes on X, backdrop click, or Escape
+
+### Resolution badge
+
+- [x] Badge text is the original file pixel size from `exif_raw`, not the decoded preview (`96 × 128` on a 128px thumb is a failure).
+- [x] `ExifImageWidth` × `ExifImageHeight` wins over `ImageWidth` × `ImageHeight`. Pairs are not mixed.
+- [x] Orientation 5–8 swaps axes (`4032 × 3024` + `Rotate 90 CW` renders `3024 × 4032`).
+- [x] When ingest EXIF has no complete pixel pair, the badge falls back to the decoded sharp image size.
+- [x] Grid tiles do not show the badge. Detail embed does not show the file-type chip in that corner.
 

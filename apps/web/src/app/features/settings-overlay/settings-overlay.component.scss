@@ -63,12 +63,27 @@
     box-shadow: var(--shadow-2xl), 0 12px 40px -6px color-mix(in srgb, var(--shadow-color) 18%, transparent);
   }
 
-  // In-flow dismiss control on the rail toolbar (same surface as section list)
-  // @see docs/specs/ui/settings-overlay
-  .settings-overlay__close {
-    --icon-btn-size: 2.25rem;
-    --icon-btn-radius: var(--radius-full);
-    --icon-btn-icon-size: 1.05rem;
+  // Inside the grid canvas the page is the box. Settings fills it; the canvas owns radius and shadow.
+  // @see docs/specs/ui/shell/shell-main-canvas.md
+  :host-context(app-shell-main-canvas) {
+    --settings-overlay-width: 100%;
+    --settings-overlay-height: 100%;
+
+    .settings-overlay {
+      position: absolute;
+      inset: 0;
+      transform: none;
+      z-index: 1;
+      width: 100%;
+      max-width: none;
+      height: 100%;
+      min-height: 0;
+      max-height: none;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      background: var(--chrome-surface);
+    }
   }
 
   // Top row on the rail hosting the close control (geometry owner for toolbar alignment)

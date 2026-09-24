@@ -7,6 +7,7 @@ import { MapMarkerSelectionService } from '../markers/map-marker-selection.servi
 import { WorkspaceSelectionService } from '../../../../core/workspace-selection/workspace-selection.service';
 import { WorkspaceViewService } from '../../../../core/workspace-view/workspace-view.service';
 import { MapShellState } from '../component/map-shell.state';
+import { SelectedItemsPanelCoordinatorService } from '../../../../core/selected-items-panel/selected-items-panel-coordinator.service';
 import { MapShellSearchService } from '../leaflet/map-shell-search.service';
 import { MapShellInstanceService } from '../component/map-shell-instance.service';
 import { WorkspacePaneObserverAdapter } from '../../../../core/workspace-pane/workspace-pane-observer.adapter';
@@ -29,6 +30,7 @@ export class RadiusDrawingOrchestratorService {
   private readonly workspaceSelectionService = inject(WorkspaceSelectionService);
   private readonly workspaceViewService = inject(WorkspaceViewService);
   private readonly state = inject(MapShellState);
+  private readonly selectedItemsPanelCoordinator = inject(SelectedItemsPanelCoordinatorService);
   private readonly searchService = inject(MapShellSearchService);
   private readonly instance = inject(MapShellInstanceService);
   private readonly workspacePaneObserver = inject(WorkspacePaneObserverAdapter);
@@ -217,10 +219,8 @@ export class RadiusDrawingOrchestratorService {
       this.workspaceSelectionService.selectAllInScope(imageIds);
     }
 
-    if (!this.state.photoPanelOpen()) {
-      this.state.setWorkspacePaneWidth(this.state.getWorkspacePaneOpeningWidth());
-    }
-    this.state.setPhotoPanelOpen(true);
+    this.selectedItemsPanelCoordinator.resetUserDismissedDownloadPanel();
+    this.selectedItemsPanelCoordinator.open();
     this.patchDetailMediaId(null);
     this.selectionService.setSelectedMarker(null);
   }

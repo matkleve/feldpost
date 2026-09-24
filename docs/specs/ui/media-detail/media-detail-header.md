@@ -8,7 +8,7 @@ Back navigation, inline title editing trigger, file-type hint, and overflow cont
 
 ## What It Looks Like
 
-Top row: back chevron, title (text or input), optional type chip, trailing overflow menu.
+Top row: back chevron, title (text or input), optional type chip, trailing overflow menu. Back and overflow use `hlmBtn` `variant="ghost"` `size="icon"`: the circle and gold hover come from the primitive (`docs/design/components/action-interaction-kernel.md`). This header only grows the box to `2.75rem` (3rem below 48rem). Do not set `color` on those buttons — it blocks the primitive hover.
 
 ## Where It Lives
 
