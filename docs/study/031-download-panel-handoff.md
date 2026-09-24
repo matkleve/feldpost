@@ -98,3 +98,19 @@ Owner answers the same day `[D]`:
 3. Share link, copy link, the device share sheet, and ZIP all belong. Copy link sits inside share link, not as a second peer button. The device share sheet was not understood as a separate control; it is the phone or tablet system sheet (WhatsApp, Mail, and the rest) and is not a Feldpost screen.
 4. Address, project, delete, and zoom stay on the single medium.
 5. The internal panel id `download` does not stay. It is refactored to `share`. The ZIP action id `download` is a different word and stays on the medium menu.
+
+## Update 2026-09-24 — desktop system share
+
+The owner asked for a system-share button on desktop `[D]`.
+
+| # | Situation | What the person needs | What can actually open |
+| --- | --- | --- | --- |
+| 1 | Windows, Chrome or Edge | Send the set to Mail, Teams, or another installed app | The browser’s `navigator.share` opens the Windows share sheet `[A]` |
+| 2 | Mac, Safari or Chrome | Send the set to Mail, Messages, or AirDrop | The same call opens the Mac share sheet `[A]` |
+| 3 | Firefox on desktop | Same intention | This browser has no share sheet. A button cannot invent one `[A]` |
+| 4 | Phone | Same intention | The same call opens the phone sheet `[A]` |
+| 5 | Person dismisses the sheet | Nothing is sent, no error | The current code already ignores that cancel `[A]` |
+
+Feldpost does not draw the sheet. The code calls `navigator.share` only after the audience dialog has produced a URL (`workspace-selected-items-grid.component.ts`) `[A]`. There is no second desktop API to build `[C]`.
+
+Decision `[D]`: one **Share** action. It always asks who may open the link. If the browser has `navigator.share`, desktop or phone, that call opens the system sheet. If it does not, the same action copies the link. No separate desktop button, and no Feldpost-built list of apps.
