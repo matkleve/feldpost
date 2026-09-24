@@ -211,3 +211,24 @@ Supersedes Q4–Q8 only. Q9, Q10, and B1 are still open. `[D]` unless marked `[A
 There is one nav in code. The rail list is a drawing in STUDY-015. Q9 asks that a future install store feed both, so they do not each keep their own “what is installed” rows.
 
 10. **Files is not a widget in this plan.** `[D]` The `/files` page was a mistake to treat as a product app. Do not add the route. Do not delete `docs/specs/page/files-page.md` or the folder RPCs. Whether that tree later folds into Media is undecided. Leave it warm.
+
+## Update 2026-09-24 — account, many organizations, Organization widget
+
+Supersedes **B1**. The earlier sentence “the first organization stays outside the widgets” is not what the owner wants. `[D]`
+
+**Signup.** A person can create an account without an invite. The invite code is one path, not the only path. That path adds the person to an organization immediately, for whatever email they have. `[D]`
+
+**Many organizations.** The same email can belong to more than one organization. After login the person chooses which organization to enter. `[D]`
+
+**Main path.** The person logs in, then adds the Organization widget. That widget is where they set up the organization, name an admin, and create invites. `[D]`
+
+**What the database does today, which cannot express this.** `[A]`
+
+- `handle_new_user()` refuses signup when there is no invite (`20260616085726_invite_signups_display_name.sql` lines 51–53).
+- The new profile gets exactly one `organization_id`, copied from that invite (same file, lines 71–77).
+- `profiles.organization_id` is `not null` (`20260303000002_tables.sql`).
+- RLS uses `user_org_id()`, which reads that one column (`docs/security-boundaries.md` §2.1).
+
+A future spec has to replace “one organization on the profile” before this flow can ship. This update does not name the membership table. Widget install rows, when they exist, are per user **inside the organization they have entered**, and still must not bypass RLS.
+
+Still not decided: Q9 (one install store for the nav and the STUDY-015 rail), B2 (whether people who already use Projects, Colleagues, and Organization keep them on day one).
