@@ -82,6 +82,24 @@ No code change until a run against the real geocoder says otherwise. If the rate
 
 Build action 4h from the supplement. After steps 1 and 2, the multi-word city line and the Klagenfurt line match what the parser does. Register the six i18n keys in the same change.
 
+## Update 2026-09-24 — implemented and re-measured
+
+The order above was carried out. This section does not delete the earlier claims.
+
+`[A]` A folder segment that is an exact municipality is classified as that place before the splitter runs (`path-token-classifier.ts`, `classifyTokensInSegment`). `Wiener Neustadt`, `St. Pölten`, and `Krems an der Donau` keep the city and derive AT, so the postcode beside them is kept. The 1 000-file `company_street` re-run geocodes `Getreidegasse 10` with `city=Wiener Neustadt` and `postcode=2700`.
+
+`[A]` A city matches a PLZ city when either string is the municipality name or one of its aliases (`upload-area-evidence.helpers.ts`, `cityMatchesPlzCities`). The same run geocodes `Herrengasse 20` as `Klagenfurt am Wörthersee` / `9020` with no `admin_conflict`.
+
+`[A]` An empty house list closes the tray via `deferGroup` (`upload-location-tray-flow.service.ts`). The re-run has `awaiting_disambiguation=0`. `Hauptstraße 5` is `city_step` with `gate=false`. One job is `address_deferred`.
+
+`[A]` Pipeline edges `awaiting_disambiguation → skipped`, `queued → skipped`, `queued → missing_data`, `hashing → skipped`, and `hashing → missing_data` are in the map. The 1 000-file re-run no longer has `phase=error` or `upload_error`. Phases: `complete=144 missing_data=850 skipped=6`.
+
+`[A]` The 10 000-file `company_street` required run exited 0 in 114 s. Phases: `complete=1705 missing_data=8228 skipped=67`. Jobs still active: 0. The lane mounts at most 12 rows (`LANE_MOUNT_WINDOW`) and advances that window on scroll.
+
+`[B]` Eight stub misses from the 1 000-file run (street queries Photon was not asked by the harness) all returned one Photon hit on 2026-09-24 (`photon.komoot.io`, limit 1). The harness `missing_gps` count is the stub. No product change for that count.
+
+`[A]` The folder button hover shows the six strings from the supplement. `app-popover` is not used: `brnPopoverContent` inside the intake block made sibling row bindings fail in the panel DOM test. The list is `role="tooltip"`.
+
 ## What this plan does not do
 
 It does not change chunk size, `MAX_CONCURRENT`, or the tray budget. STUDY-009 already closed the budget. It does not treat `adversarial` tray counts as a company rate. It does not add a tips component.
