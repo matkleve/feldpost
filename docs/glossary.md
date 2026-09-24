@@ -150,7 +150,7 @@
   - Who sees it: per user, inside the organization they have entered. The organization may preinstall it, allow it, lock it on, or push it to users. A new signup starts with Map and Media. Someone who already has other widgets keeps them unless the organization turned them off. No install table exists yet. Do not invent one from this entry.
   - Removing a widget hides it. It does not delete subject rows. Address and GPS live on `locations`, linked to the subject (`media_item_location_links` for a media item).
   - The live schema still has one `profiles.organization_id`. Several organizations per email is a decision in the study below, not a table.
-  - Current record: [STUDY-017](study/017-addable-apps-change-plan.md) § Update 2026-09-24 — current record. Shape of the repo: [STUDY-016](study/016-addable-apps-repo-shape.md). Issue #258.
+  - Contract: [widget-install.md](specs/system/widget-install.md). It does not name a table. Current record: [STUDY-017](study/017-addable-apps-change-plan.md) § Update 2026-09-24 — current record. Shape of the repo: [STUDY-016](study/016-addable-apps-repo-shape.md). Issue #258.
 
 - **Group (Saved Group)**  
   Legacy concept for named, user-created collections.

@@ -280,3 +280,7 @@ Three investigations measure the parts this plan can break. They do not add deci
 - [STUDY-018](018-one-organization-is-the-rls-key.md) — `user_org_id()` returns one uuid from `profiles.organization_id`. Several organizations per email have to keep that helper scalar.
 - [STUDY-019](019-map-stays-mounted-when-hidden.md) — the layout hides the map host; it does not destroy it. Zoom from Media navigates to `/map`.
 - [STUDY-020](020-signup-is-an-invite-trigger.md) — `handle_new_user()` rejects registration without an invite and writes one organization onto the profile.
+
+## Update 2026-09-24 — spec started
+
+Phase 2 has a first draft: `docs/specs/system/widget-install.md`. `[A]` once this commit lands. It records the locked install rules and names the blocks that still forbid a migration: permission key, table shape, shared-link name, colleagues after chat splits, and the membership change. It does not change `user_org_id()`, the map host, or `handle_new_user()`. `[D]` do not start Phase 3 while those blocks are open.
