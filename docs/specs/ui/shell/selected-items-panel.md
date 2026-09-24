@@ -60,6 +60,9 @@ The right-rail **Share** surface in the panel column. Shows the current unified 
 app-shell-panel-surface [panelId=share]
 ├── header (title + collapse; no second app-pane-header)
 └── app-selected-items-panel
+    ├── @if selection.size > 0
+    │   ├── Share (`hlmBtn` ghost xs) → app-share-sheet
+    │   └── phone: system sheet, no app-share-sheet
     ├── @if detailMediaId
     │   └── app-media-detail-view [shellPanelEmbedded=true]
     └── @else
@@ -75,7 +78,7 @@ app-shell-panel-surface [panelId=share]
 
 | Source | Contract | Operation |
 | --- | --- | --- |
-| `UnifiedSelectionService` | `selectedMediaIds: ReadonlySet<string>` | Read/write selection |
+| `WorkspaceSelectionService` | `selectedMediaIds: ReadonlySet<string>` | Read/write selection |
 | `WorkspacePaneObserverAdapter` | detail id, route context, active scope | Read (interim); migrate to selection module |
 | `MediaDownloadService` | delivery cache | Read (ZIP/export) |
 | `ShellLayoutService` | `share` open state | Read/write panel |
@@ -122,7 +125,7 @@ Reused unchanged (composition only):
 ```mermaid
 sequenceDiagram
   participant Map as map / media page
-  participant Sel as UnifiedSelectionService
+  participant Sel as WorkspaceSelectionService
   participant Shell as ShellLayoutService
   participant Panel as selected-items-panel
   Map->>Sel: toggle / set selection
@@ -149,6 +152,7 @@ sequenceDiagram
 | Toolbar | `app-workspace-toolbar` | toolbar host | controls | toolbar selectors | content `0` | unchanged from workspace |
 | Grid | `app-workspace-selected-items-grid` | grid host | tiles | item-grid contract | content `0` | unchanged |
 | Deselect all | `hlmBtn` host | toolbar host | the button | toolbar ghost `xs` | content `0` | visible only when selection is non-empty |
+| Share | `hlmBtn` host | panel body | the button | ghost `xs` | content `0` | opens share-sheet; hidden when selection is empty |
 
 ## Migration from Workspace Pane
 
@@ -175,4 +179,4 @@ sequenceDiagram
 - [x] Detail view opens inside panel body, same as workspace pane today.
 - [x] With `shellGridLayout` on, marker/cluster open flows mount this panel instead of `app-workspace-pane`.
 - [x] With `shellGridLayout` off, legacy workspace pane unchanged.
-- [ ] Red-test-first: test proving independent workspace-only selection is impossible when flag on.
+- [x] One `WorkspaceSelectionService` set: a second inject sees the same ids (`workspace-selection.service.spec.ts`).

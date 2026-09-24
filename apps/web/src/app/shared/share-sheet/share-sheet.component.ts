@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, type OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, computed, inject, signal, type OnInit } from '@angular/core';
 import { AuthService } from '../../core/auth/auth.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { MemberService } from '../../core/members/members.service';
@@ -22,6 +22,7 @@ export class ShareSheetComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly bulk = inject(WorkspaceBulkActionService);
   private readonly i18n = inject(I18nService);
+  private readonly host = inject(ElementRef<HTMLElement>);
 
   readonly t = (key: string, fallback = ''): string => this.i18n.t(key, fallback);
   private readonly allMembers = signal<OrgMember[]>([]);
@@ -36,6 +37,19 @@ export class ShareSheetComponent implements OnInit {
     if (!q) return people;
     return people.filter((person) => person.fullName.toLowerCase().includes(q));
   });
+
+  @HostListener('document:keydown.escape')
+  closeSearchOnEscape(): void {
+    this.searchOpen.set(false);
+  }
+
+  @HostListener('document:pointerdown', ['$event'])
+  closeSearchOnOutside(event: PointerEvent): void {
+    if (!this.searchOpen()) return;
+    const target = event.target;
+    if (target instanceof Node && this.host.nativeElement.contains(target)) return;
+    this.searchOpen.set(false);
+  }
 
   async ngOnInit(): Promise<void> {
     const result = await this.members.loadMembers();

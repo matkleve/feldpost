@@ -9,6 +9,15 @@ describe('WorkspaceSelectionService', () => {
     return TestBed.inject(WorkspaceSelectionService);
   }
 
+  it('shares one set across two injects', () => {
+    const first = setup();
+    const second = TestBed.inject(WorkspaceSelectionService);
+
+    first.toggle('img-1', { additive: true });
+
+    expect(second.isSelected('img-1')).toBe(true);
+  });
+
   it('toggles additive selection with ctrl/meta semantics', () => {
     const service = setup();
 

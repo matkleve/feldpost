@@ -55,7 +55,7 @@ Grep gate before merge — must be **0** references:
 
 ## LIVE CHECK block (required before step 9 / flag default)
 
-1. Map: select 4 items → download panel shows same 4 with footer.
+1. Map: select 4 items → share panel shows the same 4. No footer. Deselect all is on the toolbar.
 2. `/media`: toggle selection → panel updates without reopening workspace pane.
 3. Panel: deselect one → map marker deselects.
 4. Detail: open item from panel → detail inline; close returns to grid.

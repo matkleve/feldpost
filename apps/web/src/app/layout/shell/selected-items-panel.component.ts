@@ -60,11 +60,23 @@ export class SelectedItemsPanelComponent {
   readonly workspaceItemHoverEnded = output<string>();
 
   share(): void {
-    if (window.matchMedia('(max-width: 48rem)').matches) {
+    if (this.useSystemShare()) {
       void this.shareOnPhone();
       return;
     }
     this.shareOpen.update((open) => !open);
+  }
+
+  openShare(): void {
+    if (this.useSystemShare()) {
+      void this.shareOnPhone();
+      return;
+    }
+    this.shareOpen.set(true);
+  }
+
+  private useSystemShare(): boolean {
+    return window.matchMedia('(max-width: 48rem)').matches;
   }
 
   private async shareOnPhone(): Promise<void> {

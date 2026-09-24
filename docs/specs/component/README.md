@@ -96,7 +96,7 @@ Workspace chrome adjacent to the map/workspace split.
 - [quick-info-chips](workspace/quick-info-chips.md)
 - [snap-size-slider](workspace/snap-size-slider.md)
 - [active-selection-view](workspace/active-selection-view.md)
-- [share-sheet](workspace/share-sheet.md) (not built; replaces the audience dialog as the creation UI)
+- [share-sheet](workspace/share-sheet.md) (desktop creation UI; replaces the audience dialog)
 - [drag-divider](workspace/drag-divider.md)
 - [group-tab-bar](workspace/group-tab-bar.md)
 - [sidebar](workspace/sidebar.md) (+ [collapse supplement](workspace/sidebar.collapse.supplement.md), [acceptance criteria](workspace/sidebar.acceptance-criteria.md))

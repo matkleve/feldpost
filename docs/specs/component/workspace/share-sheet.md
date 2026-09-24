@@ -1,7 +1,7 @@
 # Share sheet
 
 > **Opens from:** the Share panel, after the current media set is non-empty.  
-> **Replaces as creation UI:** [share-link-audience-dialog.md](share-link-audience-dialog.md). That dialog stays mounted until this sheet ships.  
+> **Replaces as creation UI:** [share-link-audience-dialog.md](share-link-audience-dialog.md). The grid menu opens this sheet. The dialog is not mounted.  
 > **Access rules:** [share-set-access-model.md](../../service/share-set/share-set-access-model.md). This sheet does not add an audience.
 
 ## What It Is
@@ -37,6 +37,7 @@ There is no external address book. An outside person is not a face in the people
 | 6 | Taps System share | `audience: public`, then `navigator.share` with the URL. Hidden when the browser has no share sheet. |
 | 7 | Opens Share on a phone | This sheet does not open. The system sheet opens after a `public` link is created. |
 | 8 | Dismisses the sheet | No link is created. |
+| 9 | Clicks outside the search list, or presses Escape | The member list closes. No link is created. |
 
 ZIP is not a method. It downloads files and does not hand the set to a person.
 

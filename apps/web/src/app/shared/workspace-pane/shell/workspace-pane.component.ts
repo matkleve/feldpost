@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, input, output } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 
 /** Layout width of `app-drag-divider` host in the authenticated split row. */
 import { BrnTabsImports } from '@spartan-ng/brain/tabs';
@@ -8,6 +8,8 @@ import { WorkspaceToolbarComponent } from '../toolbar/workspace-toolbar/workspac
 import { WorkspaceSelectedItemsGridComponent } from '../selected-items/workspace-selected-items-grid.component';
 import { MediaDetailViewComponent } from '../media-detail/media-detail-view.component';
 import { WorkspaceProjectsPanelComponent } from '../projects-panel/workspace-projects-panel.component';
+import { ShareSheetComponent } from '../../share-sheet/share-sheet.component';
+import { WorkspaceBulkActionService } from '../workspace-bulk-action.service';
 import type { UploadLocationMapPickRequest } from '../../../core/workspace-pane/workspace-pane-shell-events.types';
 import type { ThumbnailCardHoverEvent } from '../../../core/workspace-pane/workspace-pane-thumbnail-hover.types';
 import { I18nService } from '../../../core/i18n/i18n.service';
@@ -30,6 +32,7 @@ import type { WorkspacePaneTab } from '../../../core/workspace-pane/workspace-pa
     WorkspaceSelectedItemsGridComponent,
     MediaDetailViewComponent,
     WorkspaceProjectsPanelComponent,
+    ShareSheetComponent,
   ],
   templateUrl: './workspace-pane.component.html',
   styleUrl: './workspace-pane.component.scss',
@@ -42,7 +45,9 @@ export class WorkspacePaneComponent {
   private readonly i18nService = inject(I18nService);
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
   private readonly featureFlags = inject(FeatureFlagsService);
+  private readonly bulk = inject(WorkspaceBulkActionService);
   readonly shellGridLayout = this.featureFlags.shellGridLayout;
+  readonly shareOpen = signal(false);
 
   constructor() {
     effect(() => {
@@ -159,5 +164,28 @@ export class WorkspacePaneComponent {
 
   onUploadLocationMapPickRequested(event: UploadLocationMapPickRequest): void {
     this.uploadLocationMapPickRequested.emit(event);
+  }
+
+  openShare(): void {
+    if (!this.bulk.hasSelection()) return;
+    if (window.matchMedia('(max-width: 48rem)').matches) {
+      void this.shareOnPhone();
+      return;
+    }
+    this.shareOpen.set(true);
+  }
+
+  private async shareOnPhone(): Promise<void> {
+    const url = await this.bulk.createShareLinkWithAudience(false, {
+      audience: 'public',
+      shareGrant: 'view',
+      recipientUserIds: [],
+    });
+    if (!url || typeof navigator.share !== 'function') return;
+    try {
+      await navigator.share({ url });
+    } catch {
+      // The person closed the system sheet.
+    }
   }
 }

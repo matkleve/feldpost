@@ -20,7 +20,6 @@ import { ToastService } from '../../../core/toast/toast.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
 import { GeocodingService } from '../../../core/geocoding/geocoding.service';
 import { MediaDownloadService } from '../../../core/media-download/media-download.service';
-import type { ShareAudienceDialogResult } from '../../../core/share-set/share-set.types';
 import { LocationResolverService } from '../../../core/location-resolver/location-resolver.service';
 import type {
   GroupedSection,
@@ -42,7 +41,6 @@ import {
   type ProjectSelectOption,
 } from '../../../shared/project-select-dialog/project-select-dialog.component';
 import { TextInputDialogComponent } from '../../../shared/text-input-dialog/text-input-dialog.component';
-import { ShareLinkAudienceDialogComponent } from '../../../shared/share-link-audience-dialog/share-link-audience-dialog.component';
 import { ItemGridComponent } from '../../../shared/item-grid/item-grid.component';
 import type { ItemDisplayMode } from '../../../shared/item-grid/item.component';
 import { ACTION_CONTEXT_IDS } from '../../../core/action/action-context-ids';
@@ -252,7 +250,6 @@ const THUMBNAIL_CONTEXT_ACTION_DEFINITIONS: ReadonlyArray<ThumbnailContextAction
     HlmMenuSeparatorDirective,
     ProjectSelectDialogComponent,
     TextInputDialogComponent,
-    ShareLinkAudienceDialogComponent,
   ],
 })
 export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
@@ -291,6 +288,7 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
   readonly hoverStarted = output<ThumbnailCardHoverEvent>();
   readonly hoverEnded = output<string>();
   readonly locationMapPickRequested = output<UploadLocationMapPickRequest>();
+  readonly shareRequested = output<void>();
 
   private readonly scrollContainerRef = viewChild<ElementRef<HTMLElement>>('scrollContainer');
   private signBatchTimer: ReturnType<typeof setTimeout> | null = null;
@@ -302,8 +300,6 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
   readonly projectOptions = signal<ReadonlyArray<ProjectSelectOption>>([]);
   readonly projectDialogSelectedId = signal<string | null>(null);
   readonly addressDialogOpen = signal(false);
-  readonly shareAudienceDialogOpen = signal(false);
-  private readonly shareAudienceDialogKind = signal<'clipboard' | 'silent' | 'native'>('silent');
 
   readonly sections = computed(() => this.viewService.groupedSections());
 
@@ -610,13 +606,9 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
         await this.downloadSelectionZip();
         break;
       case 'share_link':
-        this.openShareAudienceDialog('silent');
-        break;
       case 'copy_link':
-        this.openShareAudienceDialog('clipboard');
-        break;
       case 'native_share':
-        this.openShareAudienceDialog('native');
+        this.shareRequested.emit();
         break;
       case 'remove_from_project':
         await this.removeSelectedFromProject();
@@ -886,44 +878,6 @@ export class WorkspaceSelectedItemsGridComponent implements OnDestroy {
       message: this.t('workspace.export.success.zipStarted', 'ZIP download started.'),
       type: 'success',
     });
-  }
-
-  openShareAudienceDialog(kind: 'clipboard' | 'silent' | 'native'): void {
-    if (!this.bulkActions.hasSelection()) {
-      this.bulkActions.showNoSelectionError('error');
-      return;
-    }
-    this.shareAudienceDialogKind.set(kind);
-    this.shareAudienceDialogOpen.set(true);
-  }
-
-  closeShareAudienceDialog(): void {
-    this.shareAudienceDialogOpen.set(false);
-  }
-
-  async onShareAudienceDialogConfirmed(audience: ShareAudienceDialogResult): Promise<void> {
-    this.shareAudienceDialogOpen.set(false);
-    const kind = this.shareAudienceDialogKind();
-    const copyToClipboard = kind === 'clipboard';
-    const url = await this.bulkActions.createShareLinkWithAudience(copyToClipboard, audience);
-    if (!url) {
-      return;
-    }
-    if (
-      kind === 'native' &&
-      typeof navigator !== 'undefined' &&
-      'share' in navigator
-    ) {
-      try {
-        await navigator.share({
-          title: this.t('workspace.export.share.title', 'Workspace export'),
-          text: this.t('workspace.export.share.text', 'Shared media selection'),
-          url,
-        });
-      } catch {
-        // No-op: user may cancel native share.
-      }
-    }
   }
 
   private async openProjectDialog(): Promise<void> {

@@ -1,6 +1,6 @@
 # Share link audience dialog
 
-> **Replacement UI:** [share-sheet.md](share-sheet.md). This file is the dialog that is still mounted. Do not add people or methods here.
+> **Replacement UI:** [share-sheet.md](share-sheet.md). The grid no longer mounts this dialog. Do not add people or methods here.
 
 ## What It Is
 
@@ -13,7 +13,7 @@ A fixed-position panel with radio options, optional multi-line UUID field for `n
 ## Where It Lives
 
 - **Code:** `apps/web/src/app/shared/share-link-audience-dialog/`
-- **Consumers:** `WorkspaceSelectedItemsGridComponent`
+- **Consumers:** none. The share sheet is the creation UI.
 
 ## Actions
 
