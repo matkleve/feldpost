@@ -70,3 +70,7 @@ The owner said go. Step 2 is in this branch `[A]`.
 - Collapse closes the panel only. It does not call `closeWorkspacePane()`, so it does not clear the selection `[A]`.
 - The grid still reads `WorkspaceSelectionService`. No second store `[A]`.
 - Step 3 (matrix columns) and step 4 (thumbnail context menu) are unchanged. The red-test for a workspace-only selection is still open.
+
+## Update 2026-09-24 — what the panel is for
+
+The owner asked whether this window exists to pass media on, and whether `download` is the wrong name. That question is [STUDY-031](./031-download-panel-handoff.md) `[A]`. It does not reverse the footer decision in this file.
