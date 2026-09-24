@@ -1,0 +1,24 @@
+// Lets the apps section shrink inside the organization page grid.
+// @see docs/specs/page/organization-page.md
+:host {
+  display: block;
+  min-width: 0;
+  min-height: 0;
+}
+
+// Stacks one app rule per row.
+// @see docs/specs/system/widget-install.md
+ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+// Lays the allow, preinstall, lock, and push controls on one row.
+// @see docs/specs/system/widget-install.md
+li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-3);
+  align-items: center;
+}

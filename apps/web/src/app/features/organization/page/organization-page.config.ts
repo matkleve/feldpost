@@ -5,7 +5,8 @@ export type OrganizationSectionId =
   | 'billing'
   | 'integrations'
   | 'export'
-  | 'audit';
+  | 'audit'
+  | 'apps';
 
 export interface OrganizationSectionConfig {
   id: OrganizationSectionId;
@@ -83,6 +84,16 @@ export const ORGANIZATION_SECTIONS: readonly OrganizationSectionConfig[] = [
     subtitleKey: 'organization.section.audit.subtitle',
     subtitleFallback: 'Recent admin actions',
     viewPermissionKey: 'org.settings.edit',
+  },
+  {
+    id: 'apps',
+    icon: 'apps',
+    labelKey: 'organization.section.apps',
+    labelFallback: 'Apps',
+    subtitleKey: 'organization.section.apps.subtitle',
+    subtitleFallback: 'Which apps people in this organization can add',
+    viewPermissionKey: 'org.settings.edit',
+    editPermissionKey: 'org.settings.edit',
   },
 ];
 

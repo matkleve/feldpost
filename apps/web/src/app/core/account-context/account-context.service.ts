@@ -1,5 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { SupabaseService } from '../supabase/supabase.service';
+import { WidgetInstallService } from '../widget-install/widget-install.service';
 
 export interface AccountMembership {
   organizationId: string;
@@ -14,6 +15,7 @@ export interface AccountMembership {
 @Injectable({ providedIn: 'root' })
 export class AccountContextService {
   private readonly supabase = inject(SupabaseService);
+  private readonly widgetInstall = inject(WidgetInstallService);
 
   readonly organizationId = signal<string | null>(null);
   readonly memberships = signal<AccountMembership[]>([]);
@@ -59,6 +61,7 @@ export class AccountContextService {
       return;
     }
     this.organizationId.set(organizationId);
+    await this.widgetInstall.load();
   }
 
   async createOrganization(name: string): Promise<void> {
@@ -73,5 +76,6 @@ export class AccountContextService {
     this.confirmOpen.set(false);
     this.organizationId.set(typeof data === 'string' ? data : null);
     await this.load();
+    await this.widgetInstall.load();
   }
 }

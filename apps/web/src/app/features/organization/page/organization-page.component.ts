@@ -22,6 +22,7 @@ import { OrganizationBillingSectionComponent } from '../sections/billing/organiz
 import { OrganizationIntegrationsSectionComponent } from '../sections/integrations/organization-integrations-section.component';
 import { OrganizationExportSectionComponent } from '../sections/export/organization-export-section.component';
 import { OrganizationAuditSectionComponent } from '../sections/audit/organization-audit-section.component';
+import { OrganizationAppsSectionComponent } from '../sections/apps/organization-apps-section.component';
 import {
   ORGANIZATION_SECTIONS,
   resolveOrganizationSectionConfig,
@@ -43,6 +44,7 @@ import {
     OrganizationIntegrationsSectionComponent,
     OrganizationExportSectionComponent,
     OrganizationAuditSectionComponent,
+    OrganizationAppsSectionComponent,
   ],
   templateUrl: './organization-page.component.html',
   styleUrl: './organization-page.component.scss',

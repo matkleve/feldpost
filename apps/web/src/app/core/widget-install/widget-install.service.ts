@@ -15,6 +15,7 @@ export class WidgetInstallService {
   private readonly supabase = inject(SupabaseService);
 
   readonly installedIds = signal<readonly WidgetId[]>(NAV_FALLBACK);
+  readonly policies = signal<readonly WidgetPolicyRow[]>([]);
 
   async load(): Promise<void> {
     const [policiesResult, userRowsResult] = await Promise.all([
@@ -36,6 +37,7 @@ export class WidgetInstallService {
       .map(toUserRow)
       .filter((row): row is UserWidgetRow => row !== null);
 
+    this.policies.set(policies);
     this.installedIds.set(effectiveWidgetIds({ policies, userRows }));
   }
 
@@ -48,6 +50,31 @@ export class WidgetInstallService {
       return;
     }
     await this.load();
+  }
+
+  async push(widgetId: WidgetId): Promise<string | null> {
+    const { error } = await this.supabase.client.rpc('push_organization_widget', {
+      p_widget_id: widgetId,
+    });
+    if (error) {
+      return error.message;
+    }
+    await this.load();
+    return null;
+  }
+
+  async savePolicy(
+    organizationId: string,
+    policy: WidgetPolicyRow,
+  ): Promise<string | null> {
+    const { error } = await this.supabase.client.from('organization_widget_policies').upsert({
+      organization_id: organizationId,
+      widget_id: policy.widgetId,
+      allowed: policy.allowed,
+      preinstalled: policy.preinstalled,
+      locked: policy.locked,
+    });
+    return error ? error.message : null;
   }
 }
 

@@ -160,6 +160,14 @@ export class NavComponent {
     void this.widgetInstall.setInstalled(widgetId, true);
   }
 
+  hideWidget(route: string): void {
+    void this.widgetInstall.setInstalled(routeWidgetId(route), false);
+  }
+
+  widgetLabel(widgetId: WidgetId): string {
+    return this.t(`widget.${widgetId}`, widgetId);
+  }
+
   isNavItemActive(item: NavItem): boolean {
     const shell = this.activeShell();
     if (item.route === '/') return shell === 'map';

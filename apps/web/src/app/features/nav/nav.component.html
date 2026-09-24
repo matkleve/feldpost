@@ -58,6 +58,9 @@
               </span>
               <span class="nav__label text-sm">{{ item.label }}</span>
             </a>
+            <button type="button" (click)="hideWidget(item.route)">
+              {{ t('nav.catalog.hide', 'Hide') }}
+            </button>
           }
         </li>
       }
@@ -68,7 +71,7 @@
         @for (widgetId of catalogItems(); track widgetId) {
           <li class="sidebar__item">
             <button type="button" class="nav__link" (click)="addWidget(widgetId)">
-              <span class="nav__label text-sm">{{ t('nav.catalog.add', 'Add') }} {{ widgetId }}</span>
+              <span class="nav__label text-sm">{{ t('nav.catalog.add', 'Add') }} {{ widgetLabel(widgetId) }}</span>
             </button>
           </li>
         }
@@ -78,6 +81,7 @@
     <div class="sidebar__spacer" aria-hidden="true"></div>
 
     <div class="nav__utility-row">
+      <a class="nav__label text-sm" routerLink="/chat">{{ t('nav.chat', 'Messages') }}</a>
       <label class="nav__label text-sm" for="account-context">
         {{ t('nav.context.label', 'Context') }}
       </label>
