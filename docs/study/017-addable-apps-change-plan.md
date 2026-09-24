@@ -288,3 +288,7 @@ Phase 2 has a first draft: `docs/specs/system/widget-install.md`. `[A]` once thi
 ## Update 2026-09-24 — install rows
 
 The blocks in the sentence above are closed in `docs/specs/system/widget-install.md` and `supabase/migrations/20260924120000_widget_install.sql`. `[A]` for those paths. Permission is `org.settings.edit`. Tables are `organization_widget_policies` and `user_widget_installs`. The path is the link name. Colleagues keeps chat. `user_org_id()` and `handle_new_user()` are unchanged. The nav reads `effectiveWidgetIds`. `[D]` several organizations per email are still not in this migration.
+
+## Update 2026-09-24 — the decisions were not challenged
+
+[STUDY-021](021-addable-app-decisions-unchallenged.md) is the critique this plan did not contain. `[A]` once that file is in the tree. It does not replace the current record. It says which of those sentences cannot be true yet.
