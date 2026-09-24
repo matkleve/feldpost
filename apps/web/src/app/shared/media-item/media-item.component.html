@@ -69,11 +69,11 @@
       (contentResolutionChange)="onContentResolution($event)"
     />
 
-    @if (!showInteractionChrome() && detailContentResolution(); as resolution) {
+    @if (!showInteractionChrome() && resolutionBadge(); as resolution) {
       <span
         class="media-item__resolution-badge"
         [attr.aria-label]="
-          t('workspace.imageDetail.mediaResolution.aria', 'Displayed image resolution')
+          t('workspace.imageDetail.mediaResolution.aria', 'Original image resolution')
         "
       >
         {{ resolution.width }} × {{ resolution.height }}

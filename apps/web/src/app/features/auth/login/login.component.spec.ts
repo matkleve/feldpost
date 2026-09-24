@@ -12,6 +12,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router, withNavigationErrorHandler } from '@angular/router';
 import { LoginComponent } from './login.component';
 import { AuthService } from '../../../core/auth/auth.service';
+import { featureFlagRouterQueryParams } from '../../../core/feature-flags/feature-flags.helpers';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -114,7 +115,9 @@ describe('LoginComponent', () => {
         fillForm(fixture, 'user@example.com', 'secret1');
         (fixture.nativeElement as HTMLElement).querySelector('form')!.dispatchEvent(new Event('submit'));
         await fixture.whenStable();
-        expect(navigateSpy).toHaveBeenCalledWith(['/']);
+        expect(navigateSpy).toHaveBeenCalledWith(['/'], {
+            queryParams: featureFlagRouterQueryParams(),
+        });
     });
 
     it('displays error message when signIn fails', async () => {

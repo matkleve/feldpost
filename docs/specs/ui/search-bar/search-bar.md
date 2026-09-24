@@ -17,7 +17,7 @@ This parent spec defines the implementation contract for the search surface UI a
 
 ## What It Looks Like
 
-Floating search surface pinned top-center over the map. Frosted chrome (`frosted-chrome.surface`) with the same corner radius, panel padding, and panel gap as the Sidebar, subtle shadow, and warm `var(--card)` tint. The structure is: panel container → compact search row → results panel revealed inside the same surface. Do not morph the container into a pill in any state. The leading search icon and trailing clear button both sit inside helper wrappers that absorb the extra search-row height while preserving the shared fixed square media-slot rhythm. Results sections use headers, dividers, and clickable rows built from the shared `.ui-item` row pattern. Matched query text uses warm accent treatment per dropdown item spec — not filled primary CTA styling.
+Floating search surface pinned top-center over the map. Frosted chrome (`frosted-chrome.panel`) with a pill radius of half the chrome height (`2.75rem`), so the closed bar is a capsule and the same radius stays when the results panel opens inside it. Panel padding and gap match the Sidebar. The structure is: panel container → compact search row → results panel revealed inside the same surface. The leading search icon and trailing clear button both sit inside helper wrappers that absorb the extra search-row height while preserving the shared fixed square media-slot rhythm. Results sections use headers, dividers, and clickable rows built from the shared `.ui-item` row pattern. Matched query text uses warm accent treatment per dropdown item spec — not filled primary CTA styling.
 
 ## Interaction emphasis
 
@@ -250,7 +250,7 @@ sequenceDiagram
 ### Layout & Visuals
 
 - [x] Search bar is visible top-center over the map on both desktop and mobile
-- [x] Search surface uses `.ui-container` with the same panel radius as the Sidebar in all states
+- [x] Search surface is a pill: outer radius is half `--search-bar-chrome-size` (`2.75rem`) and does not change when the results panel opens
 - [x] Search surface uses the same shared panel padding and gap tokens as the Sidebar
 - [x] Results dropdown inset uses `var(--spacing-1)`; row hover surfaces use `var(--container-radius-control)` (matches nav `.sidebar__panel` / `.nav__link`)
 - [x] Leading search icon uses a fixed square media slot aligned to shared media-size tokens
@@ -260,8 +260,8 @@ sequenceDiagram
 - [x] Geocoder skeleton rows match final `.ui-item` geometry (row height, vertical padding, and media-column width)
 - [x] Geocoder skeleton rows use neutral light-gray loading surfaces (not clay/orange accents)
 - [x] Section divider only shows when both DB and geocoder sections have items
-- [x] Results panel expansion animates outer panel height without animating row height, row padding, media width, or panel radius
-- [x] Opening and closing the dropdown does not change outer corner radius, item padding, or media-column width
+- [x] Results panel expansion animates outer panel height without animating row height, row padding, media width, or the pill radius
+- [x] Opening and closing the dropdown does not change the outer pill radius, item padding, or media-column width
 - [x] Replacing geocoder skeleton rows with real geocoder rows does not cause vertical jump from row-size mismatch
 
 ### Interaction

@@ -13,6 +13,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
+import { featureFlagRouterQueryParams } from '../../../core/feature-flags/feature-flags.helpers';
 import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
 import { HLM_FORM_FIELD_IMPORTS } from '../../../shared/ui/form-field';
 import { HLM_INPUT_IMPORTS } from '../../../shared/ui/input';
@@ -69,7 +70,7 @@ export class LoginComponent {
 
     // On success: onAuthStateChange in AuthService updates the session signal.
     // The authGuard on / will now pass through.
-    this.router.navigate(['/']);
+    void this.router.navigate(['/'], { queryParams: featureFlagRouterQueryParams() });
   }
 }
 

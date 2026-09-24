@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output } from '@angular/core';
+import { Component, computed, effect, inject, input, output } from '@angular/core';
 
 /** Layout width of `app-drag-divider` host in the authenticated split row. */
 import { BrnTabsImports } from '@spartan-ng/brain/tabs';
@@ -14,6 +14,7 @@ import { WorkspaceViewService } from '../../../core/workspace-view/workspace-vie
 import { WorkspaceSelectionService } from '../../../core/workspace-selection/workspace-selection.service';
 import type { ThumbnailCardHoverEvent } from '../../../core/workspace-pane/workspace-pane-thumbnail-hover.types';
 import { I18nService } from '../../../core/i18n/i18n.service';
+import { FeatureFlagsService } from '../../../core/feature-flags/feature-flags.service';
 import type { WorkspacePaneTab } from '../../../core/workspace-pane/workspace-pane-host.port';
 
 /**
@@ -46,6 +47,16 @@ export class WorkspacePaneComponent {
   private readonly workspaceViewService = inject(WorkspaceViewService);
   protected readonly selectionService = inject(WorkspaceSelectionService);
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
+  private readonly featureFlags = inject(FeatureFlagsService);
+  readonly shellGridLayout = this.featureFlags.shellGridLayout;
+
+  constructor() {
+    effect(() => {
+      if (this.shellGridLayout() && this.activeTab() === 'upload') {
+        this.activeTabChange.emit('selected-items');
+      }
+    });
+  }
 
   // ── Shell geometry inputs (formerly WorkspacePaneShellComponent) ──────────
   readonly currentWidth = input(360);

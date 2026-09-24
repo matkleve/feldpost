@@ -1,0 +1,10 @@
+<ng-content />
+@for (option of options(); track option.id) {
+  <app-shell-control-option
+    [option]="option"
+    [side]="side()"
+    [active]="activeId() === option.id"
+    [open]="isOpen(option)"
+    (click)="choose(option)"
+  />
+}

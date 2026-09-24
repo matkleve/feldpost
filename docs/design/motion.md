@@ -58,7 +58,7 @@ Panel and row geometry remain fixed while these transitions run, including conta
 
 ### Media Page Transition Contract
 
-Use this table as the implementation reference for transition usage on the media page.
+Use this table as the implementation reference for transition usage on the media page. Paths under `features/media/` moved to `apps/web/src/app/shared/media-item/`.
 
 | Media Area                               | File / Selector                                                                                                                                        | Transition Properties                                     | Required Token                                                 |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------- | -------------------------------------------------------------- |
@@ -76,5 +76,5 @@ Notes:
 
 - Keep geometry stable while transitions run; animate only visual properties.
 - Prefer **`var(--motion-duration-fast) var(--motion-ease-out)`** for opacity/transform fades (**Phase 7 Batch 37** removed **`--transition-fade-in`** / **`--transition-fade-out`** from the bridge; same timing as the former aliases).
-- **Phase 7 Batch 41:** **`--interactive-transition-standard`** was removed with the **historical** legacy bridge file (**`_legacy-design-tokens.scss`** — **absent** from **`apps/web`** after Batch **50**; inventory: **`docs/design/token-layers.md`**) — multi-property background/border/color cross-fades use **literal lists** at callsites (for example **`120ms ease-out`** per property) or **`var(--motion-duration-fast) var(--motion-ease-out)`** where a single shorthand matches; **`--motion-*`** ownership is summarized in **`docs/design/tokens.md`** / **`token-layers.md`** (see also **`panel-trigger.component.scss`**).
-- For panel/container-level open-close choreography, use **`200ms cubic-bezier(0.4, 0, 0.2, 1)`** (canonical panel timing in **`docs/design/tokens.md`** §3.6; **Batch 36** removed **`--motion-duration-base`** / **`--motion-ease-standard`**) or equivalent Tailwind duration/easing utilities instead of a dedicated CSS alias.
+- **Phase 7 Batch 41:** **`--interactive-transition-standard`** was removed with the legacy bridge. Multi-property fades use `var(--motion-duration-fast)` or `var(--motion-duration-standard)` with `var(--motion-ease-out)`. Do not write `120ms`.
+- For panel open-close, use a shipped duration token when one matches. `200ms` has no token; leave that literal where a callsite already uses it.

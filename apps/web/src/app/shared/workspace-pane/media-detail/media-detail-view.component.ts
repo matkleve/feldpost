@@ -221,6 +221,8 @@ export class MediaDetailViewComponent implements OnDestroy {
 
   readonly mediaId = input<string | null>(null);
   readonly paneWidth = input<number | null>(null);
+  /** Grid shell panel column — use flex column layout, not mobile full-viewport overlay. */
+  readonly shellPanelEmbedded = input(false);
   readonly addressSearchRequestImageId = input<string | null>(null);
   readonly addressSearchRequestId = input(0);
   readonly closed = output<void>();
@@ -243,7 +245,11 @@ export class MediaDetailViewComponent implements OnDestroy {
   readonly paneLayout = computed((): MediaDetailPaneLayout => {
     const explicit = this.paneWidth();
     const width = explicit != null && explicit > 0 ? explicit : this.measuredPaneWidth();
-    return resolvePaneLayout(width > 0 ? width : 720);
+    const resolved = resolvePaneLayout(width > 0 ? width : 720);
+    if (this.shellPanelEmbedded() && resolved === 'narrow') {
+      return 'medium';
+    }
+    return resolved;
   });
 
   readonly viewState = computed((): MediaDetailViewState => {

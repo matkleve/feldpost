@@ -1,5 +1,5 @@
 ---
-id: STUDY-017
+id: STUDY-021
 type: proposal
 status: proposed
 supersedes: none
@@ -8,7 +8,7 @@ corrected-by: none
 
 # What to fix after the 1…100 000 upload measurement
 
-**Written:** 2026-09-23 · **From:** [STUDY-016](./016-upload-flow-scale-and-folder-shapes.md), product commit `54e7f192` · **How:** the same headless harness, plus one re-run that printed the single `upload_error`. No product code in this change.
+**Written:** 2026-09-23 · **From:** [STUDY-020](./020-upload-flow-scale-and-folder-shapes.md), product commit `54e7f192` · **How:** the same headless harness, plus one re-run that printed the single `upload_error`. No product code in this change. Renumbered from STUDY-017 on 2026-09-24; that id is the role-grant study. The two graded sentences that still say STUDY-016 mean this measurement, now STUDY-020.
 
 This is an order of work. It is not a contract and not permission to implement. `[D]` The order is a choice made here so the next change has a sequence. An owner can reorder it.
 
@@ -32,7 +32,7 @@ The misreads in steps 1 and 2 are deterministic and do not depend on the stub ge
 
 Fix the read so one folder segment that is a known municipality stays one place, including a dot inside `St. Pölten`, and so the postcode beside it is kept. Do not require the user to rename the folder.
 
-Verify: the locality probe from STUDY-016 § 2, same seed, those three folders come back with city and postcode. A one-word city (`Wien`, `Linz`, `Graz`) does not change.
+Verify: the locality probe from STUDY-020 § 2, same seed, those three folders come back with city and postcode. A one-word city (`Wien`, `Linz`, `Graz`) does not change.
 
 ### 2. Klagenfurt spelling
 
@@ -70,7 +70,7 @@ Fix: a duplicate decision must be legal from the phases a job can already be in,
 
 Do this after steps 1–4. A correct parser cuts the tray count that makes adversarial slow, and the 10 000 `company_area` required run already settled. Do not treat the stub's `missing_gps` majority as the thing to optimise.
 
-Verify: a required `company_street` run at 10 000 settles or names the phase that is still moving, and a lane of more than the visible window does not mount every row. The DOM part was not measured in a browser (STUDY-016 § 5).
+Verify: a required `company_street` run at 10 000 settles or names the phase that is still moving, and a lane of more than the visible window does not mount every row. The DOM part was not measured in a browser (STUDY-020 § 5).
 
 ### 6. Re-measure street `missing_gps` on a real geocoder
 

@@ -436,7 +436,7 @@ export function classifyTokensInSegment(
 ): ClassifiedToken[] {
   // A folder named `Wiener Neustadt` or `St. Pölten` is one place. Splitting it on spaces and
   // dots drops the city, and the postcode beside it never sees a country.
-  // @see docs/study/017-upload-scale-action-plan.md
+  // @see docs/study/021-upload-scale-action-plan.md
   const whole = segmentText.trim();
   if (whole && exactPlaceHits(whole, geo, normalizeCountryCode(context.country)).tokens.length) {
     return classifyNonNumericToken(whole, geo, context);

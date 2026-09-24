@@ -1,0 +1,66 @@
+// Backgroundless rail. Labels paint above the page. The last group takes the leftover.
+// @see docs/specs/ui/shell/shell-control-area.md
+:host {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: var(--spacing-3);
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  position: relative;
+  z-index: 200;
+  background: transparent;
+}
+
+// Left rail: account and settings take the leftover at the bottom.
+// @see docs/specs/ui/shell/shell-control-area.md
+:host[data-side='left'] > app-shell-control-container:last-of-type {
+  margin-top: auto;
+}
+
+// Right rail: the history container and the help container sit at the bottom.
+// @see docs/specs/ui/shell/shell-control-area.md
+:host[data-side='right'] > app-shell-control-container:nth-last-of-type(2) {
+  margin-top: auto;
+}
+
+@layer components {
+  // Logo control. Opens the overview. Same hit target as one rail option.
+  // @see docs/specs/page/widget-overview.md
+  .shell-control-area__logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--shell-control-option-size);
+    height: var(--shell-control-option-size);
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-full);
+    background: transparent;
+    color: var(--menu-item-text);
+    cursor: pointer;
+  }
+
+  // Stamp mark sized to match default Material Icons in rail options (~24px).
+  // @see docs/specs/ui/shell/shell-control-option.md
+  .shell-control-area__logo-mark {
+    display: block;
+    width: var(--spacing-5);
+    height: var(--spacing-5);
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+}
+
+@layer states {
+  // Same hover/active circle as app-shell-control-option.
+  // @see docs/specs/ui/shell/shell-control-option.md
+  .shell-control-area__logo:hover,
+  .shell-control-area__logo:focus-visible,
+  .shell-control-area__logo[aria-current='page'] {
+    color: var(--brand-gold);
+    background: var(--action-hover);
+  }
+}

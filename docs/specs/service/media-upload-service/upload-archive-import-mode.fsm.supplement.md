@@ -27,7 +27,7 @@ to `missing_data` with `issueKind: 'address_deferred'` instead.
 | Duplicate by content hash | `→ skipped` | identical |
 | Upload fails | `→ error` | identical |
 
-`missing_data` is already terminal and already the Issues lane
+`missing_data` is already terminal and already the Clarifications lane
 ([phase FSM supplement](./upload-manager.phase-fsm.supplement.md)), so this adds no new phase and no
 new terminal — which is the point. The archive mode is a **narrowing** of an existing machine, not a
 second machine.

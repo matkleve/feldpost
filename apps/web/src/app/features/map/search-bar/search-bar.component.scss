@@ -35,7 +35,9 @@
   box-sizing: border-box;
   min-height: var(--search-bar-chrome-size);
   width: 100%;
-  border-radius: var(--radius-md);
+  // Pill at rest (half of 2.75rem). The value stays fixed when results open, so a tall panel does not turn into a capsule.
+  // @see docs/specs/ui/search-bar/search-bar.md
+  border-radius: calc(var(--search-bar-chrome-size) / 2);
   @include frosted-chrome.panel;
   overflow: hidden;
   contain: layout;
@@ -45,7 +47,7 @@
     box-shadow var(--motion-duration-fast) var(--motion-ease-out);
 
   &:hover:not(:focus-within):not(.search-bar--open) {
-    background: color-mix(in srgb, var(--brand-gold) 10%, var(--chrome-surface));
+    background: color-mix(in srgb, var(--brand-gold) 10%, var(--map-chrome-surface));
     border-color: color-mix(in srgb, var(--brand-gold) 42%, color-mix(in srgb, var(--border) 50%, transparent));
   }
 

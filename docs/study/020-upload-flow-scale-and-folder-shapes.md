@@ -1,5 +1,5 @@
 ---
-id: STUDY-016
+id: STUDY-020
 type: investigation
 status: active
 supersedes: none
@@ -156,7 +156,7 @@ Nothing here is a proposal to change chunk size, concurrency, or the tokenizer. 
 
 ## Update 2026-09-23 — the one `upload_error`
 
-The paragraph in § 3 that says the cause was not recovered still stands as the state of the first run (`--detail=0`). This section adds the re-run. It does not delete that sentence. The ordered work is [STUDY-017](./017-upload-scale-action-plan.md).
+The paragraph in § 3 that says the cause was not recovered still stands as the state of the first run (`--detail=0`). This section adds the re-run. It does not delete that sentence. The ordered work is [STUDY-021](./021-upload-scale-action-plan.md).
 
 `[A]` Same harness, `--count=1000 --profile=company_street --answer-trays --detail=0`, seed 7, `UPLOAD_TRACE_COMPARE_PROFILES=0`, Vitest filter `location required`. Exit 0 in 6.4 s. Phases matched the first run: `awaiting_disambiguation=60 complete=279 error=1 missing_data=653 skipped=7`.
 

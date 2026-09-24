@@ -14,7 +14,7 @@ corrected-by: none
 
 **Status `proposed`:** normative specs and code must not ship until [#257](https://github.com/matkleve/feldpost/issues/257) planning acceptance criteria are checked and this study is `accepted`.
 
-> **Read § 13 and § 14 before acting on anything above them.** Two updates dated 2026-09-22 were appended: **§ 13** measures the plan against the live code and the repository's gates, and supersedes two build-order claims; **§ 14** records the owner's decisions, which reorganise the plan — the left rail drives the **canvas**, the right rail drives the **panel column**, and Settings and Account are canvas content rather than panels, superseding § 5.3's panel roster. Nothing above has been edited. **§ 15** then sets the delivery plan for the owner's "this week or next" goal, specifies the feature-flag module, and corrects § 13.1's own advice — the rail-width property cannot be deleted in the grid-scaffold phase, because the settings overlay still reads it. All three sections name what they supersede, per [`STUDY-FORMAT.md`](./STUDY-FORMAT.md) § Correcting a study; under its § Trust order the owner's answers in § 14 outrank everything else in this file.
+> **Read § 13 and § 14 before acting on anything above them.** Two updates dated 2026-09-22 were appended: **§ 13** measures the plan against the live code and the repository's gates, and supersedes two build-order claims; **§ 14** records the owner's decisions, which reorganise the plan — the left rail drives the **canvas**, the right rail drives the **panel column**, and Settings and Account are canvas content rather than panels, superseding § 5.3's panel roster. Nothing above has been edited. **§ 15** then sets the delivery plan for the owner's "this week or next" goal, specifies the feature-flag module, and corrects § 13.1's own advice — the rail-width property cannot be deleted in the grid-scaffold phase, because the settings overlay still reads it. **§ 16** (2026-09-23) adds that canvas page content is left-aligned. **§ 17** (2026-09-23) measures why panel boxes show no shadow: the shared `shell-box` is already on them; an ancestor `overflow: hidden` clips it. All of these sections name what they supersede, per [`STUDY-FORMAT.md`](./STUDY-FORMAT.md) § Correcting a study; under its § Trust order the owner's answers in § 14 and § 16 outrank everything else in this file.
 
 ---
 
@@ -42,7 +42,7 @@ Today's authenticated shell does not match the owner's target `[D]`:
 | Settings overlay | Settings panel in panel column |
 | Account inside settings | Profile panel separate |
 | Upload shell top-right | Upload panel in panel column |
-| Resizable workspace pane on the right | TBD — Q2 |
+| Resizable workspace pane on the right | `app-shell-column-divider` + **stack divider** between top/bottom panel groups — [shell-panel-resize.md](../specs/ui/shell/shell-panel-resize.md) (**7a–7b implemented**; step 8 LIVE CHECK before flag default) |
 | Search top-center on map | Search + filter top-left (map chrome) |
 | Theme in nav | Theme bottom-right (map chrome) |
 
@@ -85,6 +85,10 @@ Rail containers, side panels, and matching floating chrome must share **radius, 
 **Proposed:** add `@mixin shell-box` in `_frosted-chrome.scss` (or adjacent) wrapping `frosted-chrome.panel` + `border-radius: var(--container-radius-panel)`. Optional `shell-box--compact` for small rail containers using `--container-radius-control`.
 
 **Prefer mixin + tokens over a wrapper component** unless DOM consistency is required `[D]`. Do not invent new `--shell-*` globals without spec row `[A]` (`agent-css-variable-contract.md`).
+
+### 2.2.1 · Surface elevation ladder (desk behind rails) `[D]`
+
+Light and sandstone themes need a **darker desk** in grid gutters so frosted `shell-box` surfaces (rails containers, canvas, panels) read as elevated steps — not one flat cream field. Spec: [`shell-surface-elevation.md`](../specs/ui/shell/shell-surface-elevation.md). Tokens: `--layout-desk-background` on `app-grid-shell` only; rails stay transparent. **Shipped** — build step [workspace-pane-retirement.md](../specs/ui/shell/workspace-pane-retirement.md) §7d.
 
 ### 2.3 Primitive-first build order `[D]`
 
@@ -659,6 +663,8 @@ So the eight section ids, the subsection deep-links and the command-palette entr
 
 This does not make it trivial, and it does not remove the Sensitive classification — an FSM table and adversarial review are still owed. It does mean it is a plausible third-week item rather than a multi-week unknown `[C]`. It also corrects my own earlier estimate, which was made without reading `settings-url.helpers.ts`.
 
+**2026-09-23:** the renderer now mounts inside `app-shell-main-canvas` and fills that box. URL sync stays on `AppComponent`. The route underneath stays mounted and is `inert` while settings is open. The FSM table is still owed.
+
 ### 15.5 · The schedule
 
 One PR per row. Each merges before the next starts, so any row can be the stopping point without leaving a half-migrated shell `[D]`.
@@ -685,3 +691,60 @@ Stated now so it is recognisable early rather than on the last day `[C]`:
 - **CI is not currently a signal.** Every workflow on `main` — `verify`, `i18n Check`, `Design System Check`, `Build & Test`, `Spec Lint` — has completed in roughly four seconds with `conclusion: failure` on each of the last four commits, and the job logs are not retrievable `[A]`. The failures predate this workstream and are not caused by any content change `[C]`. Until that is fixed, every row above is gated by whatever a developer runs locally, which is weaker than it looks and is worth fixing before row 4 rather than after.
 - **Spec coverage is discovered late.** If row 1's specs miss a selector that rows 5–6 introduce, those rows are blocked at the gate, not at review (§ 13.5). Name the components in row 1 even if their shape is still uncertain.
 - **The `+` widget page pulls #258 forward.** Row 5 renders the rail from a list. If that list has to be a real installed-widget query rather than a static array, row 5 absorbs part of #258. Keep it a static array for now `[D]`.
+
+## 16 · Update 2026-09-23 — canvas pages are left-aligned
+
+**Owner decision** `[D]`: content of a left-rail page inside `app-shell-main-canvas` starts at the **left** content edge of that box. Title, toolbar, and grids do not sit in a centered column.
+
+Seen on `/media` with `?ff=shellGridLayout` (2026-09-23): the Media heading, the toolbar, and the tile grid read as a block floating in the canvas instead of lining up with its left inset `[D]`.
+
+| Surface | Alignment |
+| --- | --- |
+| Canvas pages (Media, Projects, and later Settings / Account) | Left. Same inset on every page. Extra width stays **to the right** of the content. |
+| Map in the canvas | Unchanged. The map fills the box. This rule is for page documents, not the map. |
+
+Built in `app-page-grid` only while that grid is inside `app-shell-main-canvas`: the nav clearance (`4.5rem`) becomes `var(--spacing-6)`, and the leading `1fr` gutter collapses so unused width stays on the right. The map does not use this grid. Contract: [shell-main-canvas.md](../specs/ui/shell/shell-main-canvas.md). The shared bottom edge of canvas and panel column is [grid-shell.md](../specs/ui/shell/grid-shell.md) and [shell-panel-column.md](../specs/ui/shell/shell-panel-column.md). Build order: [workspace-pane-retirement.md](../specs/ui/shell/workspace-pane-retirement.md) step 8c, before step 9.
+
+**2026-09-23, owner:** `/media` no longer keeps the unused width on the right. With no left rail, that page is one full-width track. `/projects` keeps the list on the left and the dashboard beside it.
+
+## 17 · Update 2026-09-23 — panel shadow is clipped, the box already exists
+
+**Measured:** 2026-09-23, branch `cursor/grid-shell-preview-c5a8`, by reading source. Not a new component.
+
+The owner is right `[D]`: the flat panel is `overflow: hidden` on an ancestor, not a missing box.
+
+### What already is the shared box
+
+One mixin, already used. Do not add a second layout component `[A]`.
+
+| Piece | Where | What it sets |
+| --- | --- | --- |
+| `@mixin shell-box` | `apps/web/src/styles/_frosted-chrome.scss` | `--chrome-surface`, `border-radius: var(--container-radius-panel)`, `box-shadow: var(--layout-box-shadow)` |
+| Radius token | `apps/web/src/styles/_typography-baseline.scss` | `--container-radius-panel: var(--radius-lg)` |
+| Shadow token | `apps/web/src/styles.scss` | `--layout-box-shadow` — short, stronger than `--shadow-md` |
+| Contract | `docs/specs/ui/shell/shell-surface-elevation.md` | L2 boxes must not set their own `box-shadow` |
+
+Consumers of that mixin `[A]`:
+
+| Element | File | Ancestor clips the shadow? |
+| --- | --- | --- |
+| Rail container | `shell-control-container.component.scss` | No. `app-shell-control-area` is transparent and does not set `overflow`. The shadow paints into the desk gutter. |
+| Canvas | `shell-main-canvas.component.scss` | No. `overflow: hidden` is **on the box itself**. An element's own overflow does not clip its own `box-shadow`. The grid host does not clip either. |
+| Panel surface | `shell-panel-surface.component.scss` | **Yes.** The mixin is on the surface, and the surface also has `overflow: hidden` (that part is fine). The clip is the parent. |
+| Hover label | `shell-control-option.component.scss` | Not a layout box. Same mixin, ignore for this bug. |
+
+### Why the panel is flat
+
+`app-shell-panel-column` and `.shell-panel-column__top` both set `overflow: hidden` (`shell-panel-column.component.scss`) `[A]`. That was added so a filled top stack cannot paint below the canvas. The surface fills the top stack, so its shadow — which paints **outside** the surface — falls outside the top stack and is clipped on every side `[C]`. A short Selected-items card loses the shadow too, because the stack is only as tall as the card.
+
+The canvas keeps its shadow because nothing above it clips `[A]`. Same mixin, different ancestor.
+
+### What to update — not what to build
+
+Keep `@mixin shell-box`. Keep the radius token. Keep `--layout-box-shadow` `[D]`.
+
+Move the clip off the ancestors `[D]`. The surface already clips its own content. The column and the top stack should stay `overflow: visible` so the shadow can fall into the desk gutter, the same place the canvas shadow falls. The bottom edge stays a **height** constraint (`max-height: 100%`, flex shrink), not a clip. If the height constraint slips, the panel hangs under the map again — that is the risk of taking the clip off `[C]`.
+
+Do not inset the column with padding to "make room" for the shadow. That would pull the panel border off the canvas border `[D]`.
+
+**Applied 2026-09-23** `[A]`: `overflow: visible` on `app-shell-panel-column`, `.shell-panel-column__top`, and both split stacks. `max-height: 100%` stays. The surface still clips its own content.

@@ -1,0 +1,16 @@
+@if (!hideHeader()) {
+  <header class="shell-panel-surface__header">
+    <h2>{{ title() }}</h2>
+    <button
+      type="button"
+      class="shell-panel-surface__collapse"
+      (click)="collapse()"
+      [attr.aria-label]="t('shell.panel.collapse', 'Collapse panel')"
+    >
+      <span class="material-symbols-outlined" aria-hidden="true">right_panel_close</span>
+    </button>
+  </header>
+}
+<div class="shell-panel-surface__body" [class.shell-panel-surface__body--detail]="hideHeader()">
+  <ng-content />
+</div>

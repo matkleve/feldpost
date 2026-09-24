@@ -30,7 +30,7 @@ English is the source text. Register the keys in `docs/i18n/translation-workbenc
 | `upload.folder.shape.tip.copies` | A Windows copy suffix such as `(1)` on a folder name is ignored. |
 | `upload.folder.shape.tip.spelling` | Use one spelling for a city. `Klagenfurt` and `Klagenfurt am Wörthersee` are the same place. |
 
-The intro says "most reliably". It must not say every line already resolves with no question. [STUDY-016](../../../study/016-upload-flow-scale-and-folder-shapes.md) measured that `Wiener Neustadt`, `St. Pölten`, and `Krems an der Donau` are split by the tokenizer, and that `Klagenfurt` plus postcode `9020` opens one city question. Those two lines are the shape to aim for. They become true after [STUDY-017](../../../study/017-upload-scale-action-plan.md) steps 1 and 2. Until then the hover may still show them, as a recommendation.
+The intro says "most reliably". It must not say every line already resolves with no question. [STUDY-020](../../../study/020-upload-flow-scale-and-folder-shapes.md) measured that `Wiener Neustadt`, `St. Pölten`, and `Krems an der Donau` are split by the tokenizer, and that `Klagenfurt` plus postcode `9020` opens one city question. Those two lines are the shape to aim for. [STUDY-021](../../../study/021-upload-scale-action-plan.md) steps 1 and 2 made them true on 2026-09-24. The hover still shows them as a recommendation, not as a gate.
 
 `stripWindowsCopySuffix` already removes a trailing `(N)` (`path-token-classifier.ts`). The copies line matches current behaviour.
 

@@ -30,7 +30,7 @@ why this contract closes the race rather than trying to cut in clever places.
 
 | # | Guarantee | Why it matters |
 | --- | --- | --- |
-| **G1** | A job becomes drainable only after **its own chunk** has been classified and its group is in the batch cache. | A job that drains before its group exists resolves against nothing and lands in Issues. |
+| **G1** | A job becomes drainable only after **its own chunk** has been classified and its group is in the batch cache. | A job that drains before its group exists resolves against nothing and lands in Clarifications. |
 | **G2** | Classification yields to the event loop between chunks. | This is the responsiveness the phase exists for. |
 | **G3** | Chunking never changes the outcome: same groups, same lanes, same tray count as an unchunked run. | A performance change that moves a file to a different lane is a bug, not a speed-up. |
 | **G4** | No tray is **presented** to the user until the whole batch is classified. | Closes the race in § 2; makes chunk size irrelevant to correctness. |

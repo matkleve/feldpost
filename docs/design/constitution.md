@@ -23,7 +23,7 @@ control lives**, because the two surfaces are used by different hands.
   `3rem × 3rem (48×48px)`, desktop at least `2.75rem × 2.75rem (44×44px)`. This
   is the rule the product exists for and it is not negotiable there. A visually
   smaller control is fine only when padding or a transparent hit zone brings the
-  real hit area up to that size — `size="icon"` is 40px, so it does **not** reach
+  real hit area up to that size — `size="icon"` is a 40px circle, so it does **not** reach
   it on its own.
 - **Dense desktop chrome.** Rail rows and their actions, toolbar triggers,
   workspace-pane controls: at least `1.5rem × 1.5rem (24×24px)`, **and** no other
@@ -52,7 +52,7 @@ control lives**, because the two surfaces are used by different hands.
 
 - Use warm neutrals, not sterile grays or cold blue-blacks.
 - The product's own data layer must always be more visually prominent than the base map.
-- `--color-clay` is the reserved warm accent for meaningful emphasis, not decoration.
+- `--brand-gold` is the reserved warm accent for meaningful emphasis, not decoration.
 
 ## Buttons
 

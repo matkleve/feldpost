@@ -10,6 +10,8 @@ Folder-specific rules:
 
 **App nav:** [nav/nav-system.md](nav/nav-system.md)
 
+**Grid shell:** [shell/README.md](shell/README.md)
+
 **Workspace Pane (split host, `photoPanelOpen` interim):** [workspace/workspace-pane.md](workspace/workspace-pane.md) — [layout priorities backlog](../../backlog/workspace-pane-layout-and-spec-priorities.md).
 
 **Upload panel (UI over `core/upload`):** [upload/upload-panel-system.md](upload/upload-panel-system.md) — component detail under [../component/upload/](../component/upload/).

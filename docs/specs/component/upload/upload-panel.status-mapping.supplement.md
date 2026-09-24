@@ -4,7 +4,7 @@
 
 ## What It Is
 
-The **phase state diagram** (queued through complete/error/missing_data/skipped) and the **lane-bucketing rule** (issue kind first, then phase family) that Upload Panel uses to route a job into the Uploading / Uploaded / Issues lane. Split from `upload-panel.md` for size; the row-level status text strings live in [lane & row actions § Status Text Contract](upload-panel.lane-and-row-actions.md#status-text-contract).
+The **phase state diagram** (queued through complete/error/missing_data/skipped) and the **lane-bucketing rule** (issue kind first, then phase family) that Upload Panel uses to route a job into the Uploading / Uploaded / Clarifications lane. Split from `upload-panel.md` for size; the row-level status text strings live in [lane & row actions § Status Text Contract](upload-panel.lane-and-row-actions.md#status-text-contract).
 
 ## What It Looks Like
 
@@ -70,7 +70,7 @@ stateDiagram-v2
 ```mermaid
 flowchart LR
   A[Job phase] --> B{Issue kind?}
-  B -->|duplicate_photo| C[Issues lane]
+  B -->|duplicate_photo| C[Clarifications lane]
   B -->|missing_gps| C
   B -->|document_unresolved| C
   B -->|conflict_review| C

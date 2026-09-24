@@ -4,13 +4,13 @@
  * @see docs/specs/ui/upload/upload-panel-system.md — panel-owned presentation state vs manager-owned job signals.
  *
  * Transforms UploadManagerService.jobs into panel view model:
- *  - Buckets jobs by lane (uploading | uploaded | issues)
+ *  - Buckets jobs by lane (uploading | uploaded | clarifications)
  *  - Computes lane counts and effective lane (current switch selection)
  *  - Filters jobs for display (max 5 running, scrollable; all uploaded)
  *
  * Signals:
  *  - laneBuckets: Record<UploadLane, UploadJob[]> — bucketized jobs
- *  - laneCounts: {uploading, uploaded, issues} — badge counts
+ *  - laneCounts: {uploading, uploaded, clarifications} — badge counts
  *  - laneJobs: UploadJob[] — filtered for current lane (scrollable, limited)
  *  - effectiveLane: UploadLane — currently selected lane from switch
  */
@@ -33,7 +33,7 @@ export class UploadPanelStateService {
     const buckets: Record<UploadLane, UploadJob[]> = {
       uploading: [],
       uploaded: [],
-      issues: [],
+      clarifications: [],
     };
     for (const job of this.uploadManager.jobs()) {
       buckets[this.getLaneForJob(job)].push(job);
@@ -44,14 +44,14 @@ export class UploadPanelStateService {
   readonly laneCounts = computed(() => {
     let uploading = 0,
       uploaded = 0,
-      issues = 0;
+      clarifications = 0;
     for (const job of this.uploadManager.jobs()) {
       const lane = this.getLaneForJob(job);
       if (lane === 'uploaded') uploaded++;
-      else if (lane === 'issues') issues++;
+      else if (lane === 'clarifications') clarifications++;
       else uploading++;
     }
-    return { uploading, uploaded, issues };
+    return { uploading, uploaded, clarifications };
   });
 
   readonly laneJobs = computed(() => this.laneBuckets()['uploading']);

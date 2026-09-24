@@ -26,6 +26,8 @@ import { AuthService } from '../../../../core/auth/auth.service';
 import { SupabaseService } from '../../../../core/supabase/supabase.service';
 import { GeocodingService } from '../../../../core/geocoding/geocoding.service';
 import { UploadShellUiService } from '../../../upload/upload-shell/upload-shell-ui.service';
+import { SelectedItemsPanelCoordinatorService } from '../../../../core/selected-items-panel/selected-items-panel-coordinator.service';
+import { of } from 'rxjs';
 
 export function createMapContainerElementStub(): {
   classList: { add: ReturnType<typeof vi.fn>; remove: ReturnType<typeof vi.fn> };
@@ -100,6 +102,32 @@ function createWorkspacePaneShellHostStub(state: MapShellState): WorkspacePaneSh
     onWorkspaceItemHoverStartedFromPane(_event: ThumbnailCardHoverEvent): void {},
     onWorkspaceItemHoverEndedFromPane(_mediaId: string): void {},
   };
+}
+
+function createSelectedItemsPanelCoordinatorStub(
+  state: MapShellState,
+): SelectedItemsPanelCoordinatorService {
+  return {
+    isOpen: () => state.photoPanelOpen(),
+    open: () => {
+      if (!state.photoPanelOpen()) {
+        state.setWorkspacePaneWidth(state.getWorkspacePaneOpeningWidth());
+      }
+      state.setPhotoPanelOpen(true);
+    },
+    openUploadSurface: () => {
+      if (!state.photoPanelOpen()) {
+        state.setWorkspacePaneWidth(state.getWorkspacePaneOpeningWidth());
+      }
+      state.setPhotoPanelOpen(true);
+    },
+    close: () => state.setPhotoPanelOpen(false),
+    onDownloadPanelUserDismissed: () => {},
+    resetUserDismissedDownloadPanel: () => {},
+    getMapPaneOffsetPx: () =>
+      state.photoPanelOpen() ? state.workspacePaneWidth() / 2 : 0,
+    isSelectionPanelOpenForMap: () => state.photoPanelOpen(),
+  } as SelectedItemsPanelCoordinatorService;
 }
 
 function createSupabaseQueryMock() {
@@ -186,10 +214,17 @@ export function buildTestBed() {
         },
       },
       {
+        provide: SelectedItemsPanelCoordinatorService,
+        useFactory: (state: MapShellState) => createSelectedItemsPanelCoordinatorStub(state),
+        deps: [MapShellState],
+      },
+      {
         provide: Router,
         useValue: {
           navigate: vi.fn(),
           getCurrentNavigation: vi.fn().mockReturnValue(null),
+          url: '/map',
+          events: of(),
         },
       },
       {

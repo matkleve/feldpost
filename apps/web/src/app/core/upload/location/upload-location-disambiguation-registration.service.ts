@@ -117,8 +117,8 @@ export class UploadLocationDisambiguationRegistrationService {
   }
 
   /**
-   * Park jobs in the Issues lane instead of a tray. `missing_data` is already terminal and already
-   * the Issues lane, so this adds no phase and no new terminal — the archive mode narrows the
+   * Park jobs in the Clarifications lane instead of a tray. `missing_data` is already terminal and already
+   * the Clarifications lane, so this adds no phase and no new terminal — the archive mode narrows the
    * existing machine rather than introducing a second one.
    */
   private routeJobsToDeferredIssues(jobIds: readonly string[]): void {

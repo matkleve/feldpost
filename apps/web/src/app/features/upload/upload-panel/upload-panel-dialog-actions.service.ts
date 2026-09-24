@@ -46,7 +46,7 @@ export interface UploadPanelDialogActionsRegisterOptions {
   imageUploaded: (e: MapMarkerImageUploadedEvent) => void;
   locationPreviewRequested: (e: UploadLocationPreviewEvent) => void;
   locationPreviewCleared: () => void;
-  setLane: (lane: 'uploading' | 'uploaded' | 'issues') => void;
+  setLane: (lane: 'uploading' | 'uploaded' | 'clarifications') => void;
   dismissFile: (jobId: string) => void;
   placeFile: (jobId: string, lat: number, lng: number) => void;
   openExistingDuplicateInMedia: (job: UploadJob) => Promise<void>;

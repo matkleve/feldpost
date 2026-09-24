@@ -18,7 +18,14 @@ export type UploadFileTypeChip = {
   descriptionFallback: string;
 };
 
-export const UPLOAD_LANES: ReadonlyArray<UploadLane> = ['uploading', 'uploaded', 'issues'];
+export const UPLOAD_LANES: ReadonlyArray<UploadLane> = ['uploading', 'clarifications', 'uploaded'];
+
+/**
+ * Panel width at which the grid-shell upload surface becomes two columns.
+ * Left: intake. Right: the three lanes in one horizontal row, and the selected lane under that row.
+ * The panel fills the shell column. Two columns start once that column is at least 42rem.
+ */
+export const UPLOAD_PANEL_WIDE_MIN_PX = 672;
 
 export const DEFAULT_FILE_TYPE_EXTENSIONS: ReadonlyArray<string> = [
   'jpg',

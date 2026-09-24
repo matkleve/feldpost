@@ -1,0 +1,22 @@
+@if (side() === 'left') {
+  <app-shell-control-container side="left" [options]="logoOptions">
+    <button
+      type="button"
+      class="shell-control-area__logo"
+      [attr.aria-current]="logoActive() ? 'page' : null"
+      [attr.aria-label]="t('widget.overview.title', 'Overview')"
+      (click)="openOverview()"
+    >
+      <img class="shell-control-area__logo-mark" src="/assets/logo.svg" alt="" />
+    </button>
+  </app-shell-control-container>
+}
+@for (group of groups(); track group.id) {
+  <app-shell-control-container
+    [options]="group.options"
+    [side]="side()"
+    [activeId]="activeId()"
+    [openIds]="openIds()"
+    (chosen)="onChosen($event)"
+  />
+}

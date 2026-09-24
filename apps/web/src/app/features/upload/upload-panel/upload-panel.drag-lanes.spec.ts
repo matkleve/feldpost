@@ -104,9 +104,9 @@ describe('UploadPanelComponent lanes', () => {
       ],
     });
 
-    component.laneHandlers.onLaneSwitchValueChange('issues');
+    component.laneHandlers.onLaneSwitchValueChange('clarifications');
 
-    expect(component.effectiveLane()).toBe('issues');
+    expect(component.effectiveLane()).toBe('clarifications');
   });
 
   it('counts missing_data jobs in issues lane', async () => {
@@ -117,7 +117,7 @@ describe('UploadPanelComponent lanes', () => {
       ],
     });
 
-    expect(component.laneCounts().issues).toBe(1);
+    expect(component.laneCounts().clarifications).toBe(1);
     expect(component.laneCounts().uploading).toBe(1);
   });
 
@@ -131,7 +131,7 @@ describe('UploadPanelComponent lanes', () => {
         }),
       ],
     });
-    component.laneHandlers.setSelectedLane('issues');
+    component.laneHandlers.setSelectedLane('clarifications');
 
     expect(component.visibleLaneJobs().length).toBe(1);
     expect(component.visibleLaneJobs()[0]?.phase).toBe('missing_data');

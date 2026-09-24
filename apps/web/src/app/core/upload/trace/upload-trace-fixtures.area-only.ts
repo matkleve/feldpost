@@ -2,7 +2,7 @@
  * Area-only scenarios: a folder names a place and nothing else.
  *
  * A correct result is a location at area precision — everything above it filled, no coordinates, and
- * no question. Today all three land in Issues.
+ * no question. Today all three land in Clarifications.
  * @see docs/study/005-upload-pipeline-trace-findings.md#f-19
  */
 

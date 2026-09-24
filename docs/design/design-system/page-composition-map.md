@@ -70,7 +70,7 @@ Composition:
 
 - `app-map-shell`
   - map zone
-    - `app-segmented-switch` (map style)
+    - map style switch (`.map-style-switch` on `app-map-shell`)
     - upload trigger/action button
     - `app-upload-panel`
     - `app-search-bar`

@@ -1,0 +1,76 @@
+@use '../../../styles/frosted-chrome';
+
+// Frosted panel box. Shrinks with its stack so a filled top ends on the canvas.
+// @see docs/specs/ui/shell/shell-panel-surface.md
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  max-height: 100%;
+  overflow: hidden;
+  @include frosted-chrome.shell-box;
+}
+
+// Sibling surfaces keep their content height. One surface must not take the whole stack.
+// @see docs/specs/ui/shell/shell-panel-surface.md
+:host-context(.shell-panel-column__top[data-multi]),
+:host-context(.shell-panel-column__bottom[data-multi]) {
+  flex: 0 0 auto;
+  min-height: auto;
+  max-height: none;
+}
+
+// Title row. Header padding is the inset; the collapse circle sits inside it.
+// @see docs/specs/ui/shell/shell-panel-surface.md
+.shell-panel-surface__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3);
+}
+
+// Collapse control — right_panel_close slides the panel column shut toward the right rail.
+// @see docs/specs/ui/shell/shell-panel-surface.md
+.shell-panel-surface__collapse {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--menu-item-text);
+  cursor: pointer;
+
+  .material-symbols-outlined {
+    font-size: var(--font-size-xl);
+    line-height: var(--line-height-solid);
+  }
+
+  &:hover,
+  &:focus-visible {
+    color: var(--brand-gold);
+    background: var(--action-hover);
+  }
+}
+
+// Projected feature body — flex column so grid/footer scroll inside, not clip horizontally.
+// @see docs/specs/ui/shell/shell-panel-surface.md
+.shell-panel-surface__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  padding: var(--spacing-3);
+
+  &--detail {
+    padding: 0;
+  }
+}

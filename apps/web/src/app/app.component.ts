@@ -1,9 +1,8 @@
 import type { OnInit } from '@angular/core';
-import { Component, computed, effect, inject } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, map, startWith } from 'rxjs/operators';
-import { SettingsOverlayComponent } from './features/settings-overlay/settings-overlay.component';
 import { ToastContainerComponent } from './shared/toast/toast-container.component';
 import { LocationResolverService } from './core/location-resolver/location-resolver.service';
 import { AuthService } from './core/auth/auth.service';
@@ -37,7 +36,7 @@ declare global {
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, SettingsOverlayComponent, ToastContainerComponent],
+  imports: [RouterOutlet, ToastContainerComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
@@ -58,9 +57,6 @@ export class AppComponent implements OnInit {
     ),
     { initialValue: this.router.url },
   );
-
-  readonly showNav = computed(() => !this.currentUrl().startsWith('/auth'));
-  readonly settingsOverlayOpen = this.settingsPaneService.open;
 
   constructor() {
     effect(() => {
@@ -86,10 +82,6 @@ export class AppComponent implements OnInit {
         void this.router.navigateByUrl(stripSettingsSuffix(url));
       }
     });
-  }
-
-  onSettingsOverlayOpenChange(open: boolean): void {
-    this.settingsPaneService.setOpen(open);
   }
 
   ngOnInit(): void {

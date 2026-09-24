@@ -10,7 +10,7 @@ Token borders and fills from tweakcn semantics (`--primary`, `--border`, `--mute
 
 | `variant` | Rest | Hover / focus | Selected / on (when applicable) |
 | --------- | ---- | ------------- | -------------------------------- |
-| `default` | Solid `--primary`, light foreground | Darker primary (`primary/90`) | — |
+| `default` | Solid `--primary`, light foreground | `--primary-hover` | — |
 | `destructive` | Solid destructive | Darker destructive | — |
 | `outline` | Muted text, border, background | **Gold** ink + gold wash | Selected ink at rest; **gold** on hover even when selected |
 | `ghost` | Muted text, transparent | Same as outline hover | Same as outline |
@@ -65,7 +65,7 @@ On map/upload **frosted** shells (`frosted-chrome.surface`), `variant="outline"`
 | `variant` | `'default' \| 'destructive' \| 'outline' \| 'secondary' \| 'ghost' \| 'link'` | `'default'` |
 | `size` | `'default' \| 'xs' \| 'sm' \| 'lg' \| 'icon' \| 'icon-sm' \| 'icon-xs' \| 'icon-md'` | `'default'` |
 
-Labeled heights: `xs` = h-8 (2rem, fits a `normal` rail row), `sm` = h-9, `default` = h-10, `lg` = h-11. Icon-only squares: `icon-xs` h-6, `icon-sm` h-8, `icon-md` h-9, `icon` h-10. Horizontal padding is locked to spacing-2 for every labeled size.
+Labeled heights: `xs` = h-8 (2rem, fits a `normal` rail row), `sm` = h-9, `default` = h-10, `lg` = h-11. `size="icon"` is a circle (`rounded-full`) at h-10 (2.5rem). Smaller icon sizes stay squares: `icon-xs` h-6, `icon-sm` h-8, `icon-md` h-9, all `rounded-md`. Horizontal padding is locked to spacing-2 for every labeled size. Dense detail-row actions may clamp the circle and set `radius-sm`.
 | `iconPlacement` | `'start' \| 'end'` | balanced (padding semantics) |
 
 ## File Map

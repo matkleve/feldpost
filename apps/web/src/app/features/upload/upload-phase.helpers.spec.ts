@@ -23,7 +23,7 @@ describe('upload-phase helpers with locationSourceUsed', () => {
     });
 
     expect(getIssueKind(job)).toBe('missing_gps');
-    expect(getLaneForJob(job)).toBe('issues');
+    expect(getLaneForJob(job)).toBe('clarifications');
   });
 
   it('uses explicit issueKind for issues lane independently from source marker', () => {
@@ -35,7 +35,7 @@ describe('upload-phase helpers with locationSourceUsed', () => {
     });
 
     expect(getIssueKind(job)).toBe('document_unresolved');
-    expect(getLaneForJob(job)).toBe('issues');
+    expect(getLaneForJob(job)).toBe('clarifications');
   });
 
   it('G4a: address_deferred issueKind routes to issues lane', () => {
@@ -46,7 +46,7 @@ describe('upload-phase helpers with locationSourceUsed', () => {
     });
 
     expect(getIssueKind(job)).toBe('address_deferred');
-    expect(getLaneForJob(job)).toBe('issues');
+    expect(getLaneForJob(job)).toBe('clarifications');
   });
 
   it('G4a: address_deferred is distinct from missing_gps', () => {
