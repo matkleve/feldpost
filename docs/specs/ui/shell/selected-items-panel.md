@@ -40,7 +40,7 @@ The right-rail **Share** surface in the panel column. Shows the current unified 
 | 4 | Clicks item in grid | Opens inline detail for that media id | `detailMediaId` set |
 | 5 | Closes detail | Returns to grid mode | `detailMediaId` cleared |
 | 6 | Uses toolbar filter/sort/group | Scoped grid updates; selection kept by id | existing workspace toolbar |
-| 7 | Clicks **Deselect all** | Clears the canvas selection | `WorkspaceSelectionService.clearSelection()` |
+| 7 | Clicks **Deselect all** | Clears the canvas selection | `UnifiedSelectionService.clearSelection()` |
 | 8 | Selection becomes empty | Deselect control hides; panel may stay open showing empty state | `selectedMediaIds` empty |
 | 9 | Opens share URL with media set | Resolves token; selection becomes resolved ids; panel opens | share restore flow |
 | 10 | Grid shell **off** | Legacy Workspace Pane still handles these flows | `shellGridLayout === false` |
@@ -78,7 +78,7 @@ app-shell-panel-surface [panelId=share]
 
 | Source | Contract | Operation |
 | --- | --- | --- |
-| `WorkspaceSelectionService` | `selectedMediaIds: ReadonlySet<string>` | Read/write selection |
+| `UnifiedSelectionService` | `selectedMediaIds: ReadonlySet<string>` | Read/write selection |
 | `WorkspacePaneObserverAdapter` | detail id, route context, active scope | Read (interim); migrate to selection module |
 | `MediaDownloadService` | delivery cache | Read (ZIP/export) |
 | `ShellLayoutService` | `share` open state | Read/write panel |
@@ -125,7 +125,7 @@ Reused unchanged (composition only):
 ```mermaid
 sequenceDiagram
   participant Map as map / media page
-  participant Sel as WorkspaceSelectionService
+  participant Sel as UnifiedSelectionService
   participant Shell as ShellLayoutService
   participant Panel as selected-items-panel
   Map->>Sel: toggle / set selection
@@ -165,9 +165,6 @@ sequenceDiagram
 | Projects tab | Canvas `/projects` — **not** in panel |
 | Independent workspace selection | **Removed** — [unified-selection.md](./unified-selection.md) |
 | Resizable width via divider | `app-shell-column-divider` + persisted `panelColumnWidthPx` ([shell-panel-resize.md](./shell-panel-resize.md)) |
-| Single scroll column | Stack divider in `app-shell-panel-column` when top + bottom stacks open ([shell-panel-resize.md](./shell-panel-resize.md)) |
-
-**Deletion gate (PR 7):** remove `app-workspace-pane`, `app-drag-divider`, and `photoPanelOpen` path only when grid flag is default-on and this panel passes LIVE CHECK.
 
 ## Acceptance Criteria
 
@@ -179,4 +176,4 @@ sequenceDiagram
 - [x] Detail view opens inside panel body, same as workspace pane today.
 - [x] With `shellGridLayout` on, marker/cluster open flows mount this panel instead of `app-workspace-pane`.
 - [x] With `shellGridLayout` off, legacy workspace pane unchanged.
-- [x] One `WorkspaceSelectionService` set: a second inject sees the same ids (`workspace-selection.service.spec.ts`).
+- [x] One selection set: `UnifiedSelectionService` delegates to `WorkspaceSelectionService`, and a second inject sees the same ids.

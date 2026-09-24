@@ -1,20 +1,15 @@
-import {
-  afterNextRender,
-  Component,
-  computed,
-  DestroyRef,
-  effect,
-  ElementRef,
-  inject,
-  input,
-  output,
-} from '@angular/core';
-import { WorkspaceToolbarComponent } from '../../../shared/workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component';
-import { WorkspaceSelectedItemsGridComponent } from '../../../shared/workspace-pane/selected-items/workspace-selected-items-grid.component';
-import { MediaDetailViewComponent } from '../../../shared/workspace-pane/media-detail/media-detail-view.component';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import { UnifiedSelectionService } from '../../../core/unified-selection/unified-selection.service';
 import type { UploadLocationMapPickRequest } from '../../../core/workspace-pane/workspace-pane-shell-events.types';
 import { ShellPanelColumnResizeService } from '../../../core/shell-layout/shell-panel-column-resize.service';
 import type { ThumbnailCardHoverEvent } from '../../../core/workspace-pane/workspace-pane-thumbnail-hover.types';
+import { ShareSheetComponent } from '../../../shared/share-sheet/share-sheet.component';
+import { HLM_BUTTON_IMPORTS } from '../../../shared/ui/button';
+import { WorkspaceBulkActionService } from '../../../shared/workspace-pane/workspace-bulk-action.service';
+import { WorkspaceToolbarComponent } from '../../../shared/workspace-pane/toolbar/workspace-toolbar/workspace-toolbar.component';
+import { WorkspaceSelectedItemsGridComponent } from '../../../shared/workspace-pane/selected-items/workspace-selected-items-grid.component';
+import { MediaDetailViewComponent } from '../../../shared/workspace-pane/media-detail/media-detail-view.component';
 
 /**
  * Selected items panel body — grid, toolbar, and inline detail for the grid shell download surface.
@@ -26,6 +21,8 @@ import type { ThumbnailCardHoverEvent } from '../../../core/workspace-pane/works
     WorkspaceToolbarComponent,
     WorkspaceSelectedItemsGridComponent,
     MediaDetailViewComponent,
+    ShareSheetComponent,
+    ...HLM_BUTTON_IMPORTS,
   ],
   templateUrl: './selected-items-panel.component.html',
   styleUrl: './selected-items-panel.component.scss',
@@ -35,6 +32,13 @@ import type { ThumbnailCardHoverEvent } from '../../../core/workspace-pane/works
 })
 export class SelectedItemsPanelComponent {
   private readonly panelColumnResize = inject(ShellPanelColumnResizeService);
+  private readonly selection = inject(UnifiedSelectionService);
+  private readonly bulk = inject(WorkspaceBulkActionService);
+  private readonly i18n = inject(I18nService);
+
+  readonly t = (key: string, fallback = ''): string => this.i18n.t(key, fallback);
+  readonly selectedCount = computed(() => this.selection.selectedMediaIds().size);
+  readonly shareOpen = signal(false);
 
   readonly detailMediaId = input<string | null>(null);
   readonly detailAddressSearchRequestMediaId = input<string | null>(null);
@@ -87,5 +91,39 @@ export class SelectedItemsPanelComponent {
 
   onUploadLocationMapPickRequested(event: UploadLocationMapPickRequest): void {
     this.uploadLocationMapPickRequested.emit(event);
+  }
+
+  share(): void {
+    if (this.useSystemShare()) {
+      void this.shareOnPhone();
+      return;
+    }
+    this.shareOpen.update((open) => !open);
+  }
+
+  openShare(): void {
+    if (this.useSystemShare()) {
+      void this.shareOnPhone();
+      return;
+    }
+    this.shareOpen.set(true);
+  }
+
+  private useSystemShare(): boolean {
+    return window.matchMedia('(max-width: 48rem)').matches;
+  }
+
+  private async shareOnPhone(): Promise<void> {
+    const url = await this.bulk.createShareLinkWithAudience(false, {
+      audience: 'public',
+      shareGrant: 'view',
+      recipientUserIds: [],
+    });
+    if (!url || typeof navigator.share !== 'function') return;
+    try {
+      await navigator.share({ url });
+    } catch {
+      // The person closed the system sheet.
+    }
   }
 }

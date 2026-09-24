@@ -17,6 +17,7 @@ describe('MapShellState photo panel routing', () => {
   });
 
   it('opens the workspace pane signal when the grid shell is off', () => {
+    localStorage.setItem(key, 'false');
     const state = TestBed.inject(MapShellState);
     const shell = TestBed.inject(ShellLayoutService);
     state.setPhotoPanelOpen(true);
