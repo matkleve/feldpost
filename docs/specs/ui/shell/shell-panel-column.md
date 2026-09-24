@@ -2,7 +2,7 @@
 
 ## What It Is
 
-The third grid track. It stacks panels opened from the **right rail**, aligned to match rail container groups: **top stack** (actions) and **bottom stack** (help). Each stack holds every open id in that group. It has no background of its own. Whether an id is open is owned by [shell-layout.md](../../service/shell-layout/shell-layout.md): opening one id does not close another.
+The third grid track. It stacks panels opened from the **right rail**, aligned to match rail container groups: **top stack** (actions) and **bottom stack** (help). Each stack holds every open id in that group. It has no background of its own. Whether an id is open is owned by [shell-layout.md](../../service/shell-layout/shell-layout.md): opening one id does not close another. User scenarios: [UC-022](../../../use-cases/UC-022-panel-stacks.md).
 
 ## What It Looks Like
 

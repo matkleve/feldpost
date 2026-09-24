@@ -18,7 +18,7 @@ Circle hit target, `2.75rem` by `2.75rem` (`--shell-control-option-size`), icon 
 | # | User Action | System Response | Triggers |
 | --- | --- | --- | --- |
 | 1 | Click a canvas option | Router navigates | `routerLink` |
-| 2 | Click a panel option | `setOpen(id, !open)` | `ShellLayoutService` |
+| 2 | Click a panel option | `setOpen(id, !open)` for **that id only**. Other open ids stay | `ShellLayoutService` |
 | 3 | Pointer rests 1s | Label becomes visible | hover |
 | 4 | Pointer leaves | Label hides | hover |
 | 5 | Click `+` | Nothing | inert |
