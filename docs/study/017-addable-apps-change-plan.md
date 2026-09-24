@@ -272,3 +272,11 @@ The owner said existing apps stay, and they come off only if the organization tu
 `handle_new_user()` refuses signup without an invite and copies one `organization_id` onto the profile (`20260616085726_invite_signups_display_name.sql` lines 51–77). `profiles.organization_id` is `not null` (`20260303000002_tables.sql`). RLS reads that one column through `user_org_id()`. There is no install table. Nav is the fixed array in `nav.component.ts` lines 123–129.
 
 A spec has to replace “one organization on the profile” before the signup and multi-organization flow can ship. This file is still `proposed`. It is not permission to migrate.
+
+## Update 2026-09-24 — fragility studies
+
+Three investigations measure the parts this plan can break. They do not add decisions. `[A]` that the files exist once this commit lands.
+
+- [STUDY-018](018-one-organization-is-the-rls-key.md) — `user_org_id()` returns one uuid from `profiles.organization_id`. Several organizations per email have to keep that helper scalar.
+- [STUDY-019](019-map-stays-mounted-when-hidden.md) — the layout hides the map host; it does not destroy it. Zoom from Media navigates to `/map`.
+- [STUDY-020](020-signup-is-an-invite-trigger.md) — `handle_new_user()` rejects registration without an invite and writes one organization onto the profile.
