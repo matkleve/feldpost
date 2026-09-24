@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { classifyTokensInSegment } from './path-token-classifier';
+import { classifyTokensInSegment, tokenizeSegment } from './path-token-classifier';
 
 const geo = {
   states: [
@@ -93,6 +93,23 @@ describe('classifyTokensInSegment — gazetteer matching', () => {
 
     expect(city?.value).toBe('Klagenfurt');
     expect(city?.confidence).toBe(1);
+  });
+
+  it('keeps a multi-word municipality as one city and derives the country', () => {
+    const places = {
+      states: [] as { n: string; a: string[] }[],
+      municipalities: [
+        { n: 'Wiener Neustadt', b: 'Niederösterreich', a: [] },
+        { n: 'St. Pölten', b: 'Niederösterreich', a: [] },
+        { n: 'Krems an der Donau', b: 'Niederösterreich', a: [] },
+      ],
+    };
+    for (const name of ['Wiener Neustadt', 'St. Pölten', 'Krems an der Donau']) {
+      const context = { country: null as string | null };
+      const tokens = classifyTokensInSegment(tokenizeSegment(name), places, context, name);
+      expect(tokens.find((t) => t.kind === 'city')?.value).toBe(name);
+      expect(context.country).toBe('AT');
+    }
   });
 
   it('matches an alias exactly', () => {

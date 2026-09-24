@@ -9,6 +9,9 @@ import {
 import type { UploadLaneCounts } from './upload-panel-helpers';
 import type { UploadLane } from '../upload-phase.helpers';
 
+/** Rows mounted in the lane. The overflow shows five; the rest stay off the DOM. */
+export const LANE_MOUNT_WINDOW = 12;
+
 export interface UploadPanelViewModelRegisterOptions {
   t: (key: string, fallback?: string) => string;
   laneCounts: () => UploadLaneCounts;
@@ -59,6 +62,17 @@ export class UploadPanelViewModelService {
       options.issueAttentionPulse(),
       options.effectiveLane(),
     );
+  });
+
+  readonly laneWindowStart = signal(0);
+
+  readonly mountedLaneJobs = computed<ReadonlyArray<UploadJob>>(() => {
+    const jobs = this.visibleLaneJobs();
+    const start = Math.min(
+      Math.max(0, this.laneWindowStart()),
+      Math.max(0, jobs.length - LANE_MOUNT_WINDOW),
+    );
+    return jobs.slice(start, start + LANE_MOUNT_WINDOW);
   });
 
   readonly visibleLaneJobs = computed<ReadonlyArray<UploadJob>>(() => {

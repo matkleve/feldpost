@@ -198,11 +198,25 @@
           ? t('upload.folder.unsupported.hint', 'Folder upload is not supported in this browser.')
           : null
       "
+      (mouseenter)="folderImportSupported && folderShapeTipOpen.set(true)"
+      (mouseleave)="folderShapeTipOpen.set(false)"
       (click)="inputHandlers.onSelectFolder($event, folderInput)"
     >
       <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true">folder</span>
       <span class="upload-panel__intake-btn-label">{{ uploadFolderLabelText() }}</span>
     </button>
+    @if (folderShapeTipOpen()) {
+      <div class="upload-panel__folder-shape-tip" role="tooltip">
+        <p>{{ t('upload.folder.shape.tip.intro', 'Any folder is fine. This shape is read most reliably:') }}</p>
+        <ul>
+          <li>{{ t('upload.folder.shape.tip.building', 'One folder per building: City / postcode / Street number / files.') }}</li>
+          <li>{{ t('upload.folder.shape.tip.city', 'The city is one folder, spelled as one place name. A name with more than one word stays one folder (Wiener Neustadt, St. Pölten, Krems an der Donau).') }}</li>
+          <li>{{ t('upload.folder.shape.tip.street', 'Street and house number share that building folder (Hauptstraße 5).') }}</li>
+          <li>{{ t('upload.folder.shape.tip.copies', 'A Windows copy suffix such as (1) on a folder name is ignored.') }}</li>
+          <li>{{ t('upload.folder.shape.tip.spelling', 'Use one spelling for a city. Klagenfurt and Klagenfurt am Wörthersee are the same place.') }}</li>
+        </ul>
+      </div>
+    }
 
     <!--
       Stable state: archive import — classify, ask nothing (Phase 5.1 / D-04).
@@ -378,9 +392,10 @@
     <div
       class="upload-panel__lane-overflow"
       [class.upload-panel__lane-overflow--scrollable]="visibleLaneJobs().length > 5"
+      (scroll)="onLaneScroll($event)"
     >
       <ul class="upload-panel__file-list" [attr.aria-label]="t('upload.panel.queue.aria', 'Upload queue')">
-        @for (job of visibleLaneJobs(); track trackByJobId($index, job)) {
+        @for (job of mountedLaneJobs(); track trackByJobId($index, job)) {
           <app-upload-panel-item
             [job]="job"
             [interactive]="rowHandlers.isRowInteractive(job)"

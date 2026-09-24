@@ -541,6 +541,12 @@ export class UploadLocationTrayFlowService {
       city: trimmed,
       score: h.importance,
     }));
+    if (houseCandidates.length === 0) {
+      // An empty house list is not a question. Leave the jobs in Issues instead of a tray
+      // with nothing to pick. @see docs/study/017-upload-scale-action-plan.md
+      this.resolution().deferGroup(group.id);
+      return;
+    }
     this.disambiguationStore.patchGroup({
       ...group,
       trayStep: '1b',
@@ -564,6 +570,13 @@ export class UploadLocationTrayFlowService {
     }
     if (candidateId) {
       this.resolution().applyCandidateToGroup(groupId, candidateId);
+      return;
+    }
+    const houses = group.houseNumberCandidates?.length
+      ? group.houseNumberCandidates
+      : group.candidates;
+    if (houses.length === 0) {
+      this.resolution().deferGroup(groupId);
     }
   }
 

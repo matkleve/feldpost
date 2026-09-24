@@ -15,7 +15,7 @@ A hover list on the enabled **Upload folder** control. It recommends a folder sh
 | Folder import not supported | The existing `upload.folder.unsupported.hint` only. The list is not shown. |
 | **Import archive** | Unchanged. It keeps `upload.archive.import.hint`. |
 
-The list is more than one line, so it does not go in the native `title` attribute. Chrome is `app-popover` (registered; the parent owns position and the list markup). Do not add a tips component.
+The list is more than one line, so it does not go in the native `title` attribute. The list is a `role="tooltip"` on the folder button. `app-popover` stays unused here: its `brnPopoverContent` host requires a popover trigger and breaks sibling row bindings when mounted inside the intake block. Do not add a tips component.
 
 ## The list
 
@@ -38,7 +38,7 @@ The intro says "most reliably". It must not say every line already resolves with
 
 | Behavior | Visual Geometry Owner | Stacking Context Owner | Interaction Hit-Area Owner | Selector(s) | Layer (z-index/token) | Test Oracle |
 | --- | --- | --- | --- | --- | --- | --- |
-| Recommendation list | `app-popover` panel | `app-popover` (z-index 300, already on `.popover`) | **Upload folder** button | `.upload-panel__intake-btn--folder` | popover shell, no new z-index | Hover while folder import works shows the six strings. Disabled folder button shows `upload.folder.unsupported.hint` and not the list. A flat folder still submits. |
+| Recommendation list | `.upload-panel__folder-shape-tip` | intake area (`position: relative`) | **Upload folder** button | `.upload-panel__intake-btn--folder` | z-index 300, no new token | Hover while folder import works shows the six strings. Disabled folder button shows `upload.folder.unsupported.hint` and not the list. A flat folder still submits. |
 
 Geometry of the list stays on the popover. The button does not grow to fit the list.
 

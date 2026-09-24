@@ -434,6 +434,14 @@ export function classifyTokensInSegment(
   /** The segment these tokens came from — needed to reject a noise segment as a street. */
   segmentText = '',
 ): ClassifiedToken[] {
+  // A folder named `Wiener Neustadt` or `St. Pölten` is one place. Splitting it on spaces and
+  // dots drops the city, and the postcode beside it never sees a country.
+  // @see docs/study/017-upload-scale-action-plan.md
+  const whole = segmentText.trim();
+  if (whole && exactPlaceHits(whole, geo, normalizeCountryCode(context.country)).tokens.length) {
+    return classifyNonNumericToken(whole, geo, context);
+  }
+
   const classified: ClassifiedToken[] = [];
 
   const deferredNumeric: string[] = [];

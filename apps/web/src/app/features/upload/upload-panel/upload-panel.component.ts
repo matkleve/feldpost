@@ -315,6 +315,23 @@ export class UploadPanelComponent implements OnDestroy {
 
   readonly laneSwitchOptions = this.viewModel.laneSwitchOptions;
   readonly visibleLaneJobs = this.viewModel.visibleLaneJobs;
+  readonly mountedLaneJobs = this.viewModel.mountedLaneJobs;
+  readonly folderShapeTipOpen = signal(false);
+
+  onLaneScroll(event: Event): void {
+    const el = event.target as HTMLElement;
+    const nearEnd = el.scrollTop + el.clientHeight >= el.scrollHeight - 8;
+    if (!nearEnd) {
+      return;
+    }
+    const total = this.visibleLaneJobs().length;
+    const start = this.viewModel.laneWindowStart();
+    const next = Math.min(start + 8, Math.max(0, total - 12));
+    if (next !== start) {
+      this.viewModel.laneWindowStart.set(next);
+      el.scrollTop = 0;
+    }
+  }
   readonly issueAttentionPulse = this.lifecycle.issueAttentionPulse;
   readonly fileTypeGroups = DEFAULT_FILE_TYPE_GROUPS;
   readonly defaultFileInputAccept = DEFAULT_UPLOAD_FILE_INPUT_ACCEPT;

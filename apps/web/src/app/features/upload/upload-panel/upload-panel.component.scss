@@ -62,6 +62,7 @@
     min-width: 0;
 
     &--intake {
+      position: relative;
       gap: var(--spacing-3);
       overflow: visible;
     }
@@ -640,6 +641,23 @@
     font-size: var(--font-size-sm);
     color: var(--muted-foreground);
     line-height: var(--line-height-reading);
+  }
+
+  // Hover list of the recommended folder shape. Position is the panel's; chrome is app-popover.
+  // @see docs/specs/component/upload/upload-panel.folder-shape-tips.supplement.md
+  &__folder-shape-tip {
+    position: absolute;
+    z-index: 300;
+    inset-inline-start: 0;
+    margin-top: var(--spacing-1);
+    max-width: 18rem;
+    padding: var(--spacing-2);
+    background: var(--chrome-surface);
+    border: 1px solid var(--menu-border-subtle);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    color: var(--menu-item-text);
+    font-size: var(--font-size-sm);
   }
 
   &__lane-overflow {

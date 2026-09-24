@@ -22,6 +22,30 @@ export function normalizeAdminValue(value: string): string {
     .replace(/\s+/g, ' ');
 }
 
+function cityMatchesPlzCities(
+  city: string,
+  expandedCities: string[],
+  municipalities: GemeindeRecord[],
+): boolean {
+  const targets = new Set(expandedCities.map(normalizeAdminValue));
+  const normCity = normalizeAdminValue(city);
+  if (targets.has(normCity)) {
+    return true;
+  }
+  for (const municipality of municipalities) {
+    const names = [municipality.n, ...(municipality.a ?? [])]
+      .map(normalizeAdminValue)
+      .filter((name) => name.length > 0);
+    if (!names.includes(normCity)) {
+      continue;
+    }
+    if (names.some((name) => targets.has(name))) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function expandPostcodeCities(postcode: string, postcodeMap?: PlzMap): string[] {
   if (!postcodeMap) {
     return [postcode];
@@ -394,10 +418,8 @@ export function detectAreaConflicts(
       if (!expandedCities.length) {
         continue;
       }
-      const normalizedExpanded = expandedCities.map(normalizeAdminValue);
       for (const cityEntry of cityEntries) {
-        const normCity = normalizeAdminValue(cityEntry.value);
-        if (!normalizedExpanded.includes(normCity)) {
+        if (!cityMatchesPlzCities(cityEntry.value, expandedCities, options.municipalities)) {
           incompatiblePc.push(cityEntry);
           for (const expandedCity of expandedCities) {
             incompatiblePc.push({

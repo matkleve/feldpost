@@ -69,6 +69,12 @@ const PIPELINE_TRANSITIONS: ReadonlySet<string> = new Set([
   edge('converting_format', 'uploading'),
   edge('hashing', 'dedup_check'),
   edge('hashing', 'resolving_location'),
+  // Dedup can finish after classify has already parked or queued the job.
+  // @see docs/study/017-upload-scale-action-plan.md
+  edge('hashing', 'skipped'),
+  edge('hashing', 'missing_data'),
+  edge('queued', 'skipped'),
+  edge('queued', 'missing_data'),
   // F-14: a tray group is registered asynchronously, so it can land while the job is inside the
   // hashing await. The hold, not the label, is what keeps the job parked (see the FSM supplement),
   // so this edge is pipeline structure rather than the map gap it used to stand in for.
@@ -96,6 +102,7 @@ const PIPELINE_TRANSITIONS: ReadonlySet<string> = new Set([
   edge('awaiting_disambiguation', 'queued'),
   edge('awaiting_disambiguation', 'resolving_location'),
   edge('awaiting_disambiguation', 'missing_data'),
+  edge('awaiting_disambiguation', 'skipped'),
   edge('conflict_check', 'awaiting_conflict_resolution'),
   edge('conflict_check', 'uploading'),
   // `awaiting_conflict_resolution` is non-terminal, so the user-channel branch of

@@ -156,6 +156,24 @@ describe('detectAreaConflicts — postcode-city cross-validation', () => {
     expect(values.some((v) => v.includes('polten'))).toBe(true);
   });
 
+  it('does not conflict when the city is an alias of the PLZ city', () => {
+    const conflicts = detectAreaConflicts(
+      {
+        city: [{ level: 2, value: 'Klagenfurt am Wörthersee', source: 'folder', field: 'city' }],
+        postcode: [{ level: 1, value: '9020', source: 'folder', field: 'postcode' }],
+      },
+      {
+        municipalities: [
+          ...municipalities,
+          { n: 'Klagenfurt am Wörthersee', b: 'Kärnten', a: ['Klagenfurt'] },
+        ],
+        postcodeMap: { ...postcodeMap, '9020': ['Klagenfurt'] },
+        country: 'AT',
+      },
+    );
+    expect(conflicts).toHaveLength(0);
+  });
+
   it('does not conflict when postcode 1200 and city Wien agree', () => {
     const conflicts = detectAreaConflicts(
       {

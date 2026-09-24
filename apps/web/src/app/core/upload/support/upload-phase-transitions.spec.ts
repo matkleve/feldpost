@@ -30,6 +30,14 @@ describe('upload-phase-transitions', () => {
     expect(canTransition('missing_data', 'error', 'user')).toBe(true);
   });
 
+  it('allows a duplicate decision from a tray, the queue, or hashing', () => {
+    expect(canTransition('awaiting_disambiguation', 'skipped', 'pipeline')).toBe(true);
+    expect(canTransition('queued', 'skipped', 'pipeline')).toBe(true);
+    expect(canTransition('hashing', 'skipped', 'pipeline')).toBe(true);
+    expect(canTransition('queued', 'missing_data', 'pipeline')).toBe(true);
+    expect(canTransition('hashing', 'missing_data', 'pipeline')).toBe(true);
+  });
+
   it('allows user cancel from active phases to error', () => {
     expect(canTransition('uploading', 'error', 'user')).toBe(true);
     expect(canTransition('awaiting_disambiguation', 'error', 'user')).toBe(true);
