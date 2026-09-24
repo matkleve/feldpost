@@ -114,3 +114,17 @@ The owner asked for a system-share button on desktop `[D]`.
 Feldpost does not draw the sheet. The code calls `navigator.share` only after the audience dialog has produced a URL (`workspace-selected-items-grid.component.ts`) `[A]`. There is no second desktop API to build `[C]`.
 
 Decision `[D]`: one **Share** action. It always asks who may open the link. If the browser has `navigator.share`, desktop or phone, that call opens the system sheet. If it does not, the same action copies the link. No separate desktop button, and no Feldpost-built list of apps.
+
+## Update 2026-09-24 — the desktop list is the media menu
+
+The owner rejected the decision above `[D]`. Desktop share is not “call the operating system or give up”. It is an in-app action list, the same shell as the media right-click menu (`map-context-menu` / `option-menu-surface` in `workspace-selected-items-grid.component.html`) `[A]`. No new menu component `[D]`.
+
+| # | Desktop situation | Row they pick | What the app does |
+| --- | --- | --- | --- |
+| 1 | The link should land in a chat that is already open | Copy link | Copies the URL |
+| 2 | Send the set by email | Email | Opens the mail app with the link in the body |
+| 3 | Send the set through WhatsApp on the desktop | WhatsApp | Opens WhatsApp with the link filled in |
+| 4 | The browser also has a system sheet | System share, last row | Calls `navigator.share` |
+| 5 | Phone | No list | The system sheet already lists the installed apps, so the phone skips this menu `[D]` |
+
+The audience dialog still runs first, so every row shares a real link `[D]`. The ZIP action stays off this list. It is a file download, not a destination `[D]`.
