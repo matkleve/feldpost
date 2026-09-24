@@ -86,3 +86,15 @@ STUDY-019 forbids putting those handoffs back as a bottom selection bar `[D]`. A
 - Whether Deselect all should stay visible while detail is open. STUDY-019 already left that open.
 
 What settles it: the owner’s answers to the five questions in the chat that filed this study.
+
+## Update 2026-09-24 — media, not photographs
+
+Rows 5 and 6 above say “photo”. That word is wrong `[D]`. The set is media: every file the product stores. A photograph is one kind of file. The same window, the same handoff, and the same per-item actions apply to any medium. “On the single image” was the wrong phrase. The owner’s phrase is **on the single medium** `[D]`.
+
+Owner answers the same day `[D]`:
+
+1. The job of this window is to pass the current set on.
+2. The visible name is **Share** (de: **Teilen**). “Selected items” described the mirror. It did not describe the job.
+3. Share link, copy link, the device share sheet, and ZIP all belong. Copy link sits inside share link, not as a second peer button. The device share sheet was not understood as a separate control; it is the phone or tablet system sheet (WhatsApp, Mail, and the rest) and is not a Feldpost screen.
+4. Address, project, delete, and zoom stay on the single medium.
+5. The internal panel id `download` does not stay. It is refactored to `share`. The ZIP action id `download` is a different word and stays on the medium menu.

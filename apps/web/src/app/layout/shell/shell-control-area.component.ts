@@ -76,7 +76,7 @@ export class ShellControlAreaComponent {
   onChosen(option: ShellControlOptionModel): void {
     if (option.kind === 'panel' && option.panelId) {
       const opening = !this.shellLayout.isOpen(option.panelId);
-      if (option.panelId === 'download' && opening) {
+      if (option.panelId === 'share' && opening) {
         this.selectedItemsPanelCoordinator.resetUserDismissedDownloadPanel();
       }
       this.shellLayout.setOpen(option.panelId, opening);

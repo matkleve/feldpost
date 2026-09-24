@@ -26,7 +26,7 @@ export function routePhotoPanelOpen(
         : localStorage.getItem(featureFlagStorageKey('shellGridLayout')),
   }).value;
   if (grid) {
-    shellLayout.setOpen('download', value);
+    shellLayout.setOpen('share', value);
     paneOpen.set(false);
     return;
   }

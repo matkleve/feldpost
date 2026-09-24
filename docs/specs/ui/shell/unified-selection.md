@@ -2,7 +2,7 @@
 
 > **Owner decision:** [STUDY-015 §14.7](../../../study/015-shell-grid-layout-change-plan.md)  
 > **Change class:** Sensitive — deletes independent workspace selection state.  
-> **Consumers:** map shell, `/media`, selected items panel (`download`).
+> **Consumers:** map shell, `/media`, share panel (`share`).
 
 ## What It Is
 
@@ -105,6 +105,6 @@ sequenceDiagram
 
 - [ ] Red test fails before implementation: panel can select id not on map when flag on.
 - [ ] Green after: one shared store; panel toggle updates map styling.
-- [ ] Share-link restore sets global selection, opens `download` panel.
+- [ ] Share-link restore sets global selection, opens `share` panel.
 - [ ] `shellGridLayout` off: legacy dual-path allowed until PR 7 deletes it.
 - [ ] Service spec + types mirror `docs/specs/service/unified-selection/`.

@@ -21,7 +21,7 @@ describe('MapShellState photo panel routing', () => {
     const shell = TestBed.inject(ShellLayoutService);
     state.setPhotoPanelOpen(true);
     expect(state.photoPanelOpen()).toBe(true);
-    expect(shell.isOpen('download')).toBe(false);
+    expect(shell.isOpen('share')).toBe(false);
   });
 
   it('opens the download panel and leaves the workspace pane closed when the grid shell is on', () => {
@@ -30,9 +30,9 @@ describe('MapShellState photo panel routing', () => {
     const shell = TestBed.inject(ShellLayoutService);
     state.setPhotoPanelOpen(true);
     expect(state.photoPanelOpen()).toBe(false);
-    expect(shell.isOpen('download')).toBe(true);
+    expect(shell.isOpen('share')).toBe(true);
     state.setPhotoPanelOpen(false);
     expect(state.photoPanelOpen()).toBe(false);
-    expect(shell.isOpen('download')).toBe(false);
+    expect(shell.isOpen('share')).toBe(false);
   });
 });

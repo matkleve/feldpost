@@ -14,7 +14,7 @@ export class SelectedItemsPanelCoordinatorService {
   private userDismissedDownloadPanel = false;
 
   isOpen(): boolean {
-    return this.shellLayout.isOpen('download');
+    return this.shellLayout.isOpen('share');
   }
 
   /**
@@ -24,7 +24,7 @@ export class SelectedItemsPanelCoordinatorService {
     if (options.respectUserDismiss && this.userDismissedDownloadPanel) {
       return;
     }
-    this.shellLayout.open('download');
+    this.shellLayout.open('share');
     this.userDismissedDownloadPanel = false;
   }
 
@@ -36,7 +36,7 @@ export class SelectedItemsPanelCoordinatorService {
   }
 
   close(): void {
-    this.shellLayout.close('download');
+    this.shellLayout.close('share');
   }
 
   onDownloadPanelUserDismissed(): void {
@@ -49,7 +49,7 @@ export class SelectedItemsPanelCoordinatorService {
 
   /** Half-width offset for map centering when a side panel is open. */
   getMapPaneOffsetPx(): number {
-    return this.shellLayout.isOpen('download') ||
+    return this.shellLayout.isOpen('share') ||
       this.shellLayout.openPanels().some((panel) => panel.open)
       ? this.panelColumnResize.panelColumnWidthPx() / 2
       : 0;

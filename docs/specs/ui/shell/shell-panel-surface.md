@@ -2,7 +2,7 @@
 
 ## What It Is
 
-One frosted panel in the panel column. Ids are `upload`, `download`, `shared-media`, `tips`, and `help`.
+One frosted panel in the panel column. Ids are `upload`, `share`, `shared-media`, `tips`, and `help`.
 
 ## What It Looks Like
 
@@ -15,7 +15,7 @@ The collapse control is a `2.75rem` circle inside the header padding, so its top
 | `panelId` | Body | Spec |
 | --- | --- | --- |
 | `upload` | `UploadPanelComponent` (not `app-upload-shell`) | upload panel wiring in layout |
-| `download` | `SelectedItemsPanelComponent` | [selected-items-panel.md](./selected-items-panel.md) |
+| `share` | `SelectedItemsPanelComponent` | [selected-items-panel.md](./selected-items-panel.md) |
 | `shared-media` | Placeholder until product exists | — |
 | `tips` | Placeholder until product exists | — |
 | `help` | Placeholder until product exists | — |
@@ -41,7 +41,7 @@ app-shell-panel-surface
 │   └── collapse button (right_panel_close)
 └── body (projected)
     ├── app-upload-panel [id upload]
-    ├── app-selected-items-panel [id download]
+    ├── app-selected-items-panel [id share]
     ├── placeholder [id shared-media, tips, help]
 ```
 
@@ -70,13 +70,13 @@ Open/closed is owned by `ShellLayoutService`, not this surface.
 
 ## Wiring
 
-The workspace pane Upload tab is not a second host for upload. Upload has one home: `upload` surface. Selected items has one home: `download` surface ([selected-items-panel.md](./selected-items-panel.md)).
+The workspace pane Upload tab is not a second host for upload. Upload has one home: `upload` surface. The share panel has one home: `share` surface ([selected-items-panel.md](./selected-items-panel.md)).
 
 ```mermaid
 flowchart TB
   surface[app-shell-panel-surface]
   surface --> upload[app-upload-panel]
-  surface --> download[app-selected-items-panel]
+  surface --> share[app-selected-items-panel]
   surface --> stubs[shared-media / tips / help placeholders]
 ```
 
@@ -91,7 +91,7 @@ flowchart TB
 ## Acceptance Criteria
 
 - [ ] `upload` renders `UploadPanelComponent` and not `app-upload-shell`.
-- [x] `download` renders `SelectedItemsPanelComponent` per [selected-items-panel.md](./selected-items-panel.md).
+- [x] `share` renders `SelectedItemsPanelComponent` per [selected-items-panel.md](./selected-items-panel.md).
 - [ ] `help`, `tips`, `shared-media` render placeholders until those products exist.
 - [ ] Collapse control is icon-only `right_panel_close` with `shell.panel.collapse` aria-label (not a text Close button).
 - [ ] Collapse calls `close(panelId)` once.

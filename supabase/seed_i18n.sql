@@ -45201,32 +45201,32 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'shell.control.download', 'Selected items', 'en', 'Grid shell right rail. Opens the selected-items panel.')
+values (null, 'shell.control.share', 'Share', 'en', 'Grid shell right rail. Opens the panel that passes the current media set on.')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Selected items', 'published'
+select t.id, 'en', 'Share', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'shell.control.download'
+where t.organization_id is null and t.key = 'shell.control.share'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Ausgewählte Elemente', 'published'
+select t.id, 'de', 'Teilen', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'shell.control.download'
+where t.organization_id is null and t.key = 'shell.control.share'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Elementi selezionati', 'published'
+select t.id, 'it', 'Condividi', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'shell.control.download'
+where t.organization_id is null and t.key = 'shell.control.share'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
@@ -45542,32 +45542,32 @@ on conflict (app_text_id, lang) do update set
   status = 'published';
 
 insert into public.app_texts (organization_id, key, source_text, source_lang, context)
-values (null, 'shell.panel.download.title', 'Selected items', 'en', 'Selected items panel surface title.')
+values (null, 'shell.panel.share.title', 'not photographs only.', 'en', 'Share panel surface title. The set is any media file')
 on conflict (scope_key) do update set
   source_text = excluded.source_text,
   source_lang = excluded.source_lang,
   context = excluded.context;
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'en', 'Selected items', 'published'
+select t.id, 'en', 'not photographs only.', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'shell.panel.download.title'
+where t.organization_id is null and t.key = 'shell.panel.share.title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'de', 'Ausgewählte Elemente', 'published'
+select t.id, 'de', 'Share', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'shell.panel.download.title'
+where t.organization_id is null and t.key = 'shell.panel.share.title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';
 
 insert into public.app_text_translations (app_text_id, lang, translated_text, status)
-select t.id, 'it', 'Elementi selezionati', 'published'
+select t.id, 'it', 'Teilen', 'published'
 from public.app_texts t
-where t.organization_id is null and t.key = 'shell.panel.download.title'
+where t.organization_id is null and t.key = 'shell.panel.share.title'
 on conflict (app_text_id, lang) do update set
   translated_text = excluded.translated_text,
   status = 'published';

@@ -289,7 +289,7 @@ Canonical names for every visible piece of the interface. Use these in code, doc
   A `var(--shell-control-option-size)` icon button (`app-shell-control-option`) inside a control container. Its hover label overlays and does not change track size.
 
 - **Selected items panel**  
-  The `download` panel surface in the panel column. Product title **Selected items**. Shows unified media selection, toolbar, bulk footer, and inline detail. Spec: `docs/specs/ui/shell/selected-items-panel.md`. Replaces the Workspace Pane media tab when the grid shell is on.
+  The `share` panel surface in the panel column. Product title **Share**. Shows the current media set (any file, not photographs only) and passes that set on. Spec: `docs/specs/ui/shell/selected-items-panel.md`. Replaces the Workspace Pane media tab when the grid shell is on.
 
 - **Unified selection**  
   Single `selectedMediaIds` store shared by map, `/media`, and the selected items panel. No independent workspace-only selection when `shellGridLayout` is on. Spec: `docs/specs/ui/shell/unified-selection.md`.

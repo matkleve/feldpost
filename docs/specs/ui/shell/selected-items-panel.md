@@ -1,17 +1,17 @@
 # Selected items panel
 
-> **Internal panel id:** `download` (`ShellLayoutService`)  
-> **Product name:** Selected items (`shell.panel.download.title`)  
+> **Internal panel id:** `share` (`ShellLayoutService`)  
+> **Product name:** Share (`shell.panel.share.title`, de: Teilen)  
 > **Owner decision:** [STUDY-015 §14.7](../../../study/015-shell-grid-layout-change-plan.md) — unified selection; this panel **mirrors** map/`/media` selection, it does not hold a second one.  
 > **Replaces (grid shell):** Workspace Pane **Media** tab + drag-divider column. Upload tab already moved to `upload` panel (§14.6).
 
 ## What It Is
 
-The right-rail **Selected items** surface in the panel column. Shows the current unified media selection (grid, toolbar filters) and inline media detail when one item is focused. Selecting happens on the canvas. This panel mirrors that selection. Opens from the right-rail download icon and from selection-driven flows that today open the Workspace Pane.
+The right-rail **Share** surface in the panel column. Shows the current unified media selection (grid, toolbar filters) and inline media detail when one item is focused. Selecting happens on the canvas. This panel mirrors that selection. Opens from the right-rail share icon and from selection-driven flows that today open the Workspace Pane.
 
 ## What It Looks Like
 
-- **Chrome:** `app-shell-panel-surface` with `panelId="download"` — frosted `shell-box`, title **Selected items**, close control.
+- **Chrome:** `app-shell-panel-surface` with `panelId="share"` — frosted `shell-box`, title **Share**, close control.
 - **Body:** full-height column inside the panel surface body:
   - **Detail mode:** `MediaDetailViewComponent` — full body height; **no** shell footer; **no** body divider. Shell surface title row hidden (detail header owns chrome). Requires panel width ≥ **480px** or panel-embedded layout override — see [shell-panel-resize.md](./shell-panel-resize.md) § Detail mode.
   - **Grid mode:** `WorkspaceToolbarComponent` + `ItemGridComponent` with projected domain items.
@@ -24,18 +24,18 @@ The right-rail **Selected items** surface in the panel column. Shows the current
 
 | Layer | Location |
 | --- | --- |
-| Shell host | `authenticated-app-layout.component.html` — `data-panel-id="download"` slot |
-| Body component | `apps/web/src/app/layout/shell/selected-items-panel/` (new; extracts from workspace pane) |
+| Shell host | `authenticated-app-layout.component.html` — `data-panel-id="share"` slot |
+| Body component | `apps/web/src/app/layout/shell/selected-items-panel/` |
 | State | `ShellLayoutService` open stack + unified selection module (see [unified-selection.md](./unified-selection.md)) |
-| Right rail | `shell-control.types.ts` — `id: 'download'`, icon `download` |
+| Right rail | `shell-control.types.ts` — `id: 'share'`, icon `share` |
 
 ## Actions
 
 | # | User action | System response | Triggers |
 | --- | --- | --- | --- |
-| 1 | Clicks right-rail download icon | Toggles `download` only. Other open panels stay | `ShellLayoutService.setOpen('download', !open)` |
+| 1 | Clicks right-rail share icon | Toggles `share` only. Other open panels stay | `ShellLayoutService.setOpen('share', !open)` |
 | 2 | Selects media on map or `/media` | Selection updates; panel may auto-open (see auto-open rules) | unified selection store |
-| 3 | Clicks close on panel surface | `ShellLayoutService.close('download')` | panel unmounts |
+| 3 | Clicks close on panel surface | `ShellLayoutService.close('share')` | panel unmounts |
 | 4 | Clicks item in grid | Opens inline detail for that media id | `detailMediaId` set |
 | 5 | Closes detail | Returns to grid mode | `detailMediaId` cleared |
 | 6 | Uses toolbar filter/sort/group | Scoped grid updates; selection kept by id | existing workspace toolbar |
@@ -48,15 +48,16 @@ The right-rail **Selected items** surface in the panel column. Shows the current
 
 | Condition | Behavior |
 | --- | --- |
-| First item added to selection (0 → 1) | Open `download` panel if closed |
-| Marker/cluster click that adds scope | Open `download` panel; grid shows scoped items |
-| Detail requested from map/upload | Open `download` panel; enter detail mode |
+| First item added to selection (0 → 1) | Open `share` panel if closed |
+| Marker/cluster click that adds scope | Open `share` panel; grid shows scoped items |
+| Detail requested from map/upload | Open `share` panel; enter detail mode |
 | User closed panel manually | Do **not** re-open until next explicit open trigger (selection change alone does not fight user dismiss) |
 
 ## Component Hierarchy
 
 ```text
-app-shell-panel-surface [panelId=download]
+app-shell-panel-surface [panelId=share]
+├── header (title + collapse; no second app-pane-header)
 └── app-selected-items-panel
     ├── @if detailMediaId
     │   └── app-media-detail-view [shellPanelEmbedded=true]
@@ -76,14 +77,14 @@ app-shell-panel-surface [panelId=download]
 | `UnifiedSelectionService` | `selectedMediaIds: ReadonlySet<string>` | Read/write selection |
 | `WorkspacePaneObserverAdapter` | detail id, route context, active scope | Read (interim); migrate to selection module |
 | `MediaDownloadService` | delivery cache | Read (ZIP/export) |
-| `ShellLayoutService` | `download` open state | Read/write panel |
-| `I18nService` | `shell.panel.download.title` | Title |
+| `ShellLayoutService` | `share` open state | Read/write panel |
+| `I18nService` | `shell.panel.share.title` | Title |
 
 ```mermaid
 erDiagram
   UNIFIED_SELECTION ||--o{ MEDIA_ITEM : "selected ids"
   SELECTED_ITEMS_PANEL ||--|| UNIFIED_SELECTION : reads
-  SHELL_LAYOUT ||--o| SELECTED_ITEMS_PANEL : "open when download"
+  SHELL_LAYOUT ||--o| SELECTED_ITEMS_PANEL : "open when share"
   MAP_SHELL ||--o{ UNIFIED_SELECTION : toggles
   MEDIA_PAGE ||--o{ UNIFIED_SELECTION : toggles
 ```
@@ -92,7 +93,7 @@ erDiagram
 
 | Name | Type | Default | Effect |
 | --- | --- | --- | --- |
-| `panelOpen` | per `download` id | `closed` | Body mounted in panel column |
+| `panelOpen` | per `share` id | `closed` | Body mounted in panel column |
 | `detailMediaId` | `string \| null` | `null` | Grid vs detail layout |
 | `selection` | `Set<string>` | empty | Grid selection + Deselect all visibility |
 
@@ -107,7 +108,7 @@ Panel open/closed: `ShellLayoutService` FSM (`closed` ↔ `open`). Detail and se
 | `layout/shell/selected-items-panel/selected-items-panel.component.scss` | Panel body geometry only |
 | `core/unified-selection/unified-selection.service.ts` | Single selection store |
 | `core/unified-selection/unified-selection.types.ts` | Scope + mirror contract |
-| `authenticated-app-layout.component.html` | Project body into `download` surface |
+| `authenticated-app-layout.component.html` | Project body into `share` surface |
 
 Reused unchanged (composition only):
 
@@ -125,7 +126,7 @@ sequenceDiagram
   participant Panel as selected-items-panel
   Map->>Sel: toggle / set selection
   Sel-->>Panel: selected ids
-  Map->>Shell: open(download) on scope open
+  Map->>Shell: open(share) on scope open
   Shell-->>Panel: mount body
   Panel->>Sel: Deselect all clears selection
 ```
@@ -152,8 +153,8 @@ sequenceDiagram
 
 | Workspace Pane (legacy) | Selected items panel (grid shell) |
 | --- | --- |
-| `app-workspace-pane` + drag divider | `download` panel column track |
-| `photoPanelOpen` signal | `ShellLayoutService.isOpen('download')` |
+| `app-workspace-pane` + drag divider | `share` panel column track |
+| `photoPanelOpen` signal | `ShellLayoutService.isOpen('share')` |
 | Media tab | This panel (only grid content) |
 | Upload tab | `upload` panel — **deleted** from workspace |
 | Projects tab | Canvas `/projects` — **not** in panel |
@@ -165,12 +166,12 @@ sequenceDiagram
 
 ## Acceptance Criteria
 
-- [ ] `download` surface renders `app-selected-items-panel`, not a placeholder paragraph.
-- [ ] No Upload or Projects tab in this panel.
-- [ ] Selection in panel grid mirrors map/`/media` selection (no second independent set).
-- [ ] Toolbar shows one quiet **Deselect all** button when the selection is non-empty, and no bottom export bar.
-- [ ] Column divider resizes canvas ↔ panel width within clamps; preference persists ([shell-panel-resize.md](./shell-panel-resize.md)).
-- [ ] Detail view opens inside panel body, same as workspace pane today.
-- [ ] With `shellGridLayout` on, marker/cluster open flows mount this panel instead of `app-workspace-pane`.
-- [ ] With `shellGridLayout` off, legacy workspace pane unchanged.
+- [x] `share` surface renders `app-selected-items-panel`, not a placeholder paragraph.
+- [x] No Upload or Projects tab in this panel.
+- [x] Selection in panel grid mirrors map/`/media` selection (no second independent set).
+- [x] Toolbar shows one quiet **Deselect all** button when the selection is non-empty, and no bottom export bar.
+- [x] Column divider resizes canvas ↔ panel width within clamps; preference persists ([shell-panel-resize.md](./shell-panel-resize.md)).
+- [x] Detail view opens inside panel body, same as workspace pane today.
+- [x] With `shellGridLayout` on, marker/cluster open flows mount this panel instead of `app-workspace-pane`.
+- [x] With `shellGridLayout` off, legacy workspace pane unchanged.
 - [ ] Red-test-first: test proving independent workspace-only selection is impossible when flag on.

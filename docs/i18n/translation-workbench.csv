@@ -1613,7 +1613,7 @@ shell.panel.help.title,Help,Help panel surface title.,Help,Hilfe,Aiuto
 shell.panel.help.body,Help is not available yet.,Help panel placeholder body.,Help is not available yet.,Hilfe ist noch nicht verfügbar.,L'aiuto non è ancora disponibile.
 shell.panel.collapse,Collapse panel,Panel surface collapse control (chevron_right). Collapses the panel column toward the right rail.,Collapse panel,Panel einklappen,Comprimi pannello
 shell.control.notifications,Notifications,Grid shell right rail. Opens the notifications panel.,Notifications,Benachrichtigungen,Notifiche
-shell.control.download,Selected items,Grid shell right rail. Opens the selected-items panel.,Selected items,Ausgewählte Elemente,Elementi selezionati
+shell.control.share,Share,Grid shell right rail. Opens the panel that passes the current media set on.,Share,Teilen,Condividi
 shell.control.sharedMedia,Shared media,Grid shell right rail. Opens the shared media panel.,Shared media,Geteilte Medien,Media condivisi
 shell.control.undo,Undo,Grid shell right rail. Inert until a history product exists.,Undo,Rückgängig,Annulla
 shell.control.history,Activity history,Grid shell right rail. Inert until a history product exists.,Activity history,Aktivitätsverlauf,Cronologia attività
@@ -1624,7 +1624,7 @@ shell.control.theme.light,Light,Grid shell theme option label.,Light,Hell,Chiaro
 shell.control.theme.dark,Dark,Grid shell theme option label.,Dark,Dunkel,Scuro
 shell.control.theme.sandstone,Sandstone,Grid shell theme option label.,Sandstone,Sandstein,Arenaria
 shell.panel.notifications.title,Notifications,Notifications panel surface title.,Notifications,Benachrichtigungen,Notifiche
-shell.panel.download.title,Selected items,Selected items panel surface title.,Selected items,Ausgewählte Elemente,Elementi selezionati
+shell.panel.share.title,Share,Share panel surface title. The set is any media file, not photographs only.,Share,Teilen,Condividi
 shell.panel.sharedMedia.title,Shared media,Shared media panel surface title.,Shared media,Geteilte Medien,Media condivisi
 shell.panel.tips.title,Tips,Tips panel surface title.,Tips,Tipps,Suggerimenti
 shell.panel.unavailable.body,This panel is not available yet.,Placeholder body for a right-rail panel that has no product yet.,This panel is not available yet.,Dieser Bereich ist noch nicht verfügbar.,Questo pannello non è ancora disponibile.
