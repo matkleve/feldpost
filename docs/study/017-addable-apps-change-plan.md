@@ -182,3 +182,19 @@ The questions above stay. These answers supersede Q1–Q3 only. Q4–Q10 are sti
 Bootstrap, which Q2 forces: the first organization and the first admin are outside the widget list. The Organization widget is the admin UI after that row exists. Making the widget itself create the organization would be a new flow. It is not designed here.
 
 **B1.** The first organization stays outside the widget system (seed or a later founder step that is not an installable app). The Organization widget only edits an organization that already exists. Is that the split you want?
+
+## Update 2026-09-24 — answers 4–8
+
+Supersedes Q4–Q8 only. Q9, Q10, and B1 are still open. `[D]` unless marked `[A]`.
+
+4. **Uninstall does not delete data.** Data is removed only when DSGVO requires that deletion, as its own action. Hiding a widget must not tell the user the rows are gone. Chat is its own widget. Its rows stay when the chat widget is removed, until that data is itself removed. Today the chat UI is the `/colleagues` route `[A]` `docs/specs/page/colleagues-page.md`. This answer splits chat off that page. It does not define a second colleagues screen.
+
+5. **A new start has Map and Media only.** `[D]` Not Projects, Colleagues, Organization, or Chat. Phase 3’s backfill must not grant the other apps unless a later answer says existing users keep what they already use. See B2.
+
+6. **Settings and Account stay on the shell.** `[D]` They are not widgets and have no install bit.
+
+7. **Upload is an add-on of Media.** `[D]` It is not its own install and it is not shell chrome. It is present when Media is present. The layout still mounts `app-upload-shell` on every authenticated route `[A]` `authenticated-app-layout.component.html`. Phase 5 has to follow Media’s install, including a temporary Media session.
+
+8. **A shared link opens a temporary widget.** `[D]` The page does not appear as a normal install. The temporary widget lasts until logout, then it is gone. It is not a durable install row. It does not bypass RLS. Share-set tokens (`resolve_share_set`) are a different door for a selection of media `[A]` `docs/specs/service/share-set/share-set-access-model.md`. This answer is about opening an app the user has not installed. How the link names the app is not specified.
+
+**B2.** “Only Map and Media” — does that apply to people who already use Projects, Colleagues, and Organization on the day this ships, or only to accounts created after it ships?
