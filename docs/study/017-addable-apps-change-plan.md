@@ -306,3 +306,17 @@ Owner answers to the flow questions. `[D]` Supersedes the reading that an accoun
 4. **Not answered.** The owner asked what the link question meant. It is restated below. Colleagues versus Chat, and the ship-day backfill, were not answered in this message.
 
 **Link question, plain.** Someone sends you a link to Projects. You have not added Projects. We open it for this visit. You log out. That open is forgotten. The next day you click the same link. Do we open Projects again for that visit, or does Projects stay off until you add it yourself?
+
+## Update 2026-09-24 — colleagues, chat, backfill
+
+Owner answers. `[D]`
+
+**Colleagues requires an organization.** A self-employed account with no organization does not get Colleagues. The people list is organization membership. There is no colleagues surface for a lone account.
+
+**Chat is not required on the Colleagues page.** The owner said chat does not need to be there.
+
+**Chat may be account-to-account.** `[D]` A later chat could reach another account, not only people inside one organization. That is why a separate chat widget can make sense. It is not designed here. Today's chat rows are organization-scoped. `[A]` `supabase/migrations/20260615180000_org_roles_colleagues_chat.sql` and the chat RLS that compares `organization_id` to `user_org_id()`. Account-to-account chat cannot be a flag on those tables.
+
+**Ship-day backfill does not matter.** `[D]` The owner said there is no real data to protect. “Keep every current app on” is not a product requirement. The migration that inserted five installed rows for every profile may be replaced by the new-account rule when this is rebuilt. Do not treat that backfill as an owner decision.
+
+The link question in the previous section is still unanswered.
