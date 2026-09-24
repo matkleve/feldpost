@@ -8,7 +8,7 @@ Deep-linkable settings as a **suffix on the active app shell**, not a standalone
 - `/{shell}/settings/:section`
 - `/{shell}/settings/:section/:subsection`
 
-`shell` is one of: `map` (canonical for map root), `media`, `projects`, or `projects/:projectId`.
+`shell` is one of: `map` (canonical for map root), `media`, `projects`, `projects/:projectId`, `colleagues`, or `organization` (and `organization/:section`). Matchers: `apps/web/src/app/layout/authenticated-shell-matchers.ts`.
 
 The visible UI is the settings surface inside `app-shell-main-canvas`. The shell route stays mounted under the outlet and is covered while settings is open.
 

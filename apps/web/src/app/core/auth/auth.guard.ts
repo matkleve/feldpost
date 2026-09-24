@@ -63,7 +63,7 @@ export const authGuard: CanActivateFn = async () => {
  * Prevents authenticated users from revisiting login/register screens.
  * Usage: canActivate: [guestGuard]
  */
-export const guestGuard: CanActivateFn = async () => {
+export const guestGuard: CanActivateFn = async (route) => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
@@ -71,6 +71,14 @@ export const guestGuard: CanActivateFn = async () => {
 
   if (!auth.session()) {
     return true;
+  }
+
+  const invite = route.queryParamMap?.get('invite')?.trim();
+  const childPath = route.firstChild?.routeConfig?.path ?? route.routeConfig?.path;
+  if (invite && childPath === 'register') {
+    return router.createUrlTree(['/join'], {
+      queryParams: { invite, ...featureFlagRouterQueryParams() },
+    });
   }
 
   // Already logged in — go to the main app (preserve `ff` when present)

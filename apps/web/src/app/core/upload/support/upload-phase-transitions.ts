@@ -70,7 +70,7 @@ const PIPELINE_TRANSITIONS: ReadonlySet<string> = new Set([
   edge('hashing', 'dedup_check'),
   edge('hashing', 'resolving_location'),
   // Dedup can finish after classify has already parked or queued the job.
-  // @see docs/study/021-upload-scale-action-plan.md
+  // @see docs/study/029-upload-scale-action-plan.md
   edge('hashing', 'skipped'),
   edge('hashing', 'missing_data'),
   edge('queued', 'skipped'),

@@ -1,8 +1,13 @@
 import { Component, HostListener, computed, effect, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter, map, startWith } from 'rxjs/operators';
 import { AuthService } from '../../core/auth/auth.service';
+import { AccountContextService } from '../../core/account-context/account-context.service';
+import { WidgetInstallService } from '../../core/widget-install/widget-install.service';
+import { WIDGET_IDS } from '../../core/widget-install/widget-install.helpers';
+import type { WidgetId } from '../../core/widget-install/widget-install.types';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { sidebarWidthOwner } from '../../core/feature-flags/feature-flags.helpers';
 import { FeatureFlagsService } from '../../core/feature-flags/feature-flags.service';
@@ -30,7 +35,7 @@ const SIDEBAR_WIDTH_TRANSITION_MS = 200;
 @Component({
   selector: 'app-nav',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, FormsModule],
   templateUrl: './nav.component.html',
   styleUrl: './nav.component.scss',
   host: {
@@ -40,6 +45,8 @@ const SIDEBAR_WIDTH_TRANSITION_MS = 200;
 })
 export class NavComponent {
   private readonly router = inject(Router);
+  private readonly widgetInstall = inject(WidgetInstallService);
+  readonly accountContext = inject(AccountContextService);
   private readonly authService = inject(AuthService);
   private readonly i18nService = inject(I18nService);
   private readonly settingsPaneService = inject(SettingsPaneService);
@@ -128,13 +135,46 @@ export class NavComponent {
     return this.t('nav.theme.light', 'Light');
   });
 
-  readonly navItems = computed<NavItem[]>(() => [
-    { icon: 'map', label: this.t('nav.item.map', 'Map'), route: '/' },
-    { icon: 'perm_media', label: this.t('nav.item.media', 'Media'), route: '/media' },
-    { icon: 'folder', label: this.t('nav.item.projects', 'Projects'), route: '/projects' },
-    { icon: 'groups', label: this.t('nav.item.colleagues', 'Colleagues'), route: '/colleagues' },
-    { icon: 'business', label: this.t('nav.item.organization', 'Organization'), route: '/organization' },
-  ]);
+  constructor() {
+    void this.widgetInstall.load();
+    void this.accountContext.load();
+  }
+
+  readonly navItems = computed<NavItem[]>(() => {
+    const installed = new Set(this.widgetInstall.installedIds());
+    const items: NavItem[] = [
+      { icon: 'map', label: this.t('nav.item.map', 'Map'), route: '/' },
+      { icon: 'perm_media', label: this.t('nav.item.media', 'Media'), route: '/media' },
+      { icon: 'folder', label: this.t('nav.item.projects', 'Projects'), route: '/projects' },
+      { icon: 'groups', label: this.t('nav.item.colleagues', 'Colleagues'), route: '/colleagues' },
+      { icon: 'business', label: this.t('nav.item.organization', 'Organization'), route: '/organization' },
+    ];
+    return items.filter((item) => {
+      if (this.accountContext.personal() && item.route === '/colleagues') {
+        return false;
+      }
+      return installed.has(routeWidgetId(item.route));
+    });
+  });
+
+  readonly catalogItems = computed(() => {
+    const installed = new Set(this.widgetInstall.installedIds());
+    return WIDGET_IDS.filter((id) => !installed.has(id)).filter(
+      (id) => !(this.accountContext.personal() && id === 'colleagues'),
+    );
+  });
+
+  addWidget(widgetId: WidgetId): void {
+    void this.widgetInstall.setInstalled(widgetId, true);
+  }
+
+  hideWidget(route: string): void {
+    void this.widgetInstall.setInstalled(routeWidgetId(route), false);
+  }
+
+  widgetLabel(widgetId: WidgetId): string {
+    return this.t(`widget.${widgetId}`, widgetId);
+  }
 
   isNavItemActive(item: NavItem): boolean {
     const shell = this.activeShell();
@@ -180,6 +220,25 @@ export class NavComponent {
     void this.router.navigateByUrl(buildSettingsUrl(shellSegments));
   }
 
+  orgName = '';
+
+  onContextChange(value: string): void {
+    void this.accountContext.setContext(value === '' ? null : value);
+  }
+
+  openCreateOrganization(): void {
+    this.accountContext.confirmOpen.set(true);
+  }
+
+  confirmCreateOrganization(): void {
+    const name = this.orgName.trim();
+    if (!name) {
+      return;
+    }
+    void this.accountContext.createOrganization(name);
+    this.orgName = '';
+  }
+
   @HostListener('document:pointerdown', ['$event'])
   onDocumentPointerDown(event: PointerEvent): void {
     if (!this.settingsOverlayOpen()) return;
@@ -193,4 +252,12 @@ export class NavComponent {
       if (parseSettingsUrl(url)) void this.router.navigateByUrl(stripSettingsSuffix(url));
     }
   }
+}
+
+function routeWidgetId(route: string): WidgetId {
+  if (route === '/media') return 'media';
+  if (route === '/projects') return 'projects';
+  if (route === '/colleagues') return 'colleagues';
+  if (route === '/organization') return 'organization';
+  return 'map';
 }

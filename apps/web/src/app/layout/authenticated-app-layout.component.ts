@@ -25,6 +25,8 @@ import {
 import { ShareLinkRestoreService } from '../core/share-set/share-link-restore.service';
 import type { ShareLinkRestoreResult } from '../core/share-set/share-link-restore.types';
 import { ShareUrlSyncService } from '../core/share-set/share-url-sync.service';
+import { AccountContextService } from '../core/account-context/account-context.service';
+import { WidgetInstallService } from '../core/widget-install/widget-install.service';
 import { I18nService } from '../core/i18n/i18n.service';
 import { applyOrgBrandingToDocument } from '../core/organization/organization.helpers';
 import { OrganizationService } from '../core/organization/organization.service';
@@ -103,6 +105,8 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
   private readonly i18nService = inject(I18nService);
   readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
   private readonly organizationService = inject(OrganizationService);
+  readonly accountContext = inject(AccountContextService);
+  readonly widgetInstall = inject(WidgetInstallService);
   private readonly injector = inject(Injector);
 
   private readonly currentUrl = toSignal(
@@ -120,6 +124,7 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
   private readonly navigationTargetShell = signal<AuthenticatedActiveShell | null>(null);
 
   readonly mapShellVisible = computed(() =>
+    this.widgetInstall.installedIds().includes('map') &&
     resolveMapShellDisplayed(this.activeShell(), this.navigationTargetShell()),
   );
 
@@ -149,6 +154,7 @@ export class AuthenticatedAppLayoutComponent implements WorkspacePaneShellHost {
     void this.organizationService.loadBranding().then((result) => {
       applyOrgBrandingToDocument(result.data);
     });
+    void this.accountContext.load();
 
     effect(() => {
       const shell = this.activeShell();

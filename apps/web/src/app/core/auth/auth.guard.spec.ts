@@ -99,6 +99,20 @@ describe('guestGuard', () => {
     const tree = result as UrlTree;
     expect(tree.toString()).toContain('/');
   });
+
+  it('sends a logged-in invite link to join', async () => {
+    const { routerSpy } = setup(true);
+    await TestBed.runInInjectionContext(() =>
+      guestGuard(
+        {
+          queryParamMap: { get: (key: string) => (key === 'invite' ? 'abc' : null) },
+          firstChild: { routeConfig: { path: 'register' } },
+        } as any,
+        {} as any,
+      ),
+    );
+    expect(routerSpy.createUrlTree).toHaveBeenCalledWith(['/join'], { queryParams: { invite: 'abc' } });
+  });
 });
 
 // ── waitForAuth loading race ───────────────────────────────────────────────────

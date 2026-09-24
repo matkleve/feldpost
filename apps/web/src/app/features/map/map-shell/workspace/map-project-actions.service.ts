@@ -102,13 +102,20 @@ export class MapProjectActionsService {
     firstImageId: string;
   }): Promise<CreateProjectFromImageResult> {
     const organizationId = await this.resolveOrganizationIdForImage(params.firstImageId);
-    if (!organizationId) {
+
+    const { data: userData } = await this.supabaseService.client.auth.getUser();
+    const userId = userData.user?.id;
+    if (!userId) {
       return { ok: false, reason: 'organization-missing' };
     }
 
     const { data: projectData, error: projectError } = await this.supabaseService.client
       .from('projects')
-      .insert({ name: params.projectName, organization_id: organizationId })
+      .insert({
+        name: params.projectName,
+        organization_id: organizationId,
+        created_by: userId,
+      })
       .select('id,name')
       .single();
 

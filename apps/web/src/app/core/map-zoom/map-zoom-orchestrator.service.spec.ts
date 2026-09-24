@@ -1,6 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { WorkspacePaneLayoutMapEffectsService } from '../workspace-pane/workspace-pane-layout-map-effects.service';
+import { signal } from '@angular/core';
+import { WidgetInstallService } from '../widget-install/widget-install.service';
 import { MapZoomOrchestratorService } from './map-zoom-orchestrator.service';
 
 describe('MapZoomOrchestratorService', () => {
@@ -22,8 +24,8 @@ describe('MapZoomOrchestratorService', () => {
           },
         },
         {
-          provide: Router,
-          useValue: { url: '/map', navigate },
+          provide: WidgetInstallService,
+          useValue: { installedIds: signal(['map', 'media', 'projects', 'colleagues', 'organization']) },
         },
       ],
     });

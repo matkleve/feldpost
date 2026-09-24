@@ -14,34 +14,10 @@ The design follows the "canonical log line" / wide-event pattern: build up one o
 
 ## Storage
 
-Single `app_events` table. Migration name: `YYYYMMDDHHMMSS_create_app_events.sql`.
+Single `app_events` table. The applied migration is `supabase/migrations/20260613120000_create_app_events.sql`. Columns are `id`, `created_at`, `org_id`, `user_id`, `event`. Policies in that file, not the names below from an earlier draft:
 
-```sql
-CREATE TABLE app_events (
-  id         uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  created_at timestamptz NOT NULL    DEFAULT now(),
-  org_id     uuid        NOT NULL    REFERENCES organizations(id),
-  user_id    uuid        NOT NULL    REFERENCES auth.users(id),
-  event      jsonb       NOT NULL
-);
-
-CREATE INDEX idx_app_events_event_gin ON app_events USING gin (event);
-CREATE INDEX idx_app_events_org_created ON app_events (org_id, created_at DESC);
-
--- RLS: users see only their org's events
-ALTER TABLE app_events ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can read own org events"
-  ON app_events FOR SELECT
-  USING (org_id = (SELECT organization_id FROM profiles WHERE id = auth.uid()));
-
-CREATE POLICY "Users can insert own org events"
-  ON app_events FOR INSERT
-  WITH CHECK (
-    user_id = auth.uid()
-    AND org_id = (SELECT organization_id FROM profiles WHERE id = auth.uid())
-  );
-```
+- `app_events: org read` — `org_id = public.user_org_id()`
+- `app_events: user insert own org` — `user_id = auth.uid()` and `org_id = public.user_org_id()`
 
 `org_id` and `user_id` are top-level columns (not inside `event` jsonb) for cheap RLS evaluation and indexing. They are not duplicated inside the jsonb payload.
 
@@ -226,7 +202,7 @@ If a future operation spans client → Edge Function (e.g. geocoding already pro
 | `apps/web/src/app/core/wide-event/wide-event.service.spec.ts` | Unit tests |
 | `apps/web/src/app/core/wide-event/adapters/supabase-event-writer.ts` | PostgREST insert adapter |
 | `apps/web/src/app/core/wide-event/README.md` | Module index |
-| `supabase/migrations/YYYYMMDDHHMMSS_create_app_events.sql` | Table, indexes, RLS |
+| `supabase/migrations/20260613120000_create_app_events.sql` | Table, indexes, RLS |
 
 ## Phase 2 Instrumentation Targets
 

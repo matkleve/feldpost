@@ -14,7 +14,7 @@ function buildDeps(mediaInsertError?: unknown): {
   const profilesChain = {
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
-    single: vi.fn().mockResolvedValue({ data: { organization_id: 'org-1' }, error: null }),
+    single: vi.fn().mockResolvedValue({ data: { active_organization_id: 'org-1' }, error: null }),
   };
 
   const mediaItemsChain = {

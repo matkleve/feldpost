@@ -187,11 +187,15 @@ describe('AuthService', () => {
       });
     });
 
-    it('returns an error when invite code is missing', async () => {
+    it('signs up with no invite when the code is blank', async () => {
       const { service, fakeSupabase } = setup();
       const result = await service.signUp('a@b.com', 'pass123', 'Alice', '   ');
-      expect(result.error?.message).toContain('Invite code is required');
-      expect(fakeSupabase.client.auth.signUp).not.toHaveBeenCalled();
+      expect(result.error).toBeNull();
+      expect(fakeSupabase.client.auth.signUp).toHaveBeenCalledWith({
+        email: 'a@b.com',
+        password: 'pass123',
+        options: { data: { full_name: 'Alice' } },
+      });
     });
 
     it('does not call signUp when Web Crypto is unavailable (fail closed)', async () => {

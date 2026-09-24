@@ -543,7 +543,7 @@ export class UploadLocationTrayFlowService {
     }));
     if (houseCandidates.length === 0) {
       // An empty house list is not a question. Leave the jobs in Issues instead of a tray
-      // with nothing to pick. @see docs/study/021-upload-scale-action-plan.md
+      // with nothing to pick. @see docs/study/029-upload-scale-action-plan.md
       this.resolution().deferGroup(group.id);
       return;
     }

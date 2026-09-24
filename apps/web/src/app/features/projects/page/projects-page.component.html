@@ -38,6 +38,12 @@
         </button>
       </div>
     } @else if (currentProjectId() && currentProject(); as project) {
+      <button hlmBtn type="button" variant="outline" (click)="onShareProject(project.id)">
+        {{ t('projects.share.create', 'Share project') }}
+      </button>
+      @if (shareLink(); as link) {
+        <p>{{ link }}</p>
+      }
       <app-project-detail-view
         [project]="project"
         [namingNewProject]="isNamingCurrentProject()"

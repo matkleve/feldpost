@@ -1,0 +1,48 @@
+<section>
+  <h2>{{ t('organization.apps.title', 'Apps') }}</h2>
+  <h3>{{ t('organization.apps.createTitle', 'New organization') }}</h3>
+  <p>{{ t('nav.context.separate', 'Existing data stays where it is. The new organization starts empty.') }}</p>
+  <label>
+    {{ t('nav.context.name', 'Organization name') }}
+    <input [(ngModel)]="organizationName" name="organizationName" />
+  </label>
+  <button type="button" (click)="createOrganization()">
+    {{ t('nav.context.confirm', 'Create separate organization') }}
+  </button>
+  <p>{{ t('organization.apps.body', 'Allow an app, preinstall it for people with no choice yet, or lock it on. Push turns it on for everyone. Saving a preinstall does not turn someone back on.') }}</p>
+  @if (errorMessage(); as message) {
+    <p role="alert">{{ message }}</p>
+  }
+  <ul>
+    @for (widgetId of widgetIds; track widgetId) {
+      <li>
+        <span>{{ t('widget.' + widgetId, widgetId) }}</span>
+        <label>
+          <input
+            type="checkbox"
+            [checked]="policy(widgetId).allowed"
+            (change)="save(widgetId, { allowed: $any($event.target).checked })"
+          />
+          {{ t('organization.apps.allow', 'Allow') }}
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            [checked]="policy(widgetId).preinstalled"
+            (change)="save(widgetId, { preinstalled: $any($event.target).checked })"
+          />
+          {{ t('organization.apps.preinstall', 'Preinstall') }}
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            [checked]="policy(widgetId).locked"
+            (change)="save(widgetId, { locked: $any($event.target).checked })"
+          />
+          {{ t('organization.apps.lock', 'Lock') }}
+        </label>
+        <button type="button" (click)="push(widgetId)">{{ t('organization.apps.push', 'Push') }}</button>
+      </li>
+    }
+  </ul>
+</section>

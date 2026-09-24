@@ -129,29 +129,23 @@ export class AuthService {
     email: string,
     password: string,
     fullName: string,
-    inviteCode: string,
+    inviteCode: string | null,
   ): Promise<AuthResult> {
-    const normalizedInviteCode = inviteCode.trim();
-    if (!normalizedInviteCode) {
-      return { error: new Error('Invite code is required.') };
-    }
+    const normalizedInviteCode = inviteCode?.trim() ?? '';
+    const data: { full_name: string; invite_token_hash?: string } = { full_name: fullName };
 
-    let inviteTokenHash: string;
-    try {
-      inviteTokenHash = await this.sha256(normalizedInviteCode);
-    } catch (error) {
-      return { error: error instanceof Error ? error : new Error('Invite code hashing failed.') };
+    if (normalizedInviteCode) {
+      try {
+        data.invite_token_hash = await this.sha256(normalizedInviteCode);
+      } catch (error) {
+        return { error: error instanceof Error ? error : new Error('Invite code hashing failed.') };
+      }
     }
 
     const { error } = await this.supabase.client.auth.signUp({
       email,
       password,
-      options: {
-        data: {
-          full_name: fullName,
-          invite_token_hash: inviteTokenHash,
-        },
-      },
+      options: { data },
     });
     return { error };
   }

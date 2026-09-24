@@ -1,6 +1,8 @@
 # Projects Page
 
 > **Use cases:** [use-cases/projects-page-workspace.md](../../use-cases/projects-page-workspace.md), [use-cases/projects-grouping-filter-sort.md](../../use-cases/projects-grouping-filter-sort.md)
+>
+> **Superseded for the page shell:** [projects-dashboard.md](projects-dashboard.md) replaces grid/list/board/map view modes on `/projects`. Do not implement those modes from this file. Project create, archive, and media membership below stay in force where they still match `ProjectsService`.
 
 ## What It Is
 
@@ -173,8 +175,8 @@ flowchart LR
 | Rename/archive/restore/delete  | `ProjectsService.renameProject()`, `archiveProject()`, `restoreProject()`, `deleteProject()`                      | `Promise<boolean>`              |
 | Project color                  | `ProjectsService.setProjectColor()`                                                                               | `Promise<boolean>`              |
 | Project-scoped workspace media | `ProjectsService.loadProjectWorkspaceImages(projectId)`                                                           | `ProjectScopedWorkspaceImage[]` |
-| Primary city                   | Derived in `ProjectsService` from the most frequent `media_items.city` per project (tie-break: lexicographic)     | `string \| null`                |
-| Primary district               | Derived in `ProjectsService` from the most frequent `media_items.district` per project (tie-break: lexicographic) | `string \| null`                |
+| Primary city                   | Not read from `media_items`. `city` was dropped in `20260525130000_drop_media_items_location_columns.sql`. `loadProjectActivityRows` sets `city` to null | `string \| null`                |
+| Primary district               | Same as city. `media_items.district` was dropped in that migration. The service sets `district` to null | `string \| null`                |
 | View preference                | `localStorage['feldpost.projects.viewMode']` via component persistence helper                                     | `'grid' \| 'list' \| 'map' \| 'board'` |
 | Route-scoped project open      | `ActivatedRoute.snapshot.paramMap.get('projectId')`                                                               | `string \| null`                |
 | Filter rules                   | `FilterService.rules()` restricted to the projects operator profile                                               | `FilterRule[]`                  |
@@ -229,9 +231,9 @@ Media-level-only fields (`date-captured`, `date-uploaded`, `distance`, `project`
 
 | File                                                                   | Purpose                                                               |
 | ---------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| `apps/web/src/app/features/projects/projects-page.component.ts`        | Standalone route component and page interaction orchestration         |
-| `apps/web/src/app/features/projects/projects-page.component.html`      | Page template for list/cards/workspace states                         |
-| `apps/web/src/app/features/projects/projects-page.component.scss`      | Page styles                                                           |
+| `apps/web/src/app/features/projects/page/projects-page.component.ts`   | Standalone route component and page interaction orchestration         |
+| `apps/web/src/app/features/projects/page/projects-page.component.html` | Page template                                                          |
+| `apps/web/src/app/features/projects/page/projects-page.component.scss` | Page styles                                                            |
 | `apps/web/src/app/features/projects/projects-view-toggle.component.ts` | List/cards toggle control                                             |
 | `apps/web/src/app/features/projects/project-color-picker.component.ts` | Color selector using semantic tokens                                  |
 | `apps/web/src/app/core/projects/projects.service.ts`                   | Project read/search/create/rename/archive/restore/delete data service |

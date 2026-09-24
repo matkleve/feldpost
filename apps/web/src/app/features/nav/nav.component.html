@@ -58,12 +58,59 @@
               </span>
               <span class="nav__label text-sm">{{ item.label }}</span>
             </a>
+            <button type="button" (click)="hideWidget(item.route)">
+              {{ t('nav.catalog.hide', 'Hide') }}
+            </button>
           }
         </li>
       }
     </ul>
 
+    @if (catalogItems().length > 0) {
+      <ul class="nav__list" role="list">
+        @for (widgetId of catalogItems(); track widgetId) {
+          <li class="sidebar__item">
+            <button type="button" class="nav__link" (click)="addWidget(widgetId)">
+              <span class="nav__label text-sm">{{ t('nav.catalog.add', 'Add') }} {{ widgetLabel(widgetId) }}</span>
+            </button>
+          </li>
+        }
+      </ul>
+    }
+
     <div class="sidebar__spacer" aria-hidden="true"></div>
+
+    <div class="nav__utility-row">
+      <a class="nav__label text-sm" routerLink="/chat">{{ t('nav.chat', 'Messages') }}</a>
+      <a class="nav__label text-sm" routerLink="/join">{{ t('nav.join', 'Join organization') }}</a>
+      <a class="nav__label text-sm" routerLink="/projects/receive">{{ t('nav.projectShare', 'Project links') }}</a>
+      <label class="nav__label text-sm" for="account-context">
+        {{ t('nav.context.label', 'Context') }}
+      </label>
+      <select
+        id="account-context"
+        [value]="accountContext.organizationId() ?? ''"
+        (change)="onContextChange($any($event.target).value)"
+      >
+        <option value="">{{ t('nav.context.personal', 'Personal') }}</option>
+        @for (membership of accountContext.memberships(); track membership.organizationId) {
+          <option [value]="membership.organizationId">{{ membership.name }}</option>
+        }
+      </select>
+      <button type="button" (click)="openCreateOrganization()">
+        {{ t('nav.context.create', 'Create organization') }}
+      </button>
+      @if (accountContext.confirmOpen()) {
+        <p>{{ t('nav.context.separate', 'Existing data stays where it is. The new organization starts empty.') }}</p>
+        <input [(ngModel)]="orgName" [attr.aria-label]="t('nav.context.name', 'Organization name')" />
+        <button type="button" (click)="confirmCreateOrganization()">
+          {{ t('nav.context.confirm', 'Create separate organization') }}
+        </button>
+      }
+      @if (accountContext.errorMessage(); as message) {
+        <p>{{ message }}</p>
+      }
+    </div>
 
     <!-- Utility row: theme cycle -->
     <div class="nav__utility-row">

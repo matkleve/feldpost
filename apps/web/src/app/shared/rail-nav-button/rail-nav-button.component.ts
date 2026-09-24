@@ -14,8 +14,8 @@ import { HLM_BUTTON_IMPORTS } from '../ui/button';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RailNavButtonComponent {
-  readonly label = input.required<string>();
-  readonly icon = input.required<string>();
+  readonly label = input('');
+  readonly icon = input('');
   readonly active = input(false);
   readonly pressed = input<boolean | null>(null);
 

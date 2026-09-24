@@ -51,9 +51,11 @@ const ROOT = resolve(import.meta.dirname, "..");
  * registered `app-confirm-dialog`, which absorbed its `busy` and `size` variants
  * (issue #256). `organization-roles-section` left the same day: widget-grants.md
  * names that roles screen.
+ *
+ * 2026-09-24: `shell-route-placeholder` left the list. `map-page.md` names it
+ * as the outlet child for `/` and `/map`.
  */
 const ALLOWLIST = new Set([
-  "apps/web/src/app/layout/shell-route-placeholder.component.ts",
   "apps/web/src/app/features/organization/sections/audit/organization-audit-section.component.ts",
   "apps/web/src/app/features/organization/sections/billing/organization-billing-section.component.ts",
   "apps/web/src/app/features/organization/sections/branding/organization-branding-section.component.ts",

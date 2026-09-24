@@ -1,9 +1,7 @@
 <div class="page-grid">
-  @if (leftRail()) {
-    <div class="page-grid__rail page-grid__rail--left">
-      <ng-content select="[pageGridLeft]" />
-    </div>
-  }
+  <div class="page-grid__rail page-grid__rail--left" [hidden]="!leftRail()">
+    <ng-content select="[pageGridLeft]" />
+  </div>
 
   <div
     class="page-grid__rail page-grid__rail--center"
@@ -13,9 +11,7 @@
     <ng-content select="[pageGridCenter]" />
   </div>
 
-  @if (rightRailOpen()) {
-    <div class="page-grid__rail page-grid__rail--right">
-      <ng-content select="[pageGridRight]" />
-    </div>
-  }
+  <div class="page-grid__rail page-grid__rail--right" [hidden]="!rightRailOpen()">
+    <ng-content select="[pageGridRight]" />
+  </div>
 </div>

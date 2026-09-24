@@ -10,6 +10,8 @@ Folder-specific rules:
 - **Declarative menu resolution:** [action-engine-system.md](action-engine-system.md) (pairs with [action-context-matrix.md](action-context-matrix.md)).
 - **Upload without a location, resolve it later:** [deferred-location-resolution.md](deferred-location-resolution.md) (single-item row actions and batch runs; pairs with [files-page.md](../page/files-page.md)).
 - **General authorization (RLS + roles):** [authorization-model.md](authorization-model.md)
+- **Widget install (addable apps on the left nav):** [widget-install.md](widget-install.md)
+- **Account context (personal or one organization):** [account-context.md](account-context.md)
 - **Widget and data grants:** [widget-grants.md](widget-grants.md)
 - **Security analyses:** [security/README.md](security/README.md)
 

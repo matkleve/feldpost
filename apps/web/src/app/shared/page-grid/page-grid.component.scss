@@ -87,6 +87,12 @@
   overflow: hidden;
 }
 
+// A closed rail stays out of the grid. display:flex would otherwise beat [hidden].
+// @see docs/design/page-rail-grid.md
+.page-grid__rail[hidden] {
+  display: none;
+}
+
 // Canvas pages start at the left inset. A page with a left rail keeps that rail;
 // a page without one (Media) uses the rest of the box.
 // @see docs/specs/ui/shell/shell-main-canvas.md
