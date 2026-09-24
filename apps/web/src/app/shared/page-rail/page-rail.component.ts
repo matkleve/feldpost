@@ -16,5 +16,5 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 })
 export class PageRailComponent {
   /** Accessible name for the rail landmark (`nav`). */
-  readonly ariaLabel = input.required<string>();
+  readonly ariaLabel = input('');
 }

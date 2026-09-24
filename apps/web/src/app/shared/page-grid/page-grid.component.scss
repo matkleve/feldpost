@@ -86,3 +86,9 @@
   min-height: 0;
   overflow: hidden;
 }
+
+// A closed rail stays out of the grid. display:flex would otherwise beat [hidden].
+// @see docs/design/page-rail-grid.md
+.page-grid__rail[hidden] {
+  display: none;
+}
