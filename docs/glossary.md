@@ -133,9 +133,10 @@
 ## Project & Metadata
 
 - **Organization**  
-  A company or team that owns all data within its scope. Every user belongs to exactly one organization.
+  A company or team that owns all data within its scope. In the live schema every profile has exactly one `organization_id`.
   - Table: `organizations`.
   - All RLS policies use `organization_id` to enforce data isolation between orgs (see security-boundaries.md §2.1).
+  - A later decision, not this schema: the same email may belong to more than one organization, and the person chooses one after login. Recorded in [STUDY-017](study/017-addable-apps-change-plan.md) § Update 2026-09-24 — current record. Do not add a membership table from this entry.
 
 - **Project**  
   A logical grouping of **media items** that belong to the same construction job, site, or contract.
@@ -145,10 +146,11 @@
 - **Widget**  
   An addable app: a product surface on the shell. Map and Media are widgets of this kind. Later surfaces (for example a vehicles app) would be too. Map is not a separate kind of module.
   - Not a projects-dashboard card. Those cards are named in [projects-dashboard.md](specs/page/projects-dashboard.md).
-  - Not a shared component in the component registry.
-  - Who sees it: per user. The organization may preinstall it or allow it. No install table exists yet. Do not invent one from this entry.
-  - Address and GPS are not Map data. They live on `locations`, linked to the subject (`media_item_location_links` for a media item). Removing the Map widget does not remove those rows.
-  - Reasoning, not a schema: [STUDY-016](study/016-addable-apps-repo-shape.md). Issue #258.
+  - Not a shared component in the component registry. Settings and Account are shell chrome, not widgets. Upload belongs to Media.
+  - Who sees it: per user, inside the organization they have entered. The organization may preinstall it, allow it, lock it on, or push it to users. A new signup starts with Map and Media. Someone who already has other widgets keeps them unless the organization turned them off. No install table exists yet. Do not invent one from this entry.
+  - Removing a widget hides it. It does not delete subject rows. Address and GPS live on `locations`, linked to the subject (`media_item_location_links` for a media item).
+  - The live schema still has one `profiles.organization_id`. Several organizations per email is a decision in the study below, not a table.
+  - Current record: [STUDY-017](study/017-addable-apps-change-plan.md) § Update 2026-09-24 — current record. Shape of the repo: [STUDY-016](study/016-addable-apps-repo-shape.md). Issue #258.
 
 - **Group (Saved Group)**  
   Legacy concept for named, user-created collections.

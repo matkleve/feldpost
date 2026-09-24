@@ -10,6 +10,8 @@ corrected-by: none
 
 **Written:** 2026-09-24. **On:** `cursor/addable-apps-change-plan-cb0a`, reading STUDY-016, the glossary, routes, nav, and `20260615180000_org_roles_colleagues_chat.sql`. No database was queried. **Status `proposed`.** This is not a spec and not permission to migrate.
 
+The current record is the last section, **Update 2026-09-24 — current record**. Earlier sentences that still say a question is open are superseded when that section answers them. Do not edit those sentences away.
+
 Owner decisions this plan obeys, all `[D]`, from STUDY-016 § Update 2026-09-24:
 
 - A widget is an addable app. Map is one, the same kind as Media.
@@ -240,3 +242,33 @@ Still not decided: Q9 (one install store for the nav and the STUDY-015 rail), B2
 **B2.** People who already use Projects, Colleagues, and Organization keep those on the day this ships. `[D]` “Only Map and Media” is the set for a new account, not a removal of apps an existing user already has. Read from the owner’s “of course” on 2026-09-24. If that reading is wrong, this paragraph is the one to correct.
 
 Plain meaning of “new account,” added after the owner asked what that phrase means: a person who has just signed up, and has not added widgets yet, has Map and Media on the nav. Projects, Chat, and Organization are not on until that person adds them, or an invite or an organization push turns them on. It does not mean a new database, and it does not turn those apps off for someone who already has them.
+
+## Update 2026-09-24 — current record
+
+The owner said existing apps stay, and they come off only if the organization turned them off. `[D]` That supersedes the hedge in the B2 paragraph above (“if that reading is wrong”). It does not change “a new signup starts with Map and Media.”
+
+### Locked `[D]`
+
+1. A widget is an addable app. Map, Media, Projects, Colleagues, Organization, and Chat are that kind. Map is not a special always-on module. Dashboard cards are not widgets. Settings and Account are shell chrome, not widgets. Files is not a widget in this plan. Upload is an add-on of Media: it is present when Media is present, including a temporary Media session.
+2. Install is per user, inside the organization they have entered. The organization may preinstall a widget, allow it, lock a preinstalled widget so the user cannot turn it off, or push it to all users. Saving preinstall again does not turn a widget back on for someone who turned it off. Push is a separate action and does turn it back on.
+3. A person who just signed up, and has not added widgets, has Map and Media on the nav. Projects, Chat, and Organization come on when that person adds them, or when an invite or an organization push turns them on.
+4. A person who already uses Projects, Colleagues, and Organization keeps those on the day this ships. They come off only if the organization turned them off. Phase 3’s backfill must install what that person already uses, then apply the organization’s off switches. It must not strip those apps because the new-signup set is Map and Media.
+5. Uninstall hides the route and the nav row. It does not delete subject data. Address and GPS stay on `locations`, linked to the subject. Chat rows stay when the chat widget is removed. Data is deleted only by its own DSGVO action. The UI must not say the rows are gone.
+6. A shared link to an app the user has not installed opens that app until logout. It is not a durable install row and it does not bypass RLS.
+7. A person can create an account without an invite. An invite is one path and joins that email to an organization immediately. The same email can belong to more than one organization. After login the person chooses which organization to enter. They then add the Organization widget and use it to set up the organization, name an admin, and create invites.
+8. The right side is not an install list. The only install list this plan stores is the one that drives the left nav.
+
+### Still not chosen `[D]` that they are open
+
+- The permission key that may set preinstall, allow, lock, and push. No `org.widgets.manage` key exists `[A]` migration `20260615180000` lines 27–31.
+- Whether user install and org flags are one table or two. Column names are not chosen.
+- How a shared link names the app.
+- What the colleagues page shows once chat is its own widget.
+- Whether the `/files` tree later folds into Media. Do not add the route. Do not delete the files spec or the folder RPCs.
+- The membership table that replaces one `profiles.organization_id`. This record does not name it.
+
+### What the database does today `[A]`
+
+`handle_new_user()` refuses signup without an invite and copies one `organization_id` onto the profile (`20260616085726_invite_signups_display_name.sql` lines 51–77). `profiles.organization_id` is `not null` (`20260303000002_tables.sql`). RLS reads that one column through `user_org_id()`. There is no install table. Nav is the fixed array in `nav.component.ts` lines 123–129.
+
+A spec has to replace “one organization on the profile” before the signup and multi-organization flow can ship. This file is still `proposed`. It is not permission to migrate.
