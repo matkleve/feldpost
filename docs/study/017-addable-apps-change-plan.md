@@ -238,3 +238,5 @@ Still not decided: Q9 (one install store for the nav and the STUDY-015 rail), B2
 9. **The right side is not decided.** `[D]` The owner does not know if widgets will sit on the right. Do not build a second install store for a right rail. STUDY-015’s right rail stays a layout sketch. The only install list this plan may store is the one that drives the left nav, until a later decision says the right side is also widgets.
 
 **B2.** People who already use Projects, Colleagues, and Organization keep those on the day this ships. `[D]` “Only Map and Media” is the set for a new account, not a removal of apps an existing user already has. Read from the owner’s “of course” on 2026-09-24. If that reading is wrong, this paragraph is the one to correct.
+
+Plain meaning of “new account,” added after the owner asked what that phrase means: a person who has just signed up, and has not added widgets yet, has Map and Media on the nav. Projects, Chat, and Organization are not on until that person adds them, or an invite or an organization push turns them on. It does not mean a new database, and it does not turn those apps off for someone who already has them.
