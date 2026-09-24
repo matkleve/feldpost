@@ -16,7 +16,9 @@
     class="authenticated-app-layout__map-host"
     [class.authenticated-app-layout__map-host--visible]="mapShellVisible()"
   >
-    <app-map-shell />
+    @if (widgetInstall.installedIds().includes('map')) {
+      <app-map-shell />
+    }
   </div>
   <div
     class="authenticated-app-layout__shell-outlet"

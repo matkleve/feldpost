@@ -63,6 +63,18 @@
       }
     </ul>
 
+    @if (catalogItems().length > 0) {
+      <ul class="nav__list" role="list">
+        @for (widgetId of catalogItems(); track widgetId) {
+          <li class="sidebar__item">
+            <button type="button" class="nav__link" (click)="addWidget(widgetId)">
+              <span class="nav__label text-sm">{{ t('nav.catalog.add', 'Add') }} {{ widgetId }}</span>
+            </button>
+          </li>
+        }
+      </ul>
+    }
+
     <div class="sidebar__spacer" aria-hidden="true"></div>
 
     <div class="nav__utility-row">

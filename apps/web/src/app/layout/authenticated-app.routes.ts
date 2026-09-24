@@ -36,9 +36,14 @@ export const AUTHENTICATED_APP_ROUTES: Routes = [
     component: AuthenticatedAppLayoutComponent,
     children: [
       {
-        path: '',
-        loadComponent: loadShellRoutePlaceholder,
-        pathMatch: 'full',
+        path: 'chat',
+        loadComponent: () =>
+          import('../features/account-chat/account-chat.component').then((m) => m.AccountChatComponent),
+      },
+      {
+        path: 'projects/receive',
+        loadComponent: () =>
+          import('../features/projects/receive/project-receive.component').then((m) => m.ProjectReceiveComponent),
       },
       {
         matcher: mapShellMatcher,

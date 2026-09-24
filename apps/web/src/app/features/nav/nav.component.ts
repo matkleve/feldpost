@@ -6,6 +6,7 @@ import { filter, map, startWith } from 'rxjs/operators';
 import { AuthService } from '../../core/auth/auth.service';
 import { AccountContextService } from '../../core/account-context/account-context.service';
 import { WidgetInstallService } from '../../core/widget-install/widget-install.service';
+import { WIDGET_IDS } from '../../core/widget-install/widget-install.helpers';
 import type { WidgetId } from '../../core/widget-install/widget-install.types';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { ThemeService } from '../../core/theme/theme.service';
@@ -147,6 +148,17 @@ export class NavComponent {
       return installed.has(routeWidgetId(item.route));
     });
   });
+
+  readonly catalogItems = computed(() => {
+    const installed = new Set(this.widgetInstall.installedIds());
+    return WIDGET_IDS.filter((id) => !installed.has(id)).filter(
+      (id) => !(this.accountContext.personal() && id === 'colleagues'),
+    );
+  });
+
+  addWidget(widgetId: WidgetId): void {
+    void this.widgetInstall.setInstalled(widgetId, true);
+  }
 
   isNavItemActive(item: NavItem): boolean {
     const shell = this.activeShell();

@@ -38,6 +38,17 @@ export class WidgetInstallService {
 
     this.installedIds.set(effectiveWidgetIds({ policies, userRows }));
   }
+
+  async setInstalled(widgetId: WidgetId, installed: boolean): Promise<void> {
+    const { error } = await this.supabase.client.rpc('set_own_widget_installed', {
+      p_widget_id: widgetId,
+      p_installed: installed,
+    });
+    if (error) {
+      return;
+    }
+    await this.load();
+  }
 }
 
 function toPolicy(row: {

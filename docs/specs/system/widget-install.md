@@ -91,13 +91,14 @@ Chat stays on the colleagues route. This spec does not add a `chat` widget id.
 | `docs/specs/system/widget-install.md` | This contract. |
 | `supabase/migrations/20260924120000_widget_install.sql` | Tables, RLS, backfill, push, and own-install function. |
 | `apps/web/src/app/core/widget-install/` | Read model and `effectiveWidgetIds`. |
-| `apps/web/src/app/features/nav/nav.component.ts` | Renders `installedIds`. |
+| `apps/web/src/app/features/nav/nav.component.ts` | Renders `installedIds` and the add list. |
+| `supabase/migrations/20260924150000_context_widgets_share_chat.sql` | Personal install rows, project receive, account messages. |
 
 ## Wiring
 
 The nav calls `WidgetInstallService`, which calls `SupabaseService`. A failed read keeps the five current apps so a database without this migration does not go blank. A successful read with no user rows shows Map and Media.
 
-Permission key: `org.settings.edit`. Tables: `organization_widget_policies` and `user_widget_installs`. Link name: the existing path. Colleagues keeps chat. Membership stays one `profiles.organization_id`.
+A personal account stores `user_widget_installs.organization_id` as null. The nav lists ids that are not installed and calls `set_own_widget_installed`. The map host is in the layout only while Map is installed. Zoom with Map off does not navigate.
 
 ## Acceptance Criteria
 

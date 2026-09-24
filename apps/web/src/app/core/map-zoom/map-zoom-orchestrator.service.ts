@@ -5,6 +5,7 @@ import {
   coerceLocationCoordinate,
   legacyMediaHasGps,
 } from '../media-locations/media-locations.helpers';
+import { WidgetInstallService } from '../widget-install/widget-install.service';
 import { WorkspacePaneLayoutMapEffectsService } from '../workspace-pane/workspace-pane-layout-map-effects.service';
 import type { MapZoomPayload, MapZoomRequest } from './map-zoom.types';
 
@@ -16,6 +17,7 @@ import type { MapZoomPayload, MapZoomRequest } from './map-zoom.types';
 @Injectable({ providedIn: 'root' })
 export class MapZoomOrchestratorService {
   private readonly mapLayoutEffects = inject(WorkspacePaneLayoutMapEffectsService);
+  private readonly widgetInstall = inject(WidgetInstallService);
   private readonly router = inject(Router);
   private readonly injector = inject(Injector);
 
@@ -28,6 +30,11 @@ export class MapZoomOrchestratorService {
     const lat = coerceLocationCoordinate(request.lat);
     const lng = coerceLocationCoordinate(request.lng);
     const activeShell = resolveAuthenticatedActiveShell(this.router.url);
+
+    if (!this.widgetInstall.installedIds().includes('map')) {
+      this.reject('map-not-installed');
+      return;
+    }
 
     if (!request.mediaId?.trim()) {
       this.reject('missing-media-id');
