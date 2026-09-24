@@ -50,7 +50,7 @@ sequenceDiagram
 
 ## Data
 
-`user_org_id()` returns one uuid today, from `profiles.organization_id`. `[A]` STUDY-018. This spec requires a later migration where that helper returns the organization on screen, or no organization when the personal context is on screen.
+`user_org_id()` returns one uuid today, from `profiles.organization_id`. `[A]` STUDY-026. This spec requires a later migration where that helper returns the organization on screen, or no organization when the personal context is on screen.
 
 | Context | Which rows are visible |
 | --- | --- |

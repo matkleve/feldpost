@@ -10,13 +10,13 @@ Deep-linkable settings as a **suffix on the active app shell**, not a standalone
 
 `shell` is one of: `map` (canonical for map root), `media`, `projects`, `projects/:projectId`, `colleagues`, or `organization` (and `organization/:section`). Matchers: `apps/web/src/app/layout/authenticated-shell-matchers.ts`.
 
-The visible UI is the **settings overlay** on `AppComponent`. The shell route (`MapShellComponent`, `MediaComponent`, `ProjectsPageComponent`, …) stays mounted under the authenticated layout `router-outlet`.
+The visible UI is the settings surface inside `app-shell-main-canvas`. The shell route stays mounted under the outlet and is covered while settings is open.
 
 Legacy top-level `/settings/...` URLs redirect to `/map/settings/...`.
 
 ## What It Looks Like
 
-Same overlay as manual open from the nav avatar: two-column panel anchored to the sidebar. The URL encodes shell + section + subsection; closing the overlay strips the `/settings/...` suffix and leaves the shell path (e.g. `/media/settings/account` → `/media`).
+The same canvas surface the left rail opens. Two columns inside the canvas box. The URL encodes shell + section + subsection; closing strips the `/settings/...` suffix and leaves the shell path (e.g. `/media/settings/account` → `/media`).
 
 ## Where It Lives
 
@@ -32,7 +32,7 @@ Same overlay as manual open from the nav avatar: two-column panel anchored to th
 | --- | ------------------------------------------------ | ------------------------------------------------------------ | -------------------------------- |
 | 1   | Navigates to `/media/settings`                   | `MediaComponent` in outlet; overlay opens (default section)  | `NavigationEnd` → effect         |
 | 2   | Navigates to `/map/settings/map/marker-motion`   | `MapShellComponent`; overlay opens map section + subsection  | URL segments                     |
-| 3   | Opens settings from nav while on `/projects`     | Navigates to `/projects/settings`                            | `NavComponent.toggleSettingsOverlay` |
+| 3   | Opens settings from the left rail while on `/projects` | Navigates to `/projects/settings`                     | `ShellControlAreaComponent` |
 | 4   | Closes overlay while URL has settings suffix     | Router navigates to shell-only path (`stripSettingsSuffix`)  | overlay close + effect           |
 | 5   | Navigates to legacy `/settings/account`          | Redirect to `/map/settings/account`                          | route redirect                   |
 | 6   | Cold link `/media/settings/general/language`     | Media shell + overlay on general → language anchor           | parse + `openFromRoute`          |
@@ -42,8 +42,10 @@ Same overlay as manual open from the nav avatar: two-column panel anchored to th
 ```text
 AppComponent
 ├── effects: URL ↔ SettingsPaneService
-├── ss-settings-overlay
-└── router-outlet → AuthenticatedAppLayout → { map host or Media | Projects | Colleagues | Organization } (shell from URL)
+└── router-outlet → AuthenticatedAppLayout
+    └── app-shell-main-canvas
+        ├── shell route (map, media, projects) — inert while settings is open
+        └── ss-settings-overlay
 ```
 
 ## Data
@@ -70,7 +72,7 @@ AppComponent
 | `layout/authenticated-app.routes.ts`              | Shell + settings suffix routes  |
 | `core/settings-pane/settings-url.helpers.ts`      | Parse / build / strip URLs        |
 | `features/settings-overlay/settings-overlay.component.ts` | Section / TOC → URL sync |
-| `features/nav/nav.component.ts`                   | Open/close settings on current shell |
+| `layout/shell/shell-control-area.component.ts`    | Left rail navigates to the settings URL |
 | `features/settings-overlay/*`                     | Overlay presentation            |
 
 ## Wiring

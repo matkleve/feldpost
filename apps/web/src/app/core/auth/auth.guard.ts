@@ -15,6 +15,7 @@ import type { CanActivateFn} from '@angular/router';
 import { Router } from '@angular/router';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { filter, take } from 'rxjs';
+import { featureFlagRouterQueryParams } from '../feature-flags/feature-flags.helpers';
 import { AuthService } from './auth.service';
 
 /**
@@ -54,8 +55,8 @@ export const authGuard: CanActivateFn = async () => {
     return true;
   }
 
-  // Redirect to login, preserving nothing — user must re-authenticate
-  return router.createUrlTree(['/auth/login']);
+  // Redirect to login; keep `ff` so preview flags survive the auth hop.
+  return router.createUrlTree(['/auth/login'], { queryParams: featureFlagRouterQueryParams() });
 };
 
 /**
@@ -75,9 +76,11 @@ export const guestGuard: CanActivateFn = async (route) => {
   const invite = route.queryParamMap?.get('invite')?.trim();
   const childPath = route.firstChild?.routeConfig?.path ?? route.routeConfig?.path;
   if (invite && childPath === 'register') {
-    return router.createUrlTree(['/join'], { queryParams: { invite } });
+    return router.createUrlTree(['/join'], {
+      queryParams: { invite, ...featureFlagRouterQueryParams() },
+    });
   }
 
-  // Already logged in — go to the main app
-  return router.createUrlTree(['/']);
+  // Already logged in — go to the main app (preserve `ff` when present)
+  return router.createUrlTree(['/'], { queryParams: featureFlagRouterQueryParams() });
 };

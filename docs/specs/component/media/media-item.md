@@ -28,6 +28,8 @@ When `item` is `null`, the host renders an icon-free skeleton rectangle in the e
 
 **Row mode (`mode === 'row'`):** dense horizontal scan row — square thumb on the left, primary + secondary text on the right, `3rem` min row height (search-bar result density). Full contract: [media-item.row-mode.supplement.md](media-item.row-mode.supplement.md).
 
+**Detail embed** (`showInteractionChrome` false): quiet actions and the file-type chip are hidden. The lower-right corner shows the original-file resolution badge instead. Size source: [media-detail-media-viewer.md § Resolution badge](../../ui/media-detail/media-detail-media-viewer.md#resolution-badge).
+
 ## Where It Lives
 
 - Spec location: `docs/specs/component/media/media-item.md`
@@ -68,7 +70,11 @@ MediaItemComponent
 ├── [grid modes] .media-item__slot
 │   ├── MediaDisplayComponent         (owns media rendering + download states)
 │   ├── MediaItemUploadOverlayComponent
-│   └── MediaItemQuietActionsComponent
+│   ├── MediaItemQuietActionsComponent
+│   └── app-chip.media-item__filetype-chip   (lower-right, grid chrome only)
+├── [detail embed] .media-item__slot
+│   ├── MediaDisplayComponent
+│   └── .media-item__resolution-badge        (lower-right, original pixel size)
 └── [row mode] .media-item__row — see media-item.row-mode.supplement.md
     ├── .media-item__row-media → .media-item__slot → MediaDisplay + overlays
     └── .media-item__row-content (primary + secondary labels)
@@ -241,6 +247,7 @@ Remount rules:
 | Upload overlay       | `.media-item__upload-overlay` | `app-media-item:host`  | none (passive)                       | `.media-item__upload-overlay`  | layer/upload (3)      | Upload layer sits above media content and below quiet actions |
 | Quiet actions reveal | `.media-item__quiet-actions`  | `.media-item__slot`    | `.media-item-quiet-actions__button*` | `.media-item__quiet-actions`   | layer/actions (4)     | Select visible when selected; map visible on hover **or** when selected + `map-enabled` |
 | Tile hover emphasis  | `.media-item__slot`           | `app-media-item:host`  | `.media-item__slot`                  | `.media-item__slot:hover`, `.media-item__slot--linked-hover` | layer/hover (1b)      | **Primary** gold; `box-shadow` / `border-color` only — **no CSS `outline`** on rounded slot |
+| Resolution badge     | `.media-item__resolution-badge` | `.media-item__slot`  | none (passive)                       | `.media-item__resolution-badge` | 6                     | Detail embed only. Text is original pixels, not the preview bitmap. |
 
 ### Ownership Triad Declaration
 
@@ -250,6 +257,7 @@ Remount rules:
 | Upload overlay       | `.media-item__upload-overlay` | `.media-item__upload-overlay`        | `.media-item__upload-overlay`  | yes                                                                            |
 | Quiet actions reveal | `.media-item__quiet-actions`  | `.media-item__slot:hover` / `--selected` | `.media-item__quiet-actions`   | exception: slot-scoped CSS only — not `:host(:hover)`.                          |
 | Tile hover emphasis  | `.media-item__slot`           | `.media-item__slot:hover` / `--linked-hover` | `.media-item__slot`            | yes — primary gold `box-shadow`; **forbidden:** `outline` on rounded slot       |
+| Resolution badge     | `.media-item__resolution-badge` | `.media-item__resolution-badge`          | `.media-item__resolution-badge` | yes — detail embed only; grid chrome stays off                                 |
 
 ### Stacking Context
 
@@ -266,6 +274,8 @@ Remount rules:
 | Selected emphasis | 2       | `.media-item__slot--selected` |
 | Upload overlay    | 3       | `.media-item__upload-overlay`  |
 | Quiet actions     | 4       | `.media-item__quiet-actions`   |
+| File-type chip    | 5       | `.media-item__filetype-chip`   |
+| Resolution badge  | 6       | `.media-item__resolution-badge` |
 
 ## Interaction emphasis
 
@@ -305,6 +315,7 @@ Cross-surface **linked-hover** from workspace grid ↔ map marker: parent grid b
 | `apps/web/src/app/features/media/media-item-upload-overlay.component.ts` | Upload overlay presentation                                       |
 | `apps/web/src/app/features/media/media-item-quiet-actions.component.ts`  | Quiet actions presentation and outputs                            |
 | `apps/web/src/app/features/media/media-item-render-surface.component.ts` | Legacy reference only; not part of active runtime render contract |
+| `apps/web/src/app/shared/media-item/media-item-original-resolution.helpers.ts` | Original pixel size from `exif_raw` for the detail badge |
 
 ## Wiring
 
@@ -360,6 +371,8 @@ sequenceDiagram
 - [x] `MediaItemComponent` is an interaction-shell only contract and has no direct write access to route lifecycle state.
 - [x] `MediaItemComponent` is a forbidden writer for `groupingMode`, `sortMode`, and `activeFilters`.
 - [x] `MediaItemComponent` does not consume or emit coalesced systemic escalation intents.
+- [x] Detail embed (`showInteractionChrome` false) shows `.media-item__resolution-badge` with the original pixel size from `exif_raw`, and hides the file-type chip.
+- [x] Grid chrome (`showInteractionChrome` true) does not show the resolution badge.
 
 ## Ratio Binding Addendum (2026-04-05)
 
@@ -416,7 +429,9 @@ All grid tiles share one choreography: `loading-surface-visible` → `ratio-know
 
 ## File-type chip (Phase 2)
 
-Every loaded tile shows `app-chip` inside `.media-item__slot` (lower-right) with registry badge text (e.g. `JPEG`, `PPTX`) and `chipVariantForFileType`. Hover/selected border and shadow are owned by `.media-item__slot`, not the host wrapper. Chip is presentational (`pointer-events: none`); primary action remains the open control.
+Every loaded **grid** tile (`showInteractionChrome` true) shows `app-chip` inside `.media-item__slot` (lower-right) with registry badge text (e.g. `JPEG`, `PPTX`) and `chipVariantForFileType`. Hover/selected border and shadow are owned by `.media-item__slot`, not the host wrapper. Chip is presentational (`pointer-events: none`); primary action remains the open control.
+
+Detail embed uses that same corner for `.media-item__resolution-badge` and MUST NOT show the chip. The two labels are mutually exclusive.
 
 ## Canonical Name Registry Gate
 

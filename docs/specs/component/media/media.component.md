@@ -26,7 +26,7 @@ It MUST delegate content rendering behavior to `MediaContentComponent`.
 The component MUST render a stable shell structure with page header, optional `MediaToolbar`, and a content region.
 The shell MUST project deterministic lifecycle states (`boot`, `initial-loading`, `ready`, `loading-more`, `append-error`, `error`, `revalidating`) to child boundaries.
 Card-variant switching and operator/query command writes MUST remain shell-owned.
-**Upload chrome:** Global `app-upload-shell` (see [upload-shell.md](../upload/upload-shell.md)) lives in the layout **main column** (top-right of the page area, not over the workspace pane). List/header layout does not shift when the dock opens. Workspace pane **Upload** tab remains a separate embed in the layout host.
+**Page width:** inside `app-shell-main-canvas` this page has no left rail, so the header, toolbar, and grid fill the canvas. Upload opens in the right panel column and does not reflow this page.
 Visual geometry details MAY evolve independently as long as the behavior contract in this spec remains unchanged.
 
 ## Where It Lives

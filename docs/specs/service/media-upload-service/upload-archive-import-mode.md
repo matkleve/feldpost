@@ -10,21 +10,21 @@
 ## What It Is
 
 A second upload flow for importing an existing archive: resolve what can be resolved without
-asking, put everything else in Issues, and let the operator work it afterwards a folder at a time.
+asking, put everything else in Clarifications, and let the operator work it afterwards a folder at a time.
 
 ## What It Looks Like
 
 The operator picks *Import archive* instead of a normal upload, chooses a folder, and the panel
 starts uploading within a second. No questions appear at any point. Two figures run side by side:
 files imported, counting to a finite total, and items awaiting resolution, a backlog. When the first
-finishes the import is done; the second is then worked in the Issues lane, a folder at a time. If a
+finishes the import is done; the second is then worked in the Clarifications lane, a folder at a time. If a
 file fails to upload, a third line says so — a failure never hides inside the imported count.
 
 ## Where It Lives
 
 The mode is chosen in the upload panel at submit time and recorded on the batch. The import itself
 runs through the same manager, queue and pipeline as an interactive upload — this is a mode of that
-pipeline, not a parallel one. Resolution afterwards happens in the Issues lane and on
+pipeline, not a parallel one. Resolution afterwards happens in the Clarifications lane and on
 [`/files`](../../page/files-page.md).
 
 ## Why it is a flow and not a flag
@@ -41,9 +41,9 @@ This is the distinction most likely to be got wrong later, so it is stated first
 
 | Mode | Classification | Trays | Unresolved goes to |
 | --- | --- | --- | --- |
-| **Interactive** (`required`) | yes | yes — asked during import | tray, then Issues if unanswered |
+| **Interactive** (`required`) | yes | yes — asked during import | tray, then Clarifications if unanswered |
 | **No location** (`optional`) | **skipped entirely** | none | nowhere; item simply has no location |
-| **Archive import** | **yes** | **none** | **Issues**, as `address_deferred` |
+| **Archive import** | **yes** | **none** | **Clarifications**, as `address_deferred` |
 
 Archive import is *not* `optional` with a bigger batch. `optional` means "I do not want locations".
 Archive import means "resolve what you can, ask me nothing, park the rest" — so classification must
@@ -57,7 +57,7 @@ run, because everything it resolves silently is a question the operator never ha
 | 2 | Waits | Uploading begins after the first chunk; no tray ever opens | drain |
 | 3 | Watches progress | Files imported, items awaiting resolution, and failures when there are any | batch record |
 | 4 | Import finishes | Batch reports complete even with items unresolved | terminal |
-| 5 | Opens Issues or `/files` afterwards | Unresolved items are grouped by folder for bulk answering | bulk resolve |
+| 5 | Opens Clarifications or `/files` afterwards | Unresolved items are grouped by folder for bulk answering | bulk resolve |
 | 6 | Re-submits the same tree | Already-stored files are skipped by content hash | dedup |
 
 ## Component Hierarchy
@@ -67,7 +67,7 @@ UploadPanel
 ├── ModeChoice [interactive | archive]
 └── [ArchiveImportProgress]           when importMode === 'archive'
     ├── FilesImported                 finite, ends
-    └── ItemsAwaitingResolution       backlog, shrinks in Issues
+    └── ItemsAwaitingResolution       backlog, shrinks in Clarifications
 
 (no tray surface is mounted for an archive batch)
 ```
@@ -79,7 +79,7 @@ UploadPanel
 | **A1** | The mode is chosen at submit and is fixed for the batch. It cannot be switched mid-import. | A half-interactive import is a state nobody can reason about. |
 | **A2** | Classification runs, chunked and yielding, exactly as Phase 3.3 built it. | Every silent resolution is a question not asked. |
 | **A3** | **No tray is ever registered or presented during an archive import.** | The defining property; asking once is asking 45 000 times. |
-| **A4** | A group that would have opened a tray resolves to Issues instead, as `issueKind: 'address_deferred'`. | Reuses the lane and the issue kind that already exist. |
+| **A4** | A group that would have opened a tray resolves to Clarifications instead, as `issueKind: 'address_deferred'`. | Reuses the lane and the issue kind that already exist. |
 | **A5** | Uploading starts after the first chunk and never waits on resolution. | The bytes are the part that must not be lost. |
 | **A6** | An item with no resolvable location is still uploaded, with its raw evidence intact. | Same guarantee as [deferred-location-resolution](../../system/deferred-location-resolution.md). |
 | **A7** | Resolution afterwards is the folder-level bulk operation, not a per-item tray. | [files-page bulk resolution](../../page/files-page.bulk-resolution.supplement.md). |
@@ -94,7 +94,7 @@ That is a decision, and the plan called for it explicitly. The reasoning: the im
 the data in safely, and an import of 100 000 files will routinely leave tens of thousands of items
 unresolved by design — a definition of "done" that waits on those would never report done, and would
 train the operator to ignore it. Resolution is a **separate, ongoing workstream** with its own
-progress, worked in the Issues lane.
+progress, worked in the Clarifications lane.
 
 The UI therefore shows **independent progress figures**, never one blended number: *files imported*
 (finite, ends) and *items awaiting resolution* (a backlog that shrinks as work is done).
@@ -114,7 +114,7 @@ the blended number in the one place it matters most (`docs/CONSTITUTION.md` § n
 | Mode choice UI (Import archive button) | `upload-panel` intake (`upload-panel__intake-btn--archive`) | Same folder picker; passes `importMode: 'archive'` |
 | Chunked classify + drain | `enqueueAndClassifyInChunks` | Already built (Phase 3.3) |
 | Suppressing tray registration | the tray-flow service, gated on the batch mode | Must suppress **registration**, not only presentation — see the FSM supplement |
-| Routing unresolved to Issues | the pre-resolve / routing path | Writes `missing_data` + `address_deferred` |
+| Routing unresolved to Clarifications | the pre-resolve / routing path | Writes `missing_data` + `address_deferred` |
 | Bulk resolution afterwards | the shared resolve engine | One engine for folder and filter selections |
 | Import progress | the batch record | Separate figures, never blended; a failure is never an import |
 
@@ -139,7 +139,7 @@ the blended number in the one place it matters most (`docs/CONSTITUTION.md` § n
 | --- | --- |
 | `core/upload/manager/upload-manager-submit.util.ts` | accept and record the mode |
 | `core/upload/location/upload-location-tray-flow.service.ts` | suppress registration in archive mode |
-| `core/upload/pipelines/new/…` | route unresolved to Issues instead of a tray |
+| `core/upload/pipelines/new/…` | route unresolved to Clarifications instead of a tray |
 | `features/upload/upload-panel/…` | mode choice, and the progress figures |
 
 ## Acceptance Criteria
@@ -147,9 +147,9 @@ the blended number in the one place it matters most (`docs/CONSTITUTION.md` § n
 - [ ] An archive import of the curated corpus registers **zero** disambiguation groups (A3).
 - [ ] Every file that the interactive run resolves silently is also resolved here (A2) — the two runs
       differ only in what happens to the *unresolved* remainder.
-- [ ] Every unresolved item lands in Issues as `address_deferred`, and none is lost (A4, A6).
+- [ ] Every unresolved item lands in Clarifications as `address_deferred`, and none is lost (A4, A6).
 - [ ] Uploading begins after the first chunk, before classification of the tree finishes (A5).
 - [ ] The batch reports complete once uploads finish, with items still unresolved (§ What "done" means).
 - [ ] Re-submitting the same tree uploads nothing twice (A8).
-- [ ] Bulk-resolving a folder afterwards clears those items from Issues (A7).
+- [ ] Bulk-resolving a folder afterwards clears those items from Clarifications (A7).
 - [ ] The FSM supplement's transitions hold: no job reaches `awaiting_disambiguation` in this mode.

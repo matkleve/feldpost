@@ -55,6 +55,17 @@ If geocoding is proxied through your backend, configure:
 - `GEOCODING_PROVIDER`
 - `GEOCODING_API_KEY` (if your provider requires one)
 
+For the street map basemap (CARTO raster tiles), request a free key at [carto.com/basemaps/apikey](https://carto.com/basemaps/apikey), then either:
+
+- **Local dev (recommended):** add to repo-root `.env.local`:
+  ```bash
+  CARTO_BASEMAP_API_KEY=your-key-here
+  ```
+  Restart `npm run dev` — `sync-dev-environment.mjs` injects it automatically.
+- **Production builds:** set `CARTO_BASEMAP_API_KEY` in the hosting environment (`write-env.mjs` injects it at build time).
+
+Without a key, street tiles still load but show CARTO's "API KEY REQUIRED" watermark. Satellite basemap (Esri) is unaffected. Hard-refresh after adding a key (tiles are cached).
+
 ---
 
 ## 4. Database Setup

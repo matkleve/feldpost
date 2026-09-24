@@ -1,0 +1,47 @@
+// Selected items panel body geometry — chrome lives on app-shell-panel-surface.
+// @see docs/specs/ui/shell/selected-items-panel.md
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  flex: 1 1 auto;
+  inline-size: 100%;
+}
+
+// Flex column for toolbar, grid, and footer.
+// @see docs/specs/ui/shell/selected-items-panel.md
+.selected-items-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+// Scroll region — grid fills remaining space above footer.
+// @see docs/specs/ui/shell/selected-items-panel.md
+.selected-items-panel__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.selected-items-panel__body app-workspace-selected-items-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+app-workspace-pane-footer {
+  flex: 0 0 auto;
+  min-height: 0;
+}
+
+app-media-detail-view {
+  flex: 1;
+  min-height: 0;
+}

@@ -136,7 +136,7 @@
   A company or team that owns all data within its scope. In the live schema every profile has exactly one `organization_id`.
   - Table: `organizations`.
   - All RLS policies use `organization_id` to enforce data isolation between orgs (see security-boundaries.md §2.1).
-  - A later decision, not this schema: the same email may belong to more than one organization, and the person chooses one after login. Recorded in [STUDY-017](study/017-addable-apps-change-plan.md) § Update 2026-09-24 — current record. Do not add a membership table from this entry.
+  - A later decision, not this schema: the same email may belong to more than one organization, and the person chooses one after login. Recorded in [STUDY-025](study/025-addable-apps-change-plan.md) § Update 2026-09-24 — current record. Do not add a membership table from this entry.
 
 - **Project**  
   A logical grouping of **media items** that belong to the same construction job, site, or contract.
@@ -151,7 +151,7 @@
   - Removing a widget hides it. It does not delete subject rows. Address and GPS live on `locations`, linked to the subject (`media_item_location_links` for a media item).
   - The live schema still has one `profiles.organization_id`. Several organizations per email is a decision in the study below, not a table.
   - Files is not a widget. Media covers that job. Renaming Media is not decided.
-  - Contract: [widget-install.md](specs/system/widget-install.md) and [account-context.md](specs/system/account-context.md). Current record: [STUDY-017](study/017-addable-apps-change-plan.md). Shape of the repo: [STUDY-016](study/016-addable-apps-repo-shape.md). Issue #258.
+  - Contract: [widget-install.md](specs/system/widget-install.md) and [account-context.md](specs/system/account-context.md). Current record: [STUDY-025](study/025-addable-apps-change-plan.md). Shape of the repo: [STUDY-024](study/024-addable-apps-repo-shape.md). Issue #258.
 
 - **Group (Saved Group)**  
   Legacy concept for named, user-created collections.
@@ -273,8 +273,47 @@ Canonical names for every visible piece of the interface. Use these in code, doc
 - **Sidebar Pill**  
   40×4 px visual pill affordance at 50 % height of the collapsed sidebar strip. Cues interactivity.
 
+- **Grid shell**  
+  The authenticated page grid (`app-grid-shell`). Four tracks: control area, main canvas, panel column, control area. The host owns every track width.
+
+- **Main canvas**  
+  The `1fr` track (`app-shell-main-canvas`). A rounded `shell-box`. Every left-rail page mounts here. The map is one tenant of this track.
+
+- **Control area**  
+  A backgroundless rail column (`app-shell-control-area`). The left rail changes the main canvas. The right rail opens and closes the panel column.
+
+- **Control container**  
+  A frosted box (`app-shell-control-container`) grouping control options. The rail outside the box has no background.
+
+- **Control option**  
+  A `var(--shell-control-option-size)` icon button (`app-shell-control-option`) inside a control container. Its hover label overlays and does not change track size.
+
+- **Selected items panel**  
+  The `download` panel surface in the panel column. Product title **Selected items**. Shows unified media selection, toolbar, bulk footer, and inline detail. Spec: `docs/specs/ui/shell/selected-items-panel.md`. Replaces the Workspace Pane media tab when the grid shell is on.
+
+- **Unified selection**  
+  Single `selectedMediaIds` store shared by map, `/media`, and the selected items panel. No independent workspace-only selection when `shellGridLayout` is on. Spec: `docs/specs/ui/shell/unified-selection.md`.
+
+- **Widget**  
+  An optional rail destination. Absent from the rail until the organization adds it and a role allows it. Specs: `docs/specs/page/widgets-page.md`, `docs/specs/system/widget-grants.md`. Not built.
+
+- **Widget page**  
+  The canvas journey opened by the left-rail `+`: a directory of rectangles, then one explanation page per widget. Spec: `docs/specs/page/widgets-page.md`. Not built.
+
+- **Widget overview**  
+  The empty canvas. A short explanation and one state per widget. The left-rail logo opens it. Spec: `docs/specs/page/widget-overview.md`.
+
+- **Widget suite**  
+  Vehicles, Boats, Material, Storage locations, and Buildings. Each record has one place and media on `media_items`. Spec: `docs/specs/page/widget-suite.md`. Not built.
+
+- **Panel column**  
+  The third grid track (`app-shell-panel-column`). It stacks every open panel surface. Top and bottom are lists, not single slots. Opening one panel does not close another. The track contributes no width when nothing is open.
+
+- **Panel surface**  
+  One frosted panel (`app-shell-panel-surface`) in the panel column. Panel ids: `upload`, `download` (selected items), `shared-media`, `tips`, `help`.
+
 - **Workspace Pane**  
-  Right-side collapsible, resizable panel (320 px default, 280–640 px range). Houses group tabs + thumbnail gallery + inline detail view. Desktop: slides in from right. Mobile: bottom sheet.
+  **Legacy** right-side collapsible, resizable panel (drag divider). Houses Media + Upload tabs + thumbnail gallery + inline detail. **Superseded by grid shell panel column** when `shellGridLayout` is default on. See `docs/specs/ui/shell/workspace-pane-retirement.md`.
 
 - **Drag Divider**  
   4 px vertical (desktop) / horizontal (mobile) separator between map and workspace pane. `cursor: col-resize`. Shown only when workspace pane is open.

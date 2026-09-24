@@ -16,24 +16,29 @@
 -->
 
 <section
+  #panelRoot
   class="upload-panel"
   data-i18n-skip
   [class.upload-panel--visible]="visible()"
   [class.upload-panel--embedded]="embeddedInPane()"
+  [class.upload-panel--wide]="wideLayout()"
   role="region"
   [attr.aria-label]="panelTitleText()"
 >
+  <div class="upload-panel__workspace">
   <!-- ═══════════════════════════════════════════════════════════════════════════
     BLOCK 1: INTAKE ZONE
     Purpose: Drag-and-drop file selection + folder scanning progress feedback.
     ═══════════════════════════════════════════════════════════════════════════ -->
   <div class="upload-panel__area upload-panel__area--intake">
-    <div class="upload-panel__header">
-      <div class="upload-panel__header-copy">
-        <h3 class="upload-panel__title">{{ panelTitleText() }}</h3>
-        <p class="upload-panel__subtitle">{{ panelSubtitleText() }}</p>
+    @if (!embeddedInPane()) {
+      <div class="upload-panel__header">
+        <div class="upload-panel__header-copy">
+          <h3 class="upload-panel__title">{{ panelTitleText() }}</h3>
+          <p class="upload-panel__subtitle">{{ panelSubtitleText() }}</p>
+        </div>
       </div>
-    </div>
+    }
 
     @if (scanningLabel(); as label) {
       <p class="upload-panel__scan-status" role="status" aria-live="polite">{{ label }}</p>
@@ -190,7 +195,7 @@
       hlmBtn
       variant="outline"
       iconPlacement="start"
-      class="upload-panel__intake-btn upload-panel__intake-btn--folder"
+      class="upload-panel__intake-btn"
       type="button"
       [disabled]="scanning() || !folderImportSupported"
       [attr.title]="
@@ -200,8 +205,15 @@
       "
       (click)="inputHandlers.onSelectFolder($event, folderInput)"
     >
-      <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true">folder</span>
-      <span class="upload-panel__intake-btn-label">{{ uploadFolderLabelText() }}</span>
+      <span class="upload-panel__intake-btn-icon" aria-hidden="true">
+        <span class="material-icons">folder</span>
+      </span>
+      <span class="upload-panel__intake-btn-copy">
+        <span class="upload-panel__intake-btn-label">{{ uploadFolderLabelText() }}</span>
+        <span class="upload-panel__intake-btn-subtitle">{{
+          t('upload.folder.subtitle', 'Every file in one folder, with the usual questions.')
+        }}</span>
+      </span>
     </button>
 
     <!--
@@ -221,15 +233,23 @@
           ? t('upload.folder.unsupported.hint', 'Folder upload is not supported in this browser.')
           : t(
               'upload.archive.import.hint',
-              'Import a company archive: resolve what can be resolved, ask nothing, park the rest in Issues.'
+              'Import a company archive: resolve what can be resolved, ask nothing, park the rest in Clarifications.'
             )
       "
       (click)="inputHandlers.onSelectFolder($event, folderInput, 'archive')"
     >
-      <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true"
-        >inventory_2</span
-      >
-      <span class="upload-panel__intake-btn-label">{{ importArchiveLabelText() }}</span>
+      <span class="upload-panel__intake-btn-icon" aria-hidden="true">
+        <span class="material-icons">inventory_2</span>
+      </span>
+      <span class="upload-panel__intake-btn-copy">
+        <span class="upload-panel__intake-btn-label">{{ importArchiveLabelText() }}</span>
+        <span class="upload-panel__intake-btn-subtitle">{{
+          t(
+            'upload.archive.import.subtitle',
+            'A company archive. Nothing is asked; the rest waits in Clarifications.'
+          )
+        }}</span>
+      </span>
     </button>
 
     @if (!folderImportSupported) {
@@ -247,9 +267,9 @@
       [disabled]="scanning()"
       (click)="inputHandlers.openCapturePicker($event, captureInput)"
     >
-      <span class="upload-panel__intake-btn-icon material-icons" aria-hidden="true"
-        >photo_camera</span
-      >
+      <span class="upload-panel__intake-btn-icon" aria-hidden="true">
+        <span class="material-icons">photo_camera</span>
+      </span>
       <span class="upload-panel__intake-btn-label">{{ takePhotoLabelText() }}</span>
     </button>
 
@@ -276,7 +296,7 @@
           }}</span>
           @let locationSubtitle = t(
             'upload.location.mode.subtitle.on',
-            'GPS and file names; missing location → Issues.'
+            'GPS and file names; missing location → Clarifications.'
           );
           <span
             class="upload-panel__location-mode-subtitle"
@@ -332,10 +352,15 @@
       tabindex="-1"
       (change)="inputHandlers.onFolderInputChange($event); laneHandlers.setSelectedLane('uploading')"
     />
-  </div>
+    </div>
 
-  @if (showProgressBoard()) {
-    <div class="upload-panel__area--switch upload-panel__segmented" hlmPillToggle fill>
+    <div class="upload-panel__lanes">
+    <div class="upload-panel__lane-stage">
+    <div
+      class="upload-panel__area--switch upload-panel__segmented"
+      hlmPillToggle
+      [fill]="true"
+    >
       <div
         hlmToggleGroup
         class="upload-panel__lane-toggle-group w-full"
@@ -371,9 +396,18 @@
         }
       </div>
     </div>
-  }
 
-  <!-- Per-file progress list -->
+    <div class="upload-panel__lane-content">
+    @if (showClarificationTray()) {
+      <app-upload-resolver-tray
+        [panelOpen]="true"
+        [embeddedInPane]="false"
+        (previewLocation)="onTrayPreview($event)"
+        (previewLocationCleared)="onTrayPreviewCleared()"
+      />
+    }
+
+  <!-- Per-file progress list. An empty lane says what that lane is for. -->
   @if (visibleLaneJobs().length > 0) {
     <div
       class="upload-panel__lane-overflow"
@@ -405,7 +439,32 @@
         }
       </ul>
     </div>
+  } @else {
+    <p class="upload-panel__lane-empty">
+      @switch (effectiveLane()) {
+        @case ('clarifications') {
+          {{
+            t(
+              'upload.panel.lane.clarifications.empty',
+              'Files that need a decision before they can finish.'
+            )
+          }}
+        }
+        @case ('uploaded') {
+          {{ t('upload.panel.lane.uploaded.empty', 'Files that finished and are ready to use.') }}
+        }
+        @default {
+          {{
+            t('upload.panel.lane.uploading.empty', 'Files that are uploading or still in line.')
+          }}
+        }
+      }
+    </p>
   }
+    </div>
+    </div>
+    </div>
+  </div>
 
   @if (embeddedInPane() && hasSelectedUploadJobs()) {
     <app-pane-footer>

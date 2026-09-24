@@ -34,6 +34,7 @@ Every file has a stable **`UC-NNN` id**, so a spec, an issue or a pull request c
 | UC-019 | [Upload panel](./UC-019-upload-panel.md) | `component/upload/upload-panel.md` |
 | UC-020 | [Workspace export](./workspace-export.md) | `ui/workspace/workspace-actions-bar.md`, `component/workspace/active-selection-view.md` |
 | UC-021 | [Workspace view](./workspace-view.md) | `ui/workspace/workspace-pane.md`, `service/workspace-view/workspace-view-system.md` |
+| UC-022 | [Panel stacks](./UC-022-panel-stacks.md) | `service/shell-layout/shell-layout.md`, `ui/shell/shell-panel-column.md` |
 
 Each file's own frontmatter carries the full, exact `specs:` list; the column above is the
 short form for scanning.

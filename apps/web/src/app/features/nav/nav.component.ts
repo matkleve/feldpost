@@ -9,6 +9,8 @@ import { WidgetInstallService } from '../../core/widget-install/widget-install.s
 import { WIDGET_IDS } from '../../core/widget-install/widget-install.helpers';
 import type { WidgetId } from '../../core/widget-install/widget-install.types';
 import { I18nService } from '../../core/i18n/i18n.service';
+import { sidebarWidthOwner } from '../../core/feature-flags/feature-flags.helpers';
+import { FeatureFlagsService } from '../../core/feature-flags/feature-flags.service';
 import { ThemeService } from '../../core/theme/theme.service';
 import { SettingsPaneService } from '../../core/settings-pane/settings-pane.service';
 import { WorkspacePaneLayoutMapEffectsService } from '../../core/workspace-pane/workspace-pane-layout-map-effects.service';
@@ -38,6 +40,7 @@ const SIDEBAR_WIDTH_TRANSITION_MS = 200;
   styleUrl: './nav.component.scss',
   host: {
     '[class.nav--collapsed]': 'sidebarCollapsed()',
+    '[class.nav--in-grid]': 'shellGridLayout()',
   },
 })
 export class NavComponent {
@@ -49,7 +52,9 @@ export class NavComponent {
   private readonly settingsPaneService = inject(SettingsPaneService);
   private readonly mapLayoutEffects = inject(WorkspacePaneLayoutMapEffectsService);
   readonly themeService = inject(ThemeService);
-  readonly t = (key: string, fallback = '') => this.i18nService.t(key, fallback);
+  private readonly featureFlags = inject(FeatureFlagsService);
+  readonly shellGridLayout = this.featureFlags.shellGridLayout;
+  readonly t = (key: string, fallback = ''): string => this.i18nService.t(key, fallback);
 
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
@@ -72,6 +77,9 @@ export class NavComponent {
 
   private readonly _sidebarWidthEffect = effect(() => {
     const collapsed = this.sidebarCollapsed();
+    if (sidebarWidthOwner(this.shellGridLayout()) === 'grid-shell') {
+      return;
+    }
     if (typeof document !== 'undefined') {
       document.documentElement.style.setProperty(
         '--feldpost-sidebar-width',

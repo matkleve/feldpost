@@ -1,5 +1,5 @@
 ---
-id: STUDY-019
+id: STUDY-027
 type: investigation
 status: proposed
 supersedes: none
@@ -10,7 +10,7 @@ corrected-by: none
 
 **Written:** 2026-09-24. **On:** `cursor/addable-apps-change-plan-cb0a`, by reading the authenticated layout, the shell helpers, and `MapZoomOrchestratorService`. No browser was opened. **Status `proposed`.** Not permission to unmount the map.
 
-STUDY-017 Phase 5 says “installed” should control the map mount, and that Media’s zoom calls have to keep working. This study measures the mount that phase would touch.
+STUDY-025 Phase 5 says “installed” should control the map mount, and that Media’s zoom calls have to keep working. This study measures the mount that phase would touch.
 
 ## What the code does
 
@@ -30,16 +30,16 @@ Callers that ask for that zoom include the workspace pane, media, and the upload
 
 ## What is fragile
 
-Phase 4 (nav reads installs) can hide the Map row and still leave this host mounted. That matches the code. `[D]` STUDY-017 Phase 4.
+Phase 4 (nav reads installs) can hide the Map row and still leave this host mounted. That matches the code. `[D]` STUDY-025 Phase 4.
 
 Phase 5 is the break. Destroying `app-map-shell` when Map is not installed also destroys the object `getMapEffects()` returns. Zoom from Media would then navigate to `/map`. If that route is guarded because Map is not installed, the navigation fails and the orchestrator rejects with `navigation-failed` `[A]` lines 67–69. The user asked to zoom and nothing moves. `[C]` that this is the failure; the guard does not exist yet.
 
-Upload is an add-on of Media `[D]` STUDY-017 current record. Its zoom uses the same host method `[A]` `upload-shell.component.ts` lines 79–80. Hiding Map while Media is installed strands that action the same way.
+Upload is an add-on of Media `[D]` STUDY-025 current record. Its zoom uses the same host method `[A]` `upload-shell.component.ts` lines 79–80. Hiding Map while Media is installed strands that action the same way.
 
-A temporary Map session from a shared link `[D]` STUDY-017 has to mount this same shell for the session. A second map instance would be a second Leaflet owner. This study did not find a second `app-map-shell` in the layout template. `[A]`
+A temporary Map session from a shared link `[D]` STUDY-025 has to mount this same shell for the session. A second map instance would be a second Leaflet owner. This study did not find a second `app-map-shell` in the layout template. `[A]`
 
 ## What a later change has to keep true
 
 - While Map is installed, zoom from Media and from Upload still ends in `onZoomToLocation` on the one mounted shell.
 - While Map is not installed, those calls do not navigate to a route the guard will reject. They no-op. The page specs have to say that before the template loses the always-on host.
-- Do not do that template change in the same change as the install migration. `[D]` STUDY-017 Phase 5.
+- Do not do that template change in the same change as the install migration. `[D]` STUDY-025 Phase 5.

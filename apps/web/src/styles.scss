@@ -47,6 +47,7 @@
   --popover: var(--background);
   --popover-foreground: oklch(0.8109 0 0);
   --chrome-surface: color-mix(in srgb, var(--card) 85%, transparent);
+  --map-chrome-surface: color-mix(in srgb, var(--card) 94%, transparent);
   --primary: oklch(0.62 0.12 245);
   --primary-foreground: oklch(1.0000 0 0);
   --brand-gold: oklch(0.796 0.134 80);
@@ -87,18 +88,21 @@
   --radius: 0.75rem;
   --shadow-x: 0px;
   --shadow-y: 1px;
-  --shadow-blur: 4px;
-  --shadow-spread: 0px;
-  --shadow-opacity: 0.05;
+  --shadow-blur: 2px;
+  --shadow-spread: -0.5px;
+  --shadow-opacity: 0.12;
   --shadow-color: #000000;
-  --shadow-2xs: 0px 1px 4px 0px hsl(0 0% 0% / 0.03);
-  --shadow-xs: 0px 1px 4px 0px hsl(0 0% 0% / 0.03);
-  --shadow-sm: 0px 1px 4px 0px hsl(0 0% 0% / 0.05), 0px 1px 2px -1px hsl(0 0% 0% / 0.05);
-  --shadow: 0px 1px 4px 0px hsl(0 0% 0% / 0.05), 0px 1px 2px -1px hsl(0 0% 0% / 0.05);
-  --shadow-md: 0px 1px 4px 0px hsl(0 0% 0% / 0.05), 0px 2px 4px -1px hsl(0 0% 0% / 0.05);
-  --shadow-lg: 0px 1px 4px 0px hsl(0 0% 0% / 0.05), 0px 4px 6px -1px hsl(0 0% 0% / 0.05);
-  --shadow-xl: 0px 1px 4px 0px hsl(0 0% 0% / 0.05), 0px 8px 10px -1px hsl(0 0% 0% / 0.05);
-  --shadow-2xl: 0px 1px 4px 0px hsl(0 0% 0% / 0.13);
+  --shadow-2xs: 0 1px 1px 0 hsl(15 6% 10% / 0.08);
+  --shadow-xs: 0 1px 2px 0 hsl(15 6% 10% / 0.10);
+  --shadow-sm: 0 1px 2px 0 hsl(15 6% 10% / 0.14), 0 1px 1px -0.5px hsl(15 6% 10% / 0.10);
+  --shadow: 0 1px 2px 0 hsl(15 6% 10% / 0.14), 0 1px 1px -0.5px hsl(15 6% 10% / 0.10);
+  --shadow-md: 0 2px 4px -1px hsl(15 6% 10% / 0.16), 0 1px 2px 0 hsl(15 6% 10% / 0.12);
+  --shadow-lg: 0 4px 8px -2px hsl(15 6% 10% / 0.18), 0 2px 4px -1px hsl(15 6% 10% / 0.14);
+  --shadow-xl: 0 6px 12px -3px hsl(15 6% 10% / 0.20), 0 3px 6px -2px hsl(15 6% 10% / 0.16);
+  --shadow-2xl: 0 8px 16px -4px hsl(15 6% 10% / 0.24);
+  // L2 shell boxes — rails, canvas, panels. Short and stronger than --shadow-md.
+  // @see docs/specs/ui/shell/shell-surface-elevation.md
+  --layout-box-shadow: 0 1px 3px 0 hsl(15 6% 10% / 0.28), 0 2px 5px -1px hsl(15 6% 10% / 0.22);
   --success: oklch(0.68 0.16 152);
   --success-foreground: oklch(0.18 0.02 152);
   --warning: oklch(0.78 0.15 85);
@@ -139,8 +143,10 @@
   --menu-item-hover: color-mix(in srgb, var(--brand-gold) 8%, transparent);
   --menu-item-text: var(--foreground);
   --action-text: var(--muted-foreground);
-  --action-hover: color-mix(in srgb, var(--brand-gold) 12%, transparent);
+  --action-hover: color-mix(in srgb, var(--brand-gold) 10%, transparent);
   --section-text: var(--muted-foreground);
+  --layout-desk-background: var(--background);
+  --layout-desk-background-subtle: var(--background);
 }
 
 // ── tweakcn design token foundation — light mode ───────────────────────────────
@@ -156,6 +162,7 @@
   --popover: oklch(1.0000 0 0);
   --popover-foreground: oklch(0.2101 0.0318 264.6645);
   --chrome-surface: color-mix(in srgb, var(--card) 85%, transparent);
+  --map-chrome-surface: color-mix(in srgb, var(--card) 94%, transparent);
   --primary: oklch(0.50 0.10 245);
   --primary-foreground: oklch(1.0000 0 0);
   --brand-gold: oklch(0.748 0.128 84.6);
@@ -196,18 +203,21 @@
   --radius: 0.75rem;
   --shadow-x: 0px;
   --shadow-y: 1px;
-  --shadow-blur: 4px;
-  --shadow-spread: 0px;
-  --shadow-opacity: 0.05;
+  --shadow-blur: 2px;
+  --shadow-spread: -0.5px;
+  --shadow-opacity: 0.12;
   --shadow-color: #000000;
-  --shadow-2xs: 0px 1px 4px 0px hsl(0 0% 0% / 0.03);
-  --shadow-xs: 0px 1px 4px 0px hsl(0 0% 0% / 0.03);
-  --shadow-sm: 0px 1px 4px 0px hsl(0 0% 0% / 0.05), 0px 1px 2px -1px hsl(0 0% 0% / 0.05);
-  --shadow: 0px 1px 4px 0px hsl(0 0% 0% / 0.05), 0px 1px 2px -1px hsl(0 0% 0% / 0.05);
-  --shadow-md: 0px 1px 4px 0px hsl(0 0% 0% / 0.05), 0px 2px 4px -1px hsl(0 0% 0% / 0.05);
-  --shadow-lg: 0px 1px 4px 0px hsl(0 0% 0% / 0.05), 0px 4px 6px -1px hsl(0 0% 0% / 0.05);
-  --shadow-xl: 0px 1px 4px 0px hsl(0 0% 0% / 0.05), 0px 8px 10px -1px hsl(0 0% 0% / 0.05);
-  --shadow-2xl: 0px 1px 4px 0px hsl(0 0% 0% / 0.13);
+  --shadow-2xs: 0 1px 1px 0 hsl(15 6% 10% / 0.08);
+  --shadow-xs: 0 1px 2px 0 hsl(15 6% 10% / 0.10);
+  --shadow-sm: 0 1px 2px 0 hsl(15 6% 10% / 0.14), 0 1px 1px -0.5px hsl(15 6% 10% / 0.10);
+  --shadow: 0 1px 2px 0 hsl(15 6% 10% / 0.14), 0 1px 1px -0.5px hsl(15 6% 10% / 0.10);
+  --shadow-md: 0 2px 4px -1px hsl(15 6% 10% / 0.16), 0 1px 2px 0 hsl(15 6% 10% / 0.12);
+  --shadow-lg: 0 4px 8px -2px hsl(15 6% 10% / 0.18), 0 2px 4px -1px hsl(15 6% 10% / 0.14);
+  --shadow-xl: 0 6px 12px -3px hsl(15 6% 10% / 0.20), 0 3px 6px -2px hsl(15 6% 10% / 0.16);
+  --shadow-2xl: 0 8px 16px -4px hsl(15 6% 10% / 0.24);
+  // L2 shell boxes — rails, canvas, panels. Short and stronger than --shadow-md.
+  // @see docs/specs/ui/shell/shell-surface-elevation.md
+  --layout-box-shadow: 0 1px 3px 0 hsl(15 6% 10% / 0.28), 0 2px 5px -1px hsl(15 6% 10% / 0.22);
   --tracking-normal: 0rem;
   --spacing: 0.25rem;
   // Semantic states and file-type accents (single definition point; Phase 7)
@@ -216,8 +226,8 @@
   --success-foreground: oklch(0.99 0 0);
   --warning: oklch(0.58 0.14 55);
   --warning-foreground: oklch(0.22 0.03 55);
-  --primary-hover: oklch(from var(--primary) calc(l - 0.05) c h);
-  --text-disabled: color-mix(in oklch, var(--muted-foreground) 55%, var(--background));
+  --primary-hover: oklch(from var(--primary) calc(l - 0.04) c h);
+  --text-disabled: color-mix(in oklch, var(--muted-foreground) 48%, var(--background));
   --border-strong: color-mix(in oklch, var(--border) 72%, var(--foreground));
   // De-facto office / Adobe hues (readable L for chip ink — not raw chart-3).
   --filetype-image: oklch(0.55 0.13 68);
@@ -256,7 +266,11 @@
   --menu-item-hover: color-mix(in srgb, var(--brand-gold) 8%, transparent);
   --menu-item-text: var(--foreground);
   --action-text: var(--muted-foreground);
-  --action-hover: color-mix(in srgb, var(--brand-gold) 12%, transparent);
+  --action-hover: color-mix(in srgb, var(--brand-gold) 10%, transparent);
+  // L0 desk behind grid-shell rails/gutters — elevated boxes stay on --chrome-surface.
+  // @see docs/specs/ui/shell/shell-surface-elevation.md
+  --layout-desk-background: color-mix(in srgb, var(--foreground) 6%, var(--background));
+  --layout-desk-background-subtle: color-mix(in srgb, var(--foreground) 4%, var(--background));
 }
 
 // ── Dark mode token overrides ──────────────────────────────────────────────────
@@ -282,6 +296,7 @@ html[data-theme="sandstone"] {
   --card: oklch(0.9700 0.0090 72.0000);
   --popover: oklch(0.9800 0.0080 75.0000);
   --chrome-surface: color-mix(in srgb, var(--card) 85%, transparent);
+  --map-chrome-surface: color-mix(in srgb, var(--card) 94%, transparent);
   --border: oklch(0.8900 0.0150 70.0000);
   --input: oklch(0.8900 0.0150 70.0000);
   --muted: oklch(0.9500 0.0100 70.0000);
@@ -303,7 +318,7 @@ html[data-theme="sandstone"] {
   --sandstone-text-section: #66594a;
   --sandstone-border-warm: color-mix(in srgb, #a38d73 44%, transparent);
   --sandstone-hover-warm: color-mix(in srgb, #c59f63 14%, transparent);
-  --sandstone-action-hover: color-mix(in srgb, #c59f63 18%, transparent);
+  --sandstone-action-hover: color-mix(in srgb, #c59f63 10%, transparent);
 
   // Interaction-level semantic tokens — sandstone overrides
   --menu-border-subtle: var(--sandstone-border-warm);
@@ -312,6 +327,8 @@ html[data-theme="sandstone"] {
   --action-text: var(--sandstone-text-muted);
   --action-hover: var(--sandstone-action-hover);
   --section-text: var(--sandstone-text-section);
+  --layout-desk-background: color-mix(in srgb, var(--sandstone-text-dark) 5%, var(--background));
+  --layout-desk-background-subtle: color-mix(in srgb, var(--sandstone-text-dark) 3%, var(--background));
 }
 
 // ── Tailwind v4 CSS-first theme mapping ───────────────────────────────────────
@@ -409,7 +426,7 @@ html[data-theme="sandstone"] {
 @include meta.load-css('styles/switch-thumb-hover');
 
 // Headings + default anchor styling; emitted here so it follows Tailwind Preflight (not top-level @use).
-// @see docs/migration/phase-8-global-scss-elimination.md §7
+// h1 is serif at 700. h2–h6 are sans at 600. @see docs/design/tokens.md §3.2
 @include meta.load-css('styles/typography-baseline');
 
 // Last global emit on purpose: the reduced-motion override has to sit after

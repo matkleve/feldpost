@@ -8,7 +8,7 @@ corrected-by: none
 
 # Use cases for addable apps — what the branch covers
 
-**Written:** 2026-09-24. **On:** `cursor/addable-apps-change-plan-cb0a`. **How:** a second agent read the plan scenes, the install and account migrations through `20260924190000_share_copy_keeps_media.sql`, and the nav, receive, join, and chat screens. Nothing was executed against a database. **Status `proposed`.** This does not change STUDY-017.
+**Written:** 2026-09-24. **On:** `cursor/addable-apps-change-plan-cb0a`. **How:** a second agent read the plan scenes, the install and account migrations through `20260924190000_share_copy_keeps_media.sql`, and the nav, receive, join, and chat screens. Nothing was executed against a database. **Status `proposed`.** This does not change STUDY-025.
 
 Three scenes are covered. Twenty-four are partial. Four are missing. The partial ones are the product: the screen exists, and a second path still does the old thing.
 

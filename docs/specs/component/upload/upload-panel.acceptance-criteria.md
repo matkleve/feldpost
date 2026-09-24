@@ -53,7 +53,7 @@ The later code pass must revalidate at least these existing acceptance-criteria 
 - `Add/Change GPS` enters map-pick mode and commits the clicked location for the selected media item.
 - Location edits on already uploaded media never trigger re-upload or re-queue; they update persisted media location only.
 - `Download` always triggers file download behavior and never opens inline browser preview tabs.
-- The segmented switch keeps Queue / Uploaded / Issues readable and distinguishable.
+- The segmented switch keeps Waiting / Uploaded / Clarification readable and distinguishable.
 
 ## Wiring
 
@@ -80,14 +80,14 @@ sequenceDiagram
 - [ ] Folder uploads inherit folder-name address as default location hint when files do not provide their own title address.
 - [ ] File-level title address overrides inherited folder-level address.
 - [ ] If queue has jobs, segmented lane switch appears under Drop Zone
-- [x] Lane switch contains exactly 3 options: Queue (`uploading`), Uploaded, Issues
+- [x] Lane switch contains exactly 3 options: Waiting (`uploading`), Clarification (`clarifications`), Uploaded — one lane visible
 - [x] Clicking a lane filters visible media list to that lane only
 - [x] Queue and Uploaded lane buttons use icon+label content for direct readability
-- [x] Issues lane button uses icon+label content and attention styling when unresolved items exist
+- [x] Clarifications lane button uses icon+label content and attention styling when unresolved items exist
 - [x] Segmented switch block is full width and shares the same left/right edges as upload area and folder button
 - [x] Segmented switch block has no additional tile/card shell around it; the tab list itself is the only visual container
 - [x] Lane list uses a fully transparent, padding-free overflow wrapper for scrolling only
-- [x] Queue/Uploaded/Issues lane lists show max 5 rows and scroll internally when more rows exist
+- [x] Waiting/Uploaded/Clarifications lane lists show max 5 rows and scroll internally when more rows exist
 - [ ] File list block is full width and shares the same left/right edges as upload area and folder button
 - [ ] Lane list item surfaces use white/surface background (`var(--color-bg-surface)`) with state-aware warning/error tinting
 - [ ] Gap between lane items is visually see-through
@@ -98,10 +98,10 @@ sequenceDiagram
 - [ ] Compact map-overlay panel keeps row actions menu-first and does not render selection checkboxes
 - [ ] Embedded workspace panel reveals row-selection checkbox on hover/focus for eligible rows
 - [ ] Embedded workspace panel shows bottom selection toolbar only when one or more rows are selected
-- [x] Switching Queue / Uploaded / Issues lane tab clears embedded row selection (`selectedUploadJobIds`)
+- [x] Switching Waiting / Uploaded / Clarifications lane tab clears embedded row selection (`selectedUploadJobIds`)
 - [ ] Embedded selection toolbar provides retry/download/remove/clear actions for the current lane selection only
 - [x] 3-dot row menu always ends with exactly one divider followed by the destructive section (one or more entries sharing that single divider — no additional dividers between them)
-- [x] Destructive bottom action label is state-dependent: `Cancel upload` (active), `Remove from project` (uploaded), `Dismiss` (issues/failed)
+- [x] Destructive bottom action label is state-dependent: `Cancel upload` (active), `Remove from project` (uploaded), `Dismiss` (clarifications/failed)
 - [ ] Destructive bottom action uses danger styling for both label and icon
 - [x] `Delete media` is always present for uploaded rows regardless of project binding
 - [x] `Remove from project(s)` appears only when one or more project bindings exist, ordered before `Delete media` in the destructive section
@@ -124,10 +124,10 @@ sequenceDiagram
 - [ ] Location edits on already uploaded media never trigger re-upload or re-queue; they update persisted media location only
 - [x] `Download` always triggers file download behavior and never opens inline browser preview tabs
 - [x] Location mismatch (`location_mismatch_meters`) is surfaced in media detail only — upload panel rows do not show a mismatch badge
-- [ ] Duplicate-photo rows are shown in Issues and expose a secondary GPS action to open the existing placed media.
+- [ ] Duplicate-photo rows are shown in Clarifications and expose a secondary GPS action to open the existing placed media.
 - [ ] Duplicate-resolution modal appears for duplicate-photo issues with `use existing`, `upload anyway`, and `reject` options.
 - [ ] Duplicate-resolution modal provides "apply to all matching items in this batch" behavior.
-- [x] Non-photo/video documents without GPS and without parseable address land in Issues as `document_unresolved`, including project-bound intake context.
+- [x] Non-photo/video documents without GPS and without parseable address land in Clarifications as `document_unresolved`, including project-bound intake context.
 - [x] `document_unresolved` rows show status text `Choose location or project` (localized fallback allowed).
 - [ ] `document_unresolved` row menu exposes exactly `Add GPS`, `Add/Change address`, and `Assign project` before the destructive action.
 - [ ] Choosing `Add GPS`, `Add/Change address`, or `Assign project` from `document_unresolved` resolves the item and moves it to Uploaded lane.

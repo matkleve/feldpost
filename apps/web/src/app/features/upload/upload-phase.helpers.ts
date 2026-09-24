@@ -6,7 +6,7 @@ import type { UploadJob, UploadPhase } from '../../core/upload/upload-manager.se
  * @see docs/specs/ui/upload/upload-panel-system.md — UI lane FSM vs `UploadPhase` in media-upload-service specs.
  * @see docs/specs/service/media-upload-service/upload-manager.md — normative job phases and events.
  */
-export type UploadLane = 'uploading' | 'uploaded' | 'issues';
+export type UploadLane = 'uploading' | 'uploaded' | 'clarifications';
 export type UploadIssueKind =
   | 'duplicate_file'
   | 'missing_gps'
@@ -49,7 +49,7 @@ export function getLaneForJob(job: UploadJob): UploadLane {
 
   if (job.phase === 'complete') return 'uploaded';
   if (issueKind !== null || job.phase === 'skipped') {
-    return 'issues';
+    return 'clarifications';
   }
   return 'uploading';
 }

@@ -132,19 +132,19 @@ export const toggleGroupItemVariants = cva(
   [
     // Horizontal padding lives on size variants only (`ps-*` / `pe-*`): icon+label rows need slightly larger inline-start than end for optical balance (matches action-interaction kernel intent; `icon` uses `p-0`).
     // @see docs/design/components/action-interaction-kernel.md#button-policy
-    'inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-sm text-sm font-medium text-muted-foreground ring-offset-background transition-[color,background-color,box-shadow]',
+    'inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-sm text-sm font-medium text-muted-foreground transition-[color,background-color,box-shadow]',
     '[&_.material-icons]:text-[1.125rem] [&_.material-icons]:leading-none [&_.material-icons]:text-inherit',
-    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+    'focus-visible:outline-none focus-visible:shadow-[var(--interactive-focus-ring)]',
     'disabled:pointer-events-none disabled:opacity-50',
-    'data-[state=on]:bg-[color:color-mix(in_srgb,var(--interaction-selected-ink)_10%,transparent)] data-[state=on]:text-[color:var(--interaction-selected-ink)] data-[state=on]:shadow-none',
+    'data-[state=on]:bg-[color:color-mix(in_srgb,var(--interaction-selected-ink)_10%,transparent)] data-[state=on]:text-[color:var(--interaction-selected-ink)] data-[state=on]:not-focus-visible:shadow-none',
     'data-[state=on]:hover:bg-[color:color-mix(in_srgb,var(--brand-gold)_10%,transparent)] data-[state=on]:hover:text-[color:var(--brand-gold)] data-[state=on]:hover:[&_.material-icons]:text-inherit data-[state=on]:focus-visible:bg-[color:color-mix(in_srgb,var(--brand-gold)_10%,transparent)] data-[state=on]:focus-visible:text-[color:var(--brand-gold)] data-[state=on]:focus-visible:[&_.material-icons]:text-inherit',
     toggleOffEmphasis,
     'data-[attention=true]:data-[state=off]:text-[color:var(--warning)] data-[attention=true]:data-[state=off]:shadow-[0_0_0_1px_color-mix(in_srgb,var(--warning)_38%,transparent)]',
-  // Issues lane (and similar): keep destructive tone when selected — must follow generic `data-[state=on]` primary rules.
+  // Clarifications lane (and similar): keep destructive tone when selected — must follow generic `data-[state=on]` primary rules.
   // @see upload-panel.component.scss — &__area--switch.upload-panel__segmented
     'data-[destructive-hint=true]:text-destructive data-[destructive-hint=true]:[&_.material-icons]:text-destructive',
     'data-[destructive-hint=true]:data-[state=off]:hover:bg-[color:color-mix(in_srgb,var(--destructive)_10%,transparent)] data-[destructive-hint=true]:data-[state=off]:hover:text-destructive',
-    'data-[destructive-hint=true]:data-[state=on]:bg-[color:color-mix(in_srgb,var(--destructive)_10%,transparent)] data-[destructive-hint=true]:data-[state=on]:text-destructive data-[destructive-hint=true]:data-[state=on]:shadow-none',
+    'data-[destructive-hint=true]:data-[state=on]:bg-[color:color-mix(in_srgb,var(--destructive)_10%,transparent)] data-[destructive-hint=true]:data-[state=on]:text-destructive data-[destructive-hint=true]:data-[state=on]:not-focus-visible:shadow-none',
     'data-[destructive-hint=true]:data-[state=on]:hover:bg-[color:color-mix(in_srgb,var(--destructive)_14%,transparent)] data-[destructive-hint=true]:data-[state=on]:hover:text-destructive data-[destructive-hint=true]:data-[state=on]:hover:[&_.material-icons]:text-destructive',
   ].join(' '),
   {

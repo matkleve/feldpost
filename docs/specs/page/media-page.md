@@ -2,7 +2,7 @@
 
 **Status:** Element Spec  
 **Route:** `/media`  
-**Parent:** **Authenticated app layout** (split host) — see [workspace-pane § Layout host](../ui/workspace/workspace-pane.md#layout-host-canonical). **`MediaComponent`** renders **inside** the layout’s `router-outlet` main column.
+**Parent:** `app-shell-main-canvas` inside the grid shell. **`MediaComponent`** renders in the layout `router-outlet`. Title, toolbar, and grid fill that box. See [shell-main-canvas.md](../ui/shell/shell-main-canvas.md) and [page-rail-grid.md](../../design/page-rail-grid.md).
 
 ---
 
@@ -39,23 +39,18 @@ Canonical `/media` route: page-level layout, **layout-host** pane integration, a
 **Desktop Layout (canonical):**
 
 ```
-AuthenticatedAppLayout (split host)
-├── SideMenuComponent (or shared chrome — exact app structure TBD)
-├── MainColumn (flex 1) — router-outlet
-│   └── MediaComponent
-│       ├── MediaPageHeaderComponent
-│       ├── [Optional] MediaToolbar
-│       └── MediaContentComponent
-│
-└── WorkspacePaneShell + WorkspacePaneComponent   ← same pane as map route; right column
-    ├── PaneHeaderComponent
-    ├── TabSelectorComponent: "Selected Items" | "Upload"
-    └── ContentArea @switch(activeTab)
-        ├── Tab: "Selected Items" → context from `WorkspacePaneObserverAdapter` + `MediaComponent`
-        └── Tab: "Upload" → UploadPanelComponent (1:1 embed)
+app-grid-shell
+├── app-shell-control-area (left)
+├── app-shell-main-canvas
+│   └── app-page-grid (no left rail, one full-width track)
+│       └── MediaComponent
+│           ├── MediaPageHeaderComponent
+│           ├── MediaToolbar
+│           └── MediaContentComponent
+└── app-shell-panel-column (right; upload, selected items)
 ```
 
-**Settings:** **`/{shell}/settings/**`** (e.g. `/media/settings/...`) keeps the current shell in the main column; overlay is global on `AppComponent`. See [settings-routes.md](settings-routes.md).
+**Settings:** `/media/settings/...` keeps this page mounted and covers it with the settings surface inside the same canvas. See [settings-routes.md](settings-routes.md).
 
 ---
 
@@ -71,8 +66,8 @@ AuthenticatedAppLayout (split host)
 ## Where It Lives
 
 - **Route:** `/media` (routed by AppRouter → `MediaComponent` in main column)
-- **Parent Container:** **`app-authenticated-app-layout`** main column (canonical); `WorkspacePaneObserverAdapter` coordinates selected-items context; pane DOM is a **sibling** column on the same layout host.
-- **Workspace Pane:** Same `WorkspacePane` tree as map/projects routes (mounted by layout host).
+- **Parent Container:** `app-shell-main-canvas`. The page grid has no left rail, so the header, toolbar, and grid use the canvas width inside `var(--spacing-6)`.
+- **Selected items:** the right panel column, not a workspace pane beside this page.
 - **Trigger:** Navigation via app menu, or view-all-media action
 - **Persistence:** Media page state (filters, sort, group) saved to localStorage; media list snapshots and pagination cursor are cache-retained per user/query (no forced clear on normal revisit); workspace pane state (tab, selection, uploads) is independent
 - **Scroll:** `MediaComponent` `:host` is the main-column scroll owner (`height: 100%`, `overflow-y: auto`, generous page padding) so the grid can extend past the viewport without clipping the last row.

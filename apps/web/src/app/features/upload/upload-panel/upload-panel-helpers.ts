@@ -15,7 +15,7 @@ import type { UploadLane } from '../upload-phase.helpers';
 export interface UploadLaneCounts {
   uploading: number;
   uploaded: number;
-  issues: number;
+  clarifications: number;
 }
 
 /**
@@ -78,9 +78,9 @@ export function uploadLocationModeSubtitle(
     ? nonEmptyLocalized(
         t(
           'upload.location.mode.subtitle.on',
-          'GPS and file names; missing location → Issues.',
+          'GPS and file names; missing location → Clarifications.',
         ),
-        'GPS and file names; missing location → Issues.',
+        'GPS and file names; missing location → Clarifications.',
       )
     : nonEmptyLocalized(
         t('upload.location.mode.subtitle.off', 'Uploads without a location.'),
@@ -118,11 +118,21 @@ export function buildLaneSwitchOptions(
   return [
     {
       id: 'uploading',
-      label: t('upload.panel.lane.uploading', 'Queue'),
+      label: t('upload.panel.lane.uploading', 'Waiting'),
       icon: 'cloud_upload',
       type: 'icon-with-text',
-      ariaLabel: `${t('upload.panel.lane.uploading', 'Queue')} (${counts.uploading})`,
-      title: t('upload.panel.lane.uploading', 'Queue'),
+      ariaLabel: `${t('upload.panel.lane.uploading', 'Waiting')} (${counts.uploading})`,
+      title: t('upload.panel.lane.uploading', 'Waiting'),
+    },
+    {
+      id: 'clarifications',
+      label: t('upload.panel.lane.clarifications', 'Clarification'),
+      icon: 'help',
+      type: 'icon-with-text',
+      ariaLabel: `${t('upload.panel.lane.clarifications', 'Clarification')} (${counts.clarifications})`,
+      title: t('upload.panel.lane.clarifications', 'Clarification'),
+      attention:
+        issueAttentionPulse && counts.clarifications > 0 && effectiveLane !== 'clarifications',
     },
     {
       id: 'uploaded',
@@ -131,15 +141,6 @@ export function buildLaneSwitchOptions(
       type: 'icon-with-text',
       ariaLabel: `${t('upload.panel.lane.uploaded', 'Uploaded')} (${counts.uploaded})`,
       title: t('upload.panel.lane.uploaded', 'Uploaded'),
-    },
-    {
-      id: 'issues',
-      label: t('upload.panel.lane.issues', 'Issues'),
-      icon: 'warning_amber',
-      type: 'icon-with-text',
-      ariaLabel: `${t('upload.panel.lane.issues', 'Issues')} (${counts.issues})`,
-      attention: issueAttentionPulse && counts.issues > 0 && effectiveLane !== 'issues',
-      destructiveHint: counts.issues > 0,
     },
   ];
 }

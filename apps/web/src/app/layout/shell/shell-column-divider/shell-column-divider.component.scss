@@ -1,0 +1,98 @@
+// Vertical divider in the grid gap between canvas and panel column.
+// @see docs/specs/ui/shell/shell-panel-resize.md
+:host {
+  position: relative;
+  display: block;
+  inline-size: 2px;
+  min-inline-size: 0;
+  min-block-size: 0;
+  block-size: 100%;
+  pointer-events: none;
+  outline: none;
+  z-index: 2;
+
+  &:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+}
+
+.shell-column-divider__hit-zone {
+  position: absolute;
+  inset-block: 0;
+  inset-inline: calc(-1 * var(--spacing-2));
+  pointer-events: auto;
+  cursor: col-resize;
+}
+
+.shell-column-divider__bar {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  inline-size: 2px;
+  block-size: 100%;
+  background: var(--border);
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+:host:hover .shell-column-divider__bar,
+:host:focus-visible .shell-column-divider__bar,
+:host.shell-column-divider--dragging .shell-column-divider__bar {
+  inline-size: 4px;
+  background: color-mix(in srgb, var(--border) 78%, var(--foreground));
+}
+
+.shell-column-divider__grip {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: 0;
+  transform: translate(50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--spacing-5);
+  block-size: var(--spacing-6);
+  border-radius: var(--container-radius-control);
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  opacity: 0;
+  transition:
+    opacity var(--motion-duration-fast) ease-out,
+    border-color var(--motion-duration-fast) ease-out,
+    box-shadow var(--motion-duration-fast) ease-out;
+  pointer-events: none;
+}
+
+:host:hover .shell-column-divider__grip,
+:host:focus-visible .shell-column-divider__grip,
+:host.shell-column-divider--dragging .shell-column-divider__grip {
+  opacity: 1;
+  border-color: color-mix(in srgb, var(--border) 78%, var(--foreground));
+  box-shadow: var(--shadow-md);
+}
+
+.shell-column-divider__grip-icon {
+  font-size: var(--font-size-md);
+  color: color-mix(in srgb, var(--muted-foreground) 52%, transparent);
+  transition: color var(--motion-duration-fast) ease-out;
+  user-select: none;
+}
+
+:host:hover .shell-column-divider__grip-icon {
+  color: var(--muted-foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shell-column-divider__grip,
+  .shell-column-divider__grip-icon {
+    transition: none;
+  }
+}
+
+@media (max-width: 47.9375rem) {
+  :host {
+    display: none;
+  }
+}

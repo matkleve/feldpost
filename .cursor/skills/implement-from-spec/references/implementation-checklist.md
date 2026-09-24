@@ -34,7 +34,7 @@ Run through this after every agent-generated feature. Compare against the elemen
 
 ## UI & Design
 
-- [ ] Design tokens used (`--color-clay`, `--color-bg-base`, etc.)
+- [ ] Design tokens used (`--primary`, `--brand-gold`, `--background`, spacing and motion tokens)
 - [ ] Loading state renders correctly
 - [ ] Error state renders correctly
 - [ ] Empty state renders correctly with recovery action

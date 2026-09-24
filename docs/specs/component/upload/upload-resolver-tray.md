@@ -32,7 +32,8 @@
 
 ## Mounting
 
-- **Host:** `app-upload-shell` → `.upload-shell__dock` (see [upload-shell.md](./upload-shell.md)).
+- **Host (legacy shell):** `app-upload-shell` → `.upload-shell__dock` (see [upload-shell.md](./upload-shell.md)).
+- **Host (grid shell):** inside `app-upload-panel` when the Clarification lane is selected. The dock tray is not mounted, because `app-upload-shell` is not on that route.
 - **Layout:** `authenticated-app-layout.component.html` mounts one shell on **every authenticated route** (map, media, projects, …).
 - **Map preview:** `(previewLocation)` wired in `upload-shell` to pan/zoom the map when the user hovers or focuses an option.
 - **`embeddedInPane`:** when `true`, tray returns `trayMode: hidden` (workspace-embedded panel must not duplicate the shell tray).

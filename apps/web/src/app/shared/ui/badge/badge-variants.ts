@@ -13,7 +13,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
  * @see docs/MIGRATION_PLAN.md
  */
 export const badgeVariants = cva(
-  'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+  'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:shadow-[var(--interactive-focus-ring)]',
   {
     variants: {
       variant: {
@@ -22,8 +22,6 @@ export const badgeVariants = cva(
         destructive: 'border-transparent bg-destructive text-destructive-foreground',
         outline: 'border border-border bg-transparent text-foreground',
         muted: 'border-transparent bg-muted text-muted-foreground',
-        /** Status / invite chips — maps legacy `.ui-status-badge--neutral`. */
-        neutral: 'border-transparent bg-muted text-muted-foreground',
         /** Semantic info (primary-tinted). */
         info: 'border-transparent bg-primary/10 text-primary',
         /** Semantic success — uses `success` color token from `tailwind.config.js`. */

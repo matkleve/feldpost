@@ -12,7 +12,7 @@ Normative FSM and persistence matrix for **upload location routing**: panel mode
 
 | State | `locationRequirementMode` | UI label | Pipeline effect |
 | --- | --- | --- | --- |
-| `required` | `'required'` | Auto location (ON) | Filename/folder routing, post-save geocode, missing location → Issues |
+| `required` | `'required'` | Auto location (ON) | Filename/folder routing, post-save geocode, missing location → Clarifications |
 | `optional` | `'optional'` | No auto location (OFF) | Strip placement; keep EXIF metadata columns only |
 
 **Cold start default:** `required` (Auto location ON). **Not** driven by `projects.location_required` (deprecated — see [deprecated-schema.md](../../../architecture/deprecated-schema.md)).
@@ -52,7 +52,7 @@ When the user resolves `disambiguationKind: 'source'`, the app MUST persist the 
 | `selectedCandidateId` | Effect on each job in `groupingKey` (including jobs that enter Phase 3 later) |
 | --- | --- |
 | `source-text` | `buildChosenPlacementPatch(job, 'text', job.titleAddressCoords ?? candidate pin)` |
-| `source-exif` | `buildChosenPlacementPatch(job, 'exif', …)` when EXIF (or tray photo pin) present; else **folder text** when `titleAddressCoords` present; else Issues |
+| `source-exif` | `buildChosenPlacementPatch(job, 'exif', …)` when EXIF (or tray photo pin) present; else **folder text** when `titleAddressCoords` present; else Clarifications |
 | `source-both` | Same as `source-exif` for placement; product “both” semantics unchanged from code |
 | `source-none` | `deferGroup` semantics: `phase: missing_data`, `issueKind: missing_gps`, no `job.coords` |
 
@@ -167,7 +167,7 @@ When `showDirectoryPicker` is unavailable, `<input webkitdirectory>` builds jobs
 | `Mariahilferstraße 56/IMG.jpg` | `['Mariahilferstraße 56']` | `Mariahilferstraße 56` |
 | `Fuchsthalergasse 4/IMG_1283.HEIC` | `['Fuchsthalergasse 4']` | `Fuchsthalergasse 4` |
 
-Forward geocode retries (folder title): when Nominatim returns no hit for the literal string, `buildForwardGeocodeRetryQueries()` may retry once with a **generic** locality anchor (default `Wien, Österreich`) if the hint has no comma. There is **no** per-street typo table; spelling must be geocoder-resolvable or the job lands in **Issues** (Choose location).
+Forward geocode retries (folder title): when Nominatim returns no hit for the literal string, `buildForwardGeocodeRetryQueries()` may retry once with a **generic** locality anchor (default `Wien, Österreich`) if the hint has no comma. There is **no** per-street typo table; spelling must be geocoder-resolvable or the job lands in **Clarifications** (Choose location).
 
 Implementation: [folder-scan-from-file-list.helpers.ts](../../../../apps/web/src/app/core/folder-scan/folder-scan-from-file-list.helpers.ts).
 

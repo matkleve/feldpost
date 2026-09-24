@@ -33,9 +33,11 @@
       class="w-full justify-start"
       [attr.aria-label]="t('workspace.pane.tabs.aria', 'Workspace tabs')"
     >
-      <button brnTabsTrigger="upload" hlmTabsTrigger>
-        {{ t('workspace.pane.tab.upload', 'Upload') }}
-      </button>
+      @if (!shellGridLayout()) {
+        <button brnTabsTrigger="upload" hlmTabsTrigger>
+          {{ t('workspace.pane.tab.upload', 'Upload') }}
+        </button>
+      }
       <button brnTabsTrigger="selected-items" hlmTabsTrigger>
         {{ t('workspace.pane.tab.media', 'Media') }}
       </button>
@@ -59,15 +61,17 @@
         (locationMapPickRequested)="onUploadLocationMapPickRequested($event)"
       />
     } @else {
-      <!-- Upload tab panel — always in DOM so ng-content projection slot is stable -->
-      <section
-        class="workspace-pane__upload-tab"
-        [class.workspace-pane__upload-tab--active]="activeTab() === 'upload'"
-        [attr.aria-label]="t('workspace.pane.tab.upload', 'Upload')"
-        role="tabpanel"
-      >
-        <ng-content select="[data-workspace-upload-tab]" />
-      </section>
+      @if (!shellGridLayout()) {
+        <!-- Upload tab panel — always in DOM so ng-content projection slot is stable -->
+        <section
+          class="workspace-pane__upload-tab"
+          [class.workspace-pane__upload-tab--active]="activeTab() === 'upload'"
+          [attr.aria-label]="t('workspace.pane.tab.upload', 'Upload')"
+          role="tabpanel"
+        >
+          <ng-content select="[data-workspace-upload-tab]" />
+        </section>
+      }
 
       <!-- Media tab panel — always in DOM so grid state is preserved across tab switches -->
       <div

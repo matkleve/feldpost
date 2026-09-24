@@ -22,7 +22,7 @@ is the opposite of it.
 | --- | --- |
 | Reverse-geocoded street **equals** the established street, point within the radius | Propose the house number and **ask** |
 | Reverse-geocoded street **differs** | Change nothing, and **do not ask** — it is not a house-number question |
-| No street established from text | Out of scope; that is the area-only / Issues path |
+| No street established from text | Out of scope; that is the area-only / Clarifications path |
 | Point outside the radius | Change nothing |
 | No GPS on the photo | Change nothing |
 

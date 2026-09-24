@@ -1,0 +1,94 @@
+// Horizontal divider between panel scroll body and footer band.
+// @see docs/specs/ui/shell/shell-panel-resize.md
+:host {
+  position: relative;
+  display: block;
+  block-size: 2px;
+  min-block-size: 0;
+  min-inline-size: 0;
+  inline-size: 100%;
+  pointer-events: none;
+  outline: none;
+  z-index: 2;
+  flex: 0 0 auto;
+
+  &:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+}
+
+.shell-panel-body-divider__hit-zone {
+  position: absolute;
+  inset-inline: 0;
+  inset-block: calc(-1 * var(--spacing-2));
+  pointer-events: auto;
+  cursor: row-resize;
+}
+
+.shell-panel-body-divider__bar {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  block-size: 2px;
+  inline-size: 100%;
+  background: var(--border);
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+:host:hover .shell-panel-body-divider__bar,
+:host:focus-visible .shell-panel-body-divider__bar,
+:host.shell-panel-body-divider--dragging .shell-panel-body-divider__bar {
+  block-size: 4px;
+  background: color-mix(in srgb, var(--border) 78%, var(--foreground));
+}
+
+.shell-panel-body-divider__grip {
+  position: absolute;
+  inset-inline-start: 50%;
+  inset-block-end: 0;
+  transform: translate(-50%, 50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--spacing-6);
+  block-size: var(--spacing-5);
+  border-radius: var(--container-radius-control);
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  opacity: 0;
+  transition:
+    opacity var(--motion-duration-fast) ease-out,
+    border-color var(--motion-duration-fast) ease-out,
+    box-shadow var(--motion-duration-fast) ease-out;
+  pointer-events: none;
+}
+
+:host:hover .shell-panel-body-divider__grip,
+:host:focus-visible .shell-panel-body-divider__grip,
+:host.shell-panel-body-divider--dragging .shell-panel-body-divider__grip {
+  opacity: 1;
+  border-color: color-mix(in srgb, var(--border) 78%, var(--foreground));
+  box-shadow: var(--shadow-md);
+}
+
+.shell-panel-body-divider__grip-icon {
+  font-size: var(--font-size-md);
+  color: color-mix(in srgb, var(--muted-foreground) 52%, transparent);
+  transition: color var(--motion-duration-fast) ease-out;
+  user-select: none;
+  transform: rotate(90deg);
+}
+
+:host:hover .shell-panel-body-divider__grip-icon {
+  color: var(--muted-foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shell-panel-body-divider__grip,
+  .shell-panel-body-divider__grip-icon {
+    transition: none;
+  }
+}

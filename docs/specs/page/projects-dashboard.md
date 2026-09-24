@@ -10,7 +10,7 @@ These cards are not [Widgets](../../glossary.md) (addable apps). The component s
 
 ## What It Looks Like
 
-Full-height page grid inside the authenticated shell: `app-page-grid` owns nav clearance, centered band, and optional left/right rails. See [page-rail-grid.md](../../design/page-rail-grid.md).
+Full-height page grid inside `app-shell-main-canvas`. The project list stays on the left. The dashboard uses the width beside that list. See [page-rail-grid.md](../../design/page-rail-grid.md).
 
 **Right pane — Dashboard mode** (`/projects`, no project selected): card grid with one hero card (map/location preview) and secondary cards (activity, file types, upload timeline, storage, team).
 

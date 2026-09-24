@@ -51,7 +51,7 @@ describe('UploadManagerMissingDataService', () => {
     });
   });
 
-  it('persists address precision when user picks an address candidate in Issues', async () => {
+  it('persists address precision when user picks an address candidate in Clarifications', async () => {
     const service = TestBed.inject(UploadManagerMissingDataService);
     const candidate: UploadAddressCandidate = {
       id: 'cand-1',

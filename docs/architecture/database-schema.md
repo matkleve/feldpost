@@ -79,6 +79,13 @@ The tables below are column-catalogued. They are not the full runtime schema. Th
 | logo_url, address_*, phone, email, website, description, industry | text | nullable | docs/specs/page/organization-page.md |
 | created_at | timestamptz | not null/default now()             | docs/specs/page/projects-page.md |
 
+### public.organization_widgets
+
+| column | type | null/default | spec reference(s) |
+| --- | --- | --- | --- |
+| organization_id | uuid | not null, PK with widget_id | docs/specs/system/widget-grants.md |
+| widget_id | text | not null, PK with organization_id | docs/specs/system/widget-grants.md |
+
 ### public.profiles
 
 | column          | type        | null/default           | spec reference(s)                                          |

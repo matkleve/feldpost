@@ -6,7 +6,7 @@ A floating toggle button in Map Zone that controls GPS tracking mode. On activat
 
 ## What It Looks Like
 
-2.75rem circle (desktop / about 44px) and 3rem circle (mobile / about 48px). Background stays color-bg-surface. Crosshair icon color is text-primary (black/dark) when inactive and color-clay (orange) while active or seeking. Inactive icon is `gps_not_fixed` (no center dot); active icon is `gps_fixed` (center dot). Spinner replaces the icon while seeking. Subtle elevation-overlay shadow.
+`var(--map-floating-control-size)` circle (`3rem`). **Not** `hlmBtn` and **not** `app-shell-control-option` — custom `button.map-gps-btn` in `MapShellComponent` with `frosted-chrome.outline-control`. Background stays color-bg-surface. Crosshair icon color is text-primary (black/dark) when inactive and color-clay (orange) while active or seeking. Inactive icon is `gps_not_fixed` (no center dot); active icon is `gps_fixed` (center dot). Spinner replaces the icon while seeking. Subtle elevation-overlay shadow.
 
 User marker visual contract:
 
@@ -40,7 +40,7 @@ Unit note: button geometry uses rem for accessibility scaling; borders and shado
 ## Component Hierarchy
 
 ```
-GpsButton                                  ← 2.75rem/3rem circle, floating bottom-right
+GpsButton                                  ← --map-floating-control-size circle, floating bottom-right
 ├── LocationIcon                           ← black when inactive, orange when active/seeking
 └── [seeking] Spinner                      ← shown while awaiting fix
 ```
@@ -49,8 +49,7 @@ GpsButton                                  ← 2.75rem/3rem circle, floating bot
 
 | Token                       | Value                       | Notes                     |
 | --------------------------- | --------------------------- | ------------------------- |
-| `--touch-target-base`       | `2.75rem` (≈44px)           | Desktop min tap target    |
-| `--touch-target-mobile`     | `3rem` (≈48px)              | Mobile min tap target     |
+| `--map-floating-control-size` | `3rem`                    | Map GPS + basemap switch hit target |
 | `--radius-circle`           | `50%`                       | Makes it a circle         |
 | `--shadow-float`            | `0 2px 8px rgba(0,0,0,0.2)` | px fine for shadows       |
 | `--color-bg-surface`        | (from design system)        | Button background         |
@@ -159,7 +158,7 @@ sequenceDiagram
 ## Acceptance Criteria
 
 - [x] Floating bottom-right in Map Zone
-- [x] `2.75rem` (≈44px) desktop, `3rem` (≈48px) mobile tap target
+- [x] `--map-floating-control-size` (`3rem`) tap target
 - [x] Button is a toggle: first click enables tracking, second click disables tracking
 - [x] Map recenters to user location only when GPS button is clicked (not on startup geolocation)
 - [x] While active, geolocation refresh runs roughly every 60 seconds

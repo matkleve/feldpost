@@ -1,5 +1,5 @@
 ---
-id: STUDY-016
+id: STUDY-024
 type: proposal
 status: proposed
 supersedes: none
@@ -74,4 +74,4 @@ The questions above stay. These answers supersede them. They are `[D]`. They are
 
 3. **Address and GPS belong to the subject, not to Map.** `[D]` Today the subject is a media item: `locations` plus `media_item_location_links` `[A]` `docs/specs/service/media-locations/media-locations-service.md`. A later subject (the owner’s example is a vehicle) would link to locations the same way. It would not get its own copy of coordinates. Uninstalling Map does not delete those rows. Constitution §1 still applies when the product says a subject itself is deleted.
 
-4. **Issue #258 must not cite STUDY-013 as the widget plan.** `[D]` The repo’s STUDY-013 is the study-system audit `[A]`. The widget reasoning is this file, STUDY-016. `gh issue edit 258` returned `Resource not accessible by integration` on 2026-09-24 `[A]`. The issue body is unchanged. Agents must use this file, not the issue’s STUDY-013 link.
+4. **Issue #258 must not cite STUDY-013 as the widget plan.** `[D]` The repo’s STUDY-013 is the study-system audit `[A]`. The widget reasoning is this file, STUDY-024. `gh issue edit 258` returned `Resource not accessible by integration` on 2026-09-24 `[A]`. The issue body is unchanged. Agents must use this file, not the issue’s STUDY-013 link.

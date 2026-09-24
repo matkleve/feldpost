@@ -1,5 +1,5 @@
 ---
-id: STUDY-017
+id: STUDY-025
 type: proposal
 status: proposed
 supersedes: none
@@ -8,11 +8,11 @@ corrected-by: none
 
 # Addable apps — change plan
 
-**Written:** 2026-09-24. **On:** `cursor/addable-apps-change-plan-cb0a`, reading STUDY-016, the glossary, routes, nav, and `20260615180000_org_roles_colleagues_chat.sql`. No database was queried. **Status `proposed`.** This is not a spec and not permission to migrate.
+**Written:** 2026-09-24. **On:** `cursor/addable-apps-change-plan-cb0a`, reading STUDY-024, the glossary, routes, nav, and `20260615180000_org_roles_colleagues_chat.sql`. No database was queried. **Status `proposed`.** This is not a spec and not permission to migrate.
 
 The current record is the last section, **Update 2026-09-24 — current record**. Earlier sentences that still say a question is open are superseded when that section answers them. Do not edit those sentences away.
 
-Owner decisions this plan obeys, all `[D]`, from STUDY-016 § Update 2026-09-24:
+Owner decisions this plan obeys, all `[D]`, from STUDY-024 § Update 2026-09-24:
 
 - A widget is an addable app. Map is one, the same kind as Media.
 - Install is per user. The organization may preinstall a widget or allow it.
@@ -48,7 +48,7 @@ Nav is the fixed array `navItems` in `apps/web/src/app/features/nav/nav.componen
 
 Projects-dashboard cards (activity, file types, upload timeline, storage, team) are not these apps `[A]` glossary.
 
-`files` has a page spec and RPCs and no route `[A]` STUDY-016. It is not in the first install list.
+`files` has a page spec and RPCs and no route `[A]` STUDY-024. It is not in the first install list.
 
 Settings and Account are an overlay on `/{shell}/settings`, not a route of their own `[A]` `docs/specs/page/settings-routes.md`, `account-feature.md`. STUDY-015 §14 says they are canvas content `[D]` in that study. This plan does not make them widgets until question Q6 is answered.
 
@@ -88,7 +88,7 @@ Each phase stops if the questions it names are still open. Sensitive work (RLS, 
 
 ### Phase 0 — done on the previous branch
 
-Glossary definition, schema-doc omissions, stale column claims. STUDY-016. PR #283.
+Glossary definition, schema-doc omissions, stale column claims. STUDY-024. PR #283.
 
 ### Phase 1 — this document
 
@@ -141,7 +141,7 @@ The `+` page from issue #258 (search, cards, install). Only after Phase 4 shows 
 ### Not in this plan
 
 - Renaming CSS `project-dashboard__widget`. The glossary already says that class is not the product term.
-- Editing issue #258. The GitHub token cannot (`Resource not accessible by integration`, STUDY-016).
+- Editing issue #258. The GitHub token cannot (`Resource not accessible by integration`, STUDY-024).
 - STUDY-015’s grid, rails, and feature flag. Coordinate so the nav list and the grid rail are not two install mechanisms. Q9.
 - A vehicles app. Spec and tables come after this install mechanism exists, and they link to `locations`.
 
@@ -277,8 +277,8 @@ A spec has to replace “one organization on the profile” before the signup an
 
 Three investigations measure the parts this plan can break. They do not add decisions. `[A]` that the files exist once this commit lands.
 
-- [STUDY-018](018-one-organization-is-the-rls-key.md) — `user_org_id()` returns one uuid from `profiles.organization_id`. Several organizations per email have to keep that helper scalar.
-- [STUDY-019](019-map-stays-mounted-when-hidden.md) — the layout hides the map host; it does not destroy it. Zoom from Media navigates to `/map`.
+- [STUDY-026](026-one-organization-is-the-rls-key.md) — `user_org_id()` returns one uuid from `profiles.organization_id`. Several organizations per email have to keep that helper scalar.
+- [STUDY-027](027-map-stays-mounted-when-hidden.md) — the layout hides the map host; it does not destroy it. Zoom from Media navigates to `/map`.
 - [STUDY-020](020-signup-is-an-invite-trigger.md) — `handle_new_user()` rejects registration without an invite and writes one organization onto the profile.
 
 ## Update 2026-09-24 — spec started
@@ -295,7 +295,7 @@ The blocks in the sentence above are closed in `docs/specs/system/widget-install
 
 ## Update 2026-09-24 — account, canvas, creating an organization
 
-Owner answers to the flow questions. `[D]` Supersedes the reading that an account must enter an organization before it can use the app. The live schema still requires one. `[A]` STUDY-018.
+Owner answers to the flow questions. `[D]` Supersedes the reading that an account must enter an organization before it can use the app. The live schema still requires one. `[A]` STUDY-026.
 
 1. **No organization is a valid account.** A self-employed person is one person and does not need an organization. The canvas shows an overview. “Create an organization” and “enter an invite” are available. They are not a gate.
 
@@ -351,10 +351,10 @@ Today’s share sets are a token over a selection of media, with audience `publi
 ## Plan, step by step
 
 1. **Keep writing use cases.** Scenes 1–12 are the list. Add a scene when a flow does not fit one of them. No new table in this step.
-2. **Account with no organization.** Signup without an invite. The canvas overview works for one person. `profiles.organization_id` is `not null` today, so this step is a spec and a migration of its own. `[A]` STUDY-018, STUDY-020.
+2. **Account with no organization.** Signup without an invite. The canvas overview works for one person. `profiles.organization_id` is `not null` today, so this step is a spec and a migration of its own. `[A]` STUDY-026, STUDY-020.
 3. **Organization becomes optional.** Create it from widget settings, with the separation warning. Invite joins one that exists. The shell switches organization without logout. Widget rows, when they exist, belong to the context on screen: the lone account, or the organization switched to.
 4. **Widget list for that context.** Map and Media for a new start. Colleagues only in an organization. Hide does not delete data. The tables in `20260924120000_widget_install.sql` assume every profile already has one organization. They do not implement steps 2–3. Do not add columns to them until step 3 says which context a row belongs to. `[A]` STUDY-021 §6, STUDY-022.
-5. **Nav reads that list.** Same routes. Map stays mounted. `[A]` STUDY-019.
+5. **Nav reads that list.** Same routes. Map stays mounted. `[A]` STUDY-027.
 6. **Partner project share.** A person outside the company opens a project link and chooses “add to my projects” or “keep as shared.” Own spec. Not a widget flag. Not `resolve_share_set`.
 7. **Map mount follows install.** Only after Media’s zoom has a defined no-op when Map is off.
 8. **Catalog.** The `+` control, after the nav already follows the list.

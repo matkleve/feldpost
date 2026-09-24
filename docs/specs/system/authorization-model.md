@@ -46,6 +46,8 @@ Share `SECURITY DEFINER` RPCs are an **adjacent** boundary, not a replacement fo
 | `user_roles.org_role_id` | Links user to per-org `org_roles` row. |
 | `org_permissions` / `org_role_permissions` | Configurable capability catalog and assignments. |
 
+Widget and data grants extend this model. Their contract is [widget-grants.md](widget-grants.md). A widget record may be limited to selected roles or groups inside the organization. That audience is defined there. This file does not turn general grants into a per-project ACL.
+
 ## State
 
 Session state is the JWT and Postgres session settings; no separate “grant cache” in the product data model for general access.

@@ -9,7 +9,7 @@
  *
  * Responsibilities:
  *  - Route based on action type and job state
- *  - Emit lane changes (e.g., retry sets lane='issues' if job is error)
+ *  - Emit lane changes (e.g., retry sets lane='clarifications' if job is error)
  *  - Show toast feedback for disabled actions
  */
 
@@ -28,7 +28,7 @@ export interface UploadPanelMenuActionRouterOptions {
   placementRequested: (jobId: string) => void;
   dismissFile: (jobId: string) => void;
   retryFile: (jobId: string) => void;
-  setLane: (lane: 'uploading' | 'uploaded' | 'issues') => void;
+  setLane: (lane: 'uploading' | 'uploaded' | 'clarifications') => void;
 }
 
 @Injectable()

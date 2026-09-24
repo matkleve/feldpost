@@ -1,5 +1,5 @@
 ---
-id: STUDY-018
+id: STUDY-026
 type: investigation
 status: proposed
 supersedes: none
@@ -10,7 +10,7 @@ corrected-by: none
 
 **Written:** 2026-09-24. **On:** `cursor/addable-apps-change-plan-cb0a`, by reading `user_org_id()`, `profiles`, and `docs/security-boundaries.md`. No database was queried. **Status `proposed`.** Not a spec and not permission to migrate.
 
-STUDY-017’s current record says one email may belong to more than one organization, and the person chooses one after login. This study measures what that choice would hit.
+STUDY-025’s current record says one email may belong to more than one organization, and the person chooses one after login. This study measures what that choice would hit.
 
 ## What the code does
 
@@ -30,11 +30,11 @@ The fragile object is the helper, not the Organization widget.
 
 - A client that sends `organization_id` and trusts it bypasses the boundary. The frontend is untrusted `[A]` `docs/security-boundaries.md` §1.
 - A profile with no organization cannot be inserted today (`not null`). A signup that creates an account and defers the organization leaves every `user_org_id()` call null until a row exists. Policies that compare `organization_id = user_org_id()` then match nothing. `[C]` from the `not null` column and the equality checks. Not executed.
-- Two organizations on one login, with the helper still reading one column, show only the organization stored on `profiles`. The other organization’s rows stay invisible. That is safe. It is also not the product in STUDY-017 until something records which organization the session has entered and the helper reads that. `[C]`
+- Two organizations on one login, with the helper still reading one column, show only the organization stored on `profiles`. The other organization’s rows stay invisible. That is safe. It is also not the product in STUDY-025 until something records which organization the session has entered and the helper reads that. `[C]`
 - Install rows, when a spec names them, have to be scoped by the same helper. An install table with no `organization_id` check would be the first org data that is not isolated. `[D]` that this is forbidden. `[A]` that §2.2 already requires an organization-scope check on every new SELECT policy.
 
 ## What this study does not do
 
-It does not name a membership table. STUDY-017 left that name unchosen. It does not change `user_org_id()`.
+It does not name a membership table. STUDY-025 left that name unchosen. It does not change `user_org_id()`.
 
 Before any migration: a spec has to say which single organization the session has entered, how that choice is stored, and that `user_org_id()` still returns that one uuid. Red-test-first against a user who belongs to two organizations and must not read the one they did not enter.

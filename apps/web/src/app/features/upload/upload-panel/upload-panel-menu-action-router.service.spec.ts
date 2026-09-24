@@ -124,39 +124,39 @@ describe('UploadPanelMenuActionRouterService lane stability (P0)', () => {
   //   lane/tab unless user explicitly changes it"
   // @see docs/audits/upload-process-analysis-2026-09-08/06-health.md § 7
   // @see docs/audits/upload-process-analysis-2026-09-08/09-coverage.md § 4 T8
-  it('does not call setLane for upload_anyway while Issues lane is selected', async () => {
+  it('does not call setLane for upload_anyway while the Clarifications lane is selected', async () => {
     const { service, options } = setup();
     const job = makeJob({ phase: 'skipped', issueKind: 'duplicate_file' });
 
     await service.handleMenuAction(job, 'upload_anyway', {
       contextType: ACTION_CONTEXT_IDS.uploadItem,
-      lane: 'issues',
+      lane: 'clarifications',
       issueKind: 'duplicate_file',
     });
 
     expect(options.setLane).not.toHaveBeenCalled();
   });
 
-  it('does not call setLane for candidate_select while Issues lane is selected', async () => {
+  it('does not call setLane for candidate_select while the Clarifications lane is selected', async () => {
     const { service, options } = setup();
     const job = makeJob({ phase: 'missing_data', issueKind: 'address_ambiguous' });
 
     await service.handleMenuAction(job, 'candidate_select', {
       contextType: ACTION_CONTEXT_IDS.uploadItem,
-      lane: 'issues',
+      lane: 'clarifications',
       issueKind: 'address_ambiguous',
     });
 
     expect(options.setLane).not.toHaveBeenCalled();
   });
 
-  it('does not call setLane for retry while Issues lane is selected', async () => {
+  it('does not call setLane for retry while the Clarifications lane is selected', async () => {
     const { service, options } = setup();
     const job = makeJob({ phase: 'error', issueKind: 'upload_error' });
 
     await service.handleMenuAction(job, 'retry', {
       contextType: ACTION_CONTEXT_IDS.uploadItem,
-      lane: 'issues',
+      lane: 'clarifications',
       issueKind: 'upload_error',
     });
 

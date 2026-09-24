@@ -23,6 +23,15 @@ describe('resolveAuthenticatedActiveShell', () => {
     expect(resolveAuthenticatedActiveShell('/projects')).toBe('projects');
     expect(resolveAuthenticatedActiveShell('/projects/abc-123')).toBe('projects');
   });
+
+  it('resolves the overview shell', () => {
+    expect(resolveAuthenticatedActiveShell('/overview')).toBe('overview');
+  });
+
+  it('resolves the widget directory and explanation', () => {
+    expect(resolveAuthenticatedActiveShell('/widgets')).toBe('widgets');
+    expect(resolveAuthenticatedActiveShell('/widgets/vehicles')).toBe('widgets');
+  });
 });
 
 describe('resolveMapShellDisplayed', () => {
@@ -32,6 +41,7 @@ describe('resolveMapShellDisplayed', () => {
 
   it('hides map when active shell is not map and navigation is idle', () => {
     expect(resolveMapShellDisplayed('media', null)).toBe(false);
+    expect(resolveMapShellDisplayed('overview', null)).toBe(false);
   });
 
   it('hides map immediately when navigation targets a non-map shell', () => {

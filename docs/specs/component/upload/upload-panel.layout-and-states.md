@@ -8,7 +8,7 @@ Structural ASCII reference tree and **visual states** diagram for the Upload Pan
 
 ## What It Looks Like
 
-Three stacked blocks (intake → lane switch → file list), transparent shell gaps, segmentation without extra card wrappers around the tab list, and lane/file-item surfaces using surface tokens and status tints—matching the parent narrative.
+Narrow: intake, then a horizontal Waiting / Clarification / Uploaded switch, then the selected lane. Wide (grid shell, panel ≥ 42rem): intake on the left; on the right the same three options in one horizontal row, and that one lane under the row. One lane is visible in both modes.
 
 ## Where It Lives
 
@@ -48,7 +48,7 @@ flowchart TD
   <SegmentedSwitch />                  <!-- ui-tab-list ONLY, no wrapping div -->
     <!-- Uploading (Icon only) -->
     <!-- Uploaded (Icon only) -->
-    <!-- Issues (Icon + Text, flex grow) -->
+    <!-- Clarifications (Icon + Text, flex grow) -->
 
   <!-- gap -->
 

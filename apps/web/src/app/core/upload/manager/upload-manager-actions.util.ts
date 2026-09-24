@@ -83,7 +83,7 @@ export function retryUploadManagerJob(jobId: string, deps: UploadManagerActionsD
     failedAt: undefined,
     // @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-07 —
     // clear the issueKind the failure producer set, or the retried job stays
-    // in the Issues lane while phase says it's back in the queue.
+    // in the Clarifications lane while phase says it's back in the queue.
     issueKind: undefined,
   });
   deps.drainQueue();
@@ -317,7 +317,7 @@ export function resolveUploadManagerConflict(
     conflictResolution: resolution,
     // @see docs/audits/upload-process-analysis-2026-09-08/10-findings.md UP-07 —
     // clear the issueKind the conflict producer set, or the resolved job
-    // stays in the Issues lane while phase says it's back in the queue.
+    // stays in the Clarifications lane while phase says it's back in the queue.
     issueKind: undefined,
   });
   deps.transitionTo(jobId, 'queued', { channel: 'user', statusLabel: deps.queuedLabel });

@@ -41,7 +41,7 @@ const ROOT = resolve(import.meta.dirname, "..");
 
 /**
  * Uncovered when the gate was introduced (2026-09-10). Not scattered drift —
- * three whole feature areas shipped without specs: the seven organization
+ * three whole feature areas shipped without specs: the organization
  * sections, five of the projects surfaces, and the three colleagues surfaces.
  * Tracked in issue #180.
  *
@@ -49,7 +49,8 @@ const ROOT = resolve(import.meta.dirname, "..");
  * projects-tab destructive-actions supplement as the archived-only delete
  * precedent; and `projects-confirm-dialog`, deleted outright — it duplicated the
  * registered `app-confirm-dialog`, which absorbed its `busy` and `size` variants
- * (issue #256).
+ * (issue #256). `organization-roles-section` left the same day: widget-grants.md
+ * names that roles screen.
  *
  * 2026-09-24: `shell-route-placeholder` left the list. `map-page.md` names it
  * as the outlet child for `/` and `/map`.
@@ -61,7 +62,6 @@ const ALLOWLIST = new Set([
   "apps/web/src/app/features/organization/sections/export/organization-export-section.component.ts",
   "apps/web/src/app/features/organization/sections/integrations/organization-integrations-section.component.ts",
   "apps/web/src/app/features/organization/sections/profile/organization-profile-section.component.ts",
-  "apps/web/src/app/features/organization/sections/roles/organization-roles-section.component.ts",
   "apps/web/src/app/features/projects/dashboard/project-dashboard-view.component.ts",
   "apps/web/src/app/features/projects/media-section/project-media-section.component.ts",
   "apps/web/src/app/features/projects/sidebar/projects-sidebar.component.ts",

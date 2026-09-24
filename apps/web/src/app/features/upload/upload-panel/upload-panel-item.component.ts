@@ -41,7 +41,7 @@ export type UploadItemMenuAction =
 
 export interface UploadItemActionContext {
   contextType: typeof ACTION_CONTEXT_IDS.uploadItem;
-  lane: 'uploading' | 'uploaded' | 'issues';
+  lane: 'uploading' | 'uploaded' | 'clarifications';
   issueKind: ReturnType<typeof getIssueKind>;
 }
 
@@ -62,7 +62,7 @@ export interface UploadItemActionEvent {
  * Action Gating (Spec: upload-panel.md § Wiring/Data):
  * ✅ Uploading lane: view_file_details, cancel_upload
  * ✅ Uploaded lane: change_location_*, open_in_media, assign_to_project, open_project?, priority?, download?
- * ✅ Issues lane: Actions depend on issue kind:
+ * ✅ Clarifications lane: Actions depend on issue kind:
  *    - duplicate_file: open_existing_media, upload_anyway
  *    - missing_gps: change_location_map, change_location_address, retry
  *    - document_unresolved: change_location_map, change_location_address, assign_to_project
