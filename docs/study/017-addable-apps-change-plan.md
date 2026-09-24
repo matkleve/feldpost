@@ -292,3 +292,17 @@ The blocks in the sentence above are closed in `docs/specs/system/widget-install
 ## Update 2026-09-24 — the decisions were not challenged
 
 [STUDY-021](021-addable-app-decisions-unchallenged.md) is the critique this plan did not contain. `[A]` once that file is in the tree. It does not replace the current record. It says which of those sentences cannot be true yet.
+
+## Update 2026-09-24 — account, canvas, creating an organization
+
+Owner answers to the flow questions. `[D]` Supersedes the reading that an account must enter an organization before it can use the app. The live schema still requires one. `[A]` STUDY-018.
+
+1. **No organization is a valid account.** A self-employed person is one person and does not need an organization. The canvas shows an overview. “Create an organization” and “enter an invite” are available. They are not a gate.
+
+2. **Create organization lives in the widget’s settings.** The person chooses “create new organization” there. The product must say that the new organization’s data is separate from the data they already have.
+
+3. **Switching organization is a shell control.** Same pattern as Slack. The person switches without logging out. The widget list is the one for the organization they switched to.
+
+4. **Not answered.** The owner asked what the link question meant. It is restated below. Colleagues versus Chat, and the ship-day backfill, were not answered in this message.
+
+**Link question, plain.** Someone sends you a link to Projects. You have not added Projects. We open it for this visit. You log out. That open is forgotten. The next day you click the same link. Do we open Projects again for that visit, or does Projects stay off until you add it yourself?
