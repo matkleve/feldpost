@@ -359,3 +359,11 @@ Today’s share sets are a token over a selection of media, with audience `publi
 7. **Map mount follows install.** Only after Media’s zoom has a defined no-op when Map is off.
 8. **Catalog.** The `+` control, after the nav already follows the list.
 9. **Account-to-account chat.** Own spec, after the account in step 2 exists. Not a change to the Colleagues page.
+
+## Update 2026-09-24 — Files is not a product
+
+Files was an idea. Media already covers that job. `[D]` Files is not a widget, not a route to add, and not a scene in the plan. Renaming Media is not decided. Do not rename it in the same change.
+
+`docs/specs/page/files-page.md` stays for now. Media folder and bulk-resolution code still cite it. `[A]` `apps/web/src/app/core/media-folders/media-folder-tree.service.ts`. Deleting the spec before those citations move would leave the code pointing at a missing contract.
+
+Step 2 of the plan is started as `docs/specs/system/account-context.md`. `[A]` once this commit lands. It does not migrate `profiles.organization_id`. Creating an organization does not move personal rows. The new organization starts empty of that data.

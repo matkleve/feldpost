@@ -27,7 +27,7 @@ Nav rows come from `WidgetInstallService.installedIds`. The catalog of ids is `m
 | 9 | Map is not the active route | `app-map-shell` stays mounted. |
 | 10 | Signup | `handle_new_user()` does not write install rows. No rows means Map and Media. |
 
-Widget ids: `map`, `media`, `projects`, `colleagues`, `organization`. Files is not one of them. `chat` is not a separate id in this change.
+Widget ids: `map`, `media`, `projects`, `colleagues`, `organization`. Files is not a product app. Media covers that job. Renaming Media is not decided. `chat` is not a separate id in this change.
 
 ## Component Hierarchy
 

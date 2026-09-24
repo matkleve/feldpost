@@ -11,6 +11,7 @@ Folder-specific rules:
 - **Upload without a location, resolve it later:** [deferred-location-resolution.md](deferred-location-resolution.md) (single-item row actions and batch runs; pairs with [files-page.md](../page/files-page.md)).
 - **General authorization (RLS + roles):** [authorization-model.md](authorization-model.md)
 - **Widget install (addable apps on the left nav):** [widget-install.md](widget-install.md). No table until the blocks in that file are closed.
+- **Account context (personal or one organization):** [account-context.md](account-context.md). No migration in that file.
 - **Security analyses:** [security/README.md](security/README.md)
 
 Global governance references:
