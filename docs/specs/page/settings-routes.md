@@ -8,7 +8,7 @@ Deep-linkable settings as a **suffix on the active app shell**, not a standalone
 - `/{shell}/settings/:section`
 - `/{shell}/settings/:section/:subsection`
 
-`shell` is one of: `map` (canonical for map root), `media`, `projects`, or `projects/:projectId`.
+`shell` is one of: `map` (canonical for map root), `media`, `projects`, `projects/:projectId`, `colleagues`, or `organization` (and `organization/:section`). Matchers: `apps/web/src/app/layout/authenticated-shell-matchers.ts`.
 
 The visible UI is the **settings overlay** on `AppComponent`. The shell route (`MapShellComponent`, `MediaComponent`, `ProjectsPageComponent`, …) stays mounted under the authenticated layout `router-outlet`.
 
@@ -43,7 +43,7 @@ Same overlay as manual open from the nav avatar: two-column panel anchored to th
 AppComponent
 ├── effects: URL ↔ SettingsPaneService
 ├── ss-settings-overlay
-└── router-outlet → AuthenticatedAppLayout → { MapShell | Media | Projects } (shell from URL)
+└── router-outlet → AuthenticatedAppLayout → { map host or Media | Projects | Colleagues | Organization } (shell from URL)
 ```
 
 ## Data

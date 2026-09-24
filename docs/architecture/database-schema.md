@@ -40,7 +40,27 @@ Legacy image-era tables are removed from runtime schema:
 - public.saved_groups
 - public.saved_group_images
 
-## Column Catalog (Full Coverage)
+## Column Catalog
+
+The tables below are column-catalogued. They are not the full runtime schema. These objects are created in migrations and are not catalogued here:
+
+| Object | Creating migration | Spec |
+| --- | --- | --- |
+| `org_permissions`, `org_roles`, `org_role_permissions` | `20260615180000_org_roles_colleagues_chat.sql` | `docs/specs/system/authorization-model.md` |
+| `org_branding`, `org_subscriptions`, `org_invoices`, `org_api_keys`, `org_export_jobs`, `org_audit_log` | same | `docs/specs/page/organization-page.md` |
+| `chat_channels`, `chat_channel_members`, `chat_messages`, `chat_reactions`, `chat_attachments` | same | `docs/specs/service/chat/chat-service.md` |
+| `chat_message_links` | `20260615210000_chat_links_unread_storage.sql` | `docs/specs/service/chat/chat-service.md` |
+| `app_events` | `20260613120000_create_app_events.sql` | `docs/specs/service/wide-event/wide-event-service.md` |
+| `project_locations` | `20260527140000_project_locations.sql` | `docs/specs/service/media-upload-service/adapters/upload-project-locations.adapter.md` |
+| `invite_signups` | `20260616085726_invite_signups_display_name.sql` | cannot determine a spec from the files checked |
+| `org_search_tuning_profiles` | `20260522200000_org_search_tuning_profiles.sql` | `docs/specs/ui/search-bar/search-tuning-settings.md` |
+| `media_item_locations` | `20260522120000_media_item_locations.sql` | No `DROP TABLE` found. Canonical model is `locations` + `media_item_location_links` (`docs/specs/service/media-locations/media-locations-service.md`). Later migrations still reference the old table type. |
+| `profiles.suspended_at`, `profiles.removed_at` | `20260615180000_org_roles_colleagues_chat.sql` | Named as export timestamps in `docs/specs/page/organization-page.md`. Not in the `profiles` column table below. |
+| `media_items.relative_path` | `20260412123000_media_items_raw_columns_immutability.sql` | `docs/specs/page/files-page.md` |
+
+`public.roles` still exists from `20260303000002_tables.sql`. `user_roles.role_id` was dropped. Live assignment is `user_roles.org_role_id`.
+
+## Column tables
 
 ### auth.users
 

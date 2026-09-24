@@ -2,7 +2,7 @@
 
 ## What It Is
 
-Full-screen **map route host** after login: **map zone** (Leaflet), floating controls, and map-specific dialogs. **`MapShellComponent`** is loaded as the **child** of **`app-authenticated-app-layout`** for **`/`**, **`/map`**, and **`/map/settings/**`** (`authenticated-app.routes.ts`). Settings overlay is global; see [settings-routes.md](settings-routes.md). **Workspace Pane** + horizontal split are **not** owned here — they live on **`AuthenticatedAppLayoutComponent`** (see [workspace-pane § Layout host](../ui/workspace/workspace-pane.md#layout-host-canonical)). **See:** [map-shell use cases](../../use-cases/map-shell.md), [workspace-pane](../ui/workspace/workspace-pane.md), [search-bar](../ui/search-bar/search-bar.md), [media-marker](../ui/media-marker/media-marker.md), [upload-button-zone](../component/upload/upload-button-zone.md), [drag-divider](../component/workspace/drag-divider.md); product UCs 1–3 in use-case docs.
+Full-screen **map route host** after login: **map zone** (Leaflet), floating controls, and map-specific dialogs. For **`/`**, **`/map`**, and **`/map/settings/**`**, the router outlet loads `ShellRoutePlaceholderComponent` (`authenticated-app.routes.ts`). **`MapShellComponent`** stays mounted on `AuthenticatedAppLayoutComponent` and is shown when the map shell is active (`authenticated-app-layout.component.html`). Settings overlay is global; see [settings-routes.md](settings-routes.md). **Workspace Pane** + horizontal split are **not** owned here — they live on **`AuthenticatedAppLayoutComponent`** (see [workspace-pane § Layout host](../ui/workspace/workspace-pane.md#layout-host-canonical)). **See:** [map-shell use cases](../../use-cases/map-shell.md), [workspace-pane](../ui/workspace/workspace-pane.md), [search-bar](../ui/search-bar/search-bar.md), [media-marker](../ui/media-marker/media-marker.md), [upload-button-zone](../component/upload/upload-button-zone.md), [drag-divider](../component/workspace/drag-divider.md); product UCs 1–3 in use-case docs.
 
 ## What It Looks Like
 
@@ -11,7 +11,7 @@ Full viewport inside the layout **main column** (the layout host owns sidebar + 
 ## Where It Lives
 
 - **Parent**: **`AuthenticatedAppLayoutComponent`** main column via `router-outlet` (see [workspace-pane](../ui/workspace/workspace-pane.md))
-- **Component**: `MapShellComponent` at `features/map/map-shell/`
+- **Component**: `MapShellComponent` at `features/map/map-shell/component/map-shell.component.ts`, hosted by the layout, not by the outlet. Outlet placeholder: `layout/shell-route-placeholder.component.ts`.
 
 ## Actions
 
@@ -98,7 +98,7 @@ sequenceDiagram
   C-->>P: Emit outputs/events
 ```
 
-- Loaded via Angular Router as a **child** of **`app-authenticated-app-layout`** at `/`, `/map`, and `/map/settings/**` with `authGuard`
+- Map routes are children of **`app-authenticated-app-layout`** at `/`, `/map`, and `/map/settings/**` with `authGuard`. The outlet child is the empty placeholder. The map component is the layout host’s `<app-map-shell>`.
 - Initializes Leaflet in `afterNextRender` (browser-only)
 - All child floating components are positioned via CSS within Map Zone
 - Never calls Leaflet directly from template — uses `MapAdapter`

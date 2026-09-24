@@ -22,7 +22,8 @@
 
 - **Role**  
   Label describing a category of permissions (e.g., `admin`, `user`, `viewer`).
-  - Tables: `roles`, `user_roles`.
+  - Live assignment: `user_roles.org_role_id` → `org_roles` (per organization). Migration `20260615180000_org_roles_colleagues_chat.sql` dropped `user_roles.role_id`.
+  - `public.roles` is the earlier global table. It is not the assignment path.
   - Used in Row-Level Security (RLS) checks.
 
 - **Technician**  
@@ -42,7 +43,7 @@
   A single photo plus its associated metadata in the database.
   - Primary table: `media_items` (replaces legacy `images`).
   - Legacy archive: `source_image_id` column in `media_items` stores references to old `public.images` for backward compatibility during transition.
-  - Key fields: `id`, `user_id`, `storage_path`, `media_bucket_name`, `latitude`, `longitude`, `geog`, `captured_at`, (optional) direction/bearing, project reference, metadata.
+  - Key fields: `id`, `organization_id`, `created_by`, `storage_path`, `captured_at`, `exif_latitude`, `exif_longitude`, `location_status`. Map coordinates and `address_label` are on `locations`, linked by `media_item_location_links`. There is no `user_id`, `media_bucket_name`, `latitude`, `longitude`, or `geog` column on `media_items`.
   - Identifier naming contract: use `mediaId` / `mediaIds` in specs and application contracts. `imageId` / `imageIds` are legacy compatibility names only.
 
 - **Viewport**  
@@ -53,7 +54,7 @@
 
 - **Bounding Box**  
   A pair of `(lat, lng)` coordinates representing the south-west and north-east corners of a rectangular map region.
-  - Used as the spatial filter for viewport queries: `ST_DWithin` or `&&` operator against the `geog` column.
+  - Used as the spatial filter for viewport queries: `ST_DWithin` or `&&` against `locations.geog`.
 
 - **Cluster**  
   A visual grouping of nearby markers on the map rendered as a single icon with a count badge.
@@ -78,7 +79,7 @@
 
 - **Location / Coordinates**  
   The latitude and longitude representing where a **media item** was captured or is anchored on the map.
-  - Stored on **`media_items`** (`latitude`, `longitude`, generated `geog`). Legacy migration-era reads may still reference **`images`** in some SQL/RPC names; treat **`media_items`** as canonical for new contracts.
+  - Stored on **`locations`** (`latitude`, `longitude`, generated `geog`), linked from a media item by **`media_item_location_links`**. Those columns were removed from `media_items` in `20260525130000_drop_media_items_location_columns.sql`. Legacy SQL may still say `images`.
   - Used for all spatial queries and map rendering.
 
 - **EXIF Coordinates**  
@@ -105,7 +106,7 @@
   - Depends on distance (e.g., 50m radius) and bearing tolerance (e.g., ±30°).
 - **Address Label**  
   A human-readable address string stored alongside a **media item's** coordinates (e.g., "Burgstraße 7, 8001 Zürich").
-  - Column: `media_items.address_label`.
+  - Column: `locations.address_label`. Not `media_items.address_label` (that column was dropped).
   - Populated on upload from (a) a user-entered address, (b) a filename hint resolved via `AddressResolverService`, or (c) reverse geocoding of the EXIF coordinates.
   - Used by `AddressResolverService` to build the DB-first address index for autocomplete ranking.
   - See `address-resolver.md` §7.
@@ -124,7 +125,7 @@
 - **Manual Review Queue**  
   A holding area in the folder import review UI for **media items** that could not be automatically resolved to a location.
   - The user can enter an address, use drag-to-map placement, assign a batch location, or skip.
-  - Skipped images are stored with `location_unresolved = TRUE` and do not appear on the map.
+  - Skipped items do not appear on the map. `location_unresolved` was an `images` column. On `media_items` the status column is `location_status` (`pending`, `resolved`, `unresolvable`).
   - See `use-cases/folder-import.md` §5.3.
 
 ---
@@ -140,6 +141,12 @@
   A logical grouping of **media items** that belong to the same construction job, site, or contract.
   - Scoped to an organization.
   - Used to filter and organize field documentation across time and space.
+
+- **Widget**  
+  An addable app: a product surface the organization can put on the shell, such as Map or Media. Later surfaces (for example a vehicles app) would be widgets in this sense.
+  - Not a projects-dashboard card. Those cards are named in [projects-dashboard.md](specs/page/projects-dashboard.md).
+  - Not a shared component in the component registry.
+  - No install table exists. Issue #258 and [STUDY-016](study/016-addable-apps-repo-shape.md) discuss the shape. They are not a contract.
 
 - **Group (Saved Group)**  
   Legacy concept for named, user-created collections.
@@ -198,7 +205,7 @@
   - Enabled by `CREATE EXTENSION postgis;` in the Supabase SQL editor.
 - **GiST Index**  
   Generalized Search Tree index used by PostGIS for efficient spatial queries.
-  - Applied to **`media_items.geog`** for bounding-box and distance queries (legacy **`images.geog`** only in historical migrations).
+  - Applied to **`locations.geog`** for bounding-box and distance queries (legacy **`images.geog`** / **`media_items.geog`** only in historical migrations).
 
 - **MapAdapter**  
   An abstraction layer over the map library (Leaflet).

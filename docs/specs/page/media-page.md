@@ -128,7 +128,8 @@ WorkspacePaneComponent
 
 | Source                                  | Fields Needed                                                        | Purpose                                      |
 | --------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------- |
-| `media_items` table                     | All columns (id, title, address_label, captured_at, media_type, ...) | Grid content                                 |
+| `media_items` table                     | `id`, `media_type`, `captured_at`, `storage_path`, `thumbnail_path`, `mime_type` (no `title` or `address_label` on this table) | Grid content                                 |
+| `locations` + `media_item_location_links` | Address and map coordinates | Display address; not columns of `media_items` |
 | `MediaPageStateService`                 | cachedItems, nextOffset, totalCount, querySignature, lastSyncedAt    | Restore list on revisit without forced clear |
 | `MediaDownloadService`                  | bestCachedTierUrl, loadState, signed URL reuse                       | Warm preview + cross-route cache reuse       |
 | `share_sets` + `share_set_items` tables | share_set_id, fingerprint, ordered media_item_id membership          | Persisted shared selections (media-era)      |

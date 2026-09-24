@@ -85,7 +85,7 @@ flowchart LR
 | Field        | Source                                         | Type                       |
 | ------------ | ---------------------------------------------- | -------------------------- |
 | Current user | `AuthService.currentUser()`                    | `User`                     |
-| Profile      | `supabase.from('profiles').select('role')`     | `Profile`                  |
+| Profile      | `UserProfileService.getOwnProfile()`: `profiles.full_name`, `profiles.organization_id`, role names from `user_roles` → `org_roles.name` | `UserProfileSnapshot` |
 | MFA Factors  | `AuthService.mfaListFactors()`                 | `MfaFactor[]`              |
 | AAL          | `AuthService.getAuthenticatorAssuranceLevel()` | `'aal1' \| 'aal2' \| null` |
 
@@ -128,7 +128,7 @@ sequenceDiagram
 - Password change can require re-auth nonce when secure password change is active
 - Password reset uses recovery flow (`resetPasswordForEmail` then `updateUser`)
 - 2FA setup uses TOTP enroll + verify and surfaces assurance level
-- Delete account cascades via DB triggers (profiles, media items, group memberships)
+- Delete account calls `delete_own_account` through `AuthService`. `saved_groups` is not part of this flow; that table was dropped.
 - After deletion, `AuthService.signOut()` → redirect to `/login`
 
 ## Acceptance Criteria
