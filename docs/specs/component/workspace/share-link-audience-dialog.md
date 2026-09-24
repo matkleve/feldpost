@@ -1,5 +1,7 @@
 # Share link audience dialog
 
+> **Replacement UI:** [share-sheet.md](share-sheet.md). This file is the dialog that is still mounted. Do not add people or methods here.
+
 ## What It Is
 
 Modal shell for choosing **share link audience** (`public`, `organization`, or `named`) before `ShareSetService.createOrReuseShareSet` runs. Named audience collects comma-separated recipient user UUIDs (same organization); the server validates membership.

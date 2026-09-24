@@ -128,3 +128,16 @@ The owner rejected the decision above `[D]`. Desktop share is not “call the op
 | 5 | Phone | No list | The system sheet already lists the installed apps, so the phone skips this menu `[D]` |
 
 The audience dialog still runs first, so every row shares a real link `[D]`. The ZIP action stays off this list. It is a file download, not a destination `[D]`.
+
+## Update 2026-09-24 — people, then methods
+
+The owner rejected the flat list `[D]`. The desktop sheet follows the iPhone order: a people band, then a methods band. Contract: [share-sheet.md](../specs/component/workspace/share-sheet.md).
+
+| Band | Who or what | Use | Link the tap creates |
+| --- | --- | --- | --- |
+| People | Organization member | Hand the set to a colleague | `named`, that user id `[A]` from the access model |
+| People | Someone outside the company | There is no external address book `[A]` | Not a face. A method sends a `public` link `[D]` |
+| Methods | Copy link, Email, WhatsApp | The link leaves on desktop | `public` `[D]` |
+| Methods | System share, last | The browser’s own sheet, when it exists | `public` `[D]` |
+
+The phone still skips this sheet `[D]`. The system sheet already shows people and apps.
