@@ -143,10 +143,12 @@
   - Used to filter and organize field documentation across time and space.
 
 - **Widget**  
-  An addable app: a product surface the organization can put on the shell, such as Map or Media. Later surfaces (for example a vehicles app) would be widgets in this sense.
+  An addable app: a product surface on the shell. Map and Media are widgets of this kind. Later surfaces (for example a vehicles app) would be too. Map is not a separate kind of module.
   - Not a projects-dashboard card. Those cards are named in [projects-dashboard.md](specs/page/projects-dashboard.md).
   - Not a shared component in the component registry.
-  - No install table exists. Issue #258 and [STUDY-016](study/016-addable-apps-repo-shape.md) discuss the shape. They are not a contract.
+  - Who sees it: per user. The organization may preinstall it or allow it. No install table exists yet. Do not invent one from this entry.
+  - Address and GPS are not Map data. They live on `locations`, linked to the subject (`media_item_location_links` for a media item). Removing the Map widget does not remove those rows.
+  - Reasoning, not a schema: [STUDY-016](study/016-addable-apps-repo-shape.md). Issue #258.
 
 - **Group (Saved Group)**  
   Legacy concept for named, user-created collections.

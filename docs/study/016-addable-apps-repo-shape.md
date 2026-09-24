@@ -63,3 +63,15 @@ Use these. They do not invent a table.
 2. Is install stored per organization, per user, or only as a build-time list?
 3. When an app is removed, is its data deleted, kept, or is removal not allowed?
 4. Should issue #258’s study ids be corrected in the issue body so they stop pointing at the wrong files?
+
+## Update 2026-09-24 — owner answers
+
+The questions above stay. These answers supersede them. They are `[D]`. They are not a migration.
+
+1. **Map is a widget.** `[D]` The owner is not sure it must always be installed, and wants it modeled as a feature anyway so the shell stays modular. Do not special-case Map as a different kind of module from Media. The layout still always mounts `MapShellComponent` `[A]` `authenticated-app-layout.component.html`. That mount is code, not the model.
+
+2. **Install is per user.** `[D]` The organization can preinstall a widget or allow it. Issue #258 option A (`organization_widgets` only) does not match this answer. A future spec has to say both the user row and the organization allow/preinstall. This study still does not name those tables.
+
+3. **Address and GPS belong to the subject, not to Map.** `[D]` Today the subject is a media item: `locations` plus `media_item_location_links` `[A]` `docs/specs/service/media-locations/media-locations-service.md`. A later subject (the owner’s example is a vehicle) would link to locations the same way. It would not get its own copy of coordinates. Uninstalling Map does not delete those rows. Constitution §1 still applies when the product says a subject itself is deleted.
+
+4. **Issue #258 must not cite STUDY-013 as the widget plan.** `[D]` The repo’s STUDY-013 is the study-system audit `[A]`. The widget reasoning is this file, STUDY-016. `gh issue edit 258` returned `Resource not accessible by integration` on 2026-09-24 `[A]`. The issue body is unchanged. Agents must use this file, not the issue’s STUDY-013 link.
