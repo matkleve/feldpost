@@ -319,4 +319,43 @@ Owner answers. `[D]`
 
 **Ship-day backfill does not matter.** `[D]` The owner said there is no real data to protect. “Keep every current app on” is not a product requirement. The migration that inserted five installed rows for every profile may be replaced by the new-account rule when this is rebuilt. Do not treat that backfill as an owner decision.
 
-The link question in the previous section is still unanswered.
+The link question is answered in the next section.
+
+## Update 2026-09-24 — links, partners, use cases
+
+Owner answers. `[D]` This section supersedes the phase order in §6 for what to build next. The old phases stay in the file. Do not start from the catalog or from another install table.
+
+**A link behaves the same every day.** Clicking a link to a widget the person has not added opens it, the same way, every time. Logout does not turn the next click into a refusal, and it does not install the widget. There is no “second day it stays off.”
+
+**An external partner is a different case.** A person who is not in the company opens a link to a project. They can choose to add it to their own projects, or to keep it as a shared project. The picture the owner used is Google Drive: “Shared with me” and “I am sharing.” That is not the widget-install bit. Install answers “is Projects in my nav.” This answers “whose project is this, and did I copy it or only receive it.”
+
+Today’s share sets are a token over a selection of media, with audience `public`, `organization`, or `named`, and grant `view`. `[A]` `docs/specs/service/share-set/share-set-access-model.md`. They are not a project the partner keeps in their own app. Do not stretch `resolve_share_set` into that flow.
+
+**The plan needs use cases before more schema.** One happy path is how the install tables got ahead of the account model. Each use case below is a required scene. More will be added when someone names them. A migration that cannot name which scene it serves does not start.
+
+| # | Scene | What has to be true |
+| --- | --- | --- |
+| 1 | Self-employed | One person, no organization. Canvas shows an overview. Invite and “create organization” are optional. |
+| 2 | Create an organization | From the widget’s settings. The screen says the new organization’s data is separate. |
+| 3 | Invite | Joins that organization immediately. |
+| 4 | Switch organization | Shell control, like Slack. No logout. Widget list follows the organization on screen. |
+| 5 | New account widgets | Map and Media until they add more. Colleagues only when an organization is on screen. |
+| 6 | Organization controls | Allow, preinstall, lock, push. Push turns a widget on. Saving preinstall does not undo a person’s off. |
+| 7 | Hide a widget | Nav row and route hide. Subject data stays. |
+| 8 | Link to a widget they have not added | Opens the same way on every click. Does not install it. |
+| 9 | External partner and a project | Not in the company. Can add the project to their own projects, or keep it as shared. |
+| 10 | Chat | Not part of Colleagues. Account-to-account chat is a later design. Current chat tables are organization-scoped. |
+| 11 | Settings, Account, Upload, Files | Settings and Account stay on the shell. Upload belongs to Media. Files is not a widget. |
+| 12 | Ship-day data | No real data to protect. The five-app backfill is not a requirement. |
+
+## Plan, step by step
+
+1. **Keep writing use cases.** Scenes 1–12 are the list. Add a scene when a flow does not fit one of them. No new table in this step.
+2. **Account with no organization.** Signup without an invite. The canvas overview works for one person. `profiles.organization_id` is `not null` today, so this step is a spec and a migration of its own. `[A]` STUDY-018, STUDY-020.
+3. **Organization becomes optional.** Create it from widget settings, with the separation warning. Invite joins one that exists. The shell switches organization without logout. Widget rows, when they exist, belong to the context on screen: the lone account, or the organization switched to.
+4. **Widget list for that context.** Map and Media for a new start. Colleagues only in an organization. Hide does not delete data. The tables in `20260924120000_widget_install.sql` assume every profile already has one organization. They do not implement steps 2–3. Do not add columns to them until step 3 says which context a row belongs to. `[A]` STUDY-021 §6, STUDY-022.
+5. **Nav reads that list.** Same routes. Map stays mounted. `[A]` STUDY-019.
+6. **Partner project share.** A person outside the company opens a project link and chooses “add to my projects” or “keep as shared.” Own spec. Not a widget flag. Not `resolve_share_set`.
+7. **Map mount follows install.** Only after Media’s zoom has a defined no-op when Map is off.
+8. **Catalog.** The `+` control, after the nav already follows the list.
+9. **Account-to-account chat.** Own spec, after the account in step 2 exists. Not a change to the Colleagues page.
